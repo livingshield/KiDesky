@@ -1,0 +1,4376 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KiDesky | Princeznino srdce – Stolní &amp; Online Desková Hra</title>
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem("kidesky_element_theme") || "light";
+                var validThemes = ["light", "fire", "water", "earth", "air"];
+                if (validThemes.indexOf(theme) === -1) theme = "light";
+                document.documentElement.setAttribute("data-theme", theme);
+            } catch (e) {}
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ================================================================
+           5 ELEMENTÁRNÍCH BAREVNÝCH TÉMAT (ŽIVLŮ)
+           ================================================================ */
+        :root, :root[data-theme="light"], body[data-theme="light"] {
+            --bg-dark: #0f0b05;
+            --bg-card: rgba(30, 22, 12, 0.94);
+            --bg-panel: rgba(44, 32, 18, 0.88);
+            --gold: #d4af37;
+            --gold-light: #fef08a;
+            --pink-heart: #ec4899;
+            --accent-blue: #38bdf8;
+            --text-main: #f5f5f4;
+            --text-muted: #a8a29e;
+            --border-gold: rgba(212, 175, 55, 0.35);
+            --theme-glow: rgba(250, 204, 21, 0.45);
+            --theme-active-grad: linear-gradient(135deg, #d4af37, #b47d1c);
+            --board-filter: none;
+            --table-vignette: radial-gradient(circle at 50% 0%, #2b1f13 0%, #0f0b05 85%);
+        }
+
+        :root[data-theme="fire"], body[data-theme="fire"] {
+            --bg-dark: #120705;
+            --bg-card: rgba(36, 14, 10, 0.95);
+            --bg-panel: rgba(52, 20, 14, 0.88);
+            --gold: #f97316;
+            --gold-light: #fed7aa;
+            --pink-heart: #f43f5e;
+            --accent-blue: #fbbf24;
+            --text-main: #fff7ed;
+            --text-muted: #d4a373;
+            --border-gold: rgba(249, 115, 22, 0.45);
+            --theme-glow: rgba(239, 68, 68, 0.55);
+            --theme-active-grad: linear-gradient(135deg, #ea580c, #b91c1c);
+            --board-filter: sepia(0.22) saturate(1.4) hue-rotate(-12deg);
+            --table-vignette: radial-gradient(circle at 50% 0%, #3a150c 0%, #120705 85%);
+        }
+
+        :root[data-theme="water"], body[data-theme="water"] {
+            --bg-dark: #040e1a;
+            --bg-card: rgba(8, 26, 44, 0.95);
+            --bg-panel: rgba(12, 38, 64, 0.88);
+            --gold: #38bdf8;
+            --gold-light: #bae6fd;
+            --pink-heart: #38bdf8;
+            --accent-blue: #0284c7;
+            --text-main: #f0f9ff;
+            --text-muted: #94a3b8;
+            --border-gold: rgba(56, 189, 248, 0.4);
+            --theme-glow: rgba(14, 165, 233, 0.5);
+            --theme-active-grad: linear-gradient(135deg, #0284c7, #0369a1);
+            --board-filter: saturate(1.2) hue-rotate(185deg) brightness(0.95);
+            --table-vignette: radial-gradient(circle at 50% 0%, #0d2847 0%, #040e1a 85%);
+        }
+
+        :root[data-theme="earth"], body[data-theme="earth"] {
+            --bg-dark: #061209;
+            --bg-card: rgba(12, 30, 18, 0.95);
+            --bg-panel: rgba(18, 44, 26, 0.88);
+            --gold: #10b981;
+            --gold-light: #a7f3d0;
+            --pink-heart: #ec4899;
+            --accent-blue: #34d399;
+            --text-main: #f0fdf4;
+            --text-muted: #86efac;
+            --border-gold: rgba(16, 185, 129, 0.4);
+            --theme-glow: rgba(34, 197, 94, 0.5);
+            --theme-active-grad: linear-gradient(135deg, #059669, #047857);
+            --board-filter: sepia(0.2) saturate(1.3) hue-rotate(65deg);
+            --table-vignette: radial-gradient(circle at 50% 0%, #15361c 0%, #061209 85%);
+        }
+
+        :root[data-theme="air"], body[data-theme="air"] {
+            --bg-dark: #0a0515;
+            --bg-card: rgba(24, 14, 42, 0.95);
+            --bg-panel: rgba(36, 20, 64, 0.88);
+            --gold: #c084fc;
+            --gold-light: #ede9fe;
+            --pink-heart: #f472b6;
+            --accent-blue: #818cf8;
+            --text-main: #faf5ff;
+            --text-muted: #c4b5fd;
+            --border-gold: rgba(192, 132, 252, 0.4);
+            --theme-glow: rgba(168, 85, 247, 0.55);
+            --theme-active-grad: linear-gradient(135deg, #9333ea, #7e22ce);
+            --board-filter: saturate(1.2) hue-rotate(240deg) brightness(0.95);
+            --table-vignette: radial-gradient(circle at 50% 0%, #281447 0%, #0a0515 85%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--table-vignette);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        body.theme-transitioning {
+            transition: background 0.4s ease, color 0.3s ease;
+        }
+
+        /* --- HORNÍ NAVIGACE --- */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(15, 13, 10, 0.94);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-gold);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .back-portal-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: all 0.2s;
+        }
+        .back-portal-link:hover {
+            color: var(--gold-light);
+            border-color: var(--gold);
+        }
+
+        .brand-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--gold-light);
+            letter-spacing: 0.5px;
+        }
+        .brand-title span {
+            color: var(--pink-heart);
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+
+        .nav-tab-btn {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            border: 1px solid rgba(212, 175, 55, 0.22);
+            padding: 0.48rem 0.95rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-tab-btn:hover {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.12);
+        }
+        .nav-tab-btn.active {
+            background: linear-gradient(135deg, #d4af37, #b47d1c);
+            color: #15110d;
+            border-color: var(--gold-light);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
+        }
+
+        .board-node {
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+        .board-node:hover {
+            filter: drop-shadow(0 0 10px var(--theme-glow, rgba(212, 175, 55, 0.6))) brightness(1.16);
+        }
+
+        .user-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.88rem;
+            flex-wrap: wrap;
+        }
+
+        /* --- ELEMENTÁRNÍ PŘEPÍNAČ TÉMAT (ŽIVLY) --- */
+        .element-theme-switcher {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--border-gold);
+            border-radius: 99px;
+            padding: 3px 4px;
+            gap: 3px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .theme-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 0.28rem 0.62rem;
+            border-radius: 99px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .theme-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .theme-btn.active {
+            background: var(--theme-active-grad, linear-gradient(135deg, #d4af37, #b47d1c));
+            color: #fff;
+            box-shadow: 0 2px 10px var(--theme-glow, rgba(212, 175, 55, 0.4));
+        }
+        @media (max-width: 1350px) {
+            .theme-btn .theme-label { display: none; }
+            .theme-btn { padding: 0.28rem 0.45rem; font-size: 0.88rem; }
+        }
+
+        .user-pill {
+            padding: 0.35rem 0.75rem;
+            border-radius: 99px;
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid var(--border-gold);
+            color: var(--gold-light);
+            cursor: pointer;
+        }
+
+        /* --- KONTEJNERY ZÁLOŽEK --- */
+        .main-container {
+            max-width: 1620px;
+            margin: 0 auto;
+            padding: 1.15rem;
+        }
+
+        /* --- KARTY A FORMULÁŘE --- */
+        .prs-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+        }
+
+        .prs-card h2, .prs-card h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .lobby-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 1.35rem;
+        }
+        @media (max-width: 980px) {
+            .lobby-grid { grid-template-columns: 1fr; }
+        }
+
+        .lobby-hero-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 1.35rem;
+            padding: 1.4rem 1.75rem;
+            border-radius: 18px;
+            background: linear-gradient(125deg, rgba(44, 28, 17, 0.95), rgba(24, 17, 13, 0.92)), url('assets/kidesky-hero.png') center/cover;
+            border: 1px solid var(--gold);
+        }
+
+        .lobby-player-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.6rem;
+            background: rgba(255,255,255,0.03);
+            padding: 0.45rem 0.65rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .player-color-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .prs-input, .prs-select {
+            background: #14110e;
+            color: var(--text-main);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            padding: 0.48rem 0.75rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.92rem;
+            width: 100%;
+        }
+
+        .btn-gold-lg {
+            background: linear-gradient(135deg, #e5c158, #b8860b);
+            color: #14100b;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            padding: 0.7rem 1.35rem;
+            border-radius: 11px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-gold-lg:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 22px rgba(212, 175, 55, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(212, 175, 55, 0.14);
+            color: var(--gold-light);
+            border: 1px solid var(--border-gold);
+            padding: 0.45rem 0.85rem;
+            border-radius: 9px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .btn-secondary:hover {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.24);
+        }
+
+        .btn-icon-danger {
+            background: rgba(239, 68, 68, 0.18);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* --- ZÁVOD O PRINCEZNINO SRDCE (RACE TRACK) --- */
+        .princess-race-container {
+            background: linear-gradient(90deg, rgba(32, 22, 14, 0.95), rgba(56, 24, 40, 0.95), rgba(32, 22, 14, 0.95));
+            border: 2px solid var(--gold);
+            border-radius: 14px;
+            padding: 0.65rem 1rem 0.75rem;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55), 0 0 16px rgba(236, 72, 153, 0.18);
+            position: relative;
+        }
+        .princess-race-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.45rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #fce7f3;
+        }
+        .princess-race-track {
+            position: relative;
+            height: 36px;
+            background: rgba(14, 10, 8, 0.75);
+            border: 1.5px solid rgba(212, 175, 55, 0.4);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.7);
+        }
+        .race-milestones {
+            position: absolute;
+            left: 18px;
+            right: 48px;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+        }
+        .race-milestone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.68rem;
+            color: rgba(255, 255, 255, 0.38);
+            font-weight: 600;
+        }
+        .race-milestone-tick {
+            width: 2px;
+            height: 8px;
+            background: rgba(212, 175, 55, 0.35);
+            margin-bottom: 2px;
+        }
+        .race-token {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.75), 0 0 8px currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.76rem;
+            font-weight: 900;
+            color: #ffffff;
+            cursor: pointer;
+            transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.15s ease;
+            z-index: 5;
+        }
+        .race-token:hover {
+            transform: translate(-50%, -50%) scale(1.22);
+            z-index: 10;
+        }
+        .race-finish-crown {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.35rem;
+            filter: drop-shadow(0 0 6px #ec4899);
+        }
+
+        /* --- MINI-TOOLTIP NAD POLÍČKY --- */
+        .prs-tile-tooltip {
+            position: fixed;
+            z-index: 99999;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(28, 20, 14, 0.98), rgba(16, 11, 8, 0.98));
+            border: 1.5px solid var(--gold);
+            border-radius: 10px;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.8), 0 0 12px rgba(212,175,55,0.25);
+            padding: 0.6rem 0.8rem;
+            min-width: 180px;
+            max-width: 270px;
+            font-size: 0.82rem;
+            color: #f1f5f9;
+            transform: translate(14px, 14px);
+            transition: opacity 0.12s ease;
+            display: none;
+        }
+        .prs-tile-tooltip.visible {
+            display: block;
+        }
+        .prs-tooltip-header {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 700;
+            font-family: 'Cinzel', serif;
+            color: #fde047;
+            margin-bottom: 0.25rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+            padding-bottom: 0.25rem;
+        }
+        .prs-tooltip-meta {
+            font-size: 0.74rem;
+            color: #94a3b8;
+            margin-bottom: 0.3rem;
+        }
+        .prs-tooltip-body {
+            line-height: 1.35;
+            font-size: 0.78rem;
+            color: #e2e8f0;
+        }
+        .prs-tooltip-set {
+            margin-top: 0.35rem;
+            margin-bottom: 0.35rem;
+            padding: 0.3rem 0.45rem;
+            border-radius: 6px;
+            background: rgba(30, 41, 59, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            font-size: 0.72rem;
+            line-height: 1.25;
+        }
+        .prs-tooltip-set.prs-set-complete {
+            background: rgba(16, 185, 129, 0.22);
+            border-color: rgba(52, 211, 153, 0.55);
+            color: #6ee7b7;
+            font-weight: 600;
+        }
+        .prs-tooltip-set.prs-set-partial {
+            background: rgba(245, 158, 11, 0.22);
+            border-color: rgba(251, 191, 36, 0.55);
+            color: #fde68a;
+        }
+        .prs-tooltip-rent {
+            font-size: 0.75rem;
+            margin-top: 0.2rem;
+            margin-bottom: 0.25rem;
+            color: #fda4af;
+        }
+        .slot-badge {
+            display: inline-block;
+            font-size: 0.68rem;
+            padding: 1px 4px;
+            border-radius: 4px;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            color: #fde047;
+            margin-right: 3px;
+        }
+        .asset-chip.chip-in-bag {
+            opacity: 0.75;
+            border-left: 2.5px solid #94a3b8;
+        }
+        .asset-chip.chip-equipped {
+            border-left: 2.5px solid #22c55e;
+            background: rgba(34, 197, 94, 0.08);
+        }
+
+        /* --- HUDEBNÍ PŘEHRÁVAČ MODAL & UI --- */
+        .music-player-card {
+            background: linear-gradient(135deg, #1c150f 0%, #110c08 100%);
+            border: 2px solid var(--gold);
+            border-radius: 16px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.85), 0 0 20px rgba(212,175,55,0.25);
+            max-width: 440px;
+            width: 90%;
+            padding: 1.25rem;
+            color: #f1f5f9;
+        }
+        .music-now-playing {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(30, 20, 14, 0.7);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 1rem;
+        }
+        .music-disc-icon {
+            font-size: 2.2rem;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.3);
+            transition: transform 0.3s ease;
+        }
+        .music-disc-icon.playing {
+            animation: spinDisc 8s linear infinite;
+        }
+        @keyframes spinDisc {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .music-track-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        .music-track-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #fde047;
+            font-family: 'Cinzel', serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .music-track-author {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .music-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 1.1rem;
+        }
+        .music-playlist-group {
+            margin-bottom: 1.1rem;
+        }
+        .music-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--gold-light);
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+        }
+        .music-sliders-group {
+            background: rgba(15, 11, 8, 0.6);
+            border-radius: 10px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+        .music-slider-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.82rem;
+            color: #cbd5e1;
+        }
+        .music-slider-row input[type="range"] {
+            accent-color: var(--gold);
+            cursor: pointer;
+        }
+        .music-custom-upload-box {
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            padding-top: 0.85rem;
+        }
+
+        /* --- HRACÍ STŮL (HEART TRACK + INTERAKTIVNÍ MAPA SE ZOOMEM + BOČNÍ PANEL) --- */
+        .heart-track-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .heart-player-pill {
+            background: var(--bg-card);
+            border: 2px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 0.6rem 0.85rem;
+            transition: all 0.2s;
+        }
+        .heart-player-pill.active-turn {
+            box-shadow: 0 0 18px rgba(236, 72, 153, 0.4);
+            background: rgba(48, 35, 26, 0.96);
+        }
+
+        .hp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            margin-bottom: 0.35rem;
+        }
+        .hp-hearts {
+            color: #f472b6;
+            font-weight: 700;
+        }
+        .bot-tag {
+            background: rgba(56, 189, 248, 0.2);
+            color: #7dd3fc;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            margin-left: 4px;
+        }
+
+        .hp-progress-bg {
+            height: 7px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 0.35rem;
+        }
+        .hp-progress-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .hp-sub {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .board-workspace {
+            display: grid;
+            grid-template-columns: 1fr 405px;
+            gap: 1.05rem;
+            align-items: start;
+        }
+        @media (max-width: 1240px) {
+            .board-workspace { grid-template-columns: 1fr; }
+        }
+
+        /* Kontejner mapy s podporou Zoomu a Panu */
+        .svg-board-container {
+            position: relative;
+            background: #14100c;
+            border: 2px solid var(--gold);
+            border-radius: 18px;
+            padding: 0.45rem;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+            overflow: hidden;
+            cursor: grab;
+            user-select: none;
+        }
+        .svg-board-container.is-panning {
+            cursor: grabbing;
+        }
+
+        #prs-board-svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Plovoucí lišta pro Zoom, Posouvání, Prosvícení originálu a Bitmapy */
+        .map-floating-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            margin-bottom: 0.5rem;
+            padding: 0.45rem 0.75rem;
+            background: rgba(20, 16, 12, 0.92);
+            border: 1px solid var(--border-gold);
+            border-radius: 12px;
+            font-size: 0.82rem;
+        }
+
+        .zoom-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .btn-zoom {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold-light);
+            border: 1px solid var(--border-gold);
+            padding: 0.28rem 0.65rem;
+            border-radius: 7px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-zoom:hover {
+            background: rgba(212, 175, 55, 0.32);
+            border-color: var(--gold);
+        }
+
+        .zoom-pct-badge {
+            min-width: 52px;
+            text-align: center;
+            font-weight: 700;
+            color: var(--gold-light);
+            font-size: 0.82rem;
+        }
+
+        .board-bottom-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.55rem;
+            padding: 0.55rem 0.85rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            font-size: 0.86rem;
+        }
+
+        /* --- AKČNÍ KARTA A KARTA RYTÍŘE --- */
+        .board-right-sidebar {
+            position: sticky;
+            top: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: calc(100vh - 1.5rem);
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .standing-tile-card {
+            background: linear-gradient(135deg, rgba(38, 28, 18, 0.98), rgba(20, 15, 10, 0.98));
+            border: 2px solid var(--gold);
+            border-radius: 14px;
+            padding: 0.9rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 15px rgba(212, 175, 55, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .standing-tile-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .standing-tile-medallion {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 2.5px solid var(--gold);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6), 0 0 10px rgba(212,175,55,0.35);
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1c150e;
+        }
+
+        .standing-tile-medallion img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .standing-tile-medallion .emoji-icon {
+            font-size: 1.85rem;
+        }
+
+        .standing-tile-meta {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .standing-tile-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold-light);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            margin-bottom: 0.2rem;
+        }
+
+        .standing-tile-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fdf6e2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.25;
+        }
+
+        .standing-tile-body {
+            background: rgba(14, 11, 8, 0.65);
+            border: 1px solid rgba(212, 175, 55, 0.18);
+            border-radius: 9px;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.84rem;
+            line-height: 1.4;
+            color: #e2e8f0;
+        }
+
+        .standing-tile-status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+            padding-top: 0.4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.8rem;
+        }
+
+        .combat-encounter-card {
+            background: linear-gradient(145deg, rgba(50, 18, 18, 0.98), rgba(24, 12, 12, 0.98));
+            border: 2px solid #ef4444;
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.35);
+        }
+
+        .combat-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.45rem;
+            background: rgba(15, 10, 10, 0.65);
+            border-radius: 8px;
+            padding: 0.65rem;
+            font-size: 0.83rem;
+            margin: 0.65rem 0;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .festival-encounter-card {
+            background: linear-gradient(145deg, rgba(50, 18, 38, 0.98), rgba(26, 12, 22, 0.98));
+            border: 2px solid #ec4899;
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.35);
+        }
+
+        /* Fyzická sběratelská duelová karta netvora (Souboje) */
+        .combat-duel-card {
+            background: linear-gradient(160deg, #2b1111 0%, #170909 60%, #0d0505 100%);
+            border: 2.5px solid #dc2626;
+            border-radius: 14px;
+            padding: 0.9rem;
+            margin-bottom: 0.95rem;
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.38), inset 0 1px 0 rgba(255,255,255,0.12);
+            position: relative;
+            overflow: hidden;
+        }
+        .combat-duel-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #f59e0b, #ef4444, #dc2626, #f59e0b);
+        }
+        .duel-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            font-size: 0.8rem;
+        }
+        .duel-tier-badge {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2.5px 8px;
+            border-radius: 6px;
+            border: 1px solid #ef4444;
+        }
+        .duel-reward-pill {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.45);
+            color: var(--gold-light);
+            font-weight: 700;
+            padding: 2.5px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+        .duel-monster-portrait-wrap {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            border-radius: 9px;
+            overflow: hidden;
+            border: 1.5px solid rgba(239, 68, 68, 0.5);
+            margin-bottom: 0.75rem;
+            background: #110707;
+        }
+        .duel-monster-art {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: contrast(1.1) brightness(0.95);
+            transition: transform 0.4s ease;
+        }
+        .combat-duel-card:hover .duel-monster-art {
+            transform: scale(1.04);
+        }
+        .duel-monster-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(13, 5, 5, 0.95) 0%, rgba(13, 5, 5, 0.3) 65%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0.55rem 0.75rem;
+            box-sizing: border-box;
+        }
+        .duel-monster-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fee2e2;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.9);
+        }
+        .duel-monster-sub {
+            font-size: 0.74rem;
+            color: #fca5a5;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+        .duel-arena-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 0.45rem;
+            margin-bottom: 0.75rem;
+        }
+        .duel-combatant {
+            background: rgba(18, 10, 10, 0.75);
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 0.55rem 0.65rem;
+            text-align: center;
+        }
+        .duel-fighter-role {
+            font-size: 0.74rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .duel-fighter-stat {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #f8fafc;
+            line-height: 1.2;
+        }
+        .duel-fighter-stat small {
+            font-size: 0.68rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: block;
+        }
+        .duel-fighter-sub {
+            font-size: 0.72rem;
+            color: #cbd5e1;
+            margin-top: 0.25rem;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+            padding-top: 0.2rem;
+        }
+        .duel-vs-badge {
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            font-weight: 900;
+            color: #fbbf24;
+            background: rgba(20, 14, 10, 0.95);
+            border: 1.5px solid #d97706;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+        }
+        .duel-odds-container {
+            background: rgba(15, 8, 8, 0.65);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 7px;
+            padding: 0.5rem 0.65rem;
+            margin-bottom: 0.75rem;
+        }
+        .duel-odds-bar-track {
+            height: 7px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .duel-odds-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+        .duel-attack-action-btn {
+            width: 100%;
+            font-size: 0.98rem;
+            font-weight: 800;
+            padding: 0.72rem;
+            background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #991b1b 100%);
+            border: 1.8px solid #fca5a5;
+            color: #ffffff;
+            border-radius: 9px;
+            cursor: pointer;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+            box-shadow: 0 4px 14px rgba(220, 38, 38, 0.45);
+            transition: all 0.2s;
+        }
+        .duel-attack-action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+            border-color: #ffffff;
+        }
+        .duel-attack-action-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        /* 3D Interaktivní karta Náhody */
+        .chance-card-box {
+            perspective: 1200px;
+            margin-bottom: 0.95rem;
+        }
+        .chance-card-inner {
+            position: relative;
+            width: 100%;
+            min-height: 180px;
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-style: preserve-3d;
+            border-radius: 14px;
+            cursor: pointer;
+        }
+        .chance-card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .chance-card-face {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            min-height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 14px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .chance-card-back {
+            background: linear-gradient(135deg, #2b1704 0%, #452408 50%, #170d03 100%);
+            border: 2.2px solid var(--gold);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+            align-items: center;
+            text-align: center;
+        }
+        .chance-card-front {
+            background: linear-gradient(135deg, #3d240d 0%, #201306 100%);
+            border: 2.2px solid #facc15;
+            box-shadow: 0 10px 30px rgba(250, 204, 21, 0.45);
+            transform: rotateY(180deg);
+        }
+        .chance-seal {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #dc2626 0%, #991b1b 75%, #450a0a 100%);
+            border: 2.5px solid #fbbf24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 14px rgba(220, 38, 38, 0.8);
+            margin-bottom: 0.5rem;
+            animation: sealGlow 2.5s infinite alternate;
+        }
+        @keyframes sealGlow {
+            0% { transform: scale(0.96); box-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+            100% { transform: scale(1.04); box-shadow: 0 0 20px rgba(251, 191, 36, 0.85); }
+        }
+
+        /* Speciální pole: Šatlava, Špitál, Krčma */
+        .prison-encounter-card {
+            background: linear-gradient(145deg, rgba(24, 24, 27, 0.98), rgba(9, 9, 11, 0.98));
+            border: 2px solid #a1a1aa;
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+        }
+        .hospital-encounter-card {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(30, 58, 95, 0.98));
+            border: 2px solid #38bdf8;
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.35);
+        }
+        .tavern-encounter-card {
+            background: linear-gradient(145deg, rgba(69, 26, 3, 0.98), rgba(28, 14, 4, 0.98));
+            border: 2px solid #f59e0b;
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
+        }
+
+        /* Královské vyrovnání dluhu (Nucená dražba za 60 %) */
+        .debt-encounter-card {
+            background: linear-gradient(145deg, rgba(58, 18, 18, 0.98), rgba(30, 12, 12, 0.98));
+            border: 2px solid #f59e0b;
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+        .debt-badge {
+            background: rgba(245, 158, 11, 0.25);
+            color: #fde68a;
+            border: 1px solid #f59e0b;
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.15rem 0.5rem;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 0.3rem;
+        }
+        .debt-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fef08a;
+            margin-bottom: 0.45rem;
+        }
+        .debt-assets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            max-height: 190px;
+            overflow-y: auto;
+            margin: 0.5rem 0;
+            padding-right: 0.25rem;
+        }
+        .debt-asset-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 7px;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.82rem;
+            color: #f1f5f9;
+        }
+        .btn-liquidate-mini {
+            background: rgba(220, 38, 38, 0.4);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            font-size: 0.74rem;
+            padding: 3px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn-liquidate-mini:hover {
+            background: rgba(220, 38, 38, 0.75);
+            color: #ffffff;
+            border-color: #ef4444;
+        }
+
+        .action-card {
+            background: linear-gradient(145deg, rgba(48, 36, 24, 0.96), rgba(26, 20, 15, 0.96));
+            border: 1.5px solid var(--gold);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.95rem;
+        }
+
+        .turn-indicator {
+            font-size: 1.05rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .dice-badge-row {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.85rem;
+            background: rgba(18, 13, 9, 0.7);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            border-radius: 11px;
+            padding: 0.55rem 0.85rem;
+        }
+
+        .dice-cube-mini {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7, #f59e0b);
+            border: 2px solid #b45309;
+            border-radius: 9px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55), inset 0 1px 3px rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            color: #78350f;
+            user-select: none;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .dice-badge-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 0;
+            flex-grow: 1;
+        }
+
+        .dice-roll-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .dice-roll-badge strong {
+            color: #fef08a;
+            font-size: 0.95rem;
+        }
+
+        .turn-summary-text {
+            font-size: 0.88rem;
+            color: #f1f5f9;
+            line-height: 1.4;
+        }
+
+        /* Zvýraznění klíčových textů a odměn */
+        .hl-bold {
+            font-weight: 700;
+            color: #fef08a;
+        }
+        .hl-gold {
+            font-weight: 700;
+            color: #facc15;
+            text-shadow: 0 0 6px rgba(234, 179, 8, 0.4);
+        }
+        .hl-heart {
+            font-weight: 700;
+            color: #f472b6;
+            text-shadow: 0 0 8px rgba(236, 72, 153, 0.5);
+            white-space: nowrap;
+        }
+
+        .dice-landed-loc {
+            font-size: 0.84rem;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+        }
+        .dice-landed-loc .loc-label {
+            color: var(--text-muted);
+            font-size: 0.76rem;
+        }
+        .dice-landed-loc .loc-name {
+            color: #fef08a;
+        }
+        .dice-landed-loc .loc-code {
+            color: #94a3b8;
+            font-size: 0.76rem;
+        }
+
+        /* Strukturovaná RPG karta události */
+        .turn-encounter-card {
+            background: linear-gradient(135deg, rgba(32, 22, 14, 0.9), rgba(18, 12, 8, 0.96));
+            border: 1px solid rgba(212, 175, 55, 0.32);
+            border-radius: 11px;
+            padding: 0.75rem 0.9rem;
+            margin-bottom: 0.85rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.45);
+        }
+        .turn-encounter-card.encounter-chance {
+            border-color: rgba(245, 158, 11, 0.55);
+            background: linear-gradient(135deg, rgba(44, 26, 12, 0.92), rgba(22, 14, 8, 0.97));
+        }
+        .encounter-header {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            margin-bottom: 0.45rem;
+            flex-wrap: wrap;
+        }
+        .encounter-type-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            background: rgba(245, 158, 11, 0.22);
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            color: #fef08a;
+        }
+        .encounter-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #fef08a;
+        }
+        .encounter-lore {
+            font-size: 0.88rem;
+            color: #e2e8f0;
+            line-height: 1.42;
+            margin-bottom: 0.45rem;
+            font-style: italic;
+        }
+        .encounter-reward-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(236, 72, 153, 0.5);
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.28);
+        }
+
+        /* 3D KOSTKA A ANIMACE */
+        .dice-showcase-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 0.65rem 0.95rem;
+            margin: 0.6rem 0;
+        }
+        .dice-cube {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7, #f59e0b);
+            border: 2.2px solid #b45309;
+            border-radius: 12px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            color: #78350f;
+            user-select: none;
+            transition: transform 0.15s;
+        }
+        .dice-rolling {
+            animation: diceTumble 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        @keyframes diceTumble {
+            0% { transform: rotate(0deg) scale(0.85); }
+            25% { transform: rotate(110deg) scale(1.18) translateY(-8px); }
+            50% { transform: rotate(200deg) scale(0.92); }
+            75% { transform: rotate(290deg) scale(1.1) translateY(-4px); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .action-buttons-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .btn-action-buy, .btn-action-skill, .btn-action-quest, .btn-action-festival, .btn-action-prison, .btn-action-hospital, .btn-action-tavern, .btn-end-turn {
+            padding: 0.52rem 0.9rem;
+            border-radius: 9px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+        .btn-action-buy { background: #15803d; color: #fff; border-color: #22c55e; }
+        .btn-action-skill { background: #6d28d9; color: #fff; border-color: #a855f7; }
+        .btn-action-quest { background: #b91c1c; color: #fff; border-color: #f87171; }
+        .btn-action-festival { background: #be185d; color: #fff; border-color: #f472b6; }
+        .btn-action-prison { background: #3f3f46; color: #f4f4f5; border-color: #a1a1aa; }
+        .btn-action-hospital { background: #0284c7; color: #fff; border-color: #38bdf8; }
+        .btn-action-tavern { background: #d97706; color: #1c1917; font-weight: 700; border-color: #fbbf24; }
+        .btn-end-turn { background: #334155; color: #f8fafc; border-color: #64748b; margin-left: auto; }
+
+        button:disabled {
+            opacity: 0.42;
+            cursor: not-allowed;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 0.65rem;
+            margin-bottom: 0.75rem;
+        }
+        .sheet-player-name { font-size: 1.08rem; font-weight: 700; }
+        .sheet-player-pos { font-size: 0.8rem; color: var(--text-muted); }
+        .sheet-gold-box {
+            background: rgba(212, 175, 55, 0.16);
+            border: 1px solid var(--gold);
+            color: var(--gold-light);
+            font-weight: 700;
+            padding: 0.35rem 0.7rem;
+            border-radius: 9px;
+        }
+
+        .stats-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.45rem;
+            margin-bottom: 0.85rem;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 9px;
+            padding: 0.4rem;
+            text-align: center;
+        }
+        .stat-box span { display: block; font-size: 0.75rem; color: var(--text-muted); }
+        .stat-box strong { font-size: 1.15rem; color: var(--gold-light); }
+        .stat-box small { display: block; font-size: 0.68rem; color: var(--text-muted); }
+
+        .sheet-section-title {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--gold);
+            margin: 0.65rem 0 0.35rem;
+            font-weight: 700;
+        }
+
+        .asset-list {
+            max-height: 155px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .asset-chip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            padding: 0.32rem 0.55rem;
+            border-radius: 7px;
+            font-size: 0.82rem;
+        }
+        .btn-sell-mini, .btn-upg-mini {
+            font-size: 0.74rem;
+            padding: 2px 6px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-sell-mini { background: rgba(180, 83, 9, 0.35); color: #fde68a; }
+        .btn-upg-mini { background: rgba(21, 128, 61, 0.45); color: #bbf7d0; margin-right: 4px; }
+        .btn-equip-toggle {
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.15s ease;
+            margin-right: 4px;
+        }
+        .btn-equip-toggle.equipped {
+            background: rgba(34, 197, 94, 0.25);
+            color: #86efac;
+            border-color: rgba(34, 197, 94, 0.5);
+        }
+        .btn-equip-toggle.equipped:hover {
+            background: rgba(34, 197, 94, 0.4);
+        }
+        .btn-equip-toggle.in-bag {
+            background: rgba(148, 163, 184, 0.18);
+            color: #cbd5e1;
+            border-color: rgba(148, 163, 184, 0.35);
+        }
+        .btn-equip-toggle.in-bag:hover {
+            background: rgba(148, 163, 184, 0.3);
+        }
+
+        .log-box {
+            max-height: 210px;
+            overflow-y: auto;
+            font-size: 0.82rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.32rem;
+        }
+        .log-entry {
+            padding: 0.3rem 0.5rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.025);
+            border-left: 3px solid #64748b;
+        }
+        .log-turn { color: var(--text-muted); font-size: 0.75rem; margin-right: 4px; }
+        .log-win, .log-festival { border-left-color: #ec4899; background: rgba(236, 72, 153, 0.08); }
+        .log-quest_win { border-left-color: #22c55e; }
+        .log-quest_loss { border-left-color: #ef4444; }
+        .log-gold, .log-buy { border-left-color: #eab308; }
+
+        /* --- TABULKY PRAVIDEL A GALERIE NÁKRESŮ --- */
+        .rules-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            margin-top: 0.6rem;
+        }
+        .rules-table th, .rules-table td {
+            padding: 0.5rem 0.65rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            text-align: left;
+        }
+        .rules-table th {
+            color: var(--gold-light);
+            background: rgba(212, 175, 55, 0.08);
+        }
+
+        .sketches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 0.85rem;
+        }
+        .sketch-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-gold);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .sketch-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+        .sketch-card img { width: 100%; height: 165px; object-fit: cover; display: block; }
+        .sketch-card-cap { padding: 0.55rem 0.7rem; font-size: 0.82rem; color: var(--gold-light); }
+
+        /* --- BALANCOVACÍ STUDIO --- */
+        .sim-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.9rem;
+            margin-top: 1rem;
+        }
+        .sim-metric-card {
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            padding: 0.9rem;
+        }
+        .sim-metric-card span { display: block; font-size: 0.8rem; color: var(--text-muted); }
+        .sim-metric-card strong { display: block; font-size: 1.35rem; color: var(--gold-light); margin: 0.2rem 0; }
+        .sim-metric-card small { color: var(--text-muted); font-size: 0.76rem; }
+
+        /* --- MODALY --- */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.82);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-box {
+            background: #1c1611;
+            border: 2px solid var(--gold);
+            border-radius: 16px;
+            max-width: 560px;
+            width: 100%;
+            padding: 1.4rem;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .saved-session-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.55rem 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 9px;
+            margin-bottom: 0.5rem;
+        }
+        .room-code-pill {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--gold-light);
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-size: 0.78rem;
+            margin-left: 6px;
+        }
+        .empty-note { color: var(--text-muted); font-size: 0.84rem; font-style: italic; padding: 0.3rem 0; }
+
+        /* --- ZBROJNICE A TRŽIŠTĚ MODAL --- */
+        .armory-modal-box {
+            max-width: 820px;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .armory-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(212,175,55,0.25);
+            padding-bottom: 0.75rem;
+            margin-bottom: 0.85rem;
+        }
+        .armory-player-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(212,175,55,0.08);
+            border: 1px solid rgba(212,175,55,0.22);
+            border-radius: 9px;
+            padding: 0.55rem 0.85rem;
+            margin-bottom: 0.85rem;
+            font-size: 0.88rem;
+        }
+        .armory-filter-bar {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.85rem;
+        }
+        .armory-tab-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #d1d5db;
+            padding: 0.35rem 0.65rem;
+            border-radius: 7px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .armory-tab-btn:hover {
+            background: rgba(212,175,55,0.18);
+            color: #fef08a;
+            border-color: rgba(212,175,55,0.4);
+        }
+        .armory-tab-btn.active {
+            background: #b45309;
+            color: #fff;
+            border-color: #fbbf24;
+            font-weight: 700;
+        }
+        .armory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 0.75rem;
+            overflow-y: auto;
+            max-height: 52vh;
+            padding-right: 4px;
+        }
+        .armory-card {
+            background: rgba(30, 24, 18, 0.9);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 10px;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+        .armory-card:hover {
+            border-color: #fbbf24;
+            transform: translateY(-2px);
+        }
+        .armory-card-tier-1 { border-top: 3.5px solid #b45309; }
+        .armory-card-tier-2 { border-top: 3.5px solid #94a3b8; }
+        .armory-card-tier-3 { border-top: 3.5px solid #fbbf24; }
+        .armory-badge-tier {
+            font-size: 0.7rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .armory-stat-chip {
+            font-size: 0.74rem;
+            padding: 2px 6px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.06);
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .armory-stat-pos { color: #86efac; }
+        .armory-stat-neg { color: #fca5a5; }
+
+        /* --- VÍTĚZNÝ CEREMONIÁL & KRÁLOVSKÁ SVATBA MODAL --- */
+        .victory-modal-box {
+            max-width: 840px;
+            background: linear-gradient(180deg, #24140b 0%, #150d07 100%);
+            border: 2.5px solid #fbbf24;
+            box-shadow: 0 0 50px rgba(251, 191, 36, 0.4), inset 0 0 30px rgba(212, 175, 55, 0.15);
+            text-align: center;
+            padding: 1.8rem 1.4rem;
+        }
+        .victory-crown-header {
+            margin-bottom: 1.2rem;
+        }
+        .victory-crown-icon {
+            font-size: 3.2rem;
+            filter: drop-shadow(0 4px 10px rgba(251, 191, 36, 0.6));
+            animation: crownBounce 2s ease-in-out infinite;
+        }
+        @keyframes crownBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.08); }
+        }
+        .victory-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.9rem;
+            color: #fbbf24;
+            margin: 0.2rem 0 0.4rem;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        }
+        .victory-subtitle {
+            font-size: 1.05rem;
+            color: #f3e5ab;
+        }
+        .victory-podium-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 0.9rem;
+            margin: 1.2rem 0;
+            flex-wrap: wrap;
+        }
+        .podium-card {
+            background: rgba(30, 20, 14, 0.85);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            width: 190px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1.5px solid rgba(255,255,255,0.15);
+        }
+        .podium-rank-1 {
+            border-color: #fbbf24;
+            background: linear-gradient(180deg, rgba(180, 83, 9, 0.35) 0%, rgba(30, 20, 14, 0.9) 100%);
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.35);
+            transform: scale(1.06);
+            order: 2;
+        }
+        .podium-rank-2 {
+            border-color: #94a3b8;
+            order: 1;
+        }
+        .podium-rank-3 {
+            border-color: #d97706;
+            order: 3;
+        }
+        .podium-rank-badge {
+            font-size: 0.78rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+        }
+        .victory-stats-table-wrap {
+            max-height: 220px;
+            overflow-y: auto;
+            margin-bottom: 1.2rem;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.25);
+        }
+        .victory-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.84rem;
+            text-align: left;
+        }
+        .victory-table th {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold-light);
+            padding: 0.55rem 0.65rem;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+        .victory-table td {
+            padding: 0.5rem 0.65rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .victory-actions-bar {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* ================================================================
+           LANDING PAGE PORTÁLU KIDESKY (VARIANTA A: KRÁLOVSKÝ PORTÁL & KATALOG)
+           ================================================================ */
+        .lp-hero-showcase {
+            display: grid;
+            grid-template-columns: 1.25fr 0.95fr;
+            gap: 1.5rem;
+            background:
+                linear-gradient(135deg, rgba(20, 14, 8, 0.94) 0%, rgba(38, 25, 14, 0.88) 55%, rgba(22, 14, 9, 0.95) 100%),
+                url('assets/landmarks/royal_castle.jpg') center/cover no-repeat;
+            border: 2px solid var(--gold);
+            border-radius: 18px;
+            padding: 1.65rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 16px 42px rgba(0, 0, 0, 0.65), inset 0 0 32px rgba(212, 175, 55, 0.12);
+            position: relative;
+            overflow: hidden;
+        }
+        @media (max-width: 1080px) {
+            .lp-hero-showcase {
+                grid-template-columns: 1fr;
+            }
+        }
+        .lp-kicker-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: rgba(212, 175, 55, 0.16);
+            border: 1px solid var(--gold);
+            color: var(--gold-light);
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.9px;
+            padding: 0.28rem 0.75rem;
+            border-radius: 999px;
+            margin-bottom: 0.65rem;
+        }
+        .lp-hero-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.75rem, 2.8vw, 2.55rem);
+            color: var(--gold-light);
+            line-height: 1.18;
+            margin-bottom: 0.55rem;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.85);
+        }
+        .lp-hero-lead {
+            color: #e7e5e4;
+            font-size: 0.98rem;
+            line-height: 1.58;
+            margin-bottom: 1rem;
+        }
+        .lp-badges-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.1rem;
+        }
+        .lp-meta-pill {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(212, 175, 55, 0.32);
+            border-radius: 9px;
+            padding: 0.35rem 0.7rem;
+            font-size: 0.82rem;
+            color: #f5f5f4;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.38rem;
+        }
+        .lp-meta-pill strong {
+            color: var(--gold-light);
+        }
+
+        /* Pás interaktivních medailonků políček */
+        .lp-medallions-box {
+            background: rgba(12, 9, 6, 0.68);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            border-radius: 13px;
+            padding: 0.8rem 0.95rem;
+            margin-bottom: 1.1rem;
+        }
+        .lp-medallions-strip {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            margin: 0.5rem 0 0.6rem;
+        }
+        .lp-medallion-item {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 2.5px solid var(--gold);
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            background: #1c140d;
+        }
+        .lp-medallion-item:hover, .lp-medallion-item.active {
+            transform: translateY(-4px) scale(1.1);
+            border-color: #fef08a;
+            box-shadow: 0 0 16px var(--theme-glow);
+        }
+        .lp-medallion-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .lp-medallion-desc {
+            font-size: 0.83rem;
+            color: #fde68a;
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 3px solid var(--gold);
+            padding: 0.42rem 0.65rem;
+            border-radius: 6px;
+            min-height: 2.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Lišta identity (Host vs. Přihlášený rytíř) */
+        .lp-auth-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            border-radius: 12px;
+            padding: 0.65rem 0.9rem;
+            margin-bottom: 1.15rem;
+        }
+        .lp-cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        /* Pravý sloupec Hero sekce: Video + Živá animace */
+        .lp-media-card {
+            background: rgba(14, 10, 7, 0.88);
+            border: 1.5px solid var(--gold);
+            border-radius: 15px;
+            padding: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.65);
+        }
+        .lp-media-tabs {
+            display: flex;
+            gap: 0.45rem;
+            margin-bottom: 0.7rem;
+        }
+        .lp-media-tab-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: var(--text-muted);
+            padding: 0.42rem 0.65rem;
+            border-radius: 9px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lp-media-tab-btn.active {
+            background: var(--theme-active-grad);
+            color: #1c1917;
+            border-color: var(--gold-light);
+            font-weight: 700;
+            box-shadow: 0 0 12px var(--theme-glow);
+        }
+        .lp-media-stage {
+            position: relative;
+            width: 100%;
+            height: 290px;
+            border-radius: 11px;
+            overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            background: #090604;
+        }
+        .lp-media-stage video,
+        .lp-media-stage canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .lp-media-caption {
+            margin-top: 0.65rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        /* Rozcestník 3 herních režimů (Solo / Hot-Seat / Online Multiplayer) */
+        .lp-section-heading {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: var(--gold-light);
+            margin: 1.6rem 0 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+        .lp-modes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1.6rem;
+        }
+        @media (max-width: 1120px) {
+            .lp-modes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .lp-mode-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-gold);
+            border-radius: 15px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .lp-mode-card:hover {
+            border-color: var(--gold);
+        }
+        .lp-mode-card-highlight {
+            border-color: var(--gold);
+            box-shadow: 0 8px 28px rgba(212, 175, 55, 0.16);
+        }
+        .lp-mode-badge {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            background: rgba(212, 175, 55, 0.16);
+            color: var(--gold-light);
+            margin-bottom: 0.45rem;
+            width: fit-content;
+        }
+
+        /* Pravidla za 60 vteřin (4 kroky) */
+        .lp-steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.95rem;
+            margin-bottom: 1.6rem;
+        }
+        @media (max-width: 980px) {
+            .lp-steps-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 560px) {
+            .lp-steps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .lp-step-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-gold);
+            border-radius: 13px;
+            padding: 1rem;
+            position: relative;
+        }
+        .lp-step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--theme-active-grad);
+            color: #1c1917;
+            font-weight: 800;
+            font-size: 0.85rem;
+            margin-bottom: 0.45rem;
+        }
+
+        /* Katalog her KiDesky */
+        .lp-catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width: 980px) {
+            .lp-catalog-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .lp-game-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-gold);
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .lp-game-card.active-game {
+            border-color: var(--gold);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
+        }
+        .lp-game-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--gold-light);
+        }
+        .lp-game-thumb {
+            height: 155px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding: 0.75rem;
+        }
+        .lp-game-body {
+            padding: 1.05rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+        }
+
+        /* --- ONLINE MULTIPLAYER MÍSTNOST & ZÁMEK SLOTU --- */
+        .online-room-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            background: linear-gradient(90deg, rgba(12, 38, 64, 0.88) 0%, rgba(24, 20, 14, 0.92) 100%);
+            border: 1.5px solid rgba(56, 189, 248, 0.5);
+            border-radius: 12px;
+            padding: 0.55rem 0.95rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+        }
+        .online-pulse-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+            animation: onlinePulse 1.8s infinite;
+        }
+        @keyframes onlinePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.45; transform: scale(0.85); }
+        }
+        .waiting-turn-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.92));
+            border: 2px dashed #38bdf8;
+            border-radius: 13px;
+            padding: 1.15rem;
+            text-align: center;
+        }
+
+        /* ==========================================================================
+           RESPONZIVNÍ & MOBILNÍ / TABLETOVÝ SYSTÉM (Princeznino srdce Mobile HUD)
+           ========================================================================== */
+
+        body[data-device="mobile"] {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Zamezení scrollování stránky v mobilním režimu herního plánu */
+        body[data-device="mobile"].on-board-tab {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Kompaktní horní lišta na mobilu */
+        body[data-device="mobile"] .topbar {
+            padding: 0.35rem 0.6rem;
+            gap: 0.35rem;
+        }
+        body[data-device="mobile"] .brand-title {
+            font-size: 0.96rem;
+        }
+        body[data-device="mobile"] .nav-tabs {
+            gap: 0.25rem;
+            overflow-x: auto;
+            max-width: 100%;
+            padding-bottom: 2px;
+            -webkit-overflow-scrolling: touch;
+        }
+        body[data-device="mobile"] .nav-tab-btn {
+            padding: 0.3rem 0.55rem;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+        body[data-device="mobile"] .user-bar {
+            gap: 0.35rem;
+        }
+        body[data-device="mobile"] .element-theme-switcher {
+            padding: 2px;
+        }
+        body[data-device="mobile"] .theme-btn {
+            padding: 0.2rem 0.35rem;
+            font-size: 0.75rem;
+        }
+
+        /* Mobilní herní stůl (#tab-board) na výšku (Portrait) */
+        body[data-device="mobile"] .main-container {
+            padding: 0.4rem 0.4rem 95px 0.4rem;
+        }
+        body[data-device="mobile"][data-orientation="portrait"] .board-workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        body[data-device="mobile"][data-orientation="portrait"] .board-right-sidebar {
+            display: none; /* Skryto na výšku, plně nahrazeno Sticky Thumb Dockem a Bottom Sheetem */
+        }
+        body[data-device="mobile"] .svg-board-container {
+            height: auto;
+            min-height: auto;
+            border-radius: 12px;
+            padding: 2px;
+            touch-action: none;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] #prs-board-svg {
+            width: 100%;
+            height: 100%;
+        }
+        body[data-device="mobile"] .map-floating-toolbar {
+            padding: 0.35rem 0.5rem;
+            margin-bottom: 0.35rem;
+            gap: 0.35rem;
+        }
+        body[data-device="mobile"] .map-floating-toolbar .btn-zoom {
+            padding: 0.28rem 0.45rem;
+            font-size: 0.75rem;
+        }
+        body[data-device="mobile"] .board-bottom-bar {
+            display: none;
+        }
+        body[data-device="mobile"] .princess-race-container {
+            padding: 0.4rem 0.6rem;
+            margin-bottom: 0.35rem;
+        }
+        body[data-device="mobile"] .heart-track-grid {
+            gap: 0.3rem;
+            margin-bottom: 0.35rem;
+            overflow-x: auto;
+            padding-bottom: 3px;
+        }
+
+        /* Mobilní herní stůl na šířku (Landscape) - "Konzolový režim" */
+        body[data-device="mobile"][data-orientation="landscape"] .main-container {
+            padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+            max-width: 100%;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .topbar {
+            display: none;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .board-workspace {
+            display: grid;
+            grid-template-columns: 1fr 310px;
+            gap: 0.5rem;
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+            padding-top: 2px;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .svg-board-container {
+            height: calc(100vh - 44px);
+            touch-action: none;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .board-right-sidebar {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 8px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-right: 4px;
+            gap: 0.45rem;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] #mobile-action-dock {
+            display: none !important;
+        }
+
+        /* --- MOBILNÍ STICKY THUMB DOCK (Spodní akční panel) --- */
+        .mobile-action-dock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(18, 14, 22, 0.96);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-top: 1.5px solid var(--gold);
+            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            padding: 4px 8px;
+            padding-bottom: max(6px, env(safe-area-inset-bottom));
+        }
+
+        .mobile-dock-status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            padding: 2px 4px 4px 4px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+            color: var(--text-muted);
+        }
+        .mobile-dock-player-pill {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            color: var(--gold-light);
+        }
+        .mobile-dock-stats {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        .mobile-dock-stats span {
+            white-space: nowrap;
+        }
+
+        .mobile-dock-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .mobile-dock-btn-main-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+        .mobile-btn-primary {
+            width: 100%;
+            height: 48px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 800;
+            border-radius: 12px;
+            border: 1px solid #fde047;
+            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+            color: #1a0f2e;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4);
+            transition: transform 0.1s ease, filter 0.15s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .mobile-btn-primary:active {
+            transform: scale(0.97);
+        }
+        .mobile-btn-primary:disabled {
+            opacity: 0.6;
+            background: #475569;
+            border-color: #64748b;
+            color: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .mobile-dock-icon-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .mobile-dock-icon-btn {
+            position: relative;
+            width: 44px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s ease, border-color 0.15s ease;
+            padding: 2px;
+        }
+        .mobile-dock-icon-btn:active, .mobile-dock-icon-btn.active {
+            background: rgba(212, 175, 55, 0.25);
+            border-color: var(--gold);
+        }
+        .dock-btn-icon {
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+        .dock-btn-label {
+            font-size: 0.64rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            line-height: 1;
+        }
+        .dock-btn-badge {
+            position: absolute;
+            top: 2px;
+            right: 3px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 800;
+            min-width: 14px;
+            height: 14px;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+        }
+
+        /* --- MOBILNÍ BOTTOM SHEET DRAWER (Vysouvací šuplík) --- */
+        .mobile-sheet-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 1050;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .mobile-sheet-backdrop.active {
+            opacity: 1;
+        }
+
+        .mobile-bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 82vh;
+            background: rgba(18, 14, 22, 0.98);
+            border-top: 2px solid var(--gold);
+            border-radius: 18px 18px 0 0;
+            z-index: 1100;
+            box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+        }
+        .mobile-bottom-sheet.open {
+            transform: translateY(0);
+        }
+
+        .mobile-sheet-handle-bar {
+            width: 100%;
+            padding: 8px 0 4px 0;
+            display: flex;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .mobile-sheet-drag-handle {
+            width: 44px;
+            height: 5px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .mobile-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 1rem 0.65rem 1rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        .mobile-sheet-title {
+            margin: 0;
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            color: var(--gold-light);
+        }
+        .mobile-sheet-close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mobile-sheet-close-btn:active {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fff;
+        }
+
+        .mobile-sheet-content {
+            padding: 0.85rem 1rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            flex: 1;
+        }
+
+        /* Tabletová adaptace */
+        body[data-device="tablet"] .board-workspace {
+            grid-template-columns: 1fr 340px;
+            gap: 0.8rem;
+        }
+        body[data-device="tablet"] .svg-board-container {
+            height: 66vh;
+            touch-action: none;
+        }
+        body[data-device="tablet"] #mobile-action-dock {
+            display: none !important;
+        }
+    
+        /* --- SUBNAV PRO PRAVIDLA, BESTIÁŘ, HRADY A TROFEJE --- */
+        .rules-subnav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+        }
+        .rules-subnav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            padding: 0.5rem 0.95rem;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .rules-subnav-btn:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+            color: var(--gold-light);
+        }
+        .rules-subnav-btn.active {
+            background: linear-gradient(135deg, #d4af37, #b47d1c);
+            color: #15110d;
+            border-color: var(--gold-light);
+            box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
+        }
+
+        /* --- GRID PRO BESTIÁŘ A HRADY --- */
+        .cards-media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 1.15rem;
+            margin-top: 1rem;
+        }
+        .bestiary-card, .castle-card {
+            background: rgba(18, 14, 12, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.22);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .bestiary-card:hover, .castle-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--gold);
+        }
+        .card-media-header {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: #000;
+            cursor: pointer;
+        }
+        .card-media-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            display: block;
+        }
+        .card-media-header:hover .card-media-img {
+            transform: scale(1.05);
+        }
+        .card-media-badge-left {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0,0,0,0.78);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(212,175,55,0.4);
+            color: var(--gold-light);
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .card-media-badge-right {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.78);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(239,68,68,0.5);
+            color: #fca5a5;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .card-media-body {
+            padding: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .card-media-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--gold-light);
+            margin-bottom: 0.35rem;
+        }
+        .card-media-desc {
+            font-size: 0.82rem;
+            color: #d6d3d1;
+            line-height: 1.4;
+            margin-bottom: 0.65rem;
+            flex: 1;
+        }
+        .card-callout-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 0.78rem;
+            margin-top: 0.35rem;
+        }
+
+        /* --- GRID PRO TROFEJE --- */
+        .trophies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 0.85rem;
+            margin-top: 1rem;
+        }
+        .trophy-item-card {
+            background: rgba(22, 17, 14, 0.9);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 8px;
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s ease;
+        }
+        .trophy-item-card:hover {
+            border-color: var(--gold-light);
+            background: rgba(30, 24, 20, 0.95);
+        }
+        .trophy-item-card.tier-1 { border-left: 4px solid #60a5fa; }
+        .trophy-item-card.tier-2 { border-left: 4px solid #a855f7; }
+        .trophy-item-card.tier-3 { border-left: 4px solid #f59e0b; }
+
+        .slot-badge-trophy {
+            background: linear-gradient(135deg, rgba(212,175,55,0.35), rgba(180,83,9,0.35)) !important;
+            color: #fde047 !important;
+            border: 1px solid rgba(253,224,71,0.6) !important;
+        }
+
+    
+        .armory-slot-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gold-light);
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            padding: 2px 7px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+    
+        /* --- ŽEBŘÍČEK VŠECH RYTÍŘŮ V PRAVÉM PANELU --- */
+        .standings-card {
+            background: linear-gradient(135deg, rgba(32, 22, 14, 0.95), rgba(20, 14, 8, 0.98));
+            border: 1.5px solid var(--gold);
+            border-radius: 12px;
+            padding: 0.65rem 0.85rem;
+            margin-bottom: 0.85rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+        .standings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+            padding-bottom: 0.35rem;
+        }
+        .standing-player-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.35rem 0.5rem;
+            border-radius: 8px;
+            margin-bottom: 0.25rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+        }
+        .standing-player-row:hover {
+            background: rgba(212, 175, 55, 0.12);
+            border-color: rgba(212, 175, 55, 0.35);
+            transform: translateX(2px);
+        }
+        .standing-player-row.active-turn {
+            background: rgba(245, 158, 11, 0.16);
+            border-color: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.22);
+        }
+        .standing-player-row.inspected-player {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+        }
+        .sp-info {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            min-width: 0;
+            flex: 1;
+        }
+        .sp-badge {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .sp-name {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sp-hearts-col {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        .sp-hearts-val {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #f472b6;
+        }
+        .sp-bar-bg {
+            width: 65px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .sp-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        /* Záložky přepínání hráčů v detailním sheetu */
+        .player-sheet-tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 0.6rem;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+        .player-sheet-tab-btn {
+            flex: 1;
+            padding: 0.25rem 0.45rem;
+            font-size: 0.74rem;
+            font-weight: 600;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .player-sheet-tab-btn.active {
+            background: var(--theme-active-grad);
+            color: #1c1917;
+            font-weight: 700;
+            border-color: var(--gold-light);
+            box-shadow: 0 0 8px var(--theme-glow);
+        }
+
+        /* Plovoucí RPG tooltip */
+        .player-hover-tooltip {
+            background: linear-gradient(145deg, rgba(28, 18, 12, 0.98), rgba(14, 9, 5, 0.98));
+            border: 1.5px solid var(--gold);
+            border-radius: 12px;
+            padding: 0.75rem 0.95rem;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.8), 0 0 16px var(--theme-glow);
+            min-width: 250px;
+            max-width: 320px;
+            pointer-events: none;
+            transition: opacity 0.12s ease;
+            backdrop-filter: blur(8px);
+        }
+        .player-link-interactive {
+            cursor: pointer;
+            text-decoration: underline dotted rgba(212, 175, 55, 0.5);
+            transition: color 0.15s ease;
+        }
+        .player-link-interactive:hover {
+            color: #fef08a !important;
+            text-decoration-color: #fef08a;
+        }
+
+    
+        /* ================================================================
+           NOVÝ GRAFICKÝ DESIGN KARTY RYTÍŘŮ (PRAVÝ PANEL)
+           ================================================================ */
+        .character-sheet-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        /* 2x2 Mřížka volby rytířů u stolu */
+        .knight-selector-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+            margin-bottom: 0.4rem;
+        }
+        .ks-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(212, 175, 55, 0.22);
+            border-radius: 9px;
+            padding: 0.35rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            user-select: none;
+        }
+        .ks-pill:hover {
+            background: rgba(212, 175, 55, 0.12);
+            border-color: rgba(212, 175, 55, 0.5);
+            transform: translateY(-1px);
+        }
+        .ks-pill.active {
+            background: linear-gradient(135deg, rgba(48, 32, 16, 0.95), rgba(24, 16, 8, 0.98));
+            border-color: var(--gold-light);
+            box-shadow: 0 0 10px var(--theme-glow), inset 0 0 8px rgba(212, 175, 55, 0.2);
+        }
+        .ks-pill.turn-now {
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+        }
+        .ks-pill-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.3rem;
+        }
+        .ks-avatar {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .ks-name {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+        .ks-crown {
+            font-size: 0.75rem;
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+        .ks-pill-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+        }
+        .ks-hearts {
+            color: #f472b6;
+            font-weight: 700;
+        }
+        .ks-gold {
+            color: #fef08a;
+            font-weight: 600;
+        }
+
+        /* Profilová karta vybraného rytíře */
+        .knight-profile-card {
+            background: linear-gradient(135deg, rgba(28, 20, 13, 0.96), rgba(16, 11, 7, 0.98));
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            border-radius: 12px;
+            padding: 0.75rem 0.85rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .knight-hero-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            margin-bottom: 0.65rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding-bottom: 0.55rem;
+        }
+        .knight-avatar-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.6), inset 0 1px 3px rgba(255,255,255,0.4);
+            border: 2px solid rgba(255,255,255,0.4);
+        }
+        .knight-hero-titles {
+            flex: 1;
+            min-width: 0;
+        }
+        .knight-name-line {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: #fef08a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tag-on-turn {
+            font-size: 0.68rem;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #d97706, #b45309);
+            color: #fff;
+            padding: 0.1rem 0.4rem;
+            border-radius: 6px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+        }
+        .knight-sub-line {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .knight-gold-badge {
+            background: rgba(212, 175, 55, 0.14);
+            border: 1px solid rgba(212, 175, 55, 0.45);
+            border-radius: 8px;
+            padding: 0.25rem 0.55rem;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .gold-amount {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #fef08a;
+            line-height: 1.1;
+        }
+        .gold-unit {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+
+        /* Měřič Srdcí */
+        .knight-hearts-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            border-radius: 9px;
+            padding: 0.45rem 0.65rem;
+        }
+        .hearts-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+        .hearts-title {
+            color: #fce7f3;
+            font-weight: 600;
+        }
+        .hearts-score {
+            color: #f472b6;
+            font-weight: 700;
+        }
+        .hearts-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.3rem;
+        }
+        .hearts-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            box-shadow: 0 0 8px rgba(236, 72, 153, 0.6);
+            transition: width 0.4s ease;
+        }
+        .hearts-row-sub {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .hearts-row-sub strong {
+            color: #fce7f3;
+        }
+
+        /* Hlavičky sekcí Character Sheetu */
+        .sheet-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-top: 0.35rem;
+            margin-bottom: 0.35rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding-bottom: 0.25rem;
+        }
+        .sheet-section-header small {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* 4 Ctnosti (2x2 RPG Grid) */
+        .virtues-2x2-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.45rem;
+            margin-bottom: 0.45rem;
+        }
+        .virtue-tile {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 0.4rem 0.55rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .vt-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+        .vt-val {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fef08a;
+        }
+        .vt-val.bonus {
+            color: #86efac;
+            text-shadow: 0 0 6px rgba(74, 222, 128, 0.4);
+        }
+        .vt-pips {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+        .virtue-pip {
+            font-size: 0.75rem;
+            line-height: 1;
+        }
+        .virtue-pip.filled {
+            color: #facc15;
+            text-shadow: 0 0 4px rgba(250, 204, 21, 0.6);
+        }
+        .virtue-pip.empty {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Výbava a Zbrojnice (Rack) */
+        .equipment-rack {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.35rem;
+            margin-bottom: 0.45rem;
+        }
+        .eq-slot-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.5rem;
+            border-radius: 7px;
+            font-size: 0.75rem;
+        }
+        .eq-slot-pill.empty {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            color: var(--text-muted);
+        }
+        .eq-slot-pill.empty .eq-icon {
+            opacity: 0.45;
+        }
+
+        /* Chovy zvířat a panství (Souhrnné pillboxy) */
+        .fiefs-summary-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-bottom: 0.45rem;
+        }
+        .fief-pill {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 0.2rem 0.45rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .fief-pill.active {
+            background: rgba(212, 175, 55, 0.12);
+            border-color: rgba(212, 175, 55, 0.38);
+            color: #fef08a;
+            font-weight: 600;
+        }
+        .fiefs-empty-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 0.3rem 0.2rem;
+        }
+
+    </style>
+</head>
+<body>
+    <script>
+        (function () {
+            try {
+                var t = document.documentElement.getAttribute("data-theme") || "light";
+                document.body.setAttribute("data-theme", t);
+            } catch (e) {}
+        })();
+    </script>
+
+    <!-- HORNÍ NAVIGACE -->
+    <header class="topbar">
+        <div class="brand-wrap">
+            <a id="topbar-back-kikiai" href="/" class="back-portal-link">← Zpět na KikiAI</a>
+            <button id="topbar-back-landing" type="button" class="back-portal-link" style="display:none; cursor:pointer; background:rgba(212,175,55,0.18); border-color:var(--gold); color:var(--gold-light); font-family:inherit; font-weight:600;" onclick="PRS_App.switchTab('lobby')">🏰 ← Zpět na Landing Page</button>
+            <div class="brand-title" style="cursor:pointer;" onclick="PRS_App.switchTab('lobby')" title="Návrat na úvodní Landing Page">🎲 KiDesky: <span>Princeznino srdce</span></div>
+        </div>
+
+        <nav class="nav-tabs">
+            <button id="nav-btn-lobby" class="nav-tab-btn active" onclick="PRS_App.switchTab('lobby')">🏰 Portál &amp; Herna</button>
+            <button id="nav-btn-board" class="nav-tab-btn" onclick="PRS_App.switchTab('board')">🎲 Hrací stůl</button>
+            <button id="nav-btn-rules" class="nav-tab-btn" onclick="PRS_App.switchTab('rules')">📜 Pravidla &amp; Katalog</button>
+            <button id="nav-btn-balance" class="nav-tab-btn" onclick="PRS_App.switchTab('balance')">⚖️ Balancovací Studio</button>
+        </nav>
+
+        <div class="user-bar">
+            <!-- 5 Elementárních přepínatelných stylů -->
+            <div class="element-theme-switcher" title="Vyber živel / atmosféru království">
+                <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true)">👑 <span class="theme-label">Zlato</span></button>
+                <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true)">🔥 <span class="theme-label">Oheň</span></button>
+                <button class="theme-btn" data-theme-btn="water" onclick="PRS_App.setElementTheme('water', true)">💧 <span class="theme-label">Voda</span></button>
+                <button class="theme-btn" data-theme-btn="earth" onclick="PRS_App.setElementTheme('earth', true)">🌿 <span class="theme-label">Země</span></button>
+                <button class="theme-btn" data-theme-btn="air" onclick="PRS_App.setElementTheme('air', true)">⚡ <span class="theme-label">Bouře</span></button>
+            </div>
+            <script>
+                (function () {
+                    try {
+                        var t = document.documentElement.getAttribute("data-theme") || "light";
+                        var btns = document.querySelectorAll(".theme-btn");
+                        for (var i = 0; i < btns.length; i++) {
+                            if (btns[i].getAttribute("data-theme-btn") === t) btns[i].classList.add("active");
+                            else btns[i].classList.remove("active");
+                        }
+                    } catch (e) {}
+                })();
+            </script>
+            <button id="music-player-btn" class="btn-secondary" onclick="PRS_App.toggleMusicPopup()" style="padding: 0.35rem 0.65rem;" title="Středověký hudební přehrávač &amp; Loutna">🎵 <span id="music-btn-label">Hudba: Vyp</span></button>
+            <button id="audio-toggle-btn" class="btn-secondary" onclick="PRS_App.toggleSound()" style="padding: 0.35rem 0.65rem;" title="Zvuky hry (zapnuto / ztlumeno)">🔊 Zvuk: Zap</button>
+            <button id="device-mode-toggle-btn" class="btn-secondary" onclick="PRS_App.cycleDeviceMode()" style="padding: 0.35rem 0.65rem;" title="Přepnout režim: Auto / Mobil / PC">📱 Režim: Auto</button>
+            <div id="user-status-badge" class="user-pill" onclick="PRS_App.openAuthModal()">👤 Host: <strong>Královský Host</strong></div>
+            <button class="btn-secondary" onclick="PRS_App.openAuthModal()">Účet / Role</button>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- ================================================================
+             ZÁLOŽKA 1: KRÁLOVSKÝ PORTÁL, LANDING PAGE & HERNA (VÝCHOZÍ OBRAZOVKA)
+             ================================================================ -->
+        <section id="tab-lobby" style="display:block">
+
+            <!-- 1. HERO SHOWCASE VLAJKOVÉ HRY: PRINCEZNINO SRDCE -->
+            <div class="lp-hero-showcase">
+                <!-- Levá část: Popis hry, parametry, medailonky, identita a vstupní tlačítka -->
+                <div>
+                    <div class="lp-kicker-badge">✨ Vlajková desková hra portálu KiDesky • Stolní &amp; Online edice</div>
+                    <h1 class="lp-hero-title">👑 Princeznino srdce</h1>
+                    <p class="lp-hero-lead">
+                        Originální autorská strategická a dobrodružná desková hra zrekonstruovaná z ručně kreslených návrhů.
+                        Vydej se ze startovního rozcestí s <strong>10 000 zlatými</strong>, skupuj šlechtické chovy koní, psů a sokolů,
+                        buduj vesnice, města a hrady, cvič u mistrů čtyři rytířské ctnosti, skoli obávaného draka a získej jako první
+                        <strong>30 💖 Princezniných srdcí</strong>!
+                    </p>
+
+                    <!-- Parametry hry ("Zadní strana krabice") -->
+                    <div class="lp-badges-row">
+                        <span class="lp-meta-pill">👥 <strong>2–6 Rytířů</strong> (Solo AI / Hot-Seat / Online)</span>
+                        <span class="lp-meta-pill">⏱️ <strong>45–90 min</strong> (Rychlý okruh 30 min)</span>
+                        <span class="lp-meta-pill">🧠 <strong>Strategická &amp; RPG deskovka</strong></span>
+                        <span class="lp-meta-pill">🗺️ <strong>96 políček &amp; 4 mapy království</strong></span>
+                    </div>
+
+                    <!-- Interaktivní pás medailonků políček -->
+                    <div class="lp-medallions-box">
+                        <div style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.6px; color:var(--gold-light); font-weight:700;">
+                            🔍 Prozkoumej herní políčka království (klikni nebo najeď myší):
+                        </div>
+                        <div class="lp-medallions-strip">
+                            <div class="lp-medallion-item active" onmouseenter="PRS_App.inspectLandingMedallion('kun', this)" onclick="PRS_App.inspectLandingMedallion('kun', this)" title="Chov Koní">
+                                <img src="assets/tiles/kun.jpg" alt="Kůň" />
+                            </div>
+                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('sokol', this)" onclick="PRS_App.inspectLandingMedallion('sokol', this)" title="Chov Sokolů">
+                                <img src="assets/tiles/sokol.jpg" alt="Sokol" />
+                            </div>
+                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('village', this)" onclick="PRS_App.inspectLandingMedallion('village', this)" title="Vesnice">
+                                <img src="assets/tiles/village.jpg" alt="Vesnice" />
+                            </div>
+                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('castle', this)" onclick="PRS_App.inspectLandingMedallion('castle', this)" title="Hrad">
+                                <img src="assets/tiles/castle.jpg" alt="Hrad" />
+                            </div>
+                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('tavern', this)" onclick="PRS_App.inspectLandingMedallion('tavern', this)" title="Krčma">
+                                <img src="assets/tiles/tavern.jpg" alt="Hospoda" />
+                            </div>
+                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('drak', this)" onclick="PRS_App.inspectLandingMedallion('drak', this)" title="Drak (Úkol 3)">
+                                <img src="assets/tiles/u3_drak.jpg" alt="Drak" />
+                            </div>
+                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('festival', this)" onclick="PRS_App.inspectLandingMedallion('festival', this)" title="Královské slavnosti">
+                                <img src="assets/tiles/festival.jpg" alt="Slavnosti" />
+                            </div>
+                        </div>
+                        <div id="lp-medallion-desc-box" class="lp-medallion-desc">
+                            🐎 <strong>Šlechtický chov Koní (1 000 zl.):</strong> Kupuj hřebčíny po království. Čím více koní vlastníš, tím vyšší mýtné platí soupeři a tím vyšší rentu inkasuješ na Mýtě!
+                        </div>
+                    </div>
+
+                    <!-- Vstupní stav účtu: Host (Guest) vs. Přihlášení -->
+                    <div class="lp-auth-strip">
+                        <div id="lp-user-banner-text" style="font-size:0.86rem; color:#f5f5f4;">
+                            👤 <strong>Vstup bez bariér:</strong> Hraješ jako <strong>Královský Host</strong>. Můžeš ihned hrát proti PC nebo se připojit ke stolu přes kód.
+                        </div>
+                        <div id="lp-user-banner-actions" style="display:flex; gap:0.45rem; flex-wrap:wrap;">
+                            <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem;" onclick="PRS_App.openAuthModal()">🔑 Přihlásit se / Registrovat</button>
+                        </div>
+                    </div>
+
+                    <!-- Hlavní akční tlačítka -->
+                    <div class="lp-cta-row">
+                        <button class="btn-gold-lg" onclick="PRS_App.quickStartSoloGame('standard')">
+                            ⚡ Rychlá hra (Solo proti PC)
+                        </button>
+                        <button class="btn-secondary" style="padding:0.65rem 1.15rem; font-weight:600; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.switchTab('board')">
+                            🎲 Vstoupit přímo k Hracímu stolu
+                        </button>
+                        <button class="btn-secondary" style="padding:0.65rem 1rem;" onclick="PRS_App.switchTab('rules')">
+                            📜 Pravidla &amp; Katalog věcí
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pravá část: Přepínatelná Živá Animace Plánu + MP4 Video (RuzeProDanielku.mp4) -->
+                <div class="lp-media-card">
+                    <div>
+                        <div class="lp-media-tabs">
+                            <button id="lp-tab-btn-anim" class="lp-media-tab-btn active" onclick="PRS_App.switchLandingMedia('anim')">
+                                ✨ Živá animace království
+                            </button>
+                            <button id="lp-tab-btn-video" class="lp-media-tab-btn" onclick="PRS_App.switchLandingMedia('video')">
+                                🎬 Video upoutávka (MP4)
+                            </button>
+                        </div>
+
+                        <div class="lp-media-stage">
+                            <!-- 1. Živá interaktivní animace herního plánu (Canvas) -->
+                            <div id="lp-media-anim-wrap" style="width:100%; height:100%; position:relative;">
+                                <canvas id="lp-live-preview-canvas" width="560" height="290"></canvas>
+                                <div style="position:absolute; bottom:8px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:center; pointer-events:none;">
+                                    <span style="background:rgba(0,0,0,0.72); border:1px solid var(--gold); color:var(--gold-light); font-size:0.74rem; padding:3px 9px; border-radius:6px;">
+                                        🏰 Živý průlet nad herním plánem (96 polí)
+                                    </span>
+                                    <span style="background:rgba(236,72,153,0.85); color:#fff; font-size:0.74rem; font-weight:700; padding:3px 9px; border-radius:6px;">
+                                        Cíl: 30 💖
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 2. MP4 Video přehrávač (RuzeProDanielku.mp4) -->
+                            <div id="lp-media-video-wrap" style="width:100%; height:100%; display:none; background:#000;">
+                                <video id="lp-promo-video" controls preload="metadata" loop playsinline poster="assets/landmarks/royal_castle.jpg" style="width:100%; height:100%; object-fit:contain; background:#000;">
+                                    <source src="assets/video/RuzeProDanielku.mp4" type="video/mp4" />
+                                    Tvůj prohlížeč nepodporuje přehrávání MP4 videa.
+                                </video>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lp-media-caption">
+                        <span id="lp-media-status-label">✨ Plynulá ukázka herních medailonků, rytířů a slavností</span>
+                        <button class="btn-secondary" style="font-size:0.76rem; padding:0.25rem 0.6rem;" onclick="PRS_App.switchLandingMedia(PRS_App.currentLandingMedia === 'video' ? 'anim' : 'video')">
+                            🔄 Přepnout Video / Animaci
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. ROZCESTNÍK HERNÍCH REŽIMŮ & PŘIPOJENÍ K MULTIPLAYERU (3 SLOUPCE) -->
+            <h2 class="lp-section-heading">⚔️ Vyber si herní režim nebo se připoj k Online Multiplayeru</h2>
+            <div class="lp-modes-grid">
+
+                <!-- KARTA 1: RYCHLÁ HRA (SOLO PROTI PC RYTÍŘŮM) -->
+                <div class="lp-mode-card">
+                    <div>
+                        <span class="lp-mode-badge">Režim 1 • Okamžitý start</span>
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.18rem; margin-bottom:0.4rem;">
+                            🤖 Rychlá výprava proti PC
+                        </h3>
+                        <p style="color:var(--text-muted); font-size:0.86rem; margin-bottom:0.95rem;">
+                            Ideální pro okamžité hraní na jedno kliknutí nebo trénink taktiky. Postavíš se třem povahově odlišným PC rytířům
+                            (<em>Černý Baron, Zikmund z Chovu, Kněžna Eliška</em>).
+                        </p>
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:0.75rem; margin-bottom:1rem; font-size:0.83rem;">
+                            <div style="margin-bottom:0.35rem;">✅ <strong>Žádné čekání na spoluhráče</strong> – tahy botů běží automaticky</div>
+                            <div style="margin-bottom:0.35rem;">✅ <strong>Funguje i bez přihlášení</strong> (v režimu Královský Host)</div>
+                            <div>✅ <strong>Možnost kdykoliv uložit do cloudu</strong> a pokračovat později</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.55rem;">
+                        <button class="btn-gold-lg" style="width:100%;" onclick="PRS_App.quickStartSoloGame('standard')">
+                            ⚡ Hrát klasickou výpravu (96 polí • 30 💖)
+                        </button>
+                        <button class="btn-secondary" style="width:100%; padding:0.55rem;" onclick="PRS_App.quickStartSoloGame('fast')">
+                            🏇 Rychlá sprint partie (Zkrácený okruh 48 polí • 20 💖)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KARTA 2: VLASTNÍ NASTAVENÍ PARTIE & HOT-SEAT (2–6 HRÁČŮ) -->
+                <div class="lp-mode-card">
+                    <div>
+                        <span class="lp-mode-badge">Režim 2 • Vlastní stůl &amp; Hot-Seat</span>
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.18rem; margin-bottom:0.4rem;">
+                            🛋️ Sestavení vlastní partie (2–6 Rytířů)
+                        </h3>
+                        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.75rem;">
+                            Nastav si kombinaci <strong>živých hráčů u jednoho počítače/tabletu</strong> a <strong>PC Rytířů</strong>, zvol mapu království a cílový počet Srdcí.
+                        </p>
+
+                        <div id="lobby-players-list"></div>
+
+                        <div style="display:flex; gap:0.5rem; margin: 0.65rem 0 0.9rem;">
+                            <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.addLobbyPlayer()">➕ Přidat rytíře (max. 6)</button>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.65rem; margin-bottom:0.95rem;">
+                            <div>
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🗺️ Herní plán:</label>
+                                <select id="lobby-board-select" class="prs-select" style="font-size:0.82rem; padding:0.4rem;">
+                                    <option value="classic_96" selected>Klasický plán (96 polí)</option>
+                                    <option value="dragon_4598">Plán s Drakem a Věží</option>
+                                    <option value="compact_48">Zkrácený okruh (48 polí)</option>
+                                    <option value="procedural">Procedurální mapa</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">💖 Cíl vítězství:</label>
+                                <select id="lobby-target-hearts" class="prs-select" style="font-size:0.82rem; padding:0.4rem;">
+                                    <option value="20">20 💖 (Kratší hra)</option>
+                                    <option value="30" selected>30 💖 (Klasická hra)</option>
+                                    <option value="45">45 💖 (Epické tažení)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-gold-lg" style="width:100%" onclick="PRS_App.startNewGame(true)">
+                        🎲 Rozdat 10 000 zl. a zahájit vlastní partii!
+                    </button>
+                </div>
+
+                <!-- KARTA 3: ONLINE MULTIPLAYER & CLOUD STOLY -->
+                <div class="lp-mode-card lp-mode-card-highlight">
+                    <div>
+                        <span class="lp-mode-badge" style="background:rgba(56,189,248,0.2); color:#bae6fd; border:1px solid rgba(56,189,248,0.4);">Režim 3 • Online Multiplayer &amp; Cloud</span>
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.18rem; margin-bottom:0.4rem;">
+                            🌐 Připojení k Online Hře &amp; Místnosti
+                        </h3>
+                        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+                            Máš od kamaráda <strong>6místný kód stolu</strong>? Zadej ho níže a okamžitě vstoupíš do rozehrané partie. Nebo založ novou online místnost!
+                        </p>
+
+                        <!-- Box pro zadání 6místného kódu -->
+                        <div style="background:rgba(212,175,55,0.09); border:1px solid var(--gold); border-radius:11px; padding:0.75rem; margin-bottom:0.85rem;">
+                            <label style="font-size:0.78rem; color:var(--gold-light); font-weight:700; display:block; margin-bottom:0.35rem;">
+                                🔑 Připojit se přes 6místný kód místnosti:
+                            </label>
+                            <div style="display:flex; gap:0.45rem;">
+                                <input type="text" id="join-room-code-input" class="prs-input" style="text-transform:uppercase; font-weight:700; letter-spacing:1px;" placeholder="Např. K7M4P9" maxlength="12" />
+                                <button class="btn-gold-lg" style="white-space:nowrap; padding:0.45rem 0.9rem; font-size:0.86rem;" onclick="PRS_App.loadSessionFromCloud()">
+                                    ⚔️ Připojit
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Tlačítko pro založení nové online místnosti -->
+                        <button class="btn-secondary" style="width:100%; margin-bottom:0.9rem; border-color:#38bdf8; color:#bae6fd; font-weight:600; padding:0.5rem;" onclick="PRS_App.createOnlineMultiplayerRoom()">
+                            ☁️ Založit novou Online místnost a získat kód pro přátele
+                        </button>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <h4 style="font-size:0.84rem; color:var(--gold-light); text-transform:uppercase; letter-spacing:0.5px;">
+                                📂 Otevřené a uložené stoly na serveru
+                            </h4>
+                            <button class="btn-secondary" style="font-size:0.72rem; padding:2px 7px;" onclick="PRS_App.fetchServerStatusAndSessions()">🔄 Obnovit</button>
+                        </div>
+                        <div id="saved-sessions-list" style="max-height:175px; overflow-y:auto;">
+                            <div class="empty-note">Načítám seznam her ze serveru...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. RYCHLÝ TAHÁK: PRAVIDLA V KOSTCE ZA 60 VTEŘIN -->
+            <h2 class="lp-section-heading">📜 Jak se hraje Princeznino srdce? (Pravidla za 60 vteřin)</h2>
+            <div class="lp-steps-grid">
+                <div class="lp-step-card">
+                    <div class="lp-step-num">1</div>
+                    <h3 style="color:var(--gold-light); font-size:0.98rem; margin-bottom:0.3rem;">🐎 Skupuj chovy &amp; panství</h3>
+                    <p style="font-size:0.83rem; color:var(--text-muted);">
+                        Začínáš s <strong>10 000 zl.</strong> Kupuj sady Koní, Psů a Sokolů (čím více z jedné sady máš, tím vyšší mýtné vybíráš) a buduj Vesnice → Města → Hrady.
+                    </p>
+                </div>
+                <div class="lp-step-card">
+                    <div class="lp-step-num">2</div>
+                    <h3 style="color:var(--gold-light); font-size:0.98rem; margin-bottom:0.3rem;">⚔️ Zbroj a cvič 4 ctnosti</h3>
+                    <p style="font-size:0.83rem; color:var(--text-muted);">
+                        U obchodníka kupuj meče, zbroje, šaty a klenoty (1.–3. stupně) a u mistrů trénuj <strong>Boj, Jízdu, Tanec a Charisma</strong> až na úroveň +4.
+                    </p>
+                </div>
+                <div class="lp-step-card">
+                    <div class="lp-step-num">3</div>
+                    <h3 style="color:var(--gold-light); font-size:0.98rem; margin-bottom:0.3rem;">🐉 Plň úkoly a skoli Draka</h3>
+                    <p style="font-size:0.83rem; color:var(--text-muted);">
+                        Na políčkách Úkolů 1.–3. stupně bojuj s divokou zvěří, monstry a drakem. Za vítězství získáš zlaťáky i drahocenná Princeznina srdce!
+                    </p>
+                </div>
+                <div class="lp-step-card">
+                    <div class="lp-step-num">4</div>
+                    <h3 style="color:var(--gold-light); font-size:0.98rem; margin-bottom:0.3rem;">💖 Zazář na Slavnostech</h3>
+                    <p style="font-size:0.83rem; color:var(--text-muted);">
+                        Vstup na pole <strong>Královských slavností</strong>, předveď všechny 4 ctnosti a získej přízeň princezny. První rytíř s <strong>30 💖</strong> slaví královskou svatbu!
+                    </p>
+                </div>
+            </div>
+
+            <!-- 4. KATALOG HER PORTÁLU KIDESKY (SOUČASNÉ & BUDOUCÍ HRY) -->
+            <h2 class="lp-section-heading">📚 Katalog autorských her portálu KiDesky</h2>
+            <div class="lp-catalog-grid">
+                <!-- Hra 1: Princeznino srdce (Aktivní) -->
+                <div class="lp-game-card active-game">
+                    <div class="lp-game-thumb" style="background-image: linear-gradient(to top, rgba(15,11,5,0.95), rgba(15,11,5,0.15)), url('assets/landmarks/royal_castle.jpg');">
+                        <span class="lp-kicker-badge" style="margin:0; background:rgba(34,197,94,0.25); border-color:#4ade80; color:#bbf7d0;">
+                            🟢 Aktivní hra • Plná verze
+                        </span>
+                    </div>
+                    <div class="lp-game-body">
+                        <div>
+                            <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.15rem; margin-bottom:0.3rem;">
+                                👑 Princeznino srdce
+                            </h3>
+                            <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:0.75rem;">
+                                Velká rytířská deskovka o budování panství, šlechtických chovech, turnajích, drakovi a boji o ruku princezny.
+                            </p>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.85rem; font-size:0.76rem; color:#fde68a;">
+                                <span>👥 2–6 hráčů</span> • <span>⏱️ 45–90 min</span> • <span>🌐 Online &amp; Hot-Seat</span>
+                            </div>
+                        </div>
+                        <button class="btn-gold-lg" style="width:100%; font-size:0.86rem; padding:0.5rem;" onclick="PRS_App.switchTab('board')">
+                            🎲 Otevřít Hrací stůl
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hra 2: Dobytí Dračí Hory (Připravujeme) -->
+                <div class="lp-game-card" style="opacity:0.88;">
+                    <div class="lp-game-thumb" style="background-image: linear-gradient(to top, rgba(15,11,5,0.95), rgba(15,11,5,0.2)), url('assets/landmarks/dragon.jpg');">
+                        <span class="lp-kicker-badge" style="margin:0; background:rgba(249,115,22,0.22); border-color:#fb923c; color:#fed7aa;">
+                            🔨 V přípravě • Edice KiDesky
+                        </span>
+                    </div>
+                    <div class="lp-game-body">
+                        <div>
+                            <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.15rem; margin-bottom:0.3rem;">
+                                🐉 Dobytí Dračí Hory
+                            </h3>
+                            <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:0.75rem;">
+                                Kooperativní dobrodružná deskovka na hrdiny. Sestup do podzemních labyrintů, hledej prastaré artefakty a přemoz dračího vládce.
+                            </p>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.85rem; font-size:0.76rem; color:var(--text-muted);">
+                                <span>👥 1–4 hrdinové</span> • <span>⏱️ 60 min</span> • <span>🗡️ Dungeon &amp; Kooperace</span>
+                            </div>
+                        </div>
+                        <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; padding:0.5rem;">
+                            ⏳ Připravujeme do katalogu KiDesky
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hra 3: Obchodníci Království (Koncept) -->
+                <div class="lp-game-card" style="opacity:0.88;">
+                    <div class="lp-game-thumb" style="background-image: linear-gradient(to top, rgba(15,11,5,0.95), rgba(15,11,5,0.2)), url('assets/tiles/merchant.jpg');">
+                        <span class="lp-kicker-badge" style="margin:0; background:rgba(56,189,248,0.2); border-color:#38bdf8; color:#bae6fd;">
+                            📐 Koncept v návrhu
+                        </span>
+                    </div>
+                    <div class="lp-game-body">
+                        <div>
+                            <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.15rem; margin-bottom:0.3rem;">
+                                ⚖️ Obchodníci Království
+                            </h3>
+                            <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:0.75rem;">
+                                Ekonomická a obchodní desková hra o budování cechů, vysílání kupeckých karavan a ovládnutí královských tržišť.
+                            </p>
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.85rem; font-size:0.76rem; color:var(--text-muted);">
+                                <span>👥 2–5 kupců</span> • <span>⏱️ 45–75 min</span> • <span>💰 Ekonomická strategie</span>
+                            </div>
+                        </div>
+                        <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; padding:0.5rem;">
+                            ⏳ Připravujeme do katalogu KiDesky
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================================================================
+             ZÁLOŽKA 2: HRACÍ STŮL „PRINCEZNINO SRDCE“
+             ================================================================ -->
+        <section id="tab-board" style="display:none">
+            <!-- Lišta Online Místnosti, Sdílení odkazu a Zámku postavy -->
+            <div id="online-room-bar"></div>
+
+            <!-- Velkolepý závod o Princeznino srdce (Race Track) -->
+            <div id="princess-race-container" class="princess-race-container"></div>
+
+            <!-- Horní počítadlo Srdcí a bohatství všech rytířů -->
+            <div id="heart-track-bar" class="heart-track-grid"></div>
+
+            <div class="board-workspace">
+                <!-- Levá část: Ovládací lišta Zoom/Pan + Interaktivní SVG herní plán -->
+                <div>
+                    <div class="map-floating-toolbar">
+                        <div class="zoom-btn-group">
+                            <button class="btn-zoom" style="border-color:var(--gold); color:var(--gold-light); font-weight:600; margin-right:0.35rem;" onclick="PRS_App.switchTab('lobby')" title="Návrat na úvodní Landing Page a Hernu">🏰 ← Zpět na Landing Page</button>
+                            <span style="color:var(--text-muted); margin-right:0.2rem;">🔍 Mapa:</span>
+                            <button class="btn-zoom" onclick="PRS_App.zoomBy(0.84)" title="Oddálit mapu">➖</button>
+                            <span id="zoom-pct-label" class="zoom-pct-badge">100 %</span>
+                            <button class="btn-zoom" onclick="PRS_App.zoomBy(1.18)" title="Přiblížit mapu">➕</button>
+                            <button class="btn-zoom" onclick="PRS_App.resetZoomAndPan()" title="Zobrazit celý plán">🗺️ Celá mapa</button>
+                            <button class="btn-zoom" onclick="PRS_App.centerOnActivePlayer()" title="Vycentrovat na hráče na tahu">🎯 Na hráče</button>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
+                            <select class="prs-select" style="width:auto; padding:0.26rem 0.55rem; font-size:0.8rem;" onchange="PRS_App.changeBoardTemplateLive(this.value)" title="Přepnout rozložení plánu">
+                                <option value="classic_96">Plán: Klasický (Trojdílný)</option>
+                                <option value="dragon_4598">Plán: Drak &amp; Lesní věž</option>
+                                <option value="compact_48">Plán: Zkrácený okruh</option>
+                                <option value="procedural">Plán: Procedurální</option>
+                            </select>
+                            <button class="btn-zoom" onclick="PRS_App.openGraphicsModal()">🎨 Bitmapy &amp; Prostředí</button>
+                        </div>
+                    </div>
+
+                    <!-- Interaktivní výřez mapy (podporuje kolečko myši pro Zoom a tažení myší pro posouvání) -->
+                    <div id="board-viewport-wrap" class="svg-board-container" title="Kolečkem myši přiblížíš/oddálíš, tažením myší posouváš mapu">
+                        <canvas id="prs-ambient-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0.75;"></canvas>
+                        <svg id="prs-board-svg" viewBox="0 0 1400 860" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:3;"></svg>
+                    </div>
+
+                    <div class="board-bottom-bar">
+                        <div id="inspected-node-box">
+                            💡 <em>Kolečkem myši mapu přiblížíš, tažením posuneš. Kliknutím na kruhové políčko zobrazíš jeho detail.</em>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap;">
+                            <label style="cursor:pointer; display:flex; align-items:center; gap:0.35rem;">
+                                <input type="checkbox" checked onchange="PRS_App.toggleAutoBots(this.checked)" />
+                                🤖 Automaticky tahat za PC
+                            </label>
+                            <label style="cursor:pointer; display:flex; align-items:center; gap:0.35rem;">
+                                <input type="checkbox" onchange="PRS_App.toggleFastAnim(this.checked)" />
+                                ⚡ Rychlé animace
+                            </label>
+                            <button class="btn-secondary" onclick="PRS_App.saveCurrentSessionToCloud()">💾 Uložit hru do DB</button>
+                            <span id="cloud-save-status" style="font-size:0.8rem; color:var(--gold-light);"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pravá část: Ovládání tahu, Karta Rytíře a Kronika (Fixní přehled bez scrollování) -->
+                <div class="board-right-sidebar">
+                    <!-- ŽEBŘÍČEK VŠECH RYTÍŘŮ A ZÁVOD O SRDCE (Vždy viditelný na 1 klik) -->
+                    
+                    <!-- Prominentní karta: POLÍČKO, NA KTERÉM HRÁČ STOJÍ / ZKOUMÁ -->
+                    <div id="player-standing-tile-card"></div>
+
+                    <div id="turn-action-panel"></div>
+
+                    <div class="prs-card" style="margin-bottom:0.95rem;">
+                        <div id="active-player-sheet"></div>
+                    </div>
+
+                    <div class="prs-card">
+                        <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">📜 Královská kronika událostí</h3>
+                        <div id="game-log-list" class="log-box"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             ZÁLOŽKA 3: PRAVIDLA HRY & ARCHIV NÁKRESŮ Z ROKU 2016
+             ================================================================ -->
+        <section id="tab-rules" style="display:none">
+            <div class="prs-card" style="margin-bottom:1.25rem;">
+                <!-- Horní sub-navigace záložky Pravidla & Encyklopedie -->
+                <div class="rules-subnav">
+                    <button id="rules-subtab-btn-rules" class="rules-subnav-btn active" onclick="PRS_App.switchRulesSubtab('rules')">📜 Pravidla hry</button>
+                    <button id="rules-subtab-btn-dragons" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('dragons')">🐉 Dračí bestiář (20)</button>
+                    <button id="rules-subtab-btn-castles" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('castles')">🏰 Galerie hradů (10)</button>
+                    <button id="rules-subtab-btn-trophies" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('trophies')">🏆 Síň trofejí &amp; Relikvií (29)</button>
+                </div>
+
+                <!-- SUB-ZÁLOŽKA 1: PRAVIDLA HRY -->
+                <div id="rules-subtab-rules">
+                    <h2>📜 Kompletní pravidla hry „Princeznino srdce“</h2>
+                    <p style="color:var(--text-muted); margin-bottom:1rem;">
+                        Tato pravidla věrně spojují všech 7 ručně psaných listů (<code>IMG_4594</code> až <code>IMG_4600</code>) do vyvážené 1–2hodinové stolní i online hry.
+                    </p>
+
+                    <div class="lobby-grid">
+                        <div>
+                            <h3>1. Základní ekonomika, pohyb a dražba</h3>
+                            <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4; margin-bottom:1rem;">
+                                <li><strong>Startovní jmění:</strong> Každý rytíř začíná na poli <code>START</code> s <strong>10 000 zl.</strong></li>
+                                <li><strong>Průchod STARTem:</strong> Běžný žold činí <strong>+3 000 zl.</strong> Pro nemajetné rytíře bez panství a zvířat (bezzemky) poskytuje král podporu <strong>+5 000 zl.</strong> Rytíři se šlechtickým statusem (vlastní Město či Hrad) a vysokým Charismatem získávají navíc audienci u dvora (<strong>+0,5 až +1,0 💖</strong>).</li>
+                                <li><strong>Rozcestí (1–3 / 4–6):</strong> Směr pohybu na rozcestích určuje hod kostkou: <strong>1, 2, 3</strong> vnější cestou, <strong>4, 5, 6</strong> královskou vnitřní větví s prémiemi (+200, +300, +400 zl.).</li>
+                                <li><strong>Královská dražba při dluhu (60 %):</strong> Nemá-li hráč hotovost na nájem cizího pole, nejprve odevzdá všechno zbývající zlato a zbytek dluhu uhradí nuceným odprodejem majetku bance za <strong>60 % pořizovací ceny</strong> (přebytek se vrací). Hráč nikdy nevypadává ze hry (dluh pod nulou se smaže). Dobrovolný prodej u Obchodníka je za 50 % (věci) a 100 % (statky).</li>
+                            </ul>
+
+                            <h3>2. Čtyři vlastnosti a Mistři (MB, MJ, MT, MCH, VM)</h3>
+                            <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4; margin-bottom:1rem;">
+                                <li>Každý rytíř rozvíjí <strong>Boj (MB)</strong>, <strong>Jízdu (MJ)</strong>, <strong>Tanec (MT)</strong> a <strong>Charisma (MCH)</strong> na stupních <strong>1 až 5</strong>. <strong>Velmistr (VM)</strong> dokáže naučit libovolnou vlastnost.</li>
+                                <li>Při stoupnutí na Mistra nejprve hodíš kostkou: <strong>1, 2, 3 = Mistr tě nepřijme</strong>; <strong>4, 5, 6 = Můžeš zaplatit výcvik</strong> dalšího stupně: <strong>1 000 / 2 000 / 3 000 / 4 000 / 5 000 zl.</strong></li>
+                            </ul>
+
+                            <h3>3. Sady zvířat (1–12), Panství a Výběrčí daní (VD)</h3>
+                            <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4;">
+                                <li><strong>12 sad zvířat:</strong> Sokol 400 × n, Pes 500 × n a Kůň 600 × n. Nájem cizího hráče činí <strong>20 %</strong> (1 zvíře), <strong>40 %</strong> (pár ze sady) nebo <strong>80 %</strong> (všechna 3 zvířata sady).</li>
+                                <li><strong>Chovný bonus za ucelenou sadu:</strong> Za každou zkompletovanou trojici (Kůň + Pes + Sokol ze stejné sady) získává majitel okamžitý a trvalý bonus <strong>+1,0 💖</strong>.</li>
+                                <li><strong>Chovatelská prémie:</strong> 3 hráči s nejvyšším součtem cen zvířat drží průběžně <strong>+3 💖</strong> (1. místo), <strong>+2 💖</strong> (2. místo) a <strong>+1 💖</strong> (3. místo).</li>
+                                <li><strong>Vesnice, Města, Hrady:</strong> U <strong>Výběrčího daní (VD)</strong> nesou Vesnice 500/900/1 400 zl., Města 1 200 zl., Hrady 2 500 zl. a Hrad dává trvale <strong>+1 Charisma</strong>.</li>
+                            </ul>
+
+                            <h3 style="margin-top:1.1rem;">4. Speciální lokace a Úkoly (U1–U3)</h3>
+                            <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4;">
+                                <li><strong>Dračí doupata (U3):</strong> Nejnebezpečnější souboje s 20 unikátními draky. Odměny od 6 000 do 16 000 zl., +2.5 až +6.0 💖 a 100% garantovaný drop mocné dračí trofeje!</li>
+                                <li><strong>Šatlava:</strong> Uvržení do vězení; vykoupení kaucí 1 000 zl., pokusem o útěk (hod 6), nebo čekáním 1 kolo.</li>
+                                <li><strong>Špitál sv. Lazara & Krčma:</strong> Špitál nabízí zotavení z ran a lektvary, Krčma U Zlatého korbelu hazardní kostky a rundu medoviny pro zisk Charismatu.</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3>5. Slavnosti (♡ ♡ ♡) – Hlavní zdroj Princezniných srdcí</h3>
+                            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:0.5rem;">
+                                Slavnost proběhne, pokud podmínku účasti splňují <strong>alespoň 2 hráči</strong>:
+                            </p>
+                            <table class="rules-table">
+                                <thead>
+                                    <tr>
+                                        <th>Slavnost</th>
+                                        <th>Podmínka účasti</th>
+                                        <th>1. místo</th>
+                                        <th>2. místo</th>
+                                        <th>3. místo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>⚔️ Turnaj</strong></td>
+                                        <td>Kůň + Pes + Sokol</td>
+                                        <td><code>3 + ½ CH</code> 💖</td>
+                                        <td><code>2 + ½ CH</code> 💖</td>
+                                        <td><code>1 + ½ CH</code> 💖</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>💃 Ples</strong></td>
+                                        <td>Šaty</td>
+                                        <td><code>1 + CH</code> 💖</td>
+                                        <td><code>CH</code> 💖</td>
+                                        <td><code>CH - 1</code> 💖</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>🏇 Závod</strong></td>
+                                        <td>Kůň</td>
+                                        <td><code>1,5 × CH</code> 💖</td>
+                                        <td><code>CH</code> 💖</td>
+                                        <td><code>½ CH</code> 💖</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h3 style="margin-top:1.1rem;">6. Základní výstroj zbrojnice (Vzorec: +1 000 zl. za plus, -500 zl. za mínus)</h3>
+                            <div style="max-height:245px; overflow-y:auto;">
+                                <table class="rules-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Stupeň</th>
+                                            <th>Předmět</th>
+                                            <th>⚔️</th>
+                                            <th>🏇</th>
+                                            <th>💃</th>
+                                            <th>✨</th>
+                                            <th>Cena</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="catalog-items-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-ZÁLOŽKA 2: DRAČÍ BESTIÁŘ -->
+                <div id="rules-subtab-dragons" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div>
+                            <h2 style="margin:0; font-family:'Cinzel',serif; color:var(--gold-light);">🐉 Královský dračí bestiář</h2>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin:0.2rem 0 0;">
+                                Přehled všech 20 obávaných draků a saní království, jejich taktické slabiny a unikátní dračí trofeje.
+                            </p>
+                        </div>
+                        <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                            <button class="rules-subnav-btn active bestiary-filter-btn" data-tier="all" onclick="PRS_App.setBestiaryTier('all')">Všichni drakové (20)</button>
+                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="young" onclick="PRS_App.setBestiaryTier('young')">Tier A: Mladí draci (5)</button>
+                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="elemental" onclick="PRS_App.setBestiaryTier('elemental')">Tier B: Živloví draci (9)</button>
+                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="boss" onclick="PRS_App.setBestiaryTier('boss')">Tier C: Bossové a saně (6)</button>
+                        </div>
+                    </div>
+                    <div id="bestiary-grid-container" class="cards-media-grid"></div>
+                </div>
+
+                <!-- SUB-ZÁLOŽKA 3: GALERIE HRADŮ -->
+                <div id="rules-subtab-castles" style="display:none;">
+                    <h2 style="margin:0 0 0.2rem; font-family:'Cinzel',serif; color:var(--gold-light);">🏰 Galerie královských a rodových hradů</h2>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">
+                        10 majestátních izometrických hradů a tvrzí různých živlových domén. Každé sídlo přináší prestiž a šlechtické výhody.
+                    </p>
+                    <div id="castles-grid-container" class="cards-media-grid"></div>
+                </div>
+
+                <!-- SUB-ZÁLOŽKA 4: SÍŇ TROFEJÍ & RELIKVIÍ -->
+                <div id="rules-subtab-trophies" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div>
+                            <h2 style="margin:0; font-family:'Cinzel',serif; color:var(--gold-light);">🏆 Síň trofejí a relikvií království</h2>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin:0.2rem 0 0;">
+                                29 unikátních trofejí z ulovené zvěře, přemožených monster, banditů i poražených draků. Lze je nasadit do 5. slotu výstroje!
+                            </p>
+                        </div>
+                        <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                            <button class="rules-subnav-btn active trophy-filter-btn" data-cat="all" onclick="PRS_App.setTrophiesCategory('all')">Všechny trofeje (29)</button>
+                            <button class="rules-subnav-btn trophy-filter-btn" data-cat="beasts" onclick="PRS_App.setTrophiesCategory('beasts')">🐗 Zvěř (U1)</button>
+                            <button class="rules-subnav-btn trophy-filter-btn" data-cat="monsters" onclick="PRS_App.setTrophiesCategory('monsters')">👹 Monstra &amp; Lapkové (U2)</button>
+                            <button class="rules-subnav-btn trophy-filter-btn" data-cat="dragons" onclick="PRS_App.setTrophiesCategory('dragons')">🐉 Draci (U3)</button>
+                        </div>
+                    </div>
+                    <div id="trophies-grid-container" class="trophies-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             ZÁLOŽKA 4: BALANCOVACÍ STUDIO & SIMULÁTOR EKONOMIKY
+             ================================================================ -->
+        <section id="tab-balance" style="display:none">
+            <div class="prs-card">
+                <h2>⚖️ Balancovací Studio &amp; Automatický Simulátor Ekonomiky</h2>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.1rem;">
+                    Zde můžeš upravovat ceny, výnosy a cílový počet Srdcí a jedním kliknutím nechat <strong>4 PC rytíře odehrát 30 nebo 100 celých her</strong>,
+                    abychom okamžitě viděli, jak dlouho hra trvá u stolu (cíl: <strong>1–2 hodiny</strong>) a zda hráči příliš rychle nebohatnou či neprodělávají.
+                </p>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:0.85rem; margin-bottom:1.2rem;">
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">💖 Cílový počet Srdcí:</label>
+                        <input type="number" id="cfg-targetHearts" class="prs-input" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">💰 Startovní zlato (zl.):</label>
+                        <input type="number" id="cfg-startGold" class="prs-input" step="500" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🏰 Průchod STARTem (+zl.):</label>
+                        <input type="number" id="cfg-passStartGold" class="prs-input" step="500" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🦅 Základ ceny Sokola (× sada):</label>
+                        <input type="number" id="cfg-sokol" class="prs-input" step="50" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🐕 Základ ceny Psa (× sada):</label>
+                        <input type="number" id="cfg-pes" class="prs-input" step="50" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🐎 Základ ceny Koně (× sada):</label>
+                        <input type="number" id="cfg-kun" class="prs-input" step="50" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🏘️ Cena Malé vesnice (zl.):</label>
+                        <input type="number" id="cfg-villagePrice" class="prs-input" step="250" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🏙️ Cena Města (zl.):</label>
+                        <input type="number" id="cfg-townPrice" class="prs-input" step="500" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🏯 Cena Hradu (zl.):</label>
+                        <input type="number" id="cfg-castlePrice" class="prs-input" step="500" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🎒 Balíček Věci 1 (zl.):</label>
+                        <input type="number" id="cfg-pack1" class="prs-input" step="500" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">⚔️ Balíček Věci 2 (zl.):</label>
+                        <input type="number" id="cfg-pack2" class="prs-input" step="500" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">👑 Balíček Věci 3 (zl.):</label>
+                        <input type="number" id="cfg-pack3" class="prs-input" step="500" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🐗 Střední obtížnost Zvěře (U1):</label>
+                        <input type="number" id="cfg-u1Diff" class="prs-input" min="2" max="15" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">👹 Střední obtížnost Monster (U2):</label>
+                        <input type="number" id="cfg-u2Diff" class="prs-input" min="4" max="20" />
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light);">🐲 Střední obtížnost Draků (U3):</label>
+                        <input type="number" id="cfg-u3Diff" class="prs-input" min="6" max="25" />
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.75rem; padding-top:0.5rem; border-top:1px solid rgba(255,255,255,0.08);">
+                    <select id="sim-board-select" class="prs-select" style="width:auto">
+                        <option value="classic_96">Plán: Klasický (96 polí)</option>
+                        <option value="dragon_4598">Plán: Drak &amp; Lesní věž</option>
+                        <option value="compact_48">Plán: Zkrácený okruh</option>
+                        <option value="procedural">Plán: Procedurální</option>
+                    </select>
+                    <button class="btn-gold-lg" onclick="PRS_App.runEconomySimulation(30)">⚡ Odsimulovat 30 her (Rychlý test)</button>
+                    <button class="btn-secondary" onclick="PRS_App.runEconomySimulation(100)">📊 Hloubkový test (100 her)</button>
+                    <button class="btn-action-buy" onclick="PRS_App.saveConfigToServer()">💾 Uložit tento balanc do DB (`prs_GameConfigs`)</button>
+                    <span id="save-config-feedback" style="font-size:0.85rem; color:var(--gold-light);"></span>
+                </div>
+
+                <div id="sim-results-box"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================================================
+         MOBILNÍ AKČNÍ DOCK & SPODNÍ ŠUPLÍKY (PRINCEZNINO SRDCE MOBILE HUD)
+         ======================================================================== -->
+    <div id="mobile-action-dock" class="mobile-action-dock" style="display:none;">
+        <div class="mobile-dock-status-bar">
+            <div id="mobile-dock-player-pill" class="mobile-dock-player-pill">
+                <span id="mobile-dock-player-badge">🔵</span>
+                <strong id="mobile-dock-player-name">Rytíř na tahu</strong>
+            </div>
+            <div class="mobile-dock-stats">
+                <span id="mobile-dock-gold">🪙 10 000 zl.</span>
+                <span id="mobile-dock-hearts">💖 0 / 30</span>
+                <span id="mobile-dock-tile">📍 K1</span>
+            </div>
+        </div>
+        <div class="mobile-dock-controls">
+            <div id="mobile-dock-primary-btn-wrap" class="mobile-dock-btn-main-wrap">
+                <button id="mobile-dock-primary-btn" class="mobile-btn-primary" onclick="PRS_App.handleMobilePrimaryAction()">
+                    🎲 HODIT KOSTKOU (1–6)
+                </button>
+            </div>
+            <div class="mobile-dock-icon-group">
+                <button class="mobile-dock-icon-btn" onclick="PRS_App.toggleMobileSheet('tile')" title="Detail políčka">
+                    <span class="dock-btn-icon">ℹ️</span>
+                    <span class="dock-btn-label">Pole</span>
+                </button>
+                <button class="mobile-dock-icon-btn" onclick="PRS_App.toggleMobileSheet('inventory')" title="Batoh &amp; Výbava">
+                    <span class="dock-btn-icon">🎒</span>
+                    <span class="dock-btn-label">Batoh</span>
+                    <span id="mobile-badge-inventory" class="dock-btn-badge" style="display:none;">0</span>
+                </button>
+                <button class="mobile-dock-icon-btn" onclick="PRS_App.toggleMobileSheet('estates')" title="Držená panství">
+                    <span class="dock-btn-icon">🏰</span>
+                    <span class="dock-btn-label">Sídla</span>
+                    <span id="mobile-badge-estates" class="dock-btn-badge" style="display:none;">0</span>
+                </button>
+                <button class="mobile-dock-icon-btn" onclick="PRS_App.toggleMobileSheet('logs')" title="Kronika událostí">
+                    <span class="dock-btn-icon">📜</span>
+                    <span class="dock-btn-label">Kronika</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-sheet-backdrop" class="mobile-sheet-backdrop" style="display:none;" onclick="PRS_App.closeMobileSheet()"></div>
+    <div id="mobile-bottom-sheet" class="mobile-bottom-sheet" style="display:none;">
+        <div class="mobile-sheet-handle-bar" onclick="PRS_App.closeMobileSheet()">
+            <div class="mobile-sheet-drag-handle"></div>
+        </div>
+        <div class="mobile-sheet-header">
+            <h3 id="mobile-sheet-title" class="mobile-sheet-title">🎒 Královský batoh &amp; Výbava</h3>
+            <button class="mobile-sheet-close-btn" onclick="PRS_App.closeMobileSheet()">✕</button>
+        </div>
+        <div id="mobile-sheet-content" class="mobile-sheet-content"></div>
+    </div>
+
+    <!-- MODAL: KRÁLOVSKÁ SVATBA & VÍTĚZNÝ CEREMONIÁL -->
+    <div id="victory-modal" class="modal-backdrop">
+        <div class="modal-box victory-modal-box">
+            <div class="victory-crown-header">
+                <div class="victory-crown-icon">👑</div>
+                <h1 class="victory-title">Královská svatba &amp; Triumf</h1>
+                <div id="victory-winner-subtitle" class="victory-subtitle"></div>
+            </div>
+
+            <!-- Pódium vítězů a tabulka rytířů -->
+            <div class="victory-podium-wrap" id="victory-podium-content"></div>
+
+            <!-- Podrobné statistiky všech hráčů -->
+            <div class="victory-stats-table-wrap">
+                <table class="victory-table" id="victory-table-el"></table>
+            </div>
+
+            <!-- Akční tlačítka -->
+            <div class="victory-actions-bar">
+                <button class="btn-gold-lg" onclick="PRS_App.startNewGame(true)">🔄 Spustit novou partii</button>
+                <button class="btn-secondary" id="btn-save-hall-of-fame" onclick="PRS_App.saveVictoryToCloud()">📜 Zapsat do Síně slávy</button>
+                <button class="btn-secondary" onclick="PRS_App.closeVictoryModal()">👀 Prohlédnout stůl</button>
+            </div>
+            <div id="victory-cloud-feedback" style="text-align:center; margin-top:0.5rem; font-size:0.83rem; color:var(--gold-light);"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: KRÁLOVSKÁ ZBROJNICE A TRŽIŠTĚ -->
+    <div id="armory-modal" class="modal-backdrop">
+        <div class="modal-box armory-modal-box">
+            <div class="armory-modal-header">
+                <div>
+                    <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0 0 0.2rem;">⚔️ Královská zbrojnice &amp; Trh</h2>
+                    <p style="font-size:0.83rem; color:var(--text-muted); margin:0;">
+                        Zde si můžeš zakoupit zbraně, zbroje, dvorské šaty a šperky, nebo prodat nepotřebný majetek.
+                    </p>
+                </div>
+                <button class="btn-icon-danger" onclick="PRS_App.closeArmoryModal()">✕</button>
+            </div>
+
+            <!-- Měšec & Stav nákupu -->
+            <div class="armory-player-bar">
+                <div id="armory-player-info"></div>
+                <div id="armory-merchant-status-badge"></div>
+            </div>
+
+            <!-- Filtrovací lišta -->
+            <div class="armory-filter-bar">
+                <button class="armory-tab-btn active" data-armtab="all" onclick="PRS_App.setArmoryTab('all')">Všechny věci</button>
+                <button class="armory-tab-btn" data-armtab="weapon" onclick="PRS_App.setArmoryTab('weapon')">🗡️ Zbraně</button>
+                <button class="armory-tab-btn" data-armtab="armor" onclick="PRS_App.setArmoryTab('armor')">🛡️ Zbroje</button>
+                <button class="armory-tab-btn" data-armtab="dress" onclick="PRS_App.setArmoryTab('dress')">👗 Šaty &amp; Pláště</button>
+                <button class="armory-tab-btn" data-armtab="jewel" onclick="PRS_App.setArmoryTab('jewel')">💍 Klenoty &amp; Ostruhy</button>
+                <button class="armory-tab-btn" data-armtab="trophy" onclick="PRS_App.setArmoryTab('trophy')">🏆 Trofeje &amp; Relikvie</button>
+                <button class="armory-tab-btn" data-armtab="packs" onclick="PRS_App.setArmoryTab('packs')">🎁 Balíčky</button>
+                <button class="armory-tab-btn" data-armtab="sell" onclick="PRS_App.setArmoryTab('sell')">💰 Výkup majetku</button>
+            </div>
+
+            <!-- Obsah: Katalog předmětů nebo Výkup -->
+            <div id="armory-items-grid" class="armory-grid"></div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.85rem; padding-top:0.6rem; border-top:1px solid rgba(255,255,255,0.08);">
+                <small style="color:var(--text-muted); font-size:0.78rem;">💡 Tip: Předměty dávají trvalé bonusy do bojů i na královských slavnostech.</small>
+                <button class="btn-secondary" onclick="PRS_App.closeArmoryModal()">Zavřít zbrojnici</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SPRÁVA BITMAP POLÍČEK, DOMINANT A HERNÍHO PROSTŘEDÍ -->
+    <div id="graphics-modal" class="modal-backdrop">
+        <div class="modal-box">
+            <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin-bottom:0.4rem;">🎨 Grafika, Bitmapy Políček &amp; Prostředí</h2>
+            <p style="font-size:0.83rem; color:var(--text-muted); margin-bottom:0.9rem;">
+                Každé kruhové políčko, dominanta na mapě i pozadí stolu je připraveno na vlastní bitmapy (<code>.png</code>, <code>.webp</code>, <code>.jpg</code>).
+                Jakmile nahraješ grafiku do <code>assets/tiles/</code> nebo zadáš cestu níže, políčka se automaticky vykreslí jako oříznuté kruhové bitmapové medailony.
+            </p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.65rem; margin-bottom:1rem; font-size:0.82rem;">
+                <div style="grid-column: span 2;">
+                    <label style="color:var(--gold-light);">🪵 Pozadí herního prostředí / stolu (URL):</label>
+                    <input type="text" id="gfx-env-bg" class="prs-input" placeholder="např. assets/env/table-oak.webp" />
+                </div>
+                <div style="grid-column: span 2;">
+                    <label style="color:var(--gold-light);">🗺️ Pozadí samotné herní desky (URL):</label>
+                    <input type="text" id="gfx-board-bg" class="prs-input" placeholder="např. assets/board/kingdom-map.webp" />
+                </div>
+                <div>
+                    <label style="color:var(--gold-light);">🐎 Kruhová bitmapa – Kůň:</label>
+                    <input type="text" id="gfx-tile-kun" class="prs-input" placeholder="assets/tiles/kun.png" />
+                </div>
+                <div>
+                    <label style="color:var(--gold-light);">🐕 Kruhová bitmapa – Pes:</label>
+                    <input type="text" id="gfx-tile-pes" class="prs-input" placeholder="assets/tiles/pes.png" />
+                </div>
+                <div>
+                    <label style="color:var(--gold-light);">🦅 Kruhová bitmapa – Sokol:</label>
+                    <input type="text" id="gfx-tile-sokol" class="prs-input" placeholder="assets/tiles/sokol.png" />
+                </div>
+                <div>
+                    <label style="color:var(--gold-light);">🏘️ Kruhová bitmapa – Vesnice:</label>
+                    <input type="text" id="gfx-tile-village" class="prs-input" placeholder="assets/tiles/village.png" />
+                </div>
+                <div>
+                    <label style="color:var(--gold-light);">🏙️ Kruhová bitmapa – Město:</label>
+                    <input type="text" id="gfx-tile-town" class="prs-input" placeholder="assets/tiles/town.png" />
+                </div>
+                <div>
+                    <label style="color:var(--gold-light);">🏯 Kruhová bitmapa – Hrad:</label>
+                    <input type="text" id="gfx-tile-castle" class="prs-input" placeholder="assets/tiles/castle.png" />
+                </div>
+                <div>
+                    <label style="color:var(--gold-light);">💖 Kruhová bitmapa – Slavnost:</label>
+                    <input type="text" id="gfx-tile-festival" class="prs-input" placeholder="assets/tiles/festival.png" />
+                </div>
+                <div>
+                    <label style="color:var(--gold-light);">🏰 Dominanta – Královský hrad:</label>
+                    <input type="text" id="gfx-landmark-castle" class="prs-input" placeholder="assets/landmarks/royal_castle.png" />
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; gap:0.5rem;">
+                <button class="btn-gold-lg" onclick="PRS_App.saveGraphicsSettings()">💾 Použít a uložit grafiku</button>
+                <button class="btn-secondary" onclick="PRS_App.closeGraphicsModal()">Zavřít</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PŘIHLÁŠENÍ / REGISTRACE / HOST (Guest, Player, Admin) -->
+    <div id="auth-modal" class="modal-backdrop">
+        <div class="modal-box">
+            <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin-bottom:0.5rem;">🛡️ Účet hráče (`prs_Users`)</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                V první fázi lze hrát přímo jako <strong>Nepřihlášený Host</strong> nebo se přihlásit jako <strong>Hráč / Admin</strong> pro správu uložených her a balancování.
+            </p>
+            <div style="display:flex; flex-direction:column; gap:0.65rem; margin-bottom:1rem;">
+                <input type="text" id="auth-username" class="prs-input" placeholder="Uživatelské jméno nebo e-mail (např. admin, rytir_jan)" />
+                <input type="text" id="auth-displayname" class="prs-input" placeholder="Zobrazované jméno u stolu (volitelné)" />
+                <input type="password" id="auth-password" class="prs-input" placeholder="Heslo" />
+            </div>
+            <div id="auth-feedback" style="color:#f87171; font-size:0.84rem; margin-bottom:0.75rem;"></div>
+            <div style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:space-between;">
+                <button class="btn-gold-lg" onclick="PRS_App.submitAuth('login')">🔑 Přihlásit se</button>
+                <button class="btn-secondary" onclick="PRS_App.submitAuth('register')">✨ Registrovat</button>
+                <button class="btn-secondary" onclick="PRS_App.setGuestMode()">👤 Hrát jako Host</button>
+                <button class="btn-icon-danger" onclick="PRS_App.closeAuthModal()">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plovoucí mini-tooltip nad políčky herního plánu -->
+    <div id="prs-tile-tooltip" class="prs-tile-tooltip"></div>
+
+    <!-- MODAL: KRÁLOVSKÝ HUDEBNÍ PŘEHRÁVAČ & LOUTNA -->
+    <div id="prs-music-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeMusicPopup()">
+        <div class="music-player-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
+                <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0;">🎵 Královský hudební přehrávač</h3>
+                <button class="btn-icon-danger" onclick="PRS_App.closeMusicPopup()">✕</button>
+            </div>
+            <div class="music-now-playing">
+                <div class="music-disc-icon" id="music-disc-anim">💿</div>
+                <div class="music-track-info">
+                    <div class="music-track-title" id="music-modal-title">Královská audience</div>
+                    <div class="music-track-author" id="music-modal-author">Dvorská loutna &amp; flétna</div>
+                </div>
+            </div>
+            <div class="music-controls-row">
+                <button class="btn-secondary" onclick="PRS_App.prevMusicTrack()" title="Předchozí skladba" style="padding:0.45rem 0.8rem;">⏮️</button>
+                <button class="btn-primary" id="music-modal-play-btn" onclick="PRS_App.toggleMusic()" style="min-width:130px; font-weight:bold;">▶️ Přehrát</button>
+                <button class="btn-secondary" onclick="PRS_App.nextMusicTrack()" title="Další skladba" style="padding:0.45rem 0.8rem;">⏭️</button>
+            </div>
+            <div class="music-playlist-group">
+                <label class="music-label">📜 Královský repertoár skladeb:</label>
+                <select id="music-playlist-select" class="prs-select" onchange="PRS_App.selectMusicTrack(this.value)"></select>
+            </div>
+            <div class="music-sliders-group">
+                <div class="music-slider-row">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>🎵 Hlasitost hudby</span>
+                        <strong id="music-vol-label" style="color:var(--gold-light);">35%</strong>
+                    </div>
+                    <input type="range" min="0" max="100" value="35" id="music-bgm-slider" oninput="PRS_App.handleBgmVolumeChange(this.value)">
+                </div>
+                <div class="music-slider-row">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>🔊 Hlasitost zvukových efektů</span>
+                        <strong id="music-sfx-label" style="color:var(--gold-light);">70%</strong>
+                    </div>
+                    <input type="range" min="0" max="100" value="70" id="music-sfx-slider" oninput="PRS_App.handleSfxVolumeChange(this.value)">
+                </div>
+            </div>
+            <div class="music-custom-upload-box">
+                <input type="file" id="custom-mp3-input" accept="audio/*" style="display:none" onchange="PRS_App.handleCustomAudioUpload(this)">
+                <button class="btn-secondary" onclick="document.getElementById('custom-mp3-input').click()" style="width:100%; border:1.5px dashed var(--gold); padding:0.6rem; color:var(--gold-light);">
+                    📁 Nahrát vlastní MP3 skladbu z disku
+                </button>
+                <p style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:0.4rem; margin-bottom:0;">
+                    Nahraná skladba se ihned zařadí do tvého playlistu a začne hrát.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zvukový element pro hudbu na pozadí -->
+    <audio id="prs-bgm-audio" loop preload="none"></audio>
+
+    <script src="js/game-data.js" defer></script>
+    <script src="js/game-engine.js" defer></script>
+    <script src="js/app.js" defer></script>
+    <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
+    <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
+        <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <h3 id="image-lightbox-title" style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0;"></h3>
+                <button class="btn-icon-danger" onclick="PRS_App.closeImageModal()">✕</button>
+            </div>
+            <div style="max-height:65vh; overflow:hidden; border-radius:8px; border:1px solid rgba(212,175,55,0.3); background:#0c0a09; display:flex; align-items:center; justify-content:center;">
+                <img id="image-lightbox-img" src="" alt="" style="max-width:100%; max-height:65vh; object-fit:contain; display:block;" />
+            </div>
+            <div id="image-lightbox-caption" style="margin-top:0.8rem; font-size:0.9rem; color:#e7e5e4; line-height:1.45; text-align:left;"></div>
+        </div>
+    </div>
+
+    <!-- PLOVOUCÍ RPG KARTA STATISTIK HRÁČE (Při najetí na figurku nebo jméno) -->
+    <div id="player-hover-tooltip" class="player-hover-tooltip" style="display:none; position:fixed; z-index:99999; pointer-events:none;"></div>
+</body>
+</html>
