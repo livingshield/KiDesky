@@ -1219,6 +1219,9 @@ window.PRS_App = {
                             }
                         }
                     }
+                    if (!this.graphicsConfig.tileBitmapsByType.START) {
+                        this.graphicsConfig.tileBitmapsByType.START = "assets/tiles/castle.png";
+                    }
                     if (parsed.landmarkBitmaps) {
                         for (var lk in parsed.landmarkBitmaps) {
                             var lVal = parsed.landmarkBitmaps[lk];
@@ -1264,6 +1267,9 @@ window.PRS_App = {
             url = byType[node.subtype];
         } else if (byType[node.type]) {
             url = byType[node.type];
+        }
+        if (!url && (node.type === "START" || node.type === "CASTLE" || node.code === "START")) {
+            url = "assets/tiles/castle.png";
         }
         if (url && typeof url === "string") {
             if (url.endsWith(".jpg")) url = url.replace(".jpg", ".png");
