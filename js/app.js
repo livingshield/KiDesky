@@ -3864,16 +3864,17 @@ window.PRS_App = {
         html += '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:0.75rem;">';
 
         // Sloupec 1: Výbava
+        var itemsList = p.items || [];
         html += '<div style="background:rgba(0,0,0,0.25); border:1px solid rgba(212,175,55,0.18); border-radius:10px; padding:0.7rem;">' +
             '  <div style="font-size:0.85rem; font-weight:700; color:var(--gold-light); margin-bottom:0.45rem; display:flex; justify-content:space-between;">' +
-            '    <span>🛡️ Rytířská výbava (' + p.items.length + ')</span>' +
+            '    <span>🛡️ Rytířská výbava (' + itemsList.length + ')</span>' +
             '  </div>';
-        if (p.items.length === 0) {
+        if (itemsList.length === 0) {
             html += '  <div style="font-size:0.78rem; color:var(--text-muted); font-style:italic;">Zatím žádná výbava. Lze zakoupit v Obchodě.</div>';
         } else {
             html += '  <div style="display:flex; flex-direction:column; gap:0.3rem;">';
-            for (var itIdx = 0; itIdx < p.items.length; itIdx++) {
-                var it = p.items[itIdx];
+            for (var itIdx = 0; itIdx < itemsList.length; itIdx++) {
+                var it = itemsList[itIdx];
                 var isEq = (it.isEquipped === true || (it.isEquipped !== false && eqItems[it.slot] && eqItems[it.slot].id === it.id));
                 html += '    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); border-radius:6px; padding:0.25rem 0.45rem; font-size:0.8rem;">' +
                     '      <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> <small style="color:var(--text-muted);">(' + (it.slot || "předmět") + ')</small></span>' +
@@ -3885,20 +3886,24 @@ window.PRS_App = {
         html += '</div>';
 
         // Sloupec 2: Panství a zvířata
+        var ownedNodesList = p.ownedNodes || [];
         html += '<div style="background:rgba(0,0,0,0.25); border:1px solid rgba(212,175,55,0.18); border-radius:10px; padding:0.7rem;">' +
             '  <div style="font-size:0.85rem; font-weight:700; color:var(--gold-light); margin-bottom:0.45rem; display:flex; justify-content:space-between;">' +
-            '    <span>🏰 Panství, chov a stavby (' + p.assets.length + ')</span>' +
+            '    <span>🏰 Panství, chov a stavby (' + ownedNodesList.length + ')</span>' +
             '    <span style="font-size:0.76rem; color:#f472b6;">Chov: +' + p.breedingHearts + ' ❤️</span>' +
             '  </div>';
-        if (p.assets.length === 0) {
+        if (ownedNodesList.length === 0) {
             html += '  <div style="font-size:0.78rem; color:var(--text-muted); font-style:italic;">Zatím žádné panství ani chov.</div>';
         } else {
             html += '  <div style="display:flex; flex-direction:column; gap:0.3rem;">';
-            for (var asIdx = 0; asIdx < p.assets.length; asIdx++) {
-                var as = p.assets[asIdx];
+            for (var asIdx = 0; asIdx < ownedNodesList.length; asIdx++) {
+                var ndId = ownedNodesList[asIdx];
+                var ndObj = this.state.board.nodes[ndId];
+                if (!ndObj) continue;
+                var rent = window.PRS_GameEngine.computeNodeRent(this.state, ndObj, p);
                 html += '    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); border-radius:6px; padding:0.25rem 0.45rem; font-size:0.8rem;">' +
-                    '      <span>' + (as.icon || '🏡') + ' ' + this.escapeHtml(as.name) + '</span>' +
-                    '      <span style="color:#facc15; font-size:0.75rem;">' + (as.heartsBonus ? ('+' + as.heartsBonus + ' ❤️') : '') + ' ' + (as.income ? ('+' + as.income + ' zl.') : '') + '</span>' +
+                    '      <span>' + (ndObj.icon || '🏡') + ' <strong>' + this.escapeHtml(ndObj.name) + '</strong> <small style="color:var(--text-muted);">(' + ndObj.code + ')' + (ndObj.villageLevel > 1 ? (' v' + ndObj.villageLevel) : '') + '</small></span>' +
+                    '      <span style="color:#86efac; font-size:0.75rem;">Mýtné: ' + rent.toLocaleString("cs-CZ") + ' zl.</span>' +
                     '    </div>';
             }
             html += '  </div>';
