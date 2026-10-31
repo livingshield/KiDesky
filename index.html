@@ -257,6 +257,98 @@
             .theme-btn { padding: 0.28rem 0.45rem; font-size: 0.88rem; }
         }
 
+        .compact-knight-card {
+            padding: 0.2rem 0.2rem 0.2rem 0.65rem;
+        }
+        .compact-virtues-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.35rem;
+            margin: 0.45rem 0;
+            padding: 0.35rem 0.5rem;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            font-size: 0.78rem;
+            text-align: center;
+        }
+        .cv-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            color: var(--text-muted);
+        }
+        .cv-item strong {
+            color: var(--gold-light);
+            font-size: 0.85rem;
+        }
+
+        .board-lower-dashboard {
+            margin-top: 1.8rem;
+            padding-top: 1.6rem;
+            border-top: 2px solid var(--border-gold);
+        }
+        .lower-dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.15rem;
+            padding: 0.65rem 1rem;
+            background: linear-gradient(135deg, rgba(32, 24, 16, 0.95), rgba(18, 14, 10, 0.98));
+            border: 1px solid var(--border-gold);
+            border-radius: 14px;
+        }
+        .btn-jump-lower {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gold-light);
+            text-decoration: none;
+            padding: 0.38rem 0.95rem;
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid var(--gold);
+            border-radius: 99px;
+            transition: all 0.2s ease;
+        }
+        .btn-jump-lower:hover {
+            background: rgba(212, 175, 55, 0.28);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
+        }
+        .btn-jump-upper {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--gold-light);
+            background: rgba(26, 20, 14, 0.95);
+            border: 1.5px solid var(--gold);
+            border-radius: 99px;
+            padding: 0.4rem 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-jump-upper:hover {
+            background: var(--gold);
+            color: #120e0a;
+            box-shadow: 0 0 14px rgba(212, 175, 55, 0.45);
+        }
+        .dice-cube.clickable-dice {
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .dice-cube.clickable-dice:hover {
+            transform: scale(1.08) rotate(5deg);
+            box-shadow: 0 0 16px rgba(212, 175, 55, 0.65);
+        }
+        .dice-cube.clickable-dice:active {
+            transform: scale(0.95);
+        }
+
         .lp-theme-selection-banner {
             display: flex;
             align-items: center;
@@ -3836,12 +3928,6 @@
             <!-- Lišta Online Místnosti, Sdílení odkazu a Zámku postavy -->
             <div id="online-room-bar"></div>
 
-            <!-- Velkolepý závod o Princeznino srdce (Race Track) -->
-            <div id="princess-race-container" class="princess-race-container"></div>
-
-            <!-- Horní počítadlo Srdcí a bohatství všech rytířů -->
-            <div id="heart-track-bar" class="heart-track-grid"></div>
-
             <div class="board-workspace">
                 <!-- Levá část: Ovládací lišta Zoom/Pan + Interaktivní SVG herní plán -->
                 <div>
@@ -3900,23 +3986,60 @@
                     </div>
                 </div>
 
-                <!-- Pravá část: Ovládání tahu, Karta Rytíře a Kronika (Fixní přehled bez scrollování) -->
+                <!-- Pravá část: Odlehčené a přehledné ovládání tahu a aktivního rytíře -->
                 <div class="board-right-sidebar">
-                    <!-- ŽEBŘÍČEK VŠECH RYTÍŘŮ A ZÁVOD O SRDCE (Vždy viditelný na 1 klik) -->
-                    
-                    <!-- Prominentní karta: POLÍČKO, NA KTERÉM HRÁČ STOJÍ / ZKOUMÁ -->
-                    <div id="player-standing-tile-card"></div>
-
+                    <!-- 1. TAH & KOSTKA (nejdůležitější akce nahoře) -->
                     <div id="turn-action-panel"></div>
 
-                    <div class="prs-card" style="margin-bottom:0.95rem;">
+                    <!-- 2. POLÍČKO, NA KTERÉM HRÁČ STOJÍ / ZKOUMÁ -->
+                    <div id="player-standing-tile-card"></div>
+
+                    <!-- 3. KOMPAKTNÍ KARTA AKTIVNÍHO RYTÍŘE -->
+                    <div class="prs-card" style="margin-bottom:0.6rem; padding: 0.75rem 0.9rem;">
                         <div id="active-player-sheet"></div>
                     </div>
 
-                    <div class="prs-card">
-                        <h3 style="font-size:0.95rem; margin-bottom:0.5rem;">📜 Královská kronika událostí</h3>
-                        <div id="game-log-list" class="log-box"></div>
+                    <!-- 4. Rychlý odkaz dolů do Sálu rytířů -->
+                    <div style="text-align:center; padding: 0.2rem 0 0.5rem;">
+                        <a href="#board-lower-dashboard" class="btn-jump-lower" onclick="event.preventDefault(); document.getElementById('board-lower-dashboard').scrollIntoView({behavior:'smooth'});" title="Zobrazit detailní statistiky všech rytířů a celou kroniku">
+                            🏆 Sál všech rytířů &amp; Celá kronika ↓
+                        </a>
                     </div>
+                </div>
+            </div>
+
+            <!-- NOVÝ VELKÝ PŘEHLED POD HERNÍ DESKOU: SÁL RYTÍŘŮ & CELÁ KRONIKA (k doscrolování) -->
+            <div id="board-lower-dashboard" class="board-lower-dashboard">
+                <div class="lower-dashboard-header">
+                    <div style="display:flex; align-items:center; gap:0.65rem;">
+                        <span style="font-size:1.6rem;">🏆</span>
+                        <div>
+                            <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.25rem; margin:0;">
+                                Sál rytířů &amp; Královská kronika
+                            </h2>
+                            <div style="color:var(--text-muted); font-size:0.83rem; margin-top:2px;">
+                                Podrobný přehled všech hráčů, závod o srdce a archiv všech tahů od začátku hry
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-jump-upper" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="Návrat k herní desce">
+                        ⬆️ Zpět na herní desku
+                    </button>
+                </div>
+
+                <!-- Velkolepý závod o Princeznino srdce (Race Track) -->
+                <div id="princess-race-container" class="princess-race-container" style="margin-bottom:1.2rem;"></div>
+
+                <!-- Karty všech rytířů vedle sebe (4 sloupce) -->
+                <div id="heart-track-bar" class="heart-track-grid" style="margin-bottom:1.35rem;"></div>
+
+                <!-- Kompletní Královská kronika událostí -->
+                <div class="prs-card lower-log-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.22); padding-bottom:0.55rem;">
+                        <h3 style="font-size:1.02rem; margin:0; color:var(--gold-light);">📜 Kompletní královská kronika událostí</h3>
+                        <span style="font-size:0.78rem; color:var(--text-muted);">Záznam všech hodů, soubojů, karet a obchodů</span>
+                    </div>
+                    <div id="game-log-list" class="log-box" style="max-height: 420px;"></div>
                 </div>
             </div>
         </section>

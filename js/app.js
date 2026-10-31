@@ -3739,6 +3739,15 @@ window.PRS_App = {
     // ŽEBŘÍČEK VŠECH HRÁČŮ, STATISTIKY A HOVER TOOLTIPY
     // ========================================================================
     inspectedPlayerIndex: null,
+    activePlayerTab: "none", // "none" | "items" | "fiefs"
+    toggleActivePlayerTab: function(tabName) {
+        if (this.activePlayerTab === tabName) {
+            this.activePlayerTab = "none";
+        } else {
+            this.activePlayerTab = tabName;
+        }
+        this.renderActivePlayerPanel();
+    },
 
     selectPlayerToInspect: function (pIdx) {
         if (!this.state || !this.state.players[pIdx]) return;
@@ -3972,96 +3981,59 @@ window.PRS_App = {
             nodesHtml = '<div class="fiefs-empty-hint">🏰 Rytíř zatím nevlastní panství ani stáje. Kupuj pole po království!</div>';
         }
 
-        // 5. Sestavení celého Character Sheetu
-        el.innerHTML = '<div class="character-sheet-container">' +
-            selectorHtml +
-            '<div class="knight-profile-card" style="border-top: 3.5px solid ' + p.color + ';">' +
-            '  <div class="knight-hero-row">' +
-            '    <div class="knight-avatar-badge" style="background:' + p.color + ';">' + p.badge + '</div>' +
-            '    <div class="knight-hero-titles">' +
-            '      <div class="knight-name-line">' +
-            '        <span>' + this.escapeHtml(p.name) + '</span>' +
-            (isCurTurn ? '<span class="tag-on-turn">👑 Na tahu</span>' : '') +
-            '      </div>' +
-            '      <div class="knight-sub-line">' +
-            '        <span>' + (p.type === 'Human' ? '👤 Rytíř' : '🤖 PC Bot') + '</span>' +
-            '        <span>•</span>' +
-            '        <span>📍 Pole ' + p.nodeId + ': <strong>' + this.escapeHtml(currNode ? currNode.name : '') + '</strong></span>' +
-            '      </div>' +
-            '    </div>' +
-            '    <div class="knight-gold-badge">' +
-            '      <span class="gold-amount">💰 ' + p.gold.toLocaleString("cs-CZ") + '</span>' +
-            '      <span class="gold-unit">zlaťáků</span>' +
-            '    </div>' +
-            '  </div>' +
-            '  <div class="knight-hearts-box">' +
-            '    <div class="hearts-row-top">' +
-            '      <span class="hearts-title">♡ Princeznina srdce</span>' +
-            '      <span class="hearts-score"><strong>' + p.totalHearts + '</strong> / ' + targetHearts + ' 💖</span>' +
-            '    </div>' +
-            '    <div class="hearts-bar">' +
-            '      <div class="hearts-bar-fill" style="width:' + heartsPct + '%; background:' + p.color + ';"></div>' +
-            '    </div>' +
-            '    <div class="hearts-row-sub">' +
-            '      <span>Trvalá srdce: <strong>' + (p.permanentHearts || 0) + ' 💖</strong></span>' +
-            '      <span>Bonus chovu: <strong>+' + (p.breedingHearts || 0) + ' 💖</strong></span>' +
-            '    </div>' +
-            '  </div>' +
-            '</div>' +
+        // 5. Sestavení odlehčeného, kompaktního profilu rytíře na tahu
+        var curTab = this.activePlayerTab || "none";
+        var tabContentHtml = "";
+        if (curTab === "items") {
+            tabContentHtml = '<div style="margin-top:0.45rem; padding-top:0.45rem; border-top:1px solid rgba(212,175,55,0.2);">' +
+                '<div style="font-size:0.78rem; color:var(--gold-light); font-weight:700; margin-bottom:0.35rem;">🎒 Rytířská výbava:</div>' +
+                itemsHtml +
+                '</div>';
+        } else if (curTab === "fiefs") {
+            tabContentHtml = '<div style="margin-top:0.45rem; padding-top:0.45rem; border-top:1px solid rgba(212,175,55,0.2);">' +
+                '<div style="font-size:0.78rem; color:var(--gold-light); font-weight:700; margin-bottom:0.35rem;">🏰 Panství a chovy:</div>' +
+                '<div class="fiefs-summary-pills" style="margin-bottom:0.4rem;">' +
+                '  <span class="fief-pill ' + (horseCount > 0 ? 'active' : '') + '">🐎 ' + horseCount + '</span>' +
+                '  <span class="fief-pill ' + (dogCount > 0 ? 'active' : '') + '">🐕 ' + dogCount + '</span>' +
+                '  <span class="fief-pill ' + (falconCount > 0 ? 'active' : '') + '">🦅 ' + falconCount + '</span>' +
+                '  <span class="fief-pill ' + (villageCount > 0 ? 'active' : '') + '">🏡 ' + villageCount + '</span>' +
+                '  <span class="fief-pill ' + (castleCount > 0 ? 'active' : '') + '">🏰 ' + castleCount + '</span>' +
+                '</div>' +
+                nodesHtml +
+                '</div>';
+        }
 
-            '<div class="sheet-section-header">' +
-            '  <span>⚔️ ČTYŘI RYTÍŘSKÉ CTNOSTI</span>' +
-            '  <small>Úroveň výcviku (0–5)</small>' +
-            '</div>' +
-            '<div class="virtues-2x2-grid">' +
-            '  <div class="virtue-tile">' +
-            '    <div class="vt-head">' +
-            '      <span>⚔️ Boj</span>' +
-            '      <strong class="vt-val ' + (st.boj > p.skills.boj ? 'bonus' : '') + '">' + st.boj + '</strong>' +
+        el.innerHTML = '<div class="compact-knight-card" style="border-left: 4px solid ' + p.color + ';">' +
+            '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">' +
+            '    <div style="display:flex; align-items:center; gap:0.45rem;">' +
+            '      <span class="ks-avatar" style="background:' + p.color + '; width:28px; height:28px; font-size:0.95rem; display:inline-flex; align-items:center; justify-content:center; border-radius:50%;">' + p.badge + '</span>' +
+            '      <strong style="color:var(--text-main); font-size:0.92rem;">' + this.escapeHtml(p.name) + '</strong>' +
+            (isCurTurn ? '<span class="tag-on-turn" style="font-size:0.68rem; padding:1px 5px;">👑 Na tahu</span>' : '') +
             '    </div>' +
-            '    <div class="vt-pips">' + renderPips(p.skills.boj, 5) + ' <small>(' + p.skills.boj + '/5)</small></div>' +
-            '  </div>' +
-            '  <div class="virtue-tile">' +
-            '    <div class="vt-head">' +
-            '      <span>🏇 Jízda</span>' +
-            '      <strong class="vt-val ' + (st.jizda > p.skills.jizda ? 'bonus' : '') + '">' + st.jizda + '</strong>' +
+            '    <div style="text-align:right;">' +
+            '      <div style="font-size:0.88rem; font-weight:bold; color:var(--gold-light);">💰 ' + p.gold.toLocaleString("cs-CZ") + ' zl.</div>' +
+            '      <div style="font-size:0.8rem; font-weight:bold; color:#f472b6;">💖 ' + p.totalHearts + ' / ' + targetHearts + '</div>' +
             '    </div>' +
-            '    <div class="vt-pips">' + renderPips(p.skills.jizda, 5) + ' <small>(' + p.skills.jizda + '/5)</small></div>' +
             '  </div>' +
-            '  <div class="virtue-tile">' +
-            '    <div class="vt-head">' +
-            '      <span>💃 Tanec</span>' +
-            '      <strong class="vt-val ' + (st.tanec > p.skills.tanec ? 'bonus' : '') + '">' + st.tanec + '</strong>' +
-            '    </div>' +
-            '    <div class="vt-pips">' + renderPips(p.skills.tanec, 5) + ' <small>(' + p.skills.tanec + '/5)</small></div>' +
-            '  </div>' +
-            '  <div class="virtue-tile">' +
-            '    <div class="vt-head">' +
-            '      <span>✨ Charisma</span>' +
-            '      <strong class="vt-val ' + (st.charisma > p.skills.charisma ? 'bonus' : '') + '">' + st.charisma + '</strong>' +
-            '    </div>' +
-            '    <div class="vt-pips">' + renderPips(p.skills.charisma, 5) + ' <small>(' + p.skills.charisma + '/5)</small></div>' +
-            '  </div>' +
-            '</div>' +
 
-            '<div class="sheet-section-header">' +
-            '  <span>🎒 RYTÍŘSKÁ VÝBAVA</span>' +
-            '  <small>(' + p.items.length + ' předmětů)</small>' +
-            '</div>' +
-            itemsHtml +
+            '  <!-- 4 ctnosti v jednom kompaktním horizontálním řádku -->' +
+            '  <div class="compact-virtues-row">' +
+            '    <span class="cv-item" title="Boj: ' + st.boj + ' (výcvik ' + p.skills.boj + '/5)">⚔️ <strong>' + st.boj + '</strong></span>' +
+            '    <span class="cv-item" title="Jízda: ' + st.jizda + ' (výcvik ' + p.skills.jizda + '/5)">🏇 <strong>' + st.jizda + '</strong></span>' +
+            '    <span class="cv-item" title="Tanec: ' + st.tanec + ' (výcvik ' + p.skills.tanec + '/5)">💃 <strong>' + st.tanec + '</strong></span>' +
+            '    <span class="cv-item" title="Charisma: ' + st.charisma + ' (výcvik ' + p.skills.charisma + '/5)">✨ <strong>' + st.charisma + '</strong></span>' +
+            '  </div>' +
 
-            '<div class="sheet-section-header">' +
-            '  <span>🏰 PANSTVÍ A CHOVY ZVÍŘAT</span>' +
-            '  <small>(' + p.ownedNodes.length + ' držav • Chov: ' + (p.animalValue || 0) + ' zl.)</small>' +
-            '</div>' +
-            '<div class="fiefs-summary-pills">' +
-            '  <span class="fief-pill ' + (horseCount > 0 ? 'active' : '') + '">🐎 Koně: <strong>' + horseCount + '</strong></span>' +
-            '  <span class="fief-pill ' + (dogCount > 0 ? 'active' : '') + '">🐕 Psi: <strong>' + dogCount + '</strong></span>' +
-            '  <span class="fief-pill ' + (falconCount > 0 ? 'active' : '') + '">🦅 Sokoli: <strong>' + falconCount + '</strong></span>' +
-            '  <span class="fief-pill ' + (villageCount > 0 ? 'active' : '') + '">🏡 Vesnice: <strong>' + villageCount + '</strong></span>' +
-            '  <span class="fief-pill ' + (castleCount > 0 ? 'active' : '') + '">🏰 Hrady: <strong>' + castleCount + '</strong></span>' +
-            '</div>' +
-            nodesHtml +
+            '  <!-- Rychlé záložky pro zobrazení batohu a panství -->' +
+            '  <div style="display:flex; gap:0.4rem; margin-top:0.4rem;">' +
+            '    <button class="btn-secondary" style="flex:1; padding:0.25rem 0.45rem; font-size:0.75rem; ' + (curTab === "items" ? 'background:rgba(212,175,55,0.22); border-color:var(--gold); color:#fff;' : '') + '" onclick="PRS_App.toggleActivePlayerTab(&quot;items&quot;)">' +
+            '      🎒 Výbava (' + p.items.length + ')' + (curTab === "items" ? ' ▲' : ' ▼') +
+            '    </button>' +
+            '    <button class="btn-secondary" style="flex:1; padding:0.25rem 0.45rem; font-size:0.75rem; ' + (curTab === "fiefs" ? 'background:rgba(212,175,55,0.22); border-color:var(--gold); color:#fff;' : '') + '" onclick="PRS_App.toggleActivePlayerTab(&quot;fiefs&quot;)">' +
+            '      🏰 Panství (' + p.ownedNodes.length + ')' + (curTab === "fiefs" ? ' ▲' : ' ▼') +
+            '    </button>' +
+            '  </div>' +
+            tabContentHtml +
             '</div>';
     },
 
@@ -4122,7 +4094,7 @@ window.PRS_App = {
                 '    <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:2px;">Královská hrací kostka</div>' +
                 '    <div style="font-size:0.92rem; color:var(--gold-light);">' + diceStatus + '</div>' +
                 '  </div>' +
-                '  <div id="dice-cube-el" class="dice-cube" title="Kostka">' + diceGlyph + '</div>' +
+                '  <div id="dice-cube-el" class="dice-cube clickable-dice" onclick="PRS_App.handleRollDice()" title="Klepni na kostku pro hod!">' + diceGlyph + '</div>' +
                 '</div>' +
                 (isBot
                     ? '<button class="btn-gold-lg" style="width:100%;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.stepBotNow()">🤖 Odehrát tah PC (' + this.escapeHtml(player.name) + ')</button>'

@@ -24,25 +24,36 @@ $credentials = New-Object System.Net.NetworkCredential($FtpUsername, $FtpPasswor
 
 $remoteBases = @("/www/apps/KiDesky/", "/www/wwwroot/apps/KiDesky/")
 
-function Ensure-FtpDir {
-    param($remoteUri)
-    try {
-        $req = [System.Net.FtpWebRequest]::Create($remoteUri)
-        $req.Credentials = $credentials
-        $req.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory
-        $req.KeepAlive = $false
-        $req.EnableSsl = $false
-        $resp = $req.GetResponse()
-        $resp.Close()
-        Write-Host "Created FTP dir: $remoteUri" -ForegroundColor Cyan
-    } catch {
-        # Directory likely exists
+$createdDirs = @{}
+
+function Ensure-FtpDirHierarchy {
+    param($baseUri, $relativePath)
+    $parts = $relativePath.Split('/')
+    $currentUri = $baseUri.TrimEnd('/')
+    for ($i = 0; $i -lt ($parts.Length - 1); $i++) {
+        $part = $parts[$i]
+        if (-not $part) { continue }
+        $currentUri = "$currentUri/$part"
+        if ($createdDirs.ContainsKey($currentUri)) { continue }
+        try {
+            $req = [System.Net.FtpWebRequest]::Create($currentUri)
+            $req.Credentials = $credentials
+            $req.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory
+            $req.KeepAlive = $false
+            $req.EnableSsl = $false
+            $resp = $req.GetResponse()
+            $resp.Close()
+            Write-Host "Created FTP dir: $currentUri" -ForegroundColor Cyan
+        } catch {
+            # Directory likely exists
+        }
+        $createdDirs[$currentUri] = $true
     }
 }
 
 function Upload-FtpFile {
     param($localFilePath, $remoteFileUri)
-    # STRICT SAFETY CHECK
+    # STRICT SAFETY CHECK: Poskytovatel hostingu ASPONE zakazuje *.exe soubory
     if ($localFilePath -match '\.exe($|\.)' -or $remoteFileUri -match '\.exe($|\.)') {
         Write-Error "CRITICAL VIOLATION: Refusing to upload .exe file: $localFilePath"
         return
@@ -72,11 +83,11 @@ $assetFiles = Get-ChildItem (Join-Path $localBase "assets") -Recurse -File | Whe
 
 foreach ($rb in $remoteBases) {
     Write-Host "=== Deploying assets to $rb ===" -ForegroundColor Yellow
+    $baseUri = "ftp://$FtpServer$rb"
     foreach ($file in $assetFiles) {
         $rel = $file.FullName.Substring($localBase.Length).TrimStart('\', '/').Replace('\', '/')
-        $remoteF = "ftp://$FtpServer$rb$rel"
-        $remoteDir = [System.IO.Path]::GetDirectoryName($remoteF).Replace('\', '/')
-        Ensure-FtpDir $remoteDir
+        Ensure-FtpDirHierarchy $baseUri $rel
+        $remoteF = "$baseUri$rel"
         Upload-FtpFile $file.FullName $remoteF
     }
 }
