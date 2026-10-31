@@ -68,64 +68,16 @@ function Upload-FtpFile {
     }
 }
 
-# Directories to ensure
-$dirs = @(
-    "assets",
-    "assets/env",
-    "assets/board",
-    "assets/landmarks",
-    "assets/tiles",
-    "assets/audio",
-    "assets/video",
-    "js"
-)
-
-# Files to upload
-$filesToUpload = @(
-    "index.html",
-    "PRAVIDLA_PRINCEZNINO_SRDCE.md",
-    "api.ashx",
-    "js/game-data.js",
-    "js/game-engine.js",
-    "js/app.js",
-    "assets/web.config",
-    "assets/video/RuzeProDanielku.mp4",
-    "assets/audio/bgm_court.mp3",
-    "assets/audio/bgm_tavern.mp3",
-    "assets/audio/bgm_tournament.mp3",
-    "assets/env/table_bg.jpg",
-    "assets/board/parchment_board_bg.jpg",
-    "assets/landmarks/royal_castle.jpg",
-    "assets/landmarks/dragon.jpg",
-    "assets/tiles/kun.jpg",
-    "assets/tiles/pes.jpg",
-    "assets/tiles/sokol.jpg",
-    "assets/tiles/festival.jpg",
-    "assets/tiles/u1_zver.jpg",
-    "assets/tiles/u2_monstrum.jpg",
-    "assets/tiles/u3_drak.jpg",
-    "assets/tiles/village.jpg",
-    "assets/tiles/town.jpg",
-    "assets/tiles/castle.jpg",
-    "assets/tiles/merchant.jpg",
-    "assets/tiles/prison.jpg",
-    "assets/tiles/hospital.jpg",
-    "assets/tiles/tavern.jpg"
-)
+$assetFiles = Get-ChildItem (Join-Path $localBase "assets") -Recurse -File | Where-Object { $_.FullName -notmatch '\.exe($|\.)' }
 
 foreach ($rb in $remoteBases) {
-    Write-Host "=== Deploying to $rb ===" -ForegroundColor Yellow
-    foreach ($d in $dirs) {
-        Ensure-FtpDir "ftp://$FtpServer$rb$d"
-    }
-    foreach ($rel in $filesToUpload) {
-        $localF = Join-Path $localBase $rel.Replace('/', '\')
-        if (Test-Path $localF) {
-            $remoteF = "ftp://$FtpServer$rb$rel"
-            Upload-FtpFile $localF $remoteF
-        } else {
-            Write-Warning "Local file not found: $localF"
-        }
+    Write-Host "=== Deploying assets to $rb ===" -ForegroundColor Yellow
+    foreach ($file in $assetFiles) {
+        $rel = $file.FullName.Substring($localBase.Length).TrimStart('\', '/').Replace('\', '/')
+        $remoteF = "ftp://$FtpServer$rb$rel"
+        $remoteDir = [System.IO.Path]::GetDirectoryName($remoteF).Replace('\', '/')
+        Ensure-FtpDir $remoteDir
+        Upload-FtpFile $file.FullName $remoteF
     }
 }
-Write-Host "Deployment completed!" -ForegroundColor Green
+Write-Host "Asset deployment completed!" -ForegroundColor Green
