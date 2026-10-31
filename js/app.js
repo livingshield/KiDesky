@@ -2407,6 +2407,7 @@ window.PRS_App = {
         this.renderStandingNodeCard();
         this.renderPlayersStandings();
         this.renderActivePlayerPanel();
+        this.renderLowerKnightDetail();
         this.renderActionPanel();
         this.renderLogs();
         this.updateMobileDock();
@@ -2560,12 +2561,13 @@ window.PRS_App = {
         var el = document.getElementById("heart-track-bar");
         if (!this.state) return;
         var target = this.state.config.targetHearts;
+        var inspIdx = (this.inspectedPlayerIndex !== null && this.inspectedPlayerIndex !== undefined) ? this.inspectedPlayerIndex : this.state.currentPlayerIndex;
 
         // 1. Závod o Princeznino srdce (Race Track)
         if (raceEl) {
             var raceHtml = '<div class="princess-race-header">' +
                 '<span>🏆 ZÁVOD O PRINCEZNINO SRDCE</span>' +
-                '<span style="color:#f472b6;">Cíl: ' + target + ' 💖</span>' +
+                '<span style="color:#f472b6;">Cíl: ' + target + ' ❤️</span>' +
                 '</div>' +
                 '<div class="princess-race-track">' +
                 '  <div class="race-milestones">';
@@ -2573,44 +2575,59 @@ window.PRS_App = {
             var stepCount = 5;
             for (var m = 0; m <= stepCount; m++) {
                 var stepVal = Math.round((target / stepCount) * m);
-                raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>' + stepVal + ' 💖</span></div>';
+                raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>' + stepVal + ' ❤️</span></div>';
             }
             raceHtml += '  </div>';
 
             for (var rIdx = 0; rIdx < this.state.players.length; rIdx++) {
                 var plTrack = this.state.players[rIdx];
                 var isActTrack = (rIdx === this.state.currentPlayerIndex);
+                var isInspTrack = (rIdx === inspIdx);
                 var pctTrack = Math.min(94, Math.max(3, (plTrack.totalHearts / target) * 88 + 3));
-                raceHtml += '<div class="race-token" style="left:' + pctTrack + '%;background:' + plTrack.color + ';border-color:' + (isActTrack ? '#fbbf24' : '#ffffff') + ';box-shadow:0 0 ' + (isActTrack ? '14px #fbbf24' : '6px rgba(0,0,0,0.6)') + ';" title="' + this.escapeHtml(plTrack.name) + ': ' + plTrack.totalHearts + ' 💖 (' + plTrack.gold.toLocaleString("cs-CZ") + ' zl.)">' + (rIdx + 1) + '</div>';
+                raceHtml += '<div class="race-token ' + (isInspTrack ? 'inspected-race-token' : '') + '" ' +
+                    'style="left:' + pctTrack + '%;background:' + plTrack.color + ';border-color:' + (isActTrack ? '#fbbf24' : (isInspTrack ? '#38bdf8' : '#ffffff')) + ';box-shadow:0 0 ' + (isActTrack ? '14px #fbbf24' : (isInspTrack ? '12px #38bdf8' : '6px rgba(0,0,0,0.6)')) + '; cursor:pointer;" ' +
+                    'onclick="PRS_App.selectPlayerToInspect(' + rIdx + ')" ' +
+                    'onmouseenter="PRS_App.showPlayerTooltip(event, ' + rIdx + ')" ' +
+                    'onmousemove="PRS_App.movePlayerTooltip(event)" ' +
+                    'onmouseleave="PRS_App.hidePlayerTooltip()" ' +
+                    'title="' + this.escapeHtml(plTrack.name) + ': ' + plTrack.totalHearts + ' ❤️ (' + plTrack.gold.toLocaleString("cs-CZ") + ' zl.) - Klepni pro zobrazení statistik">' + (rIdx + 1) + '</div>';
             }
 
-            raceHtml += '  <div class="race-finish-crown" title="Královský hrad &amp; Princezna">👸🏰</div>' +
+            raceHtml += '  <div class="race-finish-crown" title="Královský hrad &amp; Princezna">👑🏰</div>' +
                 '</div>';
             raceEl.innerHTML = raceHtml;
         }
 
-        // 2. Detailní karty rytířů u stolu
+        // 2. Detailní karty rytířů u stolu (kliknutím nebo najetím se zobrazí statistiky)
         if (el) {
             var html = "";
             for (var i = 0; i < this.state.players.length; i++) {
                 var p = this.state.players[i];
                 var isCurrent = (i === this.state.currentPlayerIndex);
+                var isInspected = (i === inspIdx);
                 var pct = Math.min(100, Math.round((p.totalHearts / target) * 100));
-                html += '<div class="heart-player-pill ' + (isCurrent ? 'active-turn' : '') + '" style="border-color:' + p.color + '">' +
+                html += '<div class="heart-player-pill ' + (isCurrent ? 'active-turn' : '') + ' ' + (isInspected ? 'inspected-player' : '') + '" ' +
+                    'style="border-color:' + p.color + ';" ' +
+                    'onclick="PRS_App.selectPlayerToInspect(' + i + ')" ' +
+                    'onmouseenter="PRS_App.showPlayerTooltip(event, ' + i + ')" ' +
+                    'onmousemove="PRS_App.movePlayerTooltip(event)" ' +
+                    'onmouseleave="PRS_App.hidePlayerTooltip()" ' +
+                    'title="Kliknutím zobrazíš podrobné statistiky a výbavu rytíře ' + this.escapeHtml(p.name) + '">' +
                     '<div class="hp-header">' +
-                    '  <span>' + p.badge + ' <strong>' + this.escapeHtml(p.name) + '</strong> ' + (p.type !== "Human" ? '<small class="bot-tag">PC</small>' : '') + '</span>' +
-                    '  <span class="hp-hearts">' + p.totalHearts + ' / ' + target + ' 💖</span>' +
+                    '  <span class="hp-name-wrap">' + p.badge + ' <strong class="hp-name-txt">' + this.escapeHtml(p.name) + '</strong> ' + (p.type !== "Human" ? '<small class="bot-tag">PC</small>' : '<small class="bot-tag" style="background:#0284c7;color:#fff;">Hráč</small>') + (isInspected ? ' <span style="font-size:0.72rem; color:#fde047; font-weight:600; margin-left:4px;">👁️ Zobrazen</span>' : '') + '</span>' +
+                    '  <span class="hp-hearts">' + p.totalHearts + ' / ' + target + ' ❤️</span>' +
                     '</div>' +
                     '<div class="hp-progress-bg"><div class="hp-progress-fill" style="width:' + pct + '%;background:' + p.color + '"></div></div>' +
                     '<div class="hp-sub">' +
                     '  <span>💰 ' + p.gold.toLocaleString("cs-CZ") + ' zl.</span>' +
-                    '  <span>🐾 Chov: +' + p.breedingHearts + ' 💖</span>' +
-                    '  <span>⚔' + p.skills.boj + ' 🐎' + p.skills.jizda + ' 💃' + p.skills.tanec + ' 👑' + p.skills.charisma + '</span>' +
+                    '  <span>🐎 Chov: +' + p.breedingHearts + ' ❤️</span>' +
+                    '  <span>⚔️' + p.skills.boj + ' 🏇' + p.skills.jizda + ' 💃' + p.skills.tanec + ' 👑' + p.skills.charisma + '</span>' +
                     '</div>' +
                     '</div>';
             }
             el.innerHTML = html;
         }
+        this.renderLowerKnightDetail();
     },
 
     getBoardDefsSVG: function () {
@@ -3774,12 +3791,124 @@ window.PRS_App = {
     selectPlayerToInspect: function (pIdx) {
         if (!this.state || !this.state.players[pIdx]) return;
         this.inspectedPlayerIndex = pIdx;
-        this.renderPlayersStandings();
+        this.renderHeartTrack();
         this.renderPlayersStandings();
         this.renderActivePlayerPanel();
+        this.renderLowerKnightDetail();
         if (this.state.players[pIdx]) {
             this.inspectNode(this.state.players[pIdx].nodeId);
         }
+    },
+
+    // --- DETAILNÍ KARTA STATISTIK ZVOLENÉHO RYTÍŘE V DOLNÍM SÁLU ---
+    renderLowerKnightDetail: function () {
+        var el = document.getElementById("lower-inspected-knight-detail");
+        if (!el || !this.state) return;
+
+        var inspIdx = (this.inspectedPlayerIndex !== null && this.inspectedPlayerIndex !== undefined) ? this.inspectedPlayerIndex : this.state.currentPlayerIndex;
+        var p = this.state.players[inspIdx];
+        if (!p) return;
+
+        var st = window.PRS_GameEngine.getEffectiveStats(this.state, p);
+        var targetHearts = this.state.config.targetHearts;
+        var currNode = this.state.board.nodes[p.nodeId];
+        var isTurn = (inspIdx === this.state.currentPlayerIndex);
+        var eqItems = window.PRS_GameEngine.getEquippedItems(p);
+
+        var html = '<div style="border-left: 4.5px solid ' + p.color + '; padding-left: 0.85rem;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.75rem; border-bottom:1px solid rgba(212,175,55,0.22); padding-bottom:0.75rem; margin-bottom:0.85rem;">' +
+            '  <div>' +
+            '    <div style="display:flex; align-items:center; gap:0.65rem;">' +
+            '      <span style="font-size:1.8rem;">' + p.badge + '</span>' +
+            '      <div>' +
+            '        <h3 style="margin:0; font-family:\'Cinzel\',serif; color:' + p.color + '; font-size:1.25rem;">' + this.escapeHtml(p.name) + ' ' + (p.type !== "Human" ? '<small class="bot-tag">PC</small>' : '<small class="bot-tag" style="background:#0284c7;color:#fff;">Hráč</small>') + '</h3>' +
+            '        <div style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">' +
+            (isTurn ? '<strong style="color:#fbbf24;">⚔️ Právě na tahu</strong> • ' : '') +
+            'Stojí na poli: <strong>' + (currNode ? this.escapeHtml(currNode.name) : "Neznámé") + '</strong> (Pole #' + p.nodeId + ')' +
+            '        </div>' +
+            '      </div>' +
+            '    </div>' +
+            '  </div>' +
+            '  <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">' +
+            '    <div style="text-align:right;">' +
+            '      <div style="font-size:1.08rem; font-weight:700; color:#f472b6;">' + p.totalHearts + ' / ' + targetHearts + ' ❤️</div>' +
+            '      <div style="font-size:0.85rem; color:#facc15; font-weight:600;">💰 ' + p.gold.toLocaleString("cs-CZ") + ' zl.</div>' +
+            '    </div>' +
+            '    <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.8rem; border-color:var(--gold); color:var(--gold-light);" onclick="window.scrollTo({top:0, behavior:\'smooth\'}); PRS_App.centerOnActivePlayer();" title="Přejít nahoru k hernímu plánu a ukázat figurku">' +
+            '      🎯 Ukázat na desce ↑' +
+            '    </button>' +
+            '  </div>' +
+            '</div>';
+
+        // 4 Cnosti rytíře
+        html += '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap:0.55rem; margin-bottom:0.95rem;">' +
+            '  <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:0.45rem 0.65rem; text-align:center;">' +
+            '    <div style="font-size:0.74rem; color:var(--text-muted);">⚔️ Bojová síla</div>' +
+            '    <div style="font-size:1.15rem; font-weight:bold; color:#fca5a5;">' + st.boj + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.boj + '/5)</small></div>' +
+            '  </div>' +
+            '  <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:0.45rem 0.65rem; text-align:center;">' +
+            '    <div style="font-size:0.74rem; color:var(--text-muted);">🏇 Jezdecké umění</div>' +
+            '    <div style="font-size:1.15rem; font-weight:bold; color:#7dd3fc;">' + st.jizda + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.jizda + '/5)</small></div>' +
+            '  </div>' +
+            '  <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(244,114,182,0.3); border-radius:8px; padding:0.45rem 0.65rem; text-align:center;">' +
+            '    <div style="font-size:0.74rem; color:var(--text-muted);">💃 Dvorní tanec</div>' +
+            '    <div style="font-size:1.15rem; font-weight:bold; color:#f472b6;">' + st.tanec + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.tanec + '/5)</small></div>' +
+            '  </div>' +
+            '  <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(250,204,21,0.3); border-radius:8px; padding:0.45rem 0.65rem; text-align:center;">' +
+            '    <div style="font-size:0.74rem; color:var(--text-muted);">👑 Charisma</div>' +
+            '    <div style="font-size:1.15rem; font-weight:bold; color:#fef08a;">' + st.charisma + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.charisma + '/5)</small></div>' +
+            '  </div>' +
+            '</div>';
+
+        // 2 sloupce: Výbava & Panství
+        html += '<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:0.75rem;">';
+
+        // Sloupec 1: Výbava
+        html += '<div style="background:rgba(0,0,0,0.25); border:1px solid rgba(212,175,55,0.18); border-radius:10px; padding:0.7rem;">' +
+            '  <div style="font-size:0.85rem; font-weight:700; color:var(--gold-light); margin-bottom:0.45rem; display:flex; justify-content:space-between;">' +
+            '    <span>🛡️ Rytířská výbava (' + p.items.length + ')</span>' +
+            '  </div>';
+        if (p.items.length === 0) {
+            html += '  <div style="font-size:0.78rem; color:var(--text-muted); font-style:italic;">Zatím žádná výbava. Lze zakoupit v Obchodě.</div>';
+        } else {
+            html += '  <div style="display:flex; flex-direction:column; gap:0.3rem;">';
+            for (var itIdx = 0; itIdx < p.items.length; itIdx++) {
+                var it = p.items[itIdx];
+                var isEq = (it.isEquipped === true || (it.isEquipped !== false && eqItems[it.slot] && eqItems[it.slot].id === it.id));
+                html += '    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); border-radius:6px; padding:0.25rem 0.45rem; font-size:0.8rem;">' +
+                    '      <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> <small style="color:var(--text-muted);">(' + (it.slot || "předmět") + ')</small></span>' +
+                    '      <span style="color:' + (isEq ? '#86efac' : 'var(--text-muted)') + '; font-size:0.73rem;">' + (isEq ? '✓ Nasazeno' : 'V brašně') + '</span>' +
+                    '    </div>';
+            }
+            html += '  </div>';
+        }
+        html += '</div>';
+
+        // Sloupec 2: Panství a zvířata
+        html += '<div style="background:rgba(0,0,0,0.25); border:1px solid rgba(212,175,55,0.18); border-radius:10px; padding:0.7rem;">' +
+            '  <div style="font-size:0.85rem; font-weight:700; color:var(--gold-light); margin-bottom:0.45rem; display:flex; justify-content:space-between;">' +
+            '    <span>🏰 Panství, chov a stavby (' + p.assets.length + ')</span>' +
+            '    <span style="font-size:0.76rem; color:#f472b6;">Chov: +' + p.breedingHearts + ' ❤️</span>' +
+            '  </div>';
+        if (p.assets.length === 0) {
+            html += '  <div style="font-size:0.78rem; color:var(--text-muted); font-style:italic;">Zatím žádné panství ani chov.</div>';
+        } else {
+            html += '  <div style="display:flex; flex-direction:column; gap:0.3rem;">';
+            for (var asIdx = 0; asIdx < p.assets.length; asIdx++) {
+                var as = p.assets[asIdx];
+                html += '    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); border-radius:6px; padding:0.25rem 0.45rem; font-size:0.8rem;">' +
+                    '      <span>' + (as.icon || '🏡') + ' ' + this.escapeHtml(as.name) + '</span>' +
+                    '      <span style="color:#facc15; font-size:0.75rem;">' + (as.heartsBonus ? ('+' + as.heartsBonus + ' ❤️') : '') + ' ' + (as.income ? ('+' + as.income + ' zl.') : '') + '</span>' +
+                    '    </div>';
+            }
+            html += '  </div>';
+        }
+        html += '</div>';
+
+        html += '</div>';
+        html += '</div>';
+
+        el.innerHTML = html;
     },
 
     renderPlayersStandings: function () {
@@ -3914,6 +4043,9 @@ window.PRS_App = {
             selectorHtml += '<div class="ks-pill ' + (isSel ? 'active' : '') + ' ' + (isTurnPl ? 'turn-now' : '') + '" ' +
                 'style="border-left: 3.5px solid ' + plTab.color + ';" ' +
                 'onclick="PRS_App.selectPlayerToInspect(' + tIdx + ')" ' +
+                'onmouseenter="PRS_App.showPlayerTooltip(event, ' + tIdx + ')" ' +
+                'onmousemove="PRS_App.movePlayerTooltip(event)" ' +
+                'onmouseleave="PRS_App.hidePlayerTooltip()" ' +
                 'title="' + this.escapeHtml(plTab.name) + ': ' + plTab.totalHearts + ' 💖 (' + plTab.gold.toLocaleString("cs-CZ") + ' zl.)">' +
                 '<div class="ks-pill-top">' +
                 '  <span class="ks-avatar" style="background:' + plTab.color + ';">' + plTab.badge + '</span>' +
