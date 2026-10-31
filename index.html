@@ -257,6 +257,44 @@
             .theme-btn { padding: 0.28rem 0.45rem; font-size: 0.88rem; }
         }
 
+        .lp-theme-selection-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 0.9rem 1.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, rgba(30, 24, 18, 0.95), rgba(18, 14, 10, 0.98));
+            border: 1px solid var(--border-gold);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+        }
+        .lp-theme-banner-left {
+            flex: 1;
+            min-width: 260px;
+        }
+        .lp-theme-switcher {
+            padding: 5px 8px;
+            gap: 6px;
+        }
+        .lp-theme-switcher .theme-btn {
+            padding: 0.38rem 0.85rem;
+            font-size: 0.84rem;
+        }
+        .lp-theme-switcher .theme-btn .theme-label {
+            display: inline !important;
+        }
+        .board-theme-switcher {
+            padding: 2px 5px;
+            gap: 2px;
+        }
+        .board-theme-switcher .theme-btn {
+            padding: 0.22rem 0.45rem;
+            font-size: 0.74rem;
+        }
+
         .user-pill {
             padding: 0.35rem 0.75rem;
             border-radius: 99px;
@@ -3539,6 +3577,28 @@
                 </div>
             </div>
 
+            <!-- 1b. PŘEPÍNAČ BAREVNÉHO DESIGNU & ŽIVLŮ KRÁLOVSTVÍ NA LANDING PAGE -->
+            <div class="lp-theme-selection-banner">
+                <div class="lp-theme-banner-left">
+                    <div style="display:flex; align-items:center; gap:0.55rem; margin-bottom:0.25rem;">
+                        <span style="font-size:1.35rem;">🎨</span>
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.12rem; margin:0;">
+                            Barevný design &amp; Živel království
+                        </h3>
+                    </div>
+                    <p style="font-size:0.84rem; color:var(--text-muted); margin:0;">
+                        Zvol si atmosféru hry a desky – mění barvy rozhraní, záři políček, lemování plánu, ambientní částice i dominantní hrady a draky.
+                    </p>
+                </div>
+                <div class="element-theme-switcher lp-theme-switcher" title="Vyber živel / atmosféru království">
+                    <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true)" title="Královské Zlato">👑 <span class="theme-label">Zlato</span></button>
+                    <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true)" title="Dračí Oheň">🔥 <span class="theme-label">Oheň</span></button>
+                    <button class="theme-btn" data-theme-btn="water" onclick="PRS_App.setElementTheme('water', true)" title="Mořská Voda">💧 <span class="theme-label">Voda</span></button>
+                    <button class="theme-btn" data-theme-btn="earth" onclick="PRS_App.setElementTheme('earth', true)" title="Hvozdná Země">🌿 <span class="theme-label">Země</span></button>
+                    <button class="theme-btn" data-theme-btn="air" onclick="PRS_App.setElementTheme('air', true)" title="Bouřná Magie">⚡ <span class="theme-label">Bouře</span></button>
+                </div>
+            </div>
+
             <!-- 2. ROZCESTNÍK HERNÍCH REŽIMŮ & PŘIPOJENÍ K MULTIPLAYERU (3 SLOUPCE) -->
             <h2 class="lp-section-heading">⚔️ Vyber si herní režim nebo se připoj k Online Multiplayeru</h2>
             <div class="lp-modes-grid">
@@ -3797,6 +3857,14 @@
                         </div>
 
                         <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
+                            <!-- Rychlý přepínač barevného designu a živlů přímo na desce -->
+                            <div class="element-theme-switcher board-theme-switcher" title="Barevný design &amp; Živel království">
+                                <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true)" title="Královské Zlato">👑 <span class="theme-label">Zlato</span></button>
+                                <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true)" title="Dračí Oheň">🔥 <span class="theme-label">Oheň</span></button>
+                                <button class="theme-btn" data-theme-btn="water" onclick="PRS_App.setElementTheme('water', true)" title="Mořská Voda">💧 <span class="theme-label">Voda</span></button>
+                                <button class="theme-btn" data-theme-btn="earth" onclick="PRS_App.setElementTheme('earth', true)" title="Hvozdná Země">🌿 <span class="theme-label">Země</span></button>
+                                <button class="theme-btn" data-theme-btn="air" onclick="PRS_App.setElementTheme('air', true)" title="Bouřná Magie">⚡ <span class="theme-label">Bouře</span></button>
+                            </div>
                             <select class="prs-select" style="width:auto; padding:0.26rem 0.55rem; font-size:0.8rem;" onchange="PRS_App.changeBoardTemplateLive(this.value)" title="Přepnout rozložení plánu">
                                 <option value="classic_96">Plán: Klasický (Trojdílný)</option>
                                 <option value="dragon_4598">Plán: Drak &amp; Lesní věž</option>
@@ -4240,6 +4308,25 @@
                 Každé kruhové políčko, dominanta na mapě i pozadí stolu je připraveno na vlastní bitmapy (<code>.png</code>, <code>.webp</code>, <code>.jpg</code>).
                 Jakmile nahraješ grafiku do <code>assets/tiles/</code> nebo zadáš cestu níže, políčka se automaticky vykreslí jako oříznuté kruhové bitmapové medailony.
             </p>
+            <!-- Výběr barevného designu & živlu v modálu -->
+            <div style="background:rgba(212,175,55,0.08); border:1px solid var(--border-gold); border-radius:12px; padding:0.85rem; margin-bottom:1rem;">
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.35rem;">
+                    <label style="color:var(--gold-light); font-weight:700; font-size:0.88rem;">
+                        🎨 Barevný design &amp; Živel království:
+                    </label>
+                    <div class="element-theme-switcher">
+                        <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true)" title="Královské Zlato">👑 <span class="theme-label">Zlato</span></button>
+                        <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true)" title="Dračí Oheň">🔥 <span class="theme-label">Oheň</span></button>
+                        <button class="theme-btn" data-theme-btn="water" onclick="PRS_App.setElementTheme('water', true)" title="Mořská Voda">💧 <span class="theme-label">Voda</span></button>
+                        <button class="theme-btn" data-theme-btn="earth" onclick="PRS_App.setElementTheme('earth', true)" title="Hvozdná Země">🌿 <span class="theme-label">Země</span></button>
+                        <button class="theme-btn" data-theme-btn="air" onclick="PRS_App.setElementTheme('air', true)" title="Bouřná Magie">⚡ <span class="theme-label">Bouře</span></button>
+                    </div>
+                </div>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin:0;">
+                    Okamžitě přebarví celou desku, ambientní částice, lemování plánu i dominantní hrady a draky.
+                </p>
+            </div>
+
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.65rem; margin-bottom:1rem; font-size:0.82rem;">
                 <div style="grid-column: span 2;">
                     <label style="color:var(--gold-light);">🪵 Pozadí herního prostředí / stolu (URL):</label>
