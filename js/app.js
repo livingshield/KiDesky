@@ -573,14 +573,19 @@ window.PRS_App = {
         var orientation = (h >= w) ? "portrait" : "landscape";
 
         var savedOverride = (typeof localStorage !== "undefined") ? localStorage.getItem("kidesky_device_override") : null;
+        if (w >= 900 && savedOverride === "mobile") {
+            try { localStorage.removeItem("kidesky_device_override"); } catch (e) { }
+            savedOverride = null;
+        }
+
         var device = "desktop";
 
         if (savedOverride === "mobile" || savedOverride === "desktop") {
             device = savedOverride;
         } else {
-            if (w < 768 || (orientation === "landscape" && h <= 540 && isTouch)) {
+            if (w < 768) {
                 device = "mobile";
-            } else if (w <= 1180 || (isTouch && w <= 1366)) {
+            } else if (w < 1024) {
                 device = "tablet";
             } else {
                 device = "desktop";
@@ -967,8 +972,22 @@ window.PRS_App = {
         var wrap = document.getElementById("board-viewport-wrap");
         if (!wrap) return;
 
-        // Kolečko myši = plynulý zoom směrem ke kurzoru
+                // Kolečko myši = plynulý zoom při Ctrl nebo při aktivním přiblížení; jinak přirozený posun stránky
         wrap.addEventListener("wheel", function (e) {
+            var isZoomKey = e.ctrlKey || e.metaKey;
+            var isZoomedIn = self.viewport.scale > (self.viewport.minScale + 0.03);
+
+            if (!isZoomKey) {
+                // Pokud je mapa v základním měřítku (100%) a točíme dolů, necháme stránku přirozeně scrollovat k hráčům pod deskou
+                if (e.deltaY > 0 && !isZoomedIn) {
+                    return;
+                }
+                // Pokud je stránka odscrollovaná dolů a točíme nahoru, necháme stránku přirozeně scrollovat nahoru k desce a liště
+                if (e.deltaY < 0 && typeof window !== "undefined" && window.scrollY > 4) {
+                    return;
+                }
+            }
+
             e.preventDefault();
             var rect = wrap.getBoundingClientRect();
             var mouseX = e.clientX - rect.left;
@@ -1888,6 +1907,9 @@ window.PRS_App = {
             this.renderRulesAndCatalog();
         }
         if (tabId === "board") {
+            if (typeof window !== "undefined") {
+                try { window.scrollTo({ top: 0, left: 0, behavior: "instant" }); } catch (e) { window.scrollTo(0, 0); }
+            }
             if (document.body) document.body.classList.add("on-board-tab");
             this.resizeAmbientCanvas();
             this.renderGameScreen();

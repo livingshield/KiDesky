@@ -2446,10 +2446,7 @@
         }
 
         /* Zamezení scrollování stránky v mobilním režimu herního plánu */
-        body[data-device="mobile"].on-board-tab {
-            overflow: hidden;
-            height: 100vh;
-        }
+        body[data-device="mobile"].on-board-tab { overflow-x: hidden; overflow-y: auto; }
 
         /* Kompaktní horní lišta na mobilu */
         body[data-device="mobile"] .topbar {
@@ -2549,15 +2546,15 @@
             max-width: 100%;
         }
         body[data-device="mobile"][data-orientation="landscape"] .topbar {
-            display: none;
+            display: flex;
+            padding: 0.35rem 0.6rem;
         }
         body[data-device="mobile"][data-orientation="landscape"] .board-workspace {
             display: grid;
             grid-template-columns: 1fr 310px;
             gap: 0.5rem;
-            height: 100vh;
-            max-height: 100vh;
-            overflow: hidden;
+            min-height: auto;
+            overflow: visible;
             padding-top: 2px;
         }
         body[data-device="mobile"][data-orientation="landscape"] .svg-board-container {
