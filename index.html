@@ -2365,15 +2365,30 @@
             display: none; /* Skryto na výšku, plně nahrazeno Sticky Thumb Dockem a Bottom Sheetem */
         }
         body[data-device="mobile"] .svg-board-container {
+            width: 100%;
             height: auto;
+            aspect-ratio: 1400 / 860;
             min-height: auto;
             border-radius: 12px;
             padding: 2px;
             touch-action: none;
+            box-sizing: border-box;
+            background: #14100c;
+        }
+        body[data-device="mobile"] #prs-board-svg {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1400 / 860;
+            display: block;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .svg-board-container {
+            height: calc(100vh - 44px);
+            aspect-ratio: unset;
         }
         body[data-device="mobile"][data-orientation="landscape"] #prs-board-svg {
             width: 100%;
             height: 100%;
+            aspect-ratio: unset;
         }
         body[data-device="mobile"] .map-floating-toolbar {
             padding: 0.35rem 0.5rem;
@@ -3795,7 +3810,7 @@
                     <!-- Interaktivní výřez mapy (podporuje kolečko myši pro Zoom a tažení myší pro posouvání) -->
                     <div id="board-viewport-wrap" class="svg-board-container" title="Kolečkem myši přiblížíš/oddálíš, tažením myší posouváš mapu">
                         <canvas id="prs-ambient-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;opacity:0.75;"></canvas>
-                        <svg id="prs-board-svg" viewBox="0 0 1400 860" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:3;"></svg>
+                        <svg id="prs-board-svg" viewBox="0 0 1400 860" width="1400" height="860" xmlns="http://www.w3.org/2000/svg" style="position:relative;z-index:3;width:100%;height:auto;aspect-ratio:1400/860;display:block;"></svg>
                     </div>
 
                     <div class="board-bottom-bar">

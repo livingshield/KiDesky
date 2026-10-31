@@ -1155,7 +1155,7 @@ window.PRS_App = {
         if (!nd || !wrap) return;
 
         var isMobile = (this.deviceProfile && this.deviceProfile.device === "mobile");
-        var targetScale = isMobile ? Math.max(1.35, Math.min(2.1, this.viewport.scale)) : Math.max(1.55, this.viewport.scale);
+        var targetScale = isMobile ? Math.max(1.20, Math.min(1.85, this.viewport.scale)) : Math.max(1.45, this.viewport.scale);
         this.viewport.scale = targetScale;
         var svgEl = document.getElementById("prs-board-svg");
         var svgW = (svgEl && svgEl.clientWidth > 0) ? svgEl.clientWidth : (wrap.clientWidth || 1000);
@@ -1163,7 +1163,7 @@ window.PRS_App = {
         var svgRatioX = 1400 / Math.max(1, svgW);
         var svgRatioY = 860 / Math.max(1, svgH);
 
-        // Chceme, aby (nd.x * scale + tx) = 700 a (nd.y * scale + ty) = 430
+        // Bezpečné vycentrování na hráče s respektováním okrajů desky
         var tx = 700 - nd.x * targetScale;
         var ty = 430 - nd.y * targetScale;
         this.viewport.panX = tx / svgRatioX;
@@ -1193,16 +1193,26 @@ window.PRS_App = {
                     if (parsed.boardBgUrl) this.graphicsConfig.boardBgUrl = parsed.boardBgUrl;
                     if (parsed.tileBitmapsByType) {
                         for (var k in parsed.tileBitmapsByType) {
-                            if (parsed.tileBitmapsByType[k]) {
-                                this.graphicsConfig.tileBitmapsByType[k] = parsed.tileBitmapsByType[k];
+                            var tVal = parsed.tileBitmapsByType[k];
+                            if (tVal && typeof tVal === "string") {
+                                if (tVal.endsWith(".jpg")) tVal = tVal.replace(".jpg", ".png");
+                                this.graphicsConfig.tileBitmapsByType[k] = tVal;
                             }
                         }
                     }
                     if (parsed.landmarkBitmaps) {
                         for (var lk in parsed.landmarkBitmaps) {
-                            if (parsed.landmarkBitmaps[lk]) {
-                                this.graphicsConfig.landmarkBitmaps[lk] = parsed.landmarkBitmaps[lk];
+                            var lVal = parsed.landmarkBitmaps[lk];
+                            if (lVal && typeof lVal === "string") {
+                                if (lVal.endsWith(".jpg")) lVal = lVal.replace(".jpg", ".png");
+                                this.graphicsConfig.landmarkBitmaps[lk] = lVal;
                             }
+                        }
+                    }
+                    if (parsed.decorBitmaps) {
+                        if (!this.graphicsConfig.decorBitmaps) this.graphicsConfig.decorBitmaps = {};
+                        for (var dk in parsed.decorBitmaps) {
+                            this.graphicsConfig.decorBitmaps[dk] = parsed.decorBitmaps[dk];
                         }
                     }
                 }
@@ -1230,13 +1240,21 @@ window.PRS_App = {
             return this.graphicsConfig.tileBitmapsByCode[node.code];
         }
         var byType = this.graphicsConfig.tileBitmapsByType || {};
+        var url = "";
         if (node.subtype && byType[node.subtype]) {
-            return byType[node.subtype];
+            url = byType[node.subtype];
+        } else if (byType[node.type]) {
+            url = byType[node.type];
         }
-        if (byType[node.type]) {
-            return byType[node.type];
+        if (url && typeof url === "string") {
+            if (url.endsWith(".jpg")) url = url.replace(".jpg", ".png");
+            // Na pravé polovině plánu zrcadlit směrová zvířata a draky
+            if (node.x > 700 && (node.subtype === "kun" || node.subtype === "pes" || node.subtype === "sokol" || node.subtype === "U3")) {
+                var flipUrl = url.replace(".png", "_flip.png");
+                return flipUrl;
+            }
         }
-        return "";
+        return url;
     },
 
     openGraphicsModal: function () {
@@ -2715,6 +2733,12 @@ window.PRS_App = {
             if (customLmUrl && customLmUrl.indexOf(".jpg") !== -1) {
                 customLmUrl = customLmUrl.replace(".jpg", ".png");
             }
+            // Zrcadlení draka a dominant pokud stojí na pravé polovině plánu (pohled do středu)
+            if ((lmk.x > 700 || lmk.isFlipped) && customLmUrl && customLmUrl.indexOf("_flip") === -1) {
+                if (customLmUrl.indexOf("dragon") !== -1 || lmk.id === "dragonLair") {
+                    customLmUrl = customLmUrl.replace(".png", "_flip.png");
+                }
+            }
 
             out.push('  <g class="board-landmark" transform="translate(' + (lmk.x - lmk.w / 2) + ',' + (lmk.y - lmk.h / 2) + ')">');
             if (customLmUrl) {
@@ -2859,19 +2883,25 @@ window.PRS_App = {
             for (var d = 0; d < decs.length; d++) {
                 var dec = decs[d];
                 var cat = window.PRS_DECOR_CATALOG ? window.PRS_DECOR_CATALOG[dec.catalogId] : null;
-                var customDecorUrl = (this.graphicsConfig && this.graphicsConfig.decorBitmaps && this.graphicsConfig.decorBitmaps[dec.catalogId])
+                var decorUrl = (this.graphicsConfig && this.graphicsConfig.decorBitmaps && this.graphicsConfig.decorBitmaps[dec.catalogId])
                     ? this.graphicsConfig.decorBitmaps[dec.catalogId]
-                    : "";
+                    : (cat ? (dec.isFlipped && cat.imgFlip ? cat.imgFlip : cat.img) : "");
 
-                var sc = dec.scale || 1;
-                out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')">');
-                if (customDecorUrl) {
-                    out.push('      <ellipse cx="0" cy="' + (dec.h / 2) + '" rx="' + (dec.w * 0.4) + '" ry="' + (dec.h * 0.14) + '" fill="rgba(0,0,0,0.25)" style="filter:blur(3px);"/>');
-                    out.push('      <image href="' + this.escapeHtml(customDecorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid contain"/>');
+                if (decorUrl) {
+                    if (dec.isFlipped && decorUrl.indexOf("_flip") === -1 && cat && cat.imgFlip) {
+                        decorUrl = cat.imgFlip;
+                    }
+                    var sc = dec.scale || 1;
+                    out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')">');
+                    out.push('      <ellipse cx="0" cy="' + (dec.h / 2 - 2) + '" rx="' + (dec.w * 0.42) + '" ry="' + (dec.h * 0.14) + '" fill="rgba(0,0,0,0.30)" style="filter:blur(3.5px);"/>');
+                    out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid contain" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.45));"/>');
+                    out.push('    </g>');
                 } else if (cat && cat.renderSVG) {
+                    var sc = dec.scale || 1;
+                    out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')">');
                     out.push(cat.renderSVG());
+                    out.push('    </g>');
                 }
-                out.push('    </g>');
             }
             out.push('  </g>');
         }
@@ -4614,7 +4644,11 @@ window.PRS_App = {
                 self.inspectNode(player.nodeId);
                 self.saveSessionAuto();
                 if (self.deviceProfile && self.deviceProfile.device === "mobile") {
-                    self.centerOnActivePlayer();
+                    // Na mobilu centroval na hráče pouze pokud si hráč mapu aktivně přiblížil (> 1.05)
+                    // V režimu 100% (Celá mapa) ponecháváme dokonalý přehled bez ořezu a černých pruhů
+                    if (self.viewport.scale > 1.05) {
+                        self.centerOnActivePlayer();
+                    }
                 }
                 if (onFinish) onFinish();
             });

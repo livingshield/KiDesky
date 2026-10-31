@@ -88,14 +88,14 @@ window.PRS_GRAPHICS_CONFIG = {
     // Cesty k bitmapám podle typu/podtypu políčka (pokud je prázdné, použije se generovaný erbovní medailon)
     tileBitmapsByType: {
         START: "",
-        kun: "assets/tiles/kun.jpg",
-        pes: "assets/tiles/pes.jpg",
-        sokol: "assets/tiles/sokol.jpg",
-        VILLAGE: "assets/tiles/village.jpg",
-        TOWN: "assets/tiles/town.jpg",
+        kun: "assets/tiles/kun.png",
+        pes: "assets/tiles/pes.png",
+        sokol: "assets/tiles/sokol.png",
+        VILLAGE: "assets/tiles/village.png",
+        TOWN: "assets/tiles/town.png",
         CASTLE: "assets/tiles/castle.png",
         MASTER: "",
-        MERCHANT: "assets/tiles/merchant.jpg",
+        MERCHANT: "assets/tiles/merchant.png",
         TAX: "",
         JESTER: "",
         staje: "assets/tiles/kun.jpg",
@@ -103,13 +103,13 @@ window.PRS_GRAPHICS_CONFIG = {
         krejci: "",
         sokolnik: "assets/tiles/sokol.jpg",
         psovod: "assets/tiles/pes.jpg",
-        U1: "assets/tiles/u1_zver.jpg",
-        U2: "assets/tiles/u2_monstrum.jpg",
-        U3: "assets/tiles/u3_drak.jpg",
-        FESTIVAL: "assets/tiles/festival.jpg",
-        PRISON: "assets/tiles/prison.jpg",
-        HOSPITAL: "assets/tiles/hospital.jpg",
-        TAVERN: "assets/tiles/tavern.jpg",
+        U1: "assets/tiles/u1_zver.png",
+        U2: "assets/tiles/u2_monstrum.png",
+        U3: "assets/tiles/u3_drak.png",
+        FESTIVAL: "assets/tiles/festival.png",
+        PRISON: "assets/tiles/prison.png",
+        HOSPITAL: "assets/tiles/hospital.png",
+        TAVERN: "assets/tiles/tavern.png",
         CHANCE: "",
         BONUS: ""
     },
@@ -127,6 +127,30 @@ window.PRS_GRAPHICS_CONFIG = {
         dragonLair: "assets/landmarks/dragon.png",
         forestTower: "assets/castles/castle_swamp.png",
         knightShield: ""
+    },
+    decorBitmaps: {
+        tree_oak: "assets/decorations/tree_oak.png",
+        tree_pine: "assets/decorations/tree_pine.png",
+        tree_birch: "assets/decorations/tree_birch.png",
+        grove_oak: "assets/decorations/grove_oak.png",
+        grove_pine: "assets/decorations/grove_pine.png",
+        grove_pine2: "assets/decorations/grove_pine2.png",
+        rock_boulder: "assets/decorations/rock_boulder.png",
+        mountain_peaks: "assets/decorations/mountain_peaks.png",
+        farm_field: "assets/decorations/farm_field.png",
+        pasture_fence: "assets/decorations/pasture_fence.png",
+        windmill: "assets/decorations/windmill.png",
+        cottage_timber: "assets/decorations/cottage_timber.png",
+        village_well: "assets/decorations/village_well.png",
+        merchant_wagon: "assets/decorations/merchant_wagon.png",
+        tournament_tent: "assets/decorations/tournament_tent.png",
+        signpost: "assets/decorations/signpost.png",
+        signpost2: "assets/decorations/signpost2.png",
+        lake_pond: "assets/decorations/lake_pond.png",
+        orchad_apple: "assets/decorations/orchad_apple.png",
+        orchad_plum: "assets/decorations/orchad_plum.png",
+        hruskovy_sad: "assets/decorations/hruskovy_sad.png",
+        bush: "assets/decorations/bush.png"
     }
 };
 
@@ -142,7 +166,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Listnatý dub",
         category: "vegetation",
         w: 56, h: 68, clearance: 28,
-        img: "assets/decor/tree_oak.png",
+        img: "assets/decorations/tree_oak.png",
+        imgFlip: "assets/decorations/tree_oak_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="34" rx="20" ry="7" fill="rgba(0,0,0,0.22)"/>' +
                 '<path d="M-5,14 Q-7,32 -10,36 L10,36 Q7,32 5,14 Z" fill="#6d4c41" stroke="#3e2723" stroke-width="1.2"/>' +
@@ -157,7 +182,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Horská borovice",
         category: "vegetation",
         w: 48, h: 72, clearance: 25,
-        img: "assets/decor/tree_pine.png",
+        img: "assets/decorations/tree_pine.png",
+        imgFlip: "assets/decorations/tree_pine_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="34" rx="16" ry="6" fill="rgba(0,0,0,0.22)"/>' +
                 '<rect x="-3" y="16" width="6" height="18" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>' +
@@ -172,7 +198,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Bělostná bříza",
         category: "vegetation",
         w: 44, h: 64, clearance: 22,
-        img: "assets/decor/tree_birch.png",
+        img: "assets/decorations/tree_birch.png",
+        imgFlip: "assets/decorations/tree_birch_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="32" rx="14" ry="5" fill="rgba(0,0,0,0.20)"/>' +
                 '<path d="M-2,12 L-3,32 L3,32 L2,12 Z" fill="#f5f5f4" stroke="#44403c" stroke-width="1"/>' +
@@ -187,7 +214,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Dubový hájek",
         category: "vegetation",
         w: 92, h: 76, clearance: 44,
-        img: "assets/decor/grove_oak.png",
+        img: "assets/decorations/grove_oak.png",
+        imgFlip: "assets/decorations/grove_oak_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="32" rx="36" ry="10" fill="rgba(0,0,0,0.24)"/>' +
                 '<g transform="translate(-18,-2) scale(0.85)">' +
@@ -210,7 +238,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Borový lesík",
         category: "vegetation",
         w: 86, h: 80, clearance: 42,
-        img: "assets/decor/grove_pine.png",
+        img: "assets/decorations/grove_pine.png",
+        imgFlip: "assets/decorations/grove_pine_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="34" rx="34" ry="10" fill="rgba(0,0,0,0.24)"/>' +
                 '<g transform="translate(-16,-4) scale(0.85)">' +
@@ -240,7 +269,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Mechem porostlý balvan",
         category: "terrain",
         w: 52, h: 40, clearance: 24,
-        img: "assets/decor/rock_boulder.png",
+        img: "assets/decorations/rock_boulder.png",
+        imgFlip: "assets/decorations/rock_boulder_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="14" rx="22" ry="7" fill="rgba(0,0,0,0.26)"/>' +
                 '<polygon points="-22,10 -16,-6 4,-14 22,-2 18,12 -8,14" fill="#78716c" stroke="#44403c" stroke-width="1.4"/>' +
@@ -253,7 +283,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Zasněžený horský štít",
         category: "terrain",
         w: 120, h: 74, clearance: 55,
-        img: "assets/decor/mountain_peaks.png",
+        img: "assets/decorations/mountain_peaks.png",
+        imgFlip: "assets/decorations/mountain_peaks_flip.png",
         renderSVG: function () {
             return '<ellipse cx="5" cy="28" rx="52" ry="10" fill="rgba(0,0,0,0.28)"/>' +
                 '<polygon points="-40,26 -20,-22 6,26" fill="#475569" stroke="#1e293b" stroke-width="1.5"/>' +
@@ -271,7 +302,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Pšeničné lánové pole",
         category: "agriculture",
         w: 105, h: 60, clearance: 48,
-        img: "assets/decor/farm_field.png",
+        img: "assets/decorations/farm_field.png",
+        imgFlip: "assets/decorations/farm_field_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="12" rx="46" ry="18" fill="rgba(0,0,0,0.18)"/>' +
                 '<polygon points="-44,4 0,-18 44,-4 0,18" fill="#eab308" stroke="#a16207" stroke-width="1.2" opacity="0.75"/>' +
@@ -285,7 +317,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Pastvina s dřevěnou ohradou",
         category: "agriculture",
         w: 78, h: 48, clearance: 36,
-        img: "assets/decor/pasture_fence.png",
+        img: "assets/decorations/pasture_fence.png",
+        imgFlip: "assets/decorations/pasture_fence_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="16" rx="34" ry="8" fill="rgba(0,0,0,0.2)"/>' +
                 '<rect x="-30" y="-8" width="4" height="22" fill="#854d0e" rx="1"/>' +
@@ -300,7 +333,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Větrný mlýn",
         category: "agriculture",
         w: 68, h: 88, clearance: 34,
-        img: "assets/decor/windmill.png",
+        img: "assets/decorations/windmill.png",
+        imgFlip: "assets/decorations/windmill_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="38" rx="26" ry="8" fill="rgba(0,0,0,0.25)"/>' +
                 '<polygon points="-14,34 -8,-4 8,-4 14,34" fill="#78350f" stroke="#451a03" stroke-width="1.5"/>' +
@@ -322,7 +356,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Roubená chalupa",
         category: "settlement",
         w: 70, h: 64, clearance: 35,
-        img: "assets/decor/cottage_timber.png",
+        img: "assets/decorations/cottage_timber.png",
+        imgFlip: "assets/decorations/cottage_timber_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="28" rx="28" ry="8" fill="rgba(0,0,0,0.26)"/>' +
                 '<rect x="-22" y="2" width="44" height="24" rx="2" fill="#fef3c7" stroke="#78350f" stroke-width="1.4"/>' +
@@ -339,7 +374,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Kamenná studna s rumpálem",
         category: "settlement",
         w: 42, h: 46, clearance: 22,
-        img: "assets/decor/village_well.png",
+        img: "assets/decorations/village_well.png",
+        imgFlip: "assets/decorations/village_well_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="16" rx="18" ry="7" fill="rgba(0,0,0,0.24)"/>' +
                 '<ellipse cx="0" cy="12" rx="14" ry="7" fill="#64748b" stroke="#334155" stroke-width="1.4"/>' +
@@ -355,7 +391,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Kupecký krytý vůz",
         category: "settlement",
         w: 68, h: 52, clearance: 32,
-        img: "assets/decor/merchant_wagon.png",
+        img: "assets/decorations/merchant_wagon.png",
+        imgFlip: "assets/decorations/merchant_wagon_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="20" rx="26" ry="7" fill="rgba(0,0,0,0.25)"/>' +
                 '<circle cx="-16" cy="14" r="6" fill="#78350f" stroke="#451a03" stroke-width="1.4"/>' +
@@ -371,7 +408,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Královský turnajový pavilon",
         category: "settlement",
         w: 78, h: 70, clearance: 38,
-        img: "assets/decor/tournament_tent.png",
+        img: "assets/decorations/tournament_tent.png",
+        imgFlip: "assets/decorations/tournament_tent_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="28" rx="30" ry="8" fill="rgba(0,0,0,0.26)"/>' +
                 '<polygon points="-26,22 -22,4 22,4 26,22" fill="#991b1b" stroke="#7f1d1d" stroke-width="1.4"/>' +
@@ -386,7 +424,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Dřevěný rozcestník",
         category: "settlement",
         w: 32, h: 44, clearance: 18,
-        img: "assets/decor/signpost.png",
+        img: "assets/decorations/signpost.png",
+        imgFlip: "assets/decorations/signpost_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="16" rx="12" ry="4" fill="rgba(0,0,0,0.2)"/>' +
                 '<rect x="-2" y="-12" width="4" height="26" fill="#78350f"/>' +
@@ -399,7 +438,8 @@ window.PRS_DECOR_CATALOG = {
         name: "Modré lesní jezírko",
         category: "water",
         w: 96, h: 58, clearance: 46,
-        img: "assets/decor/lake_pond.png",
+        img: "assets/decorations/lake_pond.png",
+        imgFlip: "assets/decorations/lake_pond_flip.png",
         renderSVG: function () {
             return '<ellipse cx="0" cy="14" rx="42" ry="14" fill="rgba(0,0,0,0.2)"/>' +
                 '<path d="M-38,0 C-38,-16 -10,-22 16,-18 C38,-14 42,-2 36,10 C30,22 6,24 -18,20 C-34,16 -38,8 -38,0 Z" fill="#0284c7" stroke="#0369a1" stroke-width="1.8" opacity="0.85"/>' +
@@ -408,6 +448,55 @@ window.PRS_DECOR_CATALOG = {
                 '<circle cx="12" cy="-3" r="3.5" fill="#15803d"/>' +
                 '<circle cx="13" cy="-4" r="1.5" fill="#f43f5e"/>';
         }
+    },
+    // --- 5. Nové sady, keře a rozcestníky ---
+    orchad_apple: {
+        id: "orchad_apple",
+        name: "Jabloňový sad",
+        category: "vegetation",
+        w: 96, h: 76, clearance: 44,
+        img: "assets/decorations/orchad_apple.png",
+        imgFlip: "assets/decorations/orchad_apple_flip.png"
+    },
+    hruskovy_sad: {
+        id: "hruskovy_sad",
+        name: "Hruškový sad",
+        category: "vegetation",
+        w: 96, h: 76, clearance: 44,
+        img: "assets/decorations/hruskovy_sad.png",
+        imgFlip: "assets/decorations/hruskovy_sad_flip.png"
+    },
+    orchad_plum: {
+        id: "orchad_plum",
+        name: "Švestkový sad",
+        category: "vegetation",
+        w: 96, h: 76, clearance: 44,
+        img: "assets/decorations/orchad_plum.png",
+        imgFlip: "assets/decorations/orchad_plum_flip.png"
+    },
+    bush: {
+        id: "bush",
+        name: "Hustý keř",
+        category: "vegetation",
+        w: 48, h: 42, clearance: 22,
+        img: "assets/decorations/bush.png",
+        imgFlip: "assets/decorations/bush_flip.png"
+    },
+    signpost2: {
+        id: "signpost2",
+        name: "Kamenný rozcestník",
+        category: "settlement",
+        w: 44, h: 54, clearance: 20,
+        img: "assets/decorations/signpost2.png",
+        imgFlip: "assets/decorations/signpost2_flip.png"
+    },
+    grove_pine2: {
+        id: "grove_pine2",
+        name: "Hluboký borový hvozd",
+        category: "vegetation",
+        w: 92, h: 80, clearance: 42,
+        img: "assets/decorations/grove_pine2.png",
+        imgFlip: "assets/decorations/grove_pine2_flip.png"
     }
 };
 
@@ -421,6 +510,7 @@ window.PRS_CASTLES = {
         element: "light",
         icon: "👑",
         img: "assets/castles/castle_royal.png",
+        imgFlip: "assets/castles/castle_royal_flip.png",
         desc: "Majestátní středověký hrad s robustními hradbami a červenými věžemi. Centrum moci a královského dvora."
     },
     forest: {
@@ -429,6 +519,7 @@ window.PRS_CASTLES = {
         element: "earth",
         icon: "🌲",
         img: "assets/castles/castle_forest.png",
+        imgFlip: "assets/castles/castle_forest_flip.png",
         desc: "Přírodní pevnost obrostlá mechem a břečťanem. Poskytuje rytířům slevu na trénink Jízdy u mistra."
     },
     desert: {
@@ -437,6 +528,7 @@ window.PRS_CASTLES = {
         element: "earth",
         icon: "🏜️",
         img: "assets/castles/castle_desert.png",
+        imgFlip: "assets/castles/castle_desert_flip.png",
         desc: "Zlatavý pískovcový zámek s orientálními kopulemi a oázou palem. Centrum dálkových karavan."
     },
     swamp: {
@@ -445,6 +537,7 @@ window.PRS_CASTLES = {
         element: "water",
         icon: "🌫️",
         img: "assets/castles/castle_swamp.png",
+        imgFlip: "assets/castles/castle_swamp_flip.png",
         desc: "Pochmurný hrad z tmavého zvětralého kamene obklopený hlubokým močálem a lekníny."
     },
     lava: {
@@ -453,6 +546,7 @@ window.PRS_CASTLES = {
         element: "fire",
         icon: "🌋",
         img: "assets/castles/castle_lava.png",
+        imgFlip: "assets/castles/castle_lava_flip.png",
         desc: "Děsivá pevnost vytesaná z černého obsidiánu obklopená kaskádami žhavé lávy a rudými krystaly."
     },
     dark: {
@@ -461,6 +555,7 @@ window.PRS_CASTLES = {
         element: "dark",
         icon: "🌑",
         img: "assets/castles/castle_dark.png",
+        imgFlip: "assets/castles/castle_dark_flip.png",
         desc: "Hrad z fialového a černého kamene s trnitými věžemi a magickými runami střežícími podzemní sluje."
     },
     crystal: {
@@ -469,6 +564,7 @@ window.PRS_CASTLES = {
         element: "crystal",
         icon: "💎",
         img: "assets/castles/castle_crystal.png",
+        imgFlip: "assets/castles/castle_crystal_flip.png",
         desc: "Oslnivý zámek vytesaný z obřích průsvitných drahokamů a ametystových geod, které lámou světlo."
     },
     water: {
@@ -477,6 +573,7 @@ window.PRS_CASTLES = {
         element: "water",
         icon: "🌊",
         img: "assets/castles/castle_water.png",
+        imgFlip: "assets/castles/castle_water_flip.png",
         desc: "Pohádková mořská tvrz s kaskádami vodopádů, funkčním mlýnem a modro-stříbrnými prapory."
     },
     wind: {
@@ -485,6 +582,7 @@ window.PRS_CASTLES = {
         element: "air",
         icon: "☁️",
         img: "assets/castles/castle_wind.png",
+        imgFlip: "assets/castles/castle_wind_flip.png",
         desc: "Lehká citadela z bílého kamene vznášející se vysoko v oblacích, poháněná rotujícími mechanismy."
     },
     ice: {
@@ -493,6 +591,7 @@ window.PRS_CASTLES = {
         element: "ice",
         icon: "❄️",
         img: "assets/castles/castle_ice.png",
+        imgFlip: "assets/castles/castle_ice_flip.png",
         desc: "Zámek vytesaný z průsvitného ledu a rampouchů, obklopený zamrzlými vodopády a zasněženými skalami."
     }
 };
@@ -887,30 +986,50 @@ window.PRS_QUESTS = {
     ],
     U3: [
         // --- TIER A: Mladí a divocí draci (Obtížnost 11–12) ---
-        { id: "u3_green", name: "Zelený lesní drak", icon: "🌲", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6500, hearts: 2.5, itemTier: 2, trophyId: "trophy_green", img: "assets/dragons/dragon_green.png", weakness: "dogs", desc: "Drak s šupinami z kůry a mechu. Lovečtí psi snadno odlákají jeho pozornost!" },
-        { id: "u3_swamp", name: "Bažinný jedový drak", icon: "🐊", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 7000, hearts: 2.5, itemTier: 2, trophyId: "trophy_swamp", img: "assets/dragons/dragon_swamp.png", weakness: "elixir", desc: "Těžkopádný drak z močálu chrlící jedovatý dým. Hojivý lektvar z Lazaretu ti pomůže přežít." },
-        { id: "u3_fairy", name: "Pohádkový pestrý drak", icon: "🦋", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6000, hearts: 3.0, itemTier: 2, trophyId: "trophy_fairy", img: "assets/dragons/dragon_fairy.png", weakness: "dance", desc: "Hravý drak s motýlími křídly vyfukující kouzelný prach. Lze jej okouzlit Tancem a Charismatem!" },
-        { id: "u3_water", name: "Vodní jezerní drak", icon: "🌊", tierGroup: "young", difficulty: 12, diffOffset: -1, gold: 7500, hearts: 3.0, itemTier: 2, trophyId: "trophy_water", img: "assets/dragons/dragon_water.png", weakness: "spear", desc: "Drak z hlubokých jezer s ploutvemi a vodní tříští. Střeží potopenou truhlu s perlami." },
-        { id: "u3_wind", name: "Větrný nebeský drak", icon: "🌪️", tierGroup: "young", difficulty: 12, diffOffset: -1, gold: 7500, hearts: 3.0, itemTier: 2, trophyId: "trophy_wind", img: "assets/dragons/dragon_wind.png", weakness: "horse", desc: "Elegantní drak vznášející se v oblacích. Útok z plné jízdy na koni ti dá převahu!" },
+        { id: "u3_green", name: "Zelený lesní drak", icon: "🌲", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6500, hearts: 2.5, itemTier: 2, trophyId: "trophy_green", img: "assets/dragons/dragon_green.png",
+        imgFlip: "assets/dragons/dragon_green_flip.png", weakness: "dogs", desc: "Drak s šupinami z kůry a mechu. Lovečtí psi snadno odlákají jeho pozornost!" },
+        { id: "u3_swamp", name: "Bažinný jedový drak", icon: "🐊", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 7000, hearts: 2.5, itemTier: 2, trophyId: "trophy_swamp", img: "assets/dragons/dragon_swamp.png",
+        imgFlip: "assets/dragons/dragon_swamp_flip.png", weakness: "elixir", desc: "Těžkopádný drak z močálu chrlící jedovatý dým. Hojivý lektvar z Lazaretu ti pomůže přežít." },
+        { id: "u3_fairy", name: "Pohádkový pestrý drak", icon: "🦋", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6000, hearts: 3.0, itemTier: 2, trophyId: "trophy_fairy", img: "assets/dragons/dragon_fairy.png",
+        imgFlip: "assets/dragons/dragon_fairy_flip.png", weakness: "dance", desc: "Hravý drak s motýlími křídly vyfukující kouzelný prach. Lze jej okouzlit Tancem a Charismatem!" },
+        { id: "u3_water", name: "Vodní jezerní drak", icon: "🌊", tierGroup: "young", difficulty: 12, diffOffset: -1, gold: 7500, hearts: 3.0, itemTier: 2, trophyId: "trophy_water", img: "assets/dragons/dragon_water.png",
+        imgFlip: "assets/dragons/dragon_water_flip.png", weakness: "spear", desc: "Drak z hlubokých jezer s ploutvemi a vodní tříští. Střeží potopenou truhlu s perlami." },
+        { id: "u3_wind", name: "Větrný nebeský drak", icon: "🌪️", tierGroup: "young", difficulty: 12, diffOffset: -1, gold: 7500, hearts: 3.0, itemTier: 2, trophyId: "trophy_wind", img: "assets/dragons/dragon_wind.png",
+        imgFlip: "assets/dragons/dragon_wind_flip.png", weakness: "horse", desc: "Elegantní drak vznášející se v oblacích. Útok z plné jízdy na koni ti dá převahu!" },
 
         // --- TIER B: Věkovití živloví draci (Obtížnost 13–14) ---
-        { id: "u3_red", name: "Červený ohnivý drak", icon: "🐉", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 8500, hearts: 4.0, itemTier: 3, trophyId: "trophy_red", img: "assets/dragons/dragon_red.png", weakness: "water_armor", desc: "Dravý drak se zlatavými šupinami na skalním útesu s bohatou hromadou zlaťáků." },
-        { id: "u3_volcano", name: "Sopečný lávový drak", icon: "🌋", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 9000, hearts: 4.0, itemTier: 3, trophyId: "trophy_volcano", img: "assets/dragons/dragon_volcano.png", weakness: "ice", desc: "Mohutný drak chrlící žhavou lávu. Jeho poklad se třpytí v rudém žáru sopečných puklin." },
-        { id: "u3_ice", name: "Mrazivý ledový drak", icon: "❄️", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 8500, hearts: 4.0, itemTier: 3, trophyId: "trophy_ice", img: "assets/dragons/dragon_ice.png", weakness: "fire", desc: "Ledový drak s křídly z rampouchů a geod. Zmrazí každého nepřipraveného rytíře." },
-        { id: "u3_lightning", name: "Bouřný bleskový drak", icon: "⚡", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 10000, hearts: 4.5, itemTier: 3, trophyId: "trophy_lightning", img: "assets/dragons/dragon_lightning.png", weakness: "armor", desc: "Drak sršící elektrickými výboji mezi bouřkovými mraky. Vyžaduje pevnou zbroj a rychlé reflexy." },
-        { id: "u3_black", name: "Černý stínový drak", icon: "🌑", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 9500, hearts: 4.5, itemTier: 3, trophyId: "trophy_black", img: "assets/dragons/dragon_black.png", weakness: "light", desc: "Hrozivý trnitý drak v uhelně černém hávu. Z tlamy mu stoupá magicky fialový dým." },
-        { id: "u3_crystal", name: "Křišťálový drahokamový drak", icon: "💎", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 11000, hearts: 4.5, itemTier: 3, trophyId: "trophy_crystal", img: "assets/dragons/dragon_crystal.png", weakness: "charisma", desc: "Nádherná bestie z tisíců drahokamů. Vítěz získá obrovské ložisko rubínů a ametystů." },
-        { id: "u3_bone", name: "Kostěný nemrtvý drak", icon: "💀", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 9000, hearts: 4.0, itemTier: 3, trophyId: "trophy_bone", img: "assets/dragons/dragon_bone.png", weakness: "holy", desc: "Prastarý kostlivec oživený fialovo-zeleným plamenem. Střeží zbraně padlých reků." },
-        { id: "u3_gold", name: "Zlatý královský drak", icon: "👑", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 12500, hearts: 5.0, itemTier: 3, trophyId: "trophy_gold", img: "assets/dragons/dragon_gold.png", weakness: "charisma", desc: "Majestátní drak ze zářivého zlata. Obývá největší přetékající hromadu mincí v království!" },
-        { id: "u3_shadow", name: "Přízračný drak stínů", icon: "👻", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 10000, hearts: 4.5, itemTier: 3, trophyId: "trophy_shadow", img: "assets/dragons/dragon_shadow.png", weakness: "courage", desc: "Napůl nehmotný drak tvořený temnou mlhou. Zkouší odvahu a pevnost rytířského srdce." },
+        { id: "u3_red", name: "Červený ohnivý drak", icon: "🐉", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 8500, hearts: 4.0, itemTier: 3, trophyId: "trophy_red", img: "assets/dragons/dragon_red.png",
+        imgFlip: "assets/dragons/dragon_red_flip.png", weakness: "water_armor", desc: "Dravý drak se zlatavými šupinami na skalním útesu s bohatou hromadou zlaťáků." },
+        { id: "u3_volcano", name: "Sopečný lávový drak", icon: "🌋", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 9000, hearts: 4.0, itemTier: 3, trophyId: "trophy_volcano", img: "assets/dragons/dragon_volcano.png",
+        imgFlip: "assets/dragons/dragon_volcano_flip.png", weakness: "ice", desc: "Mohutný drak chrlící žhavou lávu. Jeho poklad se třpytí v rudém žáru sopečných puklin." },
+        { id: "u3_ice", name: "Mrazivý ledový drak", icon: "❄️", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 8500, hearts: 4.0, itemTier: 3, trophyId: "trophy_ice", img: "assets/dragons/dragon_ice.png",
+        imgFlip: "assets/dragons/dragon_ice_flip.png", weakness: "fire", desc: "Ledový drak s křídly z rampouchů a geod. Zmrazí každého nepřipraveného rytíře." },
+        { id: "u3_lightning", name: "Bouřný bleskový drak", icon: "⚡", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 10000, hearts: 4.5, itemTier: 3, trophyId: "trophy_lightning", img: "assets/dragons/dragon_lightning.png",
+        imgFlip: "assets/dragons/dragon_lightning_flip.png", weakness: "armor", desc: "Drak sršící elektrickými výboji mezi bouřkovými mraky. Vyžaduje pevnou zbroj a rychlé reflexy." },
+        { id: "u3_black", name: "Černý stínový drak", icon: "🌑", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 9500, hearts: 4.5, itemTier: 3, trophyId: "trophy_black", img: "assets/dragons/dragon_black.png",
+        imgFlip: "assets/dragons/dragon_black_flip.png", weakness: "light", desc: "Hrozivý trnitý drak v uhelně černém hávu. Z tlamy mu stoupá magicky fialový dým." },
+        { id: "u3_crystal", name: "Křišťálový drahokamový drak", icon: "💎", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 11000, hearts: 4.5, itemTier: 3, trophyId: "trophy_crystal", img: "assets/dragons/dragon_crystal.png",
+        imgFlip: "assets/dragons/dragon_crystal_flip.png", weakness: "charisma", desc: "Nádherná bestie z tisíců drahokamů. Vítěz získá obrovské ložisko rubínů a ametystů." },
+        { id: "u3_bone", name: "Kostěný nemrtvý drak", icon: "💀", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 9000, hearts: 4.0, itemTier: 3, trophyId: "trophy_bone", img: "assets/dragons/dragon_bone.png",
+        imgFlip: "assets/dragons/dragon_bone_flip.png", weakness: "holy", desc: "Prastarý kostlivec oživený fialovo-zeleným plamenem. Střeží zbraně padlých reků." },
+        { id: "u3_gold", name: "Zlatý královský drak", icon: "👑", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 12500, hearts: 5.0, itemTier: 3, trophyId: "trophy_gold", img: "assets/dragons/dragon_gold.png",
+        imgFlip: "assets/dragons/dragon_gold_flip.png", weakness: "charisma", desc: "Majestátní drak ze zářivého zlata. Obývá největší přetékající hromadu mincí v království!" },
+        { id: "u3_shadow", name: "Přízračný drak stínů", icon: "👻", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 10000, hearts: 4.5, itemTier: 3, trophyId: "trophy_shadow", img: "assets/dragons/dragon_shadow.png",
+        imgFlip: "assets/dragons/dragon_shadow_flip.png", weakness: "courage", desc: "Napůl nehmotný drak tvořený temnou mlhou. Zkouší odvahu a pevnost rytířského srdce." },
 
         // --- TIER C: Legendární vícehlavé saně a bossové (Obtížnost 15–17) ---
-        { id: "u3_2headed", name: "Dvouhlavý strážný drak", icon: "🐉", tierGroup: "boss", difficulty: 15, diffOffset: 2, gold: 11500, hearts: 5.0, itemTier: 3, trophyId: "trophy_2headed", img: "assets/dragons/dragon_2headed.png", weakness: "falcon", desc: "Robustní dvouhlavý drak. Zatímco jedna hlava spí, druhá ostražitě střeží poklad." },
-        { id: "u3_3headed", name: "Tříhlavá královská saň", icon: "🐲", tierGroup: "boss", difficulty: 16, diffOffset: 3, gold: 13500, hearts: 5.5, itemTier: 3, trophyId: "trophy_3headed", img: "assets/dragons/dragon_3headed.png", weakness: "animals", desc: "Legendární tříhlavá saň království! Každá její hlava cení zuby jiným směrem. Zisk +5.5 💖!" },
-        { id: "u3_hydra", name: "Prastará lesní hydra", icon: "🐍", tierGroup: "boss", difficulty: 16, diffOffset: 3, gold: 13000, hearts: 5.5, itemTier: 3, trophyId: "trophy_hydra", img: "assets/dragons/dragon_hydra.png", weakness: "fire", desc: "Hadovitá hydra s mnoha krky prorostlá pralesním mechem. Kdo ji skolí, stane se hrdinou bájí." },
-        { id: "u3_elemental", name: "Čtyřhlavý živelný drak", icon: "🔮", tierGroup: "boss", difficulty: 17, diffOffset: 4, gold: 15000, hearts: 6.0, itemTier: 3, trophyId: "trophy_elemental", img: "assets/dragons/dragon_elemental.png", weakness: "mastery", desc: "Unikátní drak ovládající Oheň, Led, Jed i Blesk! Ultimátní zkouška čtyř rytířských ctností (+6.0 💖)!" },
-        { id: "u3_shadow_multi", name: "Temný stínový vícehlavý drak", icon: "🖤", tierGroup: "boss", difficulty: 17, diffOffset: 4, gold: 15500, hearts: 6.0, itemTier: 3, trophyId: "trophy_shadow_multi", img: "assets/dragons/dragon_shadow_multi.png", weakness: "light", desc: "Přízračná tříhlavá saň vystupující z temnot. Její porážka zažene stín z celého království." },
-        { id: "u3_5headed", name: "Pětihlavý drak Zkázy", icon: "👑", tierGroup: "boss", difficulty: 17, diffOffset: 4, gold: 16000, hearts: 6.0, itemTier: 3, trophyId: "trophy_5headed", img: "assets/dragons/dragon_5headed.png", weakness: "animals_and_spear", desc: "Nejobávanější nestvůra všech dob s pěti kroutícími se krky! Zisk legendárního pokladu a 6 💖 Princezniných srdcí!" }
+        { id: "u3_2headed", name: "Dvouhlavý strážný drak", icon: "🐉", tierGroup: "boss", difficulty: 15, diffOffset: 2, gold: 11500, hearts: 5.0, itemTier: 3, trophyId: "trophy_2headed", img: "assets/dragons/dragon_2headed.png",
+        imgFlip: "assets/dragons/dragon_2headed_flip.png", weakness: "falcon", desc: "Robustní dvouhlavý drak. Zatímco jedna hlava spí, druhá ostražitě střeží poklad." },
+        { id: "u3_3headed", name: "Tříhlavá královská saň", icon: "🐲", tierGroup: "boss", difficulty: 16, diffOffset: 3, gold: 13500, hearts: 5.5, itemTier: 3, trophyId: "trophy_3headed", img: "assets/dragons/dragon_3headed.png",
+        imgFlip: "assets/dragons/dragon_3headed_flip.png", weakness: "animals", desc: "Legendární tříhlavá saň království! Každá její hlava cení zuby jiným směrem. Zisk +5.5 💖!" },
+        { id: "u3_hydra", name: "Prastará lesní hydra", icon: "🐍", tierGroup: "boss", difficulty: 16, diffOffset: 3, gold: 13000, hearts: 5.5, itemTier: 3, trophyId: "trophy_hydra", img: "assets/dragons/dragon_hydra.png",
+        imgFlip: "assets/dragons/dragon_hydra_flip.png", weakness: "fire", desc: "Hadovitá hydra s mnoha krky prorostlá pralesním mechem. Kdo ji skolí, stane se hrdinou bájí." },
+        { id: "u3_elemental", name: "Čtyřhlavý živelný drak", icon: "🔮", tierGroup: "boss", difficulty: 17, diffOffset: 4, gold: 15000, hearts: 6.0, itemTier: 3, trophyId: "trophy_elemental", img: "assets/dragons/dragon_elemental.png",
+        imgFlip: "assets/dragons/dragon_elemental_flip.png", weakness: "mastery", desc: "Unikátní drak ovládající Oheň, Led, Jed i Blesk! Ultimátní zkouška čtyř rytířských ctností (+6.0 💖)!" },
+        { id: "u3_shadow_multi", name: "Temný stínový vícehlavý drak", icon: "🖤", tierGroup: "boss", difficulty: 17, diffOffset: 4, gold: 15500, hearts: 6.0, itemTier: 3, trophyId: "trophy_shadow_multi", img: "assets/dragons/dragon_shadow_multi.png",
+        imgFlip: "assets/dragons/dragon_shadow_multi_flip.png", weakness: "light", desc: "Přízračná tříhlavá saň vystupující z temnot. Její porážka zažene stín z celého království." },
+        { id: "u3_5headed", name: "Pětihlavý drak Zkázy", icon: "👑", tierGroup: "boss", difficulty: 17, diffOffset: 4, gold: 16000, hearts: 6.0, itemTier: 3, trophyId: "trophy_5headed", img: "assets/dragons/dragon_5headed.png",
+        imgFlip: "assets/dragons/dragon_5headed_flip.png", weakness: "animals_and_spear", desc: "Nejobávanější nestvůra všech dob s pěti kroutícími se krky! Zisk legendárního pokladu a 6 💖 Princezniných srdcí!" }
     ]
 };
 
@@ -1084,8 +1203,9 @@ window.PRS_BoardBuilder = {
         // B) Rozptýlená krajina (Scatter Terrain)
         var scatterPool = [
             "tree_oak", "tree_oak", "tree_pine", "tree_pine", "tree_birch",
-            "grove_oak", "grove_pine", "rock_boulder", "rock_boulder",
-            "farm_field", "windmill", "lake_pond", "mountain_peaks"
+            "grove_oak", "grove_pine", "grove_pine2", "rock_boulder", "rock_boulder",
+            "farm_field", "windmill", "lake_pond", "mountain_peaks",
+            "orchad_apple", "hruskovy_sad", "orchad_plum", "bush", "bush"
         ];
 
         for (var gx = 70; gx <= 1330; gx += 65) {
