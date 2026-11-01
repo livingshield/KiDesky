@@ -76,7 +76,10 @@ $codeFiles = @(
     "css/board.css",
     "css/modals.css",
     "css/mobile.css",
+    "js/app-audio.js",
     "js/app.js",
+    "js/app-online.js",
+    "js/app-catalog.js",
     "js/game-engine.js",
     "js/game-data.js"
 )
