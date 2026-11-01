@@ -2195,6 +2195,17 @@ window.PRS_App = {
         this.startNewGame(false);
         if (!this.state) return;
 
+        // Hostitel automaticky hraje za hráče č. 0
+        this.myOnlinePlayerIndex = 0;
+        if (this.state.players && this.state.players[0]) {
+            this.state.players[0].isOnlineHost = true;
+            this.state.players[0].type = "Human";
+            var hostDispName = (this.currentUser && this.currentUser.displayName && this.currentUser.displayName !== "Královský Host")
+                ? this.currentUser.displayName
+                : (this.state.players[0].name.replace(" (Ty)", "") || "Lord Filip");
+            this.state.players[0].name = hostDispName + " (Hostitel)";
+        }
+
         var title = "Online stůl (" + (this.currentUser.displayName || "Královský Host") + ")";
         fetch("api.ashx?action=save-session", {
             method: "POST",
@@ -2216,6 +2227,9 @@ window.PRS_App = {
                     self.state.sessionGuid = res.sessionGuid;
                     self.state.roomCode = res.roomCode;
                     self.lastKnownTurnNumber = self.state.turnNumber;
+                    try {
+                        localStorage.setItem("prs_slot_" + res.roomCode, "0");
+                    } catch (e) { }
                     var codeInput = document.getElementById("join-room-code-input");
                     if (codeInput) codeInput.value = res.roomCode;
                     self.fetchServerStatusAndSessions();
@@ -2468,12 +2482,19 @@ window.PRS_App = {
             }
         } catch (e) { }
 
+        var myPl = (this.myOnlinePlayerIndex >= 0 && this.state.players[this.myOnlinePlayerIndex])
+            ? this.state.players[this.myOnlinePlayerIndex]
+            : null;
+
+        var myRoleText = myPl
+            ? '🛡️ Hraješ za: <strong style="color:' + myPl.color + ';">' + myPl.badge + ' ' + this.escapeHtml(myPl.name) + '</strong>'
+            : '🛋️ Všichni hráči (Hot-Seat bez zámku)';
+
         var optionsHtml = '<option value="-1" ' + (this.myOnlinePlayerIndex === -1 ? 'selected' : '') + '>🛋️ Všichni hráči u 1 PC (Hot-Seat bez zámku)</option>';
         for (var i = 0; i < this.state.players.length; i++) {
             var pl = this.state.players[i];
-            if (pl.type === "Human") {
-                optionsHtml += '<option value="' + i + '" ' + (this.myOnlinePlayerIndex === i ? 'selected' : '') + '>🛡️ Hraji pouze za: ' + (i + 1) + '. ' + this.escapeHtml(pl.name) + '</option>';
-            }
+            var typeTag = (pl.type === "Human") ? "Hráč" : "PC";
+            optionsHtml += '<option value="' + i + '" ' + (this.myOnlinePlayerIndex === i ? 'selected' : '') + '>🛡️ ' + pl.badge + ' ' + (i + 1) + '. ' + this.escapeHtml(pl.name) + ' (' + typeTag + ')</option>';
         }
 
         barEl.innerHTML = '<div class="online-room-banner">' +
@@ -2484,8 +2505,8 @@ window.PRS_App = {
             '  <span id="online-copy-feedback" style="font-size:0.76rem; color:#86efac;"></span>' +
             '</div>' +
             '<div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">' +
-            '  <label style="font-size:0.78rem; color:#bae6fd;">Moje role u stolu:</label>' +
-            '  <select class="prs-select" style="width:auto; font-size:0.78rem; padding:0.24rem 0.5rem;" onchange="PRS_App.setMyOnlinePlayerSlot(this.value)">' + optionsHtml + '</select>' +
+            '  <span style="font-size:0.82rem; background:rgba(0,0,0,0.3); border:1px solid rgba(56,189,248,0.3); border-radius:6px; padding:0.22rem 0.55rem;">' + myRoleText + '</span>' +
+            '  <button class="btn-gold-lg" style="font-size:0.76rem; padding:0.24rem 0.6rem;" onclick="PRS_App.openOnlineRoleModal()" title="Zvolit si rytíře pro tuto online partii">👤 Zvolit / změnit rytíře</button>' +
             '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.22rem 0.5rem;" onclick="PRS_App.pollOnlineSessionNow(true)" title="Okamžitě zkontrolovat tah ze serveru">🔄 Sync (Tah #' + (this.state.turnNumber || 1) + ')</button>' +
             '</div>' +
             '</div>';
@@ -2494,13 +2515,125 @@ window.PRS_App = {
     setMyOnlinePlayerSlot: function (val) {
         var idx = parseInt(val, 10);
         if (isNaN(idx)) idx = -1;
-        this.myOnlinePlayerIndex = idx;
-        if (this.state && this.state.roomCode) {
-            try {
-                localStorage.setItem("prs_slot_" + this.state.roomCode, String(idx));
-            } catch (e) { }
+        this.claimOnlineRole(idx);
+    },
+
+    // --- MODAL VÝBĚRU POSTAVY PRO ONLINE MULTIPLAYER ---
+    openOnlineRoleModal: function () {
+        var modal = document.getElementById("online-role-modal");
+        if (!modal || !this.state) return;
+
+        var infoEl = document.getElementById("online-role-room-info");
+        if (infoEl) {
+            infoEl.innerHTML = 'Kód místnosti: <strong style="color:var(--gold-light); letter-spacing:1px;">' + this.escapeHtml(this.state.roomCode || "") + '</strong> | Cíl: <strong>' + (this.state.config.targetHearts || 30) + ' 💖</strong> | Kolo: #' + this.state.roundNumber;
         }
+
+        var nameInput = document.getElementById("online-player-custom-name");
+        if (nameInput) {
+            if (this.currentUser && this.currentUser.displayName && this.currentUser.displayName !== "Královský Host") {
+                nameInput.value = this.currentUser.displayName;
+            } else if (this.currentUser && this.currentUser.username && this.currentUser.username !== "Host (Nepřihlášený)") {
+                nameInput.value = this.currentUser.username;
+            } else if (!nameInput.value) {
+                nameInput.value = "";
+            }
+        }
+
+        this.renderOnlineRoleGrid();
+        modal.style.display = "flex";
+    },
+
+    closeOnlineRoleModal: function () {
+        var modal = document.getElementById("online-role-modal");
+        if (modal) modal.style.display = "none";
+    },
+
+    renderOnlineRoleGrid: function () {
+        var grid = document.getElementById("online-role-players-grid");
+        if (!grid || !this.state || !this.state.players) return;
+
+        var html = [];
+        for (var i = 0; i < this.state.players.length; i++) {
+            var pl = this.state.players[i];
+            var isHost = (i === 0 || !!pl.isOnlineHost);
+            var isHuman = (pl.type === "Human");
+            var isMyCurrentSlot = (this.myOnlinePlayerIndex === i);
+            var st = window.PRS_GameEngine ? window.PRS_GameEngine.getEffectiveStats(this.state, pl) : pl.skills;
+
+            var roleTag = '';
+            if (isMyCurrentSlot) {
+                roleTag = '<span style="background:#22c55e; color:#fff; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">✅ Tvoje role</span>';
+            } else if (isHost) {
+                roleTag = '<span style="background:rgba(234,179,8,0.2); color:#fbbf24; border:1px solid #fbbf24; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">👑 Hostitel</span>';
+            } else if (isHuman) {
+                roleTag = '<span style="background:rgba(56,189,248,0.2); color:#38bdf8; border:1px solid #38bdf8; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">👤 Jiný hráč</span>';
+            } else {
+                roleTag = '<span style="background:rgba(34,197,94,0.18); color:#86efac; border:1px solid #22c55e; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">✨ Volné (PC)</span>';
+            }
+
+            html.push('<div class="podium-card" style="background:rgba(20,15,10,0.92); border:1.5px solid ' + (isMyCurrentSlot ? '#22c55e' : pl.color) + '; width:100%; box-sizing:border-box; padding:0.85rem; text-align:center;">');
+            html.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">');
+            html.push('    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:bold;">#' + (i + 1) + '</span>');
+            html.push('    ' + roleTag);
+            html.push('  </div>');
+
+            html.push('  <div style="font-size:1.8rem; margin:0.2rem 0;">' + pl.badge + '</div>');
+            html.push('  <div style="font-size:1rem; font-weight:bold; color:' + pl.color + '; margin-bottom:0.2rem;">' + this.escapeHtml(pl.name) + '</div>');
+            html.push('  <div style="font-size:0.85rem; color:#f472b6; font-weight:bold; margin-bottom:0.5rem;">' + pl.totalHearts + ' 💖 • ' + pl.gold.toLocaleString("cs-CZ") + ' zl.</div>');
+
+            html.push('  <div style="display:flex; justify-content:center; gap:0.4rem; font-size:0.76rem; margin-bottom:0.75rem; color:var(--text-muted); background:rgba(0,0,0,0.3); border-radius:6px; padding:0.25rem;">');
+            html.push('    <span>⚔️' + (st.boj || 0) + '</span>');
+            html.push('    <span>🏇' + (st.jizda || 0) + '</span>');
+            html.push('    <span>💃' + (st.tanec || 0) + '</span>');
+            html.push('    <span>✨' + (st.charisma || 0) + '</span>');
+            html.push('  </div>');
+
+            if (isMyCurrentSlot) {
+                html.push('  <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; opacity:0.8; cursor:default;">✓ Hraješ za tohoto rytíře</button>');
+            } else {
+                html.push('  <button class="btn-gold-lg" style="width:100%; font-size:0.84rem; padding:0.4rem 0.5rem;" onclick="PRS_App.claimOnlineRole(' + i + ')">⚔️ Hrát za ' + this.escapeHtml(pl.name.replace(" (PC)", "").replace(" (Ty)", "")) + '</button>');
+            }
+            html.push('</div>');
+        }
+        grid.innerHTML = html.join("\n");
+    },
+
+    claimOnlineRole: function (selIdx) {
+        if (!this.state) return;
+        var nameInput = document.getElementById("online-player-custom-name");
+        var customName = nameInput ? nameInput.value.trim() : "";
+
+        if (selIdx >= 0 && selIdx < this.state.players.length) {
+            var pl = this.state.players[selIdx];
+            pl.type = "Human"; // Povýšení na lidského hráče, aby za něj netahal automatický bot!
+            if (customName) {
+                pl.name = customName;
+            } else if (this.currentUser && this.currentUser.displayName && this.currentUser.displayName !== "Královský Host") {
+                pl.name = this.currentUser.displayName;
+            } else {
+                pl.name = pl.name.replace(" (PC)", "").replace(" (Ty)", "");
+            }
+            this.myOnlinePlayerIndex = selIdx;
+            if (this.state.roomCode) {
+                try {
+                    localStorage.setItem("prs_slot_" + this.state.roomCode, String(selIdx));
+                } catch (e) { }
+            }
+            this.addLog("🛡️ Připojil ses k online stolu jako **" + pl.badge + " " + pl.name + "**!", "win");
+        } else {
+            this.myOnlinePlayerIndex = -1;
+            if (this.state.roomCode) {
+                try {
+                    localStorage.setItem("prs_slot_" + this.state.roomCode, "-1");
+                } catch (e) { }
+            }
+            this.addLog("🛋️ Hraješ v režimu Hot-Seat (všechny postavy u 1 PC).", "turn");
+        }
+
+        this.closeOnlineRoleModal();
+        this.saveCurrentSessionToCloud();
         this.renderGameScreen();
+        if (window.PRS_Audio) window.PRS_Audio.playNotice();
     },
 
     copyRoomInviteLink: function () {
@@ -5306,7 +5439,23 @@ window.PRS_App = {
                     self.state.roomCode = res.session.roomCode;
                     self.lastKnownTurnNumber = self.state.turnNumber;
                     self.switchTab("board");
-                    self.renderGameScreen();
+
+                    // Zjistíme, zda už má tento hráč v prohlížeči pro tuto místnost vybranou postavu
+                    var savedSlot = null;
+                    try {
+                        savedSlot = localStorage.getItem("prs_slot_" + self.state.roomCode);
+                    } catch (e) { }
+
+                    if (savedSlot !== null && savedSlot !== undefined && savedSlot !== "" && savedSlot !== "-1") {
+                        self.myOnlinePlayerIndex = parseInt(savedSlot, 10);
+                        self.renderGameScreen();
+                    } else {
+                        // Nově připojený hráč si musí ihned vybrat postavu, za kterou chce hrát!
+                        self.myOnlinePlayerIndex = -1;
+                        self.renderGameScreen();
+                        self.openOnlineRoleModal();
+                    }
+
                     self.addLog("☁️ Hra byla úspěšně načtena ze serveru (Kód: " + res.session.roomCode + ", tah #" + self.state.turnNumber + ").", "turn");
                     if (window.PRS_Audio) window.PRS_Audio.playNotice();
                 }

@@ -4421,6 +4421,36 @@
         <div id="mobile-sheet-content" class="mobile-sheet-content"></div>
     </div>
 
+    <!-- MODAL: VÝBĚR ROLE A POSTAVY PRO ONLINE MULTIPLAYER -->
+    <div id="online-role-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeOnlineRoleModal()">
+        <div class="modal-box" style="max-width:760px; text-align:center; padding:1.5rem 1.3rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
+                <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.35rem;">🌐 Výběr tvé postavy pro Online stůl</h2>
+                <button class="btn-icon-danger" onclick="PRS_App.closeOnlineRoleModal()">✕</button>
+            </div>
+            <div id="online-role-room-info" style="font-size:0.88rem; color:#bae6fd; margin-bottom:0.95rem;"></div>
+
+            <div style="background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.75rem 0.95rem; margin-bottom:1rem; text-align:left;">
+                <label style="font-size:0.83rem; font-weight:700; color:var(--gold-light); display:block; margin-bottom:0.35rem;">
+                    👤 Tvoje jméno u stolu (bude viditelné ostatním spoluhráčům):
+                </label>
+                <input type="text" id="online-player-custom-name" class="prs-input" placeholder="Zadej své jméno rytíře (např. Baron Jan)" maxlength="32" style="font-size:0.92rem; font-weight:bold;" />
+            </div>
+
+            <div style="font-size:0.9rem; font-weight:700; color:var(--gold-light); margin-bottom:0.65rem; text-align:left;">
+                Zvol si rytíře, kterého chceš ovládat:
+            </div>
+
+            <!-- Mřížka rytířů u stolu -->
+            <div id="online-role-players-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(215px, 1fr)); gap:0.75rem; margin-bottom:1.15rem;"></div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:0.85rem;">
+                <button class="btn-secondary" style="font-size:0.82rem;" onclick="PRS_App.claimOnlineRole(-1)">🛋️ Hrát bez zámku (Všichni hráči / Hot-Seat)</button>
+                <button class="btn-secondary" style="font-size:0.82rem;" onclick="PRS_App.closeOnlineRoleModal()">✕ Zavřít</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: KRÁLOVSKÁ SVATBA & VÍTĚZNÝ CEREMONIÁL -->
     <div id="victory-modal" class="modal-backdrop">
         <div class="modal-box victory-modal-box">
@@ -4644,9 +4674,9 @@
     <!-- Zvukový element pro hudbu na pozadí -->
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=2026110112360" defer></script>
-    <script src="js/game-engine.js?v=2026110112360" defer></script>
-    <script src="js/app.js?v=2026110112360" defer></script>
+    <script src="js/game-data.js?v=2026110112432" defer></script>
+    <script src="js/game-engine.js?v=2026110112432" defer></script>
+    <script src="js/app.js?v=2026110112432" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">
