@@ -743,9 +743,11 @@ window.PRS_App = {
             htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #52525b, #27272a); color:#f4f4f5; border-color:#71717a;" onclick="PRS_App.toggleMobileSheet(\'action\')">⛓️ VOLBY ŽALÁŘE (KAUCE / ÚTĚK)</button>');
         } else if (pa.canBuyNode) {
             var canAfford = player.gold >= pa.buyPrice;
+            var isProc = this.isActionProcessing || this.isSavingSession;
+            var buyLabel = isProc ? "⏳ KUPUJI POLE..." : "🛒 KOUPIT (" + pa.buyPrice + " zl.)";
             htmlBtns.push('<div style="display:flex; gap:6px; width:100%;">' +
-                '<button class="mobile-btn-primary" style="flex:1.4;" ' + (!canAfford ? 'disabled' : '') + ' onclick="PRS_App.handleBuyNode()">🛒 KOUPIT (' + pa.buyPrice + ' zl.)</button>' +
-                '<button class="mobile-btn-primary" style="flex:1; background:rgba(255,255,255,0.12); border-color:var(--border-gold); color:var(--text-main);" onclick="PRS_App.handleEndTurn()">➡️ Konec tahu</button>' +
+                '<button class="mobile-btn-primary" id="mobile-btn-buy-node" style="flex:1.4;' + (isProc ? ' opacity:0.5; pointer-events:none;' : '') + '" ' + (!canAfford || isProc ? 'disabled' : '') + ' onclick="PRS_App.handleBuyNode()">' + buyLabel + '</button>' +
+                '<button class="mobile-btn-primary" style="flex:1; background:rgba(255,255,255,0.12); border-color:var(--border-gold); color:var(--text-main);' + (isProc ? ' opacity:0.5; pointer-events:none;' : '') + '" ' + (isProc ? 'disabled' : '') + ' onclick="PRS_App.handleEndTurn()">➡️ Konec tahu</button>' +
                 '</div>');
         } else if (pa.canUpgradeVillage) {
             var canAffordUpg = player.gold >= pa.upgradeCost;
@@ -1918,6 +1920,8 @@ window.PRS_App = {
     onlinePollingEnabled: true,
     onlinePollTimer: null,
     isOnlineSyncing: false,
+    isActionProcessing: false,
+    isSavingSession: false,
 
     switchTab: function (tabId) {
         this.activeTab = tabId;
@@ -2725,6 +2729,7 @@ window.PRS_App = {
     pollOnlineSessionNow: function (manual) {
         var self = this;
         if (!this.state || !this.state.roomCode || this.isMoveAnimating || this.state.phase === "GAME_OVER") return;
+        if (this.isActionProcessing || this.isSavingSession) return;
         this.isOnlineSyncing = true;
 
         fetch("api.ashx?action=load-session&code=" + encodeURIComponent(this.state.roomCode))
@@ -2737,6 +2742,16 @@ window.PRS_App = {
 
                     var localSig = (self.state.turnNumber || 1) + ":" + self.state.currentPlayerIndex + ":" + self.state.phase + ":" + (self.state.logs ? self.state.logs.length : 0);
                     var remoteSig = (remoteState.turnNumber || 1) + ":" + remoteState.currentPlayerIndex + ":" + remoteState.phase + ":" + (remoteState.logs ? remoteState.logs.length : 0);
+
+                    // Pokud jsem na tahu a remote má stejné číslo tahu, remote nesmí přepsat můj čerstvý lokální tah starším stavem
+                    var isMyTurn = (self.myOnlinePlayerIndex >= 0 && self.state.currentPlayerIndex === self.myOnlinePlayerIndex);
+                    if (isMyTurn && remoteState.turnNumber === self.state.turnNumber) {
+                        var localLogs = self.state.logs ? self.state.logs.length : 0;
+                        var remoteLogs = remoteState.logs ? remoteState.logs.length : 0;
+                        if (remoteLogs <= localLogs) {
+                            return;
+                        }
+                    }
 
                     if ((remoteState.turnNumber > self.state.turnNumber) || (remoteState.turnNumber === self.state.turnNumber && remoteSig !== localSig)) {
                         var prevPlayerIdx = self.state.currentPlayerIndex;
@@ -4490,7 +4505,9 @@ window.PRS_App = {
 
         if (pa.canBuyNode) {
             var canAfford = player.gold >= pa.buyPrice;
-            btns.push('<button class="btn-action-buy" ' + (!canAfford ? 'disabled' : '') + ' onclick="PRS_App.handleBuyNode()">📜 Koupit toto pole (' + pa.buyPrice + ' zl.)</button>');
+            var isProc = this.isActionProcessing || this.isSavingSession;
+            var buyLabel = isProc ? "⏳ Kupuji pole..." : "📜 Koupit toto pole (" + pa.buyPrice + " zl.)";
+            btns.push('<button class="btn-action-buy" id="btn-buy-current-node" style="' + (isProc ? 'opacity:0.5; pointer-events:none;' : '') + '" ' + (!canAfford || isProc ? 'disabled' : '') + ' onclick="PRS_App.handleBuyNode()">' + buyLabel + '</button>');
         }
 
         if (pa.canUpgradeVillage) {
@@ -5044,17 +5061,56 @@ window.PRS_App = {
     },
 
     handleBuyNode: function () {
+        if (this.isActionProcessing || this.isSavingSession) return;
+        this.isActionProcessing = true;
+
+        // Okamžitě zneaktivnit tlačítka v DOMu pro okamžitou odezvu bez možnosti druhého kliknutí
+        var buyBtns = document.querySelectorAll(".btn-action-buy, #btn-buy-current-node, #mobile-btn-buy-node, [onclick*='handleBuyNode']");
+        for (var i = 0; i < buyBtns.length; i++) {
+            buyBtns[i].disabled = true;
+            buyBtns[i].style.opacity = "0.5";
+            buyBtns[i].style.pointerEvents = "none";
+            buyBtns[i].innerHTML = "⏳ Kupuji pole...";
+        }
+
         var ok = window.PRS_GameEngine.buyCurrentNode(this.state);
         if (ok && window.PRS_Audio) window.PRS_Audio.playCoin();
         this.renderGameScreen();
-        this.saveSessionAuto();
+        var self = this;
+        var p = this.saveSessionAuto();
+        if (p && p.finally) {
+            p.finally(function () {
+                self.isActionProcessing = false;
+            });
+        } else {
+            setTimeout(function () { self.isActionProcessing = false; }, 350);
+        }
     },
 
     handleUpgradeVillage: function (nodeId) {
+        if (this.isActionProcessing || this.isSavingSession) return;
+        this.isActionProcessing = true;
+
+        var upgBtns = document.querySelectorAll("[onclick*='handleUpgradeVillage']");
+        for (var i = 0; i < upgBtns.length; i++) {
+            upgBtns[i].disabled = true;
+            upgBtns[i].style.opacity = "0.5";
+            upgBtns[i].style.pointerEvents = "none";
+            upgBtns[i].innerHTML = "⏳ Povyšuji vesnici...";
+        }
+
         var ok = window.PRS_GameEngine.upgradeVillage(this.state, nodeId);
         if (ok && window.PRS_Audio) window.PRS_Audio.playCoin();
         this.renderGameScreen();
-        this.saveSessionAuto();
+        var self = this;
+        var p = this.saveSessionAuto();
+        if (p && p.finally) {
+            p.finally(function () {
+                self.isActionProcessing = false;
+            });
+        } else {
+            setTimeout(function () { self.isActionProcessing = false; }, 350);
+        }
     },
 
     handleTrainMaster: function (skill) {
@@ -5223,6 +5279,17 @@ window.PRS_App = {
     },
 
     handleEndTurn: function () {
+        if (this.isActionProcessing || this.isSavingSession) return;
+        this.isActionProcessing = true;
+
+        var endBtns = document.querySelectorAll("[onclick*='handleEndTurn']");
+        for (var i = 0; i < endBtns.length; i++) {
+            endBtns[i].disabled = true;
+            endBtns[i].style.opacity = "0.5";
+            endBtns[i].style.pointerEvents = "none";
+            endBtns[i].innerHTML = "⏳ Předávám tah...";
+        }
+
         if (window.PRS_Audio) window.PRS_Audio.playStep();
         this.isMoveAnimating = false;
         this.animatingPlayerIndex = null;
@@ -5234,8 +5301,17 @@ window.PRS_App = {
         window.PRS_GameEngine.endTurn(this.state);
         this.selectedNodeId = this.state.players[this.state.currentPlayerIndex].nodeId;
         this.renderGameScreen();
-        this.saveSessionAuto();
-        this.scheduleBotTurnIfNeeded();
+        var self = this;
+        var p = this.saveSessionAuto();
+        var onDone = function () {
+            self.isActionProcessing = false;
+            self.scheduleBotTurnIfNeeded();
+        };
+        if (p && p.finally) {
+            p.finally(onDone);
+        } else {
+            onDone();
+        }
     },
 
     skipToNextHumanTurn: function () {
@@ -5401,7 +5477,8 @@ window.PRS_App = {
 
     saveSessionAuto: function () {
         var self = this;
-        if (!this.state || !this.state.sessionGuid) return;
+        if (!this.state || !this.state.sessionGuid) return Promise.resolve();
+        this.isSavingSession = true;
 
         var payload = {
             sessionGuid: this.state.sessionGuid,
@@ -5418,7 +5495,7 @@ window.PRS_App = {
             players: this.state.players
         };
 
-        fetch("api.ashx?action=save-session", {
+        return fetch("api.ashx?action=save-session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -5437,6 +5514,9 @@ window.PRS_App = {
             })
             .catch(function () {
                 // Tichý fallback při síťových výpadcích
+            })
+            .finally(function () {
+                self.isSavingSession = false;
             });
     },
 
