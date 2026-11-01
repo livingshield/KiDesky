@@ -81,6 +81,10 @@ $dirsToEnsure = @(
 # Files to upload
 $filesToUpload = @(
     "index.html",
+    "css/main.css",
+    "css/board.css",
+    "css/modals.css",
+    "css/mobile.css",
     "js/app.js",
     "js/game-engine.js",
     "js/game-data.js",

@@ -51,11 +51,31 @@ function Upload-FtpFile {
     }
 }
 
+function Ensure-FtpDirectory {
+    param($remoteDirUri)
+    try {
+        $req = [System.Net.FtpWebRequest]::Create($remoteDirUri)
+        $req.Credentials = $credentials
+        $req.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory
+        $req.KeepAlive = $false
+        $req.EnableSsl = $false
+        $resp = $req.GetResponse()
+        $resp.Close()
+        Write-Host "Created FTP dir: $remoteDirUri" -ForegroundColor Cyan
+    } catch {
+        # Directory probably already exists
+    }
+}
+
 $codeFiles = @(
     "index.html",
     "api.ashx",
     "appsettings.Production.json",
     "appsettings.json",
+    "css/main.css",
+    "css/board.css",
+    "css/modals.css",
+    "css/mobile.css",
     "js/app.js",
     "js/game-engine.js",
     "js/game-data.js"
@@ -63,6 +83,8 @@ $codeFiles = @(
 
 foreach ($rb in $remoteBases) {
     Write-Host "=== Deploying code files to $rb ===" -ForegroundColor Yellow
+    Ensure-FtpDirectory "ftp://$FtpServer$($rb)css"
+    Ensure-FtpDirectory "ftp://$FtpServer$($rb)js"
     foreach ($rel in $codeFiles) {
         $localF = Join-Path $localBase $rel.Replace('/', '\')
         if (Test-Path $localF) {

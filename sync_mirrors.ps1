@@ -10,11 +10,15 @@ foreach ($target in $targets) {
         New-Item -ItemType Directory -Path $target -Force | Out-Null
     }
     
-    # 1. HTML & JS
+    # 1. HTML & JS & CSS
     Copy-Item "$projectDir\index.html" "$target\index.html" -Force
     if (-not (Test-Path "$target\js")) { New-Item -ItemType Directory -Path "$target\js" -Force | Out-Null }
     Get-ChildItem "$projectDir\js\*.js" | ForEach-Object {
         Copy-Item $_.FullName "$target\js\$($_.Name)" -Force
+    }
+    if (-not (Test-Path "$target\css")) { New-Item -ItemType Directory -Path "$target\css" -Force | Out-Null }
+    Get-ChildItem "$projectDir\css\*.css" | ForEach-Object {
+        Copy-Item $_.FullName "$target\css\$($_.Name)" -Force
     }
 
     # 2. Assets (castles, dragons, landmarks, tiles)
