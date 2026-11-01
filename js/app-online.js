@@ -537,6 +537,7 @@ openAuthModal: function () {
                 if (newState && newState.players) {
                     this.state = newState;
                     this.lastKnownTurnNumber = this.state.turnNumber;
+                    this.isBoardStaticDirty = true;
                     this.renderGameScreen();
                 }
             } catch (e) {
@@ -589,6 +590,7 @@ openAuthModal: function () {
                     self.state.sessionGuid = res.session.sessionGuid;
                     self.state.roomCode = res.session.roomCode;
                     self.lastKnownTurnNumber = self.state.turnNumber;
+                    self.isBoardStaticDirty = true;
                     self.switchTab("board");
 
                     // Zjistíme, zda už má tento hráč v prohlížeči pro tuto místnost vybranou postavu

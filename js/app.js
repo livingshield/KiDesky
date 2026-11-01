@@ -34,6 +34,7 @@ window.PRS_App = {
     animTokenPos: null,
     fastAnim: false,
     currentTheme: "light",
+    isBoardStaticDirty: true,
 
     // Stav interaktivního Zoomu a Posouvání (Pan & Zoom) herní mapy
     viewport: {
@@ -72,6 +73,7 @@ window.PRS_App = {
         this.graphicsConfig = window.PRS_GameEngine.deepClone(window.PRS_GRAPHICS_CONFIG);
         this.loadSavedGraphicsConfig();
         this.loadSavedUser();
+        this.isBoardStaticDirty = true;
         this.initTheme();
         this.detectDeviceProfile();
         this.renderLobbyPlayers();
@@ -173,6 +175,7 @@ window.PRS_App = {
 
         // Přebarvení SVG desky
         if (this.state) {
+            this.isBoardStaticDirty = true;
             this.renderBoardSVG();
         }
     },
@@ -955,6 +958,7 @@ window.PRS_App = {
 
         localStorage.setItem("prs_graphics_config", JSON.stringify(this.graphicsConfig));
         this.applyEnvironmentBackground();
+        this.isBoardStaticDirty = true;
         this.renderBoardSVG();
         this.closeGraphicsModal();
     },
@@ -2039,6 +2043,7 @@ window.PRS_App = {
 
         this.selectedNodeId = 0;
         this.lastKnownTurnNumber = 1;
+        this.isBoardStaticDirty = true;
         this.resetZoomAndPan();
         this.renderGameScreen();
         if (switchToBoard) {
@@ -2058,7 +2063,6 @@ window.PRS_App = {
         this.renderPlayersStandings();
         this.renderBoardSVG();
         this.renderStandingNodeCard();
-        this.renderPlayersStandings();
         this.renderActivePlayerPanel();
         this.renderLowerKnightDetail();
         this.renderActionPanel();
@@ -2216,8 +2220,9 @@ window.PRS_App = {
             }
         }
 
-        if (staticLayer) {
+        if (staticLayer && (this.isBoardStaticDirty || !staticLayer.hasChildNodes())) {
             staticLayer.innerHTML = this.renderBoardStaticHTML();
+            this.isBoardStaticDirty = false;
         }
         this.renderBoardTokens();
     },
@@ -2459,21 +2464,9 @@ window.PRS_App = {
             var stroke = "url(#goldRimGrad)";
             var strokeWidth = 2.0;
 
-            var activePlayer = (this.state.players && this.state.players[this.state.currentPlayerIndex]) ? this.state.players[this.state.currentPlayerIndex] : null;
-            var isCurrentPlayerStandingTile = (activePlayer && nd.id === activePlayer.nodeId);
-            var isInspectedTile = (this.selectedNodeId !== null && nd.id === this.selectedNodeId && !isCurrentPlayerStandingTile);
-
             if (nd.owner !== null && this.state.players[nd.owner]) {
                 stroke = this.state.players[nd.owner].color;
                 strokeWidth = 3.6;
-            }
-            if (isInspectedTile) {
-                stroke = "#38bdf8";
-                strokeWidth = 4.0;
-            }
-            if (isCurrentPlayerStandingTile) {
-                stroke = "#fbbf24";
-                strokeWidth = 4.2;
             }
 
             var isMajor = (nd.type === "START" || nd.type === "FESTIVAL" || nd.type === "CASTLE" || (nd.type === "QUEST" && nd.subtype === "U3"));
@@ -2482,21 +2475,6 @@ window.PRS_App = {
             var shortCode = nd.code.replace("BLD_", "").replace("SLAV_", "").replace("_OUT", "").replace("_BR1", "").replace("_BR2", "").replace("_R1", "").replace("_R2", "").replace("_L1", "");
 
             out.push('  <g class="board-node" style="cursor:pointer" onclick="PRS_App.handleNodeClick(' + nd.id + ')" onmouseenter="PRS_App.handleNodeMouseEnter(event, ' + nd.id + ')" onmouseleave="PRS_App.handleNodeMouseLeave()" onmousemove="PRS_App.handleNodeMouseMove(event)">');
-
-            // Pulzující zlatý lem a štítek "ZDE STOJÍŠ" pro políčko aktivního hráče
-            if (isCurrentPlayerStandingTile) {
-                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 7.5) + '" fill="none" stroke="#fbbf24" stroke-width="3" stroke-dasharray="5,3" opacity="0.95">');
-                out.push('      <animateTransform attributeName="transform" type="rotate" from="0 ' + nd.x + ' ' + nd.y + '" to="360 ' + nd.x + ' ' + nd.y + '" dur="12s" repeatCount="indefinite"/>');
-                out.push('    </circle>');
-                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 4) + '" fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.9"/>');
-                out.push('    <g transform="translate(' + nd.x + ',' + (nd.y - r - 15) + ')">');
-                out.push('      <rect x="-24" y="-12" width="48" height="15" rx="5" fill="#b45309" stroke="#fbbf24" stroke-width="1.2"/>');
-                out.push('      <text x="0" y="-1" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">ZDE STOJÍŠ</text>');
-                out.push('      <polygon points="-4,3 0,7 4,3" fill="#fbbf24"/>');
-                out.push('    </g>');
-            } else if (isInspectedTile) {
-                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 5.5) + '" fill="none" stroke="#38bdf8" stroke-width="2.6" stroke-dasharray="4,2"/>');
-            }
 
             // Tvarová geometrie políčka (Silueta)
             out.push(this.renderNodeSilhouette(nd, r, fill, stroke, strokeWidth, isMajor, shortCode, bmpUrl));
@@ -2544,6 +2522,41 @@ window.PRS_App = {
     renderBoardTokensHTML: function () {
         var nodes = this.state.board.nodes;
         var out = [];
+
+        var activePlayer = (this.state.players && this.state.players[this.state.currentPlayerIndex]) ? this.state.players[this.state.currentPlayerIndex] : null;
+        var activeNodeId = activePlayer ? activePlayer.nodeId : null;
+
+        // 1. Zvýraznění vybraného / zkoumaného políčka (Inspected Node Halo)
+        if (this.selectedNodeId !== null && this.selectedNodeId !== undefined && this.selectedNodeId !== activeNodeId) {
+            var selNode = nodes[this.selectedNodeId];
+            if (selNode) {
+                var selMajor = (selNode.type === "START" || selNode.type === "FESTIVAL" || selNode.type === "CASTLE" || (selNode.type === "QUEST" && selNode.subtype === "U3"));
+                var selR = selMajor ? 21 : 16.5;
+                out.push('  <g class="inspected-tile-halo" style="pointer-events:none;">');
+                out.push('    <circle cx="' + selNode.x + '" cy="' + selNode.y + '" r="' + (selR + 5.5) + '" fill="none" stroke="#38bdf8" stroke-width="3.2" stroke-dasharray="4,2"/>');
+                out.push('  </g>');
+            }
+        }
+
+        // 2. Pulzující zlatý lem a štítek "ZDE STOJÍŠ" pro políčko aktivního hráče
+        if (activePlayer) {
+            var standNode = nodes[activePlayer.nodeId];
+            if (standNode) {
+                var standMajor = (standNode.type === "START" || standNode.type === "FESTIVAL" || standNode.type === "CASTLE" || (standNode.type === "QUEST" && standNode.subtype === "U3"));
+                var standR = standMajor ? 21 : 16.5;
+                out.push('  <g class="active-standing-marker" style="pointer-events:none;">');
+                out.push('    <circle cx="' + standNode.x + '" cy="' + standNode.y + '" r="' + (standR + 7.5) + '" fill="none" stroke="#fbbf24" stroke-width="3" stroke-dasharray="5,3" opacity="0.95">');
+                out.push('      <animateTransform attributeName="transform" type="rotate" from="0 ' + standNode.x + ' ' + standNode.y + '" to="360 ' + standNode.x + ' ' + standNode.y + '" dur="12s" repeatCount="indefinite"/>');
+                out.push('    </circle>');
+                out.push('    <circle cx="' + standNode.x + '" cy="' + standNode.y + '" r="' + (standR + 4) + '" fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.9"/>');
+                out.push('    <g transform="translate(' + standNode.x + ',' + (standNode.y - standR - 15) + ')">');
+                out.push('      <rect x="-24" y="-12" width="48" height="15" rx="5" fill="#b45309" stroke="#fbbf24" stroke-width="1.2"/>');
+                out.push('      <text x="0" y="-1" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">ZDE STOJÍŠ</text>');
+                out.push('      <polygon points="-4,3 0,7 4,3" fill="#fbbf24"/>');
+                out.push('    </g>');
+                out.push('  </g>');
+            }
+        }
 
         var playersByNode = {};
         for (var k = 0; k < this.state.players.length; k++) {
@@ -3115,7 +3128,7 @@ window.PRS_App = {
 
     inspectNode: function (nodeId) {
         this.selectedNodeId = nodeId;
-        this.renderBoardSVG();
+        this.renderBoardTokens();
         this.renderStandingNodeCard();
         var node = this.state.board.nodes[nodeId];
         var box = document.getElementById("inspected-node-box");
@@ -4364,6 +4377,7 @@ window.PRS_App = {
 
         var ok = window.PRS_GameEngine.buyCurrentNode(this.state);
         if (ok && window.PRS_Audio) window.PRS_Audio.playCoin();
+        this.isBoardStaticDirty = true;
         this.renderGameScreen();
         var self = this;
         var p = this.saveSessionAuto();
@@ -4390,6 +4404,7 @@ window.PRS_App = {
 
         var ok = window.PRS_GameEngine.upgradeVillage(this.state, nodeId);
         if (ok && window.PRS_Audio) window.PRS_Audio.playCoin();
+        this.isBoardStaticDirty = true;
         this.renderGameScreen();
         var self = this;
         var p = this.saveSessionAuto();
@@ -4435,6 +4450,7 @@ window.PRS_App = {
     handleSellAsset: function (assetType, assetId, itemIndex, playerIndex) {
         var ok = window.PRS_GameEngine.sellAsset(this.state, assetType, assetId, itemIndex, playerIndex);
         if (ok && window.PRS_Audio) window.PRS_Audio.playCoin();
+        this.isBoardStaticDirty = true;
         this.renderGameScreen();
     },
 
@@ -4446,6 +4462,7 @@ window.PRS_App = {
         } else if (res && res.message) {
             this.addLog(res.message, "action");
         }
+        this.isBoardStaticDirty = true;
         this.renderGameScreen();
         this.saveSessionAuto();
     },
@@ -4455,6 +4472,7 @@ window.PRS_App = {
         var p = this.state.players[this.state.currentPlayerIndex];
         window.PRS_GameEngine.autoLiquidateDebt(this.state, p);
         if (window.PRS_Audio) window.PRS_Audio.playCoin();
+        this.isBoardStaticDirty = true;
         this.renderGameScreen();
         this.saveSessionAuto();
     },
