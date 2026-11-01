@@ -1,4 +1,4 @@
-<%@ WebHandler Language="C#" Class="KiDeskyApiHandler" %>
+﻿<%@ WebHandler Language="C#" Class="KiDeskyApiHandler" CodePage="65001" %>
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -518,7 +518,7 @@ END";
         {
             ok = true,
             status = "success",
-            project = "KiDesky – Princeznino srdce",
+            project = "KiDesky \u2013 Princeznino srdce",
             schema = "prs (prefix prs_)",
             dbConnected = dbConnected,
             dbError = dbError,
@@ -545,7 +545,7 @@ END";
         if (username.Length < 3 || password.Length < 3)
         {
             context.Response.StatusCode = 400;
-            context.Response.Write(_json.Serialize(new { status = "error", message = "Jméno i heslo musí mít alespoň 3 znaky." }));
+            context.Response.Write(_json.Serialize(new { status = "error", message = "Jm\u00e9no i heslo mus\u00ed m\u00edt alespo\u0148 3 znaky." }));
             return;
         }
 
@@ -559,7 +559,7 @@ END";
                 if (Convert.ToInt32(check.ExecuteScalar()) > 0)
                 {
                     context.Response.StatusCode = 409;
-                    context.Response.Write(_json.Serialize(new { status = "error", message = "Uživatel s tímto jménem nebo e-mailem již existuje." }));
+                    context.Response.Write(_json.Serialize(new { status = "error", message = "U\u017eivatel s t\u00edmto jm\u00e9nem nebo e-mailem ji\u017e existuje." }));
                     return;
                 }
             }
@@ -609,7 +609,7 @@ END";
                         if (!VerifyPassword(password, dbHash))
                         {
                             context.Response.StatusCode = 401;
-                            context.Response.Write(_json.Serialize(new { ok = false, status = "error", error = "Neplatné jméno nebo heslo.", message = "Neplatné jméno nebo heslo." }));
+                            context.Response.Write(_json.Serialize(new { ok = false, status = "error", error = "Neplatn\u00e9 jm\u00e9no nebo heslo.", message = "Neplatn\u00e9 jm\u00e9no nebo heslo." }));
                             return;
                         }
 
@@ -652,7 +652,7 @@ END";
         }
 
         context.Response.StatusCode = 401;
-        context.Response.Write(_json.Serialize(new { ok = false, status = "error", error = "Neplatné jméno nebo heslo.", message = "Neplatné jméno nebo heslo." }));
+        context.Response.Write(_json.Serialize(new { ok = false, status = "error", error = "Neplatn\u00e9 jm\u00e9no nebo heslo.", message = "Neplatn\u00e9 jm\u00e9no nebo heslo." }));
     }
 
     private void HandleGetConfig(HttpContext context)
@@ -722,7 +722,7 @@ END";
             }
         }
 
-        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Konfigurace vyvážení hry byla uložena do databáze [prs].[prs_GameConfigs]." }));
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Konfigurace vyv\u00e1\u017een\u00ed hry byla ulo\u017eena do datab\u00e1ze [prs].[prs_GameConfigs]." }));
     }
 
     private void HandleSaveSession(HttpContext context)
@@ -772,7 +772,7 @@ END";
                                     ok = false,
                                     status = "conflict",
                                     error = "turn_conflict",
-                                    message = "Tento tah již byl odehrán jiným hráčem. Synchronizuji aktuální stav hry.",
+                                    message = "Tento tah ji\u017e byl odehr\u00e1n jin\u00fdm hr\u00e1\u010dem. Synchronizuji aktu\u00e1ln\u00ed stav hry.",
                                     serverTurnNumber = dbTurn,
                                     sessionGuid = sessionGuid,
                                     stateJson = dbState
@@ -914,7 +914,7 @@ END";
         }
 
         context.Response.StatusCode = 404;
-        context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Uložená hra nebyla nalezena." }));
+        context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Ulo\u017een\u00e1 hra nebyla nalezena." }));
     }
 
     private void HandleLogTelemetry(HttpContext context)

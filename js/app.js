@@ -2321,7 +2321,11 @@ window.PRS_App = {
                     self.closeAuthModal();
                     self.fetchServerStatusAndSessions();
                 } else {
-                    if (msgEl) msgEl.textContent = (data && (data.error || data.message)) ? (data.error || data.message) : "Přihlášení se nezdařilo.";
+                    var rawErr = (data && (data.error || data.message)) ? (data.error || data.message) : "Přihlášení se nezdařilo.";
+                    if (rawErr.indexOf("Neplatn") !== -1 && rawErr.indexOf("heslo") !== -1) {
+                        rawErr = "Neplatné jméno nebo heslo.";
+                    }
+                    if (msgEl) msgEl.textContent = rawErr;
                 }
             })
             .catch(function () {
