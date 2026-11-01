@@ -164,12 +164,24 @@ window.PRS_GameEngine = {
         var equippedBySlot = { weapon: null, armor: null, dress: null, jewel: null, trophy: null };
         if (!player || !player.items) return equippedBySlot;
 
+        // Zajistíme unikátní uid pro všechny položky
+        for (var u = 0; u < player.items.length; u++) {
+            if (!player.items[u].uid) {
+                player.items[u].uid = (player.items[u].id || "item") + "_" + (u + 1) + "_" + Math.random().toString(36).substring(2, 7);
+            }
+        }
+
         // 1. Předměty explicitně označené jako isEquipped === true
+        // Pokud by byly dva ve stejném slotu, první zůstane a druhý se odznačí
         for (var i = 0; i < player.items.length; i++) {
             var it = player.items[i];
             var slot = it.slot || "weapon";
             if (it.isEquipped === true) {
-                equippedBySlot[slot] = it;
+                if (!equippedBySlot[slot]) {
+                    equippedBySlot[slot] = it;
+                } else {
+                    it.isEquipped = false;
+                }
             }
         }
 
@@ -197,16 +209,37 @@ window.PRS_GameEngine = {
     },
 
     // Přepnutí předmětu: Nasazeno v ruce/na sobě vs. Uloženo v batohu
-    toggleEquipItem: function (state, itemId) {
+    toggleEquipItem: function (state, itemIdentifier, itemIndex) {
         var player = state.players[state.currentPlayerIndex];
         if (!player || !player.items) return { ok: false, message: "Hráč nebyl nalezen." };
-        var target = null;
-        for (var i = 0; i < player.items.length; i++) {
-            if (player.items[i].id === itemId) {
-                target = player.items[i];
-                break;
+
+        // Zajistíme unikátní uid pro všechny předměty
+        for (var u = 0; u < player.items.length; u++) {
+            if (!player.items[u].uid) {
+                player.items[u].uid = (player.items[u].id || "item") + "_" + (u + 1) + "_" + Math.random().toString(36).substring(2, 7);
             }
         }
+
+        var target = null;
+        if (typeof itemIndex === "number" && itemIndex >= 0 && itemIndex < player.items.length) {
+            target = player.items[itemIndex];
+        } else if (itemIdentifier !== undefined && itemIdentifier !== null) {
+            for (var i = 0; i < player.items.length; i++) {
+                if (player.items[i].uid === itemIdentifier) {
+                    target = player.items[i];
+                    break;
+                }
+            }
+            if (!target) {
+                for (var j = 0; j < player.items.length; j++) {
+                    if (player.items[j].id === itemIdentifier) {
+                        target = player.items[j];
+                        break;
+                    }
+                }
+            }
+        }
+
         if (!target) return { ok: false, message: "Předmět nebyl nalezen." };
         var slot = target.slot || "weapon";
         var isCurrentlyEquipped = (target.isEquipped === true);
@@ -214,16 +247,16 @@ window.PRS_GameEngine = {
 
         if (isCurrentlyEquipped) {
             target.isEquipped = false;
-            msg = "🎒 " + player.badge + " " + player.name + " uložil předmět " + (target.icon || "⚔️") + " " + target.name + " do batohu.";
+            msg = "🎒 " + player.badge + " " + player.name + " uložil předmět " + (target.icon || "📦") + " " + target.name + " do batohu.";
         } else {
-            // Sundáme jakýkoliv jiný předmět ve stejném slotu
+            // Sundáme jakýkoliv jiný předmět ve stejném slotu (i kdyby měl stejné ID!)
             for (var k = 0; k < player.items.length; k++) {
-                if (player.items[k].slot === slot && player.items[k].id !== target.id) {
+                if (player.items[k].slot === slot && player.items[k] !== target) {
                     player.items[k].isEquipped = false;
                 }
             }
             target.isEquipped = true;
-            msg = "⚔️ " + player.badge + " " + player.name + " nasadil " + (target.icon || "⚔️") + " " + target.name + " do aktivní výstroje!";
+            msg = "⚔️ " + player.badge + " " + player.name + " nasadil " + (target.icon || "📦") + " " + target.name + " do aktivní výstroje!";
         }
         this.addLog(state, msg);
         this.recalculateBreedingAndVictory(state);
@@ -954,6 +987,7 @@ window.PRS_GameEngine = {
         if (pool.length === 0) return false;
 
         var item = this.deepClone(pool[Math.floor(Math.random() * pool.length)]);
+        item.uid = (item.id || "item") + "_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
         player.gold -= price;
         player.items.push(item);
 
@@ -980,6 +1014,7 @@ window.PRS_GameEngine = {
         if (player.gold < catalogItem.price) return false;
 
         var item = this.deepClone(catalogItem);
+        item.uid = (item.id || "item") + "_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
         player.gold -= catalogItem.price;
         player.items.push(item);
 
@@ -998,8 +1033,12 @@ window.PRS_GameEngine = {
 
         if (assetType === "item") {
             var idx = -1;
-            for (var i = 0; i < player.items.length; i++) {
-                if (player.items[i].id === assetId) { idx = i; break; }
+            if (typeof arguments[3] === "number" && arguments[3] >= 0 && arguments[3] < player.items.length) {
+                idx = arguments[3];
+            } else {
+                for (var i = 0; i < player.items.length; i++) {
+                    if (player.items[i].uid === assetId || player.items[i].id === assetId) { idx = i; break; }
+                }
             }
             if (idx === -1) return false;
             var it = player.items[idx];

@@ -170,7 +170,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/tree_oak.png",
         imgFlip: "assets/decorations/tree_oak_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="34" rx="20" ry="7" fill="rgba(0,0,0,0.22)"/>' +
+            return '' +
                 '<path d="M-5,14 Q-7,32 -10,36 L10,36 Q7,32 5,14 Z" fill="#6d4c41" stroke="#3e2723" stroke-width="1.2"/>' +
                 '<circle cx="-12" cy="2" r="15" fill="#2e7d32" opacity="0.95"/>' +
                 '<circle cx="12" cy="4" r="14" fill="#388e3c" opacity="0.95"/>' +
@@ -186,7 +186,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/tree_pine.png",
         imgFlip: "assets/decorations/tree_pine_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="34" rx="16" ry="6" fill="rgba(0,0,0,0.22)"/>' +
+            return '' +
                 '<rect x="-3" y="16" width="6" height="18" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>' +
                 '<polygon points="0,2 -24,20 24,20" fill="#2e7d32"/>' +
                 '<polygon points="0,-12 -21,6 21,6" fill="#388e3c"/>' +
@@ -202,7 +202,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/tree_birch.png",
         imgFlip: "assets/decorations/tree_birch_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="32" rx="14" ry="5" fill="rgba(0,0,0,0.20)"/>' +
+            return '' +
                 '<path d="M-2,12 L-3,32 L3,32 L2,12 Z" fill="#f5f5f4" stroke="#44403c" stroke-width="1"/>' +
                 '<line x1="-3" y1="20" x2="1" y2="20" stroke="#292524" stroke-width="1.2"/>' +
                 '<line x1="-1" y1="26" x2="3" y2="26" stroke="#292524" stroke-width="1.2"/>' +
@@ -218,7 +218,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/grove_oak.png",
         imgFlip: "assets/decorations/grove_oak_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="32" rx="36" ry="10" fill="rgba(0,0,0,0.24)"/>' +
+            return '' +
                 '<g transform="translate(-18,-2) scale(0.85)">' +
                 '  <path d="M-4,14 Q-6,30 -8,34 L8,34 Q6,30 4,14 Z" fill="#6d4c41"/>' +
                 '  <circle cx="0" cy="-6" r="15" fill="#2e7d32"/>' +
@@ -242,7 +242,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/grove_pine.png",
         imgFlip: "assets/decorations/grove_pine_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="34" rx="34" ry="10" fill="rgba(0,0,0,0.24)"/>' +
+            return '' +
                 '<g transform="translate(-16,-4) scale(0.85)">' +
                 '  <rect x="-3" y="16" width="6" height="18" fill="#5d4037"/>' +
                 '  <polygon points="0,2 -20,18 20,18" fill="#1b5e20"/>' +
@@ -273,7 +273,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/rock_boulder.png",
         imgFlip: "assets/decorations/rock_boulder_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="14" rx="22" ry="7" fill="rgba(0,0,0,0.26)"/>' +
+            return '' +
                 '<polygon points="-22,10 -16,-6 4,-14 22,-2 18,12 -8,14" fill="#78716c" stroke="#44403c" stroke-width="1.4"/>' +
                 '<polygon points="-16,-6 4,-14 10,-2 -6,4" fill="#a8a29e" opacity="0.6"/>' +
                 '<path d="M-14,-4 Q-6,-12 4,-12 Q14,-8 18,-2 Q10,4 0,2 Q-10,0 -14,-4 Z" fill="#65a30d" opacity="0.85"/>';
@@ -287,7 +287,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/mountain_peaks.png",
         imgFlip: "assets/decorations/mountain_peaks_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="5" cy="28" rx="52" ry="10" fill="rgba(0,0,0,0.28)"/>' +
+            return '' +
                 '<polygon points="-40,26 -20,-22 6,26" fill="#475569" stroke="#1e293b" stroke-width="1.5"/>' +
                 '<polygon points="-8,26 22,-28 50,26" fill="#334155" stroke="#1e293b" stroke-width="1.5"/>' +
                 '<polygon points="-20,-22 -26,-8 -20,-4 -14,-8" fill="#f8fafc"/>' +
@@ -306,7 +306,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/farm_field.png",
         imgFlip: "assets/decorations/farm_field_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="12" rx="46" ry="18" fill="rgba(0,0,0,0.18)"/>' +
+            return '' +
                 '<polygon points="-44,4 0,-18 44,-4 0,18" fill="#eab308" stroke="#a16207" stroke-width="1.2" opacity="0.75"/>' +
                 '<line x1="-30" y1="2" x2="14" y2="-12" stroke="#ca8a04" stroke-width="2"/>' +
                 '<line x1="-15" y1="9" x2="29" y2="-5" stroke="#ca8a04" stroke-width="2"/>' +
@@ -321,7 +321,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/pasture_fence.png",
         imgFlip: "assets/decorations/pasture_fence_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="16" rx="34" ry="8" fill="rgba(0,0,0,0.2)"/>' +
+            return '' +
                 '<rect x="-30" y="-8" width="4" height="22" fill="#854d0e" rx="1"/>' +
                 '<rect x="-2" y="-10" width="4" height="24" fill="#854d0e" rx="1"/>' +
                 '<rect x="26" y="-8" width="4" height="22" fill="#854d0e" rx="1"/>' +
@@ -337,7 +337,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/windmill.png",
         imgFlip: "assets/decorations/windmill_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="38" rx="26" ry="8" fill="rgba(0,0,0,0.25)"/>' +
+            return '' +
                 '<polygon points="-14,34 -8,-4 8,-4 14,34" fill="#78350f" stroke="#451a03" stroke-width="1.5"/>' +
                 '<rect x="-4" y="18" width="8" height="16" fill="#451a03" rx="1"/>' +
                 '<polygon points="-12,-4 0,-20 12,-4" fill="#b45309" stroke="#78350f" stroke-width="1.2"/>' +
@@ -360,7 +360,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/cottage_timber.png",
         imgFlip: "assets/decorations/cottage_timber_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="28" rx="28" ry="8" fill="rgba(0,0,0,0.26)"/>' +
+            return '' +
                 '<rect x="-22" y="2" width="44" height="24" rx="2" fill="#fef3c7" stroke="#78350f" stroke-width="1.4"/>' +
                 '<polygon points="-28,4 0,-18 28,4" fill="#b45309" stroke="#78350f" stroke-width="1.6"/>' +
                 '<rect x="-5" y="12" width="10" height="14" fill="#78350f"/>' +
@@ -378,7 +378,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/village_well.png",
         imgFlip: "assets/decorations/village_well_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="16" rx="18" ry="7" fill="rgba(0,0,0,0.24)"/>' +
+            return '' +
                 '<ellipse cx="0" cy="12" rx="14" ry="7" fill="#64748b" stroke="#334155" stroke-width="1.4"/>' +
                 '<ellipse cx="0" cy="10" rx="10" ry="4" fill="#0284c7"/>' +
                 '<line x1="-10" y1="10" x2="-10" y2="-6" stroke="#854d0e" stroke-width="2.5"/>' +
@@ -395,7 +395,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/merchant_wagon.png",
         imgFlip: "assets/decorations/merchant_wagon_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="20" rx="26" ry="7" fill="rgba(0,0,0,0.25)"/>' +
+            return '' +
                 '<circle cx="-16" cy="14" r="6" fill="#78350f" stroke="#451a03" stroke-width="1.4"/>' +
                 '<circle cx="16" cy="14" r="6" fill="#78350f" stroke="#451a03" stroke-width="1.4"/>' +
                 '<rect x="-22" y="6" width="44" height="8" fill="#92400e" stroke="#451a03" stroke-width="1.2"/>' +
@@ -412,7 +412,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/tournament_tent.png",
         imgFlip: "assets/decorations/tournament_tent_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="28" rx="30" ry="8" fill="rgba(0,0,0,0.26)"/>' +
+            return '' +
                 '<polygon points="-26,22 -22,4 22,4 26,22" fill="#991b1b" stroke="#7f1d1d" stroke-width="1.4"/>' +
                 '<polygon points="-24,4 0,-18 24,4" fill="#dc2626" stroke="#b91c1c" stroke-width="1.4"/>' +
                 '<line x1="-12" y1="4" x2="0" y2="-18" stroke="#facc15" stroke-width="2"/>' +
@@ -428,7 +428,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/signpost.png",
         imgFlip: "assets/decorations/signpost_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="16" rx="12" ry="4" fill="rgba(0,0,0,0.2)"/>' +
+            return '' +
                 '<rect x="-2" y="-12" width="4" height="26" fill="#78350f"/>' +
                 '<polygon points="-12,-8 6,-8 11,-5 6,-2 -12,-2" fill="#d97706" stroke="#92400e" stroke-width="0.9"/>' +
                 '<polygon points="-10,2 8,2 3,5 8,8 -10,8" fill="#b45309" stroke="#78350f" stroke-width="0.9"/>';
@@ -442,7 +442,7 @@ window.PRS_DECOR_CATALOG = {
         img: "assets/decorations/lake_pond.png",
         imgFlip: "assets/decorations/lake_pond_flip.png",
         renderSVG: function () {
-            return '<ellipse cx="0" cy="14" rx="42" ry="14" fill="rgba(0,0,0,0.2)"/>' +
+            return '' +
                 '<path d="M-38,0 C-38,-16 -10,-22 16,-18 C38,-14 42,-2 36,10 C30,22 6,24 -18,20 C-34,16 -38,8 -38,0 Z" fill="#0284c7" stroke="#0369a1" stroke-width="1.8" opacity="0.85"/>' +
                 '<ellipse cx="-6" cy="2" rx="16" ry="5" fill="none" stroke="#e0f2fe" stroke-width="1" opacity="0.65"/>' +
                 '<circle cx="-14" cy="4" r="4.5" fill="#15803d"/>' +

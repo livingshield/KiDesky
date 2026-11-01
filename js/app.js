@@ -2805,10 +2805,8 @@ window.PRS_App = {
 
             out.push('  <g class="board-landmark" transform="translate(' + (lmk.x - lmk.w / 2) + ',' + (lmk.y - lmk.h / 2) + ')">');
             if (customLmUrl) {
-                // Přirozený atmosférický stín pod podstavcem
-                out.push('    <ellipse cx="' + (lmk.w / 2) + '" cy="' + (lmk.h - 14) + '" rx="' + (lmk.w * 0.40) + '" ry="' + (lmk.h * 0.12) + '" fill="rgba(0,0,0,0.48)" style="filter: blur(6px);"/>');
-                // Průsvitná 3D izometrická ilustrace hradu nebo draka
-                out.push('    <image href="' + this.escapeHtml(customLmUrl) + '" x="0" y="0" width="' + lmk.w + '" height="' + (lmk.h - 10) + '" preserveAspectRatio="xMidYMid contain" style="filter: drop-shadow(0 6px 12px rgba(0,0,0,0.65));"/>');
+                // Průsvitná 3D izometrická ilustrace hradu nebo draka (přirozeně posazená na mapě bez plovoucího stínu)
+                out.push('    <image href="' + this.escapeHtml(customLmUrl) + '" x="0" y="0" width="' + lmk.w + '" height="' + (lmk.h - 10) + '" preserveAspectRatio="xMidYMid contain"/>');
 
                 if (lmk.id === "royalCastle") {
                     out.push('    <g transform="translate(' + (lmk.w / 2) + ', 22)">');
@@ -2956,8 +2954,7 @@ window.PRS_App = {
                     }
                     var sc = dec.scale || 1;
                     out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')">');
-                    out.push('      <ellipse cx="0" cy="' + (dec.h / 2 - 2) + '" rx="' + (dec.w * 0.42) + '" ry="' + (dec.h * 0.14) + '" fill="rgba(0,0,0,0.30)" style="filter:blur(3.5px);"/>');
-                    out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid contain" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.45));"/>');
+                    out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid contain"/>');
                     out.push('    </g>');
                 } else if (cat && cat.renderSVG) {
                     var sc = dec.scale || 1;
@@ -4118,7 +4115,10 @@ window.PRS_App = {
             itemsHtml = '<div class="asset-list">';
             for (var i = 0; i < p.items.length; i++) {
                 var it = p.items[i];
-                var isEq = (it.isEquipped === true || (it.isEquipped !== false && eqItems[it.slot] && eqItems[it.slot].id === it.id));
+                if (!it.uid) {
+                    it.uid = (it.id || "item") + "_" + (i + 1) + "_" + Math.random().toString(36).substring(2, 7);
+                }
+                var isEq = (it.isEquipped === true || (it.isEquipped !== false && eqItems[it.slot] === it));
                 var isTrophy = (it.slot === "trophy");
                 var slotLabel = this.formatSlotLabel(it.slot, true);
                 var sellRatio = atMerchant ? this.state.config.sellRates.merchantItem : this.state.config.sellRates.anywhereItem;
@@ -4126,8 +4126,8 @@ window.PRS_App = {
                 itemsHtml += '<div class="asset-chip ' + (isEq ? 'chip-equipped' : 'chip-in-bag') + '">' +
                     '<span><small class="slot-badge ' + (isTrophy ? 'slot-badge-trophy' : '') + '">' + slotLabel + '</small> ' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> <small>(⚔️' + it.boj + ' 🏇' + it.jizda + ' 💃' + it.tanec + ' ✨' + it.charisma + ')</small></span>' +
                     '<div style="display:flex;align-items:center;">' +
-                    '  <button class="btn-equip-toggle ' + (isEq ? 'equipped' : 'in-bag') + '" onclick="PRS_App.handleToggleEquip(\' + it.id + \')" title="' + (isEq ? 'Uložit do batohu' : 'Nasadit do aktivní výstroje') + '">' + (isEq ? '⚔️ Nasazeno' : '🎒 V batohu') + '</button>' +
-                    '  <button class="btn-sell-mini" onclick="PRS_App.handleSellAsset(\'item\', \'' + it.id + '\')">Prodat +' + sellVal + ' zl.</button>' +
+                    '  <button class="btn-equip-toggle ' + (isEq ? 'equipped' : 'in-bag') + '" onclick="PRS_App.handleToggleEquip(\'' + it.uid + '\', ' + i + ')" title="' + (isEq ? 'Uložit do batohu' : 'Nasadit do aktivní výstroje') + '">' + (isEq ? '⚔️ Nasazeno' : '🎒 V batohu') + '</button>' +
+                    '  <button class="btn-sell-mini" onclick="PRS_App.handleSellAsset(\'item\', \'' + it.uid + '\', ' + i + ')">Prodat +' + sellVal + ' zl.</button>' +
                     '</div>' +
                     '</div>';
             }
@@ -4883,9 +4883,9 @@ window.PRS_App = {
         this.saveSessionAuto();
     },
 
-    handleToggleEquip: function (itemId) {
+    handleToggleEquip: function (itemId, itemIndex) {
         if (!this.state) return;
-        var res = window.PRS_GameEngine.toggleEquipItem(this.state, itemId);
+        var res = window.PRS_GameEngine.toggleEquipItem(this.state, itemId, itemIndex);
         if (!res.ok) {
             this.addLog(res.message, "action");
             return;
@@ -4899,8 +4899,8 @@ window.PRS_App = {
         this.saveSessionAuto();
     },
 
-    handleSellAsset: function (assetType, assetId) {
-        var ok = window.PRS_GameEngine.sellAsset(this.state, assetType, assetId);
+    handleSellAsset: function (assetType, assetId, itemIndex) {
+        var ok = window.PRS_GameEngine.sellAsset(this.state, assetType, assetId, itemIndex);
         if (ok && window.PRS_Audio) window.PRS_Audio.playCoin();
         this.renderGameScreen();
     },
