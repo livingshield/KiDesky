@@ -1560,9 +1560,9 @@ window.PRS_App = {
                 var rInfo = ranks[r];
                 podHtml.push('<div class="podium-card ' + rInfo.cls + '">');
                 podHtml.push('  <span class="podium-rank-badge" style="background:rgba(212,175,55,0.2); color:' + rInfo.badgeCls + ';">' + rInfo.title + '</span>');
-                podHtml.push('  <div style="font-size:2rem; margin:0.2rem 0;">' + rp.badge + '</div>');
-                podHtml.push('  <div style="font-weight:bold; font-size:1.05rem; color:' + rp.color + '; margin-bottom:0.25rem;">' + this.escapeHtml(rp.name) + '</div>');
-                podHtml.push('  <div style="font-size:1.35rem; font-weight:bold; color:#f472b6;">' + rp.totalHearts + ' 💖</div>');
+                podHtml.push('  <div style="font-size:1.75rem; margin:0.1rem 0;">' + rp.badge + '</div>');
+                podHtml.push('  <div style="font-weight:bold; font-size:0.95rem; color:' + rp.color + '; margin-bottom:0.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:145px;" title="' + this.escapeHtml(rp.name) + '">' + this.escapeHtml(rp.name) + '</div>');
+                podHtml.push('  <div style="font-size:1.2rem; font-weight:bold; color:#f472b6;">' + rp.totalHearts + ' 💖</div>');
                 podHtml.push('  <small style="color:var(--text-muted); font-size:0.75rem;">' + rp.gold.toLocaleString("cs-CZ") + ' zl.</small>');
                 podHtml.push('</div>');
             }
