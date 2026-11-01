@@ -1664,7 +1664,29 @@
             font-size: 0.88rem;
             cursor: pointer;
             border: 1px solid transparent;
-            transition: all 0.15s ease;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 0.08s ease, filter 0.08s ease, background 0.15s ease;
+        }
+        button {
+            touch-action: manipulation;
+        }
+        button:active:not(:disabled),
+        .btn-gold-lg:active:not(:disabled),
+        .btn-end-turn:active:not(:disabled),
+        .btn-action-buy:active:not(:disabled),
+        .btn-action-skill:active:not(:disabled),
+        .btn-action-quest:active:not(:disabled),
+        .btn-action-festival:active:not(:disabled),
+        .btn-action-prison:active:not(:disabled),
+        .btn-action-hospital:active:not(:disabled),
+        .btn-action-tavern:active:not(:disabled),
+        .btn-secondary:active:not(:disabled),
+        .btn-primary:active:not(:disabled),
+        .mobile-btn-primary:active:not(:disabled) {
+            transform: scale(0.96) translateY(1px) !important;
+            filter: brightness(1.22) !important;
         }
         .btn-action-buy { background: #15803d; color: #fff; border-color: #22c55e; }
         .btn-action-skill { background: #6d28d9; color: #fff; border-color: #a855f7; }
@@ -4612,9 +4634,9 @@
     <!-- Zvukový element pro hudbu na pozadí -->
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=20261101_1030" defer></script>
-    <script src="js/game-engine.js?v=20261101_1030" defer></script>
-    <script src="js/app.js?v=20261101_1030" defer></script>
+    <script src="js/game-data.js?v=20261101_1145" defer></script>
+    <script src="js/game-engine.js?v=20261101_1145" defer></script>
+    <script src="js/app.js?v=20261101_1145" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">

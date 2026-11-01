@@ -713,7 +713,14 @@ window.PRS_App = {
 
         if (this.state.phase === "ROLL") {
             if (isBot) {
-                mainBtnWrap.innerHTML = '<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:#fff;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.stepBotNow()">🤖 ODEHRÁT TAH PC (' + this.escapeHtml(player.name) + ')</button>';
+                if (this.autoBotEnabled) {
+                    mainBtnWrap.innerHTML = '<div style="display:flex; gap:6px; width:100%;">' +
+                        '<button class="mobile-btn-primary" disabled style="flex:1.4; background:#1e293b; color:#94a3b8; border-color:#334155; font-size:0.83rem;">🤖 Hraje ' + this.escapeHtml(player.name) + '...</button>' +
+                        '<button class="mobile-btn-primary" style="flex:1; background:rgba(212,175,55,0.22); border-color:var(--gold); color:var(--gold-light); font-size:0.79rem;" onclick="PRS_App.skipToNextHumanTurn()">⚡ Můj tah</button>' +
+                        '</div>';
+                } else {
+                    mainBtnWrap.innerHTML = '<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:#fff;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.stepBotNow()">🤖 ODEHRÁT TAH PC (' + this.escapeHtml(player.name) + ')</button>';
+                }
             } else {
                 mainBtnWrap.innerHTML = '<button class="mobile-btn-primary" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.handleRollDice()">🎲 HODIT KOSTKOU (1–6)</button>';
             }
@@ -4268,6 +4275,18 @@ window.PRS_App = {
             var diceGlyph = this.getDiceGlyph(lastRollVal || 1);
             var diceStatus = lastRollVal ? ("Minulý hod: <strong>" + lastRollVal + "</strong>") : "Připrav kostku k hodu";
 
+            if (isBot && this.autoBotEnabled) {
+                el.innerHTML = '<div class="action-card" style="border-color:rgba(212,175,55,0.4);">' +
+                    '<div class="turn-indicator">Na tahu je: <span style="color:' + player.color + ';">' + player.badge + ' <strong>' + this.escapeHtml(player.name) + '</strong></span></div>' +
+                    '<div class="bot-auto-status" style="text-align:center; padding:0.9rem 0.6rem; background:rgba(0,0,0,0.35); border-radius:10px; margin:0.6rem 0; border:1px solid rgba(212,175,55,0.22);">' +
+                    '  <div style="font-size:1.02rem; font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.35rem;">🤖 ' + this.escapeHtml(player.name) + ' provádí tah...</div>' +
+                    '  <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">Tah počítače běží automaticky. Můžeš jej nechat proběhnout nebo přeskočit rovnou na svůj hod.</div>' +
+                    '  <button class="btn-gold-lg" style="width:100%; font-size:0.86rem; padding:0.48rem 0.85rem;" onclick="PRS_App.skipToNextHumanTurn()">⚡ Přeskočit přímo na můj tah</button>' +
+                    '</div>' +
+                    '</div>';
+                return;
+            }
+
             el.innerHTML = '<div class="action-card">' +
                 '<div class="turn-indicator">Na tahu je: <span style="color:' + player.color + ';">' + player.badge + ' <strong>' + this.escapeHtml(player.name) + '</strong></span></div>' +
                 '<div class="dice-showcase-box">' +
@@ -4702,7 +4721,9 @@ window.PRS_App = {
         self.animatingPlayerIndex = playerIndex;
         var nodes = self.state.board.nodes;
         var stepIndex = 0;
-        var stepDuration = self.fastAnim ? 85 : 155;
+        var movingPlayer = (self.state.players && self.state.players[playerIndex]) ? self.state.players[playerIndex] : null;
+        var isBotMoving = movingPlayer && movingPlayer.type !== "Human";
+        var stepDuration = isBotMoving ? 65 : (self.fastAnim ? 75 : 125);
 
         function runNextStep() {
             if (stepIndex >= path.length - 1) {
@@ -4746,7 +4767,8 @@ window.PRS_App = {
                     if (window.PRS_Audio) window.PRS_Audio.playStep();
                     self.renderBoardTokens();
                     stepIndex++;
-                    setTimeout(runNextStep, self.fastAnim ? 20 : 35);
+                    var hopPause = isBotMoving ? 12 : (self.fastAnim ? 15 : 25);
+                    setTimeout(runNextStep, hopPause);
                 }
             }
 
@@ -4761,27 +4783,43 @@ window.PRS_App = {
         if (self.isMoveAnimating || !self.state) return;
         self.isMoveAnimating = true;
 
+        // Bezpečnostní watchdog: pokud by animace selhala nebo se zasekla, po 3 s uvolníme zámek
+        clearTimeout(self.moveAnimationWatchdog);
+        self.moveAnimationWatchdog = setTimeout(function () {
+            if (self.isMoveAnimating) {
+                self.isMoveAnimating = false;
+                self.animatingPlayerIndex = null;
+                self.animTokenPos = null;
+                self.renderGameScreen();
+                if (onFinish) onFinish();
+            }
+        }, 3200);
+
         if (window.PRS_Audio) window.PRS_Audio.playDice();
 
+        var isBot = (player.type !== "Human");
         var diceEl = document.getElementById("dice-cube-el");
         if (diceEl) {
             diceEl.classList.add("dice-rolling");
         }
 
         var shuffleCount = 0;
+        var shuffleLimit = isBot ? 2 : 6;
         var shuffleInterval = setInterval(function () {
             shuffleCount++;
             var tempVal = Math.floor(Math.random() * 6) + 1;
             if (diceEl) diceEl.textContent = self.getDiceGlyph(tempVal);
-            if (shuffleCount >= 6) {
+            if (shuffleCount >= shuffleLimit) {
                 clearInterval(shuffleInterval);
             }
-        }, 60);
+        }, isBot ? 40 : 60);
 
+        var preMoveDelay = isBot ? 100 : 380;
         setTimeout(function () {
             var res = window.PRS_GameEngine.rollAndMove(self.state);
             if (!res) {
                 self.isMoveAnimating = false;
+                clearTimeout(self.moveAnimationWatchdog);
                 if (onFinish) onFinish();
                 return;
             }
@@ -4792,27 +4830,27 @@ window.PRS_App = {
             }
 
             self.animatePlayerMove(player.index, res.path, function () {
+                clearTimeout(self.moveAnimationWatchdog);
                 self.selectedNodeId = player.nodeId;
                 self.renderGameScreen();
                 self.inspectNode(player.nodeId);
                 self.saveSessionAuto();
                 if (self.deviceProfile && self.deviceProfile.device === "mobile") {
-                    // Na mobilu centroval na hráče pouze pokud si hráč mapu aktivně přiblížil (> 1.05)
-                    // V režimu 100% (Celá mapa) ponecháváme dokonalý přehled bez ořezu a černých pruhů
                     if (self.viewport.scale > 1.05) {
                         self.centerOnActivePlayer();
                     }
                 }
                 if (onFinish) onFinish();
             });
-        }, 400);
+        }, preMoveDelay);
     },
 
     handleRollDice: function () {
         var self = this;
-        if (self.isMoveAnimating || !self.state) return;
+        if (!self.state) return;
+        if (self.isMoveAnimating) return;
         var player = self.state.players[self.state.currentPlayerIndex];
-        if (player.type !== "Human") return;
+        if (!player || player.type !== "Human") return;
 
         self.executeRollAndAnimateMove(player);
     },
@@ -4998,6 +5036,13 @@ window.PRS_App = {
 
     handleEndTurn: function () {
         if (window.PRS_Audio) window.PRS_Audio.playStep();
+        this.isMoveAnimating = false;
+        this.animatingPlayerIndex = null;
+        this.animTokenPos = null;
+        if (this.autoBotTimer) {
+            clearTimeout(this.autoBotTimer);
+            this.autoBotTimer = null;
+        }
         window.PRS_GameEngine.endTurn(this.state);
         this.selectedNodeId = this.state.players[this.state.currentPlayerIndex].nodeId;
         this.renderGameScreen();
@@ -5005,11 +5050,45 @@ window.PRS_App = {
         this.scheduleBotTurnIfNeeded();
     },
 
+    skipToNextHumanTurn: function () {
+        if (!this.state || this.state.phase === "GAME_OVER") return;
+        if (this.autoBotTimer) {
+            clearTimeout(this.autoBotTimer);
+            this.autoBotTimer = null;
+        }
+        this.isMoveAnimating = false;
+        this.animatingPlayerIndex = null;
+        this.animTokenPos = null;
+
+        var safetyLimit = 16;
+        while (safetyLimit-- > 0) {
+            var cur = this.state.players[this.state.currentPlayerIndex];
+            if (!cur || cur.type === "Human" || this.state.phase === "GAME_OVER") break;
+            window.PRS_GameEngine.executeBotTurn(this.state);
+        }
+
+        var activeP = this.state.players[this.state.currentPlayerIndex];
+        if (activeP) {
+            this.selectedNodeId = activeP.nodeId;
+        }
+        this.renderGameScreen();
+        this.saveSessionAuto();
+        if (window.PRS_Audio) window.PRS_Audio.playNotice();
+    },
+
     stepBotNow: function () {
         var self = this;
-        if (!self.state || self.state.phase === "GAME_OVER" || self.isMoveAnimating) return;
+        if (!self.state || self.state.phase === "GAME_OVER") return;
         var bot = self.state.players[self.state.currentPlayerIndex];
         if (!bot || bot.type === "Human") return;
+
+        if (self.isMoveAnimating) {
+            if (self.autoBotTimer) clearTimeout(self.autoBotTimer);
+            self.autoBotTimer = setTimeout(function () {
+                self.stepBotNow();
+            }, 80);
+            return;
+        }
 
         if (self.state.phase === "ROLL") {
             self.executeRollAndAnimateMove(bot, function () {
@@ -5043,15 +5122,16 @@ window.PRS_App = {
             clearTimeout(this.autoBotTimer);
             this.autoBotTimer = null;
         }
-        if (!this.autoBotEnabled || !this.state || this.state.phase === "GAME_OVER" || this.isMoveAnimating) return;
+        if (!this.autoBotEnabled || !this.state || this.state.phase === "GAME_OVER") return;
         // V online místnosti tahá za boty pouze neuzamčený stůl (-1) nebo hostitel (hráč č. 0), aby dva prohlížeče netahaly za bota současně
         if (this.state.roomCode && this.myOnlinePlayerIndex > 0) return;
 
         var currentP = this.state.players[this.state.currentPlayerIndex];
         if (currentP && currentP.type !== "Human") {
+            var delay = self.isMoveAnimating ? 220 : 130;
             this.autoBotTimer = setTimeout(function () {
                 self.stepBotNow();
-            }, 600);
+            }, delay);
         }
     },
 
