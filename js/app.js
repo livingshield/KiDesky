@@ -397,17 +397,27 @@ window.PRS_App = {
     armoryActiveTab: "all",
     currentUser: {
         id: null,
-        username: "Host (Nepřihlášený)",
-        displayName: "Královský Host",
+        username: "Host",
+        displayName: "Host",
         role: "Guest",
         token: null
     },
     lobbyPlayers: [
-        { name: "Lord Filip (Ty)", type: "Human" },
+        { name: "Host (Ty)", type: "Human" },
         { name: "Černý Baron (PC)", type: "Bot_Aggressive" },
         { name: "Zikmund z Chovu (PC)", type: "Bot_Breeder" },
         { name: "Kněžna Eliška (PC)", type: "Bot_Noble" }
     ],
+
+    getDefaultPlayerName: function () {
+        if (this.currentUser && this.currentUser.role !== "Guest") {
+            var n = (this.currentUser.displayName || this.currentUser.username || "").trim();
+            if (n && n !== "Host" && n !== "Královský Host" && n !== "Host (Nepřihlášený)") {
+                return n + " (Ty)";
+            }
+        }
+        return "Host (Ty)";
+    },
     selectedNodeId: null,
     autoBotTimer: null,
     autoBotEnabled: true,
@@ -2187,9 +2197,7 @@ window.PRS_App = {
     },
 
     quickStartSoloGame: function (preset) {
-        var myName = (this.currentUser && this.currentUser.role !== "Guest" && this.currentUser.displayName)
-            ? this.currentUser.displayName
-            : "Lord Filip (Ty)";
+        var myName = this.getDefaultPlayerName();
 
         this.lobbyPlayers = [
             { name: myName, type: "Human" },
@@ -2233,13 +2241,13 @@ window.PRS_App = {
         if (this.state.players && this.state.players[0]) {
             this.state.players[0].isOnlineHost = true;
             this.state.players[0].type = "Human";
-            var hostDispName = (this.currentUser && this.currentUser.displayName && this.currentUser.displayName !== "Královský Host")
-                ? this.currentUser.displayName
-                : (this.state.players[0].name.replace(" (Ty)", "") || "Lord Filip");
+            var hostDispName = (this.currentUser && this.currentUser.role !== "Guest" && (this.currentUser.displayName || this.currentUser.username))
+                ? (this.currentUser.displayName || this.currentUser.username)
+                : "Host";
             this.state.players[0].name = hostDispName + " (Hostitel)";
         }
 
-        var title = "Online stůl (" + (this.currentUser.displayName || "Královský Host") + ")";
+        var title = "Online stůl (" + ((this.currentUser && this.currentUser.role !== "Guest" && (this.currentUser.displayName || this.currentUser.username)) ? (this.currentUser.displayName || this.currentUser.username) : "Host") + ")";
         fetch("api.ashx?action=save-session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -2297,6 +2305,10 @@ window.PRS_App = {
             var raw = localStorage.getItem("prs_user");
             if (raw) {
                 this.currentUser = JSON.parse(raw);
+                if (this.currentUser && (this.currentUser.role === "Guest" || !this.currentUser.role)) {
+                    this.currentUser.username = "Host";
+                    this.currentUser.displayName = "Host";
+                }
             }
         } catch (e) { }
         this.updateUserUI();
@@ -2304,24 +2316,36 @@ window.PRS_App = {
 
     updateUserUI: function () {
         var badgeEl = document.getElementById("user-status-badge");
-        var nameStr = this.escapeHtml(this.currentUser.displayName || this.currentUser.username);
-        var roleIcon = (this.currentUser.role === "Admin") ? "👑 Admin" : (this.currentUser.role === "Player" ? "🛡️ Hráč" : "👤 Host");
+        var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+        var rawName = isGuest ? "Host" : (this.currentUser.displayName || this.currentUser.username || "Hráč");
+        var nameStr = this.escapeHtml(rawName);
+        var roleIcon = isGuest ? "👤 Host" : (this.currentUser.role === "Admin" ? "👑 Admin" : "🛡️ Hráč");
         if (badgeEl) {
             badgeEl.innerHTML = roleIcon + ": <strong>" + nameStr + "</strong>";
+        }
+
+        // Aktualizace výchozího hráče č. 0 v lobby
+        var defaultPlayerName = this.getDefaultPlayerName();
+        if (this.lobbyPlayers && this.lobbyPlayers.length > 0) {
+            var curName = this.lobbyPlayers[0].name;
+            if (!curName || curName === "Lord Filip (Ty)" || curName === "Host (Ty)" || curName === "Královský Host (Ty)" || curName.endsWith(" (Ty)")) {
+                this.lobbyPlayers[0].name = defaultPlayerName;
+                this.renderLobbyPlayers();
+            }
         }
 
         // Aktualizace uvítacího pásu na Landing Page
         var lpText = document.getElementById("lp-user-banner-text");
         var lpAct = document.getElementById("lp-user-banner-actions");
         if (lpText) {
-            if (this.currentUser.role === "Guest") {
-                lpText.innerHTML = "👤 <strong>Vstup bez bariér:</strong> Hraješ jako <strong>Královský Host</strong>. Můžeš ihned hrát proti PC nebo se připojit ke stolu přes kód.";
+            if (isGuest) {
+                lpText.innerHTML = "👤 <strong>Vstup bez bariér:</strong> Hraješ jako <strong>Host</strong>. Můžeš ihned hrát proti PC nebo se připojit ke stolu přes kód.";
             } else {
                 lpText.innerHTML = roleIcon + " <strong>Vítej v království, " + nameStr + "!</strong> Tvé rozehrané partie a statistiky jsou propojené s databází.";
             }
         }
         if (lpAct) {
-            if (this.currentUser.role === "Guest") {
+            if (isGuest) {
                 lpAct.innerHTML = '<button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem;" onclick="PRS_App.openAuthModal()">🔑 Přihlásit se / Registrovat</button>';
             } else {
                 lpAct.innerHTML = '<button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem;" onclick="PRS_App.openAuthModal()">👤 Změnit účet / Odhlásit</button>';
@@ -2343,11 +2367,15 @@ window.PRS_App = {
         this.currentUser = {
             id: null,
             username: "Host",
-            displayName: "Královský Host",
+            displayName: "Host",
             role: "Guest",
             token: null
         };
         localStorage.setItem("prs_user", JSON.stringify(this.currentUser));
+        if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+            this.lobbyPlayers[0].name = "Host (Ty)";
+            this.renderLobbyPlayers();
+        }
         this.updateUserUI();
         this.closeAuthModal();
     },
@@ -2577,13 +2605,10 @@ window.PRS_App = {
 
         var nameInput = document.getElementById("online-player-custom-name");
         if (nameInput) {
-            if (this.currentUser && this.currentUser.displayName && this.currentUser.displayName !== "Královský Host") {
-                nameInput.value = this.currentUser.displayName;
-            } else if (this.currentUser && this.currentUser.username && this.currentUser.username !== "Host (Nepřihlášený)") {
-                nameInput.value = this.currentUser.username;
-            } else if (!nameInput.value) {
-                nameInput.value = "";
-            }
+            var pref = (this.currentUser && this.currentUser.role !== "Guest" && (this.currentUser.displayName || this.currentUser.username))
+                ? (this.currentUser.displayName || this.currentUser.username)
+                : "Host";
+            nameInput.value = pref;
         }
 
         this.renderOnlineRoleGrid();
@@ -2656,10 +2681,10 @@ window.PRS_App = {
             pl.type = "Human"; // Povýšení na lidského hráče, aby za něj netahal automatický bot!
             if (customName) {
                 pl.name = customName;
-            } else if (this.currentUser && this.currentUser.displayName && this.currentUser.displayName !== "Královský Host") {
-                pl.name = this.currentUser.displayName;
+            } else if (this.currentUser && this.currentUser.role !== "Guest" && (this.currentUser.displayName || this.currentUser.username)) {
+                pl.name = this.currentUser.displayName || this.currentUser.username;
             } else {
-                pl.name = pl.name.replace(" (PC)", "").replace(" (Ty)", "");
+                pl.name = "Host";
             }
             this.myOnlinePlayerIndex = selIdx;
             if (this.state.roomCode) {

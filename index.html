@@ -3610,7 +3610,7 @@
             <button id="music-player-btn" class="btn-secondary" onclick="PRS_App.toggleMusicPopup()" style="padding: 0.35rem 0.65rem;" title="Středověký hudební přehrávač &amp; Loutna">🎵 <span id="music-btn-label">Hudba: Vyp</span></button>
             <button id="audio-toggle-btn" class="btn-secondary" onclick="PRS_App.toggleSound()" style="padding: 0.35rem 0.65rem;" title="Zvuky hry (zapnuto / ztlumeno)">🔊 Zvuk: Zap</button>
             <button id="device-mode-toggle-btn" class="btn-secondary" onclick="PRS_App.cycleDeviceMode()" style="padding: 0.35rem 0.65rem;" title="Přepnout režim: Auto / Mobil / PC">📱 Režim: Auto</button>
-            <div id="user-status-badge" class="user-pill" onclick="PRS_App.openAuthModal()">👤 Host: <strong>Královský Host</strong></div>
+            <div id="user-status-badge" class="user-pill" onclick="PRS_App.openAuthModal()">👤 Host: <strong>Host</strong></div>
             <button class="btn-secondary" onclick="PRS_App.openAuthModal()">Účet / Role</button>
         </div>
     </header>
@@ -3679,7 +3679,7 @@
                     <!-- Vstupní stav účtu: Host (Guest) vs. Přihlášení -->
                     <div class="lp-auth-strip">
                         <div id="lp-user-banner-text" style="font-size:0.86rem; color:#f5f5f4;">
-                            👤 <strong>Vstup bez bariér:</strong> Hraješ jako <strong>Královský Host</strong>. Můžeš ihned hrát proti PC nebo se připojit ke stolu přes kód.
+                            👤 <strong>Vstup bez bariér:</strong> Hraješ jako <strong>Host</strong>. Můžeš ihned hrát proti PC nebo se připojit ke stolu přes kód.
                         </div>
                         <div id="lp-user-banner-actions" style="display:flex; gap:0.45rem; flex-wrap:wrap;">
                             <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem;" onclick="PRS_App.openAuthModal()">🔑 Přihlásit se / Registrovat</button>
@@ -3784,7 +3784,7 @@
                         </p>
                         <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:0.75rem; margin-bottom:1rem; font-size:0.83rem;">
                             <div style="margin-bottom:0.35rem;">✅ <strong>Žádné čekání na spoluhráče</strong> – tahy botů běží automaticky</div>
-                            <div style="margin-bottom:0.35rem;">✅ <strong>Funguje i bez přihlášení</strong> (v režimu Královský Host)</div>
+                            <div style="margin-bottom:0.35rem;">✅ <strong>Funguje i bez přihlášení</strong> (v režimu Host)</div>
                             <div>✅ <strong>Možnost kdykoliv uložit do cloudu</strong> a pokračovat později</div>
                         </div>
                     </div>
@@ -4689,8 +4689,8 @@
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
     <script src="js/game-data.js?v=2026110112432" defer></script>
-    <script src="js/game-engine.js?v=2026110112432" defer></script>
-    <script src="js/app.js?v=202611011430" defer></script>
+    <script src="js/game-engine.js?v=202611011445" defer></script>
+    <script src="js/app.js?v=202611011445" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">

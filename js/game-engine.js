@@ -26,7 +26,7 @@ window.PRS_GameEngine = {
         var board = window.PRS_BoardBuilder.createBoard(boardCode);
 
         var playerDefs = options.players || [
-            { name: "Lord Filip (Ty)", type: "Human" },
+            { name: "Host (Ty)", type: "Human" },
             { name: "Černý Baron (PC)", type: "Bot_Aggressive" },
             { name: "Zikmund z Chovu (PC)", type: "Bot_Breeder" },
             { name: "Kněžna Eliška (PC)", type: "Bot_Noble" }
