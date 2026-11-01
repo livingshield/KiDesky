@@ -1891,6 +1891,8 @@
             padding: 1.4rem;
             max-height: 90vh;
             overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
 
         .saved-session-row {
@@ -2012,24 +2014,29 @@
 
         /* --- VÍTĚZNÝ CEREMONIÁL & KRÁLOVSKÁ SVATBA MODAL --- */
         .victory-modal-box {
-            max-width: 840px;
+            max-width: 860px;
             background: linear-gradient(180deg, #24140b 0%, #150d07 100%);
             border: 2.5px solid #fbbf24;
             box-shadow: 0 0 50px rgba(251, 191, 36, 0.4), inset 0 0 30px rgba(212, 175, 55, 0.15);
             text-align: center;
-            padding: 1.8rem 1.4rem;
+            padding: 1.5rem 1.2rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+            box-sizing: border-box;
         }
         .victory-crown-header {
-            margin-bottom: 1.2rem;
+            margin-bottom: 0.8rem;
         }
         .victory-crown-icon {
-            font-size: 3.2rem;
+            font-size: 3rem;
             filter: drop-shadow(0 4px 10px rgba(251, 191, 36, 0.6));
             animation: crownBounce 2s ease-in-out infinite;
+            will-change: transform;
+            display: inline-block;
         }
         @keyframes crownBounce {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-8px) scale(1.08); }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         .victory-title {
             font-family: 'Cinzel', serif;
@@ -2064,7 +2071,7 @@
             border-color: #fbbf24;
             background: linear-gradient(180deg, rgba(180, 83, 9, 0.35) 0%, rgba(30, 20, 14, 0.9) 100%);
             box-shadow: 0 6px 20px rgba(251, 191, 36, 0.35);
-            transform: scale(1.06);
+            transform: scale(1.02);
             order: 2;
         }
         .podium-rank-2 {
@@ -2086,15 +2093,18 @@
         .victory-stats-table-wrap {
             max-height: 220px;
             overflow-y: auto;
-            margin-bottom: 1.2rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
             border: 1px solid rgba(212, 175, 55, 0.2);
             border-radius: 10px;
             background: rgba(0, 0, 0, 0.25);
+            -webkit-overflow-scrolling: touch;
         }
         .victory-table {
             width: 100%;
+            min-width: 640px;
             border-collapse: collapse;
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             text-align: left;
         }
         .victory-table th {
@@ -4634,9 +4644,9 @@
     <!-- Zvukový element pro hudbu na pozadí -->
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=2026110112031" defer></script>
-    <script src="js/game-engine.js?v=2026110112031" defer></script>
-    <script src="js/app.js?v=2026110112031" defer></script>
+    <script src="js/game-data.js?v=2026110112291" defer></script>
+    <script src="js/game-engine.js?v=2026110112291" defer></script>
+    <script src="js/app.js?v=2026110112291" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">

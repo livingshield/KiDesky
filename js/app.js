@@ -1502,6 +1502,7 @@ window.PRS_App = {
     openVictoryModal: function () {
         var modal = document.getElementById("victory-modal");
         if (!modal || !this.state) return;
+        if (modal.style.display === "flex") return; // Zabraňuje problikávání a opakovanému překreslování
         if (window.PRS_Audio) window.PRS_Audio.playFanfare();
 
         var winIdx = (this.state.winnerIndex !== null) ? this.state.winnerIndex : 0;
@@ -2542,7 +2543,7 @@ window.PRS_App = {
 
     pollOnlineSessionNow: function (manual) {
         var self = this;
-        if (!this.state || !this.state.roomCode || this.isMoveAnimating) return;
+        if (!this.state || !this.state.roomCode || this.isMoveAnimating || this.state.phase === "GAME_OVER") return;
         this.isOnlineSyncing = true;
 
         fetch("api.ashx?action=load-session&code=" + encodeURIComponent(this.state.roomCode))
@@ -4126,8 +4127,8 @@ window.PRS_App = {
                 itemsHtml += '<div class="asset-chip ' + (isEq ? 'chip-equipped' : 'chip-in-bag') + '">' +
                     '<span><small class="slot-badge ' + (isTrophy ? 'slot-badge-trophy' : '') + '">' + slotLabel + '</small> ' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> <small>(⚔️' + it.boj + ' 🏇' + it.jizda + ' 💃' + it.tanec + ' ✨' + it.charisma + ')</small></span>' +
                     '<div style="display:flex;align-items:center;">' +
-                    '  <button class="btn-equip-toggle ' + (isEq ? 'equipped' : 'in-bag') + '" onclick="PRS_App.handleToggleEquip(\'' + it.uid + '\', ' + i + ')" title="' + (isEq ? 'Uložit do batohu' : 'Nasadit do aktivní výstroje') + '">' + (isEq ? '⚔️ Nasazeno' : '🎒 V batohu') + '</button>' +
-                    '  <button class="btn-sell-mini" onclick="PRS_App.handleSellAsset(\'item\', \'' + it.uid + '\', ' + i + ')">Prodat +' + sellVal + ' zl.</button>' +
+                    '  <button class="btn-equip-toggle ' + (isEq ? 'equipped' : 'in-bag') + '" onclick="PRS_App.handleToggleEquip(\'' + it.uid + '\', ' + i + ', ' + inspIdx + ')" title="' + (isEq ? 'Uložit do batohu' : 'Nasadit do aktivní výstroje') + '">' + (isEq ? '⚔️ Nasazeno' : '🎒 V batohu') + '</button>' +
+                    '  <button class="btn-sell-mini" onclick="PRS_App.handleSellAsset(\'item\', \'' + it.uid + '\', ' + i + ', ' + inspIdx + ')">Prodat +' + sellVal + ' zl.</button>' +
                     '</div>' +
                     '</div>';
             }
@@ -4690,6 +4691,12 @@ window.PRS_App = {
             '</div>';
     },
 
+    addLog: function (text, type) {
+        if (!this.state) return;
+        window.PRS_GameEngine.addLog(this.state, text, type || "action");
+        this.renderLogs();
+    },
+
     renderLogs: function () {
         var el = document.getElementById("game-log-list");
         if (!el || !this.state) return;
@@ -4883,15 +4890,15 @@ window.PRS_App = {
         this.saveSessionAuto();
     },
 
-    handleToggleEquip: function (itemId, itemIndex) {
+    handleToggleEquip: function (itemId, itemIndex, playerIndex) {
         if (!this.state) return;
-        var res = window.PRS_GameEngine.toggleEquipItem(this.state, itemId, itemIndex);
+        var res = window.PRS_GameEngine.toggleEquipItem(this.state, itemId, itemIndex, playerIndex);
         if (!res.ok) {
-            this.addLog(res.message, "action");
+            if (this.addLog) this.addLog(res.message, "action");
             return;
         }
         if (window.PRS_Audio) window.PRS_Audio.playItem();
-        this.addLog(res.message, "action");
+        this.renderLogs();
         this.renderPlayersStandings();
         this.renderActivePlayerPanel();
         this.renderHeartTrack();
@@ -4899,8 +4906,8 @@ window.PRS_App = {
         this.saveSessionAuto();
     },
 
-    handleSellAsset: function (assetType, assetId, itemIndex) {
-        var ok = window.PRS_GameEngine.sellAsset(this.state, assetType, assetId, itemIndex);
+    handleSellAsset: function (assetType, assetId, itemIndex, playerIndex) {
+        var ok = window.PRS_GameEngine.sellAsset(this.state, assetType, assetId, itemIndex, playerIndex);
         if (ok && window.PRS_Audio) window.PRS_Audio.playCoin();
         this.renderGameScreen();
     },

@@ -209,8 +209,11 @@ window.PRS_GameEngine = {
     },
 
     // Přepnutí předmětu: Nasazeno v ruce/na sobě vs. Uloženo v batohu
-    toggleEquipItem: function (state, itemIdentifier, itemIndex) {
-        var player = state.players[state.currentPlayerIndex];
+    toggleEquipItem: function (state, itemIdentifier, itemIndex, playerIndex) {
+        var pIdx = (typeof playerIndex === "number" && playerIndex >= 0 && playerIndex < state.players.length)
+            ? playerIndex
+            : state.currentPlayerIndex;
+        var player = state.players[pIdx];
         if (!player || !player.items) return { ok: false, message: "Hráč nebyl nalezen." };
 
         // Zajistíme unikátní uid pro všechny předměty
@@ -1025,8 +1028,11 @@ window.PRS_GameEngine = {
     },
 
     // Prodej předmětu nebo nemovitosti (u Obchodníka 1/2 věc a 100% budova, jinde 1/4 věc a 1/2 budova)
-    sellAsset: function (state, assetType, assetId) {
-        var player = state.players[state.currentPlayerIndex];
+    sellAsset: function (state, assetType, assetId, itemIndex, playerIndex) {
+        var pIdx = (typeof playerIndex === "number" && playerIndex >= 0 && playerIndex < state.players.length)
+            ? playerIndex
+            : state.currentPlayerIndex;
+        var player = state.players[pIdx];
         var currentNode = state.board.nodes[player.nodeId];
         var atMerchant = currentNode && currentNode.type === "MERCHANT";
         var rates = state.config.sellRates;
