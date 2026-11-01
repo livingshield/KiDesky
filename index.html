@@ -2102,7 +2102,7 @@
             gap: 1.5rem;
             background:
                 linear-gradient(135deg, rgba(20, 14, 8, 0.94) 0%, rgba(38, 25, 14, 0.88) 55%, rgba(22, 14, 9, 0.95) 100%),
-                url('assets/landmarks/royal_castle.jpg') center/cover no-repeat;
+                url('assets/landmarks/royal_castle.png') center/cover no-repeat;
             border: 2px solid var(--gold);
             border-radius: 18px;
             padding: 1.65rem;
@@ -3613,7 +3613,7 @@
                                 <img src="assets/tiles/village.jpg" alt="Vesnice" />
                             </div>
                             <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('castle', this)" onclick="PRS_App.inspectLandingMedallion('castle', this)" title="Hrad">
-                                <img src="assets/tiles/castle.jpg" alt="Hrad" />
+                                <img src="assets/tiles/castle.png" alt="Hrad" />
                             </div>
                             <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('tavern', this)" onclick="PRS_App.inspectLandingMedallion('tavern', this)" title="Krčma">
                                 <img src="assets/tiles/tavern.jpg" alt="Hospoda" />
@@ -3682,7 +3682,7 @@
 
                             <!-- 2. MP4 Video přehrávač (RuzeProDanielku.mp4) -->
                             <div id="lp-media-video-wrap" style="width:100%; height:100%; display:none; background:#000;">
-                                <video id="lp-promo-video" controls preload="metadata" loop playsinline poster="assets/landmarks/royal_castle.jpg" style="width:100%; height:100%; object-fit:contain; background:#000;">
+                                <video id="lp-promo-video" controls preload="metadata" loop playsinline poster="assets/landmarks/royal_castle.png" style="width:100%; height:100%; object-fit:contain; background:#000;">
                                     <source src="assets/video/RuzeProDanielku.mp4" type="video/mp4" />
                                     Tvůj prohlížeč nepodporuje přehrávání MP4 videa.
                                 </video>
@@ -3875,7 +3875,7 @@
             <div class="lp-catalog-grid">
                 <!-- Hra 1: Princeznino srdce (Aktivní) -->
                 <div class="lp-game-card active-game">
-                    <div class="lp-game-thumb" style="background-image: linear-gradient(to top, rgba(15,11,5,0.95), rgba(15,11,5,0.15)), url('assets/landmarks/royal_castle.jpg');">
+                    <div class="lp-game-thumb" style="background-image: linear-gradient(to top, rgba(15,11,5,0.95), rgba(15,11,5,0.15)), url('assets/landmarks/royal_castle.png');">
                         <span class="lp-kicker-badge" style="margin:0; background:rgba(34,197,94,0.25); border-color:#4ade80; color:#bbf7d0;">
                             🟢 Aktivní hra • Plná verze
                         </span>
@@ -4612,9 +4612,9 @@
     <!-- Zvukový element pro hudbu na pozadí -->
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js" defer></script>
-    <script src="js/game-engine.js" defer></script>
-    <script src="js/app.js" defer></script>
+    <script src="js/game-data.js?v=20261101_1030" defer></script>
+    <script src="js/game-engine.js?v=20261101_1030" defer></script>
+    <script src="js/app.js?v=20261101_1030" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">

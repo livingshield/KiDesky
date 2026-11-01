@@ -150,7 +150,8 @@ window.PRS_GRAPHICS_CONFIG = {
         orchad_apple: "assets/decorations/orchad_apple.png",
         orchad_plum: "assets/decorations/orchad_plum.png",
         hruskovy_sad: "assets/decorations/hruskovy_sad.png",
-        bush: "assets/decorations/bush.png"
+        bush: "assets/decorations/bush.png",
+        hrad: "assets/decorations/hrad.png"
     }
 };
 
@@ -497,6 +498,14 @@ window.PRS_DECOR_CATALOG = {
         w: 92, h: 80, clearance: 42,
         img: "assets/decorations/grove_pine2.png",
         imgFlip: "assets/decorations/grove_pine2_flip.png"
+    },
+    hrad: {
+        id: "hrad",
+        name: "Strážní hrad",
+        category: "civilization",
+        w: 80, h: 80, clearance: 40,
+        img: "assets/decorations/hrad.png",
+        imgFlip: "assets/decorations/hrad_flip.png"
     }
 };
 

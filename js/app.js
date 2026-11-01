@@ -1219,8 +1219,11 @@ window.PRS_App = {
                             }
                         }
                     }
-                    if (!this.graphicsConfig.tileBitmapsByType.START) {
+                    if (!this.graphicsConfig.tileBitmapsByType.START || this.graphicsConfig.tileBitmapsByType.START.indexOf(".jpg") !== -1) {
                         this.graphicsConfig.tileBitmapsByType.START = "assets/tiles/castle.png";
+                    }
+                    if (!this.graphicsConfig.tileBitmapsByType.CASTLE || this.graphicsConfig.tileBitmapsByType.CASTLE.indexOf(".jpg") !== -1) {
+                        this.graphicsConfig.tileBitmapsByType.CASTLE = "assets/tiles/castle.png";
                     }
                     if (parsed.landmarkBitmaps) {
                         for (var lk in parsed.landmarkBitmaps) {
@@ -1240,6 +1243,14 @@ window.PRS_App = {
                 }
             }
         } catch (e) { }
+        if (this.graphicsConfig && this.graphicsConfig.tileBitmapsByType) {
+            if (!this.graphicsConfig.tileBitmapsByType.START || this.graphicsConfig.tileBitmapsByType.START.indexOf(".jpg") !== -1) {
+                this.graphicsConfig.tileBitmapsByType.START = "assets/tiles/castle.png";
+            }
+            if (!this.graphicsConfig.tileBitmapsByType.CASTLE || this.graphicsConfig.tileBitmapsByType.CASTLE.indexOf(".jpg") !== -1) {
+                this.graphicsConfig.tileBitmapsByType.CASTLE = "assets/tiles/castle.png";
+            }
+        }
         this.applyEnvironmentBackground();
     },
 
@@ -1995,12 +2006,12 @@ window.PRS_App = {
         var bgImg = new Image();
         bgImg.src = "assets/board/parchment_board_bg.jpg";
         var castleImg = new Image();
-        castleImg.src = "assets/landmarks/royal_castle.jpg";
+        castleImg.src = "assets/landmarks/royal_castle.png";
         var tileSources = [
             { x: 95, y: 195, label: "Chov Koní", color: "#f59e0b", src: "assets/tiles/kun.jpg" },
             { x: 185, y: 115, label: "Vesnice", color: "#22c55e", src: "assets/tiles/village.jpg" },
             { x: 290, y: 175, label: "Krčma", color: "#fbbf24", src: "assets/tiles/tavern.jpg" },
-            { x: 390, y: 95, label: "Hrad", color: "#38bdf8", src: "assets/tiles/castle.jpg" },
+            { x: 390, y: 95, label: "Hrad", color: "#38bdf8", src: "assets/tiles/castle.png" },
             { x: 475, y: 185, label: "Slavnosti 💖", color: "#ec4899", src: "assets/tiles/festival.jpg" }
         ];
         for (var i = 0; i < tileSources.length; i++) {
@@ -3656,6 +3667,9 @@ window.PRS_App = {
 
         var isMyCurrentStandingTile = (inspectId === p.nodeId);
         var bmpUrl = this.getTileBitmapUrl(node);
+        if (!bmpUrl && (node.type === "START" || node.type === "CASTLE" || node.code === "START" || (node.code && node.code.indexOf("START") !== -1))) {
+            bmpUrl = "assets/tiles/castle.png";
+        }
         var price = window.PRS_GameEngine.getNodePrice(this.state, node);
 
         var ownerText = "Volné (Nikdo nevlastní)";
@@ -3754,8 +3768,10 @@ window.PRS_App = {
               '</div>';
 
         var imgHtml = bmpUrl
-            ? '<img src="' + this.escapeHtml(bmpUrl) + '" alt="' + this.escapeHtml(node.name) + '" />'
-            : '<span class="emoji-icon">' + node.icon + '</span>';
+            ? '<img src="' + this.escapeHtml(bmpUrl) + '" alt="' + this.escapeHtml(node.name) + '" onerror="this.onerror=null; this.src=\'assets/tiles/castle.png\';" />'
+            : ((node.type === "START" || node.type === "CASTLE" || node.code === "START")
+                ? '<img src="assets/tiles/castle.png" alt="' + this.escapeHtml(node.name) + '" />'
+                : '<span class="emoji-icon">' + node.icon + '</span>');
 
         var merchantBtnHtml = (node.type === "MERCHANT")
             ? '<button class="btn-action-buy" style="margin-top:0.45rem; width:100%; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:0.4rem;" onclick="PRS_App.openArmoryModal()">🛒 Otevřít Královskou zbrojnici &amp; Trh</button>'
