@@ -185,6 +185,9 @@ public class KiDeskyApiHandler : IHttpHandler
                 case "list-sessions":
                     HandleListSessions(context);
                     break;
+                case "check-session":
+                    HandleCheckSession(context);
+                    break;
                 case "load-session":
                     HandleLoadSession(context);
                     break;
@@ -863,6 +866,50 @@ END";
         }
 
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", sessions = list }));
+    }
+
+    private void HandleCheckSession(HttpContext context)
+    {
+        string guid = context.Request.QueryString["guid"] ?? "";
+        string room = context.Request.QueryString["room"] ?? context.Request.QueryString["code"] ?? "";
+        if (string.IsNullOrEmpty(guid)) guid = room;
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            using (var cmd = new SqlCommand(@"
+                SELECT TOP 1 [SessionGuid], [RoomCode], [TurnNumber], [CurrentTurnPlayerIdx], [Status], [WinnerName], [UpdatedAt]
+                FROM [prs].[prs_GameSessions]
+                WHERE [SessionGuid] = @guid OR [RoomCode] = @room
+                ORDER BY [UpdatedAt] DESC", conn))
+            {
+                cmd.Parameters.AddWithValue("@guid", guid);
+                cmd.Parameters.AddWithValue("@room", room);
+                using (var r = cmd.ExecuteReader())
+                {
+                    if (r.Read())
+                    {
+                        var checkObj = new
+                        {
+                            ok = true,
+                            status = "success",
+                            sessionGuid = r["SessionGuid"].ToString(),
+                            roomCode = r["RoomCode"].ToString(),
+                            turnNumber = Convert.ToInt32(r["TurnNumber"]),
+                            currentPlayerIndex = Convert.ToInt32(r["CurrentTurnPlayerIdx"]),
+                            gameStatus = r["Status"].ToString(),
+                            winnerName = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString(),
+                            updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o")
+                        };
+                        context.Response.Write(_json.Serialize(checkObj));
+                        return;
+                    }
+                }
+            }
+        }
+
+        context.Response.StatusCode = 404;
+        context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Ulo\u017een\u00e1 hra nebyla nalezena." }));
     }
 
     private void HandleLoadSession(HttpContext context)

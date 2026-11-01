@@ -306,44 +306,99 @@ openAuthModal: function () {
         if (this.isActionProcessing || this.isSavingSession) return;
         this.isOnlineSyncing = true;
 
-        fetch("api.ashx?action=load-session&code=" + encodeURIComponent(this.state.roomCode))
+        var roomCode = this.state.roomCode;
+
+        // Pomocná funkce pro plné stažení a aplikaci herního stavu
+        var fetchFullSession = function () {
+            fetch("api.ashx?action=load-session&code=" + encodeURIComponent(roomCode))
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    self.isOnlineSyncing = false;
+                    if (res && res.ok && res.session && res.session.stateJson) {
+                        var remoteState = JSON.parse(res.session.stateJson);
+                        if (!remoteState || !remoteState.players) return;
+
+                        self.lastKnownUpdatedAt = res.session.updatedAt;
+
+                        var localSig = (self.state.turnNumber || 1) + ":" + self.state.currentPlayerIndex + ":" + self.state.phase + ":" + (self.state.logs ? self.state.logs.length : 0);
+                        var remoteSig = (remoteState.turnNumber || 1) + ":" + remoteState.currentPlayerIndex + ":" + remoteState.phase + ":" + (remoteState.logs ? remoteState.logs.length : 0);
+
+                        // Pokud jsem na tahu a remote má stejné číslo tahu, remote nesmí přepsat můj čerstvý lokální tah starším stavem
+                        var isMyTurn = (self.myOnlinePlayerIndex >= 0 && self.state.currentPlayerIndex === self.myOnlinePlayerIndex);
+                        if (isMyTurn && remoteState.turnNumber === self.state.turnNumber) {
+                            var localLogs = self.state.logs ? self.state.logs.length : 0;
+                            var remoteLogs = remoteState.logs ? remoteState.logs.length : 0;
+                            if (remoteLogs <= localLogs) {
+                                return;
+                            }
+                        }
+
+                        if ((remoteState.turnNumber > self.state.turnNumber) || (remoteState.turnNumber === self.state.turnNumber && remoteSig !== localSig)) {
+                            var prevPlayerIdx = self.state.currentPlayerIndex;
+                            self.state = remoteState;
+                            self.state.sessionGuid = res.session.sessionGuid;
+                            self.state.roomCode = res.session.roomCode;
+                            self.lastKnownTurnNumber = self.state.turnNumber;
+                            self.selectedNodeId = self.state.players[self.state.currentPlayerIndex].nodeId;
+                            self.renderGameScreen();
+
+                            if (window.PRS_Audio) window.PRS_Audio.playNotice();
+                            if (self.myOnlinePlayerIndex >= 0 && self.state.currentPlayerIndex === self.myOnlinePlayerIndex && prevPlayerIdx !== self.myOnlinePlayerIndex) {
+                                self.addLog("🔔 Jsi na tahu! Spoluhráč dokončil svůj tah.", "win");
+                            }
+                            self.scheduleBotTurnIfNeeded();
+                        } else if (manual) {
+                            self.renderOnlineRoomBar();
+                        }
+                    }
+                })
+                .catch(function () {
+                    self.isOnlineSyncing = false;
+                });
+        };
+
+        // Manuální stisk tlačítka Sync vynutí okamžité plné načtení
+        if (manual) {
+            fetchFullSession();
+            return;
+        }
+
+        // Automatický polling: Odlehčený Headless Turn-Check (~180 bajtů namísto ~100 kB JSONu)
+        fetch("api.ashx?action=check-session&code=" + encodeURIComponent(roomCode))
             .then(function (r) { return r.json(); })
             .then(function (res) {
-                self.isOnlineSyncing = false;
-                if (res && res.ok && res.session && res.session.stateJson) {
-                    var remoteState = JSON.parse(res.session.stateJson);
-                    if (!remoteState || !remoteState.players) return;
+                if (res && res.ok) {
+                    var needsFullFetch = false;
 
-                    var localSig = (self.state.turnNumber || 1) + ":" + self.state.currentPlayerIndex + ":" + self.state.phase + ":" + (self.state.logs ? self.state.logs.length : 0);
-                    var remoteSig = (remoteState.turnNumber || 1) + ":" + remoteState.currentPlayerIndex + ":" + remoteState.phase + ":" + (remoteState.logs ? remoteState.logs.length : 0);
-
-                    // Pokud jsem na tahu a remote má stejné číslo tahu, remote nesmí přepsat můj čerstvý lokální tah starším stavem
-                    var isMyTurn = (self.myOnlinePlayerIndex >= 0 && self.state.currentPlayerIndex === self.myOnlinePlayerIndex);
-                    if (isMyTurn && remoteState.turnNumber === self.state.turnNumber) {
-                        var localLogs = self.state.logs ? self.state.logs.length : 0;
-                        var remoteLogs = remoteState.logs ? remoteState.logs.length : 0;
-                        if (remoteLogs <= localLogs) {
-                            return;
+                    // 1. Změnilo se číslo tahu?
+                    if (res.turnNumber !== self.state.turnNumber) {
+                        needsFullFetch = true;
+                    }
+                    // 2. Změnil se aktivní hráč na tahu?
+                    else if (res.currentPlayerIndex !== self.state.currentPlayerIndex) {
+                        needsFullFetch = true;
+                    }
+                    // 3. Byla hra mezitím dokončena?
+                    else if (res.gameStatus === "Finished" && self.state.phase !== "GAME_OVER") {
+                        needsFullFetch = true;
+                    }
+                    // 4. Došlo k uložení na serveru s novým časovým razítkem (a já nejsem zrovna na tahu)?
+                    else if (self.lastKnownUpdatedAt && res.updatedAt && res.updatedAt !== self.lastKnownUpdatedAt) {
+                        var isMyTurnNow = (self.myOnlinePlayerIndex >= 0 && self.state.currentPlayerIndex === self.myOnlinePlayerIndex);
+                        if (!isMyTurnNow) {
+                            needsFullFetch = true;
                         }
                     }
 
-                    if ((remoteState.turnNumber > self.state.turnNumber) || (remoteState.turnNumber === self.state.turnNumber && remoteSig !== localSig)) {
-                        var prevPlayerIdx = self.state.currentPlayerIndex;
-                        self.state = remoteState;
-                        self.state.sessionGuid = res.session.sessionGuid;
-                        self.state.roomCode = res.session.roomCode;
-                        self.lastKnownTurnNumber = self.state.turnNumber;
-                        self.selectedNodeId = self.state.players[self.state.currentPlayerIndex].nodeId;
-                        self.renderGameScreen();
-
-                        if (window.PRS_Audio) window.PRS_Audio.playNotice();
-                        if (self.myOnlinePlayerIndex >= 0 && self.state.currentPlayerIndex === self.myOnlinePlayerIndex && prevPlayerIdx !== self.myOnlinePlayerIndex) {
-                            self.addLog("🔔 Jsi na tahu! Spoluhráč dokončil svůj tah.", "win");
-                        }
-                        self.scheduleBotTurnIfNeeded();
-                    } else if (manual) {
-                        self.renderOnlineRoomBar();
+                    if (needsFullFetch) {
+                        fetchFullSession();
+                    } else {
+                        self.isOnlineSyncing = false;
+                        self.lastKnownUpdatedAt = res.updatedAt;
                     }
+                } else {
+                    // Fallback na plný load při neočekávané odpovědi
+                    fetchFullSession();
                 }
             })
             .catch(function () {
@@ -351,7 +406,6 @@ openAuthModal: function () {
             });
     },
 
-// --- UKLÁDÁNÍ A NAČÍTÁNÍ HRY DO DATABÁZE ([prs].[prs_GameSessions]) S OPTIMISTICKÝM ZÁMKEM ---
     saveCurrentSessionToCloud: function () {
         var self = this;
         if (!this.state) return;
