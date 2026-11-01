@@ -112,12 +112,20 @@
             padding: 0;
         }
 
+        html, body {
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Outfit', sans-serif;
             background: var(--table-vignette);
             color: var(--text-main);
             min-height: 100vh;
             line-height: 1.5;
+        }
+
+        body.modal-open {
+            overflow: hidden !important;
         }
 
         body.theme-transitioning {
@@ -1875,12 +1883,15 @@
         .modal-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.82);
-            z-index: 999;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 1.2rem 1rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
         .modal-box {
             background: #1c1611;
@@ -2015,20 +2026,23 @@
         /* --- VÍTĚZNÝ CEREMONIÁL & KRÁLOVSKÁ SVATBA MODAL --- */
         .victory-modal-box {
             max-width: 860px;
+            width: 96%;
             background: linear-gradient(180deg, #24140b 0%, #150d07 100%);
             border: 2.5px solid #fbbf24;
             box-shadow: 0 0 50px rgba(251, 191, 36, 0.4), inset 0 0 30px rgba(212, 175, 55, 0.15);
             text-align: center;
-            padding: 1.5rem 1.2rem;
+            padding: 1.2rem 1.15rem;
             overflow-x: hidden;
             overflow-y: auto;
+            max-height: 92vh;
             box-sizing: border-box;
+            margin: auto;
         }
         .victory-crown-header {
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.55rem;
         }
         .victory-crown-icon {
-            font-size: 3rem;
+            font-size: 2.3rem;
             filter: drop-shadow(0 4px 10px rgba(251, 191, 36, 0.6));
             animation: crownBounce 2s ease-in-out infinite;
             will-change: transform;
@@ -2040,28 +2054,28 @@
         }
         .victory-title {
             font-family: 'Cinzel', serif;
-            font-size: 1.9rem;
+            font-size: 1.65rem;
             color: #fbbf24;
-            margin: 0.2rem 0 0.4rem;
+            margin: 0.15rem 0 0.3rem;
             text-shadow: 0 2px 8px rgba(0,0,0,0.8);
         }
         .victory-subtitle {
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             color: #f3e5ab;
         }
         .victory-podium-wrap {
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            gap: 0.9rem;
-            margin: 1.2rem 0;
+            gap: 0.75rem;
+            margin: 0.75rem 0 0.95rem;
             flex-wrap: wrap;
         }
         .podium-card {
             background: rgba(30, 20, 14, 0.85);
             border-radius: 12px;
-            padding: 0.85rem 1rem;
-            width: 190px;
+            padding: 0.65rem 0.85rem;
+            width: 175px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -2083,18 +2097,18 @@
             order: 3;
         }
         .podium-rank-badge {
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: bold;
             padding: 2px 8px;
             border-radius: 6px;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.25rem;
             text-transform: uppercase;
         }
         .victory-stats-table-wrap {
-            max-height: 220px;
-            overflow-y: auto;
+            max-height: none;
             overflow-x: auto;
-            margin-bottom: 1rem;
+            overflow-y: visible;
+            margin-bottom: 0.9rem;
             border: 1px solid rgba(212, 175, 55, 0.2);
             border-radius: 10px;
             background: rgba(0, 0, 0, 0.25);
@@ -2102,7 +2116,7 @@
         }
         .victory-table {
             width: 100%;
-            min-width: 640px;
+            min-width: 600px;
             border-collapse: collapse;
             font-size: 0.82rem;
             text-align: left;
@@ -2110,12 +2124,12 @@
         .victory-table th {
             background: rgba(212, 175, 55, 0.15);
             color: var(--gold-light);
-            padding: 0.55rem 0.65rem;
-            font-size: 0.78rem;
+            padding: 0.5rem 0.6rem;
+            font-size: 0.76rem;
             text-transform: uppercase;
         }
         .victory-table td {
-            padding: 0.5rem 0.65rem;
+            padding: 0.45rem 0.6rem;
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         .victory-actions-bar {
@@ -3852,7 +3866,7 @@
                         </div>
 
                         <!-- Tlačítko pro založení nové online místnosti -->
-                        <button class="btn-secondary" style="width:100%; margin-bottom:0.9rem; border-color:#38bdf8; color:#bae6fd; font-weight:600; padding:0.5rem;" onclick="PRS_App.createOnlineMultiplayerRoom()">
+                        <button class="btn-secondary" style="width:100%; margin-bottom:0.9rem; border-color:#38bdf8; color:#bae6fd; font-weight:600; padding:0.5rem;" id="btn-create-online-room" onclick="PRS_App.createOnlineMultiplayerRoom()">
                             ☁️ Založit novou Online místnost a získat kód pro přátele
                         </button>
 
@@ -4676,7 +4690,7 @@
 
     <script src="js/game-data.js?v=2026110112432" defer></script>
     <script src="js/game-engine.js?v=2026110112432" defer></script>
-    <script src="js/app.js?v=2026110112432" defer></script>
+    <script src="js/app.js?v=202611011415" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">

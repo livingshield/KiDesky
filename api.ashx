@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="KiDeskyApiHandler" CodePage="65001" %>
+<%@ WebHandler Language="C#" Class="KiDeskyApiHandler" %>
 using System;
 using System.Collections.Generic;
 using System.Data;

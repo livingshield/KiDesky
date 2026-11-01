@@ -1318,7 +1318,7 @@ window.PRS_App = {
 
     closeGraphicsModal: function () {
         var m = document.getElementById("graphics-modal");
-        if (m) m.style.display = "none";
+        if (m) { m.style.display = "none"; this.updateBodyModalClass(); }
     },
 
     saveGraphicsSettings: function () {
@@ -1497,6 +1497,22 @@ window.PRS_App = {
     },
 
     // --- VÍTĚZNÝ CEREMONIÁL & KRÁLOVSKÁ SVATBA (MODAL) ---
+    updateBodyModalClass: function () {
+        var anyOpen = false;
+        var backdrops = document.querySelectorAll(".modal-backdrop");
+        for (var i = 0; i < backdrops.length; i++) {
+            var d = backdrops[i].style.display;
+            if (d && d !== "none") {
+                anyOpen = true;
+                break;
+            }
+        }
+        if (document.body) {
+            if (anyOpen) document.body.classList.add("modal-open");
+            else document.body.classList.remove("modal-open");
+        }
+    },
+
     victoryModalShown: false,
 
     openVictoryModal: function () {
@@ -1583,11 +1599,13 @@ window.PRS_App = {
         if (fb) fb.textContent = "";
 
         modal.style.display = "flex";
+        this.updateBodyModalClass();
     },
 
     closeVictoryModal: function () {
         var modal = document.getElementById("victory-modal");
         if (modal) modal.style.display = "none";
+        this.updateBodyModalClass();
     },
 
     saveVictoryToCloud: function () {
@@ -1646,6 +1664,7 @@ window.PRS_App = {
     closeArmoryModal: function () {
         var modal = document.getElementById("armory-modal");
         if (modal) modal.style.display = "none";
+        this.updateBodyModalClass();
     },
 
     setArmoryTab: function (tab) {
@@ -2192,8 +2211,18 @@ window.PRS_App = {
 
     createOnlineMultiplayerRoom: function () {
         var self = this;
+        var btn = document.getElementById("btn-create-online-room");
+        var origText = btn ? btn.innerHTML : "";
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = "⏳ Zakládám online stůl na serveru...";
+        }
+
         this.startNewGame(false);
-        if (!this.state) return;
+        if (!this.state) {
+            if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+            return;
+        }
 
         // Hostitel automaticky hraje za hráče č. 0
         this.myOnlinePlayerIndex = 0;
@@ -2214,15 +2243,22 @@ window.PRS_App = {
                 sessionGuid: this.state.sessionGuid || "",
                 roomCode: this.state.roomCode || "",
                 title: title,
-                boardCode: this.state.config.boardCode || "classic_96",
-                targetHearts: this.state.config.targetHearts || 30,
+                boardCode: (this.state.board && this.state.board.code) ? this.state.board.code : "classic_96",
+                targetHearts: (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30,
                 turnNumber: this.state.turnNumber || 1,
                 expectedTurnNumber: 0,
-                stateJson: JSON.stringify(this.state)
+                stateJson: JSON.stringify(this.state),
+                players: this.state.players
             })
         })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r.ok) {
+                    throw new Error("Server vrátil HTTP " + r.status);
+                }
+                return r.json();
+            })
             .then(function (res) {
+                if (btn) { btn.disabled = false; btn.innerHTML = origText; }
                 if (res && res.ok) {
                     self.state.sessionGuid = res.sessionGuid;
                     self.state.roomCode = res.roomCode;
@@ -2237,9 +2273,16 @@ window.PRS_App = {
                     self.renderGameScreen();
                     self.addLog("🌐 Založena nová Online místnost! Pošli přátelům 6místný kód stolu: " + res.roomCode, "win");
                     if (window.PRS_Audio) window.PRS_Audio.playFanfare();
+                    self.copyRoomInviteLink();
+                    alert("🎉 Online stůl byl úspěšně založen!\n\nKód místnosti: " + res.roomCode + "\n\nOdkaz pro přátele byl zkopírován do schránky.");
+                } else {
+                    alert("Nepodařilo se založit online stůl: " + (res && res.error ? res.error : "Neznámá chyba serveru."));
+                    self.switchTab("board");
                 }
             })
-            .catch(function () {
+            .catch(function (err) {
+                if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+                alert("Chyba při zakládání místnosti na serveru: " + (err && err.message ? err.message : err));
                 self.switchTab("board");
             });
     },
@@ -2284,12 +2327,12 @@ window.PRS_App = {
 
     openAuthModal: function () {
         var m = document.getElementById("auth-modal");
-        if (m) m.style.display = "flex";
+        if (m) { m.style.display = "flex"; this.updateBodyModalClass(); }
     },
 
     closeAuthModal: function () {
         var m = document.getElementById("auth-modal");
-        if (m) m.style.display = "none";
+        if (m) { m.style.display = "none"; this.updateBodyModalClass(); }
     },
 
     setGuestMode: function () {
@@ -2546,6 +2589,7 @@ window.PRS_App = {
     closeOnlineRoleModal: function () {
         var modal = document.getElementById("online-role-modal");
         if (modal) modal.style.display = "none";
+        this.updateBodyModalClass();
     },
 
     renderOnlineRoleGrid: function () {
@@ -5301,6 +5345,15 @@ window.PRS_App = {
             players: this.state.players
         };
 
+        var isNewRoom = !this.state.roomCode;
+        if (isNewRoom && this.myOnlinePlayerIndex < 0) {
+            this.myOnlinePlayerIndex = 0;
+            if (this.state.players && this.state.players[0]) {
+                this.state.players[0].isOnlineHost = true;
+                this.state.players[0].type = "Human";
+            }
+        }
+
         fetch("api.ashx?action=save-session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -5313,11 +5366,22 @@ window.PRS_App = {
                         self.handleTurnConflict(conf);
                     });
                 }
+                if (!r.ok) {
+                    throw new Error("HTTP " + r.status);
+                }
                 return r.json().then(function (res) {
                     if (res && res.ok) {
                         self.state.sessionGuid = res.sessionGuid;
                         self.state.roomCode = res.roomCode;
                         self.lastKnownTurnNumber = self.state.turnNumber;
+                        if (isNewRoom) {
+                            try {
+                                localStorage.setItem("prs_slot_" + res.roomCode, "0");
+                            } catch (e) { }
+                            if (window.PRS_Audio) window.PRS_Audio.playFanfare();
+                            self.copyRoomInviteLink();
+                            alert("🌐 Hra byla úspěšně převedena na Online stůl!\n\nKód místnosti: " + res.roomCode + "\n\nOdkaz pro přátele byl zkopírován do schránky.");
+                        }
                         if (statusEl) statusEl.innerHTML = "✅ Uloženo! Kód místnosti: <strong>" + res.roomCode + "</strong>";
                         self.renderOnlineRoomBar();
                         self.fetchServerStatusAndSessions();
@@ -5328,9 +5392,10 @@ window.PRS_App = {
                     }
                 });
             })
-            .catch(function () {
+            .catch(function (err) {
                 localStorage.setItem("prs_saved_game", JSON.stringify(self.state));
                 if (statusEl) statusEl.textContent = "💾 Uloženo do lokální paměti prohlížeče.";
+                alert("Nepodařilo se synchronizovat online místnost se serverem (" + (err && err.message ? err.message : err) + "). Hra je uložena lokálně v prohlížeči.");
             });
     },
 
@@ -5712,7 +5777,7 @@ window.PRS_App = {
 
     closeImageModal: function () {
         var m = document.getElementById("image-lightbox-modal");
-        if (m) m.style.display = "none";
+        if (m) { m.style.display = "none"; this.updateBodyModalClass(); }
     },
 
     openSketchModal: function (imgSrc, caption) {
