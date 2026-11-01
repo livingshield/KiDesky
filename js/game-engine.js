@@ -702,6 +702,14 @@ window.PRS_GameEngine = {
         return 300;
     },
 
+    computeNodeRent: function (state, node, owner, moveRoll) {
+        return this.calculateNodeRent(state, node, owner, moveRoll || 1);
+    },
+
+    calculateRent: function (state, node, owner, moveRoll) {
+        return this.calculateNodeRent(state, node, owner, moveRoll || 1);
+    },
+
     // Převod zlata mezi hráči (pokud plátce nemá dost, zaplatí co má)
     transferGold: function (state, fromPlayer, toPlayer, amount) {
         var actual = Math.min(fromPlayer.gold, amount);

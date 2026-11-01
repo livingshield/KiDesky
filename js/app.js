@@ -934,7 +934,7 @@ window.PRS_App = {
                     var ndId = p.ownedNodes[n];
                     var ndObj = this.state.board.nodes[ndId];
                     if (!ndObj) continue;
-                    var rent = window.PRS_GameEngine.computeNodeRent(this.state, ndObj, p);
+                    var rent = window.PRS_GameEngine.calculateNodeRent(this.state, ndObj, p);
                     html += '<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:8px 10px; border-radius:8px; border:1px solid rgba(212,175,55,0.2);">' +
                         '<div>' + (ndObj.icon || '📍') + ' <strong>' + this.escapeHtml(ndObj.name) + '</strong> <small style="color:var(--text-muted);">(' + ndObj.code + ')' + (ndObj.villageLevel > 1 ? (' ★' + ndObj.villageLevel) : '') + '</small></div>' +
                         '<div style="font-weight:bold; color:#86efac; font-size:0.84rem;">Mýtné: ' + rent.toLocaleString("cs-CZ") + ' zl.</div>' +
@@ -3355,7 +3355,7 @@ window.PRS_App = {
         var ownerText = "";
         if (nd.owner !== null && this.state.players[nd.owner]) {
             var ownerP = this.state.players[nd.owner];
-            var curRent = window.PRS_GameEngine.calculateRent(this.state, nd, activePlayer);
+            var curRent = window.PRS_GameEngine.calculateNodeRent(this.state, nd, activePlayer);
             ownerText = '<div class="prs-tooltip-meta">👑 Vlastník: <strong style="color:' + ownerP.color + '">' + this.escapeHtml(ownerP.name) + '</strong></div>' +
                         '<div class="prs-tooltip-rent">🛑 Vstupné / Nájem: <strong style="color:#f87171">' + curRent.toLocaleString("cs-CZ") + ' zl.</strong></div>';
         } else if (nd.price) {
@@ -3929,7 +3929,7 @@ window.PRS_App = {
                 var ndId = ownedNodesList[asIdx];
                 var ndObj = this.state.board.nodes[ndId];
                 if (!ndObj) continue;
-                var rent = window.PRS_GameEngine.computeNodeRent(this.state, ndObj, p);
+                var rent = window.PRS_GameEngine.calculateNodeRent(this.state, ndObj, p);
                 html += '    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); border-radius:6px; padding:0.25rem 0.45rem; font-size:0.8rem;">' +
                     '      <span>' + (ndObj.icon || '🏡') + ' <strong>' + this.escapeHtml(ndObj.name) + '</strong> <small style="color:var(--text-muted);">(' + ndObj.code + ')' + (ndObj.villageLevel > 1 ? (' v' + ndObj.villageLevel) : '') + '</small></span>' +
                     '      <span style="color:#86efac; font-size:0.75rem;">Mýtné: ' + rent.toLocaleString("cs-CZ") + ' zl.</span>' +
