@@ -151,7 +151,25 @@ window.PRS_GRAPHICS_CONFIG = {
         orchad_plum: "assets/decorations/orchad_plum.png",
         hruskovy_sad: "assets/decorations/hruskovy_sad.png",
         bush: "assets/decorations/bush.png",
-        hrad: "assets/decorations/hrad.png"
+        hrad: "assets/decorations/hrad.png",
+        watermill: "assets/decorations/watermill.png",
+        wooden_watchtower: "assets/decorations/wooden_watchtower.png",
+        witch_hut: "assets/decorations/witch_hut.png",
+        fairy_ring_mushrooms: "assets/decorations/fairy_ring_mushrooms.png",
+        druid_monoliths: "assets/decorations/druid_monoliths.png",
+        ancient_ruins: "assets/decorations/ancient_ruins.png",
+        ancient_graveyard: "assets/decorations/ancient_graveyard.png",
+        cave_bear_den: "assets/decorations/cave_bear_den.png",
+        bandit_cave: "assets/decorations/bandit_cave.png",
+        dragon_cave: "assets/decorations/dragon_cave.png",
+        basilisk_cave: "assets/decorations/basilisk_cave.png",
+        snow_troll_cave: "assets/decorations/snow_troll_cave.png",
+        swamp_troll: "assets/decorations/swamp_troll.png",
+        swamp_hydra: "assets/decorations/swamp_hydra.png",
+        swamp_bridge: "assets/decorations/swamp_bridge.png",
+        dryad_sacred_oak: "assets/decorations/dryad_sacred_oak.png",
+        unicorn_grove: "assets/decorations/unicorn_grove.png",
+        pegasus_pond: "assets/decorations/pegasus_pond.png"
     }
 };
 
@@ -165,6 +183,8 @@ window.PRS_DECOR_CATALOG = {
     tree_oak: {
         id: "tree_oak",
         name: "Listnatý dub",
+        icon: "🌳",
+        desc: "Mohutný solitérní dub s hustou zelenou korunou, poskytující stín pocestným a rytířům na královských loukách.",
         category: "vegetation",
         w: 56, h: 68, clearance: 28,
         img: "assets/decorations/tree_oak.png",
@@ -181,6 +201,8 @@ window.PRS_DECOR_CATALOG = {
     tree_pine: {
         id: "tree_pine",
         name: "Horská borovice",
+        icon: "🌲",
+        desc: "Štíhlá jehličnatá borovice odolávající drsným horským větrům v podhůří i na skalnatých srázech.",
         category: "vegetation",
         w: 48, h: 72, clearance: 25,
         img: "assets/decorations/tree_pine.png",
@@ -197,6 +219,8 @@ window.PRS_DECOR_CATALOG = {
     tree_birch: {
         id: "tree_birch",
         name: "Bělostná bříza",
+        icon: "🌿",
+        desc: "Půvabná bělostná bříza se stříbřitou kůrou a jemným listovím, oblíbená v hájích u koňských pastvin.",
         category: "vegetation",
         w: 44, h: 64, clearance: 22,
         img: "assets/decorations/tree_birch.png",
@@ -213,6 +237,8 @@ window.PRS_DECOR_CATALOG = {
     grove_oak: {
         id: "grove_oak",
         name: "Dubový hájek",
+        icon: "🌳",
+        desc: "Malebné seskupení tří starých dubů tvořící přirozený stinný předěl mezi jednotlivými stezkami.",
         category: "vegetation",
         w: 92, h: 76, clearance: 44,
         img: "assets/decorations/grove_oak.png",
@@ -237,6 +263,8 @@ window.PRS_DECOR_CATALOG = {
     grove_pine: {
         id: "grove_pine",
         name: "Borový lesík",
+        icon: "🌲",
+        desc: "Hustý borový lesík vonící jehličím a pryskyřicí, lemující odlehlejší kouty a stezky k Dračí sluji.",
         category: "vegetation",
         w: 86, h: 80, clearance: 42,
         img: "assets/decorations/grove_pine.png",
@@ -268,6 +296,8 @@ window.PRS_DECOR_CATALOG = {
     rock_boulder: {
         id: "rock_boulder",
         name: "Mechem porostlý balvan",
+        icon: "🪨",
+        desc: "Prastarý žulový balvan obrostlý mechem a lišejníky, označující skalnaté úseky a stezky odvahy.",
         category: "terrain",
         w: 52, h: 40, clearance: 24,
         img: "assets/decorations/rock_boulder.png",
@@ -282,6 +312,8 @@ window.PRS_DECOR_CATALOG = {
     mountain_peaks: {
         id: "mountain_peaks",
         name: "Zasněžený horský štít",
+        icon: "🏔️",
+        desc: "Monumentální horský masiv s věčným sněhem na vrcholcích, tvořící velkolepý severní horizont království.",
         category: "terrain",
         w: 120, h: 74, clearance: 55,
         img: "assets/decorations/mountain_peaks.png",
@@ -301,6 +333,8 @@ window.PRS_DECOR_CATALOG = {
     farm_field: {
         id: "farm_field",
         name: "Pšeničné lánové pole",
+        icon: "🌾",
+        desc: "Zlatavý lán zralého pšeničného obilí s úrodnými brázdami, symbol blahobytu a míru v podhradí.",
         category: "agriculture",
         w: 105, h: 60, clearance: 48,
         img: "assets/decorations/farm_field.png",
@@ -316,6 +350,8 @@ window.PRS_DECOR_CATALOG = {
     pasture_fence: {
         id: "pasture_fence",
         name: "Pastvina s dřevěnou ohradou",
+        icon: "🐎",
+        desc: "Trámová dřevěná ohrada lemující šťavnaté pastviny, kde se chovají ušlechtilí královští koně a lovečtí psi.",
         category: "agriculture",
         w: 78, h: 48, clearance: 36,
         img: "assets/decorations/pasture_fence.png",
@@ -332,6 +368,8 @@ window.PRS_DECOR_CATALOG = {
     windmill: {
         id: "windmill",
         name: "Větrný mlýn",
+        icon: "💨",
+        desc: "Dřevěný větrný mlýn s mohutnými plachtovými lopatkami, který mele zrno na otevřených větrných pláních.",
         category: "agriculture",
         w: 68, h: 88, clearance: 34,
         img: "assets/decorations/windmill.png",
@@ -355,6 +393,8 @@ window.PRS_DECOR_CATALOG = {
     cottage_timber: {
         id: "cottage_timber",
         name: "Roubená chalupa",
+        icon: "🏡",
+        desc: "Pohádková roubená chalupa s kamennou podezdívkou a šindelovou střechou v srdci královských vsí.",
         category: "settlement",
         w: 70, h: 64, clearance: 35,
         img: "assets/decorations/cottage_timber.png",
@@ -373,6 +413,8 @@ window.PRS_DECOR_CATALOG = {
     village_well: {
         id: "village_well",
         name: "Kamenná studna s rumpálem",
+        icon: "🪣",
+        desc: "Hluboká návesní studna z kamene s poctivým dřevěným rumpálem a okovem křišťálově čisté vody.",
         category: "settlement",
         w: 42, h: 46, clearance: 22,
         img: "assets/decorations/village_well.png",
@@ -390,6 +432,8 @@ window.PRS_DECOR_CATALOG = {
     merchant_wagon: {
         id: "merchant_wagon",
         name: "Kupecký krytý vůz",
+        icon: "🛒",
+        desc: "Krytý povoz potulného kupce se sudy a truhlami, nabízející zbraně, vzácná sukna a lektvary z dalekých zemí.",
         category: "settlement",
         w: 68, h: 52, clearance: 32,
         img: "assets/decorations/merchant_wagon.png",
@@ -407,6 +451,8 @@ window.PRS_DECOR_CATALOG = {
     tournament_tent: {
         id: "tournament_tent",
         name: "Královský turnajový pavilon",
+        icon: "🎪",
+        desc: "Nádherný královský pavilon v purpurových a zlatých barvách koruny, připravený pro šlechtická klání a slavnosti.",
         category: "settlement",
         w: 78, h: 70, clearance: 38,
         img: "assets/decorations/tournament_tent.png",
@@ -423,6 +469,8 @@ window.PRS_DECOR_CATALOG = {
     signpost: {
         id: "signpost",
         name: "Dřevěný rozcestník",
+        icon: "🪧",
+        desc: "Dřevěný rozcestník se směrovkami ukazujícími cesty k hradům, vesnicím a nebezpečným stezkám.",
         category: "settlement",
         w: 32, h: 44, clearance: 18,
         img: "assets/decorations/signpost.png",
@@ -437,6 +485,8 @@ window.PRS_DECOR_CATALOG = {
     lake_pond: {
         id: "lake_pond",
         name: "Modré lesní jezírko",
+        icon: "💧",
+        desc: "Klidná lesní tůňka s kvetoucími lekníny, rákosím a průzračnou vodou, kde se zrcadlí koruny stromů.",
         category: "water",
         w: 96, h: 58, clearance: 46,
         img: "assets/decorations/lake_pond.png",
@@ -454,6 +504,8 @@ window.PRS_DECOR_CATALOG = {
     orchad_apple: {
         id: "orchad_apple",
         name: "Jabloňový sad",
+        icon: "🍎",
+        desc: "Pravidelně vysázený sad obsypaný sladkými červenými jablky přinášející osvěžení putujícím družinám.",
         category: "vegetation",
         w: 96, h: 76, clearance: 44,
         img: "assets/decorations/orchad_apple.png",
@@ -462,6 +514,8 @@ window.PRS_DECOR_CATALOG = {
     hruskovy_sad: {
         id: "hruskovy_sad",
         name: "Hruškový sad",
+        icon: "🍐",
+        desc: "Slunný ovocný sad se šťavnatými žlutými hruškami na mírných pahorcích královského panství.",
         category: "vegetation",
         w: 96, h: 76, clearance: 44,
         img: "assets/decorations/hruskovy_sad.png",
@@ -470,6 +524,8 @@ window.PRS_DECOR_CATALOG = {
     orchad_plum: {
         id: "orchad_plum",
         name: "Švestkový sad",
+        icon: "🫐",
+        desc: "Sad starých švestkových stromů s modrými plody, ze kterých vesničané vaří vyhlášená povidla.",
         category: "vegetation",
         w: 96, h: 76, clearance: 44,
         img: "assets/decorations/orchad_plum.png",
@@ -478,6 +534,8 @@ window.PRS_DECOR_CATALOG = {
     bush: {
         id: "bush",
         name: "Hustý keř",
+        icon: "🌿",
+        desc: "Hustý kvetoucí keř oživující okraje cest a poskytující bezpečný úkryt pro drobnou lesní zvěř.",
         category: "vegetation",
         w: 48, h: 42, clearance: 22,
         img: "assets/decorations/bush.png",
@@ -486,6 +544,8 @@ window.PRS_DECOR_CATALOG = {
     signpost2: {
         id: "signpost2",
         name: "Kamenný rozcestník",
+        icon: "🗿",
+        desc: "Otesaný kamenný rozcestník s vyrytými rodovými erby a směry na křižovatkách horských cest.",
         category: "settlement",
         w: 44, h: 54, clearance: 20,
         img: "assets/decorations/signpost2.png",
@@ -494,6 +554,8 @@ window.PRS_DECOR_CATALOG = {
     grove_pine2: {
         id: "grove_pine2",
         name: "Hluboký borový hvozd",
+        icon: "🌲",
+        desc: "Hluboký a neprostupný borový hvozd, v jehož větvích se ozývá tajemné houkání sov a šumění větru.",
         category: "vegetation",
         w: 92, h: 80, clearance: 42,
         img: "assets/decorations/grove_pine2.png",
@@ -502,10 +564,196 @@ window.PRS_DECOR_CATALOG = {
     hrad: {
         id: "hrad",
         name: "Strážní hrad",
+        icon: "🏰",
+        desc: "Kamenný strážní hrádek s cimbuřím a střílnami, střežící zemské hranice před nájezdy banditů.",
         category: "civilization",
         w: 80, h: 80, clearance: 40,
         img: "assets/decorations/hrad.png",
         imgFlip: "assets/decorations/hrad_flip.png"
+    },
+    // --- 6. Vodní toky a mosty ---
+    watermill: {
+        id: "watermill",
+        name: "Vodní mlýn s náhonem",
+        icon: "⚙️",
+        desc: "Klapající roubený vodní mlýn s proudem vody stékajícím po lopatkách velkého dřevěného kola.",
+        category: "agriculture",
+        w: 64, h: 84, clearance: 36,
+        img: "assets/decorations/watermill.png",
+        imgFlip: "assets/decorations/watermill_flip.png"
+    },
+    swamp_bridge: {
+        id: "swamp_bridge",
+        name: "Dřevěná lávka přes močál",
+        icon: "🌉",
+        desc: "Dřevěná lávka klenoucí se přes zrádný močál mezi orobincem, lekníny a tančícími bludičkami.",
+        category: "water",
+        w: 84, h: 57, clearance: 38,
+        img: "assets/decorations/swamp_bridge.png",
+        imgFlip: "assets/decorations/swamp_bridge_flip.png"
+    },
+    // --- 7. Strážní objekty a tajemná obydlí ---
+    wooden_watchtower: {
+        id: "wooden_watchtower",
+        name: "Dřevěná strážní věž",
+        icon: "🗼",
+        desc: "Vysoká dřevěná pozorovatelna s žebříkem a pochodní, odkud královské hlídky střeží obchodní stezky.",
+        category: "civilization",
+        w: 84, h: 50, clearance: 36,
+        img: "assets/decorations/wooden_watchtower.png",
+        imgFlip: "assets/decorations/wooden_watchtower_flip.png"
+    },
+    witch_hut: {
+        id: "witch_hut",
+        name: "Perníková chaloupka ježibaby",
+        icon: "🧙‍♀️",
+        desc: "Tajemná chaloupka s křivým komínem a bylinami, kde v kotlíku bublá podivuhodný lektvar.",
+        category: "settlement",
+        w: 84, h: 58, clearance: 38,
+        img: "assets/decorations/witch_hut.png",
+        imgFlip: "assets/decorations/witch_hut_flip.png"
+    },
+    // --- 8. Magická místa, ruiny a posvátné háje ---
+    fairy_ring_mushrooms: {
+        id: "fairy_ring_mushrooms",
+        name: "Vílí houbový kruh",
+        icon: "🍄",
+        desc: "Magický kruh světélkujících hub na lesní mýtině, kde za svitu měsíce tančí víly a lesní bytosti.",
+        category: "magic",
+        w: 66, h: 84, clearance: 34,
+        img: "assets/decorations/fairy_ring_mushrooms.png",
+        imgFlip: "assets/decorations/fairy_ring_mushrooms_flip.png"
+    },
+    druid_monoliths: {
+        id: "druid_monoliths",
+        name: "Druidské menhiry a megalit",
+        icon: "🪨",
+        desc: "Kruh starobylých mechem obrostlých menhirů s vyrytými runami, které pulzují zemskou magií.",
+        category: "magic",
+        w: 79, h: 84, clearance: 38,
+        img: "assets/decorations/druid_monoliths.png",
+        imgFlip: "assets/decorations/druid_monoliths_flip.png"
+    },
+    ancient_ruins: {
+        id: "ancient_ruins",
+        name: "Zarostlé kamenné zříceniny",
+        icon: "🏛️",
+        desc: "Zarostlé kamenné zříceniny s gotickým obloukem a rozpadlými zdmi, skrývající dávno zapomenuté poklady.",
+        category: "terrain",
+        w: 80, h: 84, clearance: 38,
+        img: "assets/decorations/ancient_ruins.png",
+        imgFlip: "assets/decorations/ancient_ruins_flip.png"
+    },
+    ancient_graveyard: {
+        id: "ancient_graveyard",
+        name: "Tajemný starý hřbitov",
+        icon: "🪦",
+        desc: "Starobylý tajemný hřbitov s kamennou zídkou, náhrobky a uschlým stromem opředený rytířskými legendami.",
+        category: "settlement",
+        w: 84, h: 60, clearance: 38,
+        img: "assets/decorations/ancient_graveyard.png",
+        imgFlip: "assets/decorations/ancient_graveyard_flip.png"
+    },
+    dryad_sacred_oak: {
+        id: "dryad_sacred_oak",
+        name: "Posvátný dub s lesní dryádou",
+        icon: "🧚‍♀️",
+        desc: "Posvátný dub prastarých věků, z jehož kmene vystupuje ochranitelská lesní dryáda obklopená světélky.",
+        category: "vegetation",
+        w: 65, h: 84, clearance: 36,
+        img: "assets/decorations/dryad_sacred_oak.png",
+        imgFlip: "assets/decorations/dryad_sacred_oak_flip.png"
+    },
+    unicorn_grove: {
+        id: "unicorn_grove",
+        name: "Kouzelný háj s jednorožcem",
+        icon: "🦄",
+        desc: "Stříbřitá mýtina v hlubokém hvozdu, kde se prochází bájný bílý jednorožec se zlatou hřívou.",
+        category: "vegetation",
+        w: 84, h: 75, clearance: 38,
+        img: "assets/decorations/unicorn_grove.png",
+        imgFlip: "assets/decorations/unicorn_grove_flip.png"
+    },
+    pegasus_pond: {
+        id: "pegasus_pond",
+        name: "Pegas u lesní studánky",
+        icon: "🪽",
+        desc: "Kouzelná lesní studánka, k níž slétá pít sněhobílý okřídlený Pegas s rozpjatými křídly.",
+        category: "water",
+        w: 84, h: 62, clearance: 38,
+        img: "assets/decorations/pegasus_pond.png",
+        imgFlip: "assets/decorations/pegasus_pond_flip.png"
+    },
+    // --- 9. Doupata a nebezpečné nestvůry ---
+    cave_bear_den: {
+        id: "cave_bear_den",
+        name: "Medvědí jeskyně",
+        icon: "🐻",
+        desc: "Skalní jeskyně plná kostí a trofejí, sloužící jako brloh obrovského divokého medvěda.",
+        category: "quest_lair",
+        w: 64, h: 84, clearance: 38,
+        img: "assets/decorations/cave_bear_den.png",
+        imgFlip: "assets/decorations/cave_bear_den_flip.png"
+    },
+    bandit_cave: {
+        id: "bandit_cave",
+        name: "Loupežnická jeskyně s pokladem",
+        icon: "💰",
+        desc: "Loupežnické doupě osvětlené pochodněmi, plné otevřených truhel se zlaťáky a zcizenými cennostmi.",
+        category: "quest_lair",
+        w: 83, h: 84, clearance: 38,
+        img: "assets/decorations/bandit_cave.png",
+        imgFlip: "assets/decorations/bandit_cave_flip.png"
+    },
+    dragon_cave: {
+        id: "dragon_cave",
+        name: "Spící drak ve sluji",
+        icon: "🐉",
+        desc: "Monumentální jeskyně, v jejímž nitru tvrdě spí drak na obrovské hromadě královského zlata.",
+        category: "quest_lair",
+        w: 84, h: 51, clearance: 38,
+        img: "assets/decorations/dragon_cave.png",
+        imgFlip: "assets/decorations/dragon_cave_flip.png"
+    },
+    basilisk_cave: {
+        id: "basilisk_cave",
+        name: "Jeskyně baziliška",
+        icon: "🦎",
+        desc: "Zlověstná skalní rozsedlina plná zkamenělých těl dobrodruhů, střežená smrtícím ještěřím baziliškem.",
+        category: "quest_lair",
+        w: 84, h: 57, clearance: 38,
+        img: "assets/decorations/basilisk_cave.png",
+        imgFlip: "assets/decorations/basilisk_cave_flip.png"
+    },
+    snow_troll_cave: {
+        id: "snow_troll_cave",
+        name: "Ledová jeskyně sněžného trolla",
+        icon: "❄️",
+        desc: "Mrazivá ledová jeskyně s obřími rampouchy, kde se v závějích ukrývá mocný sněžný troll s kyjem.",
+        category: "quest_lair",
+        w: 84, h: 56, clearance: 38,
+        img: "assets/decorations/snow_troll_cave.png",
+        imgFlip: "assets/decorations/snow_troll_cave_flip.png"
+    },
+    swamp_troll: {
+        id: "swamp_troll",
+        name: "Bažinný troll u tůně",
+        icon: "🧌",
+        desc: "Zavalitý bažinný troll porostlý řasami, který líně odpočívá pod kořeny u kalné tůně.",
+        category: "quest_lair",
+        w: 84, h: 62, clearance: 38,
+        img: "assets/decorations/swamp_troll.png",
+        imgFlip: "assets/decorations/swamp_troll_flip.png"
+    },
+    swamp_hydra: {
+        id: "swamp_hydra",
+        name: "Pětihlavá bažinná hydra",
+        icon: "🐍",
+        desc: "Děsivá pětihlavá ještěří hydra vynořující se z hlubin močálu a chrlící jedovatou mlhu.",
+        category: "quest_lair",
+        w: 84, h: 56, clearance: 38,
+        img: "assets/decorations/swamp_hydra.png",
+        imgFlip: "assets/decorations/swamp_hydra_flip.png"
     }
 };
 
@@ -982,16 +1230,16 @@ window.PRS_TROPHIES = {
 // Katalog úkolů a monster: U1 (Zvěř: 4–6), U2 (Monstra: 8–10), U3 (Draci: 12–14)
 window.PRS_QUESTS = {
     U1: [
-        { id: "u1_1", name: "Divoký kňour", icon: "🐗", difficulty: 4, diffOffset: -1, gold: 1200, hearts: 0.5, trophyId: "trophy_boar", desc: "V hlubokém lese na tebe vyrazil rozzuřený kanec." },
-        { id: "u1_2", name: "Smečka šedých vlků", icon: "🐺", difficulty: 5, diffOffset: 0, gold: 1500, hearts: 0.5, trophyId: "trophy_wolf", desc: "Vlčí smečka ohrožuje kupecké vozy u vesnice." },
-        { id: "u1_3", name: "Horský medvěd", icon: "🐻", difficulty: 5, diffOffset: 0, gold: 1800, hearts: 0.5, trophyId: "trophy_bear", desc: "Obrovský medvěd brání průsmyk ke královskému hradu." },
-        { id: "u1_4", name: "Královský bílý jelen", icon: "🦌", difficulty: 6, diffOffset: 1, gold: 2200, hearts: 1.0, trophyId: "trophy_stag", desc: "Ulovení vzácného jelena ti vynese obdiv celého dvora." }
+        { id: "u1_1", name: "Divoký kňour", icon: "🐗", difficulty: 4, diffOffset: -1, gold: 1200, hearts: 0.5, trophyId: "trophy_boar", img: "assets/decorations/cave_bear_den.png", imgFlip: "assets/decorations/cave_bear_den_flip.png", weakness: "dogs", desc: "V hlubokém lese na tebe vyrazil rozzuřený kanec. Lovečtí psi snadno odlákají jeho pozornost!" },
+        { id: "u1_2", name: "Smečka šedých vlků", icon: "🐺", difficulty: 5, diffOffset: 0, gold: 1500, hearts: 0.5, trophyId: "trophy_wolf", img: "assets/decorations/bandit_cave.png", imgFlip: "assets/decorations/bandit_cave_flip.png", weakness: "spear", desc: "Vlčí smečka ohrožuje kupecké vozy u vesnice. Dlouhé kopí udrží vlky v bezpečném odstupu." },
+        { id: "u1_3", name: "Horský medvěd", icon: "🐻", difficulty: 5, diffOffset: 0, gold: 1800, hearts: 0.5, trophyId: "trophy_bear", img: "assets/decorations/snow_troll_cave.png", imgFlip: "assets/decorations/snow_troll_cave_flip.png", weakness: "horse", desc: "Obrovský medvěd brání průsmyk ke hradu. Rychlý útok na koni zaskočí jeho těžkopádnost." },
+        { id: "u1_4", name: "Královský bílý jelen", icon: "🦌", difficulty: 6, diffOffset: 1, gold: 2200, hearts: 1.0, trophyId: "trophy_stag", img: "assets/decorations/unicorn_grove.png", imgFlip: "assets/decorations/unicorn_grove_flip.png", weakness: "falcons", desc: "Vzácný jelen v kouzelném háji. Lovecký sokol vystopuje jeho stopy v houštinách." }
     ],
     U2: [
-        { id: "u2_1", name: "Skalní obr", icon: "👹", difficulty: 8, diffOffset: -1, gold: 3000, hearts: 1.0, itemTier: 1, trophyId: "trophy_giant", desc: "Obr s kyjem vybírá mýto u horského mostu." },
-        { id: "u2_2", name: "Temný černokněžník", icon: "🧙‍♂️", difficulty: 9, diffOffset: 0, gold: 3500, hearts: 1.0, itemTier: 1, trophyId: "trophy_warlock", desc: "Zlý čaroděj sesílá kletby na okolní panství." },
-        { id: "u2_3", name: "Černý loupeživý rytíř", icon: "⚔️", difficulty: 9, diffOffset: 0, gold: 4000, hearts: 1.5, itemTier: 2, trophyId: "trophy_black_knight", desc: "Obávaný rytíř v černé zbroji tě vyzval na souboj na život a na smrt." },
-        { id: "u2_4", name: "Jeskynní vlkodlak", icon: "🐺", difficulty: 10, diffOffset: 1, gold: 4500, hearts: 1.5, itemTier: 2, trophyId: "trophy_werewolf", desc: "V tajemné jeskyni číhá bestie, které se bojí celé království." }
+        { id: "u2_1", name: "Skalní obr", icon: "👹", difficulty: 8, diffOffset: -1, gold: 3000, hearts: 1.0, itemTier: 1, trophyId: "trophy_giant", img: "assets/decorations/swamp_troll.png", imgFlip: "assets/decorations/swamp_troll_flip.png", weakness: "horse", desc: "Obr s obřím kyjem vybírá mýto u mostu. Rychlý kůň dovolí rytíři manévrovat kolem jeho úderů." },
+        { id: "u2_2", name: "Temný černokněžník", icon: "🧙‍♂️", difficulty: 9, diffOffset: 0, gold: 3500, hearts: 1.0, itemTier: 1, trophyId: "trophy_warlock", img: "assets/decorations/witch_hut.png", imgFlip: "assets/decorations/witch_hut_flip.png", weakness: "spear", desc: "Zlý čaroděj sesílá kletby ze své chatrče. Dlouhé kopí probodne jeho magické bariéry." },
+        { id: "u2_3", name: "Černý loupeživý rytíř", icon: "⚔️", difficulty: 9, diffOffset: 0, gold: 4000, hearts: 1.5, itemTier: 2, trophyId: "trophy_black_knight", img: "assets/decorations/ancient_ruins.png", imgFlip: "assets/decorations/ancient_ruins_flip.png", weakness: "armor", desc: "Obávaný rytíř ve starých ruinách tě vyzval na souboj. Pevná plátová zbroj odrazí jeho úder." },
+        { id: "u2_4", name: "Jeskynní vlkodlak", icon: "🐺", difficulty: 10, diffOffset: 1, gold: 4500, hearts: 1.5, itemTier: 2, trophyId: "trophy_werewolf", img: "assets/decorations/basilisk_cave.png", imgFlip: "assets/decorations/basilisk_cave_flip.png", weakness: "dogs", desc: "V tajemné jeskyni číhá bestie. Lovecká smečka vycítí pach vlkodlaka a pomůže v boji." }
     ],
     U3: [
         // --- TIER A: Mladí a divocí draci (Obtížnost 11–12) ---
@@ -1172,15 +1420,31 @@ window.PRS_BoardBuilder = {
             var propKey = null;
 
             if (node.type === "VILLAGE") {
-                propKey = (nIdx % 2 === 0) ? "cottage_timber" : "village_well";
-            } else if (node.type === "ANIMAL" && node.setId === 1) {
-                propKey = "pasture_fence";
+                propKey = (nIdx % 3 === 0) ? "cottage_timber" : (nIdx % 3 === 1 ? "village_well" : "watermill");
+            } else if (node.type === "ANIMAL") {
+                if (node.setId === 1) propKey = "pasture_fence";
+                else if (node.setId === 2) propKey = "unicorn_grove";
+                else if (node.setId === 3) propKey = "pegasus_pond";
+                else if (node.setId === 4) propKey = "dryad_sacred_oak";
+                else propKey = "pasture_fence";
             } else if (node.type === "MERCHANT" || node.type === "SHOP") {
                 propKey = "merchant_wagon";
             } else if (node.type === "FESTIVAL") {
                 propKey = "tournament_tent";
-            } else if (node.isJunction && nIdx % 3 === 0) {
-                propKey = "signpost";
+            } else if (node.type === "BUILDING" && node.subtype === "kovarna") {
+                propKey = "watermill";
+            } else if (node.type === "BUILDING" && (node.subtype === "staje" || node.subtype === "psovod")) {
+                propKey = "pasture_fence";
+            } else if (node.type === "QUEST") {
+                var questProps = ["dragon_cave", "cave_bear_den", "bandit_cave", "basilisk_cave", "snow_troll_cave", "swamp_hydra", "swamp_troll"];
+                propKey = questProps[nIdx % questProps.length];
+            } else if (node.type === "CHANCE" || node.type === "JESTER") {
+                var magicProps = ["fairy_ring_mushrooms", "druid_monoliths", "witch_hut", "ancient_ruins"];
+                propKey = magicProps[nIdx % magicProps.length];
+            } else if (node.type === "TAX" || node.type === "HOSPITAL") {
+                propKey = (node.type === "TAX") ? "wooden_watchtower" : "ancient_graveyard";
+            } else if (node.isJunction && nIdx % 2 === 0) {
+                propKey = (nIdx % 4 === 0) ? "signpost" : "signpost2";
             }
 
             if (propKey && catalog[propKey]) {
@@ -1214,7 +1478,10 @@ window.PRS_BoardBuilder = {
             "tree_oak", "tree_oak", "tree_pine", "tree_pine", "tree_birch",
             "grove_oak", "grove_pine", "grove_pine2", "rock_boulder", "rock_boulder",
             "farm_field", "windmill", "lake_pond", "mountain_peaks",
-            "orchad_apple", "hruskovy_sad", "orchad_plum", "bush", "bush"
+            "orchad_apple", "hruskovy_sad", "orchad_plum", "bush", "bush",
+            "watermill", "wooden_watchtower", "ancient_ruins", "druid_monoliths",
+            "fairy_ring_mushrooms", "swamp_bridge", "unicorn_grove", "pegasus_pond",
+            "dryad_sacred_oak"
         ];
 
         for (var gx = 70; gx <= 1330; gx += 65) {
@@ -1659,14 +1926,14 @@ window.PRS_BoardBuilder = {
 
         // Dekorativní zóny pro balíčky karet a dominanty přesně dle IMG_4599
         var cardZones = [
-            { code: "VECI_1", title: "VĚCI 1", subtitle: "2 500 zl.", x: 435, y: 145, w: 118, h: 125, actionTier: 1 },
-            { code: "VECI_2", title: "VĚCI 2", subtitle: "7 000 zl.", x: 580, y: 145, w: 125, h: 125, actionTier: 2 },
-            { code: "VECI_3", title: "VĚCI 3", subtitle: "12 000 zl.", x: 732, y: 145, w: 125, h: 125, actionTier: 3 },
-            { code: "ZVER_U1", title: "ZVĚŘ (U1)", subtitle: "Obtížnost 4–6", x: 935, y: 155, w: 125, h: 90 },
-            { code: "MONSTRA_U2", title: "MONSTRA (U2)", subtitle: "Obtížnost 8–10", x: 965, y: 275, w: 135, h: 95 },
-            { code: "DRACI_U3", title: "DRACI (U3)", subtitle: "Obtížnost 12–14", x: 1005, y: 398, w: 135, h: 95 },
-            { code: "NAHODA_N", title: "N", subtitle: "Karty Náhody", x: 245, y: 410, w: 86, h: 115 },
-            { code: "SLAVNOST_S", title: "S", subtitle: "Karty Slavností", x: 495, y: 425, w: 88, h: 100 }
+            { code: "VECI_1", title: "VĚCI 1", subtitle: "2 500 zl.", icon: "🗡️", color: "#60a5fa", x: 435, y: 145, w: 118, h: 125, actionTier: 1, count: 9 },
+            { code: "VECI_2", title: "VĚCI 2", subtitle: "7 000 zl.", icon: "⚔️", color: "#a855f7", x: 580, y: 145, w: 125, h: 125, actionTier: 2, count: 7 },
+            { code: "VECI_3", title: "VĚCI 3", subtitle: "12 000 zl.", icon: "👑", color: "#f59e0b", x: 732, y: 145, w: 125, h: 125, actionTier: 3, count: 4 },
+            { code: "ZVER_U1", title: "ZVĚŘ", subtitle: "Obtížnost 4–6", icon: "🐗", color: "#4ade80", x: 935, y: 155, w: 125, h: 90, count: 4 },
+            { code: "MONSTRA_U2", title: "MONSTRA", subtitle: "Obtížnost 8–10", icon: "👹", color: "#fb923c", x: 965, y: 275, w: 135, h: 95, count: 4 },
+            { code: "DRACI_U3", title: "DRACI", subtitle: "Obtížnost 11–17", icon: "🐉", color: "#f43f5e", x: 1005, y: 398, w: 135, h: 95, count: 20 },
+            { code: "NAHODA_N", title: "NÁHODA", subtitle: "Karty osudu", icon: "❓", color: "#eab308", x: 245, y: 410, w: 86, h: 115, count: 24 },
+            { code: "SLAVNOST_S", title: "SLAVNOSTI", subtitle: "Turnaj & ples", icon: "🎪", color: "#ec4899", x: 495, y: 425, w: 88, h: 100, count: 3 }
         ];
 
         var landmarks = [
@@ -1788,7 +2055,12 @@ window.PRS_BoardBuilder = {
             code: "dragon_4598",
             name: "Ilustrovaný plán s Tříhlavým drakem a Lesní věží",
             nodes: nodes,
-            cardZones: [],
+            cardZones: [
+                { code: "VECI_1", title: "VĚCI 1", subtitle: "2 500 zl.", icon: "🗡️", color: "#60a5fa", x: 255, y: 180, w: 110, h: 115, actionTier: 1, count: 9 },
+                { code: "VECI_2", title: "VĚCI 2", subtitle: "7 000 zl.", icon: "⚔️", color: "#a855f7", x: 380, y: 180, w: 110, h: 115, actionTier: 2, count: 7 },
+                { code: "NAHODA_N", title: "NÁHODA", subtitle: "Karty osudu", icon: "❓", color: "#eab308", x: 915, y: 495, w: 90, h: 110, count: 24 },
+                { code: "DRACI_U3", title: "DRACI", subtitle: "Obtížnost 11–17", icon: "🐉", color: "#f43f5e", x: 1025, y: 495, w: 120, h: 110, count: 20 }
+            ],
             landmarks: [
                 { id: "royalCastle", name: "Trojvěžový Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 675, y: 405, w: 230, h: 190 },
                 { id: "dragonLair", name: "Tříhlavá Saň (U3)", icon: "🐲", image: "assets/dragons/dragon_3headed.png", x: 425, y: 330, w: 145, h: 125 },
@@ -1868,7 +2140,11 @@ window.PRS_BoardBuilder = {
             code: "compact_48",
             name: "Zkrácený královský okruh (Rychlá hra)",
             nodes: compactNodes,
-            cardZones: [],
+            cardZones: [
+                { code: "VECI_1", title: "VĚCI 1", subtitle: "2 500 zl.", icon: "🗡️", color: "#60a5fa", x: 380, y: 165, w: 105, h: 110, actionTier: 1, count: 9 },
+                { code: "VECI_2", title: "VĚCI 2", subtitle: "7 000 zl.", icon: "⚔️", color: "#a855f7", x: 500, y: 165, w: 105, h: 110, actionTier: 2, count: 7 },
+                { code: "NAHODA_N", title: "NÁHODA", subtitle: "Karty osudu", icon: "❓", color: "#eab308", x: 620, y: 165, w: 85, h: 110, count: 24 }
+            ],
             landmarks: [
                 { id: "royalCastle", name: "Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 700, y: 320, w: 240, h: 200 },
                 { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 990, y: 430, w: 150, h: 130 }

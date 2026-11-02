@@ -1077,3 +1077,252 @@
         .sim-metric-card span { display: block; font-size: 0.8rem; color: var(--text-muted); }
         .sim-metric-card strong { display: block; font-size: 1.35rem; color: var(--gold-light); margin: 0.2rem 0; }
         .sim-metric-card small { color: var(--text-muted); font-size: 0.76rem; }
+
+        /* ====================================================================
+           FÁZE 1: INTERAKTIVNÍ 3D BALÍČKY KARET, DEKORACE & PLOVOUCÍ HLÁŠKY
+           ==================================================================== */
+
+        /* 3D vrstvené balíčky karet na plánu */
+        .board-card-deck-3d {
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+        }
+        .board-card-deck-3d:hover {
+            filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.75)) brightness(1.08);
+        }
+        .board-card-deck-3d:hover rect.deck-top-card {
+            stroke-width: 2.5px;
+            filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
+        }
+        .board-card-deck-3d:active {
+            transform: scale(0.97) translateY(2px);
+        }
+
+        /* Klikací živé dekorace krajiny */
+        .board-decor-item {
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+        .board-decor-item:hover {
+            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.95)) brightness(1.18);
+        }
+        .board-decor-item:hover image {
+            filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.95)) brightness(1.15);
+        }
+        .board-decor-item:active {
+            transform: scale(0.95);
+        }
+
+        /* Pergamenová bublina dekorace */
+        .board-decor-tooltip {
+            animation: decorTooltipPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.85));
+            user-select: none;
+        }
+        @keyframes decorTooltipPop {
+            0% { opacity: 0; transform: scale(0.75) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Plovoucí komiksové hlášky nad figurkami */
+        .pawn-toast-bubble {
+            pointer-events: none;
+            user-select: none;
+            animation: pawnToastFloat 3.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        @keyframes pawnToastFloat {
+            0% { opacity: 0; transform: translateY(8px) scale(0.8); }
+            10% { opacity: 1; transform: translateY(0) scale(1.05); }
+            18% { transform: translateY(-3px) scale(1); }
+            80% { opacity: 1; transform: translateY(-20px); }
+            100% { opacity: 0; transform: translateY(-36px) scale(0.92); }
+        }
+
+
+/* ==========================================================================
+   FÁZE 3: ZÁLOŽKOVÝ INSPEKTOR HRÁČE & ERGONOMIE
+   ========================================================================== */
+.sidebar-inspector-tabs {
+    display: flex;
+    gap: 4px;
+    background: rgba(18, 14, 10, 0.85);
+    border: 1.5px solid rgba(212, 175, 55, 0.4);
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 0.55rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar-tab-btn {
+    flex: 1;
+    padding: 6px 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    user-select: none;
+}
+
+.sidebar-tab-btn:hover {
+    color: #fef08a;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-tab-btn.active {
+    color: #1a0f07;
+    background: linear-gradient(135deg, #fef08a 0%, #d4af37 100%);
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.45);
+}
+
+.tab-shortcut-badge {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.25);
+    color: inherit;
+    font-family: monospace;
+    font-weight: 700;
+}
+
+.sidebar-tab-btn.active .tab-shortcut-badge {
+    background: rgba(0, 0, 0, 0.18);
+    color: #2b180a;
+}
+
+.sidebar-tab-pane {
+    animation: tabFadeIn 0.22s ease forwards;
+}
+
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Panel majetku hráče */
+.property-panel-card {
+    background: linear-gradient(135deg, rgba(38, 28, 18, 0.98), rgba(20, 15, 10, 0.98));
+    border: 2px solid var(--gold);
+    border-radius: 14px;
+    padding: 0.9rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.property-header-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.property-yield-badge {
+    background: rgba(34, 197, 94, 0.18);
+    border: 1px solid #22c55e;
+    color: #86efac;
+    font-weight: 800;
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.property-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 3px;
+    margin-bottom: 0.75rem;
+}
+
+.property-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.82rem;
+}
+
+.property-item-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.property-animal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 8px;
+    padding: 0.6rem;
+    margin-top: 0.5rem;
+}
+
+.property-animal-slot {
+    text-align: center;
+    padding: 0.35rem 0.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.property-animal-icon {
+    font-size: 1.15rem;
+    display: block;
+    margin-bottom: 1px;
+}
+
+.property-animal-qty {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #fef08a;
+}
+
+/* Rychlá kronika v postranním panelu */
+.quick-log-card {
+    background: linear-gradient(135deg, rgba(28, 22, 16, 0.98), rgba(16, 12, 8, 0.98));
+    border: 1.5px solid rgba(212, 175, 55, 0.45);
+    border-radius: 14px;
+    padding: 0.85rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+
+.quick-log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 310px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.quick-log-entry {
+    background: rgba(0, 0, 0, 0.35);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 6px 6px 0;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    line-height: 1.35;
+}
+
+.quick-log-entry.roll { border-left-color: #fde047; }
+.quick-log-entry.combat { border-left-color: #ef4444; }
+.quick-log-entry.buy { border-left-color: #22c55e; }
+.quick-log-entry.heart { border-left-color: #ec4899; }
+.quick-log-entry.chance { border-left-color: #f59e0b; }

@@ -17,10 +17,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=202611011530">
-    <link rel="stylesheet" href="css/board.css?v=202611011530">
-    <link rel="stylesheet" href="css/modals.css?v=202611011545">
-    <link rel="stylesheet" href="css/mobile.css?v=202611011530">
+    <link rel="stylesheet" href="css/main.css?v=202611021400">
+    <link rel="stylesheet" href="css/board.css?v=202611021400">
+    <link rel="stylesheet" href="css/modals.css?v=202611021400">
+    <link rel="stylesheet" href="css/mobile.css?v=202611021400">
 </head>
 <body>
     <script>
@@ -287,18 +287,23 @@
                                 </select>
                             </div>
                             <div>
-                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">💖 Cíl vítězství:</label>
-                                <select id="lobby-target-hearts" class="prs-select" style="font-size:0.82rem; padding:0.4rem;">
-                                    <option value="20">20 💖 (Kratší hra)</option>
-                                    <option value="30" selected>30 💖 (Klasická hra)</option>
-                                    <option value="45">45 💖 (Epické tažení)</option>
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🏆 Herní scénář &amp; Cíl:</label>
+                                <select id="lobby-game-scenario" class="prs-select" style="font-size:0.82rem; padding:0.4rem;" onchange="PRS_App.handleScenarioChange(this.value)">
+                                    <option value="sprint">⚡ Královská rychlovka (15 💖, 30 min)</option>
+                                    <option value="classic" selected>💖 Princeznino srdce (30 💖, standard)</option>
+                                    <option value="slayer">🐉 Lovci draků (Ulovení 2 draků z U3)</option>
+                                    <option value="tycoon">🏰 Feudální magnát (3 města &amp; 1 hrad)</option>
+                                    <option value="epic">👑 Epické tažení (45 💖)</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
                     <button class="btn-gold-lg" style="width:100%" onclick="PRS_App.startNewGame(true)">
-                        🎲 Rozdat 10 000 zl. a zahájit vlastní partii!
+                        🎲 Rozdat 10 000 zl. a zahájit partii!
+                    </button>
+                    <button class="btn-secondary" style="width:100%; margin-top:0.45rem; font-size:0.84rem; padding:0.35rem 0.6rem; border-color:rgba(212,175,55,0.4);" onclick="PRS_App.openTutorialModal()">
+                        ❓ Průvodce pravidly &amp; Tutoriál pro nováčky
                     </button>
                 </div>
 
@@ -528,12 +533,34 @@
                     <!-- 1. TAH & KOSTKA (nejdůležitější akce nahoře) -->
                     <div id="turn-action-panel"></div>
 
-                    <!-- 2. POLÍČKO, NA KTERÉM HRÁČ STOJÍ / ZKOUMÁ -->
-                    <div id="player-standing-tile-card"></div>
+                    <!-- 2. ZÁLOŽKOVÝ INSPEKTOR HRÁČE (FÁZE 3) -->
+                    <div class="sidebar-inspector-tabs" id="sidebar-inspector-tabs">
+                        <button class="sidebar-tab-btn active" id="stab-btn-tile" onclick="PRS_App.switchSidebarTab('tile')">📍 Pole <span class="tab-shortcut-badge">1</span></button>
+                        <button class="sidebar-tab-btn" id="stab-btn-knight" onclick="PRS_App.switchSidebarTab('knight')">🛡️ Rytíř <span class="tab-shortcut-badge">2</span></button>
+                        <button class="sidebar-tab-btn" id="stab-btn-property" onclick="PRS_App.switchSidebarTab('property')">🏰 Majetek <span class="tab-shortcut-badge">3</span></button>
+                        <button class="sidebar-tab-btn" id="stab-btn-log" onclick="PRS_App.switchSidebarTab('log')">📜 Kronika <span class="tab-shortcut-badge">4</span></button>
+                    </div>
 
-                    <!-- 3. KOMPAKTNÍ KARTA AKTIVNÍHO RYTÍŘE -->
-                    <div class="prs-card" style="margin-bottom:0.6rem; padding: 0.75rem 0.9rem;">
-                        <div id="active-player-sheet"></div>
+                    <!-- ZÁLOŽKA 1: DETAIL POLÍČKA -->
+                    <div id="sidebar-tab-pane-tile" class="sidebar-tab-pane">
+                        <div id="player-standing-tile-card"></div>
+                    </div>
+
+                    <!-- ZÁLOŽKA 2: DETAIL RYTÍŘE A ZBROJNICE -->
+                    <div id="sidebar-tab-pane-knight" class="sidebar-tab-pane" style="display:none;">
+                        <div class="prs-card" style="margin-bottom:0.6rem; padding: 0.75rem 0.9rem;">
+                            <div id="active-player-sheet"></div>
+                        </div>
+                    </div>
+
+                    <!-- ZÁLOŽKA 3: PŘEHLED MAJETKU, DANÍ A INVESTIC -->
+                    <div id="sidebar-tab-pane-property" class="sidebar-tab-pane" style="display:none;">
+                        <div id="sidebar-player-property-panel"></div>
+                    </div>
+
+                    <!-- ZÁLOŽKA 4: KRONIKA POSLEDNÍCH TAHŮ -->
+                    <div id="sidebar-tab-pane-log" class="sidebar-tab-pane" style="display:none;">
+                        <div id="sidebar-quick-log-panel"></div>
                     </div>
 
                     <!-- 4. Rychlý odkaz dolů do Sálu rytířů -->
@@ -596,6 +623,7 @@
                     <button id="rules-subtab-btn-dragons" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('dragons')">🐉 Dračí bestiář (20)</button>
                     <button id="rules-subtab-btn-castles" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('castles')">🏰 Galerie hradů (10)</button>
                     <button id="rules-subtab-btn-trophies" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('trophies')">🏆 Síň trofejí &amp; Relikvií (29)</button>
+                    <button id="rules-subtab-btn-decorations" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('decorations')">🌲 Atlas dekorací &amp; krajiny (34)</button>
                 </div>
 
                 <!-- SUB-ZÁLOŽKA 1: PRAVIDLA HRY -->
@@ -743,6 +771,27 @@
                         </div>
                     </div>
                     <div id="trophies-grid-container" class="trophies-grid"></div>
+                </div>
+
+                <!-- SUB-ZÁLOŽKA 5: ATLAS DEKORACÍ A KRAJINY -->
+                <div id="rules-subtab-decorations" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div>
+                            <h2 style="margin:0; font-family:'Cinzel',serif; color:var(--gold-light);">🌲 Atlas dekorací a herní krajiny</h2>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin:0.2rem 0 0;">
+                                34 unikátních izometrických dekorací a staveb oživujících království, kotvených k políčkům a rozptýlených v terénu.
+                            </p>
+                        </div>
+                        <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                            <button class="rules-subnav-btn active decor-filter-btn" data-cat="all" onclick="PRS_App.setDecorationsCategory('all')">Všechny (34)</button>
+                            <button class="rules-subnav-btn decor-filter-btn" data-cat="vegetation" onclick="PRS_App.setDecorationsCategory('vegetation')">🌲 Lesy &amp; Stromy</button>
+                            <button class="rules-subnav-btn decor-filter-btn" data-cat="settlement" onclick="PRS_App.setDecorationsCategory('settlement')">🌾 Sídla &amp; Venkov</button>
+                            <button class="rules-subnav-btn decor-filter-btn" data-cat="water" onclick="PRS_App.setDecorationsCategory('water')">🌊 Voda &amp; Močály</button>
+                            <button class="rules-subnav-btn decor-filter-btn" data-cat="magic" onclick="PRS_App.setDecorationsCategory('magic')">✨ Magická místa</button>
+                            <button class="rules-subnav-btn decor-filter-btn" data-cat="quest_lair" onclick="PRS_App.setDecorationsCategory('quest_lair')">⛰️ Doupata &amp; Sluje</button>
+                        </div>
+                    </div>
+                    <div id="decorations-grid-container" class="cards-media-grid"></div>
                 </div>
             </div>
         </section>
@@ -1149,12 +1198,12 @@
     <!-- Zvukový element pro hudbu na pozadí -->
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611011550" defer></script>
-    <script src="js/game-engine.js?v=202611011550" defer></script>
-    <script src="js/app-audio.js?v=202611011550" defer></script>
-    <script src="js/app.js?v=202611011625" defer></script>
-    <script src="js/app-online.js?v=202611011625" defer></script>
-    <script src="js/app-catalog.js?v=202611011550" defer></script>
+    <script src="js/game-data.js?v=202611021400" defer></script>
+    <script src="js/game-engine.js?v=202611021400" defer></script>
+    <script src="js/app-audio.js?v=202611021400" defer></script>
+    <script src="js/app.js?v=202611021400" defer></script>
+    <script src="js/app-online.js?v=202611021400" defer></script>
+    <script src="js/app-catalog.js?v=202611021400" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">
@@ -1166,6 +1215,63 @@
                 <img id="image-lightbox-img" src="" alt="" style="max-width:100%; max-height:65vh; object-fit:contain; display:block;" />
             </div>
             <div id="image-lightbox-caption" style="margin-top:0.8rem; font-size:0.9rem; color:#e7e5e4; line-height:1.45; text-align:left;"></div>
+        </div>
+    </div>
+
+    <!-- INTERAKTIVNÍ TUTORIÁL PRO NOVÁČKY (FÁZE 5) -->
+    <div id="tutorial-onboarding-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeTutorialModal()">
+        <div class="modal-box tutorial-modal-dialog">
+            <div class="tutorial-modal-header">
+                <div style="display:flex; align-items:center; gap:0.65rem;">
+                    <span style="font-size:1.6rem;">👑</span>
+                    <div>
+                        <h3 class="tutorial-header-title">Průvodce hrou: Princeznino srdce</h3>
+                        <div class="tutorial-header-sub">Krok za krokem ke cti, bohatství a ruce princezny</div>
+                    </div>
+                </div>
+                <button class="btn-icon-danger" onclick="PRS_App.closeTutorialModal()">✕</button>
+            </div>
+            <div id="tutorial-modal-body" class="tutorial-modal-body">
+                <!-- Dynamický obsah karet tutoriálu generovaný v PRS_App.renderTutorialStep() -->
+            </div>
+            <div class="tutorial-modal-footer">
+                <button id="btn-tut-prev" class="btn-secondary" onclick="PRS_App.prevTutorialStep()">← Předchozí</button>
+                <div id="tutorial-step-dots" class="tutorial-step-dots"></div>
+                <button id="btn-tut-next" class="btn-gold-lg" style="font-size:0.88rem; padding:0.45rem 1.1rem;" onclick="PRS_App.nextTutorialStep()">Další →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOUBOJOVÁ ARÉNA & DRAČÍ VÝPRAVA (FÁZE 2) -->
+    <div id="quest-duel-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeQuestDuelModal()">
+        <div class="modal-box quest-duel-modal-dialog">
+            <div class="quest-duel-modal-header">
+                <div class="quest-duel-title-wrap">
+                    <span class="quest-duel-header-icon">⚔️</span>
+                    <div>
+                        <h3 id="quest-duel-header-title" class="quest-duel-header-title">Soubojová Aréna & Dračí výprava</h3>
+                        <div id="quest-duel-header-sub" class="quest-duel-header-sub">Rytířský střet o čest, zlaťáky a Srdce princezny</div>
+                    </div>
+                </div>
+                <button class="btn-icon-danger" onclick="PRS_App.closeQuestDuelModal()" title="Zavřít arénu">✕</button>
+            </div>
+            <div id="quest-duel-modal-body" class="quest-duel-modal-body">
+                <!-- Dynamický obsah arény generovaný v PRS_App.openQuestDuelModal() -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODÁL PRO NÁHLED A PRAVIDLA BALÍČKU KARET (Card Deck Inspector) -->
+    <div id="card-deck-inspector-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeDeckModal()">
+        <div class="modal-box" style="max-width:580px; padding:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.5rem;">
+                <h3 id="card-deck-modal-title" style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; display:flex; align-items:center; gap:0.5rem;"></h3>
+                <button class="btn-icon-danger" onclick="PRS_App.closeDeckModal()">✕</button>
+            </div>
+            <div id="card-deck-modal-body" style="max-height:62vh; overflow-y:auto; line-height:1.45; font-size:0.9rem; color:#e2e8f0;"></div>
+            <div style="margin-top:1rem; text-align:right;">
+                <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal()" style="padding:0.4rem 1.25rem; cursor:pointer;">Rozumím</button>
+            </div>
         </div>
     </div>
 

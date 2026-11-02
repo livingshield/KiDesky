@@ -382,6 +382,16 @@ window.PRS_Audio = {
         var now = this.ctx.currentTime;
         this._playChime(now, 220, 0.8, 0.24 * this.sfxVolume);
         this._playChime(now + 0.1, 164.8, 1.0, 0.28 * this.sfxVolume);
+    },
+
+    playWater: function () {
+        if (this.muted) return;
+        this.ensureContext();
+        if (!this.ctx) return;
+        var now = this.ctx.currentTime;
+        this._playChime(now, 587.3, 0.18, 0.12 * this.sfxVolume);
+        this._playChime(now + 0.05, 880.0, 0.22, 0.10 * this.sfxVolume);
+        this._playChime(now + 0.11, 739.9, 0.25, 0.09 * this.sfxVolume);
     }
 };
 

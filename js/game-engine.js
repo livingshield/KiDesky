@@ -20,7 +20,16 @@ window.PRS_GameEngine = {
     createGame: function (options) {
         options = options || {};
         var cfg = this.deepClone(options.config || window.PRS_DEFAULT_CONFIG);
-        if (options.targetHearts) cfg.targetHearts = Number(options.targetHearts);
+        if (options.scenario) {
+            cfg.scenario = options.scenario;
+            if (cfg.scenario === "sprint") cfg.targetHearts = 15;
+            else if (cfg.scenario === "classic") cfg.targetHearts = 30;
+            else if (cfg.scenario === "slayer") cfg.targetHearts = 20;
+            else if (cfg.scenario === "tycoon") cfg.targetHearts = 25;
+            else if (cfg.scenario === "epic") cfg.targetHearts = 45;
+        } else if (options.targetHearts) {
+            cfg.targetHearts = Number(options.targetHearts);
+        }
 
         var boardCode = options.boardCode || "classic_96";
         var board = window.PRS_BoardBuilder.createBoard(boardCode);
@@ -410,10 +419,48 @@ window.PRS_GameEngine = {
         for (var m = 0; m < state.players.length; m++) {
             var pl = state.players[m];
             pl.totalHearts = Math.round((pl.permanentHearts + pl.breedingHearts + (pl.setHeartsBonus || 0)) * 10) / 10;
-            if (state.winnerIndex === null && pl.totalHearts >= state.config.targetHearts) {
+            var isWin = false;
+            var winReason = "";
+            var scen = (state.config && state.config.scenario) ? state.config.scenario : "classic";
+
+            if (scen === "slayer") {
+                // Lovci draků: ulovení 2 draků z U3 nebo dosažení srdcí
+                var dragonsSlain = (pl.stats && pl.stats.questsWon) ? pl.stats.questsWon : 0;
+                if (dragonsSlain >= 2) {
+                    isWin = true;
+                    winReason = "🏆 VÍTĚZSTVÍ LOVCE DRAKŮ! " + pl.badge + " " + pl.name + " skolil 2 obávané bestie království a získává věčnou slávu i ruku princezny!";
+                } else if (pl.totalHearts >= state.config.targetHearts) {
+                    isWin = true;
+                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " získal přízeň princezny (" + pl.totalHearts + " 💖)!";
+                }
+            } else if (scen === "tycoon") {
+                // Feudální magnát: ovládnutí 3 měst a 1 hradu nebo cílových srdcí
+                var cCount = 0, kCount = 0;
+                for (var oi = 0; oi < pl.ownedNodes.length; oi++) {
+                    var oNd = state.board.nodes[pl.ownedNodes[oi]];
+                    if (oNd) {
+                        if (oNd.level === 3 || oNd.type === "CASTLE") kCount++;
+                        else if (oNd.level === 2 || oNd.type === "TOWN") cCount++;
+                    }
+                }
+                if (cCount >= 3 && kCount >= 1) {
+                    isWin = true;
+                    winReason = "🏆 VÍTĚZSTVÍ FEUDÁLNÍHO MAGNÁTA! " + pl.badge + " " + pl.name + " ovládl 3 vzkvétající města a 1 hrad (" + cCount + " měst, " + kCount + " hradů)!";
+                } else if (pl.totalHearts >= state.config.targetHearts) {
+                    isWin = true;
+                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " získal srdce princezny (" + pl.totalHearts + " 💖)!";
+                }
+            } else {
+                if (pl.totalHearts >= state.config.targetHearts) {
+                    isWin = true;
+                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " dosáhl cíle (" + pl.totalHearts + " / " + state.config.targetHearts + " 💖) a získává ruku princezny!";
+                }
+            }
+
+            if (state.winnerIndex === null && isWin) {
                 state.winnerIndex = m;
                 state.phase = "GAME_OVER";
-                this.addLog(state, "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " získal srdce princezny (" + pl.totalHearts + " 💖) a stává se novým vládcem!", "win");
+                this.addLog(state, winReason, "win");
             }
         }
     },
@@ -1207,12 +1254,25 @@ window.PRS_GameEngine = {
     },
 
     // Vyhodnocení Úkolu / Souboje s monstrem či drakem (U1, U2, U3)
-    resolveQuest: function (state, forcedRoll) {
+    resolveQuest: function (state, forcedRoll, tactics) {
         var pa = state.pendingAction;
         if (!pa || !pa.canResolveQuest || !pa.questCard) return null;
         var player = state.players[state.currentPlayerIndex];
         var q = pa.questCard;
         var stats = this.getEffectiveStats(state, player);
+
+        tactics = tactics || {};
+        var tacticBonus = 0;
+        var tacticName = "Běžný útok";
+        if (tactics.charge && stats.horses > 0) {
+            tacticBonus += 1;
+            tacticName = "🏇 Útok z plné jízdy (+1 k síle)";
+        } else if (tactics.hounds && (stats.dogs > 0 || stats.falcons > 0)) {
+            tacticBonus += 1;
+            tacticName = "🐕 Lovecká smečka odlákala pozornost (+1 k síle)";
+        } else if (tactics.elixir) {
+            tacticName = "🧪 Hojivý elixír z Lazaretu (Pojistka proti Špitálu)";
+        }
 
         var roll = forcedRoll || (Math.floor(Math.random() * 6) + 1);
         var animalBonus = 0;
@@ -1222,10 +1282,13 @@ window.PRS_GameEngine = {
             animalBonus = (stats.dogs > 0 && stats.falcons > 0) ? 2 : 1;
         }
         var horseBonus = (q.questTier !== "U1" && stats.horses > 0) ? (1 + Math.floor(stats.jizda / 2)) : 0;
-        var totalPower = roll + stats.boj + animalBonus + horseBonus;
+        var totalPower = roll + stats.boj + animalBonus + horseBonus + tacticBonus;
 
         pa.canResolveQuest = false;
         var won = totalPower >= q.difficulty;
+        var trophyItemWon = null;
+        var lootWon = null;
+        var preventedHospital = false;
 
         if (won) {
             player.gold += q.gold;
@@ -1233,7 +1296,7 @@ window.PRS_GameEngine = {
             player.stats.questsWon++;
             player.stats.heartsFromQuests += q.hearts;
 
-            var rewardMsg = "⚔️ HRDINSKÉ VÍTĚZSTVÍ! " + player.badge + " " + player.name + " porazil **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. obtížnost " + q.difficulty + ", hod " + roll + ")! Získává **+" + q.gold + " zl.**" + (q.hearts > 0 ? " a **+" + q.hearts + " 💖**!" : "!");
+            var rewardMsg = "⚔️ HRDINSKÉ VÍTĚZSTVÍ! " + player.badge + " " + player.name + " porazil **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. obtížnost " + q.difficulty + ", hod " + roll + ")! Získává **+" + q.gold.toLocaleString("cs-CZ") + " zl.**" + (q.hearts > 0 ? " a **+" + q.hearts + " 💖**!" : "!");
 
             // 🏆 Získání unikátní trofeje z nestvůry / draka
             var trophyChance = (q.questTier === "U1") ? 0.75 : 1.0;
@@ -1251,6 +1314,7 @@ window.PRS_GameEngine = {
                     }
                     trophyItem.isEquipped = !hasEquippedTrophy;
                     player.items.push(trophyItem);
+                    trophyItemWon = trophyItem;
                     if (!player.stats.trophiesCollected) player.stats.trophiesCollected = 0;
                     player.stats.trophiesCollected++;
                     rewardMsg += " 🏆 Trofej: **" + trophyItem.icon + " " + trophyItem.name + "** (" + (trophyItem.isEquipped ? "Aktivně nasazena!" : "Uložena do batohu") + ")!";
@@ -1262,6 +1326,7 @@ window.PRS_GameEngine = {
                 if (pool.length > 0) {
                     var loot = this.deepClone(pool[Math.floor(Math.random() * pool.length)]);
                     player.items.push(loot);
+                    lootWon = loot;
                     rewardMsg += " Kořist: **" + loot.icon + " " + loot.name + "**!";
                 }
             }
@@ -1270,7 +1335,15 @@ window.PRS_GameEngine = {
             this.addLog(state, rewardMsg, "quest_win");
         } else {
             player.stats.questsLost++;
-            if (q.questTier === "U1") {
+            if (tactics.elixir) {
+                // Pojistka lektvarem z Lazaretu - hráč neutrpí těžké zranění
+                var elixCost = Math.min(player.gold, 500);
+                player.gold -= elixCost;
+                preventedHospital = true;
+                var elixLossMsg = "🧪 Záchrana hojivým lektvarem! " + player.badge + " " + player.name + " podlehl bestii **" + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + "), ale díky lektvaru (" + elixCost + " zl.) neutrpěl těžká zranění a nemusí do Špitálu!";
+                pa.summary = elixLossMsg;
+                this.addLog(state, elixLossMsg, "quest_loss");
+            } else if (q.questTier === "U1") {
                 var failCost = Math.min(player.gold, state.config.quests.u1FailCost || 500);
                 player.gold -= failCost;
                 var u1Msg = "🐗 Lov se nezdařil! **" + q.name + "** unikl (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + "). Ošetření ran stojí -" + failCost + " zl.";
@@ -1302,7 +1375,22 @@ window.PRS_GameEngine = {
         }
 
         this.recalculateBreedingAndVictory(state);
-        return { won: won, roll: roll, totalPower: totalPower, difficulty: q.difficulty };
+        return {
+            won: won,
+            roll: roll,
+            totalPower: totalPower,
+            difficulty: q.difficulty,
+            trophyWon: trophyItemWon,
+            lootWon: lootWon,
+            goldWon: q.gold,
+            heartsWon: q.hearts,
+            quest: q,
+            preventedHospital: preventedHospital,
+            tacticBonus: tacticBonus,
+            horseBonus: horseBonus,
+            animalBonus: animalBonus,
+            tacticName: tacticName
+        };
     },
 
     // Vyhodnocení SLAVNOSTI (Turnaj, Ples, Závod) podle vzorců z rukopisů IMG_4596 a IMG_4597

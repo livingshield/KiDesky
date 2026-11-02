@@ -70,9 +70,11 @@ function Upload-FtpFile {
 
 # Directories to ensure
 $dirsToEnsure = @(
+    "css",
     "js",
     "assets",
     "assets/castles",
+    "assets/decorations",
     "assets/dragons",
     "assets/landmarks",
     "assets/tiles"
@@ -105,6 +107,11 @@ Get-ChildItem "$localBase\assets\castles\*.jpg" | ForEach-Object {
 # Add all 20 dragons
 Get-ChildItem "$localBase\assets\dragons\*.jpg" | ForEach-Object {
     $filesToUpload += "assets/dragons/$($_.Name)"
+}
+
+# Add all decorations (PNG)
+Get-ChildItem "$localBase\assets\decorations\*.png" | Where-Object { $_.Extension -eq '.png' } | ForEach-Object {
+    $filesToUpload += "assets/decorations/$($_.Name)"
 }
 
 foreach ($rb in $remoteBases) {
