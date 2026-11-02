@@ -895,6 +895,32 @@
     padding: 0.9rem;
 }
 
+/* Slabiny z Bestiáře v Soubojové aréně */
+.duel-weakness-badge {
+    padding: 0.65rem 0.95rem;
+    border-radius: 8px;
+    margin: 0.5rem 0 0.85rem;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    transition: all 0.25s ease;
+}
+
+.duel-weakness-badge.exploited {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(16, 185, 129, 0.18) 100%);
+    border: 1.5px solid #fbbf24;
+    color: #fef08a;
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.35);
+}
+
+.duel-weakness-badge.locked {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    color: #cbd5e1;
+}
+
 .quest-tactics-title {
     font-family: 'Cinzel', serif;
     font-size: 0.96rem;

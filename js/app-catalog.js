@@ -77,22 +77,22 @@
         });
 
         var wMap = {
-            dogs: "Lovečtí psi snadno odlákají jeho pozornost",
-            falcon: "Sokol útočí na zranitelná místa",
-            animals: "Pes i sokol matou draka v boji",
-            horse: "Útok z plné jízdy na koni dává převahu",
-            dance: "Hravého draka lze okouzlit tancem a charismatem",
-            elixir: "Lektvar z Lazaretu ti pomůže přežít",
-            water_armor: "Vodní/chladivá zbroj tlumí žár",
-            ice: "Mrazivé zbraně oslabují sopečného draka",
-            fire: "Oheň taví led a krystaly",
-            armor: "Pevná zbroj svádí blesky",
-            light: "Posvěcené zbraně rozhánějí temnotu",
-            charisma: "Vysoké Charisma umožňuje draka uchlácholit",
-            holy: "Čisté rytířské srdce zažene nemrtvého",
-            courage: "Pevná vůle pronikne mlhou stínů",
-            mastery: "Zkouška všech 4 rytířských ctností",
-            animals_and_spear: "Koordinace koně, psa a kopí"
+            dogs: "Lovečtí psi odlákají pozornost (+2 k síle se psy v chovu nebo taktikou smečky)",
+            falcon: "Sokol útočí na zranitelná místa (+2 k síle se sokolem v chovu)",
+            animals: "Pes i sokol matou draka v boji (+2 k síle při vlastnictví psa a sokola)",
+            horse: "Útok z plné jízdy na koni (+2 k síle s koněm v chovu nebo taktikou nájezdu)",
+            dance: "Hravého draka lze okouzlit tancem (+2 k síle s Tancem ≥ 2 nebo slavnostním šatem)",
+            elixir: "Hojivý lektvar neutralizuje dech (+2 k síle s lektvarem / taktikou pojistky)",
+            water_armor: "Vodní perla či pevná zbroj tlumí žár (+2 k síle se zbrojí či vodní relikvií)",
+            ice: "Mrazivé zbraně oslabují sopečného draka (+2 k síle s mrazivou zbraní / relikvií)",
+            fire: "Oheň taví led a krystaly (+2 k síle s ohnivou zbraní / relikvií / tématem)",
+            armor: "Pevná rytířská zbroj svádí blesky (+2 k síle s nasazenou zbrojí)",
+            light: "Posvěcené relikvie rozhánějí temnotu (+2 k síle se světelnou relikvií / klenotem)",
+            charisma: "Vznešené charisma draka uchlácholí (+2 k síle s Charismatem ≥ 3 nebo klenotem)",
+            holy: "Svaté relikvie zaženou nemrtvého (+2 k síle s posvátnou relikvií)",
+            courage: "Pevná vůle a odvaha pronikne mlhou (+2 k síle s Bojem ≥ 3 či Jízdou ≥ 3)",
+            mastery: "Zkouška všech 4 ctností (+2 k síle při všech ctnostech ≥ 2)",
+            animals_and_spear: "Koordinace koně, zvířat a kopí (+2 k síle s koněm, zvířaty a kopím)"
         };
 
         var html = [];
@@ -119,8 +119,8 @@
             html.push('    <div class="card-media-desc">' + this.escapeHtml(d.desc) + '</div>');
 
             if (d.weakness && wMap[d.weakness]) {
-                html.push('    <div class="card-callout-box" style="border-color:rgba(253,224,71,0.25); color:#fef08a;">');
-                html.push('      💡 <strong>Taktika / Slabina:</strong> ' + wMap[d.weakness]);
+                html.push('    <div class="card-callout-box" style="border-color:rgba(253,224,71,0.35); color:#fef08a; background:rgba(212,175,55,0.12); font-size:0.8rem;">');
+                html.push('      🎯 <strong>Využitelná slabina (+2 k síle):</strong> ' + wMap[d.weakness]);
                 html.push('    </div>');
             }
 

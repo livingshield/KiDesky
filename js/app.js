@@ -3538,9 +3538,14 @@ window.PRS_App = {
         var hasHounds = stats.dogs > 0 || stats.falcons > 0;
         var canAffordElixir = player.gold >= 500;
 
+        var tacticObj = {
+            charge: this.selectedDuelTactic === "charge",
+            hounds: this.selectedDuelTactic === "hounds",
+            elixir: this.selectedDuelTactic === "elixir"
+        };
         var tacticBonus = 0;
-        if (this.selectedDuelTactic === "charge" && hasHorse) tacticBonus = 1;
-        if (this.selectedDuelTactic === "hounds" && hasHounds) tacticBonus = 1;
+        if (tacticObj.charge && hasHorse) tacticBonus = 1;
+        if (tacticObj.hounds && hasHounds) tacticBonus = 1;
 
         var animalBonus = 0;
         if (q.questTier === "U1" && hasHounds) {
@@ -3549,7 +3554,9 @@ window.PRS_App = {
             animalBonus = (stats.dogs > 0 && stats.falcons > 0) ? 2 : 1;
         }
         var horseBonus = (q.questTier !== "U1" && hasHorse) ? (1 + Math.floor(stats.jizda / 2)) : 0;
-        var basePower = stats.boj + animalBonus + horseBonus + tacticBonus;
+        var wRes = window.PRS_GameEngine.checkQuestWeakness(this.state, player, q, tacticObj);
+        var weaknessBonus = wRes.exploited ? 2 : 0;
+        var basePower = stats.boj + animalBonus + horseBonus + tacticBonus + weaknessBonus;
 
         var neededRoll = q.difficulty - basePower;
         var winCount = 0;
@@ -3626,11 +3633,23 @@ window.PRS_App = {
         html.push('      <span style="font-size:0.8rem; color:#cbd5e1;">💡 Slabina: <strong style="color:#fde047;">' + weaknessText + '</strong></span>');
         html.push('    </div>');
 
+        if (wRes.exploited) {
+            html.push('    <div class="duel-weakness-badge exploited">');
+            html.push('      <span style="font-size:1.25rem;">🎯</span>');
+            html.push('      <div><strong>SLABINA VYUŽITA (+2 k síle):</strong> ' + this.escapeHtml(wRes.reason) + '!</div>');
+            html.push('    </div>');
+        } else if (q.weakness) {
+            html.push('    <div class="duel-weakness-badge locked">');
+            html.push('      <span style="font-size:1.15rem;">💡</span>');
+            html.push('      <div><strong>Slabina bestie:</strong> ' + weaknessText + ' <span style="opacity:0.75; font-size:0.78rem;">(Zatím nesplněno – pro bonus +2 potřebuješ odpovídající výbavu, ctnost či zvíře)</span></div>');
+            html.push('    </div>');
+        }
+
         html.push('    <div class="duel-arena-grid">');
         html.push('      <div class="duel-combatant" style="border-color:' + player.color + ';">');
         html.push('        <div class="duel-fighter-role" style="color:' + player.color + ';">' + player.badge + ' ' + this.escapeHtml(player.name) + '</div>');
         html.push('        <div class="duel-fighter-stat">⚔️ ' + basePower + ' <small>stálá síla</small></div>');
-        html.push('        <div class="duel-fighter-sub">Boj ' + stats.boj + (horseBonus > 0 ? ' + Kůň ' + horseBonus : '') + (animalBonus > 0 ? ' + Zvěř ' + animalBonus : '') + (tacticBonus > 0 ? ' + Taktika ' + tacticBonus : '') + '</div>');
+        html.push('        <div class="duel-fighter-sub">Boj ' + stats.boj + (horseBonus > 0 ? ' + Kůň ' + horseBonus : '') + (animalBonus > 0 ? ' + Zvěř ' + animalBonus : '') + (tacticBonus > 0 ? ' + Taktika ' + tacticBonus : '') + (weaknessBonus > 0 ? ' + Slabina ' + weaknessBonus : '') + '</div>');
         html.push('      </div>');
         html.push('      <div class="duel-vs-badge">VS</div>');
         html.push('      <div class="duel-combatant">');
@@ -3761,6 +3780,7 @@ window.PRS_App = {
             html.push('  <div style="font-size:0.9rem; color:#cbd5e1; margin-bottom:1rem;">');
             html.push('    Hod kostkou: 🎲 <strong>' + res.roll + '</strong> &nbsp;|&nbsp; Celková bojová síla: ⚔️ <strong>' + res.totalPower + '</strong> (vs. obtížnost ' + res.difficulty + ')');
             if (res.tacticName) html.push('    <div style="font-size:0.8rem; color:#86efac; margin-top:3px;">Použitá taktika: ' + this.escapeHtml(res.tacticName) + '</div>');
+            if (res.weaknessExploited) html.push('    <div style="font-size:0.85rem; color:#fef08a; font-weight:700; margin-top:4px;">🎯 Využita slabina bestie (+2 k síle): ' + this.escapeHtml(res.weaknessReason) + '</div>');
             html.push('  </div>');
 
             html.push('  <div class="quest-bounty-badge-row" style="margin-bottom:1.25rem;">');
@@ -3806,6 +3826,7 @@ window.PRS_App = {
             html.push('  <div class="quest-ceremony-banner loss">💀 PORÁŽKA V SOUBOJI</div>');
             html.push('  <p style="font-size:1.02rem; color:#fca5a5; margin-bottom:1rem;">');
             html.push('    <strong>' + q.icon + ' ' + this.escapeHtml(q.name) + '</strong> byl nad síly rytíře (Hod: 🎲 ' + res.roll + ', Síla ' + res.totalPower + ' vs. ' + res.difficulty + ').');
+            if (res.weaknessExploited) html.push('    <div style="font-size:0.82rem; color:#fde047; margin-top:4px;">🎯 Využil jsi slabinu bestie (+2 k síle: ' + this.escapeHtml(res.weaknessReason) + '), ale hod kostkou bohužel nestačil.</div>');
             html.push('  </p>');
 
             if (res.preventedHospital) {

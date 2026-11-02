@@ -1253,6 +1253,134 @@ window.PRS_GameEngine = {
         }
     },
 
+    // Kontrola a využití specifické slabiny bestie / draka z Bestiáře (+2 k síle)
+    checkQuestWeakness: function (state, player, q, tactics) {
+        if (!q || !q.weakness) return { exploited: false, reason: "" };
+        var stats = this.getEffectiveStats(state, player);
+        tactics = tactics || {};
+        var w = q.weakness;
+        var items = player.items || [];
+
+        function hasItemMatching(predicate) {
+            for (var i = 0; i < items.length; i++) {
+                var it = items[i];
+                if (it.isEquipped !== false && predicate(it)) return it;
+            }
+            return null;
+        }
+
+        // 1. Zvířata & jezdecké umění
+        if (w === "dogs") {
+            if (stats.dogs > 0 || tactics.hounds) {
+                return { exploited: true, reason: "Lovečtí psi odlákali pozornost bestie" };
+            }
+        } else if (w === "falcon" || w === "falcons") {
+            if (stats.falcons > 0 || tactics.hounds) {
+                return { exploited: true, reason: "Lovecký sokol vystopoval zranitelná místa" };
+            }
+        } else if (w === "horse") {
+            if (stats.horses > 0 || tactics.charge || stats.jizda >= 2) {
+                return { exploited: true, reason: "Drtivý nájezd z plné jízdy na koni zlomil obranu" };
+            }
+        } else if (w === "animals") {
+            if ((stats.dogs > 0 && stats.falcons > 0) || (stats.horses > 0 && stats.dogs > 0)) {
+                return { exploited: true, reason: "Kombinace vycvičených zvířat dokonale zmátla draka" };
+            }
+        } else if (w === "animals_and_spear") {
+            var hasSpear = hasItemMatching(function (it) {
+                return it.id === "it1_3" || it.id === "it2_2" || /kopí|dřevce/i.test(it.name);
+            });
+            if ((stats.horses > 0 || stats.dogs > 0) && (hasSpear || stats.boj >= 4)) {
+                return { exploited: true, reason: "Mistrovská koordinace jízdy na koni a turnajového kopí" };
+            }
+        }
+
+        // 2. Zbraně & rytířská zbroj
+        else if (w === "spear") {
+            var spearIt = hasItemMatching(function (it) {
+                return it.id === "it1_3" || it.id === "it2_2" || /kopí|dřevce/i.test(it.name);
+            });
+            if (spearIt) {
+                return { exploited: true, reason: "Dlouhé " + spearIt.name + " udrželo nestvůru v bezpečném odstupu" };
+            }
+            if (stats.boj >= 3 && stats.jizda >= 2) {
+                return { exploited: true, reason: "Rytířské ovládnutí jezdeckého kopí a manévrů" };
+            }
+        } else if (w === "armor") {
+            var armorIt = hasItemMatching(function (it) {
+                return it.slot === "armor" || it.id === "trophy_black_knight";
+            });
+            if (armorIt || stats.hasArmor) {
+                var aName = armorIt ? armorIt.name : "Pevná zbroj";
+                return { exploited: true, reason: aName + " odrazila drtivý úder" };
+            }
+        } else if (w === "water_armor") {
+            var waterIt = hasItemMatching(function (it) {
+                return it.id === "trophy_water" || it.id === "it2_3" || it.id === "it2_4" || it.id === "it3_2" || /voda|vodní|chlad|jezero/i.test(it.name);
+            });
+            if (waterIt || stats.hasArmor) {
+                return { exploited: true, reason: "Ochranné brnění a vodní perla zchladily spalující žár" };
+            }
+        }
+
+        // 3. Živlové zbraně (Oheň, Led/Mráz)
+        else if (w === "fire") {
+            var fireIt = hasItemMatching(function (it) {
+                return it.id === "trophy_red" || it.id === "trophy_volcano" || /oheň|ohniv|žár|plam|láva/i.test(it.name);
+            });
+            var curTheme = (state && state.config && state.config.elementTheme) || (state && state.currentTheme);
+            if (fireIt || curTheme === "fire" || stats.boj >= 4) {
+                return { exploited: true, reason: "Žhavé plameny a sopečný žár roztavily ledový krunýř" };
+            }
+        } else if (w === "ice") {
+            var iceIt = hasItemMatching(function (it) {
+                return it.id === "trophy_ice" || /led|mraz|rampouch/i.test(it.name);
+            });
+            var curTheme2 = (state && state.config && state.config.elementTheme) || (state && state.currentTheme);
+            if (iceIt || curTheme2 === "water" || stats.boj >= 4) {
+                return { exploited: true, reason: "Mrazivý chlad a ledové krystaly zchladily lávovou tlamu" };
+            }
+        }
+
+        // 4. Lektvary & Lazaret
+        else if (w === "elixir") {
+            if (tactics.elixir || player.gold >= 500) {
+                return { exploited: true, reason: "Hojivý lektvar z Lazaretu neutralizoval jedovatý dech" };
+            }
+        }
+
+        // 5. Ctnosti: Tanec & Charisma
+        else if (w === "dance") {
+            if (stats.tanec >= 2 || stats.hasDress) {
+                return { exploited: true, reason: "Půvabný taneční krok a dvorský šat okouzlily hravého draka" };
+            }
+        } else if (w === "charisma") {
+            if (stats.charisma >= 3 || stats.hasJewel) {
+                return { exploited: true, reason: "Vznešené charisma rytíře dojalo drahokamového draka" };
+            }
+        }
+
+        // 6. Odvaha, Světlo, Svaté relikvie, Mistrovství
+        else if (w === "courage") {
+            if (stats.boj >= 3 || stats.jizda >= 3) {
+                return { exploited: true, reason: "Nezlomná rytířská odvaha pronikla mlhou stínů" };
+            }
+        } else if (w === "light" || w === "holy") {
+            var holyIt = hasItemMatching(function (it) {
+                return it.id === "trophy_stag" || it.id === "it3_4" || it.id === "it1_9" || it.id === "it3_2" || it.id === "it3_1" || it.id === "trophy_gold" || /svat|klenot|světlo|zlat/i.test(it.name);
+            });
+            if (holyIt || stats.charisma >= 3) {
+                return { exploited: true, reason: "Zářící posvátné světlo relikvií spálilo stínovou temnotu" };
+            }
+        } else if (w === "mastery") {
+            if (stats.boj >= 2 && stats.jizda >= 2 && stats.tanec >= 2 && stats.charisma >= 2) {
+                return { exploited: true, reason: "Dokonalé ovládnutí všech 4 rytířských ctností (Boj, Jízda, Tanec, Charisma)" };
+            }
+        }
+
+        return { exploited: false, reason: "" };
+    },
+
     // Vyhodnocení Úkolu / Souboje s monstrem či drakem (U1, U2, U3)
     resolveQuest: function (state, forcedRoll, tactics) {
         var pa = state.pendingAction;
@@ -1282,7 +1410,9 @@ window.PRS_GameEngine = {
             animalBonus = (stats.dogs > 0 && stats.falcons > 0) ? 2 : 1;
         }
         var horseBonus = (q.questTier !== "U1" && stats.horses > 0) ? (1 + Math.floor(stats.jizda / 2)) : 0;
-        var totalPower = roll + stats.boj + animalBonus + horseBonus + tacticBonus;
+        var wRes = this.checkQuestWeakness(state, player, q, tactics);
+        var weaknessBonus = wRes.exploited ? 2 : 0;
+        var totalPower = roll + stats.boj + animalBonus + horseBonus + tacticBonus + weaknessBonus;
 
         pa.canResolveQuest = false;
         var won = totalPower >= q.difficulty;
@@ -1297,6 +1427,9 @@ window.PRS_GameEngine = {
             player.stats.heartsFromQuests += q.hearts;
 
             var rewardMsg = "⚔️ HRDINSKÉ VÍTĚZSTVÍ! " + player.badge + " " + player.name + " porazil **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. obtížnost " + q.difficulty + ", hod " + roll + ")! Získává **+" + q.gold.toLocaleString("cs-CZ") + " zl.**" + (q.hearts > 0 ? " a **+" + q.hearts + " 💖**!" : "!");
+            if (wRes.exploited) {
+                rewardMsg += " 🎯 Využita slabina bestie (+2 k síle: " + wRes.reason + ")!";
+            }
 
             // 🏆 Získání unikátní trofeje z nestvůry / draka
             var trophyChance = (q.questTier === "U1") ? 0.75 : 1.0;
@@ -1389,6 +1522,9 @@ window.PRS_GameEngine = {
             tacticBonus: tacticBonus,
             horseBonus: horseBonus,
             animalBonus: animalBonus,
+            weaknessBonus: weaknessBonus,
+            weaknessExploited: wRes.exploited,
+            weaknessReason: wRes.reason,
             tacticName: tacticName
         };
     },
