@@ -9,7 +9,7 @@
 // --- PRAVIDLA, ENCYKLOPEDIE, BESTIÁŘ, HRADY A TROFEJE ---
     switchRulesSubtab: function (subtabId) {
         this.rulesSubtab = subtabId;
-        var subtabs = ["rules", "dragons", "castles", "trophies"];
+        var subtabs = ["rules", "dragons", "castles", "trophies", "decorations"];
         for (var i = 0; i < subtabs.length; i++) {
             var s = subtabs[i];
             var el = document.getElementById("rules-subtab-" + s);
@@ -23,6 +23,7 @@
         if (subtabId === "dragons") this.renderBestiary();
         else if (subtabId === "castles") this.renderCastlesGallery();
         else if (subtabId === "trophies") this.renderTrophiesHall();
+        else if (subtabId === "decorations") this.renderDecorationsGallery();
     },
 
     renderRulesAndCatalog: function () {
@@ -50,6 +51,7 @@
         this.renderBestiary();
         this.renderCastlesGallery();
         this.renderTrophiesHall();
+        this.renderDecorationsGallery();
     },
 
     // --- DRAČÍ BESTIÁŘ (20 DRAKŮ) ---
@@ -133,6 +135,9 @@
                 html.push('    </div>');
             }
 
+            if (d.imgFlip) {
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + d.img + '\', \'' + d.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">🔄 Otočit směr pohledu draka</button>');
+            }
             html.push('  </div>');
             html.push('</div>');
         }
@@ -175,6 +180,9 @@
             html.push('    <div class="card-callout-box" style="border-color:rgba(212,175,55,0.3); color:#fef08a;">');
             html.push('      🏰 <strong>Výhoda panství:</strong> Výnos daní +2 500 zl., nájem 1 500 zl., trvale +1 Charisma a audience u princezny.');
             html.push('    </div>');
+            if (c.imgFlip) {
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + c.img + '\', \'' + c.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">🔄 Otočit pohled na hrad</button>');
+            }
             html.push('  </div>');
             html.push('</div>');
         }
@@ -237,6 +245,104 @@
             html.push('</div>');
         }
         container.innerHTML = html.join("");
+    },
+
+    // --- ATLAS DEKORACÍ A KRAJINY (34+ PRVKŮ) ---
+    setDecorationsCategory: function (cat) {
+        this.decorationsActiveCategory = cat;
+        var btns = document.querySelectorAll(".decor-filter-btn");
+        btns.forEach(function (b) {
+            if (b.getAttribute("data-cat") === cat) b.classList.add("active");
+            else b.classList.remove("active");
+        });
+        this.renderDecorationsGallery();
+    },
+
+    renderDecorationsGallery: function () {
+        var container = document.getElementById("decorations-grid-container");
+        if (!container || !window.PRS_DECOR_CATALOG) return;
+
+        var catalog = window.PRS_DECOR_CATALOG;
+        var filter = this.decorationsActiveCategory || "all";
+
+        var categoryLabels = {
+            vegetation: "Lesy & Vegetace",
+            terrain: "Skály & Hory",
+            agriculture: "Zemědělství",
+            settlement: "Sídla & Stavby",
+            civilization: "Opevnění & Stráže",
+            water: "Voda & Močály",
+            magic: "Magie & Ruiny",
+            quest_lair: "Doupata & Sluje"
+        };
+
+        var categoryColors = {
+            vegetation: "#4ade80",
+            terrain: "#a8a29e",
+            agriculture: "#facc15",
+            settlement: "#fb923c",
+            civilization: "#94a3b8",
+            water: "#38bdf8",
+            magic: "#c084fc",
+            quest_lair: "#f87171"
+        };
+
+        var html = [];
+        for (var k in catalog) {
+            if (!catalog.hasOwnProperty(k)) continue;
+            var d = catalog[k];
+            var cat = d.category || "vegetation";
+
+            // Filtrování
+            if (filter !== "all") {
+                if (filter === "vegetation" && cat !== "vegetation") continue;
+                if (filter === "settlement" && cat !== "settlement" && cat !== "agriculture" && cat !== "civilization") continue;
+                if (filter === "water" && cat !== "water") continue;
+                if (filter === "magic" && cat !== "magic") continue;
+                if (filter === "quest_lair" && cat !== "quest_lair" && cat !== "terrain") continue;
+            }
+
+            var col = categoryColors[cat] || "var(--gold-light)";
+            var catName = categoryLabels[cat] || cat.toUpperCase();
+            var icon = d.icon || "🌲";
+            var desc = d.desc || "Malebný prvek oživující herní plochu království.";
+
+            html.push('<div class="decor-card" style="background:var(--card-bg, #1a1625); border:1px solid rgba(212,175,55,0.25); border-radius:8px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 4px 14px rgba(0,0,0,0.4);">');
+            html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(d.name) + '\', \'' + this.escapeHtml(desc) + '\')" title="Klikni pro zvětšení ilustrace" style="position:relative; background:radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.5) 100%); padding:1rem 0.5rem; display:flex; justify-content:center; align-items:center; min-height:160px; cursor:pointer;">');
+            html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(d.name) + '" class="card-media-img" loading="lazy" style="max-height:130px; max-width:85%; object-fit:contain; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.6)); transition:transform 0.2s;" />');
+            html.push('    <span class="card-media-badge-left" style="position:absolute; top:8px; left:8px; font-size:0.7rem; font-weight:bold; border:1px solid ' + col + '; color:' + col + '; background:rgba(0,0,0,0.75); padding:2px 6px; border-radius:4px;">' + catName + '</span>');
+            html.push('    <span class="card-media-badge-right" style="position:absolute; top:8px; right:8px; font-size:0.7rem; font-weight:bold; border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; background:rgba(0,0,0,0.75); padding:2px 6px; border-radius:4px;">📐 ' + d.w + '×' + d.h + ' px</span>');
+            html.push('  </div>');
+
+            html.push('  <div class="card-media-body" style="padding:0.75rem; display:flex; flex-direction:column; flex:1;">');
+            html.push('    <div class="card-media-title" style="font-family:\'Cinzel\',serif; font-size:0.95rem; font-weight:bold; color:var(--gold-light, #fef08a); margin-bottom:0.35rem;">' + icon + ' ' + this.escapeHtml(d.name) + '</div>');
+            html.push('    <div class="card-media-desc" style="font-size:0.8rem; color:#94a3b8; line-height:1.35; flex:1; margin-bottom:0.5rem;">' + this.escapeHtml(desc) + '</div>');
+            html.push('    <div style="font-size:0.72rem; color:#64748b; margin-bottom:0.4rem;">🏷️ Bezpečná zóna (Clearance): <strong>' + (d.clearance || 35) + ' px</strong></div>');
+            
+            if (d.imgFlip) {
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + d.img + '\', \'' + d.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; width:100%; cursor:pointer;">🔄 Otočit zrcadlení</button>');
+            }
+            html.push('  </div>');
+            html.push('</div>');
+        }
+        container.innerHTML = html.join("");
+    },
+
+    // --- INTERAKTIVNÍ ZRCADLENÍ ILUSTRACÍ V KARTÁCH (LÍC / RUB) ---
+    toggleCardFlip: function (btn, normalSrc, flipSrc) {
+        var card = btn.closest(".bestiary-card, .castle-card, .decor-card");
+        if (!card) return;
+        var img = card.querySelector(".card-media-img");
+        if (!img) return;
+        if (img.getAttribute("data-is-flipped") === "true") {
+            img.src = normalSrc;
+            img.setAttribute("data-is-flipped", "false");
+            btn.textContent = "🔄 Otočit zrcadlení";
+        } else {
+            img.src = flipSrc || normalSrc;
+            img.setAttribute("data-is-flipped", "true");
+            btn.textContent = "↩️ Původní směr";
+        }
     },
 
     // --- UNIVERZÁLNÍ LIGHTBOX PRO OBRÁZKY (DRAKY, ZÁMKY, NÁKRESY) ---
