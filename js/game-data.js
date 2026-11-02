@@ -131,7 +131,7 @@ window.PRS_GRAPHICS_CONFIG = {
     decorBitmaps: {
         tree_oak: "assets/decorations/tree_oak.png",
         tree_pine: "assets/decorations/tree_pine.png",
-        tree_birch: "assets/decorations/tree_birch.png",
+        tree_birch: "assets/decorations/tree_birch.png?v=202611021708",
         grove_oak: "assets/decorations/grove_oak.png",
         grove_pine: "assets/decorations/grove_pine.png",
         grove_pine2: "assets/decorations/grove_pine2.png",
@@ -223,8 +223,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Půvabná bělostná bříza se stříbřitou kůrou a jemným listovím, oblíbená v hájích u koňských pastvin.",
         category: "vegetation",
         w: 44, h: 64, clearance: 22,
-        img: "assets/decorations/tree_birch.png",
-        imgFlip: "assets/decorations/tree_birch_flip.png",
+        img: "assets/decorations/tree_birch.png?v=202611021708",
+        imgFlip: "assets/decorations/tree_birch_flip.png?v=202611021708",
         renderSVG: function () {
             return '' +
                 '<path d="M-2,12 L-3,32 L3,32 L2,12 Z" fill="#f5f5f4" stroke="#44403c" stroke-width="1"/>' +
@@ -847,8 +847,8 @@ window.PRS_CASTLES = {
         name: "Ledový palác Věčného mrazu",
         element: "ice",
         icon: "❄️",
-        img: "assets/castles/castle_ice.png",
-        imgFlip: "assets/castles/castle_ice_flip.png",
+        img: "assets/castles/castle_ice.png?v=202611021708",
+        imgFlip: "assets/castles/castle_ice_flip.png?v=202611021708",
         desc: "Zámek vytesaný z průsvitného ledu a rampouchů, obklopený zamrzlými vodopády a zasněženými skalami."
     }
 };
@@ -1249,28 +1249,28 @@ window.PRS_QUESTS = {
         imgFlip: "assets/dragons/dragon_swamp_flip.png", weakness: "elixir", desc: "Těžkopádný drak z močálu chrlící jedovatý dým. Hojivý lektvar z Lazaretu ti pomůže přežít." },
         { id: "u3_fairy", name: "Pohádkový pestrý drak", icon: "🦋", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6000, hearts: 3.0, itemTier: 2, trophyId: "trophy_fairy", img: "assets/dragons/dragon_fairy.png",
         imgFlip: "assets/dragons/dragon_fairy_flip.png", weakness: "dance", desc: "Hravý drak s motýlími křídly vyfukující kouzelný prach. Lze jej okouzlit Tancem a Charismatem!" },
-        { id: "u3_water", name: "Vodní jezerní drak", icon: "🌊", tierGroup: "young", difficulty: 12, diffOffset: -1, gold: 7500, hearts: 3.0, itemTier: 2, trophyId: "trophy_water", img: "assets/dragons/dragon_water.png",
-        imgFlip: "assets/dragons/dragon_water_flip.png", weakness: "spear", desc: "Drak z hlubokých jezer s ploutvemi a vodní tříští. Střeží potopenou truhlu s perlami." },
-        { id: "u3_wind", name: "Větrný nebeský drak", icon: "🌪️", tierGroup: "young", difficulty: 12, diffOffset: -1, gold: 7500, hearts: 3.0, itemTier: 2, trophyId: "trophy_wind", img: "assets/dragons/dragon_wind.png",
-        imgFlip: "assets/dragons/dragon_wind_flip.png", weakness: "horse", desc: "Elegantní drak vznášející se v oblacích. Útok z plné jízdy na koni ti dá převahu!" },
+        { id: "u3_water", name: "Vodní jezerní drak", icon: "🌊", tierGroup: "young", difficulty: 12, diffOffset: -1, gold: 7500, hearts: 3.0, itemTier: 2, trophyId: "trophy_water", img: "assets/dragons/dragon_water.png?v=202611021708",
+        imgFlip: "assets/dragons/dragon_water_flip.png?v=202611021708", weakness: "spear", desc: "Drak z hlubokých jezer s ploutvemi a vodní tříští. Střeží potopenou truhlu s perlami." },
+        { id: "u3_wind", name: "Větrný nebeský drak", icon: "🌪️", tierGroup: "young", difficulty: 12, diffOffset: -1, gold: 7500, hearts: 3.0, itemTier: 2, trophyId: "trophy_wind", img: "assets/dragons/dragon_wind.png?v=202611021708",
+        imgFlip: "assets/dragons/dragon_wind_flip.png?v=202611021708", weakness: "horse", desc: "Elegantní drak vznášející se v oblacích. Útok z plné jízdy na koni ti dá převahu!" },
 
         // --- TIER B: Věkovití živloví draci (Obtížnost 13–14) ---
         { id: "u3_red", name: "Červený ohnivý drak", icon: "🐉", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 8500, hearts: 4.0, itemTier: 3, trophyId: "trophy_red", img: "assets/dragons/dragon_red.png",
         imgFlip: "assets/dragons/dragon_red_flip.png", weakness: "water_armor", desc: "Dravý drak se zlatavými šupinami na skalním útesu s bohatou hromadou zlaťáků." },
         { id: "u3_volcano", name: "Sopečný lávový drak", icon: "🌋", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 9000, hearts: 4.0, itemTier: 3, trophyId: "trophy_volcano", img: "assets/dragons/dragon_volcano.png",
         imgFlip: "assets/dragons/dragon_volcano_flip.png", weakness: "ice", desc: "Mohutný drak chrlící žhavou lávu. Jeho poklad se třpytí v rudém žáru sopečných puklin." },
-        { id: "u3_ice", name: "Mrazivý ledový drak", icon: "❄️", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 8500, hearts: 4.0, itemTier: 3, trophyId: "trophy_ice", img: "assets/dragons/dragon_ice.png",
-        imgFlip: "assets/dragons/dragon_ice_flip.png", weakness: "fire", desc: "Ledový drak s křídly z rampouchů a geod. Zmrazí každého nepřipraveného rytíře." },
+        { id: "u3_ice", name: "Mrazivý ledový drak", icon: "❄️", tierGroup: "elemental", difficulty: 13, diffOffset: 0, gold: 8500, hearts: 4.0, itemTier: 3, trophyId: "trophy_ice", img: "assets/dragons/dragon_ice.png?v=202611021708",
+        imgFlip: "assets/dragons/dragon_ice_flip.png?v=202611021708", weakness: "fire", desc: "Ledový drak s křídly z rampouchů a geod. Zmrazí každého nepřipraveného rytíře." },
         { id: "u3_lightning", name: "Bouřný bleskový drak", icon: "⚡", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 10000, hearts: 4.5, itemTier: 3, trophyId: "trophy_lightning", img: "assets/dragons/dragon_lightning.png",
         imgFlip: "assets/dragons/dragon_lightning_flip.png", weakness: "armor", desc: "Drak sršící elektrickými výboji mezi bouřkovými mraky. Vyžaduje pevnou zbroj a rychlé reflexy." },
-        { id: "u3_black", name: "Černý stínový drak", icon: "🌑", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 9500, hearts: 4.5, itemTier: 3, trophyId: "trophy_black", img: "assets/dragons/dragon_black.png",
-        imgFlip: "assets/dragons/dragon_black_flip.png", weakness: "light", desc: "Hrozivý trnitý drak v uhelně černém hávu. Z tlamy mu stoupá magicky fialový dým." },
-        { id: "u3_crystal", name: "Křišťálový drahokamový drak", icon: "💎", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 11000, hearts: 4.5, itemTier: 3, trophyId: "trophy_crystal", img: "assets/dragons/dragon_crystal.png",
-        imgFlip: "assets/dragons/dragon_crystal_flip.png", weakness: "charisma", desc: "Nádherná bestie z tisíců drahokamů. Vítěz získá obrovské ložisko rubínů a ametystů." },
+        { id: "u3_black", name: "Černý stínový drak", icon: "🌑", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 9500, hearts: 4.5, itemTier: 3, trophyId: "trophy_black", img: "assets/dragons/dragon_black.png?v=202611021708",
+        imgFlip: "assets/dragons/dragon_black_flip.png?v=202611021708", weakness: "light", desc: "Hrozivý trnitý drak v uhelně černém hávu. Z tlamy mu stoupá magicky fialový dým." },
+        { id: "u3_crystal", name: "Křišťálový drahokamový drak", icon: "💎", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 11000, hearts: 4.5, itemTier: 3, trophyId: "trophy_crystal", img: "assets/dragons/dragon_crystal.png?v=202611021708",
+        imgFlip: "assets/dragons/dragon_crystal_flip.png?v=202611021708", weakness: "charisma", desc: "Nádherná bestie z tisíců drahokamů. Vítěz získá obrovské ložisko rubínů a ametystů." },
         { id: "u3_bone", name: "Kostěný nemrtvý drak", icon: "💀", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 9000, hearts: 4.0, itemTier: 3, trophyId: "trophy_bone", img: "assets/dragons/dragon_bone.png",
         imgFlip: "assets/dragons/dragon_bone_flip.png", weakness: "holy", desc: "Prastarý kostlivec oživený fialovo-zeleným plamenem. Střeží zbraně padlých reků." },
-        { id: "u3_gold", name: "Zlatý královský drak", icon: "👑", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 12500, hearts: 5.0, itemTier: 3, trophyId: "trophy_gold", img: "assets/dragons/dragon_gold.png",
-        imgFlip: "assets/dragons/dragon_gold_flip.png", weakness: "charisma", desc: "Majestátní drak ze zářivého zlata. Obývá největší přetékající hromadu mincí v království!" },
+        { id: "u3_gold", name: "Zlatý královský drak", icon: "👑", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 12500, hearts: 5.0, itemTier: 3, trophyId: "trophy_gold", img: "assets/dragons/dragon_gold.png?v=202611021708",
+        imgFlip: "assets/dragons/dragon_gold_flip.png?v=202611021708", weakness: "charisma", desc: "Majestátní drak ze zářivého zlata. Obývá největší přetékající hromadu mincí v království!" },
         { id: "u3_shadow", name: "Přízračný drak stínů", icon: "👻", tierGroup: "elemental", difficulty: 14, diffOffset: 1, gold: 10000, hearts: 4.5, itemTier: 3, trophyId: "trophy_shadow", img: "assets/dragons/dragon_shadow.png",
         imgFlip: "assets/dragons/dragon_shadow_flip.png", weakness: "courage", desc: "Napůl nehmotný drak tvořený temnou mlhou. Zkouší odvahu a pevnost rytířského srdce." },
 
