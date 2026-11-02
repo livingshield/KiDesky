@@ -88,6 +88,8 @@ foreach ($rb in $remoteBases) {
     Write-Host "=== Deploying code files to $rb ===" -ForegroundColor Yellow
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)css"
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)js"
+    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets"
+    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/monsters"
     foreach ($rel in $codeFiles) {
         $localF = Join-Path $localBase $rel.Replace('/', '\')
         if (Test-Path $localF) {
@@ -95,6 +97,16 @@ foreach ($rb in $remoteBases) {
             Upload-FtpFile $localF $remoteF
         } else {
             Write-Warning "Local file not found: $localF"
+        }
+    }
+
+    # Deploy monsters if any
+    $monstersDir = Join-Path $localBase "assets\monsters"
+    if (Test-Path $monstersDir) {
+        $monsterFiles = Get-ChildItem -Path $monstersDir -Filter "*.png"
+        foreach ($mf in $monsterFiles) {
+            $remoteF = "ftp://$FtpServer$($rb)assets/monsters/$($mf.Name)"
+            Upload-FtpFile $mf.FullName $remoteF
         }
     }
 }

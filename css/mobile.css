@@ -438,13 +438,22 @@
             background: radial-gradient(circle at center 60%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.88) 100%), #080605;
             cursor: pointer;
         }
+        .bestiary-card .card-media-header {
+            height: 235px;
+        }
+        .castle-card .card-media-header {
+            height: 195px;
+        }
         .card-media-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center 28px;
+            object-position: center 36px;
             transition: transform 0.3s ease;
             display: block;
+        }
+        .castle-card .card-media-img {
+            object-position: center center;
         }
         .card-media-header:hover .card-media-img {
             transform: scale(1.04) translateY(2px);
