@@ -67,12 +67,25 @@
 
     renderBestiary: function () {
         var container = document.getElementById("bestiary-grid-container");
-        if (!container || !window.PRS_QUESTS || !window.PRS_QUESTS.U3) return;
+        if (!container || !window.PRS_QUESTS) return;
 
-        var dragons = window.PRS_QUESTS.U3;
         var tierFilter = this.bestiaryActiveTier || "all";
-        var filtered = dragons.filter(function (d) {
-            if (tierFilter === "all") return true;
+        var listToFilter = [];
+
+        if (tierFilter === "u1") {
+            listToFilter = window.PRS_QUESTS.U1 || [];
+        } else if (tierFilter === "u2") {
+            var fullU2 = window.PRS_QUESTS.U2 || [];
+            listToFilter = fullU2.slice(0, 16);
+        } else if (tierFilter === "u2_epic") {
+            var fullU2b = window.PRS_QUESTS.U2 || [];
+            listToFilter = fullU2b.slice(16);
+        } else {
+            listToFilter = window.PRS_QUESTS.U3 || [];
+        }
+
+        var filtered = listToFilter.filter(function (d) {
+            if (tierFilter === "all" || tierFilter === "u1" || tierFilter === "u2" || tierFilter === "u2_epic") return true;
             return d.tierGroup === tierFilter;
         });
 
@@ -98,15 +111,21 @@
         var html = [];
         for (var i = 0; i < filtered.length; i++) {
             var d = filtered[i];
-            var tierTitle = (d.tierGroup === "young") ? "Tier A (Mladý drak)" :
-                            (d.tierGroup === "elemental" ? "Tier B (Živlový drak)" : "Tier C (Legendární Boss)");
-            var tierColor = (d.tierGroup === "young") ? "#60a5fa" :
-                            (d.tierGroup === "elemental" ? "#a855f7" : "#f59e0b");
+            var tierTitle = (d.id && d.id.indexOf("u1_") === 0) ? "Tier U1 (Lesní zvěř)" :
+                            (d.id && d.id.indexOf("u2_") === 0 && d.difficulty >= 12 ? "Tier U2+ (Mýtický titán)" :
+                            (d.id && d.id.indexOf("u2_") === 0 ? "Tier U2 (Bájné monstrum)" :
+                            (d.tierGroup === "young" ? "Tier A (Mladý drak)" :
+                            (d.tierGroup === "elemental" ? "Tier B (Živlový drak)" : "Tier C (Legendární Boss)"))));
+            var tierColor = (d.id && d.id.indexOf("u1_") === 0) ? "#10b981" :
+                            (d.id && d.id.indexOf("u2_") === 0 && d.difficulty >= 12 ? "#ec4899" :
+                            (d.id && d.id.indexOf("u2_") === 0 ? "#f59e0b" :
+                            (d.tierGroup === "young" ? "#60a5fa" :
+                            (d.tierGroup === "elemental" ? "#a855f7" : "#e11d48"))));
             var trophyDef = d.trophyId && window.PRS_TROPHIES ? window.PRS_TROPHIES[d.trophyId] : null;
 
             html.push('<div class="bestiary-card">');
             html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(d.name) + '\', \'' + this.escapeHtml(d.desc) + '\')" title="Klikni pro zvětšení ilustrace">');
-            html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(d.name) + '" class="card-media-img" loading="lazy" />');
+            html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(d.name) + '" class="card-media-img" loading="lazy" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.png\';" />');
             html.push('    <span class="card-media-badge-left" style="border-color:' + tierColor + '; color:' + tierColor + ';">' + tierTitle + '</span>');
             html.push('    <span class="card-media-badge-right">⚔️ Obtížnost ' + d.difficulty + '</span>');
             html.push('  </div>');

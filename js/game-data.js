@@ -1215,7 +1215,186 @@ window.PRS_TROPHIES = {
         boj: 7, jizda: 4, tanec: 3, charisma: 6,
         pluses: 20, minuses: 0, price: 22000,
         desc: "Ultimátní trofej ze samotného dračího císaře! Žezlo ze zlata a obsidiánu zaručující věčnou slávu."
+    },
+    // ========================================================================
+    // 34 NOVÝCH UNIKÁTNÍCH TROFEJÍ Z BÁJNÝCH MONSTER A ŠELEM (5. SLOT ZBROJNICE)
+    // ========================================================================
+    // --- U1 Trofeje ze zvěře a lesních dravců ---
+    trophy_lynx: {
+        id: "trophy_lynx", name: "Ostrý rysí zrak", tier: 1, slot: "trophy", icon: "🐱",
+        source: "Rys ostrovid (U1)", boj: 1, jizda: 1, tanec: 0, charisma: 0, pluses: 2, minuses: 0, price: 2000,
+        desc: "Vyčiněný amulet s rysími drápy a lístky kapradí. Zlepšuje postřeh v nočním lese."
+    },
+    trophy_bison: {
+        id: "trophy_bison", name: "Zubří rohovina", tier: 1, slot: "trophy", icon: "🦬",
+        source: "Zuřivý pralesní zubr (U1)", boj: 2, jizda: 0, tanec: -1, charisma: 0, pluses: 2, minuses: 1, price: 2200,
+        desc: "Hladce vyleštěný roh pralesního obra. Dává nositeli nezlomnou průbojnost."
+    },
+    trophy_panther: {
+        id: "trophy_panther", name: "Plášť z panteří kůže", tier: 1, slot: "trophy", icon: "🐆",
+        source: "Černý královský panter (U1)", boj: 0, jizda: 1, tanec: 1, charisma: 1, pluses: 3, minuses: 0, price: 2500,
+        desc: "Hebká ebenová kožešina královské šelmy. Dodává rytíři neslyšný krok a vznešenou auru."
+    },
+    trophy_spider: {
+        id: "trophy_spider", name: "Jedový váček pavouka", tier: 1, slot: "trophy", icon: "🕷️",
+        source: "Obří lesní pavouk (U1)", boj: 1, jizda: 0, tanec: 0, charisma: 1, pluses: 2, minuses: 0, price: 2300,
+        desc: "Krystalizovaný kapkovitý váček se třpytivým jedem. Nošen na opasku budí respekt lapků."
+    },
+    trophy_croc: {
+        id: "trophy_croc", name: "Pancéřový opasek z krokodýla", tier: 1, slot: "trophy", icon: "🐊",
+        source: "Jezerní krokodýl (U1)", boj: 2, jizda: 1, tanec: 0, charisma: 0, pluses: 3, minuses: 0, price: 2600,
+        desc: "Opasek z hrubé šupinaté kůže jezerní bestie. Chrání před zákeřnými výpady zblízka."
+    },
+    trophy_eagle: {
+        id: "trophy_eagle", name: "Péro orlího krále", tier: 1, slot: "trophy", icon: "🦅",
+        source: "Skalní orel (U1)", boj: 0, jizda: 2, tanec: 0, charisma: 1, pluses: 3, minuses: 0, price: 3000,
+        desc: "Zlatohnědé pero horského dravce zdobící chochol přilbice. Zvyšuje rychlost a přehled v sedle."
+    },
+    trophy_boar_lone: {
+        id: "trophy_boar_lone", name: "Válečný tesák Samotáře", tier: 1, slot: "trophy", icon: "🐗",
+        source: "Hvozdný divočák Samotář (U1)", boj: 2, jizda: 1, tanec: -1, charisma: 0, pluses: 3, minuses: 1, price: 2700,
+        desc: "Zahnutý tesák ze starého kance. Důkaz odvahy rytíře, který svedl boj muž proti muži."
+    },
+    trophy_wolverine: {
+        id: "trophy_wolverine", name: "Hřejivá rosomáčí hučka", tier: 1, slot: "trophy", icon: "🦡",
+        source: "Severní vlkobijec (U1)", boj: 2, jizda: 0, tanec: 0, charisma: 1, pluses: 3, minuses: 0, price: 2800,
+        desc: "Nezničitelná hučka ze severského dravce. Žádný mráz ani bouře rytíře nezlomí."
+    },
+    trophy_pike: {
+        id: "trophy_pike", name: "Jezerní stříbrná šupina", tier: 1, slot: "trophy", icon: "🐟",
+        source: "Obří jezerní štika (U1)", boj: 1, jizda: 0, tanec: 1, charisma: 2, pluses: 4, minuses: 0, price: 3200,
+        desc: "Obrovská zrcadlová šupina ulovená v hlubokých tůních. Odráží měsíční svit a těší dvůr."
+    },
+    trophy_unicorn: {
+        id: "trophy_unicorn", name: "Roh čistoty a světla", tier: 1, slot: "trophy", icon: "🦄",
+        source: "Magický bílý jednorožec (U1)", boj: 0, jizda: 1, tanec: 2, charisma: 2, pluses: 5, minuses: 0, price: 3800,
+        desc: "Spirálovitý perleťový roh posvátné bytosti. Princezna na plese zatají dech úžasem."
+    },
+
+    // --- U2 Trofeje z bájných monster a protivníků ---
+    trophy_basilisk: {
+        id: "trophy_basilisk", name: "Zkamenělé baziliščí oko", tier: 2, slot: "trophy", icon: "🦎",
+        source: "Zkamenělý bazilišek (U2)", boj: 2, jizda: 0, tanec: 0, charisma: 3, pluses: 5, minuses: 0, price: 6500,
+        desc: "Klenot ze ztuhlého jantaru a smaragdu. Soupeři při pohledu do něj znejistí."
+    },
+    trophy_wisp: {
+        id: "trophy_wisp", name: "Lucerna bludiček", tier: 2, slot: "trophy", icon: "🕯️",
+        source: "Močálová jezinka (U2)", boj: 0, jizda: 1, tanec: 2, charisma: 3, pluses: 6, minuses: 0, price: 6800,
+        desc: "Mosazná lucerna s věčně tančícím modrým plamínkem. Ukazuje bezpečnou cestu mlhou."
+    },
+    trophy_troll: {
+        id: "trophy_troll", name: "Kamenné srdce trolla", tier: 2, slot: "trophy", icon: "🧌",
+        source: "Horský kamenný troll (U2)", boj: 4, jizda: 1, tanec: -2, charisma: 0, pluses: 5, minuses: 2, price: 6500,
+        desc: "Těžký křemencový kámen tepající horskou silou. Rytíř získá údernost skalního balvanu."
+    },
+    trophy_minotaur: {
+        id: "trophy_minotaur", name: "Zlatý kroužek Minotaura", tier: 2, slot: "trophy", icon: "🐂",
+        source: "Minotaurus z labyrintu (U2)", boj: 4, jizda: 2, tanec: -1, charisma: 1, pluses: 7, minuses: 1, price: 7200,
+        desc: "Masivní tepaný kroužek pána labyrintu. Propůjčuje neomylný orientační smysl a hrubou sílu."
+    },
+    trophy_manticore: {
+        id: "trophy_manticore", name: "Trn z ocasu mantikory", tier: 2, slot: "trophy", icon: "🦁",
+        source: "Pralesní mantikora (U2)", boj: 3, jizda: 2, tanec: 0, charisma: 2, pluses: 7, minuses: 0, price: 7400,
+        desc: "Kostěný osten z bájné mantikory. Přidělán k jílcové záštitě meče vzbuzuje posvátnou hrůzu."
+    },
+    trophy_griffin: {
+        id: "trophy_griffin", name: "Gryfí letka a spáry", tier: 2, slot: "trophy", icon: "🦅",
+        source: "Skalní gryf (U2)", boj: 2, jizda: 4, tanec: 0, charisma: 1, pluses: 7, minuses: 0, price: 7500,
+        desc: "Obruby štítu zdobené zlatým gryfím peřím a spárem. Zvyšují rychlost rytíře při zteči."
+    },
+    trophy_siren: {
+        id: "trophy_siren", name: "Kouzelná mušle mořské sirény", tier: 2, slot: "trophy", icon: "🧜‍♀️",
+        source: "Zrádná siréna (U2)", boj: 0, jizda: 0, tanec: 4, charisma: 3, pluses: 7, minuses: 0, price: 7600,
+        desc: "Duhová perleťová ulita znějící zpěvem vln. Kdo ji přiloží k uchu, tančí s lehkostí vánku."
+    },
+    trophy_ghost_knight: {
+        id: "trophy_ghost_knight", name: "Prokletá rytířská pečeť", tier: 2, slot: "trophy", icon: "💀",
+        source: "Kostlivý přízrak (U2)", boj: 3, jizda: 1, tanec: 0, charisma: 2, pluses: 6, minuses: 0, price: 7500,
+        desc: "Zrezivělá stříbrná pečeť dávného turnajového vítěze. Osvobozena od temnoty, slouží novému hrdinovi."
+    },
+    trophy_lesovik: {
+        id: "trophy_lesovik", name: "Kouzelná větev Lesovika", tier: 2, slot: "trophy", icon: "👺",
+        source: "Lesní hejkal (U2)", boj: 2, jizda: 2, tanec: 2, charisma: 1, pluses: 7, minuses: 0, price: 7800,
+        desc: "Rostlá dubová hůlka z nitra kouzelného hvozdu. Zvířata v lese rytíře poslouchají na slovo."
+    },
+    trophy_ghoul: {
+        id: "trophy_ghoul", name: "Amulet věčného odpočinku", tier: 2, slot: "trophy", icon: "🧟",
+        source: "Hřbitovní ghúl (U2)", boj: 2, jizda: 0, tanec: 1, charisma: 4, pluses: 7, minuses: 0, price: 8000,
+        desc: "Stříbrný medailon se svěcenou vodou. Zajišťuje přízeň kněží a uznání královského dvora."
+    },
+    trophy_golem: {
+        id: "trophy_golem", name: "Šém hliněného Golema", tier: 2, slot: "trophy", icon: "🗿",
+        source: "Magický hliněný Golem (U2)", boj: 4, jizda: 0, tanec: -2, charisma: 3, pluses: 7, minuses: 2, price: 8200,
+        desc: "Zlatá destička s posvátnými runami vyňatá z čela obra. Zaručuje železnou pevnost v obraně."
+    },
+    trophy_harpy: {
+        id: "trophy_harpy", name: "Ostrý pařát skalní harpyje", tier: 2, slot: "trophy", icon: "🪶",
+        source: "Skalní krvežíznivá Harpyje (U2)", boj: 3, jizda: 2, tanec: 1, charisma: 0, pluses: 6, minuses: 0, price: 7500,
+        desc: "Zahnutý pařát z horských štítů. Rytíř s ním snadno zdolá strmé průsmyky i úskoky nepřátel."
+    },
+    trophy_alpha_werewolf: {
+        id: "trophy_alpha_werewolf", name: "Stříbrem kovaný tesák Alfy", tier: 2, slot: "trophy", icon: "🐺",
+        source: "Alfa vlkodlak noční smečky (U2)", boj: 4, jizda: 2, tanec: 0, charisma: 1, pluses: 7, minuses: 0, price: 8500,
+        desc: "Masivní tesák vůdce vlkodlačí smečky zasazený ve stříbře. Celé království uznává tvou autoritu."
+    },
+
+    // --- U2+/U3 Trofeje z legendárních titánů a bájných monster ---
+    trophy_kraken: {
+        id: "trophy_kraken", name: "Chapadlo z mořských hlubin", tier: 3, slot: "trophy", icon: "🐙",
+        source: "Mořský kraken (U2+)", boj: 4, jizda: 2, tanec: 0, charisma: 3, pluses: 9, minuses: 0, price: 11000,
+        desc: "Fosilní zkamenělé chapadlo mořské saňe. Svědectví o vítězství nad samotným oceánem."
+    },
+    trophy_sphinx: {
+        id: "trophy_sphinx", name: "Smaragdové oko sfingy", tier: 3, slot: "trophy", icon: "🦁",
+        source: "Královská sfinga (U2+)", boj: 1, jizda: 2, tanec: 2, charisma: 6, pluses: 11, minuses: 0, price: 12000,
+        desc: "Zářivý klenot z roucha moudré strážkyně pouště. Propůjčuje nepřekonatelné vladařské Charisma."
+    },
+    trophy_yeti: {
+        id: "trophy_yeti", name: "Kožešina sněžného yettiho", tier: 3, slot: "trophy", icon: "❄️",
+        source: "Sněžný yetti (U2+)", boj: 4, jizda: 3, tanec: -1, charisma: 2, pluses: 9, minuses: 1, price: 11500,
+        desc: "Bělostná nepromokavá srst vládce velehor. Žádný mrazivý dech nestvůry rytíře neohrozí."
+    },
+    trophy_phoenix: {
+        id: "trophy_phoenix", name: "Zlaté pero věčného Fénixe", tier: 3, slot: "trophy", icon: "🪶",
+        source: "Ohnivý pták Fénix (U2+)", boj: 2, jizda: 2, tanec: 4, charisma: 5, pluses: 13, minuses: 0, price: 13000,
+        desc: "Pero planoucí teplým zlatavým ohněm, které nikdy nevyhasne. Přináší věčné štěstí a slávu."
+    },
+    trophy_chimera: {
+        id: "trophy_chimera", name: "Štít z chiméří lebky", tier: 3, slot: "trophy", icon: "🐐",
+        source: "Tříhlavá chiméra (U2+)", boj: 5, jizda: 2, tanec: 0, charisma: 2, pluses: 9, minuses: 0, price: 12500,
+        desc: "Štít pobitý bronzem a rohy chiméry. Odráží plameny i jedovaté kousance."
+    },
+    trophy_cerberus: {
+        id: "trophy_cerberus", name: "Železný obojek podsvětí", tier: 3, slot: "trophy", icon: "🐕‍🦺",
+        source: "Kerberos (U2+)", boj: 4, jizda: 1, tanec: 0, charisma: 4, pluses: 9, minuses: 0, price: 12000,
+        desc: "Těžký kovaný obojek strážce temných bran. Nošený jako nátepník dodává nadlidskou sílu."
+    },
+    trophy_centaur: {
+        id: "trophy_centaur", name: "Tětiva z hřívy kentaura", tier: 3, slot: "trophy", icon: "🏹",
+        source: "Urozený kentaur (U2+)", boj: 4, jizda: 4, tanec: 0, charisma: 2, pluses: 10, minuses: 0, price: 13500,
+        desc: "Nezlomná hedvábná tětiva z hřívy lesního šampiona. Zaručuje neomylnou mušku a mistrovskou jízdu."
+    },
+    trophy_titan: {
+        id: "trophy_titan", name: "Hromový blesk titánů", tier: 3, slot: "trophy", icon: "⚡",
+        source: "Hromovládný titán bouří (U2+)", boj: 6, jizda: 2, tanec: -1, charisma: 3, pluses: 11, minuses: 1, price: 14000,
+        desc: "Ztuhlý hromoklín z modrého meteoru. Srší z něj blesky a otřásá bojištěm."
+    },
+    trophy_skeleton_king: {
+        id: "trophy_skeleton_king", name: "Zlatá koruna padlého vladaře", tier: 3, slot: "trophy", icon: "👑",
+        source: "Král kostlivců na trůně (U2+)", boj: 4, jizda: 1, tanec: 2, charisma: 6, pluses: 13, minuses: 0, price: 15000,
+        desc: "Starobylá královská koruna posázená safíry. Princezna v ní spatřuje právoplatného panovníka."
+    },
+    trophy_shadow_demon: {
+        id: "trophy_shadow_demon", name: "Krystal temného vykoupení", tier: 3, slot: "trophy", icon: "👿",
+        source: "Stínový démon z propasti (U2+)", boj: 4, jizda: 3, tanec: 3, charisma: 3, pluses: 13, minuses: 0, price: 15500,
+        desc: "Fialově pulzující kámen očištěný od zla. Dokonalá harmonie všech čtyř ctností rytířského stavu."
+    },
+    trophy_behemoth: {
+        id: "trophy_behemoth", name: "Kly bájného Behemota", tier: 3, slot: "trophy", icon: "🦣",
+        source: "Bájný obří Behemot (U2+)", boj: 6, jizda: 1, tanec: -2, charisma: 2, pluses: 9, minuses: 2, price: 14500,
+        desc: "Monstrózní kly prastarého pozemního titána. Žádná hradba ani zbroj jim neodolá."
     }
+
 };
 
 // Automatické zařazení všech 29 trofejí mezi herní předměty
@@ -1233,13 +1412,51 @@ window.PRS_QUESTS = {
         { id: "u1_1", name: "Divoký kňour", icon: "🐗", difficulty: 4, diffOffset: -1, gold: 1200, hearts: 0.5, trophyId: "trophy_boar", img: "assets/decorations/cave_bear_den.png", imgFlip: "assets/decorations/cave_bear_den_flip.png", weakness: "dogs", desc: "V hlubokém lese na tebe vyrazil rozzuřený kanec. Lovečtí psi snadno odlákají jeho pozornost!" },
         { id: "u1_2", name: "Smečka šedých vlků", icon: "🐺", difficulty: 5, diffOffset: 0, gold: 1500, hearts: 0.5, trophyId: "trophy_wolf", img: "assets/decorations/bandit_cave.png", imgFlip: "assets/decorations/bandit_cave_flip.png", weakness: "spear", desc: "Vlčí smečka ohrožuje kupecké vozy u vesnice. Dlouhé kopí udrží vlky v bezpečném odstupu." },
         { id: "u1_3", name: "Horský medvěd", icon: "🐻", difficulty: 5, diffOffset: 0, gold: 1800, hearts: 0.5, trophyId: "trophy_bear", img: "assets/decorations/snow_troll_cave.png", imgFlip: "assets/decorations/snow_troll_cave_flip.png", weakness: "horse", desc: "Obrovský medvěd brání průsmyk ke hradu. Rychlý útok na koni zaskočí jeho těžkopádnost." },
-        { id: "u1_4", name: "Královský bílý jelen", icon: "🦌", difficulty: 6, diffOffset: 1, gold: 2200, hearts: 1.0, trophyId: "trophy_stag", img: "assets/decorations/unicorn_grove.png", imgFlip: "assets/decorations/unicorn_grove_flip.png", weakness: "falcons", desc: "Vzácný jelen v kouzelném háji. Lovecký sokol vystopuje jeho stopy v houštinách." }
+        { id: "u1_4", name: "Královský bílý jelen", icon: "🦌", difficulty: 6, diffOffset: 1, gold: 2200, hearts: 1.0, trophyId: "trophy_stag", img: "assets/decorations/unicorn_grove.png", imgFlip: "assets/decorations/unicorn_grove_flip.png", weakness: "falcons", desc: "Vzácný jelen v kouzelném háji. Lovecký sokol vystopuje jeho stopy v houštinách." },
+        // --- Nová zvěř a lesní strážci (Tier U1) ---
+        { id: "u1_lynx", name: "Rys ostrovid", icon: "🐱", difficulty: 4, diffOffset: -1, gold: 1100, hearts: 0.5, trophyId: "trophy_lynx", img: "assets/monsters/monster_lynx.png", imgFlip: "assets/monsters/monster_lynx_flip.png", weakness: "falcons", desc: "Opatrný rys číhající ve větvích dubu. Lovecký sokol vystopuje jeho úkryt v korunách stromů." },
+        { id: "u1_bison", name: "Zuřivý pralesní zubr", icon: "🦬", difficulty: 5, diffOffset: 0, gold: 1400, hearts: 0.5, trophyId: "trophy_bison", img: "assets/monsters/monster_bison.png", imgFlip: "assets/monsters/monster_bison_flip.png", weakness: "horse", desc: "Těžký zubr střežící pralesní mýtinu. Rychlý nájezd na koni vyvede mohutné zvíře z rovnováhy." },
+        { id: "u1_panther", name: "Černý královský panter", icon: "🐆", difficulty: 5, diffOffset: 0, gold: 1600, hearts: 0.5, trophyId: "trophy_panther", img: "assets/monsters/monster_panther.png", imgFlip: "assets/monsters/monster_panther_flip.png", weakness: "dogs", desc: "Hbitá šelma ze stínů skalního převisu. Smečka loveckých psů zažene pantera do úzkých." },
+        { id: "u1_spider", name: "Obří lesní pavouk", icon: "🕷️", difficulty: 5, diffOffset: 0, gold: 1500, hearts: 0.5, trophyId: "trophy_spider", img: "assets/monsters/monster_spider.png", imgFlip: "assets/monsters/monster_spider_flip.png", weakness: "fire", desc: "Nestvůrný pavouk spřádající lepkavé sítě přes lesní stezku. Žár pochodní a oheň spálí jeho pavučiny." },
+        { id: "u1_croc", name: "Jezerní krokodýl (Chňapal)", icon: "🐊", difficulty: 6, diffOffset: 1, gold: 1800, hearts: 0.5, trophyId: "trophy_croc", img: "assets/monsters/monster_croc.png", imgFlip: "assets/monsters/monster_croc_flip.png", weakness: "spear", desc: "Obrněný plaz z močálových tůní. Dlouhé kopí probodne jeho tvrdý hřbetní krunýř." },
+        { id: "u1_eagle", name: "Skalní orel skalnatý", icon: "🦅", difficulty: 6, diffOffset: 1, gold: 2000, hearts: 1.0, trophyId: "trophy_eagle", img: "assets/monsters/monster_eagle.png", imgFlip: "assets/monsters/monster_eagle_flip.png", weakness: "falcons", desc: "Majestátní orel bránící hnízdo na horském štítu. Vycvičený sokol svede vzdušný souboj." },
+        { id: "u1_boar_lone", name: "Hvozdný divočák Samotář", icon: "🐗", difficulty: 6, diffOffset: 1, gold: 1900, hearts: 1.0, trophyId: "trophy_boar_lone", img: "assets/monsters/monster_boar_lone.png", imgFlip: "assets/monsters/monster_boar_lone_flip.png", weakness: "spear", desc: "Prastarý divočák s mohutnými kly. Pevné jezdecké kopí zastaví jeho drtivý čelní rozběh." },
+        { id: "u1_wolverine", name: "Severní vlkobijec (Rosomák)", icon: "🦡", difficulty: 6, diffOffset: 1, gold: 2100, hearts: 1.0, trophyId: "trophy_wolverine", img: "assets/monsters/monster_wolverine.png", imgFlip: "assets/monsters/monster_wolverine_flip.png", weakness: "armor", desc: "Zuřivý a houževnatý dravý seveřan. Pevná rytířská zbroj odrazí jeho zběsilé kousance." },
+        { id: "u1_pike", name: "Obří jezerní štika", icon: "🐟", difficulty: 7, diffOffset: 2, gold: 2300, hearts: 1.0, trophyId: "trophy_pike", img: "assets/monsters/monster_pike.png", imgFlip: "assets/monsters/monster_pike_flip.png", weakness: "spear", desc: "Monstrózní štika ohrožující rybářské bárky na jezeře. Rytířské kopí pronikne pod hladinu." },
+        { id: "u1_unicorn", name: "Magický bílý jednorožec", icon: "🦄", difficulty: 7, diffOffset: 2, gold: 2600, hearts: 1.5, trophyId: "trophy_unicorn", img: "assets/monsters/monster_unicorn.png", imgFlip: "assets/monsters/monster_unicorn_flip.png", weakness: "dance", desc: "Bájný jednorožec z kouzelného háje. Lze jej zkrotit pouze vznešeným tancem, čistotou a šaty!" }
     ],
     U2: [
         { id: "u2_1", name: "Skalní obr", icon: "👹", difficulty: 8, diffOffset: -1, gold: 3000, hearts: 1.0, itemTier: 1, trophyId: "trophy_giant", img: "assets/decorations/swamp_troll.png", imgFlip: "assets/decorations/swamp_troll_flip.png", weakness: "horse", desc: "Obr s obřím kyjem vybírá mýto u mostu. Rychlý kůň dovolí rytíři manévrovat kolem jeho úderů." },
         { id: "u2_2", name: "Temný černokněžník", icon: "🧙‍♂️", difficulty: 9, diffOffset: 0, gold: 3500, hearts: 1.0, itemTier: 1, trophyId: "trophy_warlock", img: "assets/decorations/witch_hut.png", imgFlip: "assets/decorations/witch_hut_flip.png", weakness: "spear", desc: "Zlý čaroděj sesílá kletby ze své chatrče. Dlouhé kopí probodne jeho magické bariéry." },
         { id: "u2_3", name: "Černý loupeživý rytíř", icon: "⚔️", difficulty: 9, diffOffset: 0, gold: 4000, hearts: 1.5, itemTier: 2, trophyId: "trophy_black_knight", img: "assets/decorations/ancient_ruins.png", imgFlip: "assets/decorations/ancient_ruins_flip.png", weakness: "armor", desc: "Obávaný rytíř ve starých ruinách tě vyzval na souboj. Pevná plátová zbroj odrazí jeho úder." },
-        { id: "u2_4", name: "Jeskynní vlkodlak", icon: "🐺", difficulty: 10, diffOffset: 1, gold: 4500, hearts: 1.5, itemTier: 2, trophyId: "trophy_werewolf", img: "assets/decorations/basilisk_cave.png", imgFlip: "assets/decorations/basilisk_cave_flip.png", weakness: "dogs", desc: "V tajemné jeskyni číhá bestie. Lovecká smečka vycítí pach vlkodlaka a pomůže v boji." }
+        { id: "u2_4", name: "Jeskynní vlkodlak", icon: "🐺", difficulty: 10, diffOffset: 1, gold: 4500, hearts: 1.5, itemTier: 2, trophyId: "trophy_werewolf", img: "assets/decorations/basilisk_cave.png", imgFlip: "assets/decorations/basilisk_cave_flip.png", weakness: "dogs", desc: "V tajemné jeskyni číhá bestie. Lovecká smečka vycítí pach vlkodlaka a pomůže v boji." },
+        // --- Nová bájná monstra a protivníci (Tier U2 • Obtížnost 8–11) ---
+        { id: "u2_basilisk", name: "Zkamenělý bazilišek", icon: "🦎", difficulty: 8, diffOffset: -1, gold: 3200, hearts: 1.0, itemTier: 1, trophyId: "trophy_basilisk", img: "assets/monsters/monster_basilisk.png", imgFlip: "assets/monsters/monster_basilisk_flip.png", weakness: "armor", desc: "Plaz s vražedným pohledem číhající v jeskyni. Vyleštěný štít a pevná zbroj odrazí jeho zkázonosný zrak." },
+        { id: "u2_wisp", name: "Močálová jezinka / Bludička", icon: "🕯️", difficulty: 8, diffOffset: -1, gold: 3400, hearts: 1.0, itemTier: 1, trophyId: "trophy_wisp", img: "assets/monsters/monster_wisp.png", imgFlip: "assets/monsters/monster_wisp_flip.png", weakness: "light", desc: "Zákeřný přelud lákající pocestné do bezedného bahna. Svaté světlo relikvií rozežene její klamná světla." },
+        { id: "u2_troll", name: "Horský kamenný troll", icon: "🧌", difficulty: 9, diffOffset: 0, gold: 3800, hearts: 1.5, itemTier: 1, trophyId: "trophy_troll", img: "assets/monsters/monster_troll.png", imgFlip: "assets/monsters/monster_troll_flip.png", weakness: "fire", desc: "Těžkopádný troll s kůží tvrdou jako žula. Žhavý oheň a plamenné zbraně zabrání jeho regeneraci." },
+        { id: "u2_minotaur", name: "Minotaurus z labyrintu", icon: "🐂", difficulty: 9, diffOffset: 0, gold: 4000, hearts: 1.5, itemTier: 2, trophyId: "trophy_minotaur", img: "assets/monsters/monster_minotaur.png", imgFlip: "assets/monsters/monster_minotaur_flip.png", weakness: "horse", desc: "Rohatý kolos střežící kamenný labyrint. Rychlý nájezd na koni nedovolí bestii zaměřit obří sekeru." },
+        { id: "u2_manticore", name: "Pralesní mantikora", icon: "🦁", difficulty: 9, diffOffset: 0, gold: 4200, hearts: 1.5, itemTier: 2, trophyId: "trophy_manticore", img: "assets/monsters/monster_manticore.png", imgFlip: "assets/monsters/monster_manticore_flip.png", weakness: "elixir", desc: "Lví bestie s netopýřími křídly a škorpióním ocasem. Hojivý lektvar z Lazaretu neutralizuje její smrtící jed." },
+        { id: "u2_griffin", name: "Skalní gryf", icon: "🦅", difficulty: 10, diffOffset: 1, gold: 4500, hearts: 1.5, itemTier: 2, trophyId: "trophy_griffin", img: "assets/monsters/monster_griffin.png", imgFlip: "assets/monsters/monster_griffin_flip.png", weakness: "horse", desc: "Hrdý kříženec lva a orla hnízdící na útesech. Útok z plné jízdy na koni vyrovná jeho vzdušnou převahu." },
+        { id: "u2_siren", name: "Zrádná siréna ze zátoky", icon: "🧜‍♀️", difficulty: 10, diffOffset: 1, gold: 4600, hearts: 2.0, itemTier: 2, trophyId: "trophy_siren", img: "assets/monsters/monster_siren.png", imgFlip: "assets/monsters/monster_siren_flip.png", weakness: "dance", desc: "Mořská víla svádějící rytíře do hlubin svým zpěvem. Vznešený dvorský tanec a rytmus zlomí její kouzlo." },
+        { id: "u2_ghost_knight", name: "Kostlivý rytířský přízrak", icon: "💀", difficulty: 10, diffOffset: 1, gold: 4800, hearts: 2.0, itemTier: 2, trophyId: "trophy_ghost_knight", img: "assets/monsters/monster_ghost_knight.png", imgFlip: "assets/monsters/monster_ghost_knight_flip.png", weakness: "holy", desc: "Přízračný šampion v rezavé zbroji bloudící po bojištích. Posvěcená čepel a čistá víra zničí jeho kletbu." },
+        { id: "u2_lesovik", name: "Lesní hejkal (Lesovik)", icon: "👺", difficulty: 11, diffOffset: 1, gold: 5000, hearts: 2.0, itemTier: 2, trophyId: "trophy_lesovik", img: "assets/monsters/monster_lesovik.png", imgFlip: "assets/monsters/monster_lesovik_flip.png", weakness: "courage", desc: "Starobylý duch hvozdu děsící pocestné ohlušujícím křikem. Pevná rytířská odvaha přemůže jeho lesní magii." },
+        { id: "u2_ghoul", name: "Hřbitovní ghúl / Nekromant", icon: "🧟", difficulty: 11, diffOffset: 1, gold: 5200, hearts: 2.0, itemTier: 2, trophyId: "trophy_ghoul", img: "assets/monsters/monster_ghoul.png", imgFlip: "assets/monsters/monster_ghoul_flip.png", weakness: "light", desc: "Ohavný vykradač hrobek vyvolávající temné síly. Zářící světlo posvátných klenotů spálí jeho hnilobné kouzlo." },
+        { id: "u2_golem", name: "Magický hliněný Golem", icon: "🗿", difficulty: 11, diffOffset: 1, gold: 5300, hearts: 2.0, itemTier: 2, trophyId: "trophy_golem", img: "assets/monsters/monster_golem.png", imgFlip: "assets/monsters/monster_golem_flip.png", weakness: "spear", desc: "Oživený hliněný obr střežící alchymistickou dílnu. Dlouhé kopí pronikne mezi kamenné spáry a zasáhne šém." },
+        { id: "u2_harpy", name: "Skalní krvežíznivá Harpyje", icon: "🪶", difficulty: 11, diffOffset: 1, gold: 4900, hearts: 1.5, itemTier: 2, trophyId: "trophy_harpy", img: "assets/monsters/monster_harpy.png", imgFlip: "assets/monsters/monster_harpy_flip.png", weakness: "falcons", desc: "Dravá okřídlená stvůra napadající rytíře ze skalisek. Lovecký sokol bleskově zmaří její střemhlavý útok." },
+        { id: "u2_alpha_werewolf", name: "Alfa vlkodlak noční smečky", icon: "🐺", difficulty: 11, diffOffset: 2, gold: 5500, hearts: 2.0, itemTier: 2, trophyId: "trophy_alpha_werewolf", img: "assets/monsters/monster_alpha_werewolf.png", imgFlip: "assets/monsters/monster_alpha_werewolf_flip.png", weakness: "dogs", desc: "Hrozivý vůdce vlkodlaků s očima planoucíma rudým žárem. Vycvičená psí smečka roztrhá jeho noční převahu." },
+
+        // --- Legendární titáni a epická monstra (Tier U2+ • Obtížnost 12–15) ---
+        { id: "u2_kraken", name: "Mořský kraken (Hlubinný běs)", icon: "🐙", difficulty: 12, diffOffset: 2, gold: 6500, hearts: 2.5, itemTier: 3, trophyId: "trophy_kraken", img: "assets/monsters/monster_kraken.png", imgFlip: "assets/monsters/monster_kraken_flip.png", weakness: "water_armor", desc: "Obrovské chapadlovité monstrum z hlubin moře. Vodní perla a rytířská zbroj ochrání před stažením pod vodu." },
+        { id: "u2_sphinx", name: "Pouštní královská sfinga", icon: "🦁", difficulty: 12, diffOffset: 2, gold: 7000, hearts: 3.0, itemTier: 3, trophyId: "trophy_sphinx", img: "assets/monsters/monster_sphinx.png", imgFlip: "assets/monsters/monster_sphinx_flip.png", weakness: "charisma", desc: "Moudrá a nebezpečná bytost střežící královské hrobky. Její prastaré hádanky rozluští pouze vysoké Charisma!" },
+        { id: "u2_yeti", name: "Sněžný yetti (Vládce velehor)", icon: "❄️", difficulty: 12, diffOffset: 2, gold: 6800, hearts: 2.5, itemTier: 3, trophyId: "trophy_yeti", img: "assets/monsters/monster_yeti.png", imgFlip: "assets/monsters/monster_yeti_flip.png", weakness: "fire", desc: "Ledový kolos obývající zamrzlé horské průsmyky. Žár sopečných pochodní a oheň rozežene jeho ledový dech." },
+        { id: "u2_phoenix", name: "Ohnivý pták Fénix", icon: "🪶", difficulty: 13, diffOffset: 3, gold: 8000, hearts: 3.5, itemTier: 3, trophyId: "trophy_phoenix", img: "assets/monsters/monster_phoenix.png", imgFlip: "assets/monsters/monster_phoenix_flip.png", weakness: "ice", desc: "Bájný pták znovuzrozený ze žhavého popela. Mrazivá zbraň a ledové relikvie zchladí jeho spalující plamen." },
+        { id: "u2_chimera", name: "Tříhlavá chiméra", icon: "🐐", difficulty: 13, diffOffset: 3, gold: 8500, hearts: 3.5, itemTier: 3, weakness: "animals", trophyId: "trophy_chimera", img: "assets/monsters/monster_chimera.png", imgFlip: "assets/monsters/monster_chimera_flip.png", desc: "Nestvůra s tělem lva, hlavy kozy a hadím ocasem. Smečka vycvičených psů a sokol rozdělí pozornost tří hlav." },
+        { id: "u2_cerberus", name: "Kerberos (Strážce podsvětí)", icon: "🐕‍🦺", difficulty: 13, diffOffset: 3, gold: 8200, hearts: 3.5, itemTier: 3, trophyId: "trophy_cerberus", img: "assets/monsters/monster_cerberus.png", imgFlip: "assets/monsters/monster_cerberus_flip.png", weakness: "dogs", desc: "Trojhlavý pekelný pes střežící bránu zatracení. Znalost kynologie a přítomnost psů v chovu šelmu uchlácholí." },
+        { id: "u2_centaur", name: "Urozený kentaur – Pán luků", icon: "🏹", difficulty: 14, diffOffset: 3, gold: 9500, hearts: 4.0, itemTier: 3, trophyId: "trophy_centaur", img: "assets/monsters/monster_centaur.png", imgFlip: "assets/monsters/monster_centaur_flip.png", weakness: "spear", desc: "Hrdý lesní válečník, napůl člověk a napůl kůň. Útok těžkým turnajovým dřevcem v plné jízdě přetne jeho střelbu." },
+        { id: "u2_titan", name: "Hromovládný titán bouří", icon: "⚡", difficulty: 14, diffOffset: 4, gold: 10000, hearts: 4.5, itemTier: 3, trophyId: "trophy_titan", img: "assets/monsters/monster_titan.png", imgFlip: "assets/monsters/monster_titan_flip.png", weakness: "armor", desc: "Obří titán vládnoucí bleskům z bouřkových mračen. Masivní pozlacená rytířská zbroj bezpečně svede elektrické výboje." },
+        { id: "u2_skeleton_king", name: "Král kostlivců na trůně", icon: "👑", difficulty: 15, diffOffset: 4, gold: 11000, hearts: 5.0, itemTier: 3, trophyId: "trophy_skeleton_king", img: "assets/monsters/monster_skeleton_king.png", imgFlip: "assets/monsters/monster_skeleton_king_flip.png", weakness: "holy", desc: "Prastarý vladař povstalý z krypty s diamantovým žezlem. Posvěcená královská relikvie navrátí jeho duši klid." },
+        { id: "u2_shadow_demon", name: "Stínový démon z propasti", icon: "👿", difficulty: 15, diffOffset: 4, gold: 12000, hearts: 5.0, itemTier: 3, trophyId: "trophy_shadow_demon", img: "assets/monsters/monster_shadow_demon.png", imgFlip: "assets/monsters/monster_shadow_demon_flip.png", weakness: "mastery", desc: "Netvorný pán temnoty vystupující z puklin země. Dokonalé mistrovství všech čtyř rytířských ctností zaručí triumf!" },
+        { id: "u2_behemoth", name: "Bájný obří Behemot", icon: "🦣", difficulty: 15, diffOffset: 4, gold: 11500, hearts: 4.5, itemTier: 3, trophyId: "trophy_behemoth", img: "assets/monsters/monster_behemoth.png", imgFlip: "assets/monsters/monster_behemoth_flip.png", weakness: "spear", desc: "Pravěký pozemní gigant otřásající zemí každým krokem. Dlouhé kopí šampionů najde skulinu pod krunýřem." }
     ],
     U3: [
         // --- TIER A: Mladí a divocí draci (Obtížnost 11–12) ---

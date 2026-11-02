@@ -590,7 +590,7 @@
                 <!-- Horní sub-navigace záložky Pravidla & Encyklopedie -->
                 <div class="rules-subnav">
                     <button id="rules-subtab-btn-rules" class="rules-subnav-btn active" onclick="PRS_App.switchRulesSubtab('rules')">📜 Pravidla hry</button>
-                    <button id="rules-subtab-btn-dragons" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('dragons')">🐉 Dračí bestiář (20)</button>
+                    <button id="rules-subtab-btn-dragons" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('dragons')">🐉 Bestiář & Monstra (62)</button>
                     <button id="rules-subtab-btn-castles" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('castles')">🏰 Galerie hradů (10)</button>
                     <button id="rules-subtab-btn-trophies" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('trophies')">🏆 Síň trofejí &amp; Relikvií (29)</button>
                     <button id="rules-subtab-btn-decorations" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('decorations')">🌲 Atlas dekorací &amp; krajiny (34)</button>
@@ -708,10 +708,13 @@
                             </p>
                         </div>
                         <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
-                            <button class="rules-subnav-btn active bestiary-filter-btn" data-tier="all" onclick="PRS_App.setBestiaryTier('all')">Všichni drakové (20)</button>
-                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="young" onclick="PRS_App.setBestiaryTier('young')">Tier A: Mladí draci (5)</button>
-                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="elemental" onclick="PRS_App.setBestiaryTier('elemental')">Tier B: Živloví draci (9)</button>
-                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="boss" onclick="PRS_App.setBestiaryTier('boss')">Tier C: Bossové a saně (6)</button>
+                            <button class="rules-subnav-btn active bestiary-filter-btn" data-tier="all" onclick="PRS_App.setBestiaryTier('all')">🐉 Všichni draci (20)</button>
+                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="u1" onclick="PRS_App.setBestiaryTier('u1')">🌲 Zvěř &amp; Dravci U1 (14)</button>
+                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="u2" onclick="PRS_App.setBestiaryTier('u2')">👹 Bájná monstra U2 (16)</button>
+                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="u2_epic" onclick="PRS_App.setBestiaryTier('u2_epic')">⚡ Mýtičtí titáni U2+ (12)</button>
+                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="young" onclick="PRS_App.setBestiaryTier('young')">Mladí draci (5)</button>
+                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="elemental" onclick="PRS_App.setBestiaryTier('elemental')">Živloví draci (9)</button>
+                            <button class="rules-subnav-btn bestiary-filter-btn" data-tier="boss" onclick="PRS_App.setBestiaryTier('boss')">Dračí bossové (6)</button>
                         </div>
                     </div>
                     <div style="background:linear-gradient(135deg, rgba(212,175,55,0.18), rgba(16,185,129,0.14)); border:1px solid var(--gold); border-radius:10px; padding:0.75rem 1rem; margin-bottom:1.15rem; display:flex; align-items:center; gap:0.75rem;">

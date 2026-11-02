@@ -3613,7 +3613,7 @@ window.PRS_App = {
         html.push('  <div class="quest-duel-col-left">');
         html.push('    <div class="quest-monster-showcase">');
         html.push('      <div class="quest-monster-img-wrap">');
-        html.push('        <img id="quest-monster-img-el" src="' + qImg + '" alt="' + this.escapeHtml(q.name) + '" class="quest-monster-img ' + (this.duelMonsterFlipped ? 'flipped' : '') + '">');
+        html.push('        <img id="quest-monster-img-el" src="' + qImg + '" alt="' + this.escapeHtml(q.name) + '" class="quest-monster-img ' + (this.duelMonsterFlipped ? 'flipped' : '') + '" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.png\';">');
         html.push('        <button class="quest-flip-btn" onclick="PRS_App.toggleDuelMonsterFlip()" title="Zrcadlově otočit pohled">🔄 Otočit</button>');
         html.push('      </div>');
         html.push('      <div style="font-family:\'Cinzel\',serif; font-size:1.15rem; font-weight:700; color:#fef08a; margin-bottom:2px;">' + q.icon + ' ' + this.escapeHtml(q.name) + '</div>');
