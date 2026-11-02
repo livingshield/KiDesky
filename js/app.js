@@ -2909,6 +2909,10 @@ window.PRS_App = {
     handleNodeClick: function (nodeId) {
         // Pokud uživatel právě táhl mapou myší, neotvíráme detail políčka
         if (this.viewport.dragMoved) return;
+        if (this.activeDecorTooltip) {
+            this.activeDecorTooltip = null;
+            this.renderBoardTokens();
+        }
         this.inspectNode(nodeId);
     },
 
@@ -3225,6 +3229,12 @@ window.PRS_App = {
         if (evt) evt.stopPropagation();
         var cat = window.PRS_DECOR_CATALOG ? window.PRS_DECOR_CATALOG[catalogId] : null;
         if (!cat) return;
+
+        // Pokud je tooltip teto dekorace jiz otevreny, kliknutim jej zavreme
+        if (this.activeDecorTooltip && this.activeDecorTooltip.catalogId === catalogId) {
+            this.dismissDecorTooltip(evt);
+            return;
+        }
 
         this.activeDecorTooltip = {
             catalogId: catalogId,

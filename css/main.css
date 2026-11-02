@@ -189,7 +189,7 @@
         }
 
         .board-node {
-            transition: transform 0.15s ease, filter 0.15s ease;
+            transition: filter 0.15s ease;
         }
         .board-node:hover {
             filter: drop-shadow(0 0 10px var(--theme-glow, rgba(212, 175, 55, 0.6))) brightness(1.16);
