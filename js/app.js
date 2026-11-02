@@ -268,6 +268,7 @@ window.PRS_App = {
         var label = (!cur) ? (icon + " Režim: Auto (" + devLabel + ")")
                            : (icon + " Režim: " + (cur === "mobile" ? "Mobil" : "PC"));
         btn.textContent = label;
+        this.syncSettingsDeviceLabel();
     },
 
     // --- AKTUALIZACE SPODNÍHO MOBILNÍHO DOCKU (STICKY THUMB HUD) ---
@@ -982,6 +983,7 @@ window.PRS_App = {
             btn.style.color = muted ? "#94a3b8" : "var(--gold-light)";
             btn.style.borderColor = muted ? "rgba(255,255,255,0.15)" : "var(--gold)";
         }
+        this.syncSettingsSoundLabel();
     },
 
     // --- HUDEBNÍ PŘEHRÁVAČ & BGM KONTROLER ---
@@ -2016,6 +2018,16 @@ window.PRS_App = {
     },
 
     changeBoardTemplateLive: function (boardCode) {
+        if (this.state && this.state.turnNumber > 0) {
+            var conf = confirm("V rozehrané partii nelze měnit mapu bez restartu hry.\nPřeješ si opravdu ukončit aktuální partii a začít novou hru na zvoleném plánu?");
+            if (!conf) {
+                var s = document.getElementById("board-template-select");
+                if (s && this.state.config && this.state.config.boardTemplate) {
+                    s.value = this.state.config.boardTemplate;
+                }
+                return;
+            }
+        }
         var lobbySel = document.getElementById("lobby-board-select");
         if (lobbySel) lobbySel.value = boardCode;
         this.startNewGame(false);
@@ -2067,6 +2079,15 @@ window.PRS_App = {
     // ========================================================================
     renderGameScreen: function () {
         if (!this.state) return;
+        var bSel = document.getElementById("board-template-select");
+        if (bSel) {
+            var inGame = Boolean(this.state && this.state.turnNumber > 0);
+            bSel.disabled = inGame;
+            bSel.title = inGame ? "Plán nelze měnit v průběhu rozehrané partie" : "Přepnout rozložení plánu";
+            if (this.state.config && this.state.config.boardTemplate) {
+                bSel.value = this.state.config.boardTemplate;
+            }
+        }
         this.renderOnlineRoomBar();
         this.renderHeartTrack();
         this.renderPlayersStandings();
@@ -2608,22 +2629,52 @@ window.PRS_App = {
             var pList = playersByNode[nid];
             var hostNode = nodes[Number(nid)];
             if (!hostNode) continue;
-            for (var m = 0; m < pList.length; m++) {
+
+            // Seřadíme figurky tak, aby aktivní hráč byl vykreslen jako poslední (v popředí a s plně viditelnou zlatou aurou)
+            var actIdx = this.state.currentPlayerIndex;
+            pList.sort(function (a, b) {
+                if (a.index === actIdx) return 1;
+                if (b.index === actIdx) return -1;
+                return a.index - b.index;
+            });
+
+            var count = pList.length;
+            for (var m = 0; m < count; m++) {
                 var tokenPlayer = pList[m];
-                var isAct = (tokenPlayer.index === this.state.currentPlayerIndex);
+                var isAct = (tokenPlayer.index === actIdx);
                 var isCurrentlyJumping = (this.isMoveAnimating && this.animatingPlayerIndex === tokenPlayer.index && this.animTokenPos);
 
                 var txToken, tyToken, groundY;
                 if (isCurrentlyJumping) {
                     txToken = this.animTokenPos.x;
                     tyToken = this.animTokenPos.y;
-                    groundY = hostNode.y - 12;
-                } else {
-                    var offsetAngle = (m / pList.length) * Math.PI * 2;
-                    var dist = (pList.length === 1) ? 0 : 13;
-                    txToken = Math.round(hostNode.x + Math.cos(offsetAngle) * dist);
-                    tyToken = Math.round(hostNode.y - 16 + Math.sin(offsetAngle) * dist);
                     groundY = hostNode.y - 4;
+                } else {
+                    var dx = 0;
+                    var dy = -16;
+                    if (count === 1) {
+                        dx = 0;
+                        dy = -16;
+                    } else if (count === 2) {
+                        dx = (m === 0) ? -13.5 : 13.5;
+                        dy = (m === 0) ? -17 : -15;
+                    } else if (count === 3) {
+                        if (m === 0) { dx = 0; dy = -25; }
+                        else if (m === 1) { dx = -15; dy = -11; }
+                        else { dx = 15; dy = -11; }
+                    } else if (count === 4) {
+                        if (m === 0) { dx = -14; dy = -24; }
+                        else if (m === 1) { dx = 14; dy = -24; }
+                        else if (m === 2) { dx = -14; dy = -8; }
+                        else { dx = 14; dy = -8; }
+                    } else {
+                        var angle = (m / count) * Math.PI * 2;
+                        dx = Math.cos(angle) * 20;
+                        dy = -16 + Math.sin(angle) * 16;
+                    }
+                    txToken = Math.round(hostNode.x + dx);
+                    tyToken = Math.round(hostNode.y + dy);
+                    groundY = tyToken + 12;
                 }
 
                 out.push('  <g class="knight-token-group" data-player-index="' + tokenPlayer.index + '" style="pointer-events:auto; cursor:pointer;" ' +
@@ -5753,8 +5804,310 @@ window.PRS_App = {
     },
 
     handleResolveFestival: function () {
+        var pa = this.state ? this.state.pendingAction : null;
+        if (!pa || !pa.canResolveFestival) return;
+
+        // Pokud tahá automatický bot a jsou zapnuté rychlé animace, vyhodnotíme přímo
+        var curPlayer = this.state.players[this.state.currentPlayerIndex];
+        if (curPlayer && curPlayer.isAi && this.fastAnimations) {
+            if (window.PRS_Audio) window.PRS_Audio.playFanfare();
+            window.PRS_GameEngine.resolveFestival(this.state);
+            this.renderGameScreen();
+            this.saveSessionAuto();
+            return;
+        }
+
+        this.openFestivalModal();
+    },
+
+    // ========================================================================
+    // MODÁL NASTAVENÍ HRY (#game-settings-modal)
+    // ========================================================================
+    openSettingsModal: function () {
+        var modal = document.getElementById("game-settings-modal");
+        if (!modal) return;
+        this.syncSettingsThemeBtns();
+        this.syncSettingsSoundLabel();
+        this.syncSettingsDeviceLabel();
+        var fastChk = document.getElementById("settings-fast-anim-chk");
+        if (fastChk) fastChk.checked = Boolean(this.fastAnimations);
+        var botsChk = document.getElementById("settings-autobots-chk");
+        if (botsChk) botsChk.checked = Boolean(this.autoBotsEnabled);
+        modal.style.display = "flex";
+        if (window.PRS_Audio) window.PRS_Audio.playNotice();
+    },
+
+    closeSettingsModal: function () {
+        var modal = document.getElementById("game-settings-modal");
+        if (modal) modal.style.display = "none";
+    },
+
+    syncSettingsThemeBtns: function () {
+        var t = this.currentTheme || (document.documentElement ? document.documentElement.getAttribute("data-theme") : "light") || "light";
+        var btns = document.querySelectorAll(".settings-theme-switcher .theme-btn");
+        for (var i = 0; i < btns.length; i++) {
+            if (btns[i].getAttribute("data-theme-btn") === t) btns[i].classList.add("active");
+            else btns[i].classList.remove("active");
+        }
+    },
+
+    syncSettingsSoundLabel: function () {
+        var btn = document.getElementById("settings-audio-btn");
+        if (btn && window.PRS_Audio) {
+            btn.innerHTML = window.PRS_Audio.muted ? "🔇 Zvuk: Vyp" : "🔊 Zvuk: Zap";
+        }
+    },
+
+    syncSettingsDeviceLabel: function () {
+        var btn = document.getElementById("settings-device-btn");
+        if (btn && this.deviceProfile) {
+            var cur = this.deviceProfile.override;
+            var icon = (this.deviceProfile.device === "mobile") ? "📱" : ((this.deviceProfile.device === "tablet") ? "📟" : "💻");
+            var devLabel = (this.deviceProfile.device === "mobile" ? "Mobil" : (this.deviceProfile.device === "tablet" ? "Tablet" : "PC"));
+            btn.textContent = (!cur) ? (icon + " Režim: Auto (" + devLabel + ")") : (icon + " Režim: " + (cur === "mobile" ? "Mobil" : "PC"));
+        }
+    },
+
+    // ========================================================================
+    // MODÁL KRÁLOVSKÉ SLAVNOSTI, TURNAJE A PLESU (#festival-modal)
+    // ========================================================================
+    openFestivalModal: function () {
+        var modal = document.getElementById("festival-modal");
+        var body = document.getElementById("festival-modal-body");
+        if (!modal || !body || !this.state) return;
+
+        var pa = this.state.pendingAction;
+        if (!pa || !pa.canResolveFestival) return;
+
+        var fType = pa.festivalType || "turnaj";
+        var organizer = this.state.players[this.state.currentPlayerIndex];
+
+        var meta = {
+            turnaj: {
+                icon: "🎪",
+                title: "Velký Královský Turnaj v kolbišti",
+                sub: "Rytířský souboj dřevci, lukostřelba a drezura před dvorem královny",
+                req: "Kůň, Pes a Sokol (nebo Kůň + Zbroj / Zbraň)",
+                formula: "Hod kostkou 🎲 (1–6) + Boj ⚔️ + Jízda 🏇 + Zvířecí set (+3)",
+                prizes: "🥇 1. místo: 3 + ½ Charisma 💖 (+1 200 zl.)<br>🥈 2. místo: 2 + ½ Charisma 💖 (+600 zl.)<br>🥉 3. místo: 1 + ½ Charisma 💖 (+300 zl.)"
+            },
+            ples: {
+                icon: "🎭",
+                title: "Královský Zámecký Ples & Dvorská slavnost",
+                sub: "Slavnostní ples na zámku, společenská promenáda a salónní tanec s princeznou",
+                req: "Slavnostní šaty (nebo ctnost Tanec ≥ 1)",
+                formula: "Hod kostkou 🎲 (1–6) + Tanec 💃 + Charisma ✨ + Šaty (+2)",
+                prizes: "🥇 1. místo: 1 + Charisma 💖 (+1 000 zl.)<br>🥈 2. místo: Charisma 💖 (min 1, +500 zl.)<br>🥉 3. místo: Charisma − 1 💖 (min 0.5, +250 zl.)"
+            },
+            zavod: {
+                icon: "🏇",
+                title: "Velký Královský Dostih & Jezdecký závod",
+                sub: "Rychlostní a překážkový dostih přes louky a vodní příkopy o vavřínový věnec",
+                req: "Alespoň 1 ušlechtilý kůň v chovu",
+                formula: "Hod kostkou 🎲 (1–6) + 2× Jízda 🏇 + Stádo koní (max +3)",
+                prizes: "🥇 1. místo: 1,5× Charisma 💖 (min 1.5, +1 000 zl.)<br>🥈 2. místo: Charisma 💖 (min 1, +500 zl.)<br>🥉 3. místo: ½ Charisma 💖 (min 0.5, +250 zl.)"
+            }
+        }[fType] || {
+            icon: "🎪",
+            title: "Královská slavnost",
+            sub: "Klání o čest, slávu a srdce princezny",
+            req: "Podle typu slavnosti",
+            formula: "Hod kostkou + příslušné ctnosti",
+            prizes: "Drahocenná Princeznina srdce 💖 a královské zlaťáky"
+        };
+
+        var elIcon = document.getElementById("festival-modal-icon");
+        var elTitle = document.getElementById("festival-modal-title");
+        var elSub = document.getElementById("festival-modal-sub");
+        if (elIcon) elIcon.textContent = meta.icon;
+        if (elTitle) elTitle.textContent = meta.title;
+        if (elSub) elSub.textContent = meta.sub;
+
+        // Roztřídíme hráče na soutěžící a diváky
+        var contestants = [];
+        var spectators = [];
+
+        for (var i = 0; i < this.state.players.length; i++) {
+            var p = this.state.players[i];
+            var st = window.PRS_GameEngine.getEffectiveStats(this.state, p);
+            var eligible = false;
+            var bonusText = "";
+
+            if (fType === "turnaj") {
+                eligible = (st.horses >= 1 && st.dogs >= 1 && st.falcons >= 1) || (st.horses >= 1 && (st.hasWeapon || st.hasArmor));
+                var setB = (st.horses >= 1 && st.dogs >= 1 && st.falcons >= 1) ? 3 : 0;
+                var baseB = st.boj + st.jizda + setB;
+                bonusText = "⚔️ Boj: " + st.boj + " | 🏇 Jízda: " + st.jizda + (setB ? " | 🐕🦅 Set: +3" : "") + " (Základ: +" + baseB + ")";
+            } else if (fType === "ples") {
+                eligible = st.hasDress || st.tanec >= 1;
+                var dressB = st.hasDress ? 2 : 0;
+                var baseB = st.tanec + st.charisma + dressB;
+                bonusText = "💃 Tanec: " + st.tanec + " | ✨ Charisma: " + st.charisma + (dressB ? " | 👗 Šaty: +2" : "") + " (Základ: +" + baseB + ")";
+            } else if (fType === "zavod") {
+                eligible = st.horses >= 1;
+                var horseB = Math.min(3, st.horses);
+                var baseB = (st.jizda * 2) + horseB;
+                bonusText = "🏇 2× Jízda: " + (st.jizda * 2) + " | 🐎 Koně: +" + horseB + " (Základ: +" + baseB + ")";
+            }
+
+            if (eligible) {
+                contestants.push({ player: p, stats: st, bonusText: bonusText });
+            } else {
+                var reason = (fType === "turnaj") ? "Nemá potřebná zvířata / zbroj" : ((fType === "ples") ? "Nemá slavnostní šaty ani tanec" : "Nemá žádného koně");
+                spectators.push({ player: p, reason: reason });
+            }
+        }
+
+        var h = [];
+
+        // Disciplína a pravidla banner
+        h.push('<div class="festival-discipline-banner">');
+        h.push('  <div style="font-size:2.4rem;">' + meta.icon + '</div>');
+        h.push('  <div style="flex:1;">');
+        h.push('    <div style="font-weight:bold; color:#fef08a; font-size:1.05rem;">' + meta.title + '</div>');
+        h.push('    <div style="font-size:0.83rem; color:#cbd5e1; margin-top:2px;">📜 <strong>Podmínka:</strong> ' + meta.req + '</div>');
+        h.push('    <div style="font-size:0.81rem; color:var(--gold-light); margin-top:3px;">🎲 <strong>Vzorec výkonu:</strong> ' + meta.formula + '</div>');
+        h.push('    <div style="font-size:0.79rem; color:#fbcfe8; margin-top:4px;">🎁 <strong>Odměny:</strong> ' + meta.prizes + '</div>');
+        h.push('  </div>');
+        h.push('</div>');
+
+        // Pokud nesplňuje podmínku dostatek hráčů (< 2)
+        if (contestants.length < 2) {
+            h.push('<div style="background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.4); border-radius:10px; padding:1.1rem; text-align:center; margin-bottom:1.1rem;">');
+            h.push('  <div style="font-size:1.8rem; margin-bottom:0.4rem;">🎺</div>');
+            h.push('  <h4 style="color:#fca5a5; font-family:\'Cinzel\',serif; margin:0 0 0.4rem;">Slavnost se nekoná v plné parádě</h4>');
+            h.push('  <p style="color:#cbd5e1; font-size:0.88rem; line-height:1.45; margin:0 0 0.85rem;">Podmínku účasti splňuje méně než 2 rytíři (' + contestants.length + ' rytíř splnil kvalifikaci). Král však oceňuje iniciativu pořadatele <strong>' + this.escapeHtml(organizer.name) + '</strong> a uděluje mu královský dar:</p>');
+            h.push('  <div style="display:inline-flex; gap:0.75rem; align-items:center; background:rgba(0,0,0,0.5); border:1px solid var(--gold); border-radius:8px; padding:0.5rem 1rem; font-weight:bold; color:#fef08a; margin-bottom:1rem;">');
+            h.push('    <span>💰 +800 zl.</span> <span>•</span> <span>💖 +0,5 Princeznina srdce</span>');
+            h.push('  </div>');
+            h.push('  <div><button class="btn-primary" style="padding:0.6rem 1.6rem; font-size:0.95rem;" onclick="PRS_App.executeFestivalContest(true)">🏆 Převzít královský dar a pokračovat</button></div>');
+            h.push('</div>');
+        } else {
+            // Kvalifikovaní soutěžící
+            h.push('<div style="font-weight:bold; color:var(--gold-light); margin-bottom:0.5rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px;">');
+            h.push('  ⚔️ Kvalifikovaní soutěžící rytíři (' + contestants.length + '):');
+            h.push('</div>');
+
+            for (var c = 0; c < contestants.length; c++) {
+                var cont = contestants[c];
+                var pl = cont.player;
+                var isHost = (pl.index === organizer.index);
+                h.push('<div class="festival-contestant-card">');
+                h.push('  <div class="festival-contestant-left">');
+                h.push('    <div class="festival-contestant-pawn" style="background:' + pl.color + ';">' + (pl.index + 1) + '</div>');
+                h.push('    <div class="festival-contestant-info">');
+                h.push('      <div class="festival-contestant-name">' + this.escapeHtml(pl.name) + (isHost ? ' <span style="font-size:0.75rem; color:#fef08a; background:rgba(212,175,55,0.25); border:1px solid var(--gold); border-radius:4px; padding:1px 5px;">Pořadatel</span>' : '') + '</div>');
+                h.push('      <div class="festival-contestant-bonuses">' + cont.bonusText + '</div>');
+                h.push('    </div>');
+                h.push('  </div>');
+                h.push('  <div class="festival-contestant-score-box">');
+                h.push('    <span style="font-size:0.8rem; color:#94a3b8;">Připraven</span>');
+                h.push('    <span class="festival-score-badge">🎲 ?</span>');
+                h.push('  </div>');
+                h.push('</div>');
+            }
+
+            // Diváci bez kvalifikace
+            if (spectators.length > 0) {
+                h.push('<div style="font-size:0.82rem; color:#94a3b8; margin:0.85rem 0 0.4rem; font-weight:600;">👀 Diváci na tribuně (nesplňují podmínky účasti):</div>');
+                for (var s = 0; s < spectators.length; s++) {
+                    var sp = spectators[s];
+                    h.push('<div class="festival-contestant-card festival-contestant-spectator">');
+                    h.push('  <div class="festival-contestant-left">');
+                    h.push('    <div class="festival-contestant-pawn" style="background:' + sp.player.color + '; opacity:0.7;">' + (sp.player.index + 1) + '</div>');
+                    h.push('    <div class="festival-contestant-info">');
+                    h.push('      <div style="font-weight:600; color:#cbd5e1; font-size:0.88rem;">' + this.escapeHtml(sp.player.name) + '</div>');
+                    h.push('      <div style="font-size:0.77rem; color:#ef4444;">❌ ' + sp.reason + '</div>');
+                    h.push('    </div>');
+                    h.push('  </div>');
+                    h.push('</div>');
+                }
+            }
+
+            // Spouštěcí akční tlačítko
+            h.push('<div style="margin-top:1.25rem; text-align:center;">');
+            h.push('  <button class="btn-primary" style="padding:0.75rem 2rem; font-size:1.05rem; font-weight:bold; letter-spacing:0.5px; box-shadow:0 0 20px rgba(212,175,55,0.4);" onclick="PRS_App.executeFestivalContest(false)">');
+            h.push('    🎲 Zahájit královské klání a hodit kostkami!');
+            h.push('  </button>');
+            h.push('</div>');
+        }
+
+        body.innerHTML = h.join("\n");
+        modal.style.display = "flex";
+        if (window.PRS_Audio) window.PRS_Audio.playNotice();
+    },
+
+    executeFestivalContest: function (isCompensationOnly) {
+        if (!this.state) return;
+        var modal = document.getElementById("festival-modal");
+        var body = document.getElementById("festival-modal-body");
+
+        if (isCompensationOnly) {
+            window.PRS_GameEngine.resolveFestival(this.state);
+            if (window.PRS_Audio) window.PRS_Audio.playCoin();
+            this.closeFestivalModal();
+            return;
+        }
+
+        // Hrajeme zvuk kostek
+        if (window.PRS_Audio) window.PRS_Audio.playDice();
+
+        // Vyhodnotíme v enginu
+        var res = window.PRS_GameEngine.resolveFestival(this.state);
         if (window.PRS_Audio) window.PRS_Audio.playFanfare();
-        window.PRS_GameEngine.resolveFestival(this.state);
+
+        if (!res || !body) {
+            this.closeFestivalModal();
+            return;
+        }
+
+        // Zobrazíme ceremoniál vítězů
+        var h = [];
+        h.push('<div style="text-align:center; margin-bottom:1.25rem;">');
+        h.push('  <div style="font-size:2.8rem; filter:drop-shadow(0 0 12px rgba(251,191,36,0.8));">👑</div>');
+        h.push('  <h3 style="font-family:\'Cinzel\',serif; color:#fef08a; font-size:1.35rem; margin:0 0 0.3rem;">Slavnostní vyhlášení vítězů</h3>');
+        h.push('  <div style="font-size:0.86rem; color:#cbd5e1;">Dvorní dámy a panovník dekorují nejlepší rytíře království!</div>');
+        h.push('</div>');
+
+        var parts = res.participants || [];
+        var medals = ["🥇 1. Místo", "🥈 2. Místo", "🥉 3. Místo"];
+
+        for (var p = 0; p < parts.length; p++) {
+            var part = parts[p];
+            var pl = part.player;
+            var isWinner = (p === 0);
+            var medalLabel = medals[p] || ((p + 1) + ". Místo");
+
+            h.push('<div class="festival-contestant-card' + (isWinner ? ' festival-contestant-winner' : '') + '">');
+            h.push('  <div class="festival-contestant-left">');
+            h.push('    <div class="festival-contestant-pawn" style="background:' + pl.color + ';">' + (pl.index + 1) + '</div>');
+            h.push('    <div class="festival-contestant-info">');
+            h.push('      <div class="festival-contestant-name">' + medalLabel + ': ' + this.escapeHtml(pl.name) + '</div>');
+            h.push('      <div class="festival-contestant-bonuses">🎲 Hod: ' + part.roll + ' | Výsledný výkon: <strong>' + part.score + '</strong></div>');
+            h.push('    </div>');
+            h.push('  </div>');
+            h.push('  <div class="festival-contestant-score-box">');
+            if (res.resultsText && res.resultsText[p]) {
+                var rewPart = res.resultsText[p].indexOf("->") !== -1 ? res.resultsText[p].split("->")[1].trim() : res.resultsText[p];
+                h.push('    <span class="festival-reward-pill">' + rewPart + '</span>');
+            }
+            h.push('    <span class="festival-score-badge">' + part.score + ' b.</span>');
+            h.push('  </div>');
+            h.push('</div>');
+        }
+
+        h.push('<div style="margin-top:1.4rem; text-align:center;">');
+        h.push('  <button class="btn-primary" style="padding:0.75rem 2.2rem; font-size:1.05rem; font-weight:bold;" onclick="PRS_App.closeFestivalModal()">');
+        h.push('    👑 Sláva vítězům! Pokračovat ve hře');
+        h.push('  </button>');
+        h.push('</div>');
+
+        body.innerHTML = h.join("\n");
+    },
+
+    closeFestivalModal: function () {
+        var modal = document.getElementById("festival-modal");
+        if (modal) modal.style.display = "none";
         this.renderGameScreen();
         this.saveSessionAuto();
     },

@@ -19,7 +19,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css?v=202611021800">
     <link rel="stylesheet" href="css/board.css?v=202611021800">
-    <link rel="stylesheet" href="css/modals.css?v=202611021800">
+    <link rel="stylesheet" href="css/modals.css?v=202611021825">
     <link rel="stylesheet" href="css/mobile.css?v=202611021800">
 </head>
 <body>
@@ -48,31 +48,9 @@
         </nav>
 
         <div class="user-bar">
-            <!-- 5 Elementárních přepínatelných stylů -->
-            <div class="element-theme-switcher" title="Vyber živel / atmosféru království">
-                <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true)">👑 <span class="theme-label">Zlato</span></button>
-                <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true)">🔥 <span class="theme-label">Oheň</span></button>
-                <button class="theme-btn" data-theme-btn="water" onclick="PRS_App.setElementTheme('water', true)">💧 <span class="theme-label">Voda</span></button>
-                <button class="theme-btn" data-theme-btn="earth" onclick="PRS_App.setElementTheme('earth', true)">🌿 <span class="theme-label">Země</span></button>
-                <button class="theme-btn" data-theme-btn="air" onclick="PRS_App.setElementTheme('air', true)">⚡ <span class="theme-label">Bouře</span></button>
-            </div>
-            <script>
-                (function () {
-                    try {
-                        var t = document.documentElement.getAttribute("data-theme") || "light";
-                        var btns = document.querySelectorAll(".theme-btn");
-                        for (var i = 0; i < btns.length; i++) {
-                            if (btns[i].getAttribute("data-theme-btn") === t) btns[i].classList.add("active");
-                            else btns[i].classList.remove("active");
-                        }
-                    } catch (e) {}
-                })();
-            </script>
-            <button id="music-player-btn" class="btn-secondary" onclick="PRS_App.toggleMusicPopup()" style="padding: 0.35rem 0.65rem;" title="Středověký hudební přehrávač &amp; Loutna">🎵 <span id="music-btn-label">Hudba: Vyp</span></button>
-            <button id="audio-toggle-btn" class="btn-secondary" onclick="PRS_App.toggleSound()" style="padding: 0.35rem 0.65rem;" title="Zvuky hry (zapnuto / ztlumeno)">🔊 Zvuk: Zap</button>
-            <button id="device-mode-toggle-btn" class="btn-secondary" onclick="PRS_App.cycleDeviceMode()" style="padding: 0.35rem 0.65rem;" title="Přepnout režim: Auto / Mobil / PC">📱 Režim: Auto</button>
             <div id="user-status-badge" class="user-pill" onclick="PRS_App.openAuthModal()">👤 Host: <strong>Host</strong></div>
             <button class="btn-secondary" onclick="PRS_App.openAuthModal()">Účet / Role</button>
+            <button id="topbar-settings-btn" class="btn-secondary" onclick="PRS_App.openSettingsModal()" title="Nastavení hry, živlů, zvuku a grafiky" style="padding: 0.35rem 0.75rem; font-weight:600; border-color:var(--gold); color:var(--gold-light);">⚙️ Nastavení</button>
         </div>
     </header>
 
@@ -485,21 +463,13 @@
                         </div>
 
                         <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
-                            <!-- Rychlý přepínač barevného designu a živlů přímo na desce -->
-                            <div class="element-theme-switcher board-theme-switcher" title="Barevný design &amp; Živel království">
-                                <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true)" title="Královské Zlato">👑 <span class="theme-label">Zlato</span></button>
-                                <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true)" title="Dračí Oheň">🔥 <span class="theme-label">Oheň</span></button>
-                                <button class="theme-btn" data-theme-btn="water" onclick="PRS_App.setElementTheme('water', true)" title="Mořská Voda">💧 <span class="theme-label">Voda</span></button>
-                                <button class="theme-btn" data-theme-btn="earth" onclick="PRS_App.setElementTheme('earth', true)" title="Hvozdná Země">🌿 <span class="theme-label">Země</span></button>
-                                <button class="theme-btn" data-theme-btn="air" onclick="PRS_App.setElementTheme('air', true)" title="Bouřná Magie">⚡ <span class="theme-label">Bouře</span></button>
-                            </div>
-                            <select class="prs-select" style="width:auto; padding:0.26rem 0.55rem; font-size:0.8rem;" onchange="PRS_App.changeBoardTemplateLive(this.value)" title="Přepnout rozložení plánu">
+                            <select id="board-template-select" class="prs-select" style="width:auto; padding:0.26rem 0.55rem; font-size:0.8rem;" onchange="PRS_App.changeBoardTemplateLive(this.value)" title="Přepnout rozložení plánu">
                                 <option value="classic_96">Plán: Klasický (Trojdílný)</option>
                                 <option value="dragon_4598">Plán: Drak &amp; Lesní věž</option>
                                 <option value="compact_48">Plán: Zkrácený okruh</option>
                                 <option value="procedural">Plán: Procedurální</option>
                             </select>
-                            <button class="btn-zoom" onclick="PRS_App.openGraphicsModal()">🎨 Bitmapy &amp; Prostředí</button>
+                            <button class="btn-zoom" onclick="PRS_App.openSettingsModal()" title="Nastavení živlů, zvuku, tempa hry a grafiky">⚙️ Nastavení</button>
                         </div>
                     </div>
 
@@ -1271,6 +1241,101 @@
             <div id="card-deck-modal-body" style="max-height:62vh; overflow-y:auto; line-height:1.45; font-size:0.9rem; color:#e2e8f0;"></div>
             <div style="margin-top:1rem; text-align:right;">
                 <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal()" style="padding:0.4rem 1.25rem; cursor:pointer;">Rozumím</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODÁL NASTAVENÍ HRY A PROSTŘEDÍ -->
+    <div id="game-settings-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeSettingsModal()">
+        <div class="modal-box settings-modal-dialog">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; background:linear-gradient(135deg, rgba(30,22,14,0.95), rgba(16,12,8,0.98)); border-bottom:2px solid var(--gold);">
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <span style="font-size:1.6rem;">⚙️</span>
+                    <div>
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.2rem;">Nastavení hry & království</h3>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">Přizpůsobení živlů, zvuku, ovládání a grafiky</div>
+                    </div>
+                </div>
+                <button class="btn-icon-danger" onclick="PRS_App.closeSettingsModal()" title="Zavřít nastavení">✕</button>
+            </div>
+            <div style="padding:1.25rem; display:flex; flex-direction:column; gap:1.15rem; max-height:75vh; overflow-y:auto;">
+                <!-- Sekce 1: Živel a barevný design -->
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.85rem 1rem;">
+                    <div style="font-weight:bold; color:var(--gold-light); margin-bottom:0.4rem; font-size:0.92rem; display:flex; align-items:center; gap:0.4rem;">
+                        ✨ Živel & vizuální téma království
+                    </div>
+                    <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.65rem;">Vyber atmosféru, paletu a styl herní plochy i oken:</div>
+                    <div class="element-theme-switcher settings-theme-switcher" style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                        <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true); PRS_App.syncSettingsThemeBtns();" title="Královské Zlato">👑 <span class="theme-label">Zlato</span></button>
+                        <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true); PRS_App.syncSettingsThemeBtns();" title="Dračí Oheň">🔥 <span class="theme-label">Oheň</span></button>
+                        <button class="theme-btn" data-theme-btn="water" onclick="PRS_App.setElementTheme('water', true); PRS_App.syncSettingsThemeBtns();" title="Mořská Voda">💧 <span class="theme-label">Voda</span></button>
+                        <button class="theme-btn" data-theme-btn="earth" onclick="PRS_App.setElementTheme('earth', true); PRS_App.syncSettingsThemeBtns();" title="Hvozdná Země">🌿 <span class="theme-label">Země</span></button>
+                        <button class="theme-btn" data-theme-btn="air" onclick="PRS_App.setElementTheme('air', true); PRS_App.syncSettingsThemeBtns();" title="Bouřná Magie">⚡ <span class="theme-label">Bouře</span></button>
+                    </div>
+                </div>
+
+                <!-- Sekce 2: Zvuk a hudba -->
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.85rem 1rem;">
+                    <div style="font-weight:bold; color:var(--gold-light); margin-bottom:0.4rem; font-size:0.92rem; display:flex; align-items:center; gap:0.4rem;">
+                        🎵 Zvukové efekty & hudební doprovod
+                    </div>
+                    <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.5rem;">
+                        <button id="settings-audio-btn" class="btn-secondary" onclick="PRS_App.toggleSound(); PRS_App.syncSettingsSoundLabel();" style="padding:0.45rem 0.85rem;">🔊 Zvuk: Zap</button>
+                        <button id="settings-music-btn" class="btn-secondary" onclick="PRS_App.toggleMusicPopup()" style="padding:0.45rem 0.85rem;">🎵 Přehrávač loutny & hudby</button>
+                    </div>
+                </div>
+
+                <!-- Sekce 3: Zobrazení a tempo hry -->
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.85rem 1rem;">
+                    <div style="font-weight:bold; color:var(--gold-light); margin-bottom:0.4rem; font-size:0.92rem; display:flex; align-items:center; gap:0.4rem;">
+                        📱 Rozhraní & herní tempo
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.65rem; margin-top:0.5rem;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                            <span style="font-size:0.85rem; color:#cbd5e1;">Režim zobrazení:</span>
+                            <button id="settings-device-btn" class="btn-secondary" onclick="PRS_App.cycleDeviceMode(); PRS_App.syncSettingsDeviceLabel();" style="padding:0.35rem 0.75rem;">📱 Režim: Auto</button>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.5rem;">
+                            <span style="font-size:0.85rem; color:#cbd5e1;">Rychlé animace hodů a figurek:</span>
+                            <input id="settings-fast-anim-chk" type="checkbox" onchange="PRS_App.toggleFastAnim(this.checked)" style="transform:scale(1.2); cursor:pointer;" />
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.5rem;">
+                            <span style="font-size:0.85rem; color:#cbd5e1;">Automatický tah botů (AI):</span>
+                            <input id="settings-autobots-chk" type="checkbox" checked onchange="PRS_App.toggleAutoBots(this.checked)" style="transform:scale(1.2); cursor:pointer;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sekce 4: Bitmapy a prostředí desky -->
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.85rem 1rem;">
+                    <div style="font-weight:bold; color:var(--gold-light); margin-bottom:0.4rem; font-size:0.92rem; display:flex; align-items:center; gap:0.4rem;">
+                        🎨 Bitmapy & grafické prostředí
+                    </div>
+                    <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.65rem;">Detailní správa textur desky, pozadí a dekoračních prvků:</div>
+                    <button class="btn-secondary" onclick="PRS_App.closeSettingsModal(); PRS_App.openGraphicsModal();" style="padding:0.45rem 0.85rem;">🎨 Otevřít správce prostředí a textur</button>
+                </div>
+            </div>
+            <div style="padding:0.85rem 1.25rem; background:rgba(0,0,0,0.45); border-top:1px solid rgba(212,175,55,0.2); text-align:right;">
+                <button class="btn-primary" onclick="PRS_App.closeSettingsModal()" style="padding:0.45rem 1.4rem;">Hotovo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODÁL PRO KRÁLOVSKOU SLAVNOST / TURNAJ / PLES (Festival Modal) -->
+    <div id="festival-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeFestivalModal()">
+        <div class="modal-box festival-modal-dialog">
+            <div class="festival-modal-header">
+                <div class="festival-title-wrap">
+                    <span id="festival-modal-icon" class="festival-header-icon">🎪</span>
+                    <div>
+                        <h3 id="festival-modal-title" class="festival-header-title">Královská slavnost & Turnaj</h3>
+                        <div id="festival-modal-sub" class="festival-header-sub">Soutěž o čest, slávu a Princeznino srdce</div>
+                    </div>
+                </div>
+                <button class="btn-icon-danger" onclick="PRS_App.closeFestivalModal()" title="Zavřít turnaj">✕</button>
+            </div>
+            <div id="festival-modal-body" class="festival-modal-body">
+                <!-- Dynamicky plněno z PRS_App.openFestivalModal() -->
             </div>
         </div>
     </div>

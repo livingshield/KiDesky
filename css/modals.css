@@ -1255,3 +1255,182 @@
     box-shadow: 0 0 8px #fef08a;
     transform: scale(1.25);
 }
+
+
+/* ==========================================================================
+   NASTAVENÍ HRY (#game-settings-modal) & KRÁLOVSKÝ TURNAJ (#festival-modal)
+   ========================================================================== */
+
+/* Nastavení hry dialog */
+.settings-modal-dialog {
+    max-width: 560px;
+    background: linear-gradient(135deg, rgba(22, 18, 14, 0.98), rgba(12, 10, 8, 0.99));
+    border: 2px solid var(--gold);
+    border-radius: 14px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85);
+    overflow: hidden;
+}
+
+/* Královská slavnost / Festival Modal */
+.festival-modal-dialog {
+    max-width: 680px;
+    width: 95%;
+    background: linear-gradient(135deg, rgba(24, 16, 22, 0.98), rgba(14, 10, 16, 0.99));
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.85);
+    overflow: hidden;
+    animation: modalScaleIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.festival-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.4rem;
+    background: linear-gradient(135deg, rgba(76, 29, 149, 0.92), rgba(159, 18, 57, 0.92));
+    border-bottom: 2px solid var(--gold);
+}
+
+.festival-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.festival-header-icon {
+    font-size: 2.2rem;
+    filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.7));
+}
+
+.festival-header-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.35rem;
+    color: #fef08a;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.festival-header-sub {
+    font-size: 0.82rem;
+    color: #fbcfe8;
+    margin-top: 2px;
+}
+
+.festival-modal-body {
+    padding: 1.25rem 1.4rem;
+    max-height: 72vh;
+    overflow-y: auto;
+}
+
+.festival-discipline-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(0, 0, 0, 0.45));
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 10px;
+    padding: 0.85rem 1.1rem;
+    margin-bottom: 1.1rem;
+}
+
+.festival-contestant-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 10px;
+    margin-bottom: 0.65rem;
+    transition: all 0.25s ease;
+}
+
+.festival-contestant-winner {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.22), rgba(0, 0, 0, 0.55));
+    border: 2px solid #fbbf24;
+    box-shadow: 0 0 18px rgba(251, 191, 36, 0.4);
+    transform: scale(1.01);
+}
+
+.festival-contestant-spectator {
+    opacity: 0.55;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.festival-contestant-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.festival-contestant-pawn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    border: 1.5px solid #fff;
+    flex-shrink: 0;
+}
+
+.festival-contestant-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.festival-contestant-name {
+    font-weight: bold;
+    font-size: 0.95rem;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.festival-contestant-bonuses {
+    font-size: 0.79rem;
+    color: var(--gold-light);
+    margin-top: 2px;
+}
+
+.festival-contestant-score-box {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-align: right;
+}
+
+.festival-score-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #fef08a;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid var(--gold);
+    padding: 0.3rem 0.75rem;
+    border-radius: 8px;
+    min-width: 65px;
+    text-align: center;
+}
+
+.festival-reward-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    background: rgba(236, 72, 153, 0.2);
+    border: 1px solid rgba(244, 114, 182, 0.5);
+    color: #fbcfe8;
+}
