@@ -865,6 +865,24 @@ window.PRS_GameEngine = {
     resolveChanceCard: function (state, player) {
         var card = window.PRS_CHANCE_CARDS[Math.floor(Math.random() * window.PRS_CHANCE_CARDS.length)];
         var stats = this.getEffectiveStats(state, player);
+
+        // KARTA DILEMATU / VOLBY (Interaktivní rozhodnutí A vs. B)
+        if (card.category === "dilemma") {
+            state.pendingAction.chanceCard = card;
+            state.pendingAction.dilemmaCard = card;
+            state.pendingAction.canChooseDilemma = true;
+            var dilemmaMsg = "❓ Karta osudu vyžaduje tvé rozhodnutí – **" + card.title + "**: " + card.text;
+            state.pendingAction.summary = dilemmaMsg;
+            this.addLog(state, dilemmaMsg, "gold");
+
+            // Pokud je hráč AI Bot, provede autonomní volbu ihned
+            if (player.type !== "Human") {
+                var chosenOpt = this.decideBotDilemma(state, player, card);
+                this.chooseChanceDilemma(state, player, chosenOpt);
+            }
+            return;
+        }
+
         var msg = "❓ Karta Náhody – **" + card.title + "**: " + card.text;
 
         if (card.effect === "hearts") {
@@ -907,6 +925,10 @@ window.PRS_GameEngine = {
                 player.gold = Math.max(0, player.gold - card.value);
                 msg += " (Tvůj Boj je jen " + stats.boj + " -> Ztrácíš " + card.value + " zl.)";
             }
+        } else if (card.effect === "curse") {
+            var cursePaid = Math.min(player.gold, card.value || 1200);
+            player.gold -= cursePaid;
+            msg += " (Zaplaceno knězi -" + cursePaid + " zl. za sejmutí kletby)";
         } else if (card.effect === "village_bonus") {
             var vCount = 0;
             for (var vi = 0; vi < player.ownedNodes.length; vi++) {
@@ -953,6 +975,142 @@ window.PRS_GameEngine = {
         state.pendingAction.summary = msg;
         this.addLog(state, msg);
         this.recalculateBreedingAndVictory(state);
+    },
+
+    // Vyhodnocení volby v dilematu Karty osudu (Možnost A = 0, Možnost B = 1)
+    chooseChanceDilemma: function (state, player, optionIndex) {
+        var pa = state.pendingAction;
+        var card = pa.dilemmaCard || pa.chanceCard;
+        if (!card || !card.options || !card.options[optionIndex]) return null;
+
+        var opt = card.options[optionIndex];
+        var stats = this.getEffectiveStats(state, player);
+        var msg = "⚖️ Rozhodnutí: **" + opt.title + "** – ";
+
+        if (opt.costGold) {
+            var actualCost = Math.min(player.gold, opt.costGold);
+            player.gold -= actualCost;
+            msg += "Uhrazeno -" + actualCost + " zl. ";
+        }
+        if (opt.gainGold) {
+            player.gold += opt.gainGold;
+            msg += "+" + opt.gainGold + " zl. ";
+        }
+        if (opt.gainHearts) {
+            player.permanentHearts += opt.gainHearts;
+            player.stats.heartsFromChance += opt.gainHearts;
+            msg += "+" + opt.gainHearts + " 💖 ";
+        }
+        if (opt.lossHearts) {
+            player.permanentHearts = Math.max(0, player.permanentHearts - opt.lossHearts);
+            msg += "-" + opt.lossHearts + " 💖 ";
+        }
+
+        // Speciální efekty voleb
+        if (opt.effect === "alchemist_gamble") {
+            var r = Math.random();
+            if (r < 0.6) {
+                var skKeys = ["boj", "jizda", "tanec", "charisma"];
+                skKeys.sort(function (a, b) { return player.skills[a] - player.skills[b]; });
+                var chosenSk = skKeys[0];
+                if (player.skills[chosenSk] < 5) player.skills[chosenSk]++;
+                msg += "Tinktura zabrala! Získáno +1 k " + chosenSk.toUpperCase() + "!";
+            } else {
+                var medCost = Math.min(player.gold, 400);
+                player.gold -= medCost;
+                msg += "Nevolnost! Návštěva ranhojiče stála -" + medCost + " zl.";
+            }
+        } else if (opt.effect === "dice_gamble") {
+            var dRoll = Math.floor(Math.random() * 6) + 1;
+            if (dRoll >= 4) {
+                player.gold += 3500;
+                msg += "Hod " + dRoll + " -> VÝHRA 3 500 zl. v kostkách!";
+            } else {
+                msg += "Hod " + dRoll + " -> Smůla v kostkách, vklad propadl!";
+            }
+        } else if (opt.effect === "gain_jizda") {
+            if (player.skills.jizda < 5) player.skills.jizda++;
+            msg += "Získáno +1 k Jízdě na koni!";
+        } else if (opt.effect === "gain_boj") {
+            if (player.skills.boj < 5) player.skills.boj++;
+            msg += "Získáno +1 k Boji!";
+        } else if (opt.effect === "open_chest_loot") {
+            var pool = window.PRS_ITEMS.filter(function (it) { return (it.tier === 1 || it.tier === 2) && it.slot !== "trophy"; });
+            if (pool.length > 0) {
+                var chestLoot = this.deepClone(pool[Math.floor(Math.random() * pool.length)]);
+                player.items.push(chestLoot);
+                msg += "V truhlici byl nalezen předmět: " + chestLoot.icon + " " + chestLoot.name + "!";
+            }
+        } else if (opt.effect === "fencer_duel") {
+            if (stats.boj >= 3) {
+                player.permanentHearts += 1.0;
+                player.gold += 600;
+                msg += "Tvůj Boj " + stats.boj + " stačil na vítězství (+1 💖, +600 zl.)!";
+            } else {
+                var fCost = Math.min(player.gold, 600);
+                player.gold -= fCost;
+                msg += "Šermíř tě odzbrojil, ošetření ran stálo -" + fCost + " zl.";
+            }
+        } else if (opt.effect === "free_item_1") {
+            var tier1 = window.PRS_ITEMS.filter(function (it) { return it.tier === 1 && it.slot !== "trophy"; });
+            if (tier1.length > 0) {
+                var gItem = this.deepClone(tier1[Math.floor(Math.random() * tier1.length)]);
+                player.items.push(gItem);
+                msg += "Získán předmět: " + gItem.icon + " " + gItem.name + "!";
+            }
+        } else if (opt.effect === "free_skill") {
+            var sks = ["boj", "jizda", "tanec", "charisma"];
+            sks.sort(function (a, b) { return player.skills[a] - player.skills[b]; });
+            var chSk = sks[0];
+            if (player.skills[chSk] < 5) player.skills[chSk]++;
+            msg += "Získáno +1 k " + chSk.toUpperCase() + "!";
+        } else if (opt.effect === "trade_caravan") {
+            player.gold += 2200;
+            msg += "Karavana úspěšně dorazila, výplata zisku +2 200 zl.!";
+        }
+
+        pa.canChooseDilemma = false;
+        pa.dilemmaCard = null;
+        pa.summary = msg;
+        this.addLog(state, msg, "gold");
+        this.recalculateBreedingAndVictory(state);
+        return { option: opt, message: msg };
+    },
+
+    // Rozhodování AI botů u dilematických karet podle jejich archetypu
+    decideBotDilemma: function (state, bot, card) {
+        if (!card.options || card.options.length < 2) return 0;
+        var optA = card.options[0];
+        var optB = card.options[1];
+
+        // Bot_Aggressive: preferuje zisk zlata, hazard a bojové výzvy
+        if (bot.type === "Bot_Aggressive") {
+            if (optA.effect === "dice_gamble" && bot.gold >= 2500) return 0;
+            if (optA.gainGold && (!optB.gainGold || optA.gainGold > optB.gainGold)) return 0;
+            if (optB.gainGold && (!optA.gainGold || optB.gainGold > optA.gainGold)) return 1;
+            return (Math.random() < 0.6) ? 0 : 1;
+        }
+
+        // Bot_Noble: ctí rytířské ctnosti, odmítá úplatky, preferuje Srdce princezny
+        if (bot.type === "Bot_Noble") {
+            if (optB.id === "opt_honor" || optB.gainHearts > (optA.gainHearts || 0)) return 1;
+            if (optA.gainHearts && optA.gainHearts > (optB.gainHearts || 0) && (!optA.costGold || bot.gold >= optA.costGold + 1000)) return 0;
+            if (optA.lossHearts) return 1;
+            if (optB.lossHearts) return 0;
+            return 0;
+        }
+
+        // Bot_Breeder: preferuje chov koní a šetří zlato
+        if (bot.type === "Bot_Breeder") {
+            if (optA.effect === "gain_jizda" && bot.gold >= 1500) return 0;
+            if (optA.costGold && optA.costGold > 800) return 1;
+            return 0;
+        }
+
+        // Bot_Balanced a Bot_Easy: racionální volba podle hotovosti
+        if (optA.costGold && bot.gold < optA.costGold + 800) return 1;
+        if (optA.gainHearts && optA.gainHearts >= 1.0) return 0;
+        return (Math.random() < 0.5) ? 0 : 1;
     },
 
     // Nákup volného políčka
@@ -1402,6 +1560,18 @@ window.PRS_GameEngine = {
             tacticName = "🧪 Hojivý elixír z Lazaretu (Pojistka proti Špitálu)";
         }
 
+        // Taktický bojový postoj: Dravý útok (+2 Síla / -2 Srdce), Opatrná obrana (-1 Síla / bezpečný ústup), Taktický (standard + reroll)
+        var stance = tactics.stance || "tactical";
+        var stanceBonus = 0;
+        var stanceName = "🎯 Taktický manévr";
+        if (stance === "aggressive") {
+            stanceBonus = 2;
+            stanceName = "⚔️ Dravý útok (+2 k síle, při prohře -2 💖 nebo 2× pokuta)";
+        } else if (stance === "defensive") {
+            stanceBonus = -1;
+            stanceName = "🛡️ Opatrná obrana (-1 k síle, při prohře 0 ztráta srdcí & bezpečný ústup)";
+        }
+
         var roll = forcedRoll || (Math.floor(Math.random() * 6) + 1);
         var animalBonus = 0;
         if (q.questTier === "U1" && (stats.dogs > 0 || stats.falcons > 0)) {
@@ -1412,7 +1582,7 @@ window.PRS_GameEngine = {
         var horseBonus = (q.questTier !== "U1" && stats.horses > 0) ? (1 + Math.floor(stats.jizda / 2)) : 0;
         var wRes = this.checkQuestWeakness(state, player, q, tactics);
         var weaknessBonus = wRes.exploited ? 2 : 0;
-        var totalPower = roll + stats.boj + animalBonus + horseBonus + tacticBonus + weaknessBonus;
+        var totalPower = roll + stats.boj + animalBonus + horseBonus + tacticBonus + weaknessBonus + stanceBonus;
 
         pa.canResolveQuest = false;
         var won = totalPower >= q.difficulty;
@@ -1468,7 +1638,23 @@ window.PRS_GameEngine = {
             this.addLog(state, rewardMsg, "quest_win");
         } else {
             player.stats.questsLost++;
-            if (tactics.elixir) {
+
+            // Kontrola taktického Rerollu (při taktickém postoji, prohře o 1-2 body a přítomnosti psa/sokola či Boj >= 2)
+            var canReroll = (stance === "tactical" && (q.difficulty - totalPower <= 2) && (stats.dogs > 0 || stats.falcons > 0 || stats.boj >= 2));
+            if (canReroll && !tactics.isReroll) {
+                pa.canTacticalReroll = true;
+                pa.lastDuelRoll = roll;
+                pa.lastDuelTactics = tactics;
+                pa.lastDuelPower = totalPower;
+            }
+
+            if (stance === "defensive") {
+                // Opatrná obrana: hráč neutrpí žádnou ztrátu srdcí ani vězení/lazaret
+                preventedHospital = true;
+                var defLossMsg = "🛡️ Opatrný ústup za štítem! " + player.badge + " " + player.name + " včas kryl svůj ústup před **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + "). Díky obrannému postoji neutrpěl žádnou ztrátu srdcí ani zranění!";
+                pa.summary = defLossMsg;
+                this.addLog(state, defLossMsg, "quest_loss");
+            } else if (tactics.elixir) {
                 // Pojistka lektvarem z Lazaretu - hráč neutrpí těžké zranění
                 var elixCost = Math.min(player.gold, 500);
                 player.gold -= elixCost;
@@ -1477,12 +1663,16 @@ window.PRS_GameEngine = {
                 pa.summary = elixLossMsg;
                 this.addLog(state, elixLossMsg, "quest_loss");
             } else if (q.questTier === "U1") {
-                var failCost = Math.min(player.gold, state.config.quests.u1FailCost || 500);
+                var failCost = Math.min(player.gold, (state.config.quests.u1FailCost || 500) * (stance === "aggressive" ? 2 : 1));
                 player.gold -= failCost;
-                var u1Msg = "🐗 Lov se nezdařil! **" + q.name + "** unikl (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + "). Ošetření ran stojí -" + failCost + " zl.";
+                var u1Msg = "🐗 Lov se nezdařil! **" + q.name + "** unikl (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + ")." + (stance === "aggressive" ? " Kvůli dravému výpadu tě ošetření ran stálo dvojnásobek: -" + failCost + " zl." : " Ošetření ran stojí -" + failCost + " zl.");
                 pa.summary = u1Msg;
                 this.addLog(state, u1Msg, "quest_loss");
             } else {
+                // Dravý útok na U2/U3: ztráta 2 Srdcí
+                var heartsLost = (stance === "aggressive") ? 2.0 : 1.0;
+                player.permanentHearts = Math.max(0, player.permanentHearts - heartsLost);
+
                 // Zranění v boji na U2/U3 -> převoz do Královského lazaretu (Špitál) k ošetření
                 var hospitalNode = null;
                 for (var h = 0; h < state.board.nodes.length; h++) {
@@ -1494,13 +1684,13 @@ window.PRS_GameEngine = {
                 if (hospitalNode) {
                     player.nodeId = hospitalNode.id;
                     player.skipTurns = 1;
-                    var hospLossMsg = "💀 PORÁŽKA V BOJI! " + player.badge + " " + player.name + " podlehl v souboji s **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + "). Těžce raněný rytíř byl převezen do **" + hospitalNode.name + "**, kde se 1 tah léčí!";
+                    var hospLossMsg = "💀 PORÁŽKA V BOJI! " + player.badge + " " + player.name + " podlehl v souboji s **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + ")." + (stance === "aggressive" ? " Dravý výpad způsobil kritické zranění: **-" + heartsLost + " 💖**!" : " Rytíř ztratil **-" + heartsLost + " 💖**.") + " Těžce raněný byl převezen do **" + hospitalNode.name + "**, kde se 1 tah léčí!";
                     pa.summary = hospLossMsg;
                     this.addLog(state, hospLossMsg, "quest_loss");
                 } else {
                     player.nodeId = 0;
                     player.skipTurns = 1;
-                    var deathMsg = "💀 PORÁŽKA V BOJI! " + player.badge + " " + player.name + " podlehl v souboji s **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + "). Je odnesen na **START** a vynechává 1 tah!";
+                    var deathMsg = "💀 PORÁŽKA V BOJI! " + player.badge + " " + player.name + " podlehl v souboji s **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + ")." + (stance === "aggressive" ? " Kritické zranění: **-" + heartsLost + " 💖**!" : " Ztráta **-" + heartsLost + " 💖**.") + " Rytíř byl odnesen na **START** a vynechává 1 tah!";
                     pa.summary = deathMsg;
                     this.addLog(state, deathMsg, "quest_loss");
                 }
@@ -1525,7 +1715,11 @@ window.PRS_GameEngine = {
             weaknessBonus: weaknessBonus,
             weaknessExploited: wRes.exploited,
             weaknessReason: wRes.reason,
-            tacticName: tacticName
+            tacticName: tacticName,
+            stance: stance,
+            stanceBonus: stanceBonus,
+            stanceName: stanceName,
+            canTacticalReroll: (stance === "tactical" && !won && (q.difficulty - totalPower <= 2) && (stats.dogs > 0 || stats.falcons > 0 || stats.boj >= 2))
         };
     },
 
@@ -1872,7 +2066,13 @@ window.PRS_GameEngine = {
                 if (bot.type === "Bot_Breeder" && effStats.boj < 12) shouldFight = false;
             }
             if (shouldFight) {
-                this.resolveQuest(state);
+                var botStance = "tactical";
+                if (bot.type === "Bot_Aggressive") {
+                    botStance = "aggressive";
+                } else if (bot.type === "Bot_Noble" || bot.type === "Bot_Easy") {
+                    botStance = (pa.questCard && pa.questCard.difficulty > effStats.boj + 6) ? "defensive" : "tactical";
+                }
+                this.resolveQuest(state, null, { stance: botStance });
                 if (state.phase === "GAME_OVER") return;
             }
         }

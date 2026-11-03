@@ -1507,38 +1507,150 @@ window.PRS_QUESTS = {
     ]
 };
 
-// Karty Náhody (N) - Celkem 24 autentických královských událostí
+// ============================================================================
+// KARTY NÁHODY & OSUDU (N) - Celkem 50 vyvážených karet (50% pozitivní, 25% negativní, 25% volby/dilemata)
+// ============================================================================
 window.PRS_CHANCE_CARDS = [
-    { id: "ch_1", title: "Královská přízeň", icon: "💖", effect: "hearts", value: 1.0, text: "Princezna ocenila tvé galantní vystupování u dvora. Získáváš +1 💖!" },
-    { id: "ch_2", title: "Bohatá úroda na panství", icon: "🌾", effect: "estate_bonus", value: 500, text: "Tvé osady vzkvétají! Za každou svou Vesnici, Město a Hrad získáváš +500 zl. (minimálně však +1 000 zl.)." },
-    { id: "ch_3", title: "Turnajové sázky", icon: "🎲", effect: "gold_gain", value: 1500, text: "Vsadil sis na vítěze klání a vyhrál jsi 1 500 zl.!" },
-    { id: "ch_4", title: "Přepadení loupežníky", icon: "🗡️", effect: "robbers", value: 1000, text: "V lese tě přepadli lapkové! Pokud je tvůj Boj alespoň 3, zaženeš je a získáš 1 000 zl. Jinak přicházíš o 1 000 zl." },
-    { id: "ch_5", title: "Dar od zbrojíře", icon: "🎁", effect: "free_item_1", value: 1, text: "Starý mistr zbrojíř ti věnoval předmět 1. stupně zdarma!" },
-    { id: "ch_6", title: "Lekce u dvorního mistra", icon: "📜", effect: "free_skill", value: 1, text: "Získáváš +1 stupeň v libovolné své nejnižší vlastnosti zdarma!" },
-    { id: "ch_7", title: "Oprava zbroje a sedel", icon: "🔨", effect: "gold_loss", value: 800, text: "Údržba výstroje a koní po dlouhé cestě tě stojí 800 zl." },
-    { id: "ch_8", title: "Měšec na rozcestí", icon: "💰", effect: "gold_gain", value: 2000, text: "Našel jsi ztracený kupecký měšec s 2 000 zl.!" },
-    { id: "ch_9", title: "Milostný sonet", icon: "🎶", effect: "hearts", value: 1.5, text: "Tvůj trubadúr složil píseň o tvých činech pod okny princezny. Získáváš +1,5 💖!" },
-    { id: "ch_10", title: "Hostina pro poddané", icon: "🍗", effect: "gold_loss", value: 1000, text: "Uspořádal jsi slavnost pro své poddané. Zaplatíš 1 000 zl., ale získáš +0,5 💖!" },
-    { id: "ch_11", title: "Královská milost & dotace", icon: "👑", effect: "gold_gain", value: 1800, text: "Král ocenil tvou věrnost korunce a věnuje ti královskou dotaci +1 800 zl.!" },
-    { id: "ch_12", title: "Věrný stopařský ohař", icon: "🐕", effect: "hearts", value: 0.5, text: "Tvůj pes zachránil ztraceného panoše v bažinách. Získáváš vděk dvora a +0,5 💖!" },
-    { id: "ch_13", title: "Vítězná fanfára z turnaje", icon: "🎺", effect: "hearts", value: 1.0, text: "Pověst o tvé rytířské cti se nese celým krajem. Získáváš +1 💖!" },
-    { id: "ch_14", title: "Bouře a rozbahněné cesty", icon: "⛈️", effect: "gold_loss", value: 600, text: "Prudká bouře poškodila povoz s výstrojí. Oprava kovářem tě stojí 600 zl." },
-    { id: "ch_15", title: "Dvorní intriky u stolu", icon: "🍷", effect: "intrigue", value: 1.0, text: "Protivníci tě zkoušeli očernit u princeznina stolu. Pokud máš Charisma alespoň 3, obrátíš vtip v triumf (+1 💖)! Jinak tě urovnání sporu stojí 600 zl." },
-    { id: "ch_16", title: "Klenot od královny matky", icon: "💎", effect: "free_item_1", value: 1, text: "Královna matka ti věnovala vzácný dvorský klenot do tvé výbavy!" },
-    { id: "ch_17", title: "Požehnání lesního poustevníka", icon: "🧙‍♂️", effect: "free_skill", value: 1, text: "Starý světec ti předal moudrost předků. Získáváš +1 stupeň k vlastnosti zdarma!" },
-    { id: "ch_18", title: "Královský spěšný kurýr", icon: "🏇", effect: "gold_gain", value: 1400, text: "Doručil jsi tajnou královskou depeši na hrad. Odměna činí +1 400 zl.!" },
-    { id: "ch_19", title: "Neohlášený zámecký ples", icon: "💃", effect: "ball", value: 1.0, text: "Na zámečku u cesty se koná ples! Pokud máš dvorské šaty nebo Tanec alespoň 2, získáš obdiv dvora (+1 💖). Jinak tě společenské faux pas stojí 400 zl." },
-    { id: "ch_20", title: "Nález v ruinách hradu", icon: "🗝️", effect: "gold_gain", value: 2500, text: "V rozpadlé hradní věži jsi našel starobylou železnou pokladnici se 2 500 zl.!" },
-    { id: "ch_21", title: "Svatební veselí na panství", icon: "🏘️", effect: "village_bonus", value: 600, text: "Ve tvých vesnicích se slaví svatba. Každá tvá vesnice ti přináší dar +600 zl. (min. +1 000 zl.)!" },
-    { id: "ch_22", title: "Léčení zraněného sokola", icon: "🦅", effect: "gold_loss", value: 500, text: "Tvůj lovecký dravčík potřebuje péči královského sokolníka. Platíš 500 zl." },
-    { id: "ch_23", title: "Vroucí láska poddaných", icon: "❤️", effect: "hearts", value: 1.0, text: "Lid v celém království provolává tvou slávu. Princezna ti posílá hedvábný kapesníček (+1 💖)!" },
-    { id: "ch_24", title: "Královský glejt cti", icon: "📜", effect: "gold_gain", value: 1200, text: "Obdržel jsi královský glejt stvrzující tvé šlechtické výsady (+1 200 zl.)!" }
-];
+    // --- 1. POZITIVNÍ KARTY (25 karet / 50 %) ---
+    { id: "ch_1", category: "positive", title: "Královská přízeň", icon: "💖", effect: "hearts", value: 1.0, text: "Princezna ocenila tvé galantní vystupování u dvora. Získáváš +1 💖!" },
+    { id: "ch_2", category: "positive", title: "Bohatá úroda na panství", icon: "🌾", effect: "estate_bonus", value: 500, text: "Tvé osady vzkvétají! Za každou svou Vesnici, Město a Hrad získáváš +500 zl. (minimálně však +1 000 zl.)." },
+    { id: "ch_3", category: "positive", title: "Turnajové sázky", icon: "🎲", effect: "gold_gain", value: 1500, text: "Vsadil sis na vítěze rytířského klání a vyhrál jsi 1 500 zl.!" },
+    { id: "ch_4", category: "positive", title: "Nález královského prstenu", icon: "💍", effect: "gold_gain", value: 2000, text: "Našel jsi ztracený královský pečetní prsten a vrátil jej kancléři. Odměna činí +2 000 zl.!" },
+    { id: "ch_5", category: "positive", title: "Dar od zbrojíře", icon: "🎁", effect: "free_item_1", value: 1, text: "Starý mistr zbrojíř ti věnoval předmět 1. stupně zdarma!" },
+    { id: "ch_6", category: "positive", title: "Lekce u dvorního mistra", icon: "📜", effect: "free_skill", value: 1, text: "Získáváš +1 stupeň v libovolné své nejnižší ctnosti zdarma!" },
+    { id: "ch_7", category: "positive", title: "Měšec na rozcestí", icon: "💰", effect: "gold_gain", value: 1800, text: "V mechu na starém rozcestí jsi našel ztracený kupecký měšec s 1 800 zl.!" },
+    { id: "ch_8", category: "positive", title: "Milostný sonet pro princeznu", icon: "🎶", effect: "hearts", value: 1.5, text: "Tvůj trubadúr složil dojemnou píseň o tvých činech pod okny princezny. Získáváš +1,5 💖!" },
+    { id: "ch_9", category: "positive", title: "Královská milost a dotace", icon: "👑", effect: "gold_gain", value: 2200, text: "Král ocenil tvou věrnost korunce a věnuje ti královskou dotaci +2 200 zl.!" },
+    { id: "ch_10", category: "positive", title: "Věrný stopařský ohař", icon: "🐕", effect: "hearts", value: 0.5, text: "Tvůj lovecký pes vystopoval ztraceného panoše v bažinách. Získáváš vděk dvora a +0,5 💖!" },
+    { id: "ch_11", category: "positive", title: "Vítězná fanfára z turnaje", icon: "🎺", effect: "hearts", value: 1.0, text: "Pověst o tvé rytířské cti se nese celým krajem. Získáváš +1 💖!" },
+    { id: "ch_12", category: "positive", title: "Klenot od královny matky", icon: "💎", effect: "free_item_1", value: 1, text: "Královna matka ti věnovala vzácný dvorský klenot do tvé výbavy!" },
+    { id: "ch_13", category: "positive", title: "Požehnání lesního poustevníka", icon: "🧙‍♂️", effect: "free_skill", value: 1, text: "Starý světec ti předal moudrost předků. Získáváš +1 stupeň k ctnosti zdarma!" },
+    { id: "ch_14", category: "positive", title: "Královský spěšný kurýr", icon: "🏇", effect: "gold_gain", value: 1400, text: "Doručil jsi tajnou královskou depeši na hrad. Odměna činí +1 400 zl.!" },
+    { id: "ch_15", category: "positive", title: "Nález v ruinách hradu", icon: "🗝️", effect: "gold_gain", value: 2500, text: "V rozpadlé hradní věži jsi našel starobylou železnou pokladnici se 2 500 zl.!" },
+    { id: "ch_16", category: "positive", title: "Svatební veselí na panství", icon: "🏘️", effect: "village_bonus", value: 600, text: "Ve tvých vesnicích se slaví svatba. Každá tvá vesnice ti přináší svatební dar +600 zl. (min. +1 000 zl.)!" },
+    { id: "ch_17", category: "positive", title: "Vroucí láska poddaných", icon: "❤️", effect: "hearts", value: 1.0, text: "Lid v celém království provolává tvou slávu. Princezna ti posílá hedvábný kapesníček (+1 💖)!" },
+    { id: "ch_18", category: "positive", title: "Královský glejt cti", icon: "📜", effect: "gold_gain", value: 1200, text: "Obdržel jsi královský glejt stvrzující tvé šlechtické výsady (+1 200 zl.)!" },
+    { id: "ch_19", category: "positive", title: "Dědictví po bohatém strýci", icon: "🏰", effect: "gold_gain", value: 3000, text: "Královský notář ti vyplatil šlechtické dědictví ve výši +3 000 zl.!" },
+    { id: "ch_20", category: "positive", title: "Zlatý poklad z potopeného člunu", icon: "⛵", effect: "gold_gain", value: 1800, text: "Při brodění řekou jsi z vraku člunu vylovil truhličku mincí (+1 800 zl.)!" },
+    { id: "ch_21", category: "positive", title: "Přízeň dvorních dam", icon: "🪞", effect: "hearts", value: 1.0, text: "Dvorní dámy si špitají o tvém šarmu a eleganci. Získáváš +1 💖!" },
+    { id: "ch_22", category: "positive", title: "Vynikající chov v hřebčíně", icon: "🐴", effect: "gold_gain", value: 1500, text: "Královský nákupčí ocenil tvůj chov koní a vyplatil ti prémii +1 500 zl.!" },
+    { id: "ch_23", category: "positive", title: "Požehnání poutního chrámu", icon: "✨", effect: "free_skill", value: 1, text: "Modlitba u posvátného oltáře ti vyjasnila mysl. Získáváš +1 stupeň ctnosti zdarma!" },
+    { id: "ch_24", category: "positive", title: "Rytířské vavříny ze slavnosti", icon: "🌿", effect: "hearts", value: 1.0, text: "Při slavnostním defilé ti lidé házeli květy pod nohy. Získáváš +1 💖!" },
+    { id: "ch_25", category: "positive", title: "Vzácná alchymistická tinktura", icon: "🧪", effect: "free_item_1", value: 1, text: "Lékárník z Lazaretu ti věnoval ochranný lektvar do tvé výbavy!" },
 
-// ============================================================================
-// GENERÁTOR HERNÍCH PLÁNŮ (Věrná rekonstrukce IMG_4599 a IMG_4595)
-// Plátno: 1400 x 860 px
-// ============================================================================
+    // --- 2. NEGATIVNÍ KARTY (13 karet / 26 %) ---
+    { id: "ch_26", category: "negative", title: "Rozvodněná řeka a stržený most", icon: "🌊", effect: "gold_loss", value: 1200, text: "Přívalový déšť rozvodnil řeku a poškodil tvůj povoz s výstrojí. Oprava kovářem tě stojí 1 200 zl." },
+    { id: "ch_27", category: "negative", title: "Mimořádná válečná daň", icon: "⚔️", effect: "gold_loss", value: 1500, text: "Král vyhlásil mimořádnou zemskou daň na opevnění hranic. Odvádíš 1 500 zl. do královské pokladnice." },
+    { id: "ch_28", category: "negative", title: "Noční krádež v hostinci", icon: "🗡️", effect: "gold_loss", value: 1400, text: "Zatímco jsi spal v zájezdním hostinci, prohnaný zloděj ti prořízl měšec a odcizil 1 400 zl.!" },
+    { id: "ch_29", category: "negative", title: "Mor dobytka a koní", icon: "🐂", effect: "gold_loss", value: 1000, text: "Nákaza ve stájích si vyžádala přísnou ranhojičskou karanténu. Náklady činí 1 000 zl." },
+    { id: "ch_30", category: "negative", title: "Zkažené zásoby a horečka", icon: "🤢", effect: "gold_loss", value: 800, text: "Zkažené zásoby na cestách tě upoutaly na lůžko. Ošetření ve špitále sv. Lazara tě stojí 800 zl." },
+    { id: "ch_31", category: "negative", title: "Poškozená zbroj po pádu", icon: "🔨", effect: "gold_loss", value: 900, text: "Kůň na kluzkém kamení zakopl a pláty tvé zbroje povolily. Platíš 900 zl. platnéři za opravu." },
+    { id: "ch_32", category: "negative", title: "Pomluva záštiplného barona", icon: "🍷", effect: "intrigue", value: 1.0, text: "Závistiví rivalové tě zkusili očernit u princeznina stolu. Pokud má tvůj rytíř Charisma alespoň 3, vtipem zvítězíš (+1 💖)! Jinak platíš 1 000 zl. za urovnání pomluv." },
+    { id: "ch_33", category: "negative", title: "Kletba lesní ježibaby", icon: "🧙‍♀️", effect: "curse", value: 1200, text: "Zlá jezinka u močálu uvalila na tvou družinu kletbu! Obětuješ 1 200 zl. knězi na posvěcení, jinak by tvůj rytíř ztratil sílu." },
+    { id: "ch_34", category: "negative", title: "Útěk koně do hlubokých hvozdů", icon: "🌲", effect: "gold_loss", value: 700, text: "Tvůj kůň se lekl divokého kňoura a uprchl do lesa. Najmutí psovodů na jeho vypátrání tě stojí 700 zl." },
+    { id: "ch_35", category: "negative", title: "Přepadení zemskými lapky", icon: "🦹", effect: "robbers", value: 1200, text: "V úzké soutěsce tě přepadla tlupa lapků! Pokud je tvůj Boj alespoň 3, zaženeš je a získáš 1 200 zl. Jinak tě oberou o 1 200 zl." },
+    { id: "ch_36", category: "negative", title: "Soudní spor o hranice panství", icon: "⚖️", effect: "gold_loss", value: 1100, text: "Sousední šlechtic napadl tvé pozemky. Královský rychtář vyměřil soudní poplatek 1 100 zl." },
+    { id: "ch_37", category: "negative", title: "Prohraná turnajová sázka", icon: "🎯", effect: "gold_loss", value: 1000, text: "Tvůj favorit byl v klání sražen z koně hned v prvním kole. Prohráváš svou sázku 1 000 zl." },
+    { id: "ch_38", category: "negative", title: "Léčení zraněného sokola", icon: "🦅", effect: "gold_loss", value: 600, text: "Tvůj lovecký dravčík byl poraněn při lovu. Péče královského sokolníka tě stojí 600 zl." },
+
+    // --- 3. DILEMATA A VOLBY (12 karet / 24 %) ---
+    {
+        id: "ch_39", category: "dilemma", title: "Zraněný rytíř na rozcestí", icon: "🩺",
+        text: "Na rozcestí sténá zraněný poutník v potrhané zbroji. Jak se zachováš?",
+        options: [
+            { id: "opt_help", title: "Ošetřit raněného", icon: "❤️", costGold: 800, gainHearts: 1.0, desc: "Daruješ mu lektvar a 800 zl. Princezna ocení tvé milosrdenství (+1 💖)!" },
+            { id: "opt_loot", title: "Obrat ho o cennosti", icon: "💰", gainGold: 1500, lossHearts: 0.5, desc: "Sebereš mu zbroj a váček (+1 500 zl.), ale u dvora se šíří zvěsti o tvé chamtivosti (-0,5 💖)." }
+        ]
+    },
+    {
+        id: "ch_40", category: "dilemma", title: "Tajemný potulný alchymista", icon: "🧪",
+        text: "Podivný alchymista v kápi ti nabízí bublající flakón, nebo odkoupí tvé zásoby bylin.",
+        options: [
+            { id: "opt_drink", title: "Vypít neznámý lektvar", icon: "✨", costGold: 500, effect: "alchemist_gamble", desc: "Zaplatíš 500 zl. (60% šance na trvalé +1 k náhodné ctnosti / 40% nevolnost a útrata v lazaretu)." },
+            { id: "opt_sell", title: "Prodat léčivé byliny", icon: "🌿", gainGold: 600, desc: "Odmítneš pochybný nápoj a bezpečně prodáš byliny z lesa (+600 zl.)." }
+        ]
+    },
+    {
+        id: "ch_41", category: "dilemma", title: "Sázka v královské herně", icon: "🎲",
+        text: "V panském salonu se hraje o vysoké sumy. Přisedneš k hracímu stolu?",
+        options: [
+            { id: "opt_gamble", title: "Vsadit 1 500 zl. do kostek", icon: "🎲", costGold: 1500, effect: "dice_gamble", desc: "Hodíš kostkou: při 4-6 vyhráváš 3 500 zl. (+2 000 zl. čistého)! Při 1-3 prohráváš vklad." },
+            { id: "opt_chess", title: "Šachová partie s dvořanem", icon: "♟️", gainHearts: 0.5, desc: "Místo hazardu předvedeš bystrý rozum v šachu. Získáváš uznání dvořanů (+0,5 💖)." }
+        ]
+    },
+    {
+        id: "ch_42", category: "dilemma", title: "Zlatý kompromis u dvora", icon: "⚖️",
+        text: "Zahraniční vyslanci ti nabízejí tučný dar za to, že se přimluvíš u princezny za jejich obchod.",
+        options: [
+            { id: "opt_bribe", title: "Přijmout dar vyslanců", icon: "💰", gainGold: 2500, lossHearts: 1.0, desc: "Inkasuješ bohatých +2 500 zl., ale princezna prohlédne tvůj úskok (-1,0 💖)." },
+            { id: "opt_honor", title: "Hrdě odmítnout úplatek", icon: "👑", gainHearts: 1.5, desc: "Ubráníš čest království! Princezna tě za tvou ryzí poctivost odmění (+1,5 💖)!" }
+        ]
+    },
+    {
+        id: "ch_43", category: "dilemma", title: "Zbloudilý panský hřebec", icon: "🐎",
+        text: "V bučině jsi narazil na nádherného opuštěného koně s panským cejchem sousedního hrabství.",
+        options: [
+            { id: "opt_keep_horse", title: "Přivlastnit si hřebce", icon: "🏇", costGold: 1000, effect: "gain_jizda", desc: "Zaplatíš 1 000 zl. podkoním za ututlání cejchu a získáš +1 k Jízdě na koni!" },
+            { id: "opt_return_horse", title: "Vrátit koně majiteli", icon: "🤝", gainGold: 500, gainHearts: 0.5, desc: "Pán ti vyplatí nálezné +500 zl. a tvá pověst poctivce roste (+0,5 💖)." }
+        ]
+    },
+    {
+        id: "ch_44", category: "dilemma", title: "Zapečetěná runová truhlice", icon: "📦",
+        text: "V hradních sklepeních jsi odkryl těžkou truhlici zapečetěnou prastarou pečetí.",
+        options: [
+            { id: "opt_force_open", title: "Vypáčit pečeť silou", icon: "🗝️", costGold: 600, effect: "open_chest_loot", desc: "Páčení tě stojí 600 zl., ale uvnitř nalezneš vzácnou zbraň či zbroj do výbavy!" },
+            { id: "opt_sell_chest", title: "Prodat truhlu klenotníkovi", icon: "💎", gainGold: 1400, desc: "Nechceš riskovat magickou past a zapečetěnou truhlici prodáš vcelku (+1 400 zl.)." }
+        ]
+    },
+    {
+        id: "ch_45", category: "dilemma", title: "Pomoc hladovějícím poddaným", icon: "🍞",
+        text: "Tvé osady zasáhlo krupobití a vesničané prosí o úlevu z panských poplatků.",
+        options: [
+            { id: "opt_feed_poor", title: "Odpustit daně & nakoupit obilí", icon: "🌾", costGold: 1200, gainHearts: 1.0, desc: "Zaplatíš 1 200 zl. ze své pokladnice. Vděk poddaných dojme princeznu (+1,0 💖)!" },
+            { id: "opt_strict_tax", title: "Vybrat plný nájem bez milosti", icon: "🪙", gainGold: 1200, desc: "Trváš na smlouvě a vybereš veškeré zlato (+1 200 zl.), lid však skřípe zuby." }
+        ]
+    },
+    {
+        id: "ch_46", category: "dilemma", title: "Výzva potulného šermíře", icon: "🤺",
+        text: "U mostu tě zastavil vyhlášený potulný šermíř a vyzývá tě k rytířskému měření sil.",
+        options: [
+            { id: "opt_duel_fencer", title: "Přijmout šermířský souboj", icon: "⚔️", effect: "fencer_duel", desc: "Pokud je tvůj Boj alespoň 3, mistra porazíš (+1 💖 a 600 zl.). Jinak tě ošetření stojí 600 zl." },
+            { id: "opt_tavern_fencer", title: "Pozvat ho na korbel piva", icon: "🍺", costGold: 400, effect: "gain_boj", desc: "Zaplatíš 400 zl. za hostinu v krčmě a šermíř tě naučí tajné bojové finty (+1 Boj)!" }
+        ]
+    },
+    {
+        id: "ch_47", category: "dilemma", title: "Dražba vzácného klenotu", icon: "💎",
+        text: "Na zámeckém nádvoří probíhá dražba zabaveného klenotu bývalého královského pokladníka.",
+        options: [
+            { id: "opt_buy_gem", title: "Vydražit klenot za 1 800 zl.", icon: "💍", costGold: 1800, effect: "free_item_1", desc: "Zaplatíš 1 800 zl. a získáš vzácný dvorský šperk do své rytířské výbavy!" },
+            { id: "opt_skip_gem", title: "Ponechat si zlato v měšci", icon: "💰", desc: "Neutratíš nic a ušetříš peníze na nákup hradů či drahé výstroje." }
+        ]
+    },
+    {
+        id: "ch_48", category: "dilemma", title: "Zbloudilý lesní poutník", icon: "🚶",
+        text: "V hlubokém hvozdu potkáš mladého zbloudilého poutníka, který hledá své poslání.",
+        options: [
+            { id: "opt_hire_squire", title: "Vzít ho za svého panoše", icon: "🛡️", costGold: 600, effect: "free_skill", desc: "Vybavíš ho za 600 zl. a jeho věrná služba ti trvale zvedne tvou nejnižší ctnost (+1)!" },
+            { id: "opt_guide_city", title: "Poslat ho k rychtáři do města", icon: "📜", gainGold: 300, desc: "Za bezpečné nasměrování poutníka ti městský rychtář vyplatí +300 zl." }
+        ]
+    },
+    {
+        id: "ch_49", category: "dilemma", title: "Investice do kupecké karavany", icon: "🐪",
+        text: "Zámořský kupec hledá rytíře, který by zafinancoval nákup drahého hedvábí na trhu.",
+        options: [
+            { id: "opt_invest_trade", title: "Investovat 1 000 zl. do zboží", icon: "📈", costGold: 1000, effect: "trade_caravan", desc: "Vložíš 1 000 zl. a kupec ti obratem vyplatí zisk 2 200 zl. (+1 200 zl. čistého zisku)!" },
+            { id: "opt_safe_trade", title: "Odmítnout kupecký risk", icon: "🛡️", desc: "Nenecháš se zlákat obchodem a své peníze si pevně ponecháš." }
+        ]
+    },
+    {
+        id: "ch_50", category: "dilemma", title: "Záhadná vědma u svatyně", icon: "🔮",
+        text: "Stará vědma u kapličky nabízí věštbu budoucnosti a kouzelný amulet štěstí.",
+        options: [
+            { id: "opt_witch_fortune", title: "Zaplatit 500 zl. za věštbu", icon: "✨", costGold: 500, gainHearts: 1.0, desc: "Vědma ti požehná a předpoví tvůj triumf u princezny (+1,0 💖)!" },
+            { id: "opt_witch_refuse", title: "Spoléhat na vlastní meč a rozum", icon: "⚔️", gainHearts: 0.5, desc: "Odmítneš pověry. Princezna oceňuje tvou chladnou hlavu a střídmost (+0,5 💖)." }
+        ]
+    }
+];
 
 window.PRS_BoardBuilder = {
     createBoard: function (templateCode) {

@@ -1460,3 +1460,84 @@
     border: 1px solid rgba(244, 114, 182, 0.5);
     color: #fbcfe8;
 }
+
+
+/* --- BOJOVÉ POSTOJE V SOUBOJOVÉ ARÉNĚ --- */
+.duel-stances-container {
+    margin-bottom: 0.95rem;
+}
+.duel-stances-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+}
+@media (max-width: 600px) {
+    .duel-stances-row {
+        grid-template-columns: 1fr;
+    }
+}
+.duel-stance-btn {
+    background: rgba(20, 15, 12, 0.85);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 0.65rem 0.5rem;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+    color: #e2e8f0;
+}
+.duel-stance-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+.duel-stance-btn.active.aggressive {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.35) 0%, rgba(127, 29, 29, 0.65) 100%);
+    border-color: #ef4444;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.45);
+}
+.duel-stance-btn.active.tactical {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.35) 0%, rgba(120, 53, 15, 0.65) 100%);
+    border-color: #f59e0b;
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+}
+.duel-stance-btn.active.defensive {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.35) 0%, rgba(30, 58, 138, 0.65) 100%);
+    border-color: #3b82f6;
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.45);
+}
+.duel-stance-btn .stance-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.86rem;
+}
+.duel-stance-btn .stance-badge {
+    font-size: 0.76rem;
+    font-weight: bold;
+    padding: 1px 7px;
+    border-radius: 4px;
+}
+.duel-stance-btn.aggressive .stance-badge {
+    background: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+}
+.duel-stance-btn.tactical .stance-badge {
+    background: rgba(245, 158, 11, 0.25);
+    color: #fef08a;
+    border: 1px solid rgba(245, 158, 11, 0.5);
+}
+.duel-stance-btn.defensive .stance-badge {
+    background: rgba(59, 130, 246, 0.25);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.5);
+}
+.duel-stance-btn .stance-desc {
+    font-size: 0.68rem;
+    color: #94a3b8;
+    line-height: 1.25;
+}

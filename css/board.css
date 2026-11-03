@@ -1327,3 +1327,51 @@
 .quick-log-entry.buy { border-left-color: #22c55e; }
 .quick-log-entry.heart { border-left-color: #ec4899; }
 .quick-log-entry.chance { border-left-color: #f59e0b; }
+
+
+/* --- DILEMATA A VOLBY NA KARTÁCH NÁHODY --- */
+.chance-dilemma-container {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+.chance-dilemma-btn {
+    background: rgba(20, 15, 10, 0.85);
+    border: 1.5px solid rgba(250, 204, 21, 0.35);
+    border-radius: 8px;
+    padding: 0.55rem 0.85rem;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    transition: all 0.2s ease;
+    color: #f8fafc;
+}
+.chance-dilemma-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(250, 204, 21, 0.15);
+    border-color: #facc15;
+    box-shadow: 0 4px 12px rgba(250, 204, 21, 0.25);
+}
+.chance-dilemma-btn.opt-a {
+    border-left: 4px solid #38bdf8;
+}
+.chance-dilemma-btn.opt-b {
+    border-left: 4px solid #a855f7;
+}
+.chance-dilemma-btn .opt-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #fef08a;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.chance-dilemma-btn .opt-desc {
+    font-size: 0.76rem;
+    color: #cbd5e1;
+    line-height: 1.3;
+}

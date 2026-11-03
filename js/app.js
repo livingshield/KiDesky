@@ -358,6 +358,10 @@ window.PRS_App = {
             htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #ef4444, #b91c1c); color:#fff; border-color:#fca5a5;" onclick="PRS_App.handleResolveQuest()">⚔️ ZAÚTOČIT NA BESTII (' + this.escapeHtml(pa.questCard.name) + ')</button>');
         } else if (pa.canResolveFestival) {
             htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #ec4899, #be185d); color:#fff; border-color:#fbcfe8;" onclick="PRS_App.handleResolveFestival()">🏆 VYHODNOTIT SLAVNOST (💖)</button>');
+        } else if (pa.canChooseDilemma && pa.chanceCard && pa.chanceCard.options && pa.chanceCard.options.length >= 2) {
+            var cDil = pa.chanceCard;
+            htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:#fff; border-color:#38bdf8;" onclick="PRS_App.handleChooseChanceDilemma(0)">' + cDil.options[0].icon + ' ' + this.escapeHtml(cDil.options[0].title) + '</button>');
+            htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #7c3aed, #6d28d9); color:#fff; border-color:#c084fc;" onclick="PRS_App.handleChooseChanceDilemma(1)">' + cDil.options[1].icon + ' ' + this.escapeHtml(cDil.options[1].title) + '</button>');
         } else if (pa.chanceCard) {
             htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border-color:#fef08a;" onclick="PRS_App.toggleChanceCardFlip(\'' + pa.chanceCard.id + '\')">📜 OTOČIT KARTU NÁHODY</button>');
         } else if (pa.debt) {
@@ -3493,6 +3497,7 @@ window.PRS_App = {
 
         this.duelMonsterFlipped = false;
         this.selectedDuelTactic = "normal";
+        this.selectedDuelStance = "tactical";
         this.isDuelRolling = false;
 
         this.renderQuestDuelContent();
@@ -3520,6 +3525,13 @@ window.PRS_App = {
     selectDuelTactic: function (tacticKey) {
         if (this.isDuelRolling) return;
         this.selectedDuelTactic = tacticKey;
+        this.renderQuestDuelContent();
+        if (window.PRS_Audio) window.PRS_Audio.playStep();
+    },
+
+    selectDuelStance: function (stanceKey) {
+        if (this.isDuelRolling) return;
+        this.selectedDuelStance = stanceKey;
         this.renderQuestDuelContent();
         if (window.PRS_Audio) window.PRS_Audio.playStep();
     },
@@ -3556,7 +3568,12 @@ window.PRS_App = {
         var horseBonus = (q.questTier !== "U1" && hasHorse) ? (1 + Math.floor(stats.jizda / 2)) : 0;
         var wRes = window.PRS_GameEngine.checkQuestWeakness(this.state, player, q, tacticObj);
         var weaknessBonus = wRes.exploited ? 2 : 0;
-        var basePower = stats.boj + animalBonus + horseBonus + tacticBonus + weaknessBonus;
+
+        var stanceBonus = 0;
+        if (this.selectedDuelStance === "aggressive") stanceBonus = 2;
+        else if (this.selectedDuelStance === "defensive") stanceBonus = -1;
+
+        var basePower = stats.boj + animalBonus + horseBonus + tacticBonus + weaknessBonus + stanceBonus;
 
         var neededRoll = q.difficulty - basePower;
         var winCount = 0;
@@ -3649,7 +3666,7 @@ window.PRS_App = {
         html.push('      <div class="duel-combatant" style="border-color:' + player.color + ';">');
         html.push('        <div class="duel-fighter-role" style="color:' + player.color + ';">' + player.badge + ' ' + this.escapeHtml(player.name) + '</div>');
         html.push('        <div class="duel-fighter-stat">⚔️ ' + basePower + ' <small>stálá síla</small></div>');
-        html.push('        <div class="duel-fighter-sub">Boj ' + stats.boj + (horseBonus > 0 ? ' + Kůň ' + horseBonus : '') + (animalBonus > 0 ? ' + Zvěř ' + animalBonus : '') + (tacticBonus > 0 ? ' + Taktika ' + tacticBonus : '') + (weaknessBonus > 0 ? ' + Slabina ' + weaknessBonus : '') + '</div>');
+        html.push('        <div class="duel-fighter-sub">Boj ' + stats.boj + (horseBonus > 0 ? ' + Kůň ' + horseBonus : '') + (animalBonus > 0 ? ' + Zvěř ' + animalBonus : '') + (tacticBonus > 0 ? ' + Taktika ' + tacticBonus : '') + (weaknessBonus > 0 ? ' + Slabina ' + weaknessBonus : '') + (stanceBonus !== 0 ? (stanceBonus > 0 ? ' + Postoj +' + stanceBonus : ' + Postoj ' + stanceBonus) : '') + '</div>');
         html.push('      </div>');
         html.push('      <div class="duel-vs-badge">VS</div>');
         html.push('      <div class="duel-combatant">');
@@ -3666,6 +3683,29 @@ window.PRS_App = {
         html.push('      </div>');
         html.push('      <div class="duel-odds-bar-track">');
         html.push('        <div class="duel-odds-bar-fill" style="width:' + winRate + '%; background:' + (winRate >= 65 ? 'linear-gradient(90deg, #10b981, #22c55e)' : (winRate >= 35 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' : 'linear-gradient(90deg, #dc2626, #ef4444)')) + ';"></div>');
+        html.push('      </div>');
+        html.push('    </div>');
+
+        // Volba bojového postoje
+        var curStance = this.selectedDuelStance || "tactical";
+        html.push('    <div class="duel-stances-container">');
+        html.push('      <div class="quest-tactics-title"><span>⚔️ Bojový postoj rytíře:</span></div>');
+        html.push('      <div class="duel-stances-row">');
+        html.push('        <button type="button" class="duel-stance-btn aggressive ' + (curStance === "aggressive" ? "active" : "") + '" onclick="PRS_App.selectDuelStance(\'aggressive\')">');
+        html.push('          <span class="stance-title">⚔️ Dravý útok</span>');
+        html.push('          <span class="stance-badge">+2 Síla</span>');
+        html.push('          <span class="stance-desc">Při prohře -2 💖</span>');
+        html.push('        </button>');
+        html.push('        <button type="button" class="duel-stance-btn tactical ' + (curStance === "tactical" ? "active" : "") + '" onclick="PRS_App.selectDuelStance(\'tactical\')">');
+        html.push('          <span class="stance-title">🎯 Taktický</span>');
+        html.push('          <span class="stance-badge">Běžná síla</span>');
+        html.push('          <span class="stance-desc">Šance na Reroll</span>');
+        html.push('        </button>');
+        html.push('        <button type="button" class="duel-stance-btn defensive ' + (curStance === "defensive" ? "active" : "") + '" onclick="PRS_App.selectDuelStance(\'defensive\')">');
+        html.push('          <span class="stance-title">🛡️ Opatrná obrana</span>');
+        html.push('          <span class="stance-badge">-1 Síla</span>');
+        html.push('          <span class="stance-desc">Ústup bez ztráty 💖</span>');
+        html.push('        </button>');
         html.push('      </div>');
         html.push('    </div>');
 
@@ -3741,7 +3781,8 @@ window.PRS_App = {
         var tactics = {
             charge: this.selectedDuelTactic === "charge",
             hounds: this.selectedDuelTactic === "hounds",
-            elixir: this.selectedDuelTactic === "elixir"
+            elixir: this.selectedDuelTactic === "elixir",
+            stance: this.selectedDuelStance || "tactical"
         };
 
         var self = this;
@@ -3779,6 +3820,7 @@ window.PRS_App = {
             html.push('  </p>');
             html.push('  <div style="font-size:0.9rem; color:#cbd5e1; margin-bottom:1rem;">');
             html.push('    Hod kostkou: 🎲 <strong>' + res.roll + '</strong> &nbsp;|&nbsp; Celková bojová síla: ⚔️ <strong>' + res.totalPower + '</strong> (vs. obtížnost ' + res.difficulty + ')');
+            if (res.stanceName) html.push('    <div style="font-size:0.82rem; color:#fef08a; margin-top:3px;">Bojový postoj: <strong>' + this.escapeHtml(res.stanceName) + '</strong></div>');
             if (res.tacticName) html.push('    <div style="font-size:0.8rem; color:#86efac; margin-top:3px;">Použitá taktika: ' + this.escapeHtml(res.tacticName) + '</div>');
             if (res.weaknessExploited) html.push('    <div style="font-size:0.85rem; color:#fef08a; font-weight:700; margin-top:4px;">🎯 Využita slabina bestie (+2 k síle): ' + this.escapeHtml(res.weaknessReason) + '</div>');
             html.push('  </div>');
@@ -3829,6 +3871,14 @@ window.PRS_App = {
             if (res.weaknessExploited) html.push('    <div style="font-size:0.82rem; color:#fde047; margin-top:4px;">🎯 Využil jsi slabinu bestie (+2 k síle: ' + this.escapeHtml(res.weaknessReason) + '), ale hod kostkou bohužel nestačil.</div>');
             html.push('  </p>');
 
+            if (res.canTacticalReroll) {
+                html.push('  <div style="background:rgba(245,158,11,0.22); border:1.5px dashed #f59e0b; border-radius:10px; padding:0.85rem; max-width:440px; margin:0 auto 1.15rem auto;">');
+                html.push('    <div style="font-weight:bold; color:#fef08a; font-size:0.92rem; margin-bottom:0.3rem;">🎯 Šance na taktický opravný hod!</div>');
+                html.push('    <div style="font-size:0.82rem; color:#fde68a; margin-bottom:0.6rem;">Prohrál jsi o pouhé ' + (res.difficulty - res.totalPower) + ' body! Tvé zkušenosti a lovecká zvířata ti umožňují hodit kostkou ještě jednou.</div>');
+                html.push('    <button class="quest-btn-roll-action" style="background:linear-gradient(135deg, #f59e0b, #d97706); font-size:0.92rem; padding:0.5rem 1.15rem; margin:0;" onclick="PRS_App.executeTacticalReroll()">🎲 Taktický opravný hod (Reroll 1 kostky)</button>');
+                html.push('  </div>');
+            }
+
             if (res.preventedHospital) {
                 html.push('  <div style="background:rgba(16,185,129,0.18); border:1.5px solid #10b981; border-radius:10px; padding:0.85rem; max-width:440px; margin:0 auto 1.25rem auto; color:#86efac; font-size:0.88rem;">');
                 html.push('    🧪 <strong>Záchrana lektvarem!</strong> Díky vypitému elixíru z Lazaretu neutrpěl rytíř fatální zranění a nemusí do Špitálu. Může ihned pokračovat ve hře!');
@@ -3862,6 +3912,46 @@ window.PRS_App = {
             this.renderGameScreen();
             this.saveSessionAuto();
         }
+    },
+
+    executeTacticalReroll: function () {
+        if (this.isDuelRolling) return;
+        this.isDuelRolling = true;
+        var btn = event && event.target;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = "🎲 Opravný hod se točí...";
+        }
+        var self = this;
+        var tactics = {
+            charge: this.selectedDuelTactic === "charge",
+            hounds: this.selectedDuelTactic === "hounds",
+            elixir: this.selectedDuelTactic === "elixir",
+            stance: this.selectedDuelStance || "tactical",
+            isReroll: true
+        };
+        if (window.PRS_Audio) window.PRS_Audio.playSword();
+        setTimeout(function () {
+            var res = window.PRS_GameEngine.resolveQuest(self.state, null, tactics);
+            self.isDuelRolling = false;
+            if (res && res.won) {
+                if (window.PRS_Audio) window.PRS_Audio.playFanfare();
+            } else {
+                if (window.PRS_Audio) window.PRS_Audio.playOminous();
+            }
+            self.renderDuelCeremony(res);
+            self.renderGameScreen();
+            self.saveSessionAuto();
+        }, 800);
+    },
+
+    handleChooseChanceDilemma: function (optionIndex) {
+        if (!this.state || !this.state.pendingAction || !this.state.pendingAction.canChooseDilemma) return;
+        var player = this.state.players[this.state.currentPlayerIndex];
+        var res = window.PRS_GameEngine.chooseChanceDilemma(this.state, player, optionIndex);
+        if (window.PRS_Audio) window.PRS_Audio.playItem();
+        this.renderGameScreen();
+        this.saveSessionAuto();
     },
 
     // --- FÁZE 3: ZÁLOŽKOVÝ INSPEKTOR HRÁČE & ERGONOMIE ---
@@ -5317,9 +5407,22 @@ window.PRS_App = {
                 '      </div>' +
                 '      <div style="font-family:\'Cinzel\',serif; font-size:1.1rem; font-weight:bold; color:#fef08a; margin-bottom:0.35rem;">' + this.escapeHtml(c.title) + '</div>' +
                 '      <p style="font-size:0.86rem; color:#f8fafc; line-height:1.35; margin-bottom:0.45rem;">' + this.escapeHtml(c.text) + '</p>' +
-                '      <div style="margin-top:auto; font-size:0.83rem; font-weight:bold; color:' + effColor + '; background:rgba(0,0,0,0.45); padding:0.35rem 0.6rem; border-radius:6px;">' +
-                '        ⚡ ' + this.formatGameText(pa.summary || c.text) +
-                '      </div>' +
+                (pa.canChooseDilemma && c.options && c.options.length >= 2 ? (
+                    '      <div class="chance-dilemma-container" onclick="event.stopPropagation();">' +
+                    '        <button type="button" class="chance-dilemma-btn opt-a" onclick="PRS_App.handleChooseChanceDilemma(0)">' +
+                    '          <div class="opt-title">' + c.options[0].icon + ' ' + this.escapeHtml(c.options[0].title) + '</div>' +
+                    '          <div class="opt-desc">' + this.escapeHtml(c.options[0].desc) + '</div>' +
+                    '        </button>' +
+                    '        <button type="button" class="chance-dilemma-btn opt-b" onclick="PRS_App.handleChooseChanceDilemma(1)">' +
+                    '          <div class="opt-title">' + c.options[1].icon + ' ' + this.escapeHtml(c.options[1].title) + '</div>' +
+                    '          <div class="opt-desc">' + this.escapeHtml(c.options[1].desc) + '</div>' +
+                    '        </button>' +
+                    '      </div>'
+                ) : (
+                    '      <div style="margin-top:auto; font-size:0.83rem; font-weight:bold; color:' + effColor + '; background:rgba(0,0,0,0.45); padding:0.35rem 0.6rem; border-radius:6px;">' +
+                    '        ⚡ ' + this.formatGameText(pa.summary || c.text) +
+                    '      </div>'
+                )) +
                 '    </div>' +
                 '  </div>' +
                 '</div>';
