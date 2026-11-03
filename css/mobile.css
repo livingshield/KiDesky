@@ -1052,3 +1052,36 @@
             font-style: italic;
             padding: 0.3rem 0.2rem;
         }
+
+/* Mobilní pruh pro volbu tempa a rozcestí */
+.mobile-tempo-row {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+  margin-bottom: 5px;
+}
+.mobile-tempo-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 7px;
+  padding: 0.38rem 0.2rem;
+  font-size: 0.79rem;
+  color: var(--text-light);
+  cursor: pointer;
+}
+.mobile-tempo-btn.active {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: var(--gold);
+  color: var(--gold-light);
+  font-weight: bold;
+  box-shadow: 0 0 6px rgba(212, 175, 55, 0.35);
+}
+.mobile-tempo-btn.disabled {
+  opacity: 0.35;
+  filter: grayscale(1);
+}

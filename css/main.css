@@ -778,3 +778,76 @@
             border-top: 1px solid rgba(212, 175, 55, 0.2);
             padding-top: 0.85rem;
         }
+
+/* ==========================================================================
+   Taktický pohyb, Režimy chůze / cvalu a Volba trasy na rozcestí
+   ========================================================================== */
+.movement-stance-selector {
+  margin: 0.65rem 0 0.8rem 0;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+}
+.movement-stance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+.btn-tempo-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 0.45rem 0.2rem;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-tempo-option:hover:not(.disabled) {
+  background: rgba(212, 175, 55, 0.18);
+  border-color: var(--gold);
+}
+.btn-tempo-option.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.28), rgba(245, 158, 11, 0.2));
+  border-color: var(--gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.35);
+}
+.btn-tempo-option.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+.tempo-icon {
+  font-size: 1.15rem;
+  margin-bottom: 2px;
+}
+.tempo-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+.tempo-desc {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+/* Rozcestí na mapě */
+.branch-choice-card {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  animation: pulseGoldBorder 2.5s infinite alternate;
+}
+@keyframes pulseGoldBorder {
+  0% { border-color: rgba(212, 175, 55, 0.4); }
+  100% { border-color: rgba(212, 175, 55, 0.95); box-shadow: 0 0 18px rgba(212, 175, 55, 0.4); }
+}
+.btn-branch-choice {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-branch-choice:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}

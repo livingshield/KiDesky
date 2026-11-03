@@ -465,8 +465,302 @@ window.PRS_GameEngine = {
         }
     },
 
+    // Pomocná predikce cílového pole pro určitou větev
+    getTargetNodeForBranch: function (state, startNodeId, branchType, steps) {
+        var nodes = state.board.nodes;
+        var currNode = nodes[startNodeId];
+        if (!currNode) return null;
+        var nextId = (branchType === "high") ? currNode.branchHigh : currNode.branchLow;
+        if (nextId === null || nextId === undefined) nextId = (currNode.next && currNode.next[0] !== undefined) ? currNode.next[0] : 0;
+        var curr = nextId;
+        for (var s = 1; s < steps; s++) {
+            var n = nodes[curr];
+            if (!n || !n.next || n.next.length === 0) break;
+            if (n.branchLow !== null && n.branchLow !== undefined) {
+                curr = (branchType === "high" && n.branchHigh !== null) ? n.branchHigh : n.branchLow;
+            } else {
+                curr = n.next[0];
+            }
+        }
+        return nodes[curr] || null;
+    },
+
+    // Pomocná predikce cílového pole pro zadaný hod
+    getTargetNodeForRoll: function (state, player, rollValue) {
+        var nodes = state.board.nodes;
+        var curr = player.nodeId;
+        for (var s = 0; s < rollValue; s++) {
+            var n = nodes[curr];
+            if (!n || !n.next || n.next.length === 0) break;
+            if (n.branchLow !== null && n.branchLow !== undefined && n.branchHigh !== null && n.branchHigh !== undefined) {
+                var pref = (player.type === "Bot_Aggressive" || player.type === "Bot_Noble") ? n.branchHigh : n.branchLow;
+                curr = pref;
+            } else {
+                curr = n.next[0];
+            }
+        }
+        return nodes[curr] || null;
+    },
+
+    // Hodnocení atraktivity pole pro bota / taktické rozhodování
+    scoreNodeForPlayer: function (state, player, targetNode) {
+        if (!targetNode) return 0;
+        var score = 0;
+        var pType = player.type || "Bot_Balanced";
+        var effStats = this.getEffectiveStats(state, player);
+
+        if (targetNode.type === "START") {
+            score += 15;
+        } else if (targetNode.type === "VILLAGE" || targetNode.type === "CASTLE") {
+            if (targetNode.ownerIndex === null || targetNode.ownerIndex === undefined) {
+                var price = this.getNodePrice(targetNode);
+                if (player.gold >= price) {
+                    score += (targetNode.type === "CASTLE" ? 30 : 20);
+                    if (pType === "Bot_Noble") score += 10;
+                    if (pType === "Bot_Breeder") score += 5;
+                } else {
+                    score += 5;
+                }
+            } else if (targetNode.ownerIndex === player.index) {
+                score += 10;
+            } else {
+                var rent = this.computeNodeRent ? this.computeNodeRent(state, targetNode) : (targetNode.baseRent || 500);
+                score -= Math.min(40, Math.floor(rent / 150));
+            }
+        } else if (targetNode.type === "ANIMAL") {
+            if (targetNode.ownerIndex === null || targetNode.ownerIndex === undefined) {
+                var aPrice = targetNode.buyPrice || 1000;
+                if (player.gold >= aPrice) {
+                    score += 18;
+                    if (pType === "Bot_Breeder") score += 15;
+                } else {
+                    score += 4;
+                }
+            } else if (targetNode.ownerIndex === player.index) {
+                score += 8;
+            } else {
+                score -= 10;
+            }
+        } else if (targetNode.type === "FESTIVAL") {
+            score += 22;
+            if (pType === "Bot_Noble") score += 15;
+        } else if (targetNode.type === "QUEST") {
+            var subtype = targetNode.subtype || "U1";
+            if (subtype === "U3") {
+                if (effStats.boj >= 14 && player.hp >= 3) {
+                    score += (pType === "Bot_Aggressive" ? 35 : 15);
+                } else {
+                    score -= 40;
+                }
+            } else if (subtype === "U2") {
+                if (effStats.boj >= 8 && player.hp >= 2) {
+                    score += (pType === "Bot_Aggressive" ? 25 : 12);
+                } else {
+                    score -= 15;
+                }
+            } else {
+                score += (pType === "Bot_Aggressive" ? 18 : 10);
+            }
+        } else if (targetNode.type === "MASTER") {
+            var skl = targetNode.skill;
+            if (skl && (player.skills[skl] || 0) < 3) {
+                score += 16;
+            } else {
+                score += 5;
+            }
+        } else if (targetNode.type === "CHANCE") {
+            score += 8;
+        } else if (targetNode.type === "TAVERN") {
+            if (player.hp < 4 && player.gold >= 400) {
+                score += 14;
+            } else {
+                score += 6;
+            }
+        } else if (targetNode.type === "HOSPITAL") {
+            if (player.hp <= 2) {
+                score += 30;
+            } else {
+                score += 2;
+            }
+        } else if (targetNode.type === "PRISON" || targetNode.type === "JAIL") {
+            score -= 25;
+        } else if (targetNode.type === "TAX") {
+            score -= 15;
+        } else if (targetNode.type === "BONUS") {
+            score += 12;
+        } else {
+            score += 5;
+        }
+
+        return score;
+    },
+
+    // Rozhodování bota na křižovatkách
+    decideBotBranch: function (state, bot, junctionNode, remainingSteps) {
+        var lowTarget = this.getTargetNodeForBranch(state, junctionNode.id, "low", remainingSteps);
+        var highTarget = this.getTargetNodeForBranch(state, junctionNode.id, "high", remainingSteps);
+
+        var scoreLow = this.scoreNodeForPlayer(state, bot, lowTarget);
+        var scoreHigh = this.scoreNodeForPlayer(state, bot, highTarget);
+
+        if (bot.type === "Bot_Aggressive") {
+            scoreHigh += 4;
+        } else if (bot.type === "Bot_Noble") {
+            scoreHigh += 3;
+        } else if (bot.type === "Bot_Breeder") {
+            scoreLow += 4;
+        } else if (bot.type === "Bot_Easy") {
+            scoreLow += 5;
+        }
+
+        return (scoreHigh > scoreLow) ? "high" : "low";
+    },
+
+    // Volba režimu pohybu a taktických hodů pro bota
+    decideBotMovementMode: function (state, bot) {
+        var effStats = this.getEffectiveStats(state, bot);
+        var hasHorse = (bot.stats.horses > 0 || effStats.horses > 0);
+        var hasFalcon = (bot.stats.falcons > 0 || effStats.falcons > 0);
+
+        var rollResult = Math.floor(Math.random() * 6) + 1;
+        var chosenMode = "standard";
+
+        if (hasHorse) {
+            var d1 = Math.floor(Math.random() * 6) + 1;
+            var d2 = Math.floor(Math.random() * 6) + 1;
+            var sprint = d1 + d2;
+            var options = [sprint, d1, d2];
+            var bestRoll = d1;
+            var bestScore = -999;
+            for (var i = 0; i < options.length; i++) {
+                var rCandidate = options[i];
+                var tNode = this.getTargetNodeForRoll(state, bot, rCandidate);
+                var sc = this.scoreNodeForPlayer(state, bot, tNode);
+                if (sc > bestScore) {
+                    bestScore = sc;
+                    bestRoll = rCandidate;
+                }
+            }
+            rollResult = bestRoll;
+            chosenMode = "horse";
+            this.addLog(state, "🏇 " + bot.badge + " " + bot.name + " využívá koňského cvalu (kostky " + d1 + " a " + d2 + ") a volí skok o " + rollResult + " polí!");
+        }
+
+        if (hasFalcon) {
+            var baseTarget = this.getTargetNodeForRoll(state, bot, rollResult);
+            var baseScore = this.scoreNodeForPlayer(state, bot, baseTarget);
+
+            var minusRoll = Math.max(1, rollResult - 1);
+            var plusRoll = rollResult + 1;
+
+            var minusTarget = this.getTargetNodeForRoll(state, bot, minusRoll);
+            var plusTarget = this.getTargetNodeForRoll(state, bot, plusRoll);
+
+            var minusScore = this.scoreNodeForPlayer(state, bot, minusTarget);
+            var plusScore = this.scoreNodeForPlayer(state, bot, plusTarget);
+
+            if (plusScore > baseScore + 4 && plusScore >= minusScore) {
+                this.addLog(state, "🦅 " + bot.badge + " " + bot.name + " díky sokolí navigaci upravuje přistání o +1 pole na **" + plusTarget.name + "**!");
+                rollResult = plusRoll;
+            } else if (minusScore > baseScore + 4) {
+                this.addLog(state, "🦅 " + bot.badge + " " + bot.name + " díky sokolí navigaci upravuje přistání o -1 pole na **" + minusTarget.name + "**!");
+                rollResult = minusRoll;
+            }
+        }
+
+        return { roll: rollResult, mode: chosenMode };
+    },
+
+    // Dokončení pohybu po volbě větve na rozcestí
+    continueMovementFromBranch: function (state, branchChoice) {
+        if (!state.pendingBranchChoice) return null;
+        var pbc = state.pendingBranchChoice;
+        var player = state.players[state.currentPlayerIndex];
+        var currentId = pbc.junctionNodeId;
+        var currNode = state.board.nodes[currentId];
+        var remainingSteps = pbc.remainingSteps;
+        var passedBridgeFestival = pbc.passedBridgeFestival || false;
+        var path = pbc.pathSoFar ? pbc.pathSoFar.slice() : [currentId];
+
+        var choice = branchChoice === "high" ? "high" : "low";
+        var nextId = (choice === "high") ? pbc.branchHigh : pbc.branchLow;
+        var branchName = (choice === "high") ? "vnitřní královskou stezku" : "vnější okruh";
+        if (currNode && currNode.code === "SLAV_TURNAJ") {
+            branchName = (choice === "high") ? "královským průvodem na Zámecký Ples" : "hlavní okruh";
+        }
+        var nodeName = currNode ? currNode.name : ("Pole #" + currentId);
+        this.addLog(state, "🪧 " + player.badge + " " + player.name + " na rozcestí " + nodeName + " volí **" + branchName + "**.");
+
+        for (var step = 0; step < remainingSteps; step++) {
+            if (step > 0) {
+                var cNode = state.board.nodes[currentId];
+                nextId = (cNode.next && cNode.next[0] !== undefined) ? cNode.next[0] : 0;
+                if (cNode.branchLow !== null && cNode.branchLow !== undefined &&
+                    cNode.branchHigh !== null && cNode.branchHigh !== undefined) {
+                    nextId = (choice === "high") ? cNode.branchHigh : cNode.branchLow;
+                }
+            }
+
+            currentId = nextId;
+            path.push(currentId);
+            var enteredNode = state.board.nodes[currentId];
+
+            if (enteredNode.type === "START") {
+                var isLandless = (!player.ownedNodes || player.ownedNodes.length === 0);
+                var stipend = isLandless ? (state.config.passStartGoldLandless || 5000) : state.config.passStartGold;
+                player.gold += stipend;
+                var stNow = this.getEffectiveStats(state, player);
+                var hasNobleStatus = (stNow.ownedCastles > 0 || stNow.ownedTowns > 0);
+                var courtHearts = 0;
+                if (hasNobleStatus) {
+                    courtHearts = stNow.charisma >= 4 ? 1.0 : (stNow.charisma >= 2 ? 0.5 : 0);
+                }
+                var stipendDesc = isLandless ? "zvýšenou královskou podporu pro nemajetné **+" + stipend + " zl.**" : "žold +" + stipend + " zl.";
+                if (courtHearts > 0) {
+                    player.permanentHearts += courtHearts;
+                    player.stats.heartsFromFestivals += courtHearts;
+                    this.addLog(state, "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + " a +" + courtHearts + " 💖 při královské audienci (díky šlechtickému titulu)!", "gold");
+                } else {
+                    this.addLog(state, "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + ".", "gold");
+                }
+            }
+
+            if (enteredNode.type === "BONUS" && enteredNode.bonusGold) {
+                player.gold += enteredNode.bonusGold;
+                this.addLog(state, "⛲ " + player.badge + " " + player.name + " získává prémii +" + enteredNode.bonusGold + " zl. na poli " + enteredNode.name + ".");
+            }
+
+            if (enteredNode.code === "SLAV_PLES") {
+                passedBridgeFestival = true;
+            }
+        }
+
+        player.nodeId = currentId;
+        state.lastPath = path;
+        state.phase = "ACTION";
+        state.pendingBranchChoice = null;
+
+        var landedNode = state.board.nodes[currentId];
+        this.addLog(state, "🎲 " + player.badge + " " + player.name + " dokončil tah (" + pbc.totalRoll + ") a dorazil na pole **" + landedNode.name + "**.");
+
+        this.resolveLandedNode(state, player, landedNode, pbc.totalRoll);
+        if (passedBridgeFestival && landedNode.type !== "FESTIVAL") {
+            var festTypes = ["turnaj", "ples", "zavod"];
+            state.pendingAction.canResolveFestival = true;
+            state.pendingAction.festivalType = festTypes[state.roundNumber % 3];
+            state.pendingAction.summary += " Při průchodu pod hradem (♡ ♡ ♡) se navíc koná Královská slavnost!";
+        }
+        this.recalculateBreedingAndVictory(state);
+        return {
+            roll: pbc.totalRoll,
+            path: path,
+            node: landedNode,
+            resumedPath: path.slice(pbc.pathSoFar ? pbc.pathSoFar.length - 1 : 0)
+        };
+    },
+
     // Hod kostkou a pohyb po plánu
-    rollAndMove: function (state, forcedRoll) {
+    rollAndMove: function (state, forcedRoll, branchChoices) {
         if (state.phase === "GAME_OVER") return null;
         var player = state.players[state.currentPlayerIndex];
 
@@ -504,17 +798,44 @@ window.PRS_GameEngine = {
             var currNode = state.board.nodes[currentId];
             var nextId = currNode.next[0];
 
-            // Rozcestí (1-3 vs 4-6)
+            // Taktické rozcestí (Volba větve)
             if (currNode.branchLow !== null && currNode.branchLow !== undefined &&
                 currNode.branchHigh !== null && currNode.branchHigh !== undefined) {
-                nextId = (roll <= 3) ? currNode.branchLow : currNode.branchHigh;
-                if (step === 0) {
-                    if (currNode.code === "SLAV_TURNAJ") {
-                        this.addLog(state, "🪧 " + player.name + " hodil " + roll + " v Turnaji a " + (roll <= 3 ? "opouští turnajové klání na hlavní okruh (1–3)." : "pokračuje královským průvodem na Zámecký Ples (4–6)!"));
-                    } else {
-                        this.addLog(state, "🪧 " + player.name + " hodil " + roll + " na rozcestí a vydává se " + (roll <= 3 ? "vnější cestou (1–3)." : "vnitřní královskou stezkou (4–6)!"));
-                    }
+                
+                // Pokud je hráč Člověk a větev zatím nebyla zvolena: zastavíme a vyžádáme volbu
+                if (player.type === "Human" && (!branchChoices || !branchChoices[currNode.id])) {
+                    var remainingSteps = roll - step;
+                    player.nodeId = currentId;
+                    state.lastPath = path;
+                    state.phase = "BRANCH_CHOICE";
+                    state.pendingBranchChoice = {
+                        junctionNodeId: currentId,
+                        remainingSteps: remainingSteps,
+                        totalRoll: roll,
+                        passedBridgeFestival: passedBridgeFestival,
+                        pathSoFar: path.slice(),
+                        branchLow: currNode.branchLow,
+                        branchHigh: currNode.branchHigh
+                    };
+                    return {
+                        status: "BRANCH_REQUIRED",
+                        roll: roll,
+                        path: path,
+                        junctionNode: currNode,
+                        remainingSteps: remainingSteps,
+                        branchLow: currNode.branchLow,
+                        branchHigh: currNode.branchHigh
+                    };
                 }
+
+                // Pokud je větev předvolena nebo je na tahu bot:
+                var choice = (branchChoices && branchChoices[currNode.id]) || this.decideBotBranch(state, player, currNode, roll - step);
+                nextId = (choice === "high") ? currNode.branchHigh : currNode.branchLow;
+                var branchName = (choice === "high") ? "vnitřní královskou stezku" : "vnější okruh";
+                if (currNode.code === "SLAV_TURNAJ") {
+                    branchName = (choice === "high") ? "královským průvodem na Zámecký Ples" : "hlavní okruh";
+                }
+                this.addLog(state, "🪧 " + player.badge + " " + player.name + " na rozcestí " + currNode.name + " volí **" + branchName + "**.");
             }
 
             currentId = nextId;
@@ -2026,7 +2347,8 @@ window.PRS_GameEngine = {
 
         // 1. Pokud jsme ve fázi hodu, hodíme kostkou
         if (state.phase === "ROLL") {
-            this.rollAndMove(state);
+            var moveDecision = this.decideBotMovementMode ? this.decideBotMovementMode(state, bot) : { roll: null };
+            this.rollAndMove(state, moveDecision.roll);
             if (state.phase === "GAME_OVER") return;
         }
 

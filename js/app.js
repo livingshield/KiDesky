@@ -334,6 +334,27 @@ window.PRS_App = {
             return;
         }
 
+        if (this.state.phase === "BRANCH_CHOICE") {
+            var pbc = this.state.pendingBranchChoice;
+            if (pbc) {
+                var branchLowNode = this.state.board.nodes[pbc.branchLow];
+                var branchHighNode = this.state.board.nodes[pbc.branchHigh];
+                var targetLow = window.PRS_GameEngine.getTargetNodeForBranch(this.state, pbc.junctionNodeId, "low", pbc.remainingSteps);
+                var targetHigh = window.PRS_GameEngine.getTargetNodeForBranch(this.state, pbc.junctionNodeId, "high", pbc.remainingSteps);
+
+                var lowName = branchLowNode ? branchLowNode.name : "Vnější cesta";
+                var highName = branchHighNode ? branchHighNode.name : "Vnitřní stezka";
+                var targetLowName = targetLow ? targetLow.name : "";
+                var targetHighName = targetHigh ? targetHigh.name : "";
+
+                mainBtnWrap.innerHTML = '<div style="display:flex; flex-direction:column; gap:6px; width:100%;">' +
+                    '<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #059669, #047857); border-color:#6ee7b7; text-align:center; font-size:0.84rem; padding:0.55rem 0.5rem;" onclick="PRS_App.handleChooseBranch(\'low\')">🌿 Vnější: ' + this.escapeHtml(lowName) + ' (Cíl: ' + this.escapeHtml(targetLowName) + ')</button>' +
+                    '<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #d97706, #b45309); border-color:#fde68a; text-align:center; font-size:0.84rem; padding:0.55rem 0.5rem;" onclick="PRS_App.handleChooseBranch(\'high\')">🏰 Královská: ' + this.escapeHtml(highName) + ' (Cíl: ' + this.escapeHtml(targetHighName) + ')</button>' +
+                    '</div>';
+                return;
+            }
+        }
+
         if (this.state.phase === "ROLL") {
             if (isBot) {
                 if (this.autoBotEnabled) {
@@ -345,7 +366,25 @@ window.PRS_App = {
                     mainBtnWrap.innerHTML = '<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #3b82f6, #1d4ed8); color:#fff;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.stepBotNow()">🤖 ODEHRÁT TAH PC (' + this.escapeHtml(player.name) + ')</button>';
                 }
             } else {
-                mainBtnWrap.innerHTML = '<button class="mobile-btn-primary" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.handleRollDice()">🎲 HODIT KOSTKOU (1–6)</button>';
+                var effStats = window.PRS_GameEngine.getEffectiveStats(this.state, player);
+                var hasHorse = (player.stats.horses > 0 || effStats.horses > 0);
+                var curMode = this.selectedMovementMode || "standard";
+                if (curMode === "horse" && !hasHorse) curMode = "standard";
+
+                var modeLabels = {
+                    standard: "🎲 HODIT KOSTKOU (1–6)",
+                    cautious: "🚶 OPATRNÝ KROK (1–4)",
+                    horse: "🏇 KOŇSKÝ CVAL (2d6)"
+                };
+
+                mainBtnWrap.innerHTML = '<div style="display:flex; flex-direction:column; gap:6px; width:100%;">' +
+                    '<div class="mobile-tempo-row">' +
+                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')">🎲 1–6</button>' +
+                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')">🚶 1–4</button>' +
+                    '  <button type="button" class="mobile-tempo-btn ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + '>🏇 2d6</button>' +
+                    '</div>' +
+                    '<button class="mobile-btn-primary" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.handleRollDice()">' + (modeLabels[curMode] || modeLabels.standard) + '</button>' +
+                    '</div>';
             }
             return;
         }
@@ -5207,6 +5246,40 @@ window.PRS_App = {
                 return;
             }
 
+            var effStats = window.PRS_GameEngine.getEffectiveStats(this.state, player);
+            var hasHorse = (player.stats.horses > 0 || effStats.horses > 0);
+            var curMode = this.selectedMovementMode || "standard";
+            if (curMode === "horse" && !hasHorse) curMode = "standard";
+
+            var modeLabels = {
+                standard: "🎲 HODIT KOSTKOU (1–6)",
+                cautious: "🚶 OPATRNÝ KROK (1–4)",
+                horse: "🏇 KOŇSKÝ CVAL (2d6)"
+            };
+
+            var tempoSelectorHtml = isBot ? '' : (
+                '<div class="movement-stance-selector">' +
+                '  <div style="font-size:0.73rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px; font-weight:600;">Režim pohybu:</div>' +
+                '  <div class="movement-stance-grid">' +
+                '    <button type="button" class="btn-tempo-option ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')" title="Běžný hod 1–6">' +
+                '      <span class="tempo-icon">🎲</span>' +
+                '      <span class="tempo-name">Pochod</span>' +
+                '      <span class="tempo-desc">1–6 polí</span>' +
+                '    </button>' +
+                '    <button type="button" class="btn-tempo-option ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')" title="Opatrný krok 1–4 pro přesné manévrování">' +
+                '      <span class="tempo-icon">🚶</span>' +
+                '      <span class="tempo-name">Opatrný</span>' +
+                '      <span class="tempo-desc">1–4 pole</span>' +
+                '    </button>' +
+                '    <button type="button" class="btn-tempo-option ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + ' title="' + (hasHorse ? 'Házíš 2 kostkami (2d6) – volba trysku nebo manévru!' : 'Vyžaduje alespoň 1 koně ve stáji') + '">' +
+                '      <span class="tempo-icon">🏇</span>' +
+                '      <span class="tempo-name">Cval</span>' +
+                '      <span class="tempo-desc">' + (hasHorse ? '2d6 volba' : 'Zamčeno') + '</span>' +
+                '    </button>' +
+                '  </div>' +
+                '</div>'
+            );
+
             el.innerHTML = '<div class="action-card">' +
                 '<div class="turn-indicator">Na tahu je: <span style="color:' + player.color + ';">' + player.badge + ' <strong>' + this.escapeHtml(player.name) + '</strong></span></div>' +
                 '<div class="dice-showcase-box">' +
@@ -5216,11 +5289,45 @@ window.PRS_App = {
                 '  </div>' +
                 '  <div id="dice-cube-el" class="dice-cube clickable-dice" onclick="PRS_App.handleRollDice()" title="Klepni na kostku pro hod!">' + diceGlyph + '</div>' +
                 '</div>' +
+                tempoSelectorHtml +
                 (isBot
                     ? '<button class="btn-gold-lg" style="width:100%;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.stepBotNow()">🤖 Odehrát tah PC (' + this.escapeHtml(player.name) + ')</button>'
-                    : '<button class="btn-gold-lg" style="width:100%;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.handleRollDice()">🎲 HODIT KOSTKOU (1–6)</button>') +
+                    : '<button class="btn-gold-lg" style="width:100%;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.handleRollDice()">' + (modeLabels[curMode] || modeLabels.standard) + '</button>') +
                 '</div>';
             return;
+        }
+
+        if (this.state.phase === "BRANCH_CHOICE") {
+            var pbc = this.state.pendingBranchChoice;
+            if (pbc) {
+                var junctionNode = this.state.board.nodes[pbc.junctionNodeId];
+                var branchLowNode = this.state.board.nodes[pbc.branchLow];
+                var branchHighNode = this.state.board.nodes[pbc.branchHigh];
+
+                var targetLow = window.PRS_GameEngine.getTargetNodeForBranch(this.state, pbc.junctionNodeId, "low", pbc.remainingSteps);
+                var targetHigh = window.PRS_GameEngine.getTargetNodeForBranch(this.state, pbc.junctionNodeId, "high", pbc.remainingSteps);
+
+                var lowName = branchLowNode ? branchLowNode.name : "Vnější cesta";
+                var highName = branchHighNode ? branchHighNode.name : "Královská stezka";
+                var targetLowName = targetLow ? targetLow.name : ("Pole #" + pbc.branchLow);
+                var targetHighName = targetHigh ? targetHigh.name : ("Pole #" + pbc.branchHigh);
+
+                el.innerHTML = '<div class="action-card branch-choice-card" style="border:1.5px solid var(--gold); background:linear-gradient(180deg, rgba(30,27,75,0.92), rgba(15,23,42,0.95));">' +
+                    '<div class="turn-indicator" style="color:var(--gold-light); font-size:1rem; font-family:\'Cinzel\',serif;">🔀 Volba trasy na rozcestí!</div>' +
+                    '<div style="font-size:0.84rem; color:var(--text-muted); margin:0.35rem 0 0.75rem 0;">Stojíš na poli <strong>' + this.escapeHtml(junctionNode ? junctionNode.name : '') + '</strong>. Zbývá ti ještě <strong>' + pbc.remainingSteps + '</strong> kroků. Kudy se vydáš?</div>' +
+                    '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
+                    '  <button class="btn-branch-choice branch-low" onclick="PRS_App.handleChooseBranch(\'low\')" style="text-align:left; padding:0.75rem 0.9rem; background:rgba(16,185,129,0.15); border:1px solid #10b981; border-radius:8px; color:#ecfdf5; cursor:pointer;">' +
+                    '    <div style="font-weight:700; font-size:0.95rem; color:#6ee7b7; margin-bottom:2px;">🌿 Vnější okruh (' + this.escapeHtml(lowName) + ')</div>' +
+                    '    <div style="font-size:0.78rem; color:#a7f3d0;">🎯 Cíl za ' + pbc.remainingSteps + ' kr.: <strong>' + this.escapeHtml(targetLowName) + '</strong></div>' +
+                    '  </button>' +
+                    '  <button class="btn-branch-choice branch-high" onclick="PRS_App.handleChooseBranch(\'high\')" style="text-align:left; padding:0.75rem 0.9rem; background:rgba(217,119,6,0.15); border:1px solid #f59e0b; border-radius:8px; color:#fffbeb; cursor:pointer;">' +
+                    '    <div style="font-weight:700; font-size:0.95rem; color:#fde68a; margin-bottom:2px;">🏰 Vnitřní královská stezka (' + this.escapeHtml(highName) + ')</div>' +
+                    '    <div style="font-size:0.78rem; color:#fef3c7;">🎯 Cíl za ' + pbc.remainingSteps + ' kr.: <strong>' + this.escapeHtml(targetHighName) + '</strong></div>' +
+                    '  </button>' +
+                    '</div>' +
+                    '</div>';
+                return;
+            }
         }
 
         var pa = this.state.pendingAction || {};
@@ -5719,7 +5826,7 @@ window.PRS_App = {
         runNextStep();
     },
 
-    executeRollAndAnimateMove: function (player, onFinish) {
+    executeRollAndAnimateMove: function (player, onFinish, forcedRoll) {
         var self = this;
         if (self.isMoveAnimating || !self.state) return;
         self.isMoveAnimating = true;
@@ -5757,7 +5864,7 @@ window.PRS_App = {
 
         var preMoveDelay = isBot ? 100 : 380;
         setTimeout(function () {
-            var res = window.PRS_GameEngine.rollAndMove(self.state);
+            var res = window.PRS_GameEngine.rollAndMove(self.state, forcedRoll);
             if (!res) {
                 self.isMoveAnimating = false;
                 clearTimeout(self.moveAnimationWatchdog);
@@ -5773,7 +5880,11 @@ window.PRS_App = {
             self.animatePlayerMove(player.index, res.path, function () {
                 clearTimeout(self.moveAnimationWatchdog);
                 self.selectedNodeId = player.nodeId;
-                self.showPawnToast(player.index, "Hodil " + res.roll + "!", "🎲", "#fde047");
+                if (res.status === "BRANCH_REQUIRED") {
+                    self.showPawnToast(player.index, "Rozcestí! Zbývá " + res.remainingSteps + " kr.", "🔀", "#38bdf8");
+                } else {
+                    self.showPawnToast(player.index, "Hodil " + res.roll + "!", "🎲", "#fde047");
+                }
                 if (self.viewport && self.viewport.scale > 1.05) {
                     self.centerOnActivePlayer();
                 }
@@ -5790,14 +5901,166 @@ window.PRS_App = {
         }, preMoveDelay);
     },
 
-    handleRollDice: function () {
+    selectedMovementMode: "standard",
+
+    selectMovementMode: function (mode) {
+        this.selectedMovementMode = mode;
+        this.renderGameScreen();
+    },
+
+    handleRollDice: function (overrideMode) {
         var self = this;
         if (!self.state) return;
         if (self.isMoveAnimating) return;
         var player = self.state.players[self.state.currentPlayerIndex];
         if (!player || player.type !== "Human") return;
 
-        self.executeRollAndAnimateMove(player);
+        var mode = overrideMode || self.selectedMovementMode || "standard";
+        var effStats = window.PRS_GameEngine.getEffectiveStats(self.state, player);
+        var hasHorse = (player.stats.horses > 0 || effStats.horses > 0);
+        var hasFalcon = (player.stats.falcons > 0 || effStats.falcons > 0);
+
+        if (mode === "horse" && !hasHorse) {
+            mode = "standard";
+        }
+
+        // Koňský cval: hod 2d6 a volba trysku vs manévru
+        if (mode === "horse") {
+            var d1 = Math.floor(Math.random() * 6) + 1;
+            var d2 = Math.floor(Math.random() * 6) + 1;
+            self.showHorseRollDialog(player, d1, d2, hasFalcon);
+            return;
+        }
+
+        var baseRoll = (mode === "cautious")
+            ? (Math.floor(Math.random() * 4) + 1)
+            : (Math.floor(Math.random() * 6) + 1);
+
+        // Sokolí navigace pro člověka
+        if (hasFalcon) {
+            self.showFalconNavigationDialog(player, baseRoll);
+            return;
+        }
+
+        // Běžný pochod
+        self.executeRollAndAnimateMove(player, null, baseRoll);
+    },
+
+    showHorseRollDialog: function (player, d1, d2, hasFalcon) {
+        var self = this;
+        var sum = d1 + d2;
+        var targetSum = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, sum);
+        var targetD1 = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, d1);
+        var targetD2 = (d1 !== d2) ? window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, d2) : null;
+
+        var modal = document.getElementById("generic-modal");
+        if (!modal) {
+            self.executeRollAndAnimateMove(player, null, sum);
+            return;
+        }
+
+        var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid var(--gold); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
+            '<div style="font-size:2rem; margin-bottom:0.3rem;">🏇 🎲 🎲</div>' +
+            '<h3 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin:0 0 0.5rem 0;">Koňský cval: Padlo ' + d1 + ' a ' + d2 + '!</h3>' +
+            '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">Díky koním ve stáji máš volbu: bleskově vyrazit kupředu plným tryskem, nebo přesně manévrovat na vybranou hodnotu!</div>' +
+            '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
+            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmHorseRoll(' + sum + ', ' + hasFalcon + ')">' +
+            '    <div style="font-weight:700; color:#fef08a;">⚡ Bleskový trysk (' + sum + ' polí)</div>' +
+            '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + (targetSum ? self.escapeHtml(targetSum.name) : '') + '</div>' +
+            '  </button>' +
+            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d1 + ', ' + hasFalcon + ')">' +
+            '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d1 + ' ' + (d1 === 1 ? 'pole' : (d1 < 5 ? 'pole' : 'polí')) + ')</div>' +
+            '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + (targetD1 ? self.escapeHtml(targetD1.name) : '') + '</div>' +
+            '  </button>' +
+            (targetD2 ? '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d2 + ', ' + hasFalcon + ')">' +
+            '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d2 + ' ' + (d2 < 5 ? 'pole' : 'polí') + ')</div>' +
+            '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + self.escapeHtml(targetD2.name) + '</div>' +
+            '  </button>' : '') +
+            '</div>' +
+            '</div>';
+
+        modal.innerHTML = html;
+        modal.style.display = "flex";
+    },
+
+    confirmHorseRoll: function (roll, hasFalcon) {
+        var modal = document.getElementById("generic-modal");
+        if (modal) modal.style.display = "none";
+        var player = this.state.players[this.state.currentPlayerIndex];
+        if (hasFalcon) {
+            this.showFalconNavigationDialog(player, roll);
+        } else {
+            this.executeRollAndAnimateMove(player, null, roll);
+        }
+    },
+
+    showFalconNavigationDialog: function (player, baseRoll) {
+        var self = this;
+        var minusRoll = Math.max(1, baseRoll - 1);
+        var plusRoll = baseRoll + 1;
+
+        var targetMinus = (minusRoll !== baseRoll) ? window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, minusRoll) : null;
+        var targetBase = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, baseRoll);
+        var targetPlus = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, plusRoll);
+
+        var modal = document.getElementById("generic-modal");
+        if (!modal) {
+            self.executeRollAndAnimateMove(player, null, baseRoll);
+            return;
+        }
+
+        var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
+            '<div style="font-size:2rem; margin-bottom:0.3rem;">🦅 🎯</div>' +
+            '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.5rem 0;">Sokolí navigace: Hod ' + baseRoll + '!</h3>' +
+            '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">Tvůj sokol krouží nad krajinou a dává ti možnost upravit výsledný doskok o ±1 pole!</div>' +
+            '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
+            (targetMinus ? '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border-color:#38bdf8;" onclick="PRS_App.confirmFalconRoll(' + minusRoll + ')">' +
+            '    <div style="font-weight:700; color:#e0f2fe;">◀️ Úprava: ' + minusRoll + ' polí (-1)</div>' +
+            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + self.escapeHtml(targetMinus.name) + '</div>' +
+            '  </button>' : '') +
+            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmFalconRoll(' + baseRoll + ')">' +
+            '    <div style="font-weight:700; color:#fef08a;">🎯 Původní hod: ' + baseRoll + ' polí (bez změny)</div>' +
+            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + (targetBase ? self.escapeHtml(targetBase.name) : '') + '</div>' +
+            '  </button>' +
+            (targetPlus ? ('  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border-color:#38bdf8;" onclick="PRS_App.confirmFalconRoll(' + plusRoll + ')">' +
+            '    <div style="font-weight:700; color:#e0f2fe;">▶️ Úprava: ' + plusRoll + ' polí (+1)</div>' +
+            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + self.escapeHtml(targetPlus.name) + '</div>' +
+            '  </button>') : '') +
+            '</div>' +
+            '</div>';
+
+        modal.innerHTML = html;
+        modal.style.display = "flex";
+    },
+
+    confirmFalconRoll: function (finalRoll) {
+        var modal = document.getElementById("generic-modal");
+        if (modal) modal.style.display = "none";
+        var player = this.state.players[this.state.currentPlayerIndex];
+        this.executeRollAndAnimateMove(player, null, finalRoll);
+    },
+
+    handleChooseBranch: function (branchChoice) {
+        var self = this;
+        if (!self.state || self.state.phase !== "BRANCH_CHOICE") return;
+        var player = self.state.players[self.state.currentPlayerIndex];
+        if (!player) return;
+
+        var res = window.PRS_GameEngine.continueMovementFromBranch(self.state, branchChoice);
+        if (!res) return;
+
+        if (window.PRS_Audio) window.PRS_Audio.playStep();
+
+        self.animatePlayerMove(player.index, res.resumedPath, function () {
+            self.selectedNodeId = player.nodeId;
+            self.showPawnToast(player.index, "Dorazil na " + res.node.name + "!", "🔀", "#fde047");
+            if (self.viewport && self.viewport.scale > 1.05) {
+                self.centerOnActivePlayer();
+            }
+            self.renderGameScreen();
+            self.inspectNode(player.nodeId);
+            self.saveSessionAuto();
+        });
     },
 
     handleBuyNode: function () {
