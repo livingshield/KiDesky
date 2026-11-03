@@ -9,7 +9,33 @@
         // --- AUTENTIZACE & UŽIVATELSKÝ PROFIL ---
 openAuthModal: function () {
         var m = document.getElementById("auth-modal");
-        if (m) { m.style.display = "flex"; this.updateBodyModalClass(); }
+        if (m) {
+            m.style.display = "flex";
+            var pwd = document.getElementById("auth-password");
+            if (pwd) pwd.type = "password";
+            var btn = document.getElementById("btn-toggle-password");
+            if (btn) btn.innerHTML = "👁️";
+            this.updateBodyModalClass();
+        }
+    },
+
+    togglePasswordVisibility: function () {
+        var pwd = document.getElementById("auth-password");
+        var btn = document.getElementById("btn-toggle-password");
+        if (!pwd) return;
+        if (pwd.type === "password") {
+            pwd.type = "text";
+            if (btn) {
+                btn.innerHTML = "🙈";
+                btn.title = "Skrýt heslo";
+            }
+        } else {
+            pwd.type = "password";
+            if (btn) {
+                btn.innerHTML = "👁️";
+                btn.title = "Zobrazit heslo";
+            }
+        }
     },
 
     closeAuthModal: function () {

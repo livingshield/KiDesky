@@ -17,10 +17,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=202611031835">
-    <link rel="stylesheet" href="css/board.css?v=202611031835">
-    <link rel="stylesheet" href="css/modals.css?v=202611031835">
-    <link rel="stylesheet" href="css/mobile.css?v=202611031835">
+    <link rel="stylesheet" href="css/main.css?v=202611031905">
+    <link rel="stylesheet" href="css/board.css?v=202611031905">
+    <link rel="stylesheet" href="css/modals.css?v=202611031905">
+    <link rel="stylesheet" href="css/mobile.css?v=202611031905">
 </head>
 <body>
     <script>
@@ -1138,7 +1138,12 @@
             <div style="display:flex; flex-direction:column; gap:0.65rem; margin-bottom:1rem;">
                 <input type="text" id="auth-username" class="prs-input" placeholder="Uživatelské jméno nebo e-mail (např. admin, rytir_jan)" />
                 <input type="text" id="auth-displayname" class="prs-input" placeholder="Zobrazované jméno u stolu (volitelné)" />
-                <input type="password" id="auth-password" class="prs-input" placeholder="Heslo" />
+                <div style="position:relative; display:flex; align-items:center;">
+                    <input type="password" id="auth-password" class="prs-input" placeholder="Heslo" style="width:100%; padding-right:2.4rem;" />
+                    <button type="button" id="btn-toggle-password" onclick="PRS_App.togglePasswordVisibility()" title="Zobrazit / skrýt heslo" style="position:absolute; right:0.5rem; background:none; border:none; color:var(--gold-light); font-size:1.15rem; cursor:pointer; padding:0.2rem; display:flex; align-items:center; justify-content:center; opacity:0.85; transition:opacity 0.2s;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.85">
+                        👁️
+                    </button>
+                </div>
             </div>
             <div id="auth-feedback" style="color:#f87171; font-size:0.84rem; margin-bottom:0.75rem;"></div>
             <div style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:space-between;">
@@ -1207,12 +1212,12 @@
     <!-- Zvukový element pro hudbu na pozadí -->
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611031835" defer></script>
-    <script src="js/game-engine.js?v=202611031835" defer></script>
-    <script src="js/app-audio.js?v=202611031835" defer></script>
-    <script src="js/app.js?v=202611031835" defer></script>
-    <script src="js/app-online.js?v=202611031835" defer></script>
-    <script src="js/app-catalog.js?v=202611031835" defer></script>
+    <script src="js/game-data.js?v=202611031905" defer></script>
+    <script src="js/game-engine.js?v=202611031905" defer></script>
+    <script src="js/app-audio.js?v=202611031905" defer></script>
+    <script src="js/app.js?v=202611031905" defer></script>
+    <script src="js/app-online.js?v=202611031905" defer></script>
+    <script src="js/app-catalog.js?v=202611031905" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">
