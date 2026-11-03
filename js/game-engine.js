@@ -120,6 +120,9 @@ window.PRS_GameEngine = {
                 lastToastRound: 0,
                 stats: {
                     questsWon: 0,
+                    dragonsSlain: 0,
+                    monstersSlain: 0,
+                    beastsSlain: 0,
                     questsLost: 0,
                     festivalsWon: 0,
                     heartsFromFestivals: 0,
@@ -153,6 +156,7 @@ window.PRS_GameEngine = {
             lastPath: [],
             pendingAction: null,
             winnerIndex: null,
+            winType: null,
             activePacts: [],
             logs: []
         };
@@ -591,15 +595,18 @@ window.PRS_GameEngine = {
             var winReason = "";
             var scen = (state.config && state.config.scenario) ? state.config.scenario : "classic";
 
+            var winTypeAchieved = null;
             if (scen === "slayer") {
-                // Lovci draků: ulovení 2 draků z U3 nebo dosažení srdcí
-                var dragonsSlain = (pl.stats && pl.stats.questsWon) ? pl.stats.questsWon : 0;
+                // Lovci draků: ulovení 2 draků (z U3) nebo dosažení cílových srdcí (20 💖)
+                var dragonsSlain = (pl.stats && pl.stats.dragonsSlain) ? pl.stats.dragonsSlain : 0;
                 if (dragonsSlain >= 2) {
                     isWin = true;
-                    winReason = "🏆 VÍTĚZSTVÍ LOVCE DRAKŮ! " + pl.badge + " " + pl.name + " skolil 2 obávané bestie království a získává věčnou slávu i ruku princezny!";
+                    winTypeAchieved = "slayer_dragons";
+                    winReason = "🏆 VÍTĚZSTVÍ LOVCE DRAKŮ! " + pl.badge + " " + pl.name + " skolil 2 obávané draky království a získává věčnou slávu i ruku princezny!";
                 } else if (pl.totalHearts >= state.config.targetHearts) {
                     isWin = true;
-                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " získal přízeň princezny (" + pl.totalHearts + " 💖)!";
+                    winTypeAchieved = "target_hearts";
+                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " dosáhl cílových " + state.config.targetHearts + " 💖 a získává ruku princezny!";
                 }
             } else if (scen === "tycoon") {
                 // Feudální magnát: ovládnutí 3 měst a 1 hradu nebo cílových srdcí
@@ -613,20 +620,24 @@ window.PRS_GameEngine = {
                 }
                 if (cCount >= 3 && kCount >= 1) {
                     isWin = true;
+                    winTypeAchieved = "tycoon_estates";
                     winReason = "🏆 VÍTĚZSTVÍ FEUDÁLNÍHO MAGNÁTA! " + pl.badge + " " + pl.name + " ovládl 3 vzkvétající města a 1 hrad (" + cCount + " měst, " + kCount + " hradů)!";
                 } else if (pl.totalHearts >= state.config.targetHearts) {
                     isWin = true;
-                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " získal srdce princezny (" + pl.totalHearts + " 💖)!";
+                    winTypeAchieved = "target_hearts";
+                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " dosáhl cílových " + state.config.targetHearts + " 💖 a získává ruku princezny!";
                 }
             } else {
                 if (pl.totalHearts >= state.config.targetHearts) {
                     isWin = true;
-                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " dosáhl cíle (" + pl.totalHearts + " / " + state.config.targetHearts + " 💖) a získává ruku princezny!";
+                    winTypeAchieved = "target_hearts";
+                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " dosáhl cílových " + state.config.targetHearts + " 💖 a získává ruku princezny!";
                 }
             }
 
             if (state.winnerIndex === null && isWin) {
                 state.winnerIndex = m;
+                state.winType = winTypeAchieved;
                 state.phase = "GAME_OVER";
                 this.addLog(state, winReason, "win");
             }
@@ -641,6 +652,7 @@ window.PRS_GameEngine = {
             if (activePlayers.length === 1) {
                 var soleSurvivor = activePlayers[0];
                 state.winnerIndex = soleSurvivor.index;
+                state.winType = "sole_survivor";
                 state.phase = "GAME_OVER";
                 this.addLog(state, "💀 VÍTĚZSTVÍ PŘEŽITÍM! " + soleSurvivor.badge + " " + soleSurvivor.name + " jako jediný rytíř nezkrachoval a stává se vládcem království!", "win");
             }
@@ -2218,6 +2230,13 @@ window.PRS_GameEngine = {
             player.permanentHearts += q.hearts;
             player.stats.questsWon++;
             player.stats.heartsFromQuests += q.hearts;
+            if (q.questTier === "U3" || (q.id && q.id.indexOf("u3") === 0)) {
+                player.stats.dragonsSlain = (player.stats.dragonsSlain || 0) + 1;
+            } else if (q.questTier === "U2" || (q.id && q.id.indexOf("u2") === 0)) {
+                player.stats.monstersSlain = (player.stats.monstersSlain || 0) + 1;
+            } else {
+                player.stats.beastsSlain = (player.stats.beastsSlain || 0) + 1;
+            }
 
             var rewardMsg = "⚔️ HRDINSKÉ VÍTĚZSTVÍ! " + player.badge + " " + player.name + " porazil **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. obtížnost " + q.difficulty + ", hod " + roll + ")! Získává **+" + q.gold.toLocaleString("cs-CZ") + " zl.**" + (q.hearts > 0 ? " a **+" + q.hearts + " 💖**!" : "!");
             if (wRes.exploited) {

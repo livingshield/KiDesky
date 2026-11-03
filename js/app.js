@@ -106,6 +106,17 @@ window.PRS_App = {
             self.fetchServerStatusAndSessions();
             self.checkUrlRoomParam();
         }, 60);
+
+        // Prevence nežádoucího autofillu prohlížeče (např. automatické vyplnění e-mailu do kódu stolu)
+        var clearInvalidRoomCode = function () {
+            var inp = document.getElementById("join-room-code-input");
+            if (inp && inp.value && (inp.value.indexOf("@") !== -1 || inp.value.length > 8)) {
+                inp.value = "";
+            }
+        };
+        clearInvalidRoomCode();
+        setTimeout(clearInvalidRoomCode, 250);
+        setTimeout(clearInvalidRoomCode, 1000);
     },
 
     // ========================================================================
@@ -1196,13 +1207,31 @@ window.PRS_App = {
 
         var subEl = document.getElementById("victory-winner-subtitle");
         if (subEl) {
-            subEl.innerHTML = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> dosáhl cílových <strong>' + winner.totalHearts + ' 💖</strong> a v ' + this.state.roundNumber + '. kole získává ruku princezny!';
+            var subText = "";
+            var winType = this.state.winType || "";
+            if (winType === "slayer_dragons") {
+                subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> skolil 2 obávané draky království a v ' + this.state.roundNumber + '. kole získává věčnou slávu i ruku princezny!';
+            } else if (winType === "tycoon_estates") {
+                subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> ovládl 3 města i královský hrad a v ' + this.state.roundNumber + '. kole získává ruku princezny!';
+            } else if (winType === "sole_survivor") {
+                subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> jako jediný přežil kruté nástrahy království v režimu Na život a smrt!';
+            } else {
+                var tgtH = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : winner.totalHearts;
+                subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> dosáhl cílových <strong>' + tgtH + ' 💖</strong> (získal celkem ' + winner.totalHearts + ' 💖) a v ' + this.state.roundNumber + '. kole získává ruku princezny!';
+            }
+            subEl.innerHTML = subText;
         }
 
-        var ranked = this.state.players.slice().sort(function (a, b) {
+        // Vítěz MUSÍ být vždy na 1. místě žebříčku i pódia!
+        var others = [];
+        for (var pi = 0; pi < this.state.players.length; pi++) {
+            if (pi !== winIdx) others.push(this.state.players[pi]);
+        }
+        others.sort(function (a, b) {
             if (b.totalHearts !== a.totalHearts) return b.totalHearts - a.totalHearts;
             return b.gold - a.gold;
         });
+        var ranked = [winner].concat(others);
 
         var podEl = document.getElementById("victory-podium-content");
         if (podEl) {
@@ -5212,7 +5241,7 @@ window.PRS_App = {
             }
             el.innerHTML = '<div class="action-card victory-banner">' +
                 '<h3>👑 Královská svatba! Vítězem je ' + winP.badge + ' ' + this.escapeHtml(winP.name) + '!</h3>' +
-                '<p>Získal celkem <strong>' + winP.totalHearts + ' 💖</strong> za ' + this.state.roundNumber + ' kol a získává ruku princezny.</p>' +
+                '<p>' + (this.state.winType === "slayer_dragons" ? "Skolil 2 obávané draky království" : (this.state.winType === "tycoon_estates" ? "Ovládl 3 města a královský hrad" : ("Získal celkem <strong>" + winP.totalHearts + " 💖</strong>"))) + ' za ' + this.state.roundNumber + ' kol a získává ruku princezny.</p>' +
                 '<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.6rem;">' +
                 '  <button class="btn-gold-lg" onclick="PRS_App.openVictoryModal()">👑 Otevřít ceremoniál &amp; Síň slávy</button>' +
                 '  <button class="btn-secondary" onclick="PRS_App.startNewGame(true)">🔄 Nová partie</button>' +

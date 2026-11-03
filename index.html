@@ -17,10 +17,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=202611031810">
-    <link rel="stylesheet" href="css/board.css?v=202611031810">
-    <link rel="stylesheet" href="css/modals.css?v=202611031810">
-    <link rel="stylesheet" href="css/mobile.css?v=202611031810">
+    <link rel="stylesheet" href="css/main.css?v=202611031835">
+    <link rel="stylesheet" href="css/board.css?v=202611031835">
+    <link rel="stylesheet" href="css/modals.css?v=202611031835">
+    <link rel="stylesheet" href="css/mobile.css?v=202611031835">
 </head>
 <body>
     <script>
@@ -314,7 +314,7 @@
                                 🔑 Připojit se přes 6místný kód místnosti:
                             </label>
                             <div style="display:flex; gap:0.45rem;">
-                                <input type="text" id="join-room-code-input" class="prs-input" style="text-transform:uppercase; font-weight:700; letter-spacing:1px;" placeholder="Např. K7M4P9" maxlength="12" />
+                                <input type="text" id="join-room-code-input" name="prs_room_code_table_key" autocomplete="new-password" autocorrect="off" autocapitalize="characters" spellcheck="false" class="prs-input" style="text-transform:uppercase; font-weight:700; letter-spacing:1px;" placeholder="Např. K7M4P9" maxlength="12" value="" />
                                 <button class="btn-gold-lg" style="white-space:nowrap; padding:0.45rem 0.9rem; font-size:0.86rem;" onclick="PRS_App.loadSessionFromCloud()">
                                     ⚔️ Připojit
                                 </button>
@@ -1207,12 +1207,12 @@
     <!-- Zvukový element pro hudbu na pozadí -->
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611031810" defer></script>
-    <script src="js/game-engine.js?v=202611031810" defer></script>
-    <script src="js/app-audio.js?v=202611031810" defer></script>
-    <script src="js/app.js?v=202611031810" defer></script>
-    <script src="js/app-online.js?v=202611031810" defer></script>
-    <script src="js/app-catalog.js?v=202611031810" defer></script>
+    <script src="js/game-data.js?v=202611031835" defer></script>
+    <script src="js/game-engine.js?v=202611031835" defer></script>
+    <script src="js/app-audio.js?v=202611031835" defer></script>
+    <script src="js/app.js?v=202611031835" defer></script>
+    <script src="js/app-online.js?v=202611031835" defer></script>
+    <script src="js/app-catalog.js?v=202611031835" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">
