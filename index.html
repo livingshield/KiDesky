@@ -17,10 +17,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=202611031655">
-    <link rel="stylesheet" href="css/board.css?v=202611031655">
-    <link rel="stylesheet" href="css/modals.css?v=202611031655">
-    <link rel="stylesheet" href="css/mobile.css?v=202611031655">
+    <link rel="stylesheet" href="css/main.css?v=202611031810">
+    <link rel="stylesheet" href="css/board.css?v=202611031810">
+    <link rel="stylesheet" href="css/modals.css?v=202611031810">
+    <link rel="stylesheet" href="css/mobile.css?v=202611031810">
 </head>
 <body>
     <script>
@@ -229,10 +229,13 @@
                     </div>
                     <div style="display:flex; flex-direction:column; gap:0.55rem;">
                         <button class="btn-gold-lg" style="width:100%;" onclick="PRS_App.quickStartSoloGame('standard')">
-                            ⚡ Hrát klasickou výpravu (96 polí • 30 💖)
+                            ⚡ Hrát klasickou výpravu (96 polí • 30 💖 • Standard)
                         </button>
                         <button class="btn-secondary" style="width:100%; padding:0.55rem;" onclick="PRS_App.quickStartSoloGame('fast')">
-                            🏇 Rychlá sprint partie (Zkrácený okruh 48 polí • 20 💖)
+                            🏇 Rychlá sprint partie (Zkrácený okruh 48 polí • 15 💖)
+                        </button>
+                        <button class="btn-secondary" style="width:100%; padding:0.55rem; border-color:#ef4444; color:#fca5a5;" onclick="PRS_App.quickStartSoloGame('ultimate')">
+                            💀 Výzva na život a smrt (96 polí • Ultimate • bankrot = konec!)
                         </button>
                     </div>
                 </div>
@@ -254,7 +257,7 @@
                             <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.addLobbyPlayer()">➕ Přidat rytíře (max. 6)</button>
                         </div>
 
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.65rem; margin-bottom:0.95rem;">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.55rem; margin-bottom:0.95rem;">
                             <div>
                                 <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🗺️ Herní plán:</label>
                                 <select id="lobby-board-select" class="prs-select" style="font-size:0.82rem; padding:0.4rem;">
@@ -265,13 +268,22 @@
                                 </select>
                             </div>
                             <div>
-                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🏆 Herní scénář &amp; Cíl:</label>
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🏆 Herní scénář:</label>
                                 <select id="lobby-game-scenario" class="prs-select" style="font-size:0.82rem; padding:0.4rem;" onchange="PRS_App.handleScenarioChange(this.value)">
-                                    <option value="sprint">⚡ Královská rychlovka (15 💖, 30 min)</option>
-                                    <option value="classic" selected>💖 Princeznino srdce (30 💖, standard)</option>
-                                    <option value="slayer">🐉 Lovci draků (Ulovení 2 draků z U3)</option>
-                                    <option value="tycoon">🏰 Feudální magnát (3 města &amp; 1 hrad)</option>
-                                    <option value="epic">👑 Epické tažení (45 💖)</option>
+                                    <option value="sprint">⚡ Rychlovka (15 💖)</option>
+                                    <option value="classic" selected>💖 Klasika (30 💖)</option>
+                                    <option value="slayer">🐉 Lovci draků (2 draci)</option>
+                                    <option value="tycoon">🏰 Magnát (3 města+hrad)</option>
+                                    <option value="epic">👑 Epické (45 💖)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">⚖️ Obtížnost &amp; Mód:</label>
+                                <select id="lobby-difficulty-mode" class="prs-select" style="font-size:0.82rem; padding:0.4rem;">
+                                    <option value="easy">🌿 Pohádkový (Easy)</option>
+                                    <option value="standard" selected>👑 Standardní (50% sazby)</option>
+                                    <option value="hard">⚔️ Rytířská výzva (Hard)</option>
+                                    <option value="ultimate">💀 Na život a smrt (Ultimate)</option>
                                 </select>
                             </div>
                         </div>
@@ -1195,12 +1207,12 @@
     <!-- Zvukový element pro hudbu na pozadí -->
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611031655" defer></script>
-    <script src="js/game-engine.js?v=202611031655" defer></script>
-    <script src="js/app-audio.js?v=202611031655" defer></script>
-    <script src="js/app.js?v=202611031655" defer></script>
-    <script src="js/app-online.js?v=202611031655" defer></script>
-    <script src="js/app-catalog.js?v=202611031655" defer></script>
+    <script src="js/game-data.js?v=202611031810" defer></script>
+    <script src="js/game-engine.js?v=202611031810" defer></script>
+    <script src="js/app-audio.js?v=202611031810" defer></script>
+    <script src="js/app.js?v=202611031810" defer></script>
+    <script src="js/app-online.js?v=202611031810" defer></script>
+    <script src="js/app-catalog.js?v=202611031810" defer></script>
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
     <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">

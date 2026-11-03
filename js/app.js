@@ -1868,12 +1868,21 @@ window.PRS_App = {
         var boardSel = document.getElementById("lobby-board-select");
         var targetSel = document.getElementById("lobby-target-hearts");
 
+        var diffSel = document.getElementById("lobby-difficulty-mode");
+        var scenSel = document.getElementById("lobby-game-scenario");
+
         if (preset === "fast") {
             if (boardSel) boardSel.value = "compact_48";
-            if (targetSel) targetSel.value = "20";
+            if (scenSel) scenSel.value = "sprint";
+            if (diffSel) diffSel.value = "standard";
+        } else if (preset === "ultimate") {
+            if (boardSel) boardSel.value = "classic_96";
+            if (scenSel) scenSel.value = "classic";
+            if (diffSel) diffSel.value = "ultimate";
         } else {
             if (boardSel) boardSel.value = "classic_96";
-            if (targetSel) targetSel.value = "30";
+            if (scenSel) scenSel.value = "classic";
+            if (diffSel) diffSel.value = "standard";
         }
 
         this.startNewGame(true);
@@ -2087,9 +2096,14 @@ window.PRS_App = {
 
         var boardSel = document.getElementById("lobby-board-select");
         var scenSel = document.getElementById("lobby-game-scenario");
+        var diffSel = document.getElementById("lobby-difficulty-mode");
+
         var boardCode = boardSel ? boardSel.value : "classic_96";
         var scenario = scenSel ? scenSel.value : (this.selectedGameScenario || "classic");
+        var difficultyMode = diffSel ? diffSel.value : (this.selectedDifficultyMode || "standard");
         this.selectedGameScenario = scenario;
+        this.selectedDifficultyMode = difficultyMode;
+
         var targetHearts = 30;
         if (scenario === "sprint") targetHearts = 15;
         else if (scenario === "classic") targetHearts = 30;
@@ -2101,6 +2115,7 @@ window.PRS_App = {
             config: this.activeConfig,
             boardCode: boardCode,
             scenario: scenario,
+            difficultyMode: difficultyMode,
             targetHearts: targetHearts,
             players: this.lobbyPlayers
         });
@@ -5574,6 +5589,66 @@ window.PRS_App = {
                 '</div>';
         }
 
+        // 1. Setkání na stejném poli (Duel vs Přípitek)
+        if (pa.encounterPlayer) {
+            var enc = pa.encounterPlayer;
+            var canDuel = pa.canDuelPlayer;
+            var canToast = pa.canToastPlayer;
+            specialCardHtml += '<div class="encounter-interaction-card" style="border:1.5px solid #38bdf8; background:linear-gradient(180deg, rgba(12,74,110,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">🤺 Setkání rytířů: ' + enc.badge + ' ' + this.escapeHtml(enc.name) + '</div>' +
+                '<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">Na tomto poli stojí soupeř. Zvol rytířský duel cti, nebo ukaž dvorskou noblesu přátelským přípitkem:</p>' +
+                '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
+                (canDuel ? '  <button class="btn-action-duel" style="padding:0.55rem; background:linear-gradient(135deg, #ef4444, #991b1b); color:#fff; border:1px solid #fca5a5; border-radius:7px; font-weight:700; cursor:pointer;" onclick="PRS_App.handlePlayerDuel(' + enc.index + ')">⚔️ Rytířský duel cti (Sázka ' + enc.duelStake + ' zl. &amp; 0.5 💖)</button>' : '') +
+                (canToast ? '  <button class="btn-action-toast" style="padding:0.55rem; background:linear-gradient(135deg, #f59e0b, #b45309); color:#fff; border:1px solid #fde68a; border-radius:7px; font-weight:700; cursor:pointer;" onclick="PRS_App.handlePlayerToast(' + enc.index + ')">🍷 Přátelský přípitek (' + enc.toastCost + ' zl. ➔ Zisk +0,5 💖)</button>' : '') +
+                '</div>' +
+                '</div>';
+        }
+
+        // 2. Šlechtický výkup ze sady (Královské předkupní právo)
+        if (pa.canBuyoutAnimalSet && pa.buyoutCandidates && pa.buyoutCandidates.length > 0) {
+            specialCardHtml += '<div class="buyout-interaction-card" style="border:1.5px solid #10b981; background:linear-gradient(180deg, rgba(6,78,59,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; margin-bottom:4px;">📜 Královské předkupní právo na zvíře!</div>' +
+                '<p style="font-size:0.8rem; color:#a7f3d0; margin-bottom:0.6rem;">Vlastníš 2 ze 3 zvířat sady! Můžeš vykoupit chybějící kus od majitele za dvojnásobek ceny a ihned zkompletovat sadu (+1,0 💖):</p>' +
+                '<div style="display:flex; flex-direction:column; gap:0.4rem;">';
+            for (var bi = 0; bi < pa.buyoutCandidates.length; bi++) {
+                var bc = pa.buyoutCandidates[bi];
+                var canAffordBc = player.gold >= bc.buyoutPrice;
+                specialCardHtml += '  <button class="btn-action-buyout" ' + (!canAffordBc ? 'disabled' : '') + ' style="padding:0.55rem; background:linear-gradient(135deg, #059669, #047857); color:#fff; border:1px solid #6ee7b7; border-radius:7px; font-weight:700; text-align:left; cursor:pointer;" onclick="PRS_App.handleAnimalBuyout(' + bc.nodeId + ')">' +
+                    bc.icon + ' Vykoupit ' + this.escapeHtml(bc.name) + ' ze sady #' + bc.setId + ' (' + bc.buyoutPrice + ' zl. pro ' + this.escapeHtml(bc.ownerName) + ') ➔ +1.0 💖' +
+                    '</button>';
+            }
+            specialCardHtml += '</div></div>';
+        }
+
+        // 3. Dvorní intriky u Kejklíře a v Krčmě
+        if (pa.canPlotIntrigue) {
+            specialCardHtml += '<div class="intrigue-interaction-card" style="border:1.5px solid #d97706; background:linear-gradient(180deg, rgba(120,53,15,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fde68a; margin-bottom:4px;">🃏 Dvorní intriky proti soupeřům</div>' +
+                '<p style="font-size:0.8rem; color:#fef3c7; margin-bottom:0.6rem;">Najmi kejklíře k posměchu lídra nebo uplatni královské pravomoci:</p>' +
+                '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
+                '  <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #7c3aed, #5b21b6); border-color:#c084fc;" onclick="PRS_App.openIntrigueModal(\'ballad\')">🎭 Posměšná balada pod balkónem (' + (pa.intrigueBalladCost || 750) + ' zl. ➔ Srazit soupeři Srdce 💖)</button>' +
+                '  <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #b45309, #78350f); border-color:#fbbf24;" onclick="PRS_App.openIntrigueModal(\'customs\')">📜 Královská celní kontrola (' + (pa.intrigueCustomsCost || 600) + ' zl. ➔ Zmrazit nájemné na 1 kolo)</button>' +
+                '</div></div>';
+        }
+
+        // 4. Obchodní pakt u Obchodníka a na STARTu
+        if (pa.canFormTradePact) {
+            specialCardHtml += '<div class="pact-interaction-card" style="border:1.5px solid #0284c7; background:linear-gradient(180deg, rgba(12,74,110,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">🤝 Obchodní pakt (Bezcelní aliance na 8 kol)</div>' +
+                '<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">Spoj se s rytířem: nulové mýtné na panstvích a dividenda +300 zl. při každé návštěvě!</p>' +
+                '<button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #0284c7, #0369a1); border-color:#38bdf8;" onclick="PRS_App.openTradePactModal()">🤝 Uzavřít Obchodní pakt (' + (pa.tradePactCost || 750) + ' zl.)</button>' +
+                '</div>';
+        }
+
+        // 5. Osobní výzva na Slavnosti
+        if (pa.canChallengeFestivalRival) {
+            specialCardHtml += '<div class="festival-challenge-card" style="border:1.5px solid #ec4899; background:linear-gradient(180deg, rgba(131,24,67,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fbcfe8; margin-bottom:4px;">🏆 Osobní výzva 1 na 1 na Slavnosti</div>' +
+                '<p style="font-size:0.8rem; color:#fce7f3; margin-bottom:0.6rem;">Vyzvi konkrétního soupeře k souboji v královské ctnosti o zlato a slávu:</p>' +
+                '<button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #ec4899, #be185d); border-color:#fbcfe8;" onclick="PRS_App.openFestivalChallengeModal()">🤺 Vyhlásit osobní výzvu soupeři (' + (pa.festivalChallengeStake || 750) + ' zl.)</button>' +
+                '</div>';
+        }
+
         // Krčma (Hostinec)
         if (pa.canTavernGamble || pa.canBuyTavernRound) {
             var canAffordBet = player.gold >= (pa.gambleBet || 500);
@@ -6707,9 +6782,195 @@ window.PRS_App = {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;");
+    },
+
+    // ========================================================================
+    // INTERAKCE MEZI HRÁČI (Duel, Přípitek, Výkup sad, Intriky, Pakt, Výzva)
+    // ========================================================================
+    handlePlayerDuel: function (targetIdx) {
+        var res = window.PRS_GameEngine.executePlayerDuel(this.state, targetIdx);
+        if (res) {
+            if (window.PRS_Audio) window.PRS_Audio.playSword();
+            this.renderGameScreen();
+            this.saveSessionAuto();
+        }
+    },
+
+    handlePlayerToast: function (targetIdx) {
+        var res = window.PRS_GameEngine.executePlayerToast(this.state, targetIdx);
+        if (res) {
+            if (window.PRS_Audio) window.PRS_Audio.playFanfare();
+            this.renderGameScreen();
+            this.saveSessionAuto();
+        }
+    },
+
+    handleAnimalBuyout: function (nodeId) {
+        var res = window.PRS_GameEngine.executeAnimalBuyout(this.state, nodeId);
+        if (res) {
+            if (window.PRS_Audio) window.PRS_Audio.playBuy();
+            this.renderGameScreen();
+            this.saveSessionAuto();
+        }
+    },
+
+    openIntrigueModal: function (type) {
+        var self = this;
+        var modal = document.getElementById("generic-modal");
+        if (!modal) return;
+        var p = self.state.players[self.state.currentPlayerIndex];
+        var targets = [];
+        for (var i = 0; i < self.state.players.length; i++) {
+            var pl = self.state.players[i];
+            if (pl.index !== p.index && !pl.isEliminated) targets.push(pl);
+        }
+
+        var isBallad = (type === "ballad");
+        var cost = isBallad ? (self.state.pendingAction.intrigueBalladCost || 750) : (self.state.pendingAction.intrigueCustomsCost || 600);
+
+        var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid var(--gold); border-radius:14px; text-align:center;">' +
+            '<div style="font-size:2rem; margin-bottom:0.25rem;">' + (isBallad ? '🎭 🃏' : '📜 ⚖️') + '</div>' +
+            '<h3 style="font-family:Cinzel,serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + (isBallad ? 'Posměšná balada pod balkónem' : 'Královská celní kontrola') + '</h3>' +
+            '<p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:1rem;">' +
+            (isBallad ? 'Kejklíř složí uštěpačnou píseň o vybraném soupeři (souboj Charisma + 1d6). Úspěch: soupeř ztrácí 💖 a ty získáváš dvorskou přízeň! Cena: ' + cost + ' zl.' : 'Zvol soupeře, jehož panství budou na 1 kolo zmrazena celní kontrolou (nikdo mu neplatí nájem). Cena: ' + cost + ' zl.') +
+            '</p>' +
+            '<div style="display:flex; flex-direction:column; gap:0.5rem;">';
+
+        for (var t = 0; t < targets.length; t++) {
+            var tgt = targets[t];
+            html += '<button class="btn-gold-lg" style="text-align:left; padding:0.6rem 0.85rem;" onclick="PRS_App.confirmPlotIntrigue(\'' + type + '\', ' + tgt.index + ')">' +
+                tgt.badge + ' <strong>' + self.escapeHtml(tgt.name) + '</strong> (' + tgt.totalHearts + ' 💖, Charisma ' + tgt.skills.charisma + ')' +
+                '</button>';
+        }
+
+        html += '</div>' +
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="document.getElementById(\'generic-modal\').style.display=\'none\'">Zrušit</button>' +
+            '</div>';
+
+        modal.innerHTML = html;
+        modal.style.display = "flex";
+    },
+
+    confirmPlotIntrigue: function (type, targetIdx) {
+        var modal = document.getElementById("generic-modal");
+        if (modal) modal.style.display = "none";
+        var res = window.PRS_GameEngine.executePlotIntrigue(this.state, type, targetIdx);
+        if (res) {
+            if (window.PRS_Audio) window.PRS_Audio.playNotice();
+            this.renderGameScreen();
+            this.saveSessionAuto();
+        }
+    },
+
+    openTradePactModal: function () {
+        var self = this;
+        var modal = document.getElementById("generic-modal");
+        if (!modal) return;
+        var p = self.state.players[self.state.currentPlayerIndex];
+        var cost = self.state.pendingAction.tradePactCost || 750;
+
+        // Najdi nejvyšší počet Srdcí pro kontrolu pravidla proti lídrovi
+        var maxHearts = 0;
+        for (var h = 0; h < self.state.players.length; h++) {
+            if (self.state.players[h].totalHearts > maxHearts) maxHearts = self.state.players[h].totalHearts;
+        }
+
+        var partners = [];
+        for (var i = 0; i < self.state.players.length; i++) {
+            var pl = self.state.players[i];
+            if (pl.index !== p.index && !pl.isEliminated && !window.PRS_GameEngine.hasActiveTradePact(self.state, p.index, pl.index)) {
+                var isLeaderAhead = (pl.totalHearts === maxHearts && maxHearts >= p.totalHearts + 2);
+                partners.push({ player: pl, isLeaderAhead: isLeaderAhead });
+            }
+        }
+
+        var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; text-align:center;">' +
+            '<div style="font-size:2rem; margin-bottom:0.25rem;">🤝 📜</div>' +
+            '<h3 style="font-family:Cinzel,serif; color:#7dd3fc; margin:0 0 0.5rem 0;">Uzavření Obchodního paktu</h3>' +
+            '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:1rem;">' +
+            'Zpečeť bezcelní alianci na <strong>8 celých kol</strong> za <strong>' + cost + ' zl.</strong> (polovina jde do pokladny, polovina partnerovi jako dar). ' +
+            'Pravidlo cti: Pakt nelze uzavřít s lídrem království, který vede o 2+ 💖!' +
+            '</p>' +
+            '<div style="display:flex; flex-direction:column; gap:0.5rem;">';
+
+        for (var pt = 0; pt < partners.length; pt++) {
+            var item = partners[pt];
+            var part = item.player;
+            var disabled = item.isLeaderAhead || (p.gold < cost);
+            html += '<button class="btn-gold-lg" ' + (disabled ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '') + ' style="text-align:left; padding:0.6rem 0.85rem; background:linear-gradient(135deg, #0284c7, #0369a1); border-color:#38bdf8;" onclick="PRS_App.confirmTradePact(' + part.index + ')">' +
+                part.badge + ' <strong>' + self.escapeHtml(part.name) + '</strong> (' + (part.ownedNodes ? part.ownedNodes.length : 0) + ' panství, ' + part.totalHearts + ' 💖)' +
+                (item.isLeaderAhead ? ' <small style="color:#fca5a5;">(Nelze: Lídr)</small>' : '') +
+                '</button>';
+        }
+
+        html += '</div>' +
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="document.getElementById(\'generic-modal\').style.display=\'none\'">Zrušit</button>' +
+            '</div>';
+
+        modal.innerHTML = html;
+        modal.style.display = "flex";
+    },
+
+    confirmTradePact: function (partnerIdx) {
+        var modal = document.getElementById("generic-modal");
+        if (modal) modal.style.display = "none";
+        var res = window.PRS_GameEngine.executeFormTradePact(this.state, partnerIdx);
+        if (res) {
+            if (window.PRS_Audio) window.PRS_Audio.playFanfare();
+            this.renderGameScreen();
+            this.saveSessionAuto();
+        }
+    },
+
+    openFestivalChallengeModal: function () {
+        var self = this;
+        var modal = document.getElementById("generic-modal");
+        if (!modal) return;
+        var p = self.state.players[self.state.currentPlayerIndex];
+        var stake = self.state.pendingAction.festivalChallengeStake || 750;
+
+        var rivals = [];
+        for (var i = 0; i < self.state.players.length; i++) {
+            var pl = self.state.players[i];
+            if (pl.index !== p.index && !pl.isEliminated) rivals.push(pl);
+        }
+
+        var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #ec4899; border-radius:14px; text-align:center;">' +
+            '<div style="font-size:2rem; margin-bottom:0.25rem;">🏆 🤺</div>' +
+            '<h3 style="font-family:Cinzel,serif; color:#fbcfe8; margin:0 0 0.5rem 0;">Osobní výzva na Slavnosti</h3>' +
+            '<p style="font-size:0.84rem; color:#fce7f3; margin-bottom:1rem;">' +
+            'Zvol rivala a disciplínu (hod 1d6 + hodnota ctnosti). Vítěz získá <strong>' + stake + ' zl.</strong> a <strong>+0,5 💖</strong> slávy!' +
+            '</p>' +
+            '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
+
+        for (var r = 0; r < rivals.length; r++) {
+            var riv = rivals[r];
+            html += '<div style="background:rgba(0,0,0,0.35); border:1px solid rgba(236,72,153,0.3); border-radius:8px; padding:0.55rem; text-align:left;">' +
+                '<div style="font-weight:700; color:#fbcfe8; margin-bottom:4px;">' + riv.badge + ' ' + self.escapeHtml(riv.name) + ' (' + riv.totalHearts + ' 💖)</div>' +
+                '<div style="display:flex; gap:4px;">' +
+                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'boj\')">⚔️ Boj (' + riv.skills.boj + ')</button>' +
+                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'jizda\')">🏇 Jízda (' + riv.skills.jizda + ')</button>' +
+                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'tanec\')">💃 Tanec (' + riv.skills.tanec + ')</button>' +
+                '</div>' +
+                '</div>';
+        }
+
+        html += '</div>' +
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="document.getElementById(\'generic-modal\').style.display=\'none\'">Zrušit</button>' +
+            '</div>';
+
+        modal.innerHTML = html;
+        modal.style.display = "flex";
+    },
+
+    confirmFestivalChallenge: function (rivalIdx, discipline) {
+        var modal = document.getElementById("generic-modal");
+        if (modal) modal.style.display = "none";
+        var res = window.PRS_GameEngine.executeFestivalChallenge(this.state, rivalIdx, discipline);
+        if (res) {
+            if (window.PRS_Audio) window.PRS_Audio.playSword();
+            this.renderGameScreen();
+            this.saveSessionAuto();
+        }
     }
 };
-
-window.addEventListener("DOMContentLoaded", function () {
-    window.PRS_App.init();
-});

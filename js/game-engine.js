@@ -19,7 +19,56 @@ window.PRS_GameEngine = {
 
     createGame: function (options) {
         options = options || {};
-        var cfg = this.deepClone(options.config || window.PRS_DEFAULT_CONFIG);
+        var baseConfig = window.PRS_DEFAULT_CONFIG || {};
+        var cfg = this.deepClone(baseConfig);
+        if (options.config && typeof options.config === "object") {
+            for (var k in options.config) {
+                if (options.config.hasOwnProperty(k)) cfg[k] = options.config[k];
+            }
+        }
+
+        var diffMode = options.difficultyMode || cfg.difficultyMode || "standard";
+        cfg.difficultyMode = diffMode;
+
+        if (diffMode === "easy") {
+            cfg.startGold = 12000;
+            cfg.passStartGold = 3500;
+            cfg.passStartGoldLandless = 5500;
+            if (cfg.sellRates) cfg.sellRates.forcedLiquidation = 0.75;
+            cfg.interactionRate = 0; // mírumilovný režim bez útočných duelů a intrik
+            cfg.hospitalMultiplier = 1;
+            cfg.prisonBail = 1000;
+            cfg.bankruptcyElimination = false;
+        } else if (diffMode === "hard") {
+            cfg.startGold = 8000;
+            cfg.passStartGold = 2500;
+            cfg.passStartGoldLandless = 4500;
+            if (cfg.sellRates) cfg.sellRates.forcedLiquidation = 0.50;
+            cfg.interactionRate = 1.0; // plné sazby
+            cfg.hospitalMultiplier = 1;
+            cfg.prisonBail = 1000;
+            cfg.bankruptcyElimination = false;
+        } else if (diffMode === "ultimate") {
+            cfg.startGold = 8000;
+            cfg.passStartGold = 2500;
+            cfg.passStartGoldLandless = 4000;
+            if (cfg.sellRates) cfg.sellRates.forcedLiquidation = 0.50;
+            cfg.interactionRate = 1.0;
+            cfg.hospitalMultiplier = 2; // Elixír 1 600 zl.
+            cfg.prisonBail = 2000; // Kauce 2 000 zl.
+            cfg.bankruptcyElimination = true;
+        } else {
+            // standard
+            cfg.startGold = 10000;
+            cfg.passStartGold = 3000;
+            cfg.passStartGoldLandless = 5000;
+            if (cfg.sellRates) cfg.sellRates.forcedLiquidation = 0.60;
+            cfg.interactionRate = 0.5; // poloviční sazby
+            cfg.hospitalMultiplier = 1;
+            cfg.prisonBail = 1000;
+            cfg.bankruptcyElimination = false;
+        }
+
         if (options.scenario) {
             cfg.scenario = options.scenario;
             if (cfg.scenario === "sprint") cfg.targetHearts = 15;
@@ -65,6 +114,10 @@ window.PRS_GameEngine = {
                 items: [], // pole objektů z PRS_ITEMS
                 ownedNodes: [], // pole nodeId
                 skipTurns: 0,
+                isEliminated: false,
+                isBankrupt: false,
+                frozenRentRounds: 0,
+                lastToastRound: 0,
                 stats: {
                     questsWon: 0,
                     questsLost: 0,
@@ -100,6 +153,7 @@ window.PRS_GameEngine = {
             lastPath: [],
             pendingAction: null,
             winnerIndex: null,
+            activePacts: [],
             logs: []
         };
 
@@ -122,25 +176,32 @@ window.PRS_GameEngine = {
 
     // Cena políčka podle typu a sady
     getNodePrice: function (state, node) {
-        var cfg = state.config;
-        if (!node) return 0;
-        if (node.type === "ANIMAL") {
-            var base = cfg.animalBasePrices[node.subtype] || 500;
-            return base * (node.setId || 1);
+        var realNode = node;
+        var cfg = (state && state.config) ? state.config : (window.PRS_DEFAULT_CONFIG || {});
+        if (!realNode && state && state.type) {
+            realNode = state;
+            cfg = window.PRS_DEFAULT_CONFIG || {};
         }
-        if (node.type === "VILLAGE") {
-            return cfg.estates.villagePrices[0] || 2000;
+        if (!realNode) return 0;
+        var animalBase = (cfg && cfg.animalBasePrices) ? cfg.animalBasePrices : { sokol: 400, pes: 500, kun: 600 };
+        var estates = (cfg && cfg.estates) ? cfg.estates : (window.PRS_DEFAULT_CONFIG ? window.PRS_DEFAULT_CONFIG.estates : {});
+        if (realNode.type === "ANIMAL") {
+            var base = animalBase[realNode.subtype] || 500;
+            return base * (realNode.setId || 1);
         }
-        if (node.type === "TOWN") {
-            return cfg.estates.townPrice || 4500;
+        if (realNode.type === "VILLAGE") {
+            return (estates.villagePrices && estates.villagePrices[0]) || 2000;
         }
-        if (node.type === "CASTLE") {
-            return cfg.estates.castlePrice || 8000;
+        if (realNode.type === "TOWN") {
+            return estates.townPrice || 4500;
         }
-        if (node.type === "JESTER") {
+        if (realNode.type === "CASTLE") {
+            return estates.castlePrice || 8000;
+        }
+        if (realNode.type === "JESTER") {
             return cfg.jesterPrice || 2000;
         }
-        if (node.type === "BUILDING") {
+        if (realNode.type === "BUILDING") {
             return cfg.buildingPrice || 3000;
         }
         return 0;
@@ -361,11 +422,118 @@ window.PRS_GameEngine = {
                 countInSet++;
             }
         }
-        var ratios = state.config.animalRentRatios;
+        var ratios = (state.config && state.config.animalRentRatios) || { single: 0.20, pair: 0.40, fullSet: 0.80 };
         var ratio = ratios.single || 0.20;
         if (countInSet === 2) ratio = ratios.pair || 0.40;
         if (countInSet >= 3) ratio = ratios.fullSet || 0.80;
         return Math.round(basePrice * ratio);
+    },
+
+    // Kontrola existence aktivního obchodního paktu mezi dvěma hráči
+    hasActiveTradePact: function (state, p1Idx, p2Idx) {
+        if (!state.activePacts || state.activePacts.length === 0) return false;
+        for (var i = 0; i < state.activePacts.length; i++) {
+            var pact = state.activePacts[i];
+            if ((pact.p1 === p1Idx && pact.p2 === p2Idx) || (pact.p1 === p2Idx && pact.p2 === p1Idx)) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    // Porušení obchodního paktu při nepřátelské akci (duel, intrika)
+    breakTradePact: function (state, traitorIdx, victimIdx, reason) {
+        if (!state.activePacts || state.activePacts.length === 0) return false;
+        var foundIdx = -1;
+        for (var i = 0; i < state.activePacts.length; i++) {
+            var pact = state.activePacts[i];
+            if ((pact.p1 === traitorIdx && pact.p2 === victimIdx) || (pact.p1 === victimIdx && pact.p2 === traitorIdx)) {
+                foundIdx = i;
+                break;
+            }
+        }
+        if (foundIdx !== -1) {
+            state.activePacts.splice(foundIdx, 1);
+            var traitor = state.players[traitorIdx];
+            var victim = state.players[victimIdx];
+            traitor.permanentHearts = Math.max(0, traitor.permanentHearts - 1.0);
+            this.addLog(state, "💔 ZRADA OBCHODNÍHO PAKTU! " + traitor.badge + " " + traitor.name + " napadl spojence " + victim.badge + " " + victim.name + " (" + (reason || "nepřátelská akce") + ") a ztrácí -1,0 💖 za křivopřísežnictví!", "danger");
+            return true;
+        }
+        return false;
+    },
+
+    // Nalezení chybějících zvířat do sady pro Šlechtický výkup (Královské předkupní právo)
+    getAnimalBuyoutCandidates: function (state, player, currentNode) {
+        var candidates = [];
+        var setCounts = {};
+        for (var on = 0; on < player.ownedNodes.length; on++) {
+            var an = state.board.nodes[player.ownedNodes[on]];
+            if (an && an.type === "ANIMAL" && an.setId) {
+                var sid = an.setId;
+                if (!setCounts[sid]) setCounts[sid] = { kun: 0, pes: 0, sokol: 0 };
+                if (an.subtype) setCounts[sid][an.subtype]++;
+            }
+        }
+
+        var isMerchant = (currentNode && (currentNode.type === "MERCHANT" || currentNode.type === "OBCHOD"));
+
+        for (var sKey in setCounts) {
+            var sc = setCounts[sKey];
+            var totalInSet = (sc.kun ? 1 : 0) + (sc.pes ? 1 : 0) + (sc.sokol ? 1 : 0);
+            if (totalInSet === 2) {
+                var missingSubtype = !sc.kun ? "kun" : (!sc.pes ? "pes" : "sokol");
+                for (var ni = 0; ni < state.board.nodes.length; ni++) {
+                    var candNode = state.board.nodes[ni];
+                    if (candNode && candNode.type === "ANIMAL" && candNode.setId === Number(sKey) && candNode.subtype === missingSubtype) {
+                        if (candNode.owner !== null && candNode.owner !== undefined && candNode.owner !== player.index) {
+                            var otherOwner = state.players[candNode.owner];
+                            if (otherOwner && !otherOwner.isEliminated) {
+                                if (isMerchant || candNode.id === currentNode.id) {
+                                    var origPrice = this.getNodePrice(state, candNode);
+                                    var buyoutPrice = origPrice * 2;
+                                    candidates.push({
+                                        nodeId: candNode.id,
+                                        name: candNode.name,
+                                        icon: candNode.icon || "🐾",
+                                        setId: candNode.setId,
+                                        subtype: candNode.subtype,
+                                        ownerIndex: otherOwner.index,
+                                        ownerName: otherOwner.name,
+                                        ownerBadge: otherOwner.badge,
+                                        buyoutPrice: buyoutPrice
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return candidates;
+    },
+
+    // Aktualizace trvání paktů a celních kontrol na konci celého kola
+    advanceRoundsForPactsAndIntrigues: function (state) {
+        if (state.activePacts && state.activePacts.length > 0) {
+            for (var i = state.activePacts.length - 1; i >= 0; i--) {
+                state.activePacts[i].remainingRounds--;
+                if (state.activePacts[i].remainingRounds <= 0) {
+                    var p1 = state.players[state.activePacts[i].p1];
+                    var p2 = state.players[state.activePacts[i].p2];
+                    this.addLog(state, "📜 Obchodní pakt mezi " + p1.badge + " " + p1.name + " a " + p2.badge + " " + p2.name + " po 8 kolech vypršel.");
+                    state.activePacts.splice(i, 1);
+                }
+            }
+        }
+        for (var p = 0; p < state.players.length; p++) {
+            if (state.players[p].frozenRentRounds > 0) {
+                state.players[p].frozenRentRounds--;
+                if (state.players[p].frozenRentRounds === 0) {
+                    this.addLog(state, "🏰 Královská celní kontrola nad panstvími rytíře " + state.players[p].name + " skončila.");
+                }
+            }
+        }
     },
 
     // Přepočet průběžných chovatelských bodů, kompletních sad zvířat a kontrola vítězství
@@ -461,6 +629,20 @@ window.PRS_GameEngine = {
                 state.winnerIndex = m;
                 state.phase = "GAME_OVER";
                 this.addLog(state, winReason, "win");
+            }
+        }
+
+        // Kontrola jediného přeživšího rytíře v Ultimate módu
+        if (state.config.bankruptcyElimination && state.winnerIndex === null) {
+            var activePlayers = [];
+            for (var ap = 0; ap < state.players.length; ap++) {
+                if (!state.players[ap].isEliminated) activePlayers.push(state.players[ap]);
+            }
+            if (activePlayers.length === 1) {
+                var soleSurvivor = activePlayers[0];
+                state.winnerIndex = soleSurvivor.index;
+                state.phase = "GAME_OVER";
+                this.addLog(state, "💀 VÍTĚZSTVÍ PŘEŽITÍM! " + soleSurvivor.badge + " " + soleSurvivor.name + " jako jediný rytíř nezkrachoval a stává se vládcem království!", "win");
             }
         }
     },
@@ -744,6 +926,7 @@ window.PRS_GameEngine = {
         this.addLog(state, "🎲 " + player.badge + " " + player.name + " dokončil tah (" + pbc.totalRoll + ") a dorazil na pole **" + landedNode.name + "**.");
 
         this.resolveLandedNode(state, player, landedNode, pbc.totalRoll);
+        this.attachPlayerInteractions(state, player, landedNode);
         if (passedBridgeFestival && landedNode.type !== "FESTIVAL") {
             var festTypes = ["turnaj", "ples", "zavod"];
             state.pendingAction.canResolveFestival = true;
@@ -886,6 +1069,7 @@ window.PRS_GameEngine = {
         this.addLog(state, "🎲 " + player.badge + " " + player.name + " hodil **" + roll + "** a dorazil na pole **" + landedNode.name + "**.");
 
         this.resolveLandedNode(state, player, landedNode, roll);
+        this.attachPlayerInteractions(state, player, landedNode);
         if (passedBridgeFestival && landedNode.type !== "FESTIVAL") {
             var festTypes = ["turnaj", "ples", "zavod"];
             state.pendingAction.canResolveFestival = true;
@@ -894,6 +1078,70 @@ window.PRS_GameEngine = {
         }
         this.recalculateBreedingAndVictory(state);
         return { roll: roll, path: path, node: landedNode };
+    },
+
+    // Připojení interakcí mezi hráči (Duel, Přípitek, Výkup sad, Intriky, Pakt, Výzva)
+    attachPlayerInteractions: function (state, player, node) {
+        if (!state.pendingAction) state.pendingAction = { nodeId: node.id };
+        var pa = state.pendingAction;
+        var rate = (state.config && state.config.interactionRate !== undefined) ? state.config.interactionRate : 0.5;
+
+        // 1. Setkání na stejném poli (Duel vs Přípitek)
+        if (node.type !== "START" && node.type !== "HOSPITAL" && node.type !== "PRISON") {
+            var others = [];
+            for (var i = 0; i < state.players.length; i++) {
+                var o = state.players[i];
+                if (o.index !== player.index && !o.isEliminated && o.nodeId === node.id) {
+                    others.push(o);
+                }
+            }
+            if (others.length > 0) {
+                var targetP = others[0];
+                var duelStake = Math.round(1000 * (rate > 0 ? rate : 0.5));
+                var toastCost = Math.round(500 * (rate > 0 ? rate : 0.5));
+                pa.encounterPlayer = {
+                    index: targetP.index,
+                    name: targetP.name,
+                    badge: targetP.badge,
+                    color: targetP.color,
+                    duelStake: duelStake,
+                    toastCost: toastCost
+                };
+                if (rate > 0) {
+                    pa.canDuelPlayer = true;
+                }
+                var canToast = (player.gold >= toastCost && (!player.lastToastRound || state.roundNumber - player.lastToastRound >= 3));
+                if (canToast) {
+                    pa.canToastPlayer = true;
+                }
+            }
+        }
+
+        // 2. Šlechtický výkup ze sady (Královské předkupní právo)
+        var buyouts = this.getAnimalBuyoutCandidates(state, player, node);
+        if (buyouts.length > 0) {
+            pa.canBuyoutAnimalSet = true;
+            pa.buyoutCandidates = buyouts;
+        }
+
+        // 3. Dvorní intriky u Kejklíře a v Krčmě
+        if ((node.type === "JESTER" || node.type === "TAVERN") && rate > 0) {
+            pa.canPlotIntrigue = true;
+            pa.intrigueBalladCost = Math.round(1500 * rate);
+            pa.intrigueCustomsCost = Math.round(1200 * rate);
+        }
+
+        // 4. Obchodní pakt u Obchodníka a na STARTu
+        if ((node.type === "START" || node.type === "MERCHANT" || node.type === "OBCHOD") && rate > 0) {
+            pa.canFormTradePact = true;
+            pa.tradePactCost = Math.round(1500 * rate);
+        }
+
+        // 5. Osobní výzva na Slavnosti
+        if (node.type === "FESTIVAL" && rate > 0) {
+            pa.canChallengeFestivalRival = true;
+            pa.festivalChallengeStake = Math.round(1500 * rate);
+        }
     },
 
     // Vyhodnocení pole, na kterém hráč skončil pohyb
@@ -931,6 +1179,26 @@ window.PRS_GameEngine = {
             } else {
                 // Cizí vlastník -> zaplacení nájmu / poplatku
                 var owner = state.players[node.owner];
+
+                // 1. Kontrola celní kontroly (intrika)
+                if (owner.frozenRentRounds && owner.frozenRentRounds > 0) {
+                    var frozenMsg = "📜 Královská celní kontrola! Panství " + node.name + " je pod dohledem a " + player.badge + " " + player.name + " v tomto kole neplatí žádný nájem.";
+                    this.addLog(state, frozenMsg, "info");
+                    state.pendingAction.summary = frozenMsg;
+                    return;
+                }
+
+                // 2. Kontrola obchodního paktu (bezcelní aliance + dividenda)
+                if (this.hasActiveTradePact(state, player.index, owner.index)) {
+                    var divBonus = 300;
+                    player.gold += divBonus;
+                    owner.gold += divBonus;
+                    var pactMsg = "🤝 Obchodní pakt v platnosti! " + player.badge + " " + player.name + " a " + owner.badge + " " + owner.name + " si na poli " + node.name + " neplatí nájem a oba získávají obchodní dividendu +" + divBonus + " zl.!";
+                    this.addLog(state, pactMsg, "gold");
+                    state.pendingAction.summary = pactMsg;
+                    return;
+                }
+
                 var rent = this.calculateNodeRent(state, node, owner, moveRoll);
                 var actualPaid = this.transferGold(state, player, owner, rent);
                 player.stats.rentPaid += actualPaid;
@@ -1182,9 +1450,33 @@ window.PRS_GameEngine = {
         state.pendingAction.summary = msg;
     },
 
-    // Karta Náhody (N)
+    // Karta Náhody (N) s váhováním podle herního módu
     resolveChanceCard: function (state, player) {
-        var card = window.PRS_CHANCE_CARDS[Math.floor(Math.random() * window.PRS_CHANCE_CARDS.length)];
+        var diffMode = (state.config && state.config.difficultyMode) ? state.config.difficultyMode : "standard";
+        var posWeight = 0.50, dilWeight = 0.25, negWeight = 0.25;
+        if (diffMode === "easy") {
+            posWeight = 0.70; dilWeight = 0.20; negWeight = 0.10;
+        } else if (diffMode === "hard") {
+            posWeight = 0.35; dilWeight = 0.35; negWeight = 0.30;
+        } else if (diffMode === "ultimate") {
+            posWeight = 0.35; dilWeight = 0.30; negWeight = 0.35;
+        }
+
+        var rollType = Math.random();
+        var targetCat = "positive";
+        if (rollType < posWeight) {
+            targetCat = "positive";
+        } else if (rollType < posWeight + dilWeight) {
+            targetCat = "dilemma";
+        } else {
+            targetCat = "negative";
+        }
+
+        var pool = window.PRS_CHANCE_CARDS.filter(function (c) {
+            return c.category === targetCat;
+        });
+        if (!pool || pool.length === 0) pool = window.PRS_CHANCE_CARDS;
+        var card = pool[Math.floor(Math.random() * pool.length)];
         var stats = this.getEffectiveStats(state, player);
 
         // KARTA DILEMATU / VOLBY (Interaktivní rozhodnutí A vs. B)
@@ -1672,9 +1964,19 @@ window.PRS_GameEngine = {
         } else {
             var hasMore = (player.items.length > 0 || player.ownedNodes.length > 0);
             if (!hasMore) {
-                state.pendingAction.summary = "⚠️ Rytíř odprodal veškerý majetek. Zbytek dluhu " + debt.remainingDebt + " zl. je nedobytný.";
-                delete state.pendingAction.debt;
-                return { ok: true, settled: true, remainingDebt: debt.remainingDebt };
+                if (state.config.bankruptcyElimination) {
+                    player.isBankrupt = true;
+                    player.isEliminated = true;
+                    state.pendingAction.summary = "💀 ÚPLNÝ BANKROT! Rytíř " + player.name + " nemá žádný další majetek ke splacení dluhu a je navždy vyřazen ze hry!";
+                    this.addLog(state, "💀 ÚPLNÝ BANKROT! " + player.badge + " " + player.name + " nedokázal splatit dluh a končí v dlužním vězení (vyřazen ze hry)!", "danger");
+                    delete state.pendingAction.debt;
+                    this.recalculateBreedingAndVictory(state);
+                    return { ok: true, settled: true, eliminated: true };
+                } else {
+                    state.pendingAction.summary = "⚠️ Rytíř odprodal veškerý majetek. Zbytek dluhu " + debt.remainingDebt + " zl. je nedobytný.";
+                    delete state.pendingAction.debt;
+                    return { ok: true, settled: true, remainingDebt: debt.remainingDebt };
+                }
             } else {
                 state.pendingAction.summary = "💸 Dlužíš ještě **" + debt.remainingDebt + " zl.** hráči " + creditor.name + "! Vyber další majetek.";
                 return { ok: true, settled: false, remainingDebt: debt.remainingDebt };
@@ -2318,15 +2620,277 @@ window.PRS_GameEngine = {
         return true;
     },
 
+    // 1. Rytířský duel na stejném poli
+    executePlayerDuel: function (state, targetPlayerIndex) {
+        var player = state.players[state.currentPlayerIndex];
+        var target = state.players[targetPlayerIndex];
+        if (!player || !target || player.isEliminated || target.isEliminated) return null;
+
+        var rate = (state.config && state.config.interactionRate !== undefined) ? state.config.interactionRate : 0.5;
+        var stake = Math.round(1000 * (rate > 0 ? rate : 0.5));
+        var heartStake = 0.5;
+
+        // Kontrola zrady paktu
+        this.breakTradePact(state, player.index, target.index, "rytířský duel na stejném poli");
+
+        var p1Stats = this.getEffectiveStats(state, player);
+        var p2Stats = this.getEffectiveStats(state, target);
+
+        var r1 = Math.floor(Math.random() * 6) + 1;
+        var r2 = Math.floor(Math.random() * 6) + 1;
+
+        var power1 = p1Stats.boj + r1;
+        var power2 = p2Stats.boj + r2;
+
+        var isUltimate = (state.config.difficultyMode === "ultimate");
+        var result = {
+            winnerIndex: null,
+            p1: { name: player.name, roll: r1, combat: p1Stats.boj, total: power1 },
+            p2: { name: target.name, roll: r2, combat: p2Stats.boj, total: power2 },
+            stake: stake,
+            heartStake: heartStake
+        };
+
+        if (power1 > power2) {
+            result.winnerIndex = player.index;
+            var actualGold = this.transferGold(state, target, player, stake);
+            player.permanentHearts += heartStake;
+            if (state.config.difficultyMode !== "easy" && state.config.difficultyMode !== "standard") {
+                target.permanentHearts = Math.max(0, target.permanentHearts - heartStake);
+            }
+            var winMsg = "⚔️ DUEL NA POLI! " + player.badge + " " + player.name + " (" + power1 + ") slavně porazil v rytířském souboji " + target.badge + " " + target.name + " (" + power2 + ")! Získává +" + actualGold + " zl. a +" + heartStake + " 💖!";
+            if (isUltimate) {
+                target.skipTurns = 1;
+                winMsg += " V Ultimate módu je poražený zraněn a vynechává 1 tah!";
+            }
+            this.addLog(state, winMsg, "victory");
+        } else if (power2 > power1) {
+            result.winnerIndex = target.index;
+            var actualGold2 = this.transferGold(state, player, target, stake);
+            target.permanentHearts += heartStake;
+            if (state.config.difficultyMode !== "easy" && state.config.difficultyMode !== "standard") {
+                player.permanentHearts = Math.max(0, player.permanentHearts - heartStake);
+            }
+            var loseMsg = "⚔️ DUEL NA POLI! " + target.badge + " " + target.name + " (" + power2 + ") odrazil výzvu a porazil útočníka " + player.badge + " " + player.name + " (" + power1 + ")! Poražený odevzdává " + actualGold2 + " zl.!";
+            if (isUltimate) {
+                player.skipTurns = 1;
+                loseMsg += " V Ultimate módu je poražený zraněn a vynechává 1 tah!";
+            }
+            this.addLog(state, loseMsg, "danger");
+        } else {
+            this.addLog(state, "⚔️ DUEL NA POLI! " + player.name + " (" + power1 + ") a " + target.name + " (" + power2 + ") zkřížili meče v nerozhodném střetu! Žádné zlato ani srdce se nemění.");
+        }
+
+        if (state.pendingAction) {
+            state.pendingAction.canDuelPlayer = false;
+            state.pendingAction.canToastPlayer = false;
+        }
+        this.recalculateBreedingAndVictory(state);
+        return result;
+    },
+
+    // 2. Přátelský přípitek na stejném poli
+    executePlayerToast: function (state, targetPlayerIndex) {
+        var player = state.players[state.currentPlayerIndex];
+        var target = state.players[targetPlayerIndex];
+        if (!player || !target) return false;
+
+        var rate = (state.config && state.config.interactionRate !== undefined) ? state.config.interactionRate : 0.5;
+        var cost = Math.round(500 * (rate > 0 ? rate : 0.5));
+        if (player.gold < cost) return false;
+
+        player.gold -= cost;
+        target.gold += cost;
+        player.permanentHearts += 0.5;
+        player.lastToastRound = state.roundNumber;
+
+        var msg = "🍷 PŘÁTELSKÝ PŘÍPITEK! " + player.badge + " " + player.name + " pozval rytíře " + target.badge + " " + target.name + " na číši burgundského vína (-" + cost + " zl.). Za dvorskou štědrost a noblesu získává **+0,5 💖**!";
+        this.addLog(state, msg, "gold");
+
+        if (state.pendingAction) {
+            state.pendingAction.canDuelPlayer = false;
+            state.pendingAction.canToastPlayer = false;
+            state.pendingAction.summary = msg;
+        }
+        this.recalculateBreedingAndVictory(state);
+        return true;
+    },
+
+    // 3. Šlechtický výkup ze sady (Královské předkupní právo)
+    executeAnimalBuyout: function (state, targetNodeId) {
+        var player = state.players[state.currentPlayerIndex];
+        var targetNode = state.board.nodes[targetNodeId];
+        if (!player || !targetNode || targetNode.type !== "ANIMAL" || targetNode.owner === null || targetNode.owner === player.index) {
+            return false;
+        }
+        var targetOwner = state.players[targetNode.owner];
+        var origPrice = this.getNodePrice(state, targetNode);
+        var buyoutPrice = origPrice * 2;
+
+        if (player.gold < buyoutPrice) return false;
+
+        player.gold -= buyoutPrice;
+        targetOwner.gold += buyoutPrice;
+
+        var oIdx = targetOwner.ownedNodes.indexOf(targetNode.id);
+        if (oIdx !== -1) targetOwner.ownedNodes.splice(oIdx, 1);
+        player.ownedNodes.push(targetNode.id);
+        targetNode.owner = player.index;
+
+        var msg = "📜 KRÁLOVSKÉ PŘEDKUPNÍ PRÁVO! " + player.badge + " " + player.name + " vykoupil " + targetNode.icon + " **" + targetNode.name + "** od " + targetOwner.badge + " " + targetOwner.name + " za dvojnásobek (" + buyoutPrice + " zl.) a zkompletoval sadu #" + targetNode.setId + " (+1,0 💖)!";
+        this.addLog(state, msg, "victory");
+
+        if (state.pendingAction) {
+            state.pendingAction.canBuyoutAnimalSet = false;
+            state.pendingAction.summary = msg;
+        }
+        this.recalculateBreedingAndVictory(state);
+        return true;
+    },
+
+    // 4. Dvorní intrika u Kejklíře nebo v Krčmě
+    executePlotIntrigue: function (state, type, targetPlayerIndex) {
+        var player = state.players[state.currentPlayerIndex];
+        var target = state.players[targetPlayerIndex];
+        if (!player || !target || player.isEliminated || target.isEliminated) return null;
+
+        var rate = (state.config && state.config.interactionRate !== undefined) ? state.config.interactionRate : 0.5;
+        this.breakTradePact(state, player.index, target.index, "dvorní intrika");
+
+        if (type === "ballad") {
+            var cost = Math.round(1500 * (rate > 0 ? rate : 0.5));
+            if (player.gold < cost) return null;
+            player.gold -= cost;
+
+            var p1Stats = this.getEffectiveStats(state, player);
+            var p2Stats = this.getEffectiveStats(state, target);
+
+            var r1 = Math.floor(Math.random() * 6) + 1;
+            var r2 = Math.floor(Math.random() * 6) + 1;
+
+            var ch1 = p1Stats.charisma + r1;
+            var ch2 = p2Stats.charisma + r2;
+
+            if (ch1 > ch2) {
+                var penalty = (state.config.difficultyMode === "hard" || state.config.difficultyMode === "ultimate") ? 1.0 : 0.5;
+                target.permanentHearts = Math.max(0, target.permanentHearts - penalty);
+                player.permanentHearts += 0.5;
+                var msg = "🃏 POSMĚŠNÁ BALADA USPĚLA! Kejklíř složil jízlivou píseň o " + target.badge + " " + target.name + ". Soupeř ztrácí -" + penalty + " 💖 a " + player.badge + " " + player.name + " získává +0,5 💖 dvorské přízně!";
+                this.addLog(state, msg, "gold");
+                this.recalculateBreedingAndVictory(state);
+                return { success: true, diff: ch1 - ch2 };
+            } else {
+                target.permanentHearts += 0.25;
+                var failMsg = "🃏 POSMĚŠNÁ BALADA SELHALA! " + target.badge + " " + target.name + " prokázal neochvějnou pověst a získává +0,25 💖 za dvorskou ctnost. " + player.badge + " " + player.name + " přišel o " + cost + " zl.";
+                this.addLog(state, failMsg, "danger");
+                this.recalculateBreedingAndVictory(state);
+                return { success: false, diff: ch2 - ch1 };
+            }
+        } else if (type === "customs") {
+            var cCost = Math.round(1200 * (rate > 0 ? rate : 0.5));
+            if (player.gold < cCost) return null;
+            player.gold -= cCost;
+
+            target.frozenRentRounds = 1;
+            var cMsg = "📜 KRÁLOVSKÝ CELNÍ DEKRET! " + player.badge + " " + player.name + " uplatnil královské pravomoci. Panství rytíře " + target.badge + " " + target.name + " podléhají po celé 1 kolo celní kontrole (žádný hráč mu neplatí nájem)!";
+            this.addLog(state, cMsg, "gold");
+            return { success: true };
+        }
+        return null;
+    },
+
+    // 5. Obchodní pakt u Obchodníka nebo na STARTu
+    executeFormTradePact: function (state, partnerIndex) {
+        var player = state.players[state.currentPlayerIndex];
+        var partner = state.players[partnerIndex];
+        if (!player || !partner || player.isEliminated || partner.isEliminated) return false;
+
+        if (this.hasActiveTradePact(state, player.index, partner.index)) return false;
+
+        var rate = (state.config && state.config.interactionRate !== undefined) ? state.config.interactionRate : 0.5;
+        var cost = Math.round(1500 * (rate > 0 ? rate : 0.5));
+        if (player.gold < cost) return false;
+
+        player.gold -= cost;
+        var gift = Math.round(cost / 2);
+        partner.gold += gift;
+
+        if (!state.activePacts) state.activePacts = [];
+        state.activePacts.push({
+            p1: player.index,
+            p2: partner.index,
+            remainingRounds: 8
+        });
+
+        var msg = "🤝 OBCHODNÍ PAKT UZAVŘEN! " + player.badge + " " + player.name + " a " + partner.badge + " " + partner.name + " zpečetili bezcelní alianci na 8 kol (poplatek " + cost + " zl., spojenec obdržel dar +" + gift + " zl.)! Obě strany mají nulové mýtné a získávají dividendu +300 zl. při návštěvě.";
+        this.addLog(state, msg, "gold");
+
+        if (state.pendingAction) {
+            state.pendingAction.canFormTradePact = false;
+            state.pendingAction.summary = msg;
+        }
+        return true;
+    },
+
+    // 6. Osobní výzva na Slavnosti
+    executeFestivalChallenge: function (state, rivalIndex, discipline) {
+        var player = state.players[state.currentPlayerIndex];
+        var rival = state.players[rivalIndex];
+        if (!player || !rival || player.isEliminated || rival.isEliminated) return null;
+
+        var rate = (state.config && state.config.interactionRate !== undefined) ? state.config.interactionRate : 0.5;
+        var stake = Math.round(1500 * (rate > 0 ? rate : 0.5));
+
+        this.breakTradePact(state, player.index, rival.index, "osobní výzva na slavnosti");
+
+        var discKey = discipline || "boj";
+        var s1 = player.skills[discKey] || 0;
+        var s2 = rival.skills[discKey] || 0;
+
+        var r1 = Math.floor(Math.random() * 6) + 1;
+        var r2 = Math.floor(Math.random() * 6) + 1;
+
+        var tot1 = s1 + r1;
+        var tot2 = s2 + r2;
+
+        if (tot1 > tot2) {
+            var actual = this.transferGold(state, rival, player, stake);
+            player.permanentHearts += 0.5;
+            var winMsg = "🏆 OSOBNÍ VÝZVA NA SLAVNOSTI! " + player.badge + " " + player.name + " zvítězil nad " + rival.badge + " " + rival.name + " v disciplíně " + discKey.toUpperCase() + " (" + tot1 + " vs " + tot2 + ")! Získává +" + actual + " zl. a +0,5 💖!";
+            this.addLog(state, winMsg, "victory");
+        } else if (tot2 > tot1) {
+            var actual2 = this.transferGold(state, player, rival, stake);
+            rival.permanentHearts += 0.5;
+            var loseMsg = "🏆 OSOBNÍ VÝZVA NA SLAVNOSTI! " + rival.badge + " " + rival.name + " odrazil výzvu a zvítězil nad " + player.badge + " " + player.name + " v disciplíně " + discKey.toUpperCase() + " (" + tot2 + " vs " + tot1 + ")! Poražený platí " + actual2 + " zl.!";
+            this.addLog(state, loseMsg, "danger");
+        } else {
+            this.addLog(state, "🏆 OSOBNÍ VÝZVA NA SLAVNOSTI skončila nerozhodně (" + tot1 + " vs " + tot2 + ").");
+        }
+
+        if (state.pendingAction) {
+            state.pendingAction.canChallengeFestivalRival = false;
+        }
+        this.recalculateBreedingAndVictory(state);
+        return { tot1: tot1, tot2: tot2 };
+    },
+
     // Ukončení tahu a předání dalšímu hráči
     endTurn: function (state) {
         if (state.phase === "GAME_OVER") return;
         state.pendingAction = null;
         state.turnNumber++;
-        state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
-        if (state.currentPlayerIndex === 0) {
-            state.roundNumber++;
+        var count = state.players.length;
+        var nextIdx = (state.currentPlayerIndex + 1) % count;
+        var loopGuard = 0;
+        while (state.players[nextIdx].isEliminated && loopGuard < count) {
+            nextIdx = (nextIdx + 1) % count;
+            loopGuard++;
         }
+        if (nextIdx <= state.currentPlayerIndex) {
+            state.roundNumber++;
+            this.advanceRoundsForPactsAndIntrigues(state);
+        }
+        state.currentPlayerIndex = nextIdx;
         state.phase = "ROLL";
         this.recalculateBreedingAndVictory(state);
     },
@@ -2505,7 +3069,7 @@ window.PRS_GameEngine = {
 
         // 7. Obchodník – nákup balíčků výbavy
         if (pa.canShopMerchant) {
-            var packs = state.config.itemPackPrices;
+            var packs = (state.config && state.config.itemPackPrices) || { tier1: 2500, tier2: 7000, tier3: 12000 };
             if (bot.type === "Bot_Aggressive") {
                 if (bot.gold - packs.tier3 >= 400 && bot.items.length < 5) this.buyItemPack(state, 3);
                 else if (bot.gold - packs.tier2 >= 400 && bot.items.length < 4) this.buyItemPack(state, 2);
@@ -2554,7 +3118,62 @@ window.PRS_GameEngine = {
             this.gambleInTavern(state);
         }
 
-        // 11. Konec tahu bota
+        // 11. Šlechtický výkup ze sady pro bota (Priorita: gain +1.0 💖)
+        if (pa.canBuyoutAnimalSet && pa.buyoutCandidates && pa.buyoutCandidates.length > 0) {
+            for (var bci = 0; bci < pa.buyoutCandidates.length; bci++) {
+                var bc = pa.buyoutCandidates[bci];
+                if (bot.gold >= bc.buyoutPrice + reserveGold) {
+                    this.executeAnimalBuyout(state, bc.nodeId);
+                    break;
+                }
+            }
+        }
+
+        // 12. Setkání na poli pro bota (Duel vs Přípitek)
+        if (pa.encounterPlayer) {
+            if (pa.canDuelPlayer && (bot.type === "Bot_Aggressive" || state.config.difficultyMode === "hard" || state.config.difficultyMode === "ultimate")) {
+                this.executePlayerDuel(state, pa.encounterPlayer.index);
+            } else if (pa.canToastPlayer && bot.gold >= pa.encounterPlayer.toastCost + reserveGold) {
+                this.executePlayerToast(state, pa.encounterPlayer.index);
+            }
+        }
+
+        // 13. Dvorní intriky pro bota (útočí na lídra v Srdcích)
+        if (pa.canPlotIntrigue && bot.gold >= pa.intrigueBalladCost + reserveGold) {
+            var leadRival = null;
+            var maxHearts = bot.totalHearts;
+            for (var ri = 0; ri < state.players.length; ri++) {
+                var rp = state.players[ri];
+                if (rp.index !== bot.index && !rp.isEliminated && rp.totalHearts > maxHearts) {
+                    maxHearts = rp.totalHearts;
+                    leadRival = rp;
+                }
+            }
+            if (leadRival && (leadRival.totalHearts >= bot.totalHearts + 1.5)) {
+                this.executePlotIntrigue(state, "ballad", leadRival.index);
+            }
+        }
+
+        // 14. Obchodní pakt pro bota (Chovatel a Šlechtic hledají spojence)
+        if (pa.canFormTradePact && (bot.type === "Bot_Breeder" || bot.type === "Bot_Noble") && bot.gold >= pa.tradePactCost + reserveGold) {
+            var bestPartner = null;
+            var maxEstates = 0;
+            for (var pi = 0; pi < state.players.length; pi++) {
+                var pp = state.players[pi];
+                if (pp.index !== bot.index && !pp.isEliminated && !this.hasActiveTradePact(state, bot.index, pp.index)) {
+                    var estCount = pp.ownedNodes ? pp.ownedNodes.length : 0;
+                    if (estCount > maxEstates) {
+                        maxEstates = estCount;
+                        bestPartner = pp;
+                    }
+                }
+            }
+            if (bestPartner && maxEstates >= 2) {
+                this.executeFormTradePact(state, bestPartner.index);
+            }
+        }
+
+        // 15. Konec tahu bota
         this.endTurn(state);
     },
 
@@ -2563,7 +3182,18 @@ window.PRS_GameEngine = {
     // ========================================================================
     simulateGames: function (numGames, configOverride, boardCode) {
         numGames = Math.min(200, Math.max(1, Number(numGames) || 25));
-        var cfg = this.deepClone(configOverride || window.PRS_DEFAULT_CONFIG);
+        if (typeof configOverride === "string") {
+            var tmp = boardCode;
+            boardCode = configOverride;
+            configOverride = tmp;
+        }
+        var baseConfig = window.PRS_DEFAULT_CONFIG || {};
+        var cfg = this.deepClone(baseConfig);
+        if (configOverride && typeof configOverride === "object") {
+            for (var k in configOverride) {
+                if (configOverride.hasOwnProperty(k)) cfg[k] = configOverride[k];
+            }
+        }
         var bCode = boardCode || "classic_96";
 
         var totalRounds = 0;
