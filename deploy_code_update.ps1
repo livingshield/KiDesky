@@ -76,12 +76,17 @@ $codeFiles = @(
     "css/board.css",
     "css/modals.css",
     "css/mobile.css",
+    "js/game-data.js",
+    "js/game-boards.js",
+    "js/game-engine.js",
+    "js/game-combat-ai.js",
     "js/app-audio.js",
     "js/app.js",
+    "js/app-board.js",
+    "js/app-hud.js",
+    "js/app-modals.js",
     "js/app-online.js",
-    "js/app-catalog.js",
-    "js/game-engine.js",
-    "js/game-data.js"
+    "js/app-catalog.js"
 )
 
 foreach ($rb in $remoteBases) {

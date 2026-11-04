@@ -337,7 +337,7 @@
             html.push('    <div class="card-media-title" style="font-family:\'Cinzel\',serif; font-size:0.95rem; font-weight:bold; color:var(--gold-light, #fef08a); margin-bottom:0.35rem;">' + icon + ' ' + this.escapeHtml(d.name) + '</div>');
             html.push('    <div class="card-media-desc" style="font-size:0.8rem; color:#94a3b8; line-height:1.35; flex:1; margin-bottom:0.5rem;">' + this.escapeHtml(desc) + '</div>');
             html.push('    <div style="font-size:0.72rem; color:#64748b; margin-bottom:0.4rem;">🏷️ Bezpečná zóna (Clearance): <strong>' + (d.clearance || 35) + ' px</strong></div>');
-            
+
             if (d.imgFlip) {
                 html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + d.img + '\', \'' + d.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; width:100%; cursor:pointer;">🔄 Otočit zrcadlení</button>');
             }
