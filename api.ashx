@@ -1156,7 +1156,7 @@ END
 
 IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL
 BEGIN
-    UPDATE [prs].[prs_Users] SET [DisplayName] = [Username] WHERE [DisplayName] IS NULL OR [DisplayName] = '';
+    EXEC(N'UPDATE [prs].[prs_Users] SET [DisplayName] = [Username] WHERE [DisplayName] IS NULL OR [DisplayName] = ''''');
 END
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_Videos]') AND type in (N'U'))
@@ -1219,6 +1219,11 @@ END", conn))
                 seedCmd.Parameters.Add("@vd", SqlDbType.NVarChar, 500).Value = "Oficiální videopředstavení světa KiDesky a Princeznina srdce";
                 seedCmd.Parameters.Add("@am", SqlDbType.NVarChar, 500).Value = "Vítejte v království KiDesky: Princeznino srdce! Otestujte své rytířské ctnosti v turnajích.";
                 seedCmd.ExecuteNonQuery();
+            }
+
+            using (var roleCmd = new SqlCommand("UPDATE [prs].[prs_Users] SET [Role] = N'Admin' WHERE [Username] IN (N'admin', N'rytir_jan', N'jan.kytyr@seznam.cz')", conn))
+            {
+                roleCmd.ExecuteNonQuery();
             }
 
             _extendedAdminSchemaChecked = true;
@@ -2140,10 +2145,8 @@ END";
 
 
         string username = GetStr(body, "username").Trim();
-
-
-
         string password = GetStr(body, "password");
+        string reqDisplayName = GetStr(body, "displayName").Trim();
 
 
 
@@ -2457,10 +2460,8 @@ END";
 
 
         string username = GetStr(body, "username").Trim();
-
-
-
         string password = GetStr(body, "password");
+        string reqDisplayName = GetStr(body, "displayName").Trim();
 
 
 
@@ -2675,6 +2676,21 @@ END";
                         }
 
 
+
+                        if (!string.IsNullOrEmpty(reqDisplayName) && reqDisplayName != dn)
+                        {
+                            try
+                            {
+                                using (var updNick = new SqlCommand("UPDATE [prs].[prs_Users] SET [DisplayName] = @dn WHERE [Id] = @id", conn))
+                                {
+                                    updNick.Parameters.Add("@dn", SqlDbType.NVarChar, 64).Value = reqDisplayName;
+                                    updNick.Parameters.AddWithValue("@id", id);
+                                    updNick.ExecuteNonQuery();
+                                    dn = reqDisplayName;
+                                }
+                            }
+                            catch { }
+                        }
 
                         using (var upd = new SqlCommand("UPDATE [prs].[prs_Users] SET [LastLoginAt] = SYSUTCDATETIME() WHERE [Id] = @id", conn))
 
