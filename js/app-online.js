@@ -698,7 +698,15 @@ openAuthModal: function () {
 
                             self.lastKnownTurnNumber = self.state.turnNumber;
 
-                            self.selectedNodeId = self.state.players[self.state.currentPlayerIndex].nodeId;
+                            var activeP = self.state.players[self.state.currentPlayerIndex];
+                            if (activeP) {
+                                self.selectedNodeId = activeP.nodeId;
+                                self.inspectedPlayerIndex = activeP.index;
+                                self.inspectNode(activeP.nodeId);
+                                if (self.myOnlinePlayerIndex >= 0 && self.state.currentPlayerIndex === self.myOnlinePlayerIndex) {
+                                    self.centerOnActivePlayer(true, true);
+                                }
+                            }
 
                             self.renderGameScreen();
 

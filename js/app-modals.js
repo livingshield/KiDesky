@@ -2952,6 +2952,15 @@
 
         this.updateBodyModalClass();
 
+        var activeP = (this.state && this.state.players) ? this.state.players[this.state.currentPlayerIndex] : null;
+        if (activeP && activeP.type === "Human") {
+            this.selectedNodeId = activeP.nodeId;
+            this.inspectedPlayerIndex = activeP.index;
+            this.inspectNode(activeP.nodeId);
+            this.centerOnActivePlayer(true, true);
+            this.renderGameScreen();
+        }
+
         this.scheduleBotTurnIfNeeded();
 
     }

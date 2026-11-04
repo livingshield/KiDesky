@@ -322,7 +322,7 @@
 
     },
 
-    applyViewportTransform: function () {
+    applyViewportTransform: function (smooth) {
 
         var g = document.getElementById("prs-board-stage");
 
@@ -339,6 +339,15 @@
         }
 
         if (!g || !wrap) return;
+
+        if (smooth) {
+            g.style.transition = "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)";
+            setTimeout(function () {
+                if (g) g.style.transition = "";
+            }, 480);
+        } else if (!this.viewport.isDragging && !this.viewport.isPinching) {
+            g.style.transition = "";
+        }
 
         // Převod pixelového posunu na souřadnice SVG (1400 x 860) měřený z reálné velikosti SVG
 
@@ -394,11 +403,12 @@
 
     },
 
-    centerOnActivePlayer: function () {
+    centerOnActivePlayer: function (preserveScale, smooth) {
 
         if (!this.state) return;
 
         var p = this.state.players[this.state.currentPlayerIndex];
+        if (!p) return;
 
         var nd = this.state.board.nodes[p.nodeId];
 
@@ -408,7 +418,12 @@
 
         var isMobile = (this.deviceProfile && this.deviceProfile.device === "mobile");
 
-        var targetScale = isMobile ? Math.max(1.20, Math.min(1.85, this.viewport.scale)) : Math.max(1.45, this.viewport.scale);
+        var targetScale;
+        if (preserveScale && this.viewport && this.viewport.scale > 0.5) {
+            targetScale = this.viewport.scale;
+        } else {
+            targetScale = isMobile ? Math.max(1.20, Math.min(1.85, this.viewport.scale)) : Math.max(1.45, this.viewport.scale);
+        }
 
         this.viewport.scale = targetScale;
 
@@ -434,7 +449,7 @@
 
         this.clampViewportPan();
 
-        this.applyViewportTransform();
+        this.applyViewportTransform(smooth);
 
     },
 

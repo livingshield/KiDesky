@@ -4254,7 +4254,16 @@
 
         window.PRS_GameEngine.endTurn(this.state);
 
-        this.selectedNodeId = this.state.players[this.state.currentPlayerIndex].nodeId;
+        var activeP = this.state.players[this.state.currentPlayerIndex];
+        if (activeP) {
+            this.selectedNodeId = activeP.nodeId;
+            this.inspectedPlayerIndex = activeP.index;
+            this.inspectNode(activeP.nodeId);
+            if (activeP.type === "Human") {
+                this.centerOnActivePlayer(true, true);
+                this.showPawnToast(activeP.index, "Jsi na řadě! (" + activeP.name + ")", "🎲", "#38bdf8");
+            }
+        }
 
         this.renderGameScreen();
 
@@ -4317,6 +4326,10 @@
         if (activeP) {
 
             this.selectedNodeId = activeP.nodeId;
+            this.inspectedPlayerIndex = activeP.index;
+            this.inspectNode(activeP.nodeId);
+            this.centerOnActivePlayer(true, true);
+            this.showPawnToast(activeP.index, "Jsi na řadě! (" + activeP.name + ")", "🎲", "#38bdf8");
 
         }
 
@@ -4358,7 +4371,11 @@
 
                 window.PRS_GameEngine.executeBotTurn(self.state);
 
-                self.selectedNodeId = bot.nodeId;
+                var activeP = self.state.players[self.state.currentPlayerIndex];
+                if (activeP) {
+                    self.selectedNodeId = activeP.nodeId;
+                    self.inspectedPlayerIndex = activeP.index;
+                }
 
                 self.renderGameScreen();
 
@@ -4371,6 +4388,13 @@
                     return;
                 }
 
+                if (activeP && activeP.type === "Human") {
+                    self.inspectNode(activeP.nodeId);
+                    self.centerOnActivePlayer(true, true);
+                    if (window.PRS_Audio) window.PRS_Audio.playNotice();
+                    self.showPawnToast(activeP.index, "Jsi na řadě! (" + activeP.name + ")", "🎲", "#38bdf8");
+                }
+
                 self.scheduleBotTurnIfNeeded();
 
             });
@@ -4379,7 +4403,11 @@
 
             window.PRS_GameEngine.executeBotTurn(self.state);
 
-            self.selectedNodeId = bot.nodeId;
+            var activeP = self.state.players[self.state.currentPlayerIndex];
+            if (activeP) {
+                self.selectedNodeId = activeP.nodeId;
+                self.inspectedPlayerIndex = activeP.index;
+            }
 
             self.renderGameScreen();
 
@@ -4390,6 +4418,13 @@
                 self.state.lastDuelResult = null;
                 self.showDuelResultModal(dRes2, dRes2.type);
                 return;
+            }
+
+            if (activeP && activeP.type === "Human") {
+                self.inspectNode(activeP.nodeId);
+                self.centerOnActivePlayer(true, true);
+                if (window.PRS_Audio) window.PRS_Audio.playNotice();
+                self.showPawnToast(activeP.index, "Jsi na řadě! (" + activeP.name + ")", "🎲", "#38bdf8");
             }
 
             self.scheduleBotTurnIfNeeded();
