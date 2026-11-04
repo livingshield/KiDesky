@@ -69,6 +69,7 @@ function Ensure-FtpDirectory {
 
 $codeFiles = @(
     "index.html",
+    "web.config",
     "api.ashx",
     "appsettings.Production.json",
     "appsettings.json",

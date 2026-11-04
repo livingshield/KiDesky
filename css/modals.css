@@ -1810,3 +1810,29 @@
     font-size: 0.78rem;
     margin-top: 4px;
 }
+
+
+.btn-primary {
+    background: linear-gradient(135deg, #e5c158, #b8860b);
+    color: #14100b !important;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 0.42rem 0.9rem;
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    user-select: none;
+    text-decoration: none;
+}
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.45);
+    background: linear-gradient(135deg, #f3d472, #c99718);
+    color: #14100b !important;
+}

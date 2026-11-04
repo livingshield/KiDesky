@@ -1,4 +1,4 @@
-/**
+﻿/**
  * KiDesky - Princeznino srdce
  * Modul: app-admin.js
  * Kompletní administrátorská sekce portálu:

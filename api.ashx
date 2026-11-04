@@ -1,4 +1,4 @@
-<%@ WebHandler Language="C#" Class="KiDeskyApiHandler" %>
+﻿<%@ WebHandler Language="C#" Class="KiDeskyApiHandler" %>
 
 
 
@@ -1173,9 +1173,6 @@ BEGIN
         [SortOrder] INT NOT NULL DEFAULT 0,
         [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
-
-    INSERT INTO [prs].[prs_Videos] ([Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive], [SortOrder])
-    VALUES (N'Královská upoutávka (Růže pro Danielku)', N'Oficiální videopředstavení světa KiDesky a Princeznina srdce', N'mp4', N'assets/video/RuzeProDanielku.mp4', N'assets/board/parchment_board_bg.jpg', N'trailer', 1, 10);
 END
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_Announcements]') AND type in (N'U'))
@@ -1187,13 +1184,43 @@ BEGIN
         [IsActive] BIT NOT NULL DEFAULT 1,
         [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
-
-    INSERT INTO [prs].[prs_Announcements] ([Message], [LinkUrl], [IsActive])
-    VALUES (N'Vítejte v království KiDesky: Princeznino srdce! Otestujte své rytířské ctnosti v turnajích.', N'#rules', 1);
 END", conn))
             {
                 migCmd.ExecuteNonQuery();
             }
+
+            // Bezpečná oprava a synchronizace výchozích českých textů pomocí parametrizovaného příkazu
+            using (var seedCmd = new SqlCommand(@"
+IF NOT EXISTS (SELECT 1 FROM [prs].[prs_Videos] WHERE [Id] = 1)
+BEGIN
+    INSERT INTO [prs].[prs_Videos] ([Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive], [SortOrder])
+    VALUES (@vt, @vd, N'mp4', N'assets/video/RuzeProDanielku.mp4', N'assets/board/parchment_board_bg.jpg', N'trailer', 1, 10);
+END
+ELSE
+BEGIN
+    UPDATE [prs].[prs_Videos]
+    SET [Title] = @vt, [Description] = @vd
+    WHERE [Id] = 1 OR [Url] LIKE '%RuzeProDanielku%';
+END
+
+IF NOT EXISTS (SELECT 1 FROM [prs].[prs_Announcements] WHERE [Id] = 1)
+BEGIN
+    INSERT INTO [prs].[prs_Announcements] ([Message], [LinkUrl], [IsActive])
+    VALUES (@am, N'#rules', 1);
+END
+ELSE
+BEGIN
+    UPDATE [prs].[prs_Announcements]
+    SET [Message] = @am
+    WHERE [Id] = 1;
+END", conn))
+            {
+                seedCmd.Parameters.Add("@vt", SqlDbType.NVarChar, 128).Value = "Královská upoutávka (Růže pro Danielku)";
+                seedCmd.Parameters.Add("@vd", SqlDbType.NVarChar, 500).Value = "Oficiální videopředstavení světa KiDesky a Princeznina srdce";
+                seedCmd.Parameters.Add("@am", SqlDbType.NVarChar, 500).Value = "Vítejte v království KiDesky: Princeznino srdce! Otestujte své rytířské ctnosti v turnajích.";
+                seedCmd.ExecuteNonQuery();
+            }
+
             _extendedAdminSchemaChecked = true;
         }
         catch { }
