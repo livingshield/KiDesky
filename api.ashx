@@ -731,6 +731,10 @@ public class KiDeskyApiHandler : IHttpHandler
                 case "hero-video":
                     HandleGetHeroVideo(context);
                     break;
+                case "upload-video":
+                case "admin-upload-video":
+                    HandleUploadVideo(context);
+                    break;
                 case "admin-save-video":
                     HandleAdminSaveVideo(context);
                     break;
@@ -4254,6 +4258,105 @@ END";
             }
         }
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", hero = hero }));
+    }
+
+    private void HandleUploadVideo(HttpContext context)
+    {
+        if (context.Request.HttpMethod != "POST")
+        {
+            context.Response.StatusCode = 405;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Pouze metoda POST je povolena." }));
+            return;
+        }
+
+        if (context.Request.Files.Count == 0)
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Nebyl odeslán žádný soubor k nahrání." }));
+            return;
+        }
+
+        HttpPostedFile file = context.Request.Files[0];
+        if (file == null || file.ContentLength == 0)
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Nahraný soubor je prázdný." }));
+            return;
+        }
+
+        string originalName = System.IO.Path.GetFileName(file.FileName);
+        string ext = System.IO.Path.GetExtension(originalName).ToLowerInvariant();
+
+        // Přísný bezpečnostní filtr: NIKDY nepovolit spustitelné soubory ani skripty
+        if (ext == ".exe" || ext == ".dll" || ext == ".ashx" || ext == ".aspx" || ext == ".config" || ext == ".bat" || ext == ".cmd" || ext == ".ps1" || ext == ".vbs" || ext == ".msi")
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Tento typ souboru je z bezpečnostních důvodů přísně zakázán." }));
+            return;
+        }
+
+        // Povolit pouze multimediální soubory (video nebo plakát)
+        bool isVideo = (ext == ".mp4" || ext == ".webm" || ext == ".mov" || ext == ".m4v");
+        bool isImage = (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".webp");
+        if (!isVideo && !isImage)
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Povolena jsou pouze videa (.mp4, .webm, .mov) nebo obrázky plakátů (.jpg, .png, .webp)." }));
+            return;
+        }
+
+        string subFolder = isImage ? "board" : "video";
+        string targetDir = context.Server.MapPath("~/assets/" + subFolder);
+        if (!System.IO.Directory.Exists(targetDir))
+        {
+            System.IO.Directory.CreateDirectory(targetDir);
+        }
+
+        // Čištění názvu souboru na bezpečné ASCII znaky
+        string rawName = System.IO.Path.GetFileNameWithoutExtension(originalName);
+        string safeBase = System.Text.RegularExpressions.Regex.Replace(rawName, @"[^a-zA-Z0-9_\-]", "_");
+        if (string.IsNullOrEmpty(safeBase)) safeBase = "media_" + DateTime.UtcNow.Ticks;
+        string safeFileName = safeBase + ext;
+        string fullPath = System.IO.Path.Combine(targetDir, safeFileName);
+
+        file.SaveAs(fullPath);
+
+        // Automatická synchronizace do paralelní webroot složky, pokud na serveru existuje (/www/apps vs /www/wwwroot/apps)
+        try
+        {
+            string appRoot = context.Server.MapPath("~");
+            string relSub = "assets\\" + subFolder;
+            if (appRoot.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                string altRoot = appRoot.Replace("wwwroot\\", "").Replace("wwwroot/", "");
+                string altDir = System.IO.Path.Combine(altRoot, "assets", subFolder);
+                if (System.IO.Directory.Exists(altDir))
+                {
+                    System.IO.File.Copy(fullPath, System.IO.Path.Combine(altDir, safeFileName), true);
+                }
+            }
+            else
+            {
+                string altDir = System.IO.Path.Combine(appRoot, "..", "wwwroot", "apps", "KiDesky", "assets", subFolder);
+                if (System.IO.Directory.Exists(altDir))
+                {
+                    System.IO.File.Copy(fullPath, System.IO.Path.Combine(altDir, safeFileName), true);
+                }
+            }
+        }
+        catch { }
+
+        string relativeUrl = "assets/" + subFolder + "/" + safeFileName;
+        context.Response.Write(_json.Serialize(new
+        {
+            ok = true,
+            status = "success",
+            url = relativeUrl,
+            fileName = safeFileName,
+            fileSize = file.ContentLength,
+            mediaType = isVideo ? "video" : "image",
+            message = "Soubor byl úspěšně nahrán na server: " + relativeUrl
+        }));
     }
 
     private void HandleAdminSaveVideo(HttpContext context)

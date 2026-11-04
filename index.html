@@ -2865,13 +2865,52 @@
                         </select>
                     </div>
                 </div>
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">URL adresa videa (přímý .mp4 odkaz nebo YouTube odkaz):</label>
-                    <input id="admin-vid-url" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="assets/video/RuzeProDanielku.mp4 nebo https://youtube.com/...">
+                <!-- 1. Přímé nahrání MP4 souboru na server -->
+                <div style="margin-bottom:0.85rem; background:rgba(212,175,55,0.08); border:1px dashed var(--gold); border-radius:8px; padding:0.75rem;">
+                    <label style="display:block; font-size:0.82rem; font-weight:700; color:var(--gold-light); margin-bottom:5px;">
+                        📤 Nahrát MP4 video přímo na server:
+                    </label>
+                    <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                        <input type="file" id="admin-vid-file-input" accept="video/mp4,video/webm,video/*" style="display:none;" onchange="PRS_App.handleVideoFileSelected(event)">
+                        <button type="button" class="btn-primary" style="font-size:0.8rem; padding:0.4rem 0.85rem; display:inline-flex; align-items:center; gap:0.4rem;" onclick="document.getElementById('admin-vid-file-input').click()">
+                            📁 Vybrat MP4 soubor...
+                        </button>
+                        <span id="admin-vid-file-name" style="font-size:0.78rem; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;">
+                            Žádný soubor nevybrán
+                        </span>
+                    </div>
+                    <div id="admin-vid-upload-progress-wrap" style="display:none; margin-top:0.6rem;">
+                        <div style="width:100%; height:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(212,175,55,0.3); border-radius:4px; overflow:hidden;">
+                            <div id="admin-vid-upload-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg, #f59e0b, #ec4899); transition:width 0.2s;"></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top:3px;">
+                            <span id="admin-vid-upload-status" style="font-size:0.75rem; color:#fde047;">Nahrávám na server...</span>
+                            <span id="admin-vid-upload-pct" style="font-size:0.75rem; color:#fde047; font-weight:bold;">0%</span>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- 2. Nebo zadat URL / YouTube odkaz -->
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Nebo zadejte URL adresu / YouTube odkaz:</label>
+                    <div style="display:flex; gap:0.45rem;">
+                        <input id="admin-vid-url" type="text" class="form-input" style="flex:1; box-sizing:border-box;" placeholder="assets/video/RuzeProDanielku.mp4 nebo https://youtube.com/...">
+                        <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.4rem 0.65rem; white-space:nowrap;" onclick="PRS_App.autoFetchYoutubeMeta()" title="Automaticky načíst název a náhled z YouTube">
+                            ✨ Z YouTube
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Plakát -->
                 <div style="margin-bottom:0.75rem;">
                     <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Náhledový plakát (Poster URL):</label>
-                    <input id="admin-vid-poster" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="assets/board/parchment_board_bg.jpg">
+                    <div style="display:flex; gap:0.45rem;">
+                        <input id="admin-vid-poster" type="text" class="form-input" style="flex:1; box-sizing:border-box;" placeholder="assets/board/parchment_board_bg.jpg">
+                        <input type="file" id="admin-poster-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="PRS_App.handlePosterFileSelected(event)">
+                        <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.4rem 0.65rem; white-space:nowrap;" onclick="document.getElementById('admin-poster-file-input').click()" title="Nahrát vlastní obrázek plakátu">
+                            🖼️ Nahrát plakát
+                        </button>
+                    </div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
                     <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; cursor:pointer;">

@@ -151,6 +151,12 @@
             document.getElementById("admin-vid-category").value = "trailer";
             document.getElementById("admin-vid-hero").checked = false;
             document.getElementById("admin-vid-order").value = "10";
+            var fileInput = document.getElementById("admin-vid-file-input");
+            if (fileInput) fileInput.value = "";
+            var fileNameEl = document.getElementById("admin-vid-file-name");
+            if (fileNameEl) fileNameEl.textContent = "Žádný soubor nevybrán";
+            var progWrap = document.getElementById("admin-vid-upload-progress-wrap");
+            if (progWrap) progWrap.style.display = "none";
             document.getElementById("admin-vid-feedback").textContent = "";
             document.getElementById("admin-video-modal").style.display = "flex";
         },
@@ -172,12 +178,213 @@
             document.getElementById("admin-vid-category").value = vid.category || "trailer";
             document.getElementById("admin-vid-hero").checked = !!vid.isHeroActive;
             document.getElementById("admin-vid-order").value = vid.sortOrder || 0;
+            var fileInput = document.getElementById("admin-vid-file-input");
+            if (fileInput) fileInput.value = "";
+            var fileNameEl = document.getElementById("admin-vid-file-name");
+            if (fileNameEl) fileNameEl.textContent = vid.url ? ("Aktuální: " + vid.url) : "Žádný soubor nevybrán";
+            var progWrap = document.getElementById("admin-vid-upload-progress-wrap");
+            if (progWrap) progWrap.style.display = "none";
             document.getElementById("admin-vid-feedback").textContent = "";
             document.getElementById("admin-video-modal").style.display = "flex";
         },
 
         closeAdminVideoModal: function () {
             document.getElementById("admin-video-modal").style.display = "none";
+        },
+
+        handleVideoFileSelected: function (e) {
+            var file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            var nameEl = document.getElementById("admin-vid-file-name");
+            if (nameEl) nameEl.textContent = file.name + " (" + (file.size / (1024 * 1024)).toFixed(1) + " MB)";
+
+            var progWrap = document.getElementById("admin-vid-upload-progress-wrap");
+            var progBar = document.getElementById("admin-vid-upload-progress-bar");
+            var progStatus = document.getElementById("admin-vid-upload-status");
+            var progPct = document.getElementById("admin-vid-upload-pct");
+            var fb = document.getElementById("admin-vid-feedback");
+
+            if (progWrap) progWrap.style.display = "block";
+            if (progBar) progBar.style.width = "0%";
+            if (progPct) progPct.textContent = "0%";
+            if (progStatus) {
+                progStatus.textContent = "Nahrávám video na server...";
+                progStatus.style.color = "#fde047";
+            }
+            if (fb) fb.textContent = "";
+
+            var fd = new FormData();
+            fd.append("file", file);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "api.ashx?action=upload-video", true);
+
+            xhr.upload.onprogress = function (ev) {
+                if (ev.lengthComputable) {
+                    var pct = Math.round((ev.loaded / ev.total) * 100);
+                    if (progBar) progBar.style.width = pct + "%";
+                    if (progPct) progPct.textContent = pct + "%";
+                }
+            };
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    try {
+                        var res = JSON.parse(xhr.responseText);
+                        if (res && res.ok && res.url) {
+                            var urlInput = document.getElementById("admin-vid-url");
+                            if (urlInput) urlInput.value = res.url;
+
+                            var typeSel = document.getElementById("admin-vid-type");
+                            if (typeSel) typeSel.value = "mp4";
+
+                            var titleInput = document.getElementById("admin-vid-title");
+                            if (titleInput && !titleInput.value.trim()) {
+                                var base = file.name.replace(/\.[^/.]+$/, "").replace(/[_\-]+/g, " ");
+                                titleInput.value = base.charAt(0).toUpperCase() + base.slice(1);
+                            }
+
+                            if (progBar) progBar.style.width = "100%";
+                            if (progPct) progPct.textContent = "100%";
+                            if (progStatus) {
+                                progStatus.textContent = "✅ Video nahráno: " + res.url;
+                                progStatus.style.color = "#4ade80";
+                            }
+                            if (fb) {
+                                fb.style.color = "#4ade80";
+                                fb.textContent = "✅ Soubor byl úspěšně nahrán na server.";
+                            }
+                            return;
+                        } else {
+                            if (fb) {
+                                fb.style.color = "#ef4444";
+                                fb.textContent = (res && res.message) || "Nahrání selhalo.";
+                            }
+                        }
+                    } catch (err) {
+                        if (fb) {
+                            fb.style.color = "#ef4444";
+                            fb.textContent = "Chyba při zpracování odpovědi serveru.";
+                        }
+                    }
+                } else {
+                    if (fb) {
+                        fb.style.color = "#ef4444";
+                        fb.textContent = "Chyba serveru při nahrávání (kód " + xhr.status + ").";
+                    }
+                }
+                if (progStatus) {
+                    progStatus.textContent = "❌ Chyba nahrávání";
+                    progStatus.style.color = "#ef4444";
+                }
+            };
+
+            xhr.onerror = function () {
+                if (fb) {
+                    fb.style.color = "#ef4444";
+                    fb.textContent = "Chyba sítě při odesílání souboru.";
+                }
+                if (progStatus) {
+                    progStatus.textContent = "❌ Chyba sítě";
+                    progStatus.style.color = "#ef4444";
+                }
+            };
+
+            xhr.send(fd);
+        },
+
+        handlePosterFileSelected: function (e) {
+            var file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            var fb = document.getElementById("admin-vid-feedback");
+            if (fb) {
+                fb.style.color = "#fde047";
+                fb.textContent = "Nahrávám plakát...";
+            }
+
+            var fd = new FormData();
+            fd.append("file", file);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "api.ashx?action=upload-video", true);
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    try {
+                        var res = JSON.parse(xhr.responseText);
+                        if (res && res.ok && res.url) {
+                            var posterInput = document.getElementById("admin-vid-poster");
+                            if (posterInput) posterInput.value = res.url;
+                            if (fb) {
+                                fb.style.color = "#4ade80";
+                                fb.textContent = "✅ Plakát nahrán: " + res.url;
+                            }
+                            return;
+                        }
+                    } catch (err) { }
+                }
+                if (fb) {
+                    fb.style.color = "#ef4444";
+                    fb.textContent = "Nahrání plakátu selhalo.";
+                }
+            };
+
+            xhr.onerror = function () {
+                if (fb) {
+                    fb.style.color = "#ef4444";
+                    fb.textContent = "Chyba sítě při nahrávání plakátu.";
+                }
+            };
+
+            xhr.send(fd);
+        },
+
+        autoFetchYoutubeMeta: function () {
+            var urlInput = document.getElementById("admin-vid-url");
+            var u = (urlInput ? urlInput.value : "").trim();
+            var fb = document.getElementById("admin-vid-feedback");
+            if (!u) {
+                if (fb) { fb.style.color = "#ef4444"; fb.textContent = "Nejprve zadejte YouTube odkaz."; }
+                return;
+            }
+
+            var ytMatch = u.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
+            if (!ytMatch) {
+                if (fb) { fb.style.color = "#ef4444"; fb.textContent = "Zadaná adresa není platným YouTube odkazem."; }
+                return;
+            }
+
+            var videoId = ytMatch[1];
+            var typeSel = document.getElementById("admin-vid-type");
+            if (typeSel) typeSel.value = "youtube";
+
+            var posterInput = document.getElementById("admin-vid-poster");
+            if (posterInput) posterInput.value = "https://img.youtube.com/vi/" + videoId + "/maxresdefault.jpg";
+
+            if (fb) { fb.style.color = "#fde047"; fb.textContent = "Načítám informace z YouTube..."; }
+
+            fetch("https://noembed.com/embed?url=" + encodeURIComponent("https://www.youtube.com/watch?v=" + videoId))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data && data.title) {
+                        var titleInput = document.getElementById("admin-vid-title");
+                        if (titleInput && (!titleInput.value.trim() || titleInput.value.indexOf("Video") !== -1)) {
+                            titleInput.value = data.title;
+                        }
+                        var descInput = document.getElementById("admin-vid-desc");
+                        if (descInput && !descInput.value.trim() && data.author_name) {
+                            descInput.value = "Autor: " + data.author_name;
+                        }
+                        if (fb) { fb.style.color = "#4ade80"; fb.textContent = "✅ Data z YouTube byla úspěšně načtena!"; }
+                    } else {
+                        if (fb) { fb.style.color = "#4ade80"; fb.textContent = "✅ YouTube video rozpoznáno."; }
+                    }
+                })
+                .catch(function () {
+                    if (fb) { fb.style.color = "#4ade80"; fb.textContent = "✅ YouTube video nastaveno (náhled načten)."; }
+                });
         },
 
         saveAdminVideo: function () {
