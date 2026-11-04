@@ -1956,6 +1956,17 @@ window.PRS_App = {
 
         var self = this;
 
+        // Klepnutí / kliknutí mimo vizitku rytíře ji automaticky zavře
+        document.addEventListener("pointerdown", function (e) {
+            var tip = document.getElementById("player-hover-tooltip");
+            if (!tip || tip.style.display === "none") return;
+            if (tip.contains(e.target)) return;
+            if (e.target.closest && (e.target.closest('[onmouseenter*="showPlayerTooltip"]') || e.target.closest('[onclick*="showPlayerTooltip"]'))) {
+                return;
+            }
+            self.hidePlayerTooltip();
+        }, true);
+
         window.addEventListener("keydown", function (e) {
 
             // Ignorujeme, pokud uživatel píše do formulářového pole
@@ -2071,6 +2082,7 @@ window.PRS_App = {
     },
 
     closeAllModals: function () {
+        this.hidePlayerTooltip();
 
         this.closeQuestDuelModal();
 

@@ -1797,111 +1797,84 @@
     },
 
     showPlayerTooltip: function (e, playerIndex) {
-
         var tip = document.getElementById("player-hover-tooltip");
-
         if (!tip || !this.state || !this.state.players[playerIndex]) return;
 
-        var p = this.state.players[playerIndex];
-
-        var st = window.PRS_GameEngine.getEffectiveStats(this.state, p);
-
-        var target = this.state.config.targetHearts;
-
-        var currNode = this.state.board.nodes[p.nodeId];
-
-        var eqList = [];
-
-        var eqItems = window.PRS_GameEngine.getEquippedItems(p);
-
-        for (var k in eqItems) {
-
-            if (eqItems[k]) eqList.push(eqItems[k].icon + " " + eqItems[k].name);
-
+        // Přepínání: Pokud uživatel klepne znovu na stejného hráče a vizitka je otevřená, zavřeme ji
+        if (this._activeTooltipPlayerIndex === playerIndex && tip.style.display === "block") {
+            this.hidePlayerTooltip();
+            return;
         }
+        this._activeTooltipPlayerIndex = playerIndex;
 
+        var p = this.state.players[playerIndex];
+        var st = window.PRS_GameEngine.getEffectiveStats(this.state, p);
+        var target = this.state.config.targetHearts;
+        var currNode = this.state.board.nodes[p.nodeId];
+        var eqList = [];
+        var eqItems = window.PRS_GameEngine.getEquippedItems(p);
+        for (var k in eqItems) {
+            if (eqItems[k]) eqList.push(eqItems[k].icon + " " + eqItems[k].name);
+        }
         var eqText = eqList.length > 0 ? eqList.join(", ") : "Žádná výbava";
 
         var html = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.35rem;">' +
-
             '  <span style="font-weight:700; color:' + p.color + '; font-size:0.95rem;">' + p.badge + ' ' + this.escapeHtml(p.name) + '</span>' +
-
-            '  <span style="font-size:0.75rem; color:var(--text-muted);">' + (p.type === "Human" ? "Člověk" : "PC") + '</span>' +
-
+            '  <div style="display:flex; align-items:center; gap:0.4rem;">' +
+            '    <span style="font-size:0.75rem; color:var(--text-muted);">' + (p.type === "Human" ? "Člověk" : "PC") + '</span>' +
+            '    <button type="button" class="btn-close-tooltip" onclick="event.stopPropagation(); PRS_App.hidePlayerTooltip();" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; border-radius:50%; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; font-weight:bold; padding:0; line-height:1;" title="Zavřít">✕</button>' +
+            '  </div>' +
             '</div>' +
-
             '<div style="display:flex; justify-content:space-between; margin-bottom:0.45rem;">' +
-
             '  <span style="color:#f472b6; font-weight:700; font-size:0.92rem;">💖 ' + p.totalHearts + ' / ' + target + ' Srdcí</span>' +
-
             '  <span style="color:#facc15; font-weight:700; font-size:0.92rem;">💰 ' + p.gold.toLocaleString("cs-CZ") + ' zl.</span>' +
-
             '</div>' +
-
             '<div style="font-size:0.78rem; color:#bae6fd; margin-bottom:0.45rem;">' +
-
             '  📍 Pozice: <strong>' + (currNode ? this.escapeHtml(currNode.name) : "-") + '</strong>' +
-
             '</div>' +
-
             '<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem; font-size:0.8rem; background:rgba(0,0,0,0.45); padding:0.45rem; border-radius:6px; margin-bottom:0.45rem;">' +
-
             '  <div>⚔️ Boj: <strong>' + st.boj + '</strong> <small style="color:var(--text-muted);">(' + p.skills.boj + '/5)</small></div>' +
-
             '  <div>🏇 Jízda: <strong>' + st.jizda + '</strong> <small style="color:var(--text-muted);">(' + p.skills.jizda + '/5)</small></div>' +
-
             '  <div>💃 Tanec: <strong>' + st.tanec + '</strong> <small style="color:var(--text-muted);">(' + p.skills.tanec + '/5)</small></div>' +
-
             '  <div>✨ Charisma: <strong>' + st.charisma + '</strong> <small style="color:var(--text-muted);">(' + p.skills.charisma + '/5)</small></div>' +
-
             '</div>' +
-
             '<div style="font-size:0.78rem; color:#e2e8f0; margin-bottom:0.3rem;">' +
-
             '  🏰 Panství &amp; Chovy: <strong>' + p.ownedNodes.length + '</strong> (Bonus chovu: +' + p.breedingHearts + ' 💖)' +
-
             '</div>' +
-
             '<div style="font-size:0.76rem; color:var(--text-muted); white-space:normal; line-height:1.35;">' +
-
             '  🎒 Aktivní výbava: ' + this.escapeHtml(eqText) +
-
-            '</div>';
+            '</div>' +
+            '<button type="button" class="btn-close-tooltip-full" onclick="event.stopPropagation(); PRS_App.hidePlayerTooltip();" style="width:100%; margin-top:0.6rem; padding:0.45rem 0.6rem; background:linear-gradient(135deg, rgba(212,175,55,0.22), rgba(0,0,0,0.5)); border:1px solid rgba(212,175,55,0.45); color:#fef08a; border-radius:7px; cursor:pointer; font-size:0.82rem; font-weight:700; display:flex; align-items:center; justify-content:center; gap:0.4rem;">✕ Zavřít detail rytíře</button>';
 
         tip.innerHTML = html;
-
         tip.style.display = "block";
-
         this.movePlayerTooltip(e);
-
     },
 
     movePlayerTooltip: function (e) {
-
         var tip = document.getElementById("player-hover-tooltip");
-
         if (!tip || tip.style.display === "none") return;
-
+        var isMobile = (window.innerWidth <= 768) || (this.deviceProfile && this.deviceProfile.device === "mobile");
+        if (isMobile) {
+            tip.style.left = "50%";
+            tip.style.top = "50%";
+            tip.style.transform = "translate(-50%, -50%)";
+            return;
+        }
+        tip.style.transform = "none";
+        if (!e || typeof e.clientX !== "number") return;
         var x = e.clientX + 16;
-
         var y = e.clientY + 16;
-
         if (x + 310 > window.innerWidth) x = Math.max(10, e.clientX - 320);
-
         if (y + 240 > window.innerHeight) y = Math.max(10, e.clientY - 250);
-
         tip.style.left = x + "px";
-
         tip.style.top = y + "px";
-
     },
 
     hidePlayerTooltip: function () {
-
+        this._activeTooltipPlayerIndex = null;
         var tip = document.getElementById("player-hover-tooltip");
-
         if (tip) tip.style.display = "none";
-
     },
 
     // --- PANEL AKTIVNÍHO HRÁČE A AKCÍ TAHU ---,
