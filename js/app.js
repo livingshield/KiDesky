@@ -303,7 +303,7 @@ window.PRS_App = {
         if (pillEl) pillEl.style.color = player.color || "var(--gold-light)";
 
         var goldEl = document.getElementById("mobile-dock-gold");
-        if (goldEl) goldEl.textContent = "🪙 " + player.gold.toLocaleString("cs-CZ") + " zl.";
+        if (goldEl) goldEl.innerHTML = '<span style="color:#facc15; font-size:0.96rem; font-weight:900; text-shadow:0 0 8px rgba(250,204,21,0.5);">🪙 ' + player.gold.toLocaleString("cs-CZ") + ' zl.</span>';
 
         var heartsEl = document.getElementById("mobile-dock-hearts");
         if (heartsEl) heartsEl.textContent = "💖 " + player.totalHearts + "/" + this.state.config.targetHearts;
@@ -2179,6 +2179,7 @@ window.PRS_App = {
             }
         }
         this.renderOnlineRoomBar();
+        this.renderTopPlayersHud();
         this.renderHeartTrack();
         this.renderPlayersStandings();
         this.renderBoardSVG();
@@ -2190,6 +2191,49 @@ window.PRS_App = {
         this.renderActionPanel();
         this.renderLogs();
         this.updateMobileDock();
+    },
+
+    renderTopPlayersHud: function () {
+        var el = document.getElementById("board-top-players-hud");
+        if (!el || !this.state || !this.state.players) return;
+        var target = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30;
+        var curIdx = this.state.currentPlayerIndex;
+        var inspIdx = (this.inspectedPlayerIndex !== null && this.inspectedPlayerIndex !== undefined) ? this.inspectedPlayerIndex : curIdx;
+
+        var html = [];
+        for (var i = 0; i < this.state.players.length; i++) {
+            var p = this.state.players[i];
+            var isTurn = (i === curIdx);
+            var isInspected = (i === inspIdx);
+            var pct = Math.min(100, Math.round((p.totalHearts / target) * 100));
+
+            html.push('<div class="top-hud-card ' + (isTurn ? 'is-turn' : '') + ' ' + (isInspected ? 'is-inspected' : '') + ' ' + (p.isEliminated ? 'is-eliminated' : '') + '" ' +
+                'style="border-left: 4px solid ' + p.color + ';" ' +
+                'onclick="PRS_App.selectPlayerToInspect(' + i + ')" ' +
+                'onmouseenter="PRS_App.showPlayerTooltip(event, ' + i + ')" ' +
+                'onmousemove="PRS_App.movePlayerTooltip(event)" ' +
+                'onmouseleave="PRS_App.hidePlayerTooltip()" ' +
+                'title="' + this.escapeHtml(p.name) + ' – klepnutím zobrazíš detail rytíře">' +
+                '  <div class="top-hud-row-main">' +
+                '    <div class="top-hud-identity">' +
+                '      <span class="top-hud-avatar" style="background:' + p.color + ';">' + p.badge + '</span>' +
+                '      <div class="top-hud-name-col">' +
+                '        <div class="top-hud-name" style="' + (isTurn ? 'color:#fef08a; font-weight:800;' : '') + '">' +
+                this.escapeHtml(p.name) +
+                (p.isEliminated ? ' <small style="color:#ef4444; font-weight:bold;">💀</small>' : '') +
+                '        </div>' +
+                (isTurn ? '        <span class="top-hud-turn-badge">👑 Na tahu</span>' : '') +
+                '      </div>' +
+                '    </div>' +
+                '    <div class="top-hud-stats">' +
+                '      <div class="top-hud-gold">🪙 <strong>' + p.gold.toLocaleString("cs-CZ") + '</strong> zl.</div>' +
+                '      <div class="top-hud-hearts">💖 ' + p.totalHearts + ' / ' + target + '</div>' +
+                '    </div>' +
+                '  </div>' +
+                '  <div class="top-hud-progress"><div class="top-hud-progress-bar" style="width:' + pct + '%; background:' + p.color + ';"></div></div>' +
+                '</div>');
+        }
+        el.innerHTML = html.join("");
     },
 
     renderHeartTrack: function () {
@@ -4850,6 +4894,7 @@ window.PRS_App = {
     selectPlayerToInspect: function (pIdx) {
         if (!this.state || !this.state.players[pIdx]) return;
         this.inspectedPlayerIndex = pIdx;
+        this.renderTopPlayersHud();
         this.renderHeartTrack();
         this.renderPlayersStandings();
         this.renderActivePlayerPanel();
@@ -5354,8 +5399,25 @@ window.PRS_App = {
                 '</div>'
             );
 
+            var targetHearts = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30;
+            var treasuryBannerHtml = '<div class="turn-active-treasury-banner">' +
+                '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+                '  <div style="display:flex; align-items:center; gap:0.45rem;">' +
+                '    <span class="top-hud-avatar" style="background:' + player.color + '; width:28px; height:28px; font-size:0.95rem;">' + player.badge + '</span>' +
+                '    <div>' +
+                '      <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Rytíř na tahu</div>' +
+                '      <strong style="color:' + player.color + '; font-size:0.95rem;">' + this.escapeHtml(player.name) + '</strong>' +
+                '    </div>' +
+                '  </div>' +
+                '  <div style="text-align:right;">' +
+                '    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + player.gold.toLocaleString("cs-CZ") + ' zl.</div>' +
+                '    <div style="font-size:0.76rem; font-weight:bold; color:#f472b6;">💖 ' + player.totalHearts + ' / ' + targetHearts + '</div>' +
+                '  </div>' +
+                '</div>' +
+                '</div>';
+
             el.innerHTML = '<div class="action-card">' +
-                '<div class="turn-indicator">Na tahu je: <span style="color:' + player.color + ';">' + player.badge + ' <strong>' + this.escapeHtml(player.name) + '</strong></span></div>' +
+                treasuryBannerHtml +
                 '<div class="dice-showcase-box">' +
                 '  <div>' +
                 '    <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:2px;">Královská hrací kostka</div>' +
@@ -5409,14 +5471,16 @@ window.PRS_App = {
 
         if (pa.canBuyNode) {
             var canAfford = player.gold >= pa.buyPrice;
+            var remGold = player.gold - pa.buyPrice;
             var isProc = this.isActionProcessing || this.isSavingSession;
-            var buyLabel = isProc ? "⏳ Kupuji pole..." : "📜 Koupit toto pole (" + pa.buyPrice + " zl.)";
+            var buyLabel = isProc ? "⏳ Kupuji pole..." : ("📜 Koupit toto pole (" + pa.buyPrice.toLocaleString("cs-CZ") + " zl.)" + (canAfford ? (" • Zbyde: " + remGold.toLocaleString("cs-CZ") + " zl.") : " • ❌ Chybí zlato!"));
             btns.push('<button class="btn-action-buy" id="btn-buy-current-node" style="' + (isProc ? 'opacity:0.5; pointer-events:none;' : '') + '" ' + (!canAfford || isProc ? 'disabled' : '') + ' onclick="PRS_App.handleBuyNode()">' + buyLabel + '</button>');
         }
 
         if (pa.canUpgradeVillage) {
             var canAffordUpg = player.gold >= pa.upgradeCost;
-            btns.push('<button class="btn-action-buy" ' + (!canAffordUpg ? 'disabled' : '') + ' onclick="PRS_App.handleUpgradeVillage(' + pa.nodeId + ')">🏘️ Povýšit vesnici (' + pa.upgradeCost + ' zl.)</button>');
+            var remUpg = player.gold - pa.upgradeCost;
+            btns.push('<button class="btn-action-buy" ' + (!canAffordUpg ? 'disabled' : '') + ' onclick="PRS_App.handleUpgradeVillage(' + pa.nodeId + ')">🏘️ Povýšit vesnici (' + pa.upgradeCost.toLocaleString("cs-CZ") + ' zl.)' + (canAffordUpg ? (' • Zbyde: ' + remUpg.toLocaleString("cs-CZ") + ' zl.') : '') + '</button>');
         }
 
         if (pa.canTrainMaster) {
@@ -5796,8 +5860,26 @@ window.PRS_App = {
 
         var encounterHtml = this.parseTurnEncounter(pa.summary || "");
 
+        var targetHeartsAction = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30;
+        var actTreasuryHtml = '<div class="turn-active-treasury-banner">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+            '  <div style="display:flex; align-items:center; gap:0.45rem;">' +
+            '    <span class="top-hud-avatar" style="background:' + player.color + '; width:28px; height:28px; font-size:0.95rem;">' + player.badge + '</span>' +
+            '    <div>' +
+            '      <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Rytíř na tahu</div>' +
+            '      <strong style="color:' + player.color + '; font-size:0.95rem;">' + this.escapeHtml(player.name) + '</strong>' +
+            '    </div>' +
+            '  </div>' +
+            '  <div style="text-align:right;">' +
+            '    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + player.gold.toLocaleString("cs-CZ") + ' zl.</div>' +
+            '    <div style="font-size:0.76rem; font-weight:bold; color:#f472b6;">💖 ' + player.totalHearts + ' / ' + targetHeartsAction + '</div>' +
+            '  </div>' +
+            '</div>' +
+            '</div>';
+
         el.innerHTML = specialCardHtml +
             '<div class="action-card">' +
+            actTreasuryHtml +
             '<div class="dice-badge-row">' +
             '  <div class="dice-cube-mini" title="Hod: ' + rollVal + '">' + rollGlyph + '</div>' +
             '  <div class="dice-badge-content">' +
