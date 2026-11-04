@@ -87,6 +87,7 @@
             <button id="nav-btn-rules" class="nav-tab-btn" onclick="PRS_App.switchTab('rules')">📜 Pravidla &amp; Katalog</button>
 
             <button id="nav-btn-balance" class="nav-tab-btn" onclick="PRS_App.switchTab('balance')">⚖️ Balancovací Studio</button>
+            <button id="nav-btn-admin" class="nav-tab-btn" onclick="PRS_App.switchTab('admin')" style="display:none; color:var(--gold-light); border-color:var(--gold);">🛡️ Administrace</button>
 
         </nav>
 
@@ -101,6 +102,16 @@
         </div>
 
     </header>
+
+    <!-- 👑 KRÁLOVSKÝ POSEL - OZNAMOVACÍ BANNER NAPŘÍČ PORTÁLEM -->
+    <div id="topbar-announcement-banner" class="announcement-banner" style="display:none;">
+        <div class="announcement-content">
+            <span class="announcement-badge">👑 Královský posel</span>
+            <span id="announcement-message-text" class="announcement-text"></span>
+            <a id="announcement-link-btn" class="announcement-link" href="#" target="_blank" style="display:none;">Více informací &rarr;</a>
+        </div>
+        <button class="announcement-close" onclick="PRS_App.dismissAnnouncement()" title="Zavřít oznámení">&times;</button>
+    </div>
 
     <main class="main-container">
 
@@ -282,26 +293,26 @@
 
                             <!-- 1. Živá interaktivní animace herního plánu (Canvas) -->
 
-                            <div id="lp-media-anim-wrap" style="width:100%; height:100%; position:relative;">
-
-                                <canvas id="lp-live-preview-canvas" width="640" height="360"></canvas>
-
-                                <div style="position:absolute; bottom:8px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:center; pointer-events:none;">
-
+                                                        <!-- 1. Živá interaktivní animace herního plánu (Canvas) -->
+                            <div id="lp-media-anim-wrap" style="position:absolute; inset:0; width:100%; height:100%; display:block;">
+                                <canvas id="lp-live-preview-canvas" style="position:absolute; inset:0; width:100%; height:100%; display:block;"></canvas>
+                                <div style="position:absolute; bottom:8px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:center; pointer-events:none; z-index:3;">
                                     <span style="background:rgba(0,0,0,0.72); border:1px solid var(--gold); color:var(--gold-light); font-size:0.74rem; padding:3px 9px; border-radius:6px;">
-
                                         🏰 Živý průlet nad herním plánem (96 polí)
-
                                     </span>
-
                                     <span style="background:rgba(236,72,153,0.85); color:#fff; font-size:0.74rem; font-weight:700; padding:3px 9px; border-radius:6px;">
-
                                         Cíl: 30 💖
-
                                     </span>
-
                                 </div>
+                            </div>
 
+                            <!-- 2. MP4 Video & YouTube přehrávač (Hero multimédia) -->
+                            <div id="lp-media-video-wrap" style="position:absolute; inset:0; width:100%; height:100%; display:none; background:#000;">
+                                <video id="lp-promo-video" controls preload="metadata" loop playsinline poster="assets/board/parchment_board_bg.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000;">
+                                    <source src="assets/video/RuzeProDanielku.mp4" type="video/mp4" />
+                                    Tvůj prohlížeč nepodporuje přehrávání MP4 videa.
+                                </video>
+                                <iframe id="lp-hero-youtube-player" style="position:absolute; inset:0; width:100%; height:100%; border:none; display:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                             </div>
 
                             <!-- 2. MP4 Video přehrávač (RuzeProDanielku.mp4) -->
@@ -1676,6 +1687,199 @@
 
         </section>
 
+        <!-- ========================================================================
+             ZÁLOŽKA 5: 🛡️ KRÁLOVSKÁ ADMINISTRACE (VIDEA, UŽIVATELÉ, RELACE, SYSTÉM)
+             ======================================================================== -->
+        <section id="tab-admin" style="display:none">
+            <div class="admin-container" style="max-width:1200px; margin:0 auto; padding:1.25rem;">
+                <div class="admin-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:1rem;">
+                    <div>
+                        <h1 style="font-family:'Cinzel',serif; font-size:1.6rem; color:var(--gold-light); margin:0;">🛡️ Královská Administrace</h1>
+                        <div style="color:var(--text-muted); font-size:0.85rem; margin-top:3px;">Správa multimédií, uživatelských účtů, herních relací, pravidel a systémové telemetrie</div>
+                    </div>
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <span class="badge-pill" style="background:rgba(212,175,55,0.15); border:1px solid var(--gold); color:var(--gold-light);">👑 Administrátor</span>
+                        <button class="btn-secondary" style="font-size:0.78rem;" onclick="PRS_App.switchTab('lobby')">Zpět do Herna</button>
+                    </div>
+                </div>
+
+                <!-- Navigační podzáložky administrace -->
+                <div class="admin-nav-bar" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+                    <button id="admin-nav-videos" class="admin-nav-btn active" onclick="PRS_App.switchAdminSubtab('videos')">🎬 Videa &amp; Multimédia</button>
+                    <button id="admin-nav-users" class="admin-nav-btn" onclick="PRS_App.switchAdminSubtab('users')">👥 Uživatelé &amp; Účty</button>
+                    <button id="admin-nav-sessions" class="admin-nav-btn" onclick="PRS_App.switchAdminSubtab('sessions')">🌐 Herní relace &amp; Místnosti</button>
+                    <button id="admin-nav-announcements" class="admin-nav-btn" onclick="PRS_App.switchAdminSubtab('announcements')">📢 Královský posel</button>
+                    <button id="admin-nav-balance" class="admin-nav-btn" onclick="PRS_App.switchAdminSubtab('balance')">⚖️ Pravidla &amp; Balanc</button>
+                    <button id="admin-nav-telemetry" class="admin-nav-btn" onclick="PRS_App.switchAdminSubtab('telemetry')">📊 Telemetrie &amp; Logy</button>
+                    <button id="admin-nav-system" class="admin-nav-btn" onclick="PRS_App.switchAdminSubtab('system')">🛠️ Systém &amp; Diagnostika</button>
+                </div>
+
+                <div id="admin-content-area">
+                    <!-- 1. Videa & Multimédia -->
+                    <div id="admin-subtab-videos" class="admin-subtab-pane">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                            <div>
+                                <h3 style="margin:0; color:var(--gold-light);">Správa videí &amp; upoutávek</h3>
+                                <div style="color:var(--text-muted); font-size:0.8rem;">Možnost vkládat přímá MP4 videa i YouTube embedy s výběrem aktivního videa pro Landing Page</div>
+                            </div>
+                            <button class="btn-primary" style="font-size:0.82rem;" onclick="PRS_App.openAddVideoModal()">➕ Přidat nové video</button>
+                        </div>
+                        <div class="admin-table-wrap">
+                            <table class="admin-data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:50px;">ID</th>
+                                        <th>Název &amp; Popis</th>
+                                        <th style="width:110px;">Typ</th>
+                                        <th>URL zdroje</th>
+                                        <th style="width:140px; text-align:center;">Landing Hero</th>
+                                        <th style="width:150px; text-align:right;">Akce</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-videos-table-body">
+                                    <!-- Dynamicky -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 2. Uživatelé & Účty -->
+                    <div id="admin-subtab-users" class="admin-subtab-pane" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                            <div>
+                                <h3 style="margin:0; color:var(--gold-light);">Správa uživatelských účtů (prs_Users)</h3>
+                                <div style="color:var(--text-muted); font-size:0.8rem;">Přehled hráčů, úprava zobrazovaného jména (DisplayName), přidělování rolí a reset hesel</div>
+                            </div>
+                            <input id="admin-users-search" type="text" placeholder="🔍 Hledat hráče..." class="form-input" style="max-width:240px; font-size:0.82rem; padding:0.35rem 0.6rem;" oninput="PRS_App.renderAdminUsersTable()">
+                        </div>
+                        <div class="admin-table-wrap">
+                            <table class="admin-data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:50px;">ID</th>
+                                        <th>Login / E-mail</th>
+                                        <th>Přezdívka (DisplayName)</th>
+                                        <th style="width:110px;">Role</th>
+                                        <th style="width:140px;">Stav účtu</th>
+                                        <th style="width:110px; text-align:center;">Hry / Výhry</th>
+                                        <th style="width:170px; text-align:right;">Akce</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-table-body">
+                                    <!-- Dynamicky -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 3. Herní relace & Místnosti -->
+                    <div id="admin-subtab-sessions" class="admin-subtab-pane" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                            <div>
+                                <h3 style="margin:0; color:var(--gold-light);">Online herní místnosti &amp; Relace (prs_GameSessions)</h3>
+                                <div style="color:var(--text-muted); font-size:0.8rem;">Aktivní i dokončené stoly, počet hráčů, stav hry a možnost uzavření či promazání</div>
+                            </div>
+                            <div style="display:flex; gap:0.5rem;">
+                                <button class="btn-secondary" style="font-size:0.82rem;" onclick="PRS_App.loadAdminSessions()">🔄 Obnovit</button>
+                                <button class="btn-secondary" style="font-size:0.82rem; color:#ef4444; border-color:#ef4444;" onclick="PRS_App.purgeOldSessions()">🧹 Promazat staré</button>
+                            </div>
+                        </div>
+                        <div class="admin-table-wrap">
+                            <table class="admin-data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:110px;">Kód stolu</th>
+                                        <th>Hostitel</th>
+                                        <th>Mapa / Režim</th>
+                                        <th style="width:100px; text-align:center;">Hráči</th>
+                                        <th style="width:100px; text-align:center;">Průběh</th>
+                                        <th style="width:140px;">Stav / Čas</th>
+                                        <th style="width:110px; text-align:right;">Akce</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-sessions-table-body">
+                                    <!-- Dynamicky -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 4. Královský posel (Oznámení) -->
+                    <div id="admin-subtab-announcements" class="admin-subtab-pane" style="display:none;">
+                        <div style="max-width:700px; background:rgba(0,0,0,0.3); padding:1.5rem; border-radius:10px; border:1px solid rgba(212,175,55,0.25);">
+                            <h3 style="margin-top:0; color:var(--gold-light);">📢 Zpráva královského posla (Globální oznamovací lišta)</h3>
+                            <p style="color:var(--text-muted); font-size:0.85rem;">Tato zpráva se zobrazuje v horní liště celého portálu všem návštěvníkům (např. turnaje, novinky, údržba).</p>
+                            <div style="margin-bottom:1rem;">
+                                <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:4px;">Text zprávy posla:</label>
+                                <textarea id="admin-ann-msg" class="form-input" style="width:100%; min-height:80px; box-sizing:border-box;" placeholder="Zadejte text oznámení pro hráče..."></textarea>
+                            </div>
+                            <div style="margin-bottom:1rem;">
+                                <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:4px;">Odkaz (volitelný, např. #rules nebo URL):</label>
+                                <input id="admin-ann-link" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="#rules nebo https://...">
+                            </div>
+                            <div style="margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                                <input id="admin-ann-active" type="checkbox" checked style="width:18px; height:18px;">
+                                <label for="admin-ann-active" style="font-size:0.85rem; cursor:pointer;">Oznámení je aktivní (zobrazovat návštěvníkům)</label>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <button class="btn-primary" onclick="PRS_App.saveAdminAnnouncement()">📢 Zveřejnit zprávu posla</button>
+                                <span id="admin-ann-feedback" style="font-size:0.85rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Herní pravidla & Balanc -->
+                    <div id="admin-subtab-balance" class="admin-subtab-pane" style="display:none;">
+                        <div style="margin-bottom:1rem; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:1rem;">
+                            <div style="font-weight:700; color:var(--gold-light);">⚖️ Globální ekonomika a parametry království (prs_GameConfigs)</div>
+                            <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">Zde můžete upravit globální startovní zlato, odměny za draky, mýtné a násobitele přímo pro ostrý server.</div>
+                        </div>
+                        <div style="text-align:center; padding:2rem;">
+                            <button class="btn-primary" onclick="PRS_App.switchTab('balance')">⚡ Otevřít kompletní Balancovací Studio &amp; Simulátor</button>
+                        </div>
+                    </div>
+
+                    <!-- 6. Telemetrie & Statistiky -->
+                    <div id="admin-subtab-telemetry" class="admin-subtab-pane" style="display:none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                            <div>
+                                <h3 style="margin:0; color:var(--gold-light);">Záznamy herní telemetrie (prs_TelemetryLogs)</h3>
+                                <div style="color:var(--text-muted); font-size:0.8rem;">Posledních 40 herních akcí, hodů, nákupů a dračích soubojů</div>
+                            </div>
+                            <button class="btn-secondary" style="font-size:0.82rem;" onclick="PRS_App.loadAdminTelemetry()">🔄 Obnovit logy</button>
+                        </div>
+                        <div class="admin-table-wrap">
+                            <table class="admin-data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:100px;">Čas</th>
+                                        <th style="width:130px;">Typ události</th>
+                                        <th>Hráč / Aktér</th>
+                                        <th style="width:80px; text-align:center;">Tah</th>
+                                        <th>Detail zprávy</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-telemetry-logs-body">
+                                    <!-- Dynamicky -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 7. Systém & Diagnostika -->
+                    <div id="admin-subtab-system" class="admin-subtab-pane" style="display:none;">
+                        <div style="margin-bottom:1rem;">
+                            <h3 style="margin:0; color:var(--gold-light);">Diagnostika SQL databáze &amp; Běhového prostředí</h3>
+                            <div style="color:var(--text-muted); font-size:0.8rem;">Stav tabulek schématu [prs] na ASPONE hostingu</div>
+                        </div>
+                        <div id="admin-system-diag-box">
+                            <!-- Dynamicky -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- ========================================================================
@@ -2273,6 +2477,7 @@
     <script src="js/app-modals.js?v=202611041955" defer></script>
     <script src="js/app-online.js?v=202611041955" defer></script>
     <script src="js/app-catalog.js?v=202611041955" defer></script>
+    <script src="js/app-admin.js?v=202611042030" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -2638,6 +2843,100 @@
 
     <div id="player-hover-tooltip" class="player-hover-tooltip" style="display:none; position:fixed; z-index:99999; pointer-events:none;"></div>
 
+    <!-- MODÁL: PŘIDAT / UPRAVIT VIDEO -->
+    <div id="admin-video-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeAdminVideoModal()">
+        <div class="modal-box" style="max-width:540px;">
+            <div class="modal-header">
+                <h3 id="admin-video-modal-title" style="margin:0; color:var(--gold-light); font-family:'Cinzel',serif;">🎬 Správa videa</h3>
+                <button class="modal-close" onclick="PRS_App.closeAdminVideoModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:1rem 0;">
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Název videa:</label>
+                    <input id="admin-vid-title" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="Např. Královská upoutávka...">
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Popis videa:</label>
+                    <input id="admin-vid-desc" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="Krátký popis upoutávky...">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+                    <div>
+                        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Typ videa:</label>
+                        <select id="admin-vid-type" class="form-input" style="width:100%; box-sizing:border-box;">
+                            <option value="mp4">MP4 soubor</option>
+                            <option value="youtube">YouTube video / embed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Kategorie:</label>
+                        <select id="admin-vid-category" class="form-input" style="width:100%; box-sizing:border-box;">
+                            <option value="trailer">Trailer / Upoutávka</option>
+                            <option value="gameplay">Gameplay ukázka</option>
+                            <option value="tutorial">Videomanuál / Pravidla</option>
+                            <option value="lore">Příběh &amp; Historie</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">URL adresa videa (přímý .mp4 odkaz nebo YouTube odkaz):</label>
+                    <input id="admin-vid-url" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="assets/video/RuzeProDanielku.mp4 nebo https://youtube.com/...">
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Náhledový plakát (Poster URL):</label>
+                    <input id="admin-vid-poster" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="assets/board/parchment_board_bg.jpg">
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; cursor:pointer;">
+                        <input id="admin-vid-hero" type="checkbox" style="width:16px; height:16px;">
+                        <span>Aktivní Hero video na Landing Page</span>
+                    </label>
+                    <div style="display:flex; align-items:center; gap:0.4rem;">
+                        <span style="font-size:0.8rem;">Pořadí:</span>
+                        <input id="admin-vid-order" type="number" class="form-input" style="width:60px; font-size:0.8rem; padding:0.25rem;" value="10">
+                    </div>
+                </div>
+                <div id="admin-vid-feedback" style="color:#ef4444; font-size:0.82rem; min-height:1.2rem;"></div>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:0.5rem;">
+                <button class="btn-secondary" onclick="PRS_App.closeAdminVideoModal()">Zrušit</button>
+                <button class="btn-primary" onclick="PRS_App.saveAdminVideo()">💾 Uložit video</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODÁL: ÚPRAVA UŽIVATELSKÉHO ÚČTU -->
+    <div id="admin-user-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeAdminUserModal()">
+        <div class="modal-box" style="max-width:480px;">
+            <div class="modal-header">
+                <h3 id="admin-user-modal-title" style="margin:0; color:var(--gold-light); font-family:'Cinzel',serif;">✏️ Úprava účtu</h3>
+                <button class="modal-close" onclick="PRS_App.closeAdminUserModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:1rem 0;">
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Přezdívka ve hře (DisplayName):</label>
+                    <input id="admin-user-displayname" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="Zobrazované jméno hráče...">
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Oprávnění / Role:</label>
+                    <select id="admin-user-role" class="form-input" style="width:100%; box-sizing:border-box;">
+                        <option value="Player">🛡️ Hráč (Běžný uživatel)</option>
+                        <option value="Admin">👑 Administrátor (Plný přístup)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; cursor:pointer;">
+                        <input id="admin-user-active" type="checkbox" checked style="width:16px; height:16px;">
+                        <span>Účet je aktivní (povoleno přihlášení)</span>
+                    </label>
+                </div>
+                <div id="admin-user-feedback" style="color:#ef4444; font-size:0.82rem; min-height:1.2rem;"></div>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:0.5rem;">
+                <button class="btn-secondary" onclick="PRS_App.closeAdminUserModal()">Zrušit</button>
+                <button class="btn-primary" onclick="PRS_App.saveAdminUser()">💾 Uložit změny</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

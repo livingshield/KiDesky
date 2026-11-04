@@ -719,13 +719,56 @@ public class KiDeskyApiHandler : IHttpHandler
 
 
                 case "admin-stats":
-
-
-
                     HandleAdminStats(context);
-
-
-
+                    break;
+                case "update-profile":
+                case "update_nickname":
+                    HandleUpdateNickname(context);
+                    break;
+                case "list-videos":
+                    HandleListVideos(context);
+                    break;
+                case "hero-video":
+                    HandleGetHeroVideo(context);
+                    break;
+                case "admin-save-video":
+                    HandleAdminSaveVideo(context);
+                    break;
+                case "admin-delete-video":
+                    HandleAdminDeleteVideo(context);
+                    break;
+                case "admin-set-hero-video":
+                    HandleAdminSetHeroVideo(context);
+                    break;
+                case "get-announcement":
+                    HandleGetAnnouncement(context);
+                    break;
+                case "admin-save-announcement":
+                    HandleAdminSaveAnnouncement(context);
+                    break;
+                case "admin-list-users":
+                    HandleAdminListUsers(context);
+                    break;
+                case "admin-update-user":
+                    HandleAdminUpdateUser(context);
+                    break;
+                case "admin-reset-password":
+                    HandleAdminResetPassword(context);
+                    break;
+                case "admin-delete-user":
+                    HandleAdminDeleteUser(context);
+                    break;
+                case "admin-list-sessions":
+                    HandleAdminListSessions(context);
+                    break;
+                case "admin-close-session":
+                    HandleAdminCloseSession(context);
+                    break;
+                case "admin-purge-sessions":
+                    HandleAdminPurgeSessions(context);
+                    break;
+                case "admin-system-info":
+                    HandleAdminSystemInfo(context);
                     break;
 
 
@@ -1094,40 +1137,71 @@ public class KiDeskyApiHandler : IHttpHandler
 
 
 
-    private static bool _displayNameColumnChecked = false;
+    private static bool _extendedAdminSchemaChecked = false;
+    private void EnsureExtendedAdminSchema(SqlConnection conn)
+    {
+        if (_extendedAdminSchemaChecked) return;
+        try
+        {
+            using (var migCmd = new SqlCommand(@"
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'DisplayName')
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [DisplayName] NVARCHAR(64) NULL;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'IsActive')
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [IsActive] BIT NOT NULL DEFAULT 1;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL
+BEGIN
+    UPDATE [prs].[prs_Users] SET [DisplayName] = [Username] WHERE [DisplayName] IS NULL OR [DisplayName] = '';
+END
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_Videos]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [prs].[prs_Videos] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [Title] NVARCHAR(128) NOT NULL,
+        [Description] NVARCHAR(500) NULL,
+        [VideoType] NVARCHAR(32) NOT NULL DEFAULT N'mp4',
+        [Url] NVARCHAR(500) NOT NULL,
+        [PosterUrl] NVARCHAR(500) NULL,
+        [Category] NVARCHAR(64) NOT NULL DEFAULT N'trailer',
+        [IsHeroActive] BIT NOT NULL DEFAULT 0,
+        [SortOrder] INT NOT NULL DEFAULT 0,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+
+    INSERT INTO [prs].[prs_Videos] ([Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive], [SortOrder])
+    VALUES (N'Královská upoutávka (Růže pro Danielku)', N'Oficiální videopředstavení světa KiDesky a Princeznina srdce', N'mp4', N'assets/video/RuzeProDanielku.mp4', N'assets/board/parchment_board_bg.jpg', N'trailer', 1, 10);
+END
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_Announcements]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [prs].[prs_Announcements] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [Message] NVARCHAR(500) NOT NULL,
+        [LinkUrl] NVARCHAR(256) NULL,
+        [IsActive] BIT NOT NULL DEFAULT 1,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+
+    INSERT INTO [prs].[prs_Announcements] ([Message], [LinkUrl], [IsActive])
+    VALUES (N'Vítejte v království KiDesky: Princeznino srdce! Otestujte své rytířské ctnosti v turnajích.', N'#rules', 1);
+END", conn))
+            {
+                migCmd.ExecuteNonQuery();
+            }
+            _extendedAdminSchemaChecked = true;
+        }
+        catch { }
+    }
 
     private void EnsureDisplayNameColumn(SqlConnection conn)
-
     {
-
-        if (_displayNameColumnChecked) return;
-
-        try
-
-        {
-
-            using (var migCmd = new SqlCommand(@"
-
-IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'DisplayName')
-
-BEGIN
-
-    ALTER TABLE [prs].[prs_Users] ADD [DisplayName] NVARCHAR(64) NULL;
-
-END", conn))
-
-            {
-
-                migCmd.ExecuteNonQuery();
-
-            }
-
-            _displayNameColumnChecked = true;
-
-        }
-
-        catch { }
-
+        EnsureExtendedAdminSchema(conn);
     }
 
 
@@ -1166,7 +1240,7 @@ END", conn))
 
                 conn.Open();
 
-                EnsureDisplayNameColumn(conn);
+                EnsureExtendedAdminSchema(conn);
 
 
 
@@ -2156,7 +2230,7 @@ END";
 
             string role = username.ToLowerInvariant().StartsWith("admin") ? "Admin" : "Player";
 
-            EnsureDisplayNameColumn(conn);
+            EnsureExtendedAdminSchema(conn);
 
             int userId = 0;
 
@@ -2306,6 +2380,7 @@ END";
 
 
 
+            EnsureExtendedAdminSchema(conn);
             using (var cmd = new SqlCommand("UPDATE [prs].[prs_Users] SET [DisplayName] = @d WHERE [Username] = @u OR [Email] = @u", conn))
 
 
@@ -2372,7 +2447,7 @@ END";
 
             conn.Open();
 
-            EnsureDisplayNameColumn(conn);
+            EnsureExtendedAdminSchema(conn);
 
             SqlCommand cmd = null;
 
@@ -4064,6 +4139,514 @@ END";
     }
 
 
+
+
+    // ==========================================
+    // 🛡️ ADMINISTRACE & SPRÁVA (VIDEA, UŽIVATELÉ, RELACE, OZNÁMENÍ, SYSTÉM)
+    // ==========================================
+
+    private void HandleListVideos(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var videos = new List<object>();
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                SELECT [Id], [Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive], [SortOrder], [CreatedAt]
+                FROM [prs].[prs_Videos]
+                ORDER BY [SortOrder] ASC, [Id] DESC", conn))
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    videos.Add(new
+                    {
+                        id = Convert.ToInt32(r["Id"]),
+                        title = r["Title"].ToString(),
+                        description = r["Description"] == DBNull.Value ? "" : r["Description"].ToString(),
+                        videoType = r["VideoType"].ToString(),
+                        url = r["Url"].ToString(),
+                        posterUrl = r["PosterUrl"] == DBNull.Value ? "" : r["PosterUrl"].ToString(),
+                        category = r["Category"].ToString(),
+                        isHeroActive = Convert.ToBoolean(r["IsHeroActive"]),
+                        sortOrder = Convert.ToInt32(r["SortOrder"]),
+                        createdAt = Convert.ToDateTime(r["CreatedAt"]).ToString("o")
+                    });
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", videos = videos }));
+    }
+
+    private void HandleGetHeroVideo(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        object hero = null;
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                SELECT TOP 1 [Id], [Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive]
+                FROM [prs].[prs_Videos]
+                ORDER BY [IsHeroActive] DESC, [SortOrder] ASC, [Id] ASC", conn))
+            using (var r = cmd.ExecuteReader())
+            {
+                if (r.Read())
+                {
+                    hero = new
+                    {
+                        id = Convert.ToInt32(r["Id"]),
+                        title = r["Title"].ToString(),
+                        description = r["Description"] == DBNull.Value ? "" : r["Description"].ToString(),
+                        videoType = r["VideoType"].ToString(),
+                        url = r["Url"].ToString(),
+                        posterUrl = r["PosterUrl"] == DBNull.Value ? "" : r["PosterUrl"].ToString(),
+                        category = r["Category"].ToString(),
+                        isHeroActive = Convert.ToBoolean(r["IsHeroActive"])
+                    };
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", hero = hero }));
+    }
+
+    private void HandleAdminSaveVideo(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        string title = GetStr(body, "title").Trim();
+        string description = GetStr(body, "description").Trim();
+        string videoType = GetStr(body, "videoType", "mp4").Trim().ToLowerInvariant();
+        string url = GetStr(body, "url").Trim();
+        string posterUrl = GetStr(body, "posterUrl").Trim();
+        string category = GetStr(body, "category", "trailer").Trim();
+        bool isHeroActive = body.ContainsKey("isHeroActive") && Convert.ToBoolean(body["isHeroActive"]);
+        int sortOrder = GetInt(body, "sortOrder", 0);
+
+        if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(url))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Název a URL videa jsou povinné." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            if (isHeroActive)
+            {
+                using (var clr = new SqlCommand("UPDATE [prs].[prs_Videos] SET [IsHeroActive] = 0", conn))
+                {
+                    clr.ExecuteNonQuery();
+                }
+            }
+
+            if (id > 0)
+            {
+                using (var cmd = new SqlCommand(@"
+                    UPDATE [prs].[prs_Videos]
+                    SET [Title] = @t, [Description] = @d, [VideoType] = @vt, [Url] = @u, [PosterUrl] = @pu, [Category] = @c, [IsHeroActive] = @h, [SortOrder] = @s
+                    WHERE [Id] = @id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@t", title);
+                    cmd.Parameters.AddWithValue("@d", description);
+                    cmd.Parameters.AddWithValue("@vt", videoType);
+                    cmd.Parameters.AddWithValue("@u", url);
+                    cmd.Parameters.AddWithValue("@pu", posterUrl);
+                    cmd.Parameters.AddWithValue("@c", category);
+                    cmd.Parameters.AddWithValue("@h", isHeroActive);
+                    cmd.Parameters.AddWithValue("@s", sortOrder);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            else
+            {
+                using (var cmd = new SqlCommand(@"
+                    INSERT INTO [prs].[prs_Videos] ([Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive], [SortOrder])
+                    VALUES (@t, @d, @vt, @u, @pu, @c, @h, @s)", conn))
+                {
+                    cmd.Parameters.AddWithValue("@t", title);
+                    cmd.Parameters.AddWithValue("@d", description);
+                    cmd.Parameters.AddWithValue("@vt", videoType);
+                    cmd.Parameters.AddWithValue("@u", url);
+                    cmd.Parameters.AddWithValue("@pu", posterUrl);
+                    cmd.Parameters.AddWithValue("@c", category);
+                    cmd.Parameters.AddWithValue("@h", isHeroActive);
+                    cmd.Parameters.AddWithValue("@s", sortOrder);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Video bylo úspěšně uloženo." }));
+    }
+
+    private void HandleAdminDeleteVideo(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        if (id <= 0)
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné ID videa." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand("DELETE FROM [prs].[prs_Videos] WHERE [Id] = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Video bylo smazáno." }));
+    }
+
+    private void HandleAdminSetHeroVideo(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        if (id <= 0)
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné ID videa." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var clr = new SqlCommand("UPDATE [prs].[prs_Videos] SET [IsHeroActive] = 0", conn))
+            {
+                clr.ExecuteNonQuery();
+            }
+            using (var cmd = new SqlCommand("UPDATE [prs].[prs_Videos] SET [IsHeroActive] = 1 WHERE [Id] = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Aktivní video bylo změněno." }));
+    }
+
+    private void HandleGetAnnouncement(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        object ann = null;
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                SELECT TOP 1 [Id], [Message], [LinkUrl], [IsActive], [CreatedAt]
+                FROM [prs].[prs_Announcements]
+                WHERE [IsActive] = 1
+                ORDER BY [Id] DESC", conn))
+            using (var r = cmd.ExecuteReader())
+            {
+                if (r.Read())
+                {
+                    ann = new
+                    {
+                        id = Convert.ToInt32(r["Id"]),
+                        message = r["Message"].ToString(),
+                        linkUrl = r["LinkUrl"] == DBNull.Value ? "" : r["LinkUrl"].ToString(),
+                        isActive = Convert.ToBoolean(r["IsActive"]),
+                        createdAt = Convert.ToDateTime(r["CreatedAt"]).ToString("o")
+                    };
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", announcement = ann }));
+    }
+
+    private void HandleAdminSaveAnnouncement(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        string message = GetStr(body, "message").Trim();
+        string linkUrl = GetStr(body, "linkUrl").Trim();
+        bool isActive = !body.ContainsKey("isActive") || Convert.ToBoolean(body["isActive"]);
+
+        if (string.IsNullOrEmpty(message))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Text oznámení nesmí být prázdný." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                INSERT INTO [prs].[prs_Announcements] ([Message], [LinkUrl], [IsActive])
+                VALUES (@m, @l, @a)", conn))
+            {
+                cmd.Parameters.AddWithValue("@m", message);
+                cmd.Parameters.AddWithValue("@l", linkUrl);
+                cmd.Parameters.AddWithValue("@a", isActive);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Královské oznámení bylo zveřejněno." }));
+    }
+
+    private void HandleAdminListUsers(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var users = new List<object>();
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                SELECT [Id], [Username], [Email], [Role], [DisplayName], [GamesPlayed], [GamesWon], [CreatedAt], [LastLoginAt], [IsActive]
+                FROM [prs].[prs_Users]
+                ORDER BY [Id] ASC", conn))
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    users.Add(new
+                    {
+                        id = Convert.ToInt32(r["Id"]),
+                        username = r["Username"].ToString(),
+                        email = r["Email"] == DBNull.Value ? "" : r["Email"].ToString(),
+                        role = r["Role"].ToString(),
+                        displayName = r["DisplayName"] == DBNull.Value ? r["Username"].ToString() : r["DisplayName"].ToString(),
+                        gamesPlayed = Convert.ToInt32(r["GamesPlayed"]),
+                        gamesWon = Convert.ToInt32(r["GamesWon"]),
+                        createdAt = Convert.ToDateTime(r["CreatedAt"]).ToString("o"),
+                        lastLoginAt = r["LastLoginAt"] == DBNull.Value ? null : Convert.ToDateTime(r["LastLoginAt"]).ToString("o"),
+                        isActive = Convert.ToBoolean(r["IsActive"])
+                    });
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", users = users }));
+    }
+
+    private void HandleAdminUpdateUser(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        string role = GetStr(body, "role", "Player").Trim();
+        string displayName = GetStr(body, "displayName").Trim();
+        bool isActive = !body.ContainsKey("isActive") || Convert.ToBoolean(body["isActive"]);
+
+        if (id <= 0)
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné ID uživatele." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                UPDATE [prs].[prs_Users]
+                SET [Role] = @r, [DisplayName] = @d, [IsActive] = @a
+                WHERE [Id] = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@r", role);
+                cmd.Parameters.AddWithValue("@d", string.IsNullOrEmpty(displayName) ? (object)DBNull.Value : displayName);
+                cmd.Parameters.AddWithValue("@a", isActive);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Uživatelský účet byl aktualizován." }));
+    }
+
+    private void HandleAdminResetPassword(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        string newPassword = GetStr(body, "newPassword");
+
+        if (id <= 0 || string.IsNullOrEmpty(newPassword) || newPassword.Length < 4)
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Heslo musí mít alespoň 4 znaky." }));
+            return;
+        }
+
+        string newHash = HashPassword(newPassword);
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand("UPDATE [prs].[prs_Users] SET [PasswordHash] = @p WHERE [Id] = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@p", newHash);
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Heslo uživatele bylo úspěšně změněno." }));
+    }
+
+    private void HandleAdminDeleteUser(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+
+        if (id <= 1)
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Hlavního administrátora nelze smazat." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand("DELETE FROM [prs].[prs_Users] WHERE [Id] = @id AND [Username] <> 'admin'", conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Uživatel byl smazán." }));
+    }
+
+    private void HandleAdminListSessions(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var sessions = new List<object>();
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                SELECT TOP 40 s.[Id], s.[SessionGuid], s.[RoomCode], s.[TemplateCode], s.[HostUsername], s.[Mode], s.[Difficulty], s.[Status], s.[WinnerName], s.[TurnCount], s.[CreatedAt], s.[UpdatedAt],
+                       (SELECT COUNT(*) FROM [prs].[prs_SessionPlayers] p WHERE p.[SessionGuid] = s.[SessionGuid]) AS [PlayerCount]
+                FROM [prs].[prs_GameSessions] s
+                ORDER BY s.[UpdatedAt] DESC", conn))
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    sessions.Add(new
+                    {
+                        id = Convert.ToInt32(r["Id"]),
+                        sessionGuid = r["SessionGuid"].ToString(),
+                        roomCode = r["RoomCode"] == DBNull.Value ? "" : r["RoomCode"].ToString(),
+                        templateCode = r["TemplateCode"].ToString(),
+                        hostUsername = r["HostUsername"].ToString(),
+                        mode = r["Mode"].ToString(),
+                        difficulty = r["Difficulty"].ToString(),
+                        status = r["Status"].ToString(),
+                        winnerName = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString(),
+                        turnCount = Convert.ToInt32(r["TurnCount"]),
+                        playerCount = Convert.ToInt32(r["PlayerCount"]),
+                        createdAt = Convert.ToDateTime(r["CreatedAt"]).ToString("o"),
+                        updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o")
+                    });
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", sessions = sessions }));
+    }
+
+    private void HandleAdminCloseSession(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        string sessionGuid = GetStr(body, "sessionGuid").Trim();
+
+        if (string.IsNullOrEmpty(sessionGuid))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Identifikátor relace je povinný." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand("UPDATE [prs].[prs_GameSessions] SET [Status] = 'Closed', [UpdatedAt] = SYSUTCDATETIME() WHERE [SessionGuid] = @sg", conn))
+            {
+                cmd.Parameters.AddWithValue("@sg", sessionGuid);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Herní relace byla uzavřena." }));
+    }
+
+    private void HandleAdminPurgeSessions(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int daysOld = GetInt(body, "daysOld", 7);
+        if (daysOld < 1) daysOld = 1;
+
+        int deletedCount = 0;
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                DELETE FROM [prs].[prs_SessionPlayers]
+                WHERE [SessionGuid] IN (SELECT [SessionGuid] FROM [prs].[prs_GameSessions] WHERE [UpdatedAt] < DATEADD(day, -@days, SYSUTCDATETIME()));
+
+                DELETE FROM [prs].[prs_GameSessions]
+                WHERE [UpdatedAt] < DATEADD(day, -@days, SYSUTCDATETIME());", conn))
+            {
+                cmd.Parameters.AddWithValue("@days", daysOld);
+                deletedCount = cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Staré relace starší než " + daysOld + " dní byly promazány." }));
+    }
+
+    private void HandleAdminSystemInfo(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var counts = new Dictionary<string, int>();
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            string[] tables = new string[] { "prs_Users", "prs_GameSessions", "prs_SessionPlayers", "prs_TelemetryLogs", "prs_GameConfigs", "prs_Videos", "prs_Announcements" };
+            foreach (var t in tables)
+            {
+                try
+                {
+                    using (var cmd = new SqlCommand("SELECT COUNT(*) FROM [prs].[" + t + "]", conn))
+                    {
+                        counts[t] = Convert.ToInt32(cmd.ExecuteScalar());
+                    }
+                }
+                catch
+                {
+                    counts[t] = -1;
+                }
+            }
+        }
+
+        context.Response.Write(_json.Serialize(new
+        {
+            ok = true,
+            status = "success",
+            serverTime = DateTime.UtcNow.ToString("o"),
+            dbConnected = true,
+            runtime = Environment.Version.ToString(),
+            os = Environment.OSVersion.ToString(),
+            tableCounts = counts
+        }));
+    }
 
     public bool IsReusable { get { return false; } }
 

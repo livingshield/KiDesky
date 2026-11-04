@@ -223,9 +223,13 @@ window.PRS_App = {
 
         // Spustíme výchozí ukázkovou partii (na pozadí pro okamžitý přechod ke stolu)
 
-        this.startNewGame(false);
-
         this.initLandingLiveCanvas();
+
+        this.loadActiveHeroVideo();
+
+        this.loadAnnouncement();
+
+        this.startNewGame(false);
 
         this.startOnlinePollingLoop();
 
@@ -871,7 +875,7 @@ window.PRS_App = {
 
         this.activeTab = tabId;
 
-        var tabs = ["lobby", "board", "rules", "balance"];
+        var tabs = ["lobby", "board", "rules", "balance", "admin"];
 
         for (var i = 0; i < tabs.length; i++) {
 
@@ -927,6 +931,12 @@ window.PRS_App = {
 
         }
 
+        if (tabId === "admin") {
+
+            if (this.initAdminSection) this.initAdminSection();
+
+        }
+
         if (tabId === "board") {
 
             if (typeof window !== "undefined") {
@@ -965,108 +975,116 @@ window.PRS_App = {
 
     },
 
-    // --- LANDING PAGE INTERAKTIVNÍ PRVKY (VIDEO / ŽIVÁ ANIMACE / MEDAILONKY / MULTIPLAYER) ---,
+        // --- LANDING PAGE INTERAKTIVNÍ PRVKY (VIDEO / YOUTUBE / ŽIVÁ ANIMACE / MEDAILONKY) ---,
 
-    switchLandingMedia: function (mode) {
+    currentHeroVideo: null,
 
-        this.currentLandingMedia = (mode === "video") ? "video" : "anim";
-
-        var animWrap = document.getElementById("lp-media-anim-wrap");
-
-        var videoWrap = document.getElementById("lp-media-video-wrap");
-
-        var btnAnim = document.getElementById("lp-tab-btn-anim");
-
-        var btnVideo = document.getElementById("lp-tab-btn-video");
-
-        var statusLbl = document.getElementById("lp-media-status-label");
-
-        var vid = document.getElementById("lp-promo-video");
-
-        if (this.currentLandingMedia === "video") {
-
-            if (animWrap) animWrap.style.display = "none";
-
-            if (videoWrap) videoWrap.style.display = "block";
-
-            if (btnAnim) btnAnim.classList.remove("active");
-
-            if (btnVideo) btnVideo.classList.add("active");
-
-            if (statusLbl) statusLbl.textContent = "🎬 Video upoutávka: RuzeProDanielku.mp4";
-
-            if (vid) {
-
-                try { vid.play(); } catch (e) { }
-
-            }
-
-        } else {
-
-            if (vid && !vid.paused) {
-
-                try { vid.pause(); } catch (e) { }
-
-            }
-
-            if (videoWrap) videoWrap.style.display = "none";
-
-            if (animWrap) animWrap.style.display = "block";
-
-            if (btnVideo) btnVideo.classList.remove("active");
-
-            if (btnAnim) btnAnim.classList.add("active");
-
-            if (statusLbl) statusLbl.textContent = "✨ Plynulá ukázka herních medailonků, rytířů a slavností";
-
-            this.initLandingLiveCanvas();
-
+    getYoutubeEmbedUrl: function (url) {
+        if (!url) return "";
+        var match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
+        if (match && match[1]) {
+            return "https://www.youtube-nocookie.com/embed/" + match[1] + "?autoplay=1&rel=0";
         }
-
+        return url;
     },
 
-    inspectLandingMedallion: function (key, el) {
+    loadActiveHeroVideo: function () {
+        var self = this;
+        fetch("api.ashx?action=hero-video")
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res && res.ok && res.hero) {
+                    self.currentHeroVideo = res.hero;
+                    var btnVideo = document.getElementById("lp-tab-btn-video");
+                    if (btnVideo && res.hero.title) {
+                        btnVideo.innerHTML = "🎬 " + self.escapeHtml(res.hero.title);
+                    }
+                    var videoEl = document.getElementById("lp-promo-video");
+                    if (videoEl && res.hero.videoType === "mp4" && res.hero.url) {
+                        videoEl.src = res.hero.url;
+                        if (res.hero.posterUrl) videoEl.poster = res.hero.posterUrl;
+                    }
+                }
+            })
+            .catch(function () { });
+    },
 
-        var descriptions = {
+    loadAnnouncement: function () {
+        fetch("api.ashx?action=get-announcement")
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res && res.ok && res.announcement && res.announcement.message) {
+                    var banner = document.getElementById("topbar-announcement-banner");
+                    var txt = document.getElementById("announcement-message-text");
+                    var lnk = document.getElementById("announcement-link-btn");
+                    if (banner && txt) {
+                        txt.textContent = res.announcement.message;
+                        if (res.announcement.linkUrl) {
+                            lnk.href = res.announcement.linkUrl;
+                            lnk.style.display = "inline-flex";
+                        } else {
+                            lnk.style.display = "none";
+                        }
+                        banner.style.display = "flex";
+                    }
+                }
+            })
+            .catch(function () { });
+    },
 
-            kun: "🐎 <strong>Šlechtický chov Koní (1 000 zl.):</strong> Kupuj hřebčíny po království. Čím více koní vlastníš, tím vyšší mýtné platí soupeři a tím vyšší rentu inkasuješ na Mýtě!",
+    dismissAnnouncement: function () {
+        var banner = document.getElementById("topbar-announcement-banner");
+        if (banner) banner.style.display = "none";
+    },
 
-            sokol: "🦅 <strong>Královský chov Sokolů (1 500 zl.):</strong> Vzácné lovecké ptactvo. Kompletní sada sokolů přináší obrovské mýtné od ostatních rytířů a zisk při průchodu Mýtem.",
+    switchLandingMedia: function (mode) {
+        this.currentLandingMedia = (mode === "video") ? "video" : "anim";
+        var animWrap = document.getElementById("lp-media-anim-wrap");
+        var videoWrap = document.getElementById("lp-media-video-wrap");
+        var btnAnim = document.getElementById("lp-tab-btn-anim");
+        var btnVideo = document.getElementById("lp-tab-btn-video");
+        var statusLbl = document.getElementById("lp-media-status-label");
+        var vid = document.getElementById("lp-promo-video");
+        var yt = document.getElementById("lp-hero-youtube-player");
 
-            village: "🏡 <strong>Vesnice (2 000 zl. • příjem +300 zl.):</strong> Základ tvého feudálního panství. Kdykoliv vstoupíš na svou vesnici, můžeš ji povýšit na Město!",
+        if (this.currentLandingMedia === "video") {
+            if (animWrap) animWrap.style.display = "none";
+            if (videoWrap) videoWrap.style.display = "block";
+            if (btnAnim) btnAnim.classList.remove("active");
+            if (btnVideo) btnVideo.classList.add("active");
 
-            castle: "🏰 <strong>Hrad (povýšení za 4 000 zl. • příjem +1 200 zl.):</strong> Nedobytná pevnost šlechtice. Přináší královskou rentu a nejvyšší prestiž v celém království.",
+            var videoTitle = (this.currentHeroVideo && this.currentHeroVideo.title) ? this.currentHeroVideo.title : "Královská upoutávka";
+            if (statusLbl) statusLbl.textContent = "🎬 " + videoTitle;
 
-            tavern: "🍺 <strong>Středověká Krčma:</strong> Místo odpočinku, sázek v kostkách a verbování družiny. Pozor však na příliš bujaré oslavy, ať neztratíš tah!",
-
-            drak: "🐉 <strong>Doubrava Draka (Úkol 3. stupně):</strong> Ultimátní zkouška rytíře! Hoď kostkou + přičti svůj Boj. Při vítězství získáš <strong>4 000 zl. a +3 💖 Princeznina srdce</strong>!",
-
-            festival: "💖 <strong>Královské slavnosti:</strong> Vrchol hry! Předveď princezně své 4 ctnosti (Boj, Jízdu, Tanec, Charisma) a proměň je v drahocenná <strong>Princeznina srdce 💖</strong>!"
-
-        };
-
-        var box = document.getElementById("lp-medallion-desc-box");
-
-        if (box && descriptions[key]) {
-
-            box.innerHTML = descriptions[key];
-
-        }
-
-        if (el && el.parentElement) {
-
-            var items = el.parentElement.querySelectorAll(".lp-medallion-item");
-
-            for (var i = 0; i < items.length; i++) {
-
-                items[i].classList.remove("active");
-
+            if (this.currentHeroVideo && this.currentHeroVideo.videoType === "youtube") {
+                if (vid) { vid.style.display = "none"; try { vid.pause(); } catch (e) { } }
+                if (yt) {
+                    yt.style.display = "block";
+                    var embedUrl = this.getYoutubeEmbedUrl(this.currentHeroVideo.url);
+                    if (yt.src !== embedUrl) yt.src = embedUrl;
+                }
+            } else {
+                if (yt) { yt.style.display = "none"; yt.src = ""; }
+                if (vid) {
+                    vid.style.display = "block";
+                    if (this.currentHeroVideo && this.currentHeroVideo.url && vid.currentSrc !== this.currentHeroVideo.url) {
+                        vid.src = this.currentHeroVideo.url;
+                    }
+                    try { vid.play(); } catch (e) { }
+                }
             }
-
-            el.classList.add("active");
-
+        } else {
+            if (vid && !vid.paused) {
+                try { vid.pause(); } catch (e) { }
+            }
+            if (yt) { yt.src = ""; yt.style.display = "none"; }
+            if (videoWrap) videoWrap.style.display = "none";
+            if (animWrap) animWrap.style.display = "block";
+            if (btnVideo) btnVideo.classList.remove("active");
+            if (btnAnim) btnAnim.classList.add("active");
+            if (statusLbl) statusLbl.textContent = "✨ Plynulá ukázka herních medailonků, rytířů a slavností";
+            this.initLandingLiveCanvas();
         }
-
     },
 
     initLandingLiveCanvas: function () {
@@ -1077,7 +1095,7 @@ window.PRS_App = {
 
         var ctx = canvas.getContext("2d");
 
-        // Klíčové textury pro živou animaci
+        // Klíčové textury pro živou animaci s bezpečnými zálohami
         var bgImg = new Image();
         bgImg.src = "assets/board/parchment_board_bg.jpg";
 
@@ -1085,11 +1103,11 @@ window.PRS_App = {
         castleImg.src = "assets/landmarks/royal_castle.png";
 
         var tileSources = [
-            { rx: 0.16, ry: 0.62, label: "Chov Koní", color: "#f59e0b", src: "assets/tiles/kun.jpg" },
-            { rx: 0.33, ry: 0.38, label: "Vesnice", color: "#22c55e", src: "assets/tiles/village.jpg" },
-            { rx: 0.50, ry: 0.60, label: "Krčma", color: "#fbbf24", src: "assets/tiles/tavern.jpg" },
-            { rx: 0.68, ry: 0.35, label: "Hrad", color: "#38bdf8", src: "assets/tiles/castle.png" },
-            { rx: 0.85, ry: 0.62, label: "Slavnosti 💖", color: "#ec4899", src: "assets/tiles/festival.jpg" }
+            { rx: 0.16, ry: 0.62, label: "Chov Koní", color: "#f59e0b", icon: "🐎", src: "assets/tiles/kun.jpg" },
+            { rx: 0.33, ry: 0.38, label: "Vesnice", color: "#22c55e", icon: "🏡", src: "assets/tiles/village.jpg" },
+            { rx: 0.50, ry: 0.60, label: "Krčma", color: "#fbbf24", icon: "🍺", src: "assets/tiles/tavern.jpg" },
+            { rx: 0.68, ry: 0.35, label: "Hrad", color: "#38bdf8", icon: "🏰", src: "assets/tiles/castle.png" },
+            { rx: 0.85, ry: 0.62, label: "Slavnosti 💖", color: "#ec4899", icon: "💖", src: "assets/tiles/festival.jpg" }
         ];
 
         for (var i = 0; i < tileSources.length; i++) {
@@ -1100,7 +1118,7 @@ window.PRS_App = {
 
         var t = 0;
         var sparks = [];
-        for (var s = 0; s < 24; s++) {
+        for (var s = 0; s < 28; s++) {
             sparks.push({
                 x: Math.random() * 640,
                 y: Math.random() * 360,
@@ -1112,150 +1130,188 @@ window.PRS_App = {
         }
 
         var renderLoop = function () {
-            t += 0.016;
-            var w = canvas.width || 640;
-            var h = canvas.height || 360;
+            try {
+                t += 0.016;
 
-            ctx.clearRect(0, 0, w, h);
+                // Automatické dynamické škálování plátna podle jeho reálného vykreslení v DOMu
+                var rect = canvas.getBoundingClientRect();
+                var dw = Math.round(rect.width) || 640;
+                var dh = Math.round(rect.height) || 360;
+                if (canvas.width !== dw || canvas.height !== dh) {
+                    canvas.width = dw;
+                    canvas.height = dh;
+                }
+                var w = canvas.width;
+                var h = canvas.height;
 
-            // 1. Pozadí pergamenu s jemným pohybem kamery
-            if (bgImg.complete && bgImg.naturalWidth > 0) {
-                var panX = Math.sin(t * 0.35) * 16;
-                var panY = Math.cos(t * 0.25) * 9;
-                ctx.drawImage(bgImg, -25 + panX, -15 + panY, w + 50, h + 30);
-            } else {
-                var bgGrad = ctx.createLinearGradient(0, 0, w, h);
-                bgGrad.addColorStop(0, "#2a1b0e");
-                bgGrad.addColorStop(0.5, "#1e130a");
+                ctx.clearRect(0, 0, w, h);
+
+                // 1. Teplé královské pergamenové pozadí
+                var bgGrad = ctx.createRadialGradient(w * 0.5, h * 0.5, 30, w * 0.5, h * 0.5, Math.max(w, h) * 0.7);
+                bgGrad.addColorStop(0, "#4a301a");
+                bgGrad.addColorStop(0.6, "#2c1a0e");
                 bgGrad.addColorStop(1, "#140c06");
                 ctx.fillStyle = bgGrad;
                 ctx.fillRect(0, 0, w, h);
-            }
 
-            // Jemná silueta královského hradu na pozadí
-            if (castleImg.complete && castleImg.naturalWidth > 0) {
-                ctx.save();
-                ctx.globalAlpha = 0.20;
-                ctx.drawImage(castleImg, w * 0.5 - 75, h * 0.08, 150, 150);
-                ctx.restore();
-            }
-
-            // Ztmavující viněta pro kontrast
-            var grad = ctx.createRadialGradient(w * 0.5, h * 0.48, 50, w * 0.5, h * 0.5, w * 0.68);
-            grad.addColorStop(0, "rgba(20, 14, 8, 0.20)");
-            grad.addColorStop(1, "rgba(10, 7, 4, 0.78)");
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, w, h);
-
-            // 2. Zlatá královská cesta propojující medailonky
-            ctx.save();
-            ctx.beginPath();
-            for (var i = 0; i < tileSources.length; i++) {
-                var nd = tileSources[i];
-                var nx = nd.rx * w;
-                var ny = nd.ry * h;
-                if (i === 0) ctx.moveTo(nx, ny);
-                else ctx.lineTo(nx, ny);
-            }
-            ctx.strokeStyle = "rgba(212, 175, 55, 0.55)";
-            ctx.lineWidth = 6;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            ctx.stroke();
-
-            ctx.strokeStyle = "rgba(254, 240, 138, 0.85)";
-            ctx.lineWidth = 2.5;
-            ctx.setLineDash([7, 7]);
-            ctx.lineDashOffset = -t * 24;
-            ctx.stroke();
-            ctx.restore();
-
-            // 3. Kruhové medailonky políček
-            var baseRad = Math.min(w, h) * 0.09;
-            for (var j = 0; j < tileSources.length; j++) {
-                var tile = tileSources[j];
-                var tx = tile.rx * w;
-                var ty = tile.ry * h;
-                var pulse = 1 + Math.sin(t * 2.2 + j) * 0.04;
-                var rad = baseRad * pulse;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(tx, ty, rad, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.clip();
-
-                if (tile.img && tile.img.complete && tile.img.naturalWidth > 0) {
-                    ctx.drawImage(tile.img, tx - rad, ty - rad, rad * 2, rad * 2);
-                } else {
-                    ctx.fillStyle = "#2b1d10";
-                    ctx.fillRect(tx - rad, ty - rad, rad * 2, rad * 2);
+                // Kreslení pergamenu s jemným posunem kamery (pokud je načten)
+                if (bgImg.complete && bgImg.naturalWidth > 0) {
+                    try {
+                        var panX = Math.sin(t * 0.35) * 16;
+                        var panY = Math.cos(t * 0.25) * 9;
+                        ctx.save();
+                        ctx.globalAlpha = 0.65;
+                        ctx.drawImage(bgImg, -25 + panX, -15 + panY, w + 50, h + 30);
+                        ctx.restore();
+                    } catch (e) { }
                 }
-                ctx.restore();
 
-                // Zlatá obroučka
+                // Silueta královského hradu na pozadí
+                if (castleImg.complete && castleImg.naturalWidth > 0) {
+                    try {
+                        ctx.save();
+                        ctx.globalAlpha = 0.25;
+                        ctx.drawImage(castleImg, w * 0.5 - 80, h * 0.08, 160, 160);
+                        ctx.restore();
+                    } catch (e) { }
+                }
+
+                // Zlatá královská cesta propojující medailonky
+                ctx.save();
                 ctx.beginPath();
-                ctx.arc(tx, ty, rad, 0, Math.PI * 2);
-                ctx.strokeStyle = tile.color;
-                ctx.lineWidth = 3;
+                for (var i = 0; i < tileSources.length; i++) {
+                    var nd = tileSources[i];
+                    var nx = nd.rx * w;
+                    var ny = nd.ry * h;
+                    if (i === 0) ctx.moveTo(nx, ny);
+                    else ctx.lineTo(nx, ny);
+                }
+                ctx.strokeStyle = "rgba(212, 175, 55, 0.45)";
+                ctx.lineWidth = 7;
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
                 ctx.stroke();
 
-                // Popisek pod medailonkem
-                var boxW = 86;
-                var boxH = 17;
-                ctx.fillStyle = "rgba(15, 10, 6, 0.85)";
-                ctx.fillRect(tx - boxW * 0.5, ty + rad + 4, boxW, boxH);
-                ctx.strokeStyle = "rgba(212, 175, 55, 0.35)";
-                ctx.lineWidth = 1;
-                ctx.strokeRect(tx - boxW * 0.5, ty + rad + 4, boxW, boxH);
+                ctx.strokeStyle = "rgba(254, 240, 138, 0.9)";
+                ctx.lineWidth = 3;
+                ctx.setLineDash([8, 8]);
+                ctx.lineDashOffset = -t * 26;
+                ctx.stroke();
+                ctx.restore();
 
-                ctx.fillStyle = "#fef08a";
-                ctx.font = "bold 11px Outfit, sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText(tile.label, tx, ty + rad + 16);
-            }
+                // 3. Kruhové medailonky políček
+                var baseRad = Math.min(w, h) * 0.10;
+                for (var j = 0; j < tileSources.length; j++) {
+                    var tile = tileSources[j];
+                    var tx = tile.rx * w;
+                    var ty = tile.ry * h;
+                    var pulse = 1 + Math.sin(t * 2.2 + j) * 0.04;
+                    var rad = baseRad * pulse;
 
-            // 4. Animované figurky rytířů putující po cestě
-            var segCount = tileSources.length - 1;
-            var prog = (t * 0.42) % segCount;
-            var segIdx = Math.floor(prog);
-            var segFrac = prog - segIdx;
-            var pA = tileSources[segIdx];
-            var pB = tileSources[segIdx + 1];
-            var ax = pA.rx * w;
-            var ay = pA.ry * h;
-            var bx = pB.rx * w;
-            var by = pB.ry * h;
-            var kx = ax + (bx - ax) * segFrac;
-            var ky = ay + (by - ay) * segFrac - Math.abs(Math.sin(segFrac * Math.PI)) * 20;
+                    // Záře pod medailonkem
+                    var glow = ctx.createRadialGradient(tx, ty, rad * 0.5, tx, ty, rad * 1.4);
+                    glow.addColorStop(0, tile.color);
+                    glow.addColorStop(1, "rgba(0,0,0,0)");
+                    ctx.fillStyle = glow;
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, rad * 1.35, 0, Math.PI * 2);
+                    ctx.fill();
 
-            // Stín a žeton rytíře
-            ctx.beginPath();
-            ctx.arc(kx, ky, 14, 0, Math.PI * 2);
-            ctx.fillStyle = "#dc2626";
-            ctx.fill();
-            ctx.lineWidth = 2.5;
-            ctx.strokeStyle = "#fef08a";
-            ctx.stroke();
+                    // Pozadí a obrázek medailonku
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, rad, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.clip();
 
-            ctx.fillStyle = "#fff";
-            ctx.font = "13px sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("⚔️", kx, ky + 4.5);
+                    ctx.fillStyle = "#2b1d10";
+                    ctx.fillRect(tx - rad, ty - rad, rad * 2, rad * 2);
 
-            // 5. Zlaté jiskry a srdíčka
-            for (var k = 0; k < sparks.length; k++) {
-                var sp = sparks[k];
-                sp.x += sp.vx;
-                sp.y += sp.vy;
-                if (sp.y < -10) {
-                    sp.y = h + 8;
-                    sp.x = Math.random() * w;
+                    var drawn = false;
+                    if (tile.img && tile.img.complete && tile.img.naturalWidth > 0) {
+                        try {
+                            ctx.drawImage(tile.img, tx - rad, ty - rad, rad * 2, rad * 2);
+                            drawn = true;
+                        } catch (e) { }
+                    }
+                    if (!drawn) {
+                        // Heraldická ikona jako záloha
+                        ctx.fillStyle = "#fef08a";
+                        ctx.font = "bold " + Math.round(rad * 0.9) + "px sans-serif";
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(tile.icon, tx, ty);
+                    }
+                    ctx.restore();
+
+                    // Zlatá obroučka
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, rad, 0, Math.PI * 2);
+                    ctx.strokeStyle = tile.color;
+                    ctx.lineWidth = 3.5;
+                    ctx.stroke();
+
+                    // Popisek pod medailonkem
+                    var boxW = Math.max(90, rad * 2.2);
+                    var boxH = 19;
+                    ctx.fillStyle = "rgba(15, 10, 6, 0.88)";
+                    ctx.fillRect(tx - boxW * 0.5, ty + rad + 4, boxW, boxH);
+                    ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(tx - boxW * 0.5, ty + rad + 4, boxW, boxH);
+
+                    ctx.fillStyle = "#fef08a";
+                    ctx.font = "bold 11px Outfit, sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "alphabetic";
+                    ctx.fillText(tile.label, tx, ty + rad + 17);
                 }
+
+                // 4. Animovaný žeton rytíře putujícího po královské cestě
+                var segCount = tileSources.length - 1;
+                var prog = (t * 0.38) % segCount;
+                var segIdx = Math.floor(prog);
+                var segFrac = prog - segIdx;
+                var pA = tileSources[segIdx] || tileSources[0];
+                var pB = tileSources[segIdx + 1] || tileSources[segCount];
+                var ax = pA.rx * w;
+                var ay = pA.ry * h;
+                var bx = pB.rx * w;
+                var by = pB.ry * h;
+                var kx = ax + (bx - ax) * segFrac;
+                var ky = ay + (by - ay) * segFrac - Math.abs(Math.sin(segFrac * Math.PI)) * 22;
+
+                // Žeton rytíře
                 ctx.beginPath();
-                ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
-                ctx.fillStyle = "rgba(250, 204, 21, " + sp.alpha + ")";
+                ctx.arc(kx, ky, 15, 0, Math.PI * 2);
+                ctx.fillStyle = "#dc2626";
                 ctx.fill();
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = "#fef08a";
+                ctx.stroke();
+
+                ctx.fillStyle = "#fff";
+                ctx.font = "14px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("⚔️", kx, ky);
+
+                // 5. Zlaté jiskry a srdíčka
+                for (var k = 0; k < sparks.length; k++) {
+                    var sp = sparks[k];
+                    sp.x += sp.vx;
+                    sp.y += sp.vy;
+                    if (sp.y < -10) {
+                        sp.y = h + 8;
+                        sp.x = Math.random() * w;
+                    }
+                    ctx.beginPath();
+                    ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(250, 204, 21, " + sp.alpha + ")";
+                    ctx.fill();
+                }
+            } catch (frameErr) {
+                console.warn("Live canvas frame err:", frameErr);
             }
 
             requestAnimationFrame(renderLoop);
@@ -1531,6 +1587,14 @@ window.PRS_App = {
         if (badgeEl) {
 
             badgeEl.innerHTML = roleIcon + ": <strong>" + nameStr + "</strong>";
+
+        }
+
+        var adminNav = document.getElementById("nav-btn-admin");
+
+        if (adminNav) {
+
+            adminNav.style.display = (this.currentUser && this.currentUser.role === "Admin") ? "inline-flex" : "none";
 
         }
 
