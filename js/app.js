@@ -18,13 +18,37 @@ window.PRS_App = {
     ],
 
     getDefaultPlayerName: function () {
+        // 1. Zkontrolujeme ručně uloženou rytířskou přezdívku z dřívějších her
+        try {
+            var savedNick = (localStorage.getItem("prs_player_nickname") || "").trim();
+            if (savedNick && savedNick.toLowerCase() !== "host" && savedNick.toLowerCase() !== "admin") {
+                return savedNick.replace(/\s*\(Ty\)$/i, "") + " (Ty)";
+            }
+        } catch (e) { }
+
+        // 2. Přihlášený uživatel (DisplayName / hezky upravený login)
         if (this.currentUser && this.currentUser.role !== "Guest") {
-            var n = (this.currentUser.displayName || this.currentUser.username || "").trim();
-            if (n && n !== "Host" && n !== "Královský Host" && n !== "Host (Nepřihlášený)") {
-                return n + " (Ty)";
+            var d = (this.currentUser.displayName || "").trim();
+            if (d && d.toLowerCase() !== "admin" && d.indexOf("@") === -1 && d.toLowerCase() !== "host") {
+                return d.replace(/\s*\(Ty\)$/i, "") + " (Ty)";
+            }
+
+            var u = (this.currentUser.username || "").trim();
+            if (u) {
+                if (u.indexOf("@") !== -1) {
+                    var localPart = u.split("@")[0].replace(/[._-]/g, " ");
+                    var prettyNick = localPart.replace(/\b\w/g, function (c) { return c.toUpperCase(); }).trim();
+                    if (prettyNick) return prettyNick + " (Ty)";
+                } else if (u.toLowerCase() === "admin") {
+                    return "Rytíř Admin (Ty)";
+                } else if (u.toLowerCase() !== "host") {
+                    return u + " (Ty)";
+                }
             }
         }
-        return "Host (Ty)";
+
+        // 3. Výchozí rytířské jméno pro nového hráče
+        return "Lord Filip (Ty)";
     },
     selectedNodeId: null,
     autoBotTimer: null,
@@ -2030,7 +2054,14 @@ window.PRS_App = {
     updateUserUI: function () {
         var badgeEl = document.getElementById("user-status-badge");
         var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
-        var rawName = isGuest ? "Host" : (this.currentUser.displayName || this.currentUser.username || "Hráč");
+        var savedNick = "";
+        try { savedNick = (localStorage.getItem("prs_player_nickname") || "").trim(); } catch (e) { }
+        var rawName = isGuest ? "Host" : (savedNick || this.currentUser.displayName || this.currentUser.username || "Hráč");
+        if (rawName && rawName.indexOf("@") !== -1) {
+            rawName = rawName.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); }).trim();
+        } else if (rawName && rawName.toLowerCase() === "admin") {
+            rawName = "Rytíř Admin";
+        }
         var nameStr = this.escapeHtml(rawName);
         var roleIcon = isGuest ? "👤 Host" : (this.currentUser.role === "Admin" ? "👑 Admin" : "🛡️ Hráč");
         if (badgeEl) {
@@ -2074,9 +2105,10 @@ window.PRS_App = {
         for (var i = 0; i < this.lobbyPlayers.length; i++) {
             var p = this.lobbyPlayers[i];
             var col = window.PRS_GameEngine.PLAYER_COLORS[i % window.PRS_GameEngine.PLAYER_COLORS.length];
+            var placeholder = (i === 0) ? ' placeholder="Tvoje rytířská přezdívka (např. Sir Gawain)" title="Zadej svou herní přezdívku (jméno rytíře u stolu)"' : ' placeholder="Jméno hráče / PC bota"';
             html += '<div class="lobby-player-row">' +
                 '<span class="player-color-dot" style="background:' + col.hex + '">' + col.badge + '</span>' +
-                '<input type="text" class="prs-input" value="' + this.escapeHtml(p.name) + '" onchange="PRS_App.updateLobbyPlayerName(' + i + ', this.value)" />' +
+                '<input type="text" class="prs-input" value="' + this.escapeHtml(p.name) + '"' + placeholder + ' oninput="PRS_App.updateLobbyPlayerName(' + i + ', this.value)" onchange="PRS_App.updateLobbyPlayerName(' + i + ', this.value)" />' +
                 '<select class="prs-select" onchange="PRS_App.updateLobbyPlayerType(' + i + ', this.value)">' +
                 '  <option value="Human" ' + (p.type === "Human" ? "selected" : "") + '>👤 Člověk (u stolu)</option>' +
                 '  <option value="Bot_Aggressive" ' + (p.type === "Bot_Aggressive" ? "selected" : "") + '>⚔️ PC Válečník (Lovec draků)</option>' +
@@ -2094,7 +2126,28 @@ window.PRS_App = {
     },
 
     updateLobbyPlayerName: function (idx, val) {
-        if (this.lobbyPlayers[idx]) this.lobbyPlayers[idx].name = val;
+        if (this.lobbyPlayers[idx]) {
+            this.lobbyPlayers[idx].name = val;
+            if (idx === 0) {
+                var cleanNick = (val || "").replace(/\s*\(Ty\)$/i, "").trim();
+                if (cleanNick && cleanNick.toLowerCase() !== "host") {
+                    try {
+                        localStorage.setItem("prs_player_nickname", cleanNick);
+                        if (this.currentUser && this.currentUser.role !== "Guest") {
+                            this.currentUser.displayName = cleanNick;
+                            localStorage.setItem("prs_user", JSON.stringify(this.currentUser));
+                            if (this.currentUser.username) {
+                                fetch("api.ashx?action=update_nickname", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ username: this.currentUser.username, displayName: cleanNick })
+                                }).catch(function () { });
+                            }
+                        }
+                    } catch (e) { }
+                }
+            }
+        }
     },
 
     updateLobbyPlayerType: function (idx, val) {

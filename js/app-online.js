@@ -60,6 +60,28 @@ openAuthModal: function () {
         this.closeAuthModal();
     },
 
+    getEffectiveNickname: function () {
+        try {
+            var sn = (localStorage.getItem("prs_player_nickname") || "").trim();
+            if (sn && sn.toLowerCase() !== "host" && sn.toLowerCase() !== "admin") return sn;
+        } catch (e) { }
+        if (this.currentUser && this.currentUser.role !== "Guest") {
+            var d = (this.currentUser.displayName || "").trim();
+            if (d && d.toLowerCase() !== "admin" && d.indexOf("@") === -1 && d.toLowerCase() !== "host") return d;
+            var u = (this.currentUser.username || "").trim();
+            if (u) {
+                if (u.indexOf("@") !== -1) {
+                    var p = u.split("@")[0].replace(/[._-]/g, " ");
+                    return p.replace(/\b\w/g, function (c) { return c.toUpperCase(); }).trim();
+                } else if (u.toLowerCase() === "admin") {
+                    return "Rytíř Admin";
+                }
+                return u;
+            }
+        }
+        return "Lord Filip";
+    },
+
     submitAuth: function (mode) {
         var self = this;
         var uInput = document.getElementById("auth-username");
@@ -85,6 +107,9 @@ openAuthModal: function () {
             .then(function (data) {
                 if (data && data.ok && data.user) {
                     self.currentUser = data.user;
+                    if (data.user.displayName && data.user.displayName.toLowerCase() !== "admin" && data.user.displayName.indexOf("@") === -1) {
+                        localStorage.setItem("prs_player_nickname", data.user.displayName);
+                    }
                     localStorage.setItem("prs_user", JSON.stringify(self.currentUser));
                     self.updateUserUI();
                     self.closeAuthModal();
