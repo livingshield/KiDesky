@@ -166,7 +166,7 @@
 
 
 
-    <link rel="stylesheet" href="css/modals.css?v=202611041645">
+    <link rel="stylesheet" href="css/modals.css?v=202611041930">
 
 
 
@@ -1142,7 +1142,7 @@
 
 
 
-                    <div>
+                    
 
 
 
@@ -1246,7 +1246,7 @@
 
 
 
-                                <canvas id="lp-live-preview-canvas" width="560" height="290"></canvas>
+                                <canvas id="lp-live-preview-canvas" width="640" height="360"></canvas>
 
 
 
@@ -1398,7 +1398,7 @@
 
 
 
-                    </div>
+                    
 
 
 
@@ -1455,6 +1455,13 @@
 
 
                     </div>
+                    <div class="lp-media-quick-pills" style="display:flex; flex-wrap:wrap; gap:0.35rem; padding-top:0.45rem; border-top:1px solid rgba(212,175,55,0.22); font-size:0.73rem; color:#d6d3d1;">
+                        <span style="background:rgba(255,255,255,0.06); padding:3px 7px; border-radius:6px; border:1px solid rgba(212,175,55,0.22);">🎲 4 herní režimy</span>
+                        <span style="background:rgba(255,255,255,0.06); padding:3px 7px; border-radius:6px; border:1px solid rgba(212,175,55,0.22);">🐉 34 monster v bestiáři</span>
+                        <span style="background:rgba(255,255,255,0.06); padding:3px 7px; border-radius:6px; border:1px solid rgba(212,175,55,0.22);">🏰 Vesnice &amp; hrady</span>
+                        <span style="background:rgba(255,255,255,0.06); padding:3px 7px; border-radius:6px; border:1px solid rgba(212,175,55,0.22);">⚔️ Turnaje &amp; 4 ctnosti</span>
+                    </div>
+
 
 
 
@@ -9766,7 +9773,7 @@
 
 
 
-    <script src="js/app.js?v=202611041645" defer></script>
+    <script src="js/app.js?v=202611041930" defer></script>
 
 
 
@@ -9782,7 +9789,21 @@
 
 
 
-    <script src="js/app-catalog.js?v=202611041625" defer></script>
+    <script src="js/app-catalog.js?v=202611041930" defer></script>
+    <script>
+        (function () {
+            function bootApp() {
+                if (window.PRS_App && window.PRS_App.init && !window.PRS_App._initialized) {
+                    window.PRS_App.init();
+                }
+            }
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", bootApp);
+            } else {
+                bootApp();
+            }
+        })();
+    </script>
 
 
 
