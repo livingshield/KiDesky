@@ -1904,14 +1904,17 @@ window.PRS_App = {
             if (boardSel) boardSel.value = "compact_48";
             if (scenSel) scenSel.value = "sprint";
             if (diffSel) diffSel.value = "standard";
+            this.handleDifficultyChange("standard");
         } else if (preset === "ultimate") {
             if (boardSel) boardSel.value = "classic_96";
             if (scenSel) scenSel.value = "classic";
             if (diffSel) diffSel.value = "ultimate";
+            this.handleDifficultyChange("ultimate");
         } else {
             if (boardSel) boardSel.value = "classic_96";
             if (scenSel) scenSel.value = "classic";
             if (diffSel) diffSel.value = "standard";
+            this.handleDifficultyChange("standard");
         }
 
         this.startNewGame(true);
@@ -4277,15 +4280,40 @@ window.PRS_App = {
         if (window.PRS_Audio) window.PRS_Audio.playStep();
     },
 
+    handleDifficultyChange: function (mode) {
+        this.selectedDifficultyMode = mode;
+        var infoEl = document.getElementById("lobby-difficulty-info");
+        var btn = document.getElementById("lobby-start-game-btn");
+        var text = "";
+
+        if (mode === "easy") {
+            text = "🌿 <strong>Pohádkový mód (Easy):</strong> 12 000 zl. do startu • žold 3 500 / 5 500 zl. • 70 % pozitivních karet • mírumilovný režim bez útočných duelů a intrik • výkup bance za 75 % • královská milost při bankrotu.";
+            if (btn) btn.innerHTML = "🎲 Rozdat 12 000 zl. a zahájit partii! (Pohádkový)";
+        } else if (mode === "hard") {
+            text = "⚔️ <strong>Rytířská výzva (Hard):</strong> 8 000 zl. do startu • žold 2 500 / 4 500 zl. • tvrdší karty osudu • plné sazby duelů i ztráta srdcí (-0,5 💖) • výkup bance za 50 % • královská milost při bankrotu.";
+            if (btn) btn.innerHTML = "🎲 Rozdat 8 000 zl. a zahájit partii! (Rytířská výzva)";
+        } else if (mode === "ultimate") {
+            text = "💀 <strong>Na život a smrt (Ultimate):</strong> 8 000 zl. do startu • žold 2 500 / 4 000 zl. • karty 35 % poz. / 35 % neg. • duely posílají poraženého do špitálu! • špitál i kauce 2× dražší (1 600 zl. / 2 000 zl.) • <strong>ELIMINACE při bankrotu!</strong>";
+            if (btn) btn.innerHTML = "🎲 Rozdat 8 000 zl. a zahájit partii! (Na život a smrt 💀)";
+        } else {
+            text = "👑 <strong>Standardní mód:</strong> 10 000 zl. do startu • žold 3 000 / 5 000 zl. • vyvážené karty Náhody • 50% sazby duelů a intrik • královská milost při dluhu.";
+            if (btn) btn.innerHTML = "🎲 Rozdat 10 000 zl. a zahájit partii!";
+        }
+
+        if (infoEl) infoEl.innerHTML = text;
+        if (window.PRS_Audio) window.PRS_Audio.playStep();
+    },
+
     renderOnlineRoomBar: function () {
         var el = document.getElementById("online-room-bar");
         if (!el) return;
 
         if (!this.state || !this.state.roomCode) {
+            var diffLabel = { easy: "🌿 Easy", standard: "👑 Standard", hard: "⚔️ Hard", ultimate: "💀 Ultimate" }[(this.state && this.state.config && this.state.config.difficultyMode) || "standard"] || "👑 Standard";
             el.innerHTML = '<div class="online-room-bar-container" style="background:rgba(20,16,12,0.85); border-color:rgba(212,175,55,0.3);">' +
                 '<div class="online-bar-left">' +
                 '  <span style="font-size:1.1rem;">🎮</span>' +
-                '  <span style="font-size:0.84rem; color:#cbd5e1;">Lokální partie u jednoho zařízení</span>' +
+                '  <span style="font-size:0.84rem; color:#cbd5e1;">Lokální partie • Mód: <strong style="color:#fde68a;">' + diffLabel + '</strong></span>' +
                 '</div>' +
                 '<div class="online-bar-right">' +
                 '  <button class="btn-secondary" style="font-size:0.76rem; padding:3px 9px; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.createOnlineMultiplayerRoom()">☁️ Založit online stůl pro přátele</button>' +
@@ -4302,7 +4330,9 @@ window.PRS_App = {
         html.push('<div class="online-room-bar-container">');
         html.push('  <div class="online-bar-left">');
         html.push('    <span class="online-pulse-dot" title="Aktivní spojení se serverem"></span>');
+        var diffLabelOnline = { easy: "🌿 Easy", standard: "👑 Standard", hard: "⚔️ Hard", ultimate: "💀 Ultimate" }[(this.state && this.state.config && this.state.config.difficultyMode) || "standard"] || "👑 Standard";
         html.push('    <span class="online-room-code-badge">STŮL: ' + this.escapeHtml(this.state.roomCode) + '</span>');
+        html.push('    <span class="online-room-code-badge" style="background:rgba(217,119,6,0.3); border-color:#d97706; color:#fde68a;">' + diffLabelOnline + '</span>');
         if (myP) {
             html.push('    <span style="font-size:0.82rem; color:' + myP.color + ';">👤 Ty: <strong>' + myP.badge + ' ' + this.escapeHtml(myP.name) + '</strong></span>');
         }
@@ -5198,8 +5228,8 @@ window.PRS_App = {
             '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">' +
             '    <div style="display:flex; align-items:center; gap:0.45rem;">' +
             '      <span class="ks-avatar" style="background:' + p.color + '; width:28px; height:28px; font-size:0.95rem; display:inline-flex; align-items:center; justify-content:center; border-radius:50%;">' + p.badge + '</span>' +
-            '      <strong style="color:var(--text-main); font-size:0.92rem;">' + this.escapeHtml(p.name) + '</strong>' +
-            (isCurTurn ? '<span class="tag-on-turn" style="font-size:0.68rem; padding:1px 5px;">👑 Na tahu</span>' : '') +
+            '      <strong style="color:var(--text-main); font-size:0.92rem;' + (p.isEliminated ? ' text-decoration:line-through; opacity:0.6;' : '') + '">' + this.escapeHtml(p.name) + '</strong>' +
+            (p.isEliminated ? '<span style="font-size:0.68rem; padding:1px 5px; background:#dc2626; color:#fff; border-radius:4px; font-weight:bold;">💀 Bankrot</span>' : (isCurTurn ? '<span class="tag-on-turn" style="font-size:0.68rem; padding:1px 5px;">👑 Na tahu</span>' : '')) +
             '    </div>' +
             '    <div style="text-align:right;">' +
             '      <div style="font-size:0.88rem; font-weight:bold; color:var(--gold-light);">💰 ' + p.gold.toLocaleString("cs-CZ") + ' zl.</div>' +
