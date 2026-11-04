@@ -3685,6 +3685,8 @@ window.PRS_GameEngine = {
 
             this.advanceRoundsForPactsAndIntrigues(state);
 
+            this.addLog(state, "🏰 Začíná " + state.roundNumber + ". kolo království!", "milestone");
+
         }
 
         state.currentPlayerIndex = nextIdx;

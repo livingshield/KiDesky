@@ -2953,7 +2953,9 @@
         this.updateBodyModalClass();
 
         var activeP = (this.state && this.state.players) ? this.state.players[this.state.currentPlayerIndex] : null;
-        if (activeP && activeP.type === "Human") {
+        if (this.syncFocusToActivePlayer) {
+            this.syncFocusToActivePlayer(true);
+        } else if (activeP && activeP.type === "Human") {
             this.selectedNodeId = activeP.nodeId;
             this.inspectedPlayerIndex = activeP.index;
             this.inspectNode(activeP.nodeId);

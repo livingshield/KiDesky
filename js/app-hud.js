@@ -4216,6 +4216,27 @@
 
     },
 
+    syncFocusToActivePlayer: function (smooth) {
+        if (!this.state || !this.state.players) return;
+        var activeP = this.state.players[this.state.currentPlayerIndex];
+        if (!activeP) return;
+
+        this.selectedNodeId = activeP.nodeId;
+        this.inspectedPlayerIndex = activeP.index;
+        this.inspectNode(activeP.nodeId);
+
+        // Bezpečné vycentrování pohledu na figurku nově aktivního hráče (vždy, i po dohrání celého kola)
+        this.centerOnActivePlayer(true, smooth !== false);
+
+        // Kompletní překreslení panelů, aby focus a žlutý lem okamžitě přeskočily na nového hráče
+        this.renderGameScreen();
+
+        if (activeP.type === "Human") {
+            if (window.PRS_Audio) window.PRS_Audio.playNotice();
+            this.showPawnToast(activeP.index, "Jsi na řadě! (" + activeP.name + ")", "🎲", "#38bdf8");
+        }
+    },
+
     handleEndTurn: function () {
 
         if (this.isActionProcessing || this.isSavingSession) return;
@@ -4254,18 +4275,7 @@
 
         window.PRS_GameEngine.endTurn(this.state);
 
-        var activeP = this.state.players[this.state.currentPlayerIndex];
-        if (activeP) {
-            this.selectedNodeId = activeP.nodeId;
-            this.inspectedPlayerIndex = activeP.index;
-            this.inspectNode(activeP.nodeId);
-            if (activeP.type === "Human") {
-                this.centerOnActivePlayer(true, true);
-                this.showPawnToast(activeP.index, "Jsi na řadě! (" + activeP.name + ")", "🎲", "#38bdf8");
-            }
-        }
-
-        this.renderGameScreen();
+        this.syncFocusToActivePlayer(true);
 
         var self = this;
 
@@ -4371,13 +4381,7 @@
 
                 window.PRS_GameEngine.executeBotTurn(self.state);
 
-                var activeP = self.state.players[self.state.currentPlayerIndex];
-                if (activeP) {
-                    self.selectedNodeId = activeP.nodeId;
-                    self.inspectedPlayerIndex = activeP.index;
-                }
-
-                self.renderGameScreen();
+                self.syncFocusToActivePlayer(true);
 
                 self.saveSessionAuto();
 
@@ -4388,13 +4392,6 @@
                     return;
                 }
 
-                if (activeP && activeP.type === "Human") {
-                    self.inspectNode(activeP.nodeId);
-                    self.centerOnActivePlayer(true, true);
-                    if (window.PRS_Audio) window.PRS_Audio.playNotice();
-                    self.showPawnToast(activeP.index, "Jsi na řadě! (" + activeP.name + ")", "🎲", "#38bdf8");
-                }
-
                 self.scheduleBotTurnIfNeeded();
 
             });
@@ -4403,13 +4400,7 @@
 
             window.PRS_GameEngine.executeBotTurn(self.state);
 
-            var activeP = self.state.players[self.state.currentPlayerIndex];
-            if (activeP) {
-                self.selectedNodeId = activeP.nodeId;
-                self.inspectedPlayerIndex = activeP.index;
-            }
-
-            self.renderGameScreen();
+            self.syncFocusToActivePlayer(true);
 
             self.saveSessionAuto();
 
@@ -4418,13 +4409,6 @@
                 self.state.lastDuelResult = null;
                 self.showDuelResultModal(dRes2, dRes2.type);
                 return;
-            }
-
-            if (activeP && activeP.type === "Human") {
-                self.inspectNode(activeP.nodeId);
-                self.centerOnActivePlayer(true, true);
-                if (window.PRS_Audio) window.PRS_Audio.playNotice();
-                self.showPawnToast(activeP.index, "Jsi na řadě! (" + activeP.name + ")", "🎲", "#38bdf8");
             }
 
             self.scheduleBotTurnIfNeeded();

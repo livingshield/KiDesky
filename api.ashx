@@ -4306,7 +4306,7 @@ END";
         }
 
         string subFolder = isImage ? "board" : "video";
-        string targetDir = context.Server.MapPath("~/assets/" + subFolder);
+        string targetDir = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(context.Request.PhysicalPath), "assets", subFolder);
         if (!System.IO.Directory.Exists(targetDir))
         {
             System.IO.Directory.CreateDirectory(targetDir);
@@ -4324,12 +4324,12 @@ END";
         // Automatická synchronizace do paralelní webroot složky, pokud na serveru existuje (/www/apps vs /www/wwwroot/apps)
         try
         {
-            string appRoot = context.Server.MapPath("~");
-            string relSub = "assets\\" + subFolder;
-            if (appRoot.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase) >= 0)
+            string appDir = System.IO.Path.GetDirectoryName(context.Request.PhysicalPath);
+            string relSub = System.IO.Path.Combine("assets", subFolder);
+            if (appDir.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                string altRoot = appRoot.Replace("wwwroot\\", "").Replace("wwwroot/", "");
-                string altDir = System.IO.Path.Combine(altRoot, "assets", subFolder);
+                string altRoot = appDir.Replace("wwwroot\\", "").Replace("wwwroot/", "");
+                string altDir = System.IO.Path.Combine(altRoot, relSub);
                 if (System.IO.Directory.Exists(altDir))
                 {
                     System.IO.File.Copy(fullPath, System.IO.Path.Combine(altDir, safeFileName), true);
@@ -4337,13 +4337,12 @@ END";
             }
             else
             {
-                string altDir = System.IO.Path.Combine(appRoot, "..", "wwwroot", "apps", "KiDesky", "assets", subFolder);
+                string altDir = System.IO.Path.GetFullPath(System.IO.Path.Combine(appDir, "..", "..", "wwwroot", "apps", "KiDesky", relSub));
                 if (System.IO.Directory.Exists(altDir))
                 {
                     System.IO.File.Copy(fullPath, System.IO.Path.Combine(altDir, safeFileName), true);
                 }
             }
-        }
         catch { }
 
         string relativeUrl = "assets/" + subFolder + "/" + safeFileName;

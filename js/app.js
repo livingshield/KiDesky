@@ -1135,19 +1135,21 @@ window.PRS_App = {
 
                 // Automatické dynamické škálování plátna podle jeho reálného vykreslení v DOMu
                 var rect = canvas.getBoundingClientRect();
-                var dw = Math.round(rect.width) || 640;
-                var dh = Math.round(rect.height) || 360;
+                var dw = Math.round(rect.width) || (canvas.parentElement ? canvas.parentElement.clientWidth : 0) || 640;
+                var dh = Math.round(rect.height) || (canvas.parentElement ? canvas.parentElement.clientHeight : 0) || 360;
                 if (canvas.width !== dw || canvas.height !== dh) {
                     canvas.width = dw;
                     canvas.height = dh;
                 }
-                var w = canvas.width;
-                var h = canvas.height;
+                var w = Math.max(100, canvas.width);
+                var h = Math.max(100, canvas.height);
 
                 ctx.clearRect(0, 0, w, h);
 
                 // 1. Teplé královské pergamenové pozadí
-                var bgGrad = ctx.createRadialGradient(w * 0.5, h * 0.5, 30, w * 0.5, h * 0.5, Math.max(w, h) * 0.7);
+                var rInner = Math.max(5, Math.min(w, h) * 0.06);
+                var rOuter = Math.max(rInner + 10, Math.max(w, h) * 0.7);
+                var bgGrad = ctx.createRadialGradient(w * 0.5, h * 0.5, rInner, w * 0.5, h * 0.5, rOuter);
                 bgGrad.addColorStop(0, "#4a301a");
                 bgGrad.addColorStop(0.6, "#2c1a0e");
                 bgGrad.addColorStop(1, "#140c06");
