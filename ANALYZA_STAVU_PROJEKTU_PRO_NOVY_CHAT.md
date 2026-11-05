@@ -2,7 +2,7 @@
 
 > **Datum vyhotovení:** 5. 11. 2026  
 > **Aktuální verze cache-busteru:** `?v=202611050074`  
-> **Poslední Git commit:** v přípravě (Audio biomy, kronika mostů a telemetry, karty Náhody ch_51-ch_57, 4. slavnost Lov)  
+> **Poslední Git commit:** `7a49cb5` (`feat(biome-audio, chronicle, content): add procedural footsteps & bridge sounds, river Doubravka chronicle events, telemetry, 4th festival (Lov), and chance cards ch_51-ch_57`)  
 > **Produkční URL:** https://www.ekobio.org/apps/KiDesky/  
 > **Lokální pracovní adresář:** `c:\Users\janky\.gemini\antigravity\scratch\KiDesky`
 
