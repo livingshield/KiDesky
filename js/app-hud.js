@@ -222,13 +222,23 @@
 
             var cDil = pa.chanceCard;
 
-            htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:#fff; border-color:#38bdf8;" onclick="PRS_App.handleChooseChanceDilemma(0)">' + cDil.options[0].icon + ' ' + this.escapeHtml(cDil.options[0].title) + '</button>');
-
-            htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #7c3aed, #6d28d9); color:#fff; border-color:#c084fc;" onclick="PRS_App.handleChooseChanceDilemma(1)">' + cDil.options[1].icon + ' ' + this.escapeHtml(cDil.options[1].title) + '</button>');
+            htmlBtns.push('<div style="display:flex; flex-direction:column; gap:6px; width:100%;">' +
+                '<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #0284c7, #0369a1); color:#fff; border-color:#38bdf8;" onclick="PRS_App.handleChooseChanceDilemma(0)">' + cDil.options[0].icon + ' ' + this.escapeHtml(cDil.options[0].title) + '</button>' +
+                '<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #7c3aed, #6d28d9); color:#fff; border-color:#c084fc;" onclick="PRS_App.handleChooseChanceDilemma(1)">' + cDil.options[1].icon + ' ' + this.escapeHtml(cDil.options[1].title) + '</button>' +
+                '<button class="mobile-btn-primary" style="background:rgba(255,255,255,0.12); color:#fde047; border-color:var(--border-gold);" onclick="PRS_App.openChanceModal()">📜 Zobrazit kartu osudu</button>' +
+                '</div>');
 
         } else if (pa.chanceCard) {
 
-            htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border-color:#fef08a;" onclick="PRS_App.toggleChanceCardFlip(\'' + pa.chanceCard.id + '\')">📜 OTOČIT KARTU NÁHODY</button>');
+            var isFlipped = (this.flippedChanceCardId === pa.chanceCard.id);
+            if (!isFlipped) {
+                htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border-color:#fef08a;" onclick="PRS_App.openChanceModal()">📜 OTOČIT KARTU NÁHODY</button>');
+            } else {
+                htmlBtns.push('<div style="display:flex; gap:6px; width:100%;">' +
+                    '<button class="mobile-btn-primary" style="flex:1.2; background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border-color:#fef08a;" onclick="PRS_App.openChanceModal()">📜 ' + this.escapeHtml(pa.chanceCard.title) + '</button>' +
+                    '<button class="mobile-btn-primary" style="flex:1; background:rgba(255,255,255,0.12); border-color:var(--border-gold); color:var(--text-main);" onclick="PRS_App.handleEndTurn()">➡️ Konec tahu</button>' +
+                    '</div>');
+            }
 
         } else if (pa.debt) {
 
@@ -3681,6 +3691,13 @@
 
                     }
 
+                }
+
+                // Automatické otevření karty Náhody pro hráče
+                if (player.type === "Human" && self.state.pendingAction && self.state.pendingAction.chanceCard) {
+                    setTimeout(function () {
+                        self.openChanceModal();
+                    }, 280);
                 }
 
                 if (onFinish) onFinish();

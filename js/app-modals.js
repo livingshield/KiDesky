@@ -1646,6 +1646,8 @@
 
         if (window.PRS_Audio) window.PRS_Audio.playItem();
 
+        this.closeChanceModal();
+
         this.renderGameScreen();
 
         this.saveSessionAuto();
@@ -2296,22 +2298,87 @@
 
     // --- INTERAKTIVNÍ KARTA NÁHODY (3D OTOČENÍ) ---,
 
+    openChanceModal: function () {
+        if (!this.state || !this.state.pendingAction || !this.state.pendingAction.chanceCard) return;
+        var modal = document.getElementById("chance-card-modal");
+        if (!modal) return;
+        this.renderChanceModalContent();
+        modal.style.display = "flex";
+        this.updateBodyModalClass();
+        if (window.PRS_Audio) window.PRS_Audio.playItem();
+    },
+
+    closeChanceModal: function () {
+        var modal = document.getElementById("chance-card-modal");
+        if (modal) modal.style.display = "none";
+        this.updateBodyModalClass();
+    },
+
+    renderChanceModalContent: function () {
+        var body = document.getElementById("chance-modal-body");
+        if (!body || !this.state || !this.state.pendingAction || !this.state.pendingAction.chanceCard) return;
+        var pa = this.state.pendingAction;
+        var c = pa.chanceCard;
+        var isFlipped = (this.flippedChanceCardId === c.id);
+        var effColor = (c.effect === "gold_loss" || c.effect === "robbers") ? "#fca5a5" : ((c.effect === "hearts" || c.effect === "ball") ? "#f472b6" : "#fde047");
+
+        var html = '<div class="chance-card-box" style="margin-bottom:0.5rem; perspective:1200px;">' +
+            '  <div id="modal-chance-card-inner" class="chance-card-inner ' + (isFlipped ? 'flipped' : '') + '" style="min-height:230px;" onclick="PRS_App.toggleChanceCardFlip(\'' + c.id + '\')">' +
+            '    <div class="chance-card-face chance-card-back" style="padding:1.2rem; text-align:center;">' +
+            '      <div class="chance-seal">👑</div>' +
+            '      <div style="font-family:\'Cinzel\',serif; font-size:1.15rem; font-weight:bold; color:var(--gold-light); margin-bottom:0.35rem;">KRÁLOVSKÝ PERGAMEN OSUDU</div>' +
+            '      <p style="font-size:0.86rem; color:#fde68a; margin-bottom:1rem; line-height:1.4;">Stoupnul jsi na pole Náhody! Klepnutím prolomíš voskovou pečeť a odhalíš vůli osudu.</p>' +
+            '      <button type="button" class="btn-action-tavern" style="font-size:0.92rem; padding:0.55rem 1.4rem; cursor:pointer; font-weight:bold;" onclick="event.stopPropagation(); PRS_App.toggleChanceCardFlip(\'' + c.id + '\')">📜 OTOČIT KARTU NÁHODY</button>' +
+            '    </div>' +
+            '    <div class="chance-card-face chance-card-front" style="padding:1.1rem;">' +
+            '      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; border-bottom:1px solid rgba(250,204,21,0.3); padding-bottom:0.35rem;">' +
+            '        <span class="standing-tile-badge" style="background:rgba(234,179,8,0.25); color:#fef08a; border-color:#eab308; font-weight:700;">❓ KARTA NÁHODY</span>' +
+            '        <span style="font-size:0.8rem; color:#fde047; font-weight:bold;">' + c.id + '</span>' +
+            '      </div>' +
+            '      <div style="font-family:\'Cinzel\',serif; font-size:1.15rem; font-weight:bold; color:#fef08a; margin-bottom:0.4rem;">' + this.escapeHtml(c.title) + '</div>' +
+            '      <p style="font-size:0.9rem; color:#f8fafc; line-height:1.4; margin-bottom:0.65rem;">' + this.escapeHtml(c.text) + '</p>' +
+            (pa.canChooseDilemma && c.options && c.options.length >= 2 ? (
+                '      <div class="chance-dilemma-container" onclick="event.stopPropagation();" style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.4rem;">' +
+                '        <button type="button" class="chance-dilemma-btn opt-a" style="text-align:left; padding:0.65rem 0.85rem; background:linear-gradient(135deg, rgba(2,132,199,0.35), rgba(3,105,161,0.55)); border:1.5px solid #38bdf8; border-radius:8px; color:#fff; cursor:pointer;" onclick="PRS_App.handleChooseChanceDilemma(0)">' +
+                '          <div class="opt-title" style="font-weight:700; color:#7dd3fc; margin-bottom:2px;">' + c.options[0].icon + ' ' + this.escapeHtml(c.options[0].title) + '</div>' +
+                '          <div class="opt-desc" style="font-size:0.82rem; color:#e0f2fe; line-height:1.3;">' + this.escapeHtml(c.options[0].desc) + '</div>' +
+                '        </button>' +
+                '        <button type="button" class="chance-dilemma-btn opt-b" style="text-align:left; padding:0.65rem 0.85rem; background:linear-gradient(135deg, rgba(124,58,237,0.35), rgba(109,40,217,0.55)); border:1.5px solid #c084fc; border-radius:8px; color:#fff; cursor:pointer;" onclick="PRS_App.handleChooseChanceDilemma(1)">' +
+                '          <div class="opt-title" style="font-weight:700; color:#e9d5ff; margin-bottom:2px;">' + c.options[1].icon + ' ' + this.escapeHtml(c.options[1].title) + '</div>' +
+                '          <div class="opt-desc" style="font-size:0.82rem; color:#f5f3ff; line-height:1.3;">' + this.escapeHtml(c.options[1].desc) + '</div>' +
+                '        </button>' +
+                '      </div>'
+            ) : (
+                '      <div style="margin-top:auto; font-size:0.88rem; font-weight:bold; color:' + effColor + '; background:rgba(0,0,0,0.55); padding:0.5rem 0.75rem; border-radius:8px; border:1px solid rgba(255,255,255,0.12); margin-bottom:0.75rem;">' +
+                '        ⚡ ' + this.formatGameText(pa.summary || c.text) +
+                '      </div>' +
+                '      <button type="button" class="btn-primary" style="width:100%; padding:0.6rem; font-weight:bold; font-size:0.92rem;" onclick="PRS_App.closeChanceModal(); PRS_App.handleEndTurn();">➡️ Rozumím &amp; Ukončit tah</button>'
+            )) +
+            '    </div>' +
+            '  </div>' +
+            '</div>';
+
+        body.innerHTML = html;
+    },
+
     toggleChanceCardFlip: function (cardId) {
-
         if (this.flippedChanceCardId === cardId) {
-
             this.flippedChanceCardId = null;
-
         } else {
-
             this.flippedChanceCardId = cardId;
-
             if (window.PRS_Audio) window.PRS_Audio.playItem();
-
         }
-
         this.renderActionPanel();
+        this.renderChanceModalContent();
 
+        var isMobile = (window.innerWidth <= 768) || (this.deviceProfile && this.deviceProfile.device === "mobile");
+        if (isMobile) {
+            var modal = document.getElementById("chance-card-modal");
+            if (!modal || modal.style.display === "none") {
+                this.openChanceModal();
+            }
+        }
+        this.updateMobileDock();
     },
 
     // --- SPECIÁLNÍ POLE: ŠATLAVA (PRISON) ---,

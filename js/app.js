@@ -2083,6 +2083,7 @@ window.PRS_App = {
 
     closeAllModals: function () {
         this.hidePlayerTooltip();
+        this.closeChanceModal();
 
         this.closeQuestDuelModal();
 
