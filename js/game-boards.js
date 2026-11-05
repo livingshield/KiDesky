@@ -726,7 +726,7 @@ window.KiDeskyMapGenerator = {
             { code: "K3", type: "ANIMAL", subtype: "kun", setId: 3, name: "Kůň 3 (Vraník)", icon: "🐎" },
             { code: "N3", type: "CHANCE", name: "Náhoda", icon: "❓" },
             { code: "PSOV1", type: "BUILDING", subtype: "psovod", name: "Psovod 1", icon: "🦴" },
-            { code: "S11_OUT", type: "ANIMAL", subtype: "sokol", setId: 11, name: "Sokol 11 (Raroh)", icon: "🦅" },
+            { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅" },
             { code: "S3", type: "ANIMAL", subtype: "sokol", setId: 3, name: "Sokol 3 (Ostříž)", icon: "🦅" },
             { code: "N4", type: "CHANCE", name: "Náhoda", icon: "❓" },
             { code: "P3", type: "ANIMAL", subtype: "pes", setId: 3, name: "Pes 3 (Chrt)", icon: "🐕" },
@@ -744,6 +744,7 @@ window.KiDeskyMapGenerator = {
         var bottomDefs = [
             { code: "KOV2", type: "BUILDING", subtype: "kovarna", name: "Kovárna 2", icon: "⚒️" },
             { code: "K5", type: "ANIMAL", subtype: "kun", setId: 5, name: "Kůň 5 (Bělouš)", icon: "🐎" },
+            { code: "S5", type: "ANIMAL", subtype: "sokol", setId: 5, name: "Sokol 5 (Královský ostříž)", icon: "🦅" },
             { code: "V4", type: "VILLAGE", estateId: "V4", name: "Vesnice 4 (Dubina)", icon: "🏘️" },
             { code: "P5", type: "ANIMAL", subtype: "pes", setId: 5, name: "Pes 5 (Slídič)", icon: "🐕" },
             { code: "U1_2", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
@@ -751,7 +752,6 @@ window.KiDeskyMapGenerator = {
             { code: "U1_3", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
             { code: "K6", type: "ANIMAL", subtype: "kun", setId: 6, name: "Kůň 6 (Plavák)", icon: "🐎" },
             { code: "VD2", type: "TAX", name: "Výběrčí daní", icon: "👑" },
-            { code: "U1_4", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
             { code: "KE3", type: "JESTER", jesterId: 3, name: "Kejklíř 3", icon: "🃏" },
             { code: "SATL", type: "PRISON", name: "Královská šatlava", icon: "⛓️" },
             { code: "OBCHOD3", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
@@ -761,7 +761,7 @@ window.KiDeskyMapGenerator = {
             { code: "V5", type: "VILLAGE", estateId: "V5", name: "Vesnice 5 (Skalice)", icon: "🏘️", hasRoof: true },
             { code: "M2", type: "TOWN", estateId: "M2", name: "Město 2 (Stříbratec)", icon: "🏙️" },
             { code: "K7", type: "ANIMAL", subtype: "kun", setId: 7, name: "Kůň 7 (Šiml)", icon: "🐎" },
-            { code: "S8", type: "ANIMAL", subtype: "sokol", setId: 8, name: "Sokol 8 (Orlovec)", icon: "🦅" }
+            { code: "S7", type: "ANIMAL", subtype: "sokol", setId: 7, name: "Sokol 7 (Luňák)", icon: "🦅" }
         ];
 
         var leftDefs = [
@@ -770,7 +770,7 @@ window.KiDeskyMapGenerator = {
             { code: "P7", type: "ANIMAL", subtype: "pes", setId: 7, name: "Pes 7 (Doga)", icon: "🐕" },
             { code: "V6", type: "VILLAGE", estateId: "V6", name: "Vesnice 6 (Meziříčí)", icon: "🏘️" },
             { code: "N8", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "S12", type: "ANIMAL", subtype: "sokol", setId: 12, name: "Sokol 12 (Fénixův sokol)", icon: "🦅" },
+            { code: "S8", type: "ANIMAL", subtype: "sokol", setId: 8, name: "Sokol 8 (Orlovec)", icon: "🦅" },
             { code: "KE4", type: "JESTER", jesterId: 4, name: "Kejklíř 4", icon: "🃏" },
             { code: "VM1", type: "MASTER", skill: "any", name: "Velmistr", icon: "🧙‍♂️" },
             { code: "K8", type: "ANIMAL", subtype: "kun", setId: 8, name: "Kůň 8 (Fríský oř)", icon: "🐎" },
@@ -778,7 +778,7 @@ window.KiDeskyMapGenerator = {
             { code: "P8", type: "ANIMAL", subtype: "pes", setId: 8, name: "Pes 8 (Chrtí král)", icon: "🐕" },
             { code: "S9", type: "ANIMAL", subtype: "sokol", setId: 9, name: "Sokol 9 (Jestřáb)", icon: "🦅" },
             { code: "OBCHOD4", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
-            { code: "U1_5", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
+            { code: "P9", type: "ANIMAL", subtype: "pes", setId: 9, name: "Pes 9 (Lovecký chrt)", icon: "🐕" },
             { code: "V8", type: "VILLAGE", estateId: "V8", name: "Vesnice 8 (Podhradí)", icon: "🏘️" },
             { code: "K9", type: "ANIMAL", subtype: "kun", setId: 9, name: "Kůň 9 (Andaluský hřebec)", icon: "🐎" },
             { code: "M3", type: "TOWN", estateId: "M3", name: "Město 3 (Zlatov)", icon: "🏙️" },
@@ -825,10 +825,10 @@ window.KiDeskyMapGenerator = {
             { code: "MJ1", type: "MASTER", skill: "jizda", name: "Mistr Jízdy", icon: "🏇" },
             { code: "MCH2", type: "MASTER", skill: "charisma", name: "Mistr Charismatu", icon: "✨" },
             { code: "S11", type: "ANIMAL", subtype: "sokol", setId: 11, name: "Sokol 11 (Bílý raroh)", icon: "🦅" },
-            { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅" },
+            { code: "KOV_R", type: "BUILDING", subtype: "kovarna", name: "Hradní zbrojíř", icon: "⚒️" },
             { code: "U2_R1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "M4", type: "TOWN", estateId: "M4", name: "Město 4 (Mečov)", icon: "🏙️" },
-            { code: "K12", type: "ANIMAL", subtype: "kun", setId: 12, name: "Kůň 12 (Královský oř)", icon: "🐎" },
+            { code: "K11", type: "ANIMAL", subtype: "kun", setId: 11, name: "Kůň 11 (Hvězdný hřebec)", icon: "🐎" },
             { code: "VM2", type: "MASTER", skill: "any", name: "Velmistr", icon: "🧙‍♂️" },
             { code: "U2_R2", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "U3_1", type: "QUEST", subtype: "U3", name: "Dračí sluj I (U3)", icon: "🐉" },
@@ -862,7 +862,7 @@ window.KiDeskyMapGenerator = {
 
         // Větev 2 (Střední / Most Slavností)
         var bridgeDefs = [
-            { code: "S5", type: "ANIMAL", subtype: "sokol", setId: 5, name: "Sokol 5 (Královský ostříž)", icon: "🦅" },
+            { code: "SLAV_BRANA", type: "CHANCE", name: "Slavnostní brána", icon: "🎪" },
             { code: "N_BR1", type: "CHANCE", name: "Náhoda u mostu", icon: "❓" },
             { code: "M1", type: "TOWN", estateId: "M1", name: "Město 1 (Královo Pole)", icon: "🏙️" },
             { code: "KREJ1", type: "BUILDING", subtype: "krejci", name: "Krejčí 1", icon: "🧵" },
@@ -874,7 +874,7 @@ window.KiDeskyMapGenerator = {
             { code: "U1_BR", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
             { code: "U2_BR", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "V7", type: "VILLAGE", estateId: "V7", name: "Vesnice 7 (Slunečná)", icon: "🏘️", hasRoof: true },
-            { code: "S7", type: "ANIMAL", subtype: "sokol", setId: 7, name: "Sokol 7 (Luňák)", icon: "🦅" },
+            { code: "KRCMA_BR", type: "TAVERN", name: "Hradní šenk", icon: "🍺" },
             { code: "MCH_BR", type: "MASTER", skill: "charisma", name: "Mistr Dvornosti", icon: "✨" }
         ];
         var brStart = nodes.length;
@@ -905,10 +905,10 @@ window.KiDeskyMapGenerator = {
 
         // Větev 3 (Levá / Hrad 1)
         var leftBranchDefs = [
-            { code: "P9", type: "ANIMAL", subtype: "pes", setId: 9, name: "Pes 9 (Lovecký chrt)", icon: "🐕" },
+            { code: "S12", type: "ANIMAL", subtype: "sokol", setId: 12, name: "Sokol 12 (Fénixův sokol)", icon: "🦅" },
             { code: "SOK2", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 2", icon: "🦅" },
             { code: "U2_L1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
-            { code: "K11", type: "ANIMAL", subtype: "kun", setId: 11, name: "Kůň 11 (Hvězdný hřebec)", icon: "🐎" },
+            { code: "K12", type: "ANIMAL", subtype: "kun", setId: 12, name: "Kůň 12 (Královský oř)", icon: "🐎" },
             { code: "H1", type: "CASTLE", estateId: "H1", name: castleH1.name, icon: castleH1.icon },
             { code: "P12", type: "ANIMAL", subtype: "pes", setId: 12, name: "Pes 12 (Zlatý chrt)", icon: "🐕" },
             { code: "MT2", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃" }
@@ -1640,7 +1640,7 @@ buildClassic4599Board: function () {
             { code: "K3", type: "ANIMAL", subtype: "kun", setId: 3, name: "Kůň 3 (Vraník)", icon: "🐎" },
             { code: "N3", type: "CHANCE", name: "Náhoda", icon: "❓" },
             { code: "PSOV1", type: "BUILDING", subtype: "psovod", name: "Psovod 1", icon: "🦴" },
-            { code: "S11_OUT", type: "ANIMAL", subtype: "sokol", setId: 11, name: "Sokol 11 (Raroh)", icon: "🦅" },
+            { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅" },
             { code: "S3", type: "ANIMAL", subtype: "sokol", setId: 3, name: "Sokol 3 (Ostříž)", icon: "🦅" },
             { code: "N4", type: "CHANCE", name: "Náhoda", icon: "❓" },
             { code: "P3", type: "ANIMAL", subtype: "pes", setId: 3, name: "Pes 3 (Chrt)", icon: "🐕" },
@@ -1656,10 +1656,11 @@ buildClassic4599Board: function () {
         ];
         var rightPts = this.sampleBezier([1188, 134], [1365, 290], [1365, 650], [1160, 782], rightDefs.length, true);
 
-        // Sekce 3: Dolní rovinka zprava doleva od Kovárny 2 přes odbočku na most SLAVNOSTÍ až k S8 (indexy 32..51, 20 polí)
+        // Sekce 3: Dolní rovinka zprava doleva od Kovárny 2 přes odbočku na most SLAVNOSTÍ až k S7 (indexy 32..51, 20 polí)
         var bottomDefs = [
             { code: "KOV2", type: "BUILDING", subtype: "kovarna", name: "Kovárna 2", icon: "⚒️" },
             { code: "K5", type: "ANIMAL", subtype: "kun", setId: 5, name: "Kůň 5 (Bělouš)", icon: "🐎" },
+            { code: "S5", type: "ANIMAL", subtype: "sokol", setId: 5, name: "Sokol 5 (Královský ostříž)", icon: "🦅" },
             { code: "V4", type: "VILLAGE", estateId: "V4", name: "Vesnice 4 (Dubina)", icon: "🏘️" },
             { code: "P5", type: "ANIMAL", subtype: "pes", setId: 5, name: "Pes 5 (Slídič)", icon: "🐕" },
             { code: "U1_2", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
@@ -1667,7 +1668,6 @@ buildClassic4599Board: function () {
             { code: "U1_3", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
             { code: "K6", type: "ANIMAL", subtype: "kun", setId: 6, name: "Kůň 6 (Plavák)", icon: "🐎" },
             { code: "VD2", type: "TAX", name: "Výběrčí daní", icon: "👑" },
-            { code: "U1_4", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
             { code: "KE3", type: "JESTER", jesterId: 3, name: "Kejklíř 3", icon: "🃏" },
             { code: "SATL", type: "PRISON", name: "Královská šatlava", icon: "⛓️" },
             { code: "OBCHOD3", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
@@ -1677,7 +1677,7 @@ buildClassic4599Board: function () {
             { code: "V5", type: "VILLAGE", estateId: "V5", name: "Vesnice 5 (Skalice)", icon: "🏘️", hasRoof: true },
             { code: "M2", type: "TOWN", estateId: "M2", name: "Město 2 (Stříbratec)", icon: "🏙️" },
             { code: "K7", type: "ANIMAL", subtype: "kun", setId: 7, name: "Kůň 7 (Šiml)", icon: "🐎" },
-            { code: "S8", type: "ANIMAL", subtype: "sokol", setId: 8, name: "Sokol 8 (Orlovec)", icon: "🦅" }
+            { code: "S7", type: "ANIMAL", subtype: "sokol", setId: 7, name: "Sokol 7 (Luňák)", icon: "🦅" }
         ];
         var bottomPts = this.sampleBezier([1110, 795], [820, 804], [520, 804], [255, 795], bottomDefs.length, true);
 
@@ -1688,7 +1688,7 @@ buildClassic4599Board: function () {
             { code: "P7", type: "ANIMAL", subtype: "pes", setId: 7, name: "Pes 7 (Doga)", icon: "🐕" },
             { code: "V6", type: "VILLAGE", estateId: "V6", name: "Vesnice 6 (Meziříčí)", icon: "🏘️" },
             { code: "N8", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "S12", type: "ANIMAL", subtype: "sokol", setId: 12, name: "Sokol 12 (Fénixův sokol)", icon: "🦅" },
+            { code: "S8", type: "ANIMAL", subtype: "sokol", setId: 8, name: "Sokol 8 (Orlovec)", icon: "🦅" },
             { code: "KE4", type: "JESTER", jesterId: 4, name: "Kejklíř 4", icon: "🃏" },
             { code: "VM1", type: "MASTER", skill: "any", name: "Velmistr", icon: "🧙‍♂️" },
             { code: "K8", type: "ANIMAL", subtype: "kun", setId: 8, name: "Kůň 8 (Fríský oř)", icon: "🐎" },
@@ -1696,7 +1696,7 @@ buildClassic4599Board: function () {
             { code: "P8", type: "ANIMAL", subtype: "pes", setId: 8, name: "Pes 8 (Chrtí král)", icon: "🐕" },
             { code: "S9", type: "ANIMAL", subtype: "sokol", setId: 9, name: "Sokol 9 (Jestřáb)", icon: "🦅" },
             { code: "OBCHOD4", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
-            { code: "U1_5", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
+            { code: "P9", type: "ANIMAL", subtype: "pes", setId: 9, name: "Pes 9 (Lovecký chrt)", icon: "🐕" },
             { code: "V8", type: "VILLAGE", estateId: "V8", name: "Vesnice 8 (Podhradí)", icon: "🏘️" },
             { code: "K9", type: "ANIMAL", subtype: "kun", setId: 9, name: "Kůň 9 (Andaluský hřebec)", icon: "🐎" },
             { code: "M3", type: "TOWN", estateId: "M3", name: "Město 3 (Zlatov)", icon: "🏙️" },
@@ -1746,16 +1746,15 @@ buildClassic4599Board: function () {
         }
 
         // B) VNITŘNÍ VĚTEV 1 (PRAVÁ): Odbočka z P2 (uzel 13) kolem Zvěře/Monster/Draků a Hradu 2 -> návrat do N5 (uzel 31)
-        // Přesně podle pravého listu IMG_4599: P11 -> MJ -> MCH -> S11 -> Sokolník 1 -> U2 -> M4 -> K12 -> Mistr -> U2 -> U3 -> U3 -> Hrad 2
         var rightBranchDefs = [
             { code: "P11", type: "ANIMAL", subtype: "pes", setId: 11, name: "Pes 11 (Stříbrný ohař)", icon: "🐕" },
             { code: "MJ1", type: "MASTER", skill: "jizda", name: "Mistr Jízdy", icon: "🏇" },
             { code: "MCH2", type: "MASTER", skill: "charisma", name: "Mistr Charismatu", icon: "✨" },
             { code: "S11", type: "ANIMAL", subtype: "sokol", setId: 11, name: "Sokol 11 (Bílý raroh)", icon: "🦅" },
-            { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅" },
+            { code: "KOV_R", type: "BUILDING", subtype: "kovarna", name: "Hradní zbrojíř", icon: "⚒️" },
             { code: "U2_R1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "M4", type: "TOWN", estateId: "M4", name: "Město 4 (Mečov)", icon: "🏙️" },
-            { code: "K12", type: "ANIMAL", subtype: "kun", setId: 12, name: "Kůň 12 (Královský oř)", icon: "🐎" },
+            { code: "K11", type: "ANIMAL", subtype: "kun", setId: 11, name: "Kůň 11 (Hvězdný hřebec)", icon: "🐎" },
             { code: "VM2", type: "MASTER", skill: "any", name: "Velmistr", icon: "🧙‍♂️" },
             { code: "U2_R2", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "U3_1", type: "QUEST", subtype: "U3", name: "Dračí sluj I (U3)", icon: "🐉" },
@@ -1789,9 +1788,8 @@ buildClassic4599Board: function () {
         nodes[13].branchHigh = rbStart;
 
         // C) VNITŘNÍ VĚTEV 2 (STŘEDNÍ MOST SLAVNOSTÍ POD HRADEM):
-        // Odbočka ze S6 (uzel 37) obloukem přes S5 -> N -> M1 -> Krejčí 1 -> SLAVNOST (Turnaj, Ples, Závod) -> N -> MT -> U1 -> U2 -> V7 -> S7 -> M -> návrat do S8 (uzel 51)
         var bridgeDefs = [
-            { code: "S5", type: "ANIMAL", subtype: "sokol", setId: 5, name: "Sokol 5 (Královský ostříž)", icon: "🦅" },
+            { code: "SLAV_BRANA", type: "CHANCE", name: "Slavnostní brána", icon: "🎪" },
             { code: "N_BR1", type: "CHANCE", name: "Náhoda u mostu", icon: "❓" },
             { code: "M1", type: "TOWN", estateId: "M1", name: "Město 1 (Královo Pole)", icon: "🏙️" },
             { code: "KREJ1", type: "BUILDING", subtype: "krejci", name: "Krejčí 1", icon: "🧵" },
@@ -1803,7 +1801,7 @@ buildClassic4599Board: function () {
             { code: "U1_BR", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
             { code: "U2_BR", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "V7", type: "VILLAGE", estateId: "V7", name: "Vesnice 7 (Slunečná)", icon: "🏘️", hasRoof: true },
-            { code: "S7", type: "ANIMAL", subtype: "sokol", setId: 7, name: "Sokol 7 (Luňák)", icon: "🦅" },
+            { code: "KRCMA_BR", type: "TAVERN", name: "Hradní šenk", icon: "🍺" },
             { code: "MCH_BR", type: "MASTER", skill: "charisma", name: "Mistr Dvornosti", icon: "✨" }
         ];
         var bridgePts = this.sampleBezier([845, 745], [690, 540], [430, 540], [275, 745], bridgeDefs.length, true);
@@ -1834,12 +1832,11 @@ buildClassic4599Board: function () {
         nodes[37].branchHigh = brStart;
 
         // D) VNITŘNÍ VĚTEV 3 (LEVÁ SMYČKA KOLEM HRADU 1):
-        // Přesně podle levého listu IMG_4599: odbočka z OBCHOD5 (uzel 76) dolů doleva přes P9 -> Sokolník 2 -> U2 -> K11 -> Hrad 1 -> P12 -> MT -> napojení do K9 (uzel 67)
         var leftBranchDefs = [
-            { code: "P9", type: "ANIMAL", subtype: "pes", setId: 9, name: "Pes 9 (Lovecký chrt)", icon: "🐕" },
+            { code: "S12", type: "ANIMAL", subtype: "sokol", setId: 12, name: "Sokol 12 (Fénixův sokol)", icon: "🦅" },
             { code: "SOK2", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 2", icon: "🦅" },
             { code: "U2_L1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
-            { code: "K11", type: "ANIMAL", subtype: "kun", setId: 11, name: "Kůň 11 (Hvězdný hřebec)", icon: "🐎" },
+            { code: "K12", type: "ANIMAL", subtype: "kun", setId: 12, name: "Kůň 12 (Královský oř)", icon: "🐎" },
             { code: "H1", type: "CASTLE", estateId: "H1", name: "Hrad 1 (Lví Hrad)", icon: "🏯" },
             { code: "P12", type: "ANIMAL", subtype: "pes", setId: 12, name: "Pes 12 (Zlatý chrt)", icon: "🐕" },
             { code: "MT2", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃" }
@@ -1975,29 +1972,29 @@ buildClassic4599Board: function () {
             // Horní okraj od STARTu doprava k odbočce u Výběrčího daní (uzly 0..5)
             { code: "START", type: "START", name: "START (+3 000 zl.)", icon: "🏰", x: 700, y: 68, next: [1] },
             { code: "OBCHOD1", type: "MERCHANT", name: "Obchodník", icon: "⚖️", x: 810, y: 80, next: [2] },
-            { code: "S1", type: "ANIMAL", subtype: "sokol", setId: 1, name: "Sokol 1", icon: "🦅", x: 910, y: 105, next: [3] },
-            { code: "P1", type: "ANIMAL", subtype: "pes", setId: 1, name: "Pes 1", icon: "🐕", x: 1005, y: 140, next: [4] },
+            { code: "S1", type: "ANIMAL", subtype: "sokol", setId: 1, name: "Sokol 1 (Poštolka)", icon: "🦅", x: 910, y: 105, next: [3] },
+            { code: "P1", type: "ANIMAL", subtype: "pes", setId: 1, name: "Pes 1 (Ohař)", icon: "🐕", x: 1005, y: 140, next: [4] },
             { code: "N1", type: "CHANCE", name: "Náhoda", icon: "❓", x: 1090, y: 185, next: [5] },
             { code: "VD1", type: "TAX", name: "Výběrčí daní – Odbočka k věži", icon: "👑", isJunction: true, x: 1160, y: 240, branchLow: 6, branchHigh: 13 },
 
             // 1. Vnější okruh vpravo dolů (1–3) k uzlu N2 (uzly 6..12)
-            { code: "K1", type: "ANIMAL", subtype: "kun", setId: 1, name: "Kůň 1", icon: "🐎", x: 1240, y: 315, next: [7] },
-            { code: "V1", type: "VILLAGE", estateId: "V1", name: "Vesnice 1", icon: "🏘️", hasRoof: true, x: 1275, y: 405, next: [8] },
-            { code: "K10", type: "ANIMAL", subtype: "kun", setId: 10, name: "Kůň 10", icon: "🐎", x: 1285, y: 495, next: [9] },
-            { code: "P10", type: "ANIMAL", subtype: "pes", setId: 10, name: "Pes 10", icon: "🐕", x: 1265, y: 585, next: [10] },
-            { code: "S10", type: "ANIMAL", subtype: "sokol", setId: 10, name: "Sokol 10", icon: "🦅", x: 1220, y: 670, next: [11] },
+            { code: "K1", type: "ANIMAL", subtype: "kun", setId: 1, name: "Kůň 1 (Grošák)", icon: "🐎", x: 1240, y: 315, next: [7] },
+            { code: "V1", type: "VILLAGE", estateId: "V1", name: "Vesnice 1 (Králova Lhota)", icon: "🏘️", hasRoof: true, x: 1275, y: 405, next: [8] },
+            { code: "K2", type: "ANIMAL", subtype: "kun", setId: 2, name: "Kůň 2 (Hnědák)", icon: "🐎", x: 1285, y: 495, next: [9] },
+            { code: "S2", type: "ANIMAL", subtype: "sokol", setId: 2, name: "Sokol 2 (Krahujec)", icon: "🦅", x: 1265, y: 585, next: [10] },
+            { code: "P2", type: "ANIMAL", subtype: "pes", setId: 2, name: "Pes 2 (Bígl)", icon: "🐕", x: 1220, y: 670, next: [11] },
             { code: "U1_1", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗", x: 1150, y: 740, next: [12] },
-            { code: "K2", type: "ANIMAL", subtype: "kun", setId: 2, name: "Kůň 2", icon: "🐎", x: 1060, y: 785, next: [21] },
+            { code: "STAJE1", type: "BUILDING", subtype: "staje", name: "Stáje 1", icon: "🏠", x: 1060, y: 785, next: [21] },
 
             // 1. Vnitřní větev přes Lesní věž (+200 zl.) a Mistry (4–6) k uzlu N2 (uzly 13..20)
             { code: "BON_200", type: "BONUS", bonusGold: 200, name: "Lesní věž (+200 zl.)", icon: "⛲", x: 1075, y: 260, next: [14] },
             { code: "MT1", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃", x: 1030, y: 325, next: [15] },
-            { code: "M1", type: "TOWN", estateId: "M1", name: "Město 1", icon: "🏙️", x: 995, y: 395, next: [16] },
-            { code: "P9", type: "ANIMAL", subtype: "pes", setId: 9, name: "Pes 9", icon: "🐕", x: 975, y: 470, next: [17] },
+            { code: "M1", type: "TOWN", estateId: "M1", name: "Město 1 (Královo Pole)", icon: "🏙️", x: 995, y: 395, next: [16] },
+            { code: "PSOV1", type: "BUILDING", subtype: "psovod", name: "Psovod 1", icon: "🦴", x: 975, y: 470, next: [17] },
             { code: "HOSP", type: "HOSPITAL", name: "Lesní lazaret", icon: "🏥", x: 965, y: 545, next: [18] },
             { code: "MB2", type: "MASTER", skill: "boj", name: "Mistr Boje", icon: "⚔️", x: 975, y: 620, next: [19] },
             { code: "U2_1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹", x: 1000, y: 690, next: [20] },
-            { code: "K8", type: "ANIMAL", subtype: "kun", setId: 8, name: "Kůň 8", icon: "🐎", x: 1035, y: 745, next: [21] },
+            { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅", x: 1035, y: 745, next: [21] },
 
             // Spodní spojnice k odbočce na most Slavností (uzly 21..23)
             { code: "KRCMA", type: "TAVERN", name: "Zájezdní hostinec", icon: "🍺", x: 970, y: 805, next: [22] },
@@ -2005,44 +2002,44 @@ buildClassic4599Board: function () {
             { code: "KE1", type: "JESTER", jesterId: 1, name: "Kejklíř 1 – Odbočka ke Slavnosti", icon: "🃏", isJunction: true, x: 790, y: 820, branchLow: 24, branchHigh: 28 },
 
             // 2. Spodní bezpečná cesta pod hradem (1–3) k Vesnici 3 (uzly 24..27)
-            { code: "V2", type: "VILLAGE", estateId: "V2", name: "Vesnice 2", icon: "🏘️", hasRoof: true, x: 700, y: 825, next: [25] },
+            { code: "V2", type: "VILLAGE", estateId: "V2", name: "Vesnice 2 (Lhotka)", icon: "🏘️", hasRoof: true, x: 700, y: 825, next: [25] },
             { code: "VD2", type: "TAX", name: "Výběrčí daní", icon: "👑", x: 610, y: 822, next: [26] },
             { code: "U1_2", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗", x: 520, y: 815, next: [27] },
-            { code: "P2", type: "ANIMAL", subtype: "pes", setId: 2, name: "Pes 2", icon: "🐕", x: 430, y: 805, next: [33] },
+            { code: "K3", type: "ANIMAL", subtype: "kun", setId: 3, name: "Kůň 3 (Vraník)", icon: "🐎", x: 430, y: 805, next: [33] },
 
             // 2. Most Slavností ♡ ♡ ♡ pod Královským hradem (4–6) k Vesnici 3 (uzly 28..32)
-            { code: "U1_BR", type: "QUEST", subtype: "U1", name: "Lov u mostu (U1)", icon: "🐗", x: 800, y: 725, next: [29] },
+            { code: "K4", type: "ANIMAL", subtype: "kun", setId: 4, name: "Kůň 4 (Ryzák)", icon: "🐎", x: 800, y: 725, next: [29] },
             { code: "SLAV_TURNAJ", type: "FESTIVAL", subtype: "turnaj", name: "SLAVNOST: Turnaj ♡ – Východ na hod 1–3", icon: "💖", isJunction: true, x: 735, y: 655, branchLow: 25, branchHigh: 30 },
             { code: "SLAV_PLES", type: "FESTIVAL", subtype: "ples", name: "SLAVNOST: Ples ♡", icon: "💖", x: 665, y: 645, next: [31] },
             { code: "SLAV_ZAVOD", type: "FESTIVAL", subtype: "zavod", name: "SLAVNOST: Závod ♡", icon: "💖", x: 595, y: 655, next: [32] },
-            { code: "BON_400", type: "BONUS", bonusGold: 400, name: "Královská cesta (+400 zl.)", icon: "🏛️", x: 515, y: 720, next: [33] },
+            { code: "S4", type: "ANIMAL", subtype: "sokol", setId: 4, name: "Sokol 4 (Raroh)", icon: "🦅", x: 515, y: 720, next: [33] },
 
             // Levá stoupající cesta k Dračí odbočce (uzly 33..37)
-            { code: "V3", type: "VILLAGE", estateId: "V3", name: "Vesnice 3", icon: "🏘️", hasRoof: true, x: 350, y: 785, next: [34] },
-            { code: "P3", type: "ANIMAL", subtype: "pes", setId: 3, name: "Pes 3", icon: "🐕", x: 265, y: 745, next: [35] },
-            { code: "MB1", type: "MASTER", skill: "boj", name: "Mistr Boje", icon: "⚔️", x: 195, y: 680, next: [36] },
-            { code: "S2", type: "ANIMAL", subtype: "sokol", setId: 2, name: "Sokol 2", icon: "🦅", x: 145, y: 600, next: [37] },
+            { code: "V3", type: "VILLAGE", estateId: "V3", name: "Vesnice 3 (Březová)", icon: "🏘️", hasRoof: true, x: 350, y: 785, next: [34] },
+            { code: "P3", type: "ANIMAL", subtype: "pes", setId: 3, name: "Pes 3 (Chrt)", icon: "🐕", x: 265, y: 745, next: [35] },
+            { code: "P4", type: "ANIMAL", subtype: "pes", setId: 4, name: "Pes 4 (Barvář)", icon: "🐕", x: 195, y: 680, next: [36] },
+            { code: "S3", type: "ANIMAL", subtype: "sokol", setId: 3, name: "Sokol 3 (Ostříž)", icon: "🦅", x: 145, y: 600, next: [37] },
             { code: "V7", type: "VILLAGE", estateId: "V7", name: "Vesnice 7 – Odbočka k drakovi", icon: "🏘️", hasRoof: true, isJunction: true, x: 118, y: 510, branchLow: 38, branchHigh: 42 },
 
             // 3. Levá bezpečná cesta podél útesu (1–3) ke Koni 6 (uzly 38..41)
             { code: "SATL", type: "PRISON", name: "Hradní žalář", icon: "⛓️", x: 110, y: 420, next: [39] },
-            { code: "K3", type: "ANIMAL", subtype: "kun", setId: 3, name: "Kůň 3", icon: "🐎", x: 125, y: 330, next: [40] },
+            { code: "K5", type: "ANIMAL", subtype: "kun", setId: 5, name: "Kůň 5 (Bělouš)", icon: "🐎", x: 125, y: 330, next: [40] },
             { code: "VD3", type: "TAX", name: "Výběrčí daní", icon: "👑", x: 165, y: 250, next: [41] },
-            { code: "U1_3", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗", x: 225, y: 185, next: [48] },
+            { code: "S5", type: "ANIMAL", subtype: "sokol", setId: 5, name: "Sokol 5 (Královský ostříž)", icon: "🦅", x: 225, y: 185, next: [48] },
 
             // 3. Dračí stezka (+300 zl.) do sluje Tříhlavé saně (4–6) ke Koni 6 (uzly 42..47)
             { code: "BON_300", type: "BONUS", bonusGold: 300, name: "Dračí stezka (+300 zl.)", icon: "⛩️", x: 200, y: 490, next: [43] },
-            { code: "MCH1", type: "MASTER", skill: "charisma", name: "Mistr Charismatu", icon: "✨", x: 265, y: 445, next: [44] },
-            { code: "H1", type: "CASTLE", estateId: "H1", name: "Hrad 1", icon: "🏯", x: 305, y: 390, next: [45] },
+            { code: "P5", type: "ANIMAL", subtype: "pes", setId: 5, name: "Pes 5 (Slídič)", icon: "🐕", x: 265, y: 445, next: [44] },
+            { code: "H1", type: "CASTLE", estateId: "H1", name: "Hrad 1 (Dračí Hrad)", icon: "🏯", x: 305, y: 390, next: [45] },
             { code: "U3_DRAK", type: "QUEST", subtype: "U3", name: "Tříhlavá saň (U3)", icon: "🐲", x: 315, y: 320, next: [46] },
             { code: "VM1", type: "MASTER", skill: "any", name: "Velmistr", icon: "🧙‍♂️", x: 295, y: 245, next: [47] },
-            { code: "K12", type: "ANIMAL", subtype: "kun", setId: 12, name: "Kůň 12", icon: "🐎", x: 260, y: 180, next: [48] },
+            { code: "K6", type: "ANIMAL", subtype: "kun", setId: 6, name: "Kůň 6 (Plavák)", icon: "🐎", x: 260, y: 180, next: [48] },
 
             // Návratová cesta podél hradeb zpět ke STARTu (uzly 48..51)
-            { code: "K6", type: "ANIMAL", subtype: "kun", setId: 6, name: "Kůň 6", icon: "🐎", x: 320, y: 115, next: [49] },
-            { code: "S6", type: "ANIMAL", subtype: "sokol", setId: 6, name: "Sokol 6", icon: "🦅", x: 410, y: 85, next: [50] },
-            { code: "V6", type: "VILLAGE", estateId: "V6", name: "Vesnice 6", icon: "🏘️", hasRoof: true, x: 510, y: 72, next: [51] },
-            { code: "P7", type: "ANIMAL", subtype: "pes", setId: 7, name: "Pes 7", icon: "🐕", x: 610, y: 68, next: [0] }
+            { code: "S6", type: "ANIMAL", subtype: "sokol", setId: 6, name: "Sokol 6 (Jestřábník)", icon: "🦅", x: 320, y: 115, next: [49] },
+            { code: "P6", type: "ANIMAL", subtype: "pes", setId: 6, name: "Pes 6 (Vlkodav)", icon: "🐕", x: 410, y: 85, next: [50] },
+            { code: "V4", type: "VILLAGE", estateId: "V4", name: "Vesnice 4 (Dubina)", icon: "🏘️", hasRoof: true, x: 510, y: 72, next: [51] },
+            { code: "KOV1", type: "BUILDING", subtype: "kovarna", name: "Kovárna 1", icon: "⚒️", x: 610, y: 68, next: [0] }
         ];
 
         var nodes = rawNodes.map(function (n, i) {
@@ -2097,27 +2094,67 @@ buildClassic4599Board: function () {
     // 3. ZKRÁCENÝ RYTÍŘSKÝ PLÁN (Pro rychlé testování ~40 min)
     // ========================================================================
     buildCompactBoard: function () {
-        var full = this.buildClassic4599Board();
+        var outerDefs = [
+            { code: "START", type: "START", name: "START (+3 000 zl.)", icon: "🏰" },
+            { code: "K1", type: "ANIMAL", subtype: "kun", setId: 1, name: "Kůň 1 (Grošák)", icon: "🐎" },
+            { code: "S1", type: "ANIMAL", subtype: "sokol", setId: 1, name: "Sokol 1 (Poštolka)", icon: "🦅" },
+            { code: "P1", type: "ANIMAL", subtype: "pes", setId: 1, name: "Pes 1 (Ohař)", icon: "🐕" },
+            { code: "STAJE1", type: "BUILDING", subtype: "staje", name: "Stáje 1", icon: "🏠" },
+            { code: "V1", type: "VILLAGE", estateId: "V1", name: "Vesnice 1 (Králova Lhota)", icon: "🏘️", hasRoof: true },
+            { code: "OBCHOD1", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
+            { code: "N1", type: "CHANCE", name: "Náhoda", icon: "❓" },
+            { code: "VD1", type: "TAX", name: "Výběrčí daní", icon: "👑" },
+            { code: "K2", type: "ANIMAL", subtype: "kun", setId: 2, name: "Kůň 2 (Hnědák)", icon: "🐎" },
+            { code: "S2", type: "ANIMAL", subtype: "sokol", setId: 2, name: "Sokol 2 (Krahujec)", icon: "🦅" },
+            { code: "P2", type: "ANIMAL", subtype: "pes", setId: 2, name: "Pes 2 (Bígl)", icon: "🐕" },
+            { code: "PSOV1", type: "BUILDING", subtype: "psovod", name: "Psovod 1", icon: "🦴" },
+            { code: "V2", type: "VILLAGE", estateId: "V2", name: "Vesnice 2 (Lhotka)", icon: "🏘️", hasRoof: true },
+            { code: "HOSP", type: "HOSPITAL", name: "Královský lazaret", icon: "🏥" },
+            { code: "KE1", type: "JESTER", jesterId: 1, name: "Kejklíř 1", icon: "🃏" },
+            { code: "M1", type: "TOWN", estateId: "M1", name: "Město 1 (Královo Pole)", icon: "🏙️" },
+            { code: "K3", type: "ANIMAL", subtype: "kun", setId: 3, name: "Kůň 3 (Vraník)", icon: "🐎" },
+            { code: "S3", type: "ANIMAL", subtype: "sokol", setId: 3, name: "Sokol 3 (Ostříž)", icon: "🦅" },
+            { code: "P3", type: "ANIMAL", subtype: "pes", setId: 3, name: "Pes 3 (Chrt)", icon: "🐕" },
+            { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅" },
+            { code: "V3", type: "VILLAGE", estateId: "V3", name: "Vesnice 3 (Březová)", icon: "🏘️", hasRoof: true },
+            { code: "N2", type: "CHANCE", name: "Náhoda", icon: "❓" },
+            { code: "KOV1", type: "BUILDING", subtype: "kovarna", name: "Kovárna 1", icon: "⚒️" },
+            { code: "SATL", type: "PRISON", name: "Královská šatlava", icon: "⛓️" },
+            { code: "K4", type: "ANIMAL", subtype: "kun", setId: 4, name: "Kůň 4 (Ryzák) – Odbočka", icon: "🐎", isJunction: true },
+            { code: "S4", type: "ANIMAL", subtype: "sokol", setId: 4, name: "Sokol 4 (Raroh)", icon: "🦅" },
+            { code: "P4", type: "ANIMAL", subtype: "pes", setId: 4, name: "Pes 4 (Barvář)", icon: "🐕" },
+            { code: "V4", type: "VILLAGE", estateId: "V4", name: "Vesnice 4 (Dubina)", icon: "🏘️", hasRoof: true },
+            { code: "M2", type: "TOWN", estateId: "M2", name: "Město 2 (Stříbratec)", icon: "🏙️" },
+            { code: "KRCMA", type: "TAVERN", name: "Krčma U Zlatého korbelu", icon: "🍺" },
+            { code: "H1", type: "CASTLE", estateId: "H1", name: "Hrad 1 (Královský hrad)", icon: "🏰" },
+            { code: "OBCHOD2", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
+            { code: "N3", type: "CHANCE", name: "Náhoda", icon: "❓" }
+        ];
+
         var compactNodes = [];
-        var outerCount = 34;
+        var outerCount = outerDefs.length;
         for (var i = 0; i < outerCount; i++) {
-            var src = full.nodes[(i * 2) % 68];
+            var src = outerDefs[i];
             var angle = (i / outerCount) * Math.PI * 2 - Math.PI / 2;
             var rx = 560, ry = 330;
             compactNodes.push({
                 id: i,
-                code: i === 0 ? "START" : src.code,
-                type: i === 0 ? "START" : src.type,
-                subtype: src.subtype,
-                setId: src.setId,
-                estateId: src.estateId,
-                jesterId: src.jesterId,
-                skill: src.skill,
-                name: i === 0 ? "START (+3 000 zl.)" : src.name,
-                icon: i === 0 ? "🏰" : src.icon,
+                code: src.code,
+                type: src.type,
+                subtype: src.subtype || null,
+                setId: src.setId || null,
+                estateId: src.estateId || null,
+                jesterId: src.jesterId || null,
+                skill: src.skill || null,
+                hasRoof: !!src.hasRoof,
+                isJunction: !!src.isJunction,
+                name: src.name,
+                icon: src.icon,
                 x: Math.round(700 + Math.cos(angle) * rx),
                 y: Math.round(430 + Math.sin(angle) * ry),
-                next: [(i + 1) % outerCount]
+                next: [(i + 1) % outerCount],
+                branchLow: null,
+                branchHigh: null
             });
         }
 
