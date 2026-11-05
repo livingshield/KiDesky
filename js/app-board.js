@@ -838,8 +838,10 @@
             out.push('    <path d="' + riv.path + '" stroke="rgba(12,24,36,0.65)" stroke-width="' + (rw + 6) + '" stroke-linecap="round" fill="none"/>');
             // 2. Vodní hladina
             out.push('    <path d="' + riv.path + '" stroke="' + (riv.color || '#0284c7') + '" stroke-width="' + rw + '" stroke-linecap="round" fill="none" opacity="0.82"/>');
-            // 3. Světelné odlesky na vlnkách
-            out.push('    <path d="' + riv.path + '" stroke="#bae6fd" stroke-width="' + Math.max(2, rw * 0.28) + '" stroke-linecap="round" stroke-dasharray="14,18" fill="none" opacity="0.75"/>');
+            // 3. Světelné odlesky na vlnkách s animací proudu vody
+            out.push('    <path d="' + riv.path + '" stroke="#bae6fd" stroke-width="' + Math.max(2, rw * 0.28) + '" stroke-linecap="round" stroke-dasharray="12,18" fill="none" opacity="0.78">');
+            out.push('      <animate attributeName="stroke-dashoffset" values="0;-30" dur="2.4s" repeatCount="indefinite"/>');
+            out.push('    </path>');
         }
         out.push('  </g>');
         return out.join("\n");
@@ -852,9 +854,15 @@
         for (var b = 0; b < board.bridges.length; b++) {
             var brg = board.bridges[b];
             out.push('    <g class="board-bridge-item" transform="translate(' + brg.x + ',' + brg.y + ') rotate(' + brg.angle + ')">');
+            // Stín mostu na hladinu řeky
+            out.push('      <rect x="-19" y="-14" width="38" height="28" rx="4" fill="rgba(0,0,0,0.52)"/>');
             // Mostovka (kamenná deska pod cestou)
             out.push('      <rect x="-18" y="-13" width="36" height="26" rx="4" fill="#3f3f46" stroke="#18181b" stroke-width="1.6"/>');
             out.push('      <rect x="-16" y="-11" width="32" height="22" rx="3" fill="#71717a" stroke="#d4af37" stroke-width="0.9"/>');
+            // Dřevěná prkna mostu
+            out.push('      <line x1="-10" y1="-11" x2="-10" y2="11" stroke="#3f3f46" stroke-width="1.1"/>');
+            out.push('      <line x1="-2" y1="-11" x2="-2" y2="11" stroke="#3f3f46" stroke-width="1.1"/>');
+            out.push('      <line x1="6" y1="-11" x2="6" y2="11" stroke="#3f3f46" stroke-width="1.1"/>');
             // Zábradlí po obou stranách
             out.push('      <line x1="-18" y1="-13" x2="18" y2="-13" stroke="#d4af37" stroke-width="2.4"/>');
             out.push('      <line x1="-18" y1="13" x2="18" y2="13" stroke="#d4af37" stroke-width="2.4"/>');
