@@ -1346,29 +1346,21 @@ window.PRS_App = {
         var castleImg = new Image();
         castleImg.src = "assets/landmarks/royal_castle.png";
 
-        // 2. Královský drak (Červený ohnivý drak U3)
+        // 2. Královský drak (Červený ohnivý drak U3) pro Dračí sluj
         var dragonImg = new Image();
         dragonImg.src = "assets/dragons/dragon_red.png";
 
-        // 3. Bestiář monstrum (Vlkodlak U1/U2)
-        var monsterImg = new Image();
-        monsterImg.src = "assets/monsters/monster_alpha_werewolf.png";
-
-        // 4. Nové 2.5D figurky rytířů z královské sady figurek
+        // 3. Nová 2.5D figurka rytíře
         var knightPawnImg = new Image();
         knightPawnImg.src = "assets/pawns/pawn_knight_valiant.png";
 
-        var huntressPawnImg = new Image();
-        huntressPawnImg.src = "assets/pawns/pawn_lady_huntress.png";
-
-        // 5. Nová dobrodružná trasa královstvím (6 klíčových políček)
+        // 4. Harmonická pětice medailonků na královské pouti
         var questTiles = [
-            { rx: 0.08, ry: 0.62, label: "Start", title: "Startovní rozcestí", color: "#eab308", icon: "🚩", src: "assets/tiles/start.png", story: "🚩 1. Startovní rozcestí: Rytíř vyráží s 10 000 zlaťáky do světa" },
-            { rx: 0.23, ry: 0.38, label: "Chov koní", title: "Královské stáje", color: "#f59e0b", icon: "🐎", src: "assets/tiles/kun.jpg", story: "🐎 2. Chov koní & panství: Budování stájí, chov zvířat a výběr nájmů" },
-            { rx: 0.39, ry: 0.64, label: "Hvozd zvěře", title: "Nebezpečný hvozd", color: "#10b981", icon: "🐺", src: "assets/tiles/u1_zver.jpg", story: "🐺 3. Hvozd se zvěří: Zkouška rytířských ctností v lovu divočáků a vlkodlaků" },
-            { rx: 0.55, ry: 0.34, label: "Turnaj & Hrad", title: "Turnaj rytířů", color: "#38bdf8", icon: "🏰", src: "assets/tiles/castle.png", story: "🏰 4. Královský turnaj: Klání mistrů v boji, jízdě na koni a tanci" },
-            { rx: 0.72, ry: 0.64, label: "Dračí sluj", title: "Doupě draků U3", color: "#ef4444", icon: "🐉", src: "assets/tiles/u3_drak.jpg", story: "🐉 5. Dračí doupě: Epický souboj s plamenným Červeným drakem o poklad!" },
-            { rx: 0.89, ry: 0.38, label: "Slavnosti 💖", title: "Královské slavnosti", color: "#ec4899", icon: "💖", src: "assets/tiles/festival.jpg", story: "💖 6. Královské slavnosti: Zisk 30 Princezniných srdcí a vítězství!" }
+            { rx: 0.12, ry: 0.58, label: "Start", color: "#10b981", icon: "🚩", src: "assets/tiles/start.png", story: "🚩 1. Startovní rozcestí: Rytíř vyráží s 10 000 zlaťáky do světa" },
+            { rx: 0.31, ry: 0.40, label: "Chov koní", color: "#f59e0b", icon: "🐎", src: "assets/tiles/kun.jpg", story: "🐎 2. Chov koní & stáje: Budování panství, zvířata a výběr nájmů" },
+            { rx: 0.50, ry: 0.58, label: "Hrad & Turnaj", color: "#0ea5e9", icon: "🏰", src: "assets/tiles/castle.png", story: "🏰 3. Královský turnaj: Klání mistrů ve 4 královských ctnostech" },
+            { rx: 0.69, ry: 0.40, label: "Dračí sluj", color: "#ef4444", icon: "🐉", src: "assets/tiles/u3_drak.jpg", story: "🐉 4. Dračí sluj: Epický souboj s ohnivým drakem o slavný poklad" },
+            { rx: 0.88, ry: 0.58, label: "Slavnosti 💖", color: "#ec4899", icon: "💖", src: "assets/tiles/festival.jpg", story: "💖 5. Královské slavnosti: Zisk 30 Princezniných srdcí a vítězství!" }
         ];
 
         for (var i = 0; i < questTiles.length; i++) {
@@ -1380,34 +1372,47 @@ window.PRS_App = {
         var t = 0;
         var lastStoryIdx = -1;
 
-        // Magické jiskry a ohnivé částečky draka
+        // Magické jiskry a srdíčka
         var sparks = [];
-        for (var s = 0; s < 32; s++) {
+        for (var s = 0; s < 26; s++) {
             sparks.push({
                 x: Math.random() * 640,
                 y: Math.random() * 360,
-                r: 1.2 + Math.random() * 2.2,
-                vy: -0.35 - Math.random() * 0.6,
-                vx: (Math.random() - 0.5) * 0.45,
-                alpha: 0.25 + Math.random() * 0.7,
-                hue: Math.random() > 0.4 ? 48 : (Math.random() > 0.5 ? 12 : 330)
+                r: 1.2 + Math.random() * 2.0,
+                vy: -0.3 - Math.random() * 0.45,
+                vx: (Math.random() - 0.5) * 0.35,
+                alpha: 0.25 + Math.random() * 0.65,
+                type: Math.random() > 0.3 ? "gold" : "rose"
             });
         }
 
+        // Ohnivé jiskřičky u Dračí sluje
         var dragonEmbers = [];
-        for (var de = 0; de < 18; de++) {
+        for (var de = 0; de < 12; de++) {
             dragonEmbers.push({
-                x: 0,
-                y: 0,
-                vx: -0.8 - Math.random() * 1.2,
-                vy: 0.4 + Math.random() * 0.8,
-                r: 1.5 + Math.random() * 2.5,
-                life: Math.random(),
-                maxLife: 1.0 + Math.random() * 0.8
+                offsetAngle: Math.random() * Math.PI * 2,
+                dist: 10 + Math.random() * 32,
+                speed: 0.4 + Math.random() * 0.8,
+                r: 1.2 + Math.random() * 2.0,
+                life: Math.random()
             });
         }
 
         var tickerEl = document.getElementById("lp-live-quest-ticker");
+
+        var drawRoundedRect = function (c, x, y, width, height, radius) {
+            c.beginPath();
+            c.moveTo(x + radius, y);
+            c.lineTo(x + width - radius, y);
+            c.arcTo(x + width, y, x + width, y + radius, radius);
+            c.lineTo(x + width, y + height - radius);
+            c.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+            c.lineTo(x + radius, y + height);
+            c.arcTo(x, y + height, x, y + height - radius, radius);
+            c.lineTo(x, y + radius);
+            c.arcTo(x, y, x + radius, y, radius);
+            c.closePath();
+        };
 
         var renderLoop = function () {
             try {
@@ -1426,166 +1431,151 @@ window.PRS_App = {
                 ctx.clearRect(0, 0, w, h);
 
                 // --- 1. Atmosférické pergamenové pozadí ---
-                var rInner = Math.max(5, Math.min(w, h) * 0.08);
-                var rOuter = Math.max(rInner + 10, Math.max(w, h) * 0.75);
-                var bgGrad = ctx.createRadialGradient(w * 0.5, h * 0.5, rInner, w * 0.5, h * 0.5, rOuter);
-                bgGrad.addColorStop(0, "#3e2412");
-                bgGrad.addColorStop(0.55, "#24130a");
-                bgGrad.addColorStop(1, "#0f0804");
+                var bgGrad = ctx.createRadialGradient(w * 0.5, h * 0.5, Math.min(w, h) * 0.1, w * 0.5, h * 0.5, Math.max(w, h) * 0.7);
+                bgGrad.addColorStop(0, "#3a2312");
+                bgGrad.addColorStop(0.65, "#201208");
+                bgGrad.addColorStop(1, "#0d0703");
                 ctx.fillStyle = bgGrad;
                 ctx.fillRect(0, 0, w, h);
 
                 if (bgImg.complete && bgImg.naturalWidth > 0) {
                     try {
-                        var panX = Math.sin(t * 0.28) * 14;
-                        var panY = Math.cos(t * 0.22) * 8;
+                        var panX = Math.sin(t * 0.2) * 10;
+                        var panY = Math.cos(t * 0.16) * 6;
                         ctx.save();
-                        ctx.globalAlpha = 0.55;
-                        ctx.drawImage(bgImg, -20 + panX, -12 + panY, w + 40, h + 24);
+                        ctx.globalAlpha = 0.50;
+                        ctx.drawImage(bgImg, -16 + panX, -10 + panY, w + 32, h + 20);
                         ctx.restore();
                     } catch (e) { }
                 }
 
-                // --- 2. Silueta královského hradu v dálce ---
+                // --- 2. Královský hrad uprostřed na pozadí ---
                 if (castleImg.complete && castleImg.naturalWidth > 0) {
                     try {
                         ctx.save();
-                        ctx.globalAlpha = 0.22;
-                        var castleW = Math.min(180, w * 0.28);
+                        ctx.globalAlpha = 0.18;
+                        var castleW = Math.min(160, w * 0.25);
                         var castleH = castleW * (castleImg.naturalHeight / castleImg.naturalWidth);
-                        ctx.drawImage(castleImg, w * 0.48 - castleW * 0.5, h * 0.04, castleW, castleH);
+                        ctx.drawImage(castleImg, w * 0.5 - castleW * 0.5, h * 0.12, castleW, castleH);
                         ctx.restore();
                     } catch (e) { }
                 }
 
-                // --- 3. MAJESTÁTNÍ KRÁLOVSKÝ DRAK (Vznáší se nad dračí slují) ---
-                var dragonHover = Math.sin(t * 1.6) * 9;
-                var dragonTilt = Math.sin(t * 0.8) * 0.05;
-                var dX = w * 0.74;
-                var dY = h * 0.18 + dragonHover;
-                var dSize = Math.min(145, Math.max(75, w * 0.21));
+                // --- 3. Zlatá královská cesta (Hladká sinusová křivka) ---
+                var segCount = questTiles.length - 1;
 
-                var dGlow = ctx.createRadialGradient(dX, dY, dSize * 0.1, dX, dY, dSize * 0.95);
-                var auraPulse = 0.45 + Math.sin(t * 3.5) * 0.15;
-                dGlow.addColorStop(0, "rgba(239, 68, 68, " + auraPulse + ")");
-                dGlow.addColorStop(0.5, "rgba(245, 158, 11, " + (auraPulse * 0.6) + ")");
-                dGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
-                ctx.fillStyle = dGlow;
-                ctx.beginPath();
-                ctx.arc(dX, dY, dSize * 0.95, 0, Math.PI * 2);
-                ctx.fill();
-
-                if (dragonImg.complete && dragonImg.naturalWidth > 0) {
-                    try {
-                        ctx.save();
-                        ctx.translate(dX, dY);
-                        ctx.rotate(dragonTilt);
-                        ctx.shadowColor = "rgba(0,0,0,0.8)";
-                        ctx.shadowBlur = 16;
-                        ctx.shadowOffsetY = 10;
-                        ctx.drawImage(dragonImg, -dSize * 0.5, -dSize * 0.5, dSize, dSize);
-                        ctx.restore();
-                    } catch (e) { }
+                var nodePoints = [];
+                for (var ni = 0; ni < questTiles.length; ni++) {
+                    nodePoints.push({ x: questTiles[ni].rx * w, y: questTiles[ni].ry * h });
                 }
 
-                // Plamenné jiskry z draka
-                for (var deIdx = 0; deIdx < dragonEmbers.length; deIdx++) {
-                    var emb = dragonEmbers[deIdx];
-                    emb.life += 0.022;
-                    if (emb.life > emb.maxLife) {
-                        emb.life = 0;
-                        emb.x = dX - dSize * 0.2 + (Math.random() - 0.5) * 16;
-                        emb.y = dY + dSize * 0.1 + (Math.random() - 0.5) * 12;
-                        emb.vx = -0.7 - Math.random() * 1.1;
-                        emb.vy = 0.3 + (Math.random() - 0.5) * 0.8;
-                    } else {
-                        emb.x += emb.vx;
-                        emb.y += emb.vy;
-                    }
-                    var embFade = Math.sin((emb.life / emb.maxLife) * Math.PI);
-                    ctx.beginPath();
-                    ctx.arc(emb.x, emb.y, emb.r * embFade, 0, Math.PI * 2);
-                    ctx.fillStyle = (deIdx % 2 === 0) ? ("rgba(251, 191, 36, " + (embFade * 0.85) + ")") : ("rgba(239, 68, 68, " + (embFade * 0.85) + ")");
-                    ctx.fill();
-                }
-
-                // Štítek draka
-                ctx.save();
-                var dLabel = "🐉 Ohnivý drak (U3)";
-                ctx.font = "bold 10px 'Cinzel', serif";
-                var dLabelW = ctx.measureText(dLabel).width + 12;
-                ctx.fillStyle = "rgba(15, 10, 6, 0.85)";
-                ctx.fillRect(dX - dLabelW * 0.5, dY - dSize * 0.52, dLabelW, 16);
-                ctx.strokeStyle = "rgba(239, 68, 68, 0.75)";
-                ctx.lineWidth = 1;
-                ctx.strokeRect(dX - dLabelW * 0.5, dY - dSize * 0.52, dLabelW, 16);
-                ctx.fillStyle = "#fca5a5";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(dLabel, dX, dY - dSize * 0.52 + 8);
-                ctx.restore();
-
-                // --- 4. NEBEZPEČNÁ LESNÍ BESTIE (U pole zvěře) ---
-                var mX = questTiles[2].rx * w - 34;
-                var mY = questTiles[2].ry * h - 38;
-                var mSize = Math.min(46, Math.max(30, w * 0.08));
-                if (monsterImg.complete && monsterImg.naturalWidth > 0) {
-                    try {
-                        ctx.save();
-                        var mBreathing = 1 + Math.sin(t * 3.2) * 0.04;
-                        ctx.translate(mX, mY);
-                        ctx.scale(mBreathing, mBreathing);
-                        ctx.fillStyle = "rgba(0,0,0,0.55)";
-                        ctx.beginPath();
-                        ctx.ellipse(0, mSize * 0.45, mSize * 0.35, mSize * 0.15, 0, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.drawImage(monsterImg, -mSize * 0.5, -mSize * 0.5, mSize, mSize);
-                        ctx.restore();
-                    } catch (e) { }
-                }
-
-                // --- 5. ZLATÁ KRÁLOVSKÁ CESTA PROPOJUJÍCÍ MEDAILONKY ---
+                // Široká záře cesty
                 ctx.save();
                 ctx.beginPath();
-                for (var qi = 0; qi < questTiles.length; qi++) {
-                    var qNode = questTiles[qi];
-                    var qx = qNode.rx * w;
-                    var qy = qNode.ry * h;
-                    if (qi === 0) ctx.moveTo(qx, qy);
-                    else {
-                        var prevNode = questTiles[qi - 1];
-                        var cpx = (prevNode.rx * w + qx) * 0.5;
-                        var cpy = (prevNode.ry * h + qy) * 0.5 + ((qi % 2 === 0) ? -16 : 16);
-                        ctx.quadraticCurveTo(cpx, cpy, qx, qy);
-                    }
+                for (var ci = 0; ci < segCount; ci++) {
+                    var p0 = nodePoints[ci];
+                    var p1 = nodePoints[ci + 1];
+                    var mx = (p0.x + p1.x) * 0.5;
+                    var my = (p0.y + p1.y) * 0.5;
+                    if (ci === 0) ctx.moveTo(p0.x, p0.y);
+                    ctx.quadraticCurveTo(p0.x * 0.25 + mx * 0.75, my, p1.x, p1.y);
                 }
-                ctx.strokeStyle = "rgba(212, 175, 55, 0.45)";
-                ctx.lineWidth = 6;
+                ctx.strokeStyle = "rgba(212, 175, 55, 0.22)";
+                ctx.lineWidth = 10;
                 ctx.lineCap = "round";
                 ctx.stroke();
 
+                // Plná zlatá linka cesty
+                ctx.strokeStyle = "rgba(212, 175, 55, 0.65)";
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                // Animované zářící úseky
                 ctx.strokeStyle = "rgba(254, 240, 138, 0.95)";
                 ctx.lineWidth = 2.5;
-                ctx.setLineDash([7, 8]);
-                ctx.lineDashOffset = -t * 28;
+                ctx.setLineDash([8, 12]);
+                ctx.lineDashOffset = -t * 26;
                 ctx.stroke();
                 ctx.restore();
 
-                // --- 6. KRUHOVÉ MEDAILONKY POLÍČEK S REÁLNÝMI ILUSTRACEMI ---
-                var baseRad = Math.min(w, h) * 0.088;
+                // Šlápoty / stepping stones mezi uzly
+                ctx.save();
+                for (var si = 0; si < segCount; si++) {
+                    var sA = nodePoints[si];
+                    var sB = nodePoints[si + 1];
+                    var sMid = { x: (sA.x + sB.x) * 0.5, y: (sA.y + sB.y) * 0.5 };
+                    for (var st = 1; st <= 2; st++) {
+                        var frac = st / 3;
+                        var stX = (1 - frac) * (1 - frac) * sA.x + 2 * (1 - frac) * frac * (sA.x * 0.25 + sMid.x * 0.75) + frac * frac * sB.x;
+                        var stY = (1 - frac) * (1 - frac) * sA.y + 2 * (1 - frac) * frac * sMid.y + frac * frac * sB.y;
+                        ctx.beginPath();
+                        ctx.arc(stX, stY, 3, 0, Math.PI * 2);
+                        ctx.fillStyle = "rgba(254, 240, 138, 0.55)";
+                        ctx.fill();
+                    }
+                }
+                ctx.restore();
+
+                // --- 4. Zmenšený strážce Dračí sluje (vkusně nad 4. medailonkem) ---
+                var dLairX = nodePoints[3].x;
+                var dLairY = nodePoints[3].y;
+                if (dragonImg.complete && dragonImg.naturalWidth > 0) {
+                    try {
+                        ctx.save();
+                        var dScale = Math.min(76, Math.max(50, w * 0.12));
+                        var dHoverY = dLairY - dScale * 0.95 + Math.sin(t * 1.8) * 4;
+                        var dTilt = Math.sin(t * 1.2) * 0.04;
+
+                        var dRadGlow = ctx.createRadialGradient(dLairX, dHoverY, 5, dLairX, dHoverY, dScale * 0.7);
+                        dRadGlow.addColorStop(0, "rgba(239, 68, 68, 0.35)");
+                        dRadGlow.addColorStop(0.7, "rgba(245, 158, 11, 0.15)");
+                        dRadGlow.addColorStop(1, "rgba(0,0,0,0)");
+                        ctx.fillStyle = dRadGlow;
+                        ctx.beginPath();
+                        ctx.arc(dLairX, dHoverY, dScale * 0.7, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.translate(dLairX, dHoverY);
+                        ctx.rotate(dTilt);
+                        ctx.shadowColor = "rgba(0,0,0,0.7)";
+                        ctx.shadowBlur = 10;
+                        ctx.shadowOffsetY = 4;
+                        ctx.drawImage(dragonImg, -dScale * 0.5, -dScale * 0.5, dScale, dScale);
+                        ctx.restore();
+                    } catch (e) { }
+                }
+
+                // Jiskry z dračí sluje
+                for (var dei = 0; dei < dragonEmbers.length; dei++) {
+                    var deItem = dragonEmbers[dei];
+                    deItem.life += 0.02;
+                    if (deItem.life > 1) deItem.life = 0;
+                    var deAng = deItem.offsetAngle + t * 0.6;
+                    var deDist = deItem.dist * deItem.life;
+                    var deX = dLairX + Math.cos(deAng) * deDist;
+                    var deY = (dLairY - 45) + Math.sin(deAng) * deDist * 0.6 - deItem.life * 14;
+                    var deAlpha = Math.sin(deItem.life * Math.PI) * 0.7;
+                    ctx.beginPath();
+                    ctx.arc(deX, deY, deItem.r, 0, Math.PI * 2);
+                    ctx.fillStyle = (dei % 2 === 0) ? ("rgba(251, 191, 36, " + deAlpha + ")") : ("rgba(239, 68, 68, " + deAlpha + ")");
+                    ctx.fill();
+                }
+
+                // --- 5. Královské medailonky políček ---
+                var baseRad = Math.min(w, h) * 0.10;
                 for (var tj = 0; tj < questTiles.length; tj++) {
                     var tile = questTiles[tj];
-                    var tx = tile.rx * w;
-                    var ty = tile.ry * h;
-                    var pulse = 1 + Math.sin(t * 2.4 + tj * 1.1) * 0.04;
+                    var tx = nodePoints[tj].x;
+                    var ty = nodePoints[tj].y;
+                    var pulse = 1 + Math.sin(t * 2.2 + tj * 1.2) * 0.035;
                     var rad = baseRad * pulse;
 
-                    var glow = ctx.createRadialGradient(tx, ty, rad * 0.4, tx, ty, rad * 1.4);
+                    var glow = ctx.createRadialGradient(tx, ty, rad * 0.4, tx, ty, rad * 1.45);
                     glow.addColorStop(0, tile.color);
                     glow.addColorStop(1, "rgba(0,0,0,0)");
                     ctx.fillStyle = glow;
                     ctx.beginPath();
-                    ctx.arc(tx, ty, rad * 1.4, 0, Math.PI * 2);
+                    ctx.arc(tx, ty, rad * 1.45, 0, Math.PI * 2);
                     ctx.fill();
 
                     ctx.save();
@@ -1613,30 +1603,46 @@ window.PRS_App = {
                     }
                     ctx.restore();
 
+                    ctx.save();
                     ctx.beginPath();
                     ctx.arc(tx, ty, rad, 0, Math.PI * 2);
                     ctx.strokeStyle = tile.color;
-                    ctx.lineWidth = 3.2;
+                    ctx.lineWidth = 3.5;
                     ctx.stroke();
 
-                    var boxW = Math.max(76, rad * 2.2);
-                    var boxH = 17;
-                    ctx.fillStyle = "rgba(12, 8, 5, 0.9)";
-                    ctx.fillRect(tx - boxW * 0.5, ty + rad + 4, boxW, boxH);
-                    ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, rad - 2.5, 0, Math.PI * 2);
+                    ctx.strokeStyle = "rgba(254, 240, 138, 0.75)";
                     ctx.lineWidth = 1;
-                    ctx.strokeRect(tx - boxW * 0.5, ty + rad + 4, boxW, boxH);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // Elegantní zaoblený štítek pod medailonkem
+                    var labelW = Math.max(78, rad * 2.2);
+                    var labelH = 18;
+                    var labelX = tx - labelW * 0.5;
+                    var labelY = ty + rad + 5;
+
+                    ctx.save();
+                    ctx.fillStyle = "rgba(16, 11, 7, 0.85)";
+                    drawRoundedRect(ctx, labelX, labelY, labelW, labelH, 6);
+                    ctx.fill();
+
+                    ctx.strokeStyle = "rgba(212, 175, 55, 0.5)";
+                    ctx.lineWidth = 1;
+                    drawRoundedRect(ctx, labelX, labelY, labelW, labelH, 6);
+                    ctx.stroke();
 
                     ctx.fillStyle = "#fef08a";
-                    ctx.font = "bold 10px Outfit, sans-serif";
+                    ctx.font = "600 11px Outfit, sans-serif";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
-                    ctx.fillText(tile.label, tx, ty + rad + 12);
+                    ctx.fillText(tile.label, tx, labelY + labelH * 0.5);
+                    ctx.restore();
                 }
 
-                // --- 7. NOVÉ 2.5D FIGURKY RYTÍŘŮ PUTUJÍCÍCH PO CESTĚ ---
-                var segCount = questTiles.length - 1;
-                var questProgress = (t * 0.45) % segCount;
+                // --- 6. Nová 2.5D figurka rytíře plynule putujícího po trase ---
+                var questProgress = (t * 0.42) % segCount;
                 var currSeg = Math.floor(questProgress);
                 var segFrac = questProgress - currSeg;
 
@@ -1647,112 +1653,52 @@ window.PRS_App = {
                     }
                 }
 
-                var getNodePos = function (progress) {
-                    var cS = Math.floor(progress);
-                    var sF = progress - cS;
-                    var pA = questTiles[cS] || questTiles[0];
-                    var pB = questTiles[cS + 1] || questTiles[segCount];
-                    var ax = pA.rx * w;
-                    var ay = pA.ry * h;
-                    var bx = pB.rx * w;
-                    var by = pB.ry * h;
-                    var cpx = (ax + bx) * 0.5;
-                    var cpy = (ay + by) * 0.5 + ((cS % 2 === 0) ? 16 : -16);
-                    var qx = (1 - sF) * (1 - sF) * ax + 2 * (1 - sF) * sF * cpx + sF * sF * bx;
-                    var qy = (1 - sF) * (1 - sF) * ay + 2 * (1 - sF) * sF * cpy + sF * sF * by;
-                    var hop = Math.abs(Math.sin(sF * Math.PI)) * 14;
-                    return { x: qx, y: qy - hop, groundY: qy };
-                };
+                var pA = nodePoints[currSeg];
+                var pB = nodePoints[currSeg + 1];
+                var midX = (pA.x + pB.x) * 0.5;
+                var midY = (pA.y + pB.y) * 0.5;
+                var ctrlX = pA.x * 0.25 + midX * 0.75;
+                var ctrlY = midY;
 
-                // A. Hlavní figurka: Udatný rytíř (Jan)
-                var kPos = getNodePos(questProgress);
-                var pawnH = Math.min(52, Math.max(34, h * 0.14));
-                var pawnW = pawnH * 0.65;
+                var kX = (1 - segFrac) * (1 - segFrac) * pA.x + 2 * (1 - segFrac) * segFrac * ctrlX + segFrac * segFrac * pB.x;
+                var kGroundY = (1 - segFrac) * (1 - segFrac) * pA.y + 2 * (1 - segFrac) * segFrac * ctrlY + segFrac * segFrac * pB.y;
+                var hop = Math.abs(Math.sin(segFrac * Math.PI)) * 10;
+                var kY = kGroundY - hop;
+
+                var pawnH = Math.min(54, Math.max(38, h * 0.16));
+                var pawnW = pawnH * 0.64;
 
                 ctx.save();
-                ctx.fillStyle = "rgba(0,0,0,0.65)";
+                ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
                 ctx.beginPath();
-                ctx.ellipse(kPos.x, kPos.groundY, pawnW * 0.6, pawnW * 0.25, 0, 0, Math.PI * 2);
+                ctx.ellipse(kX, kGroundY, pawnW * 0.55, pawnW * 0.22, 0, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.strokeStyle = "#fbbf24";
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                ctx.ellipse(kPos.x, kPos.groundY, pawnW * 0.55, pawnW * 0.22, 0, 0, Math.PI * 2);
+                ctx.ellipse(kX, kGroundY, pawnW * 0.5, pawnW * 0.2, 0, 0, Math.PI * 2);
                 ctx.stroke();
 
                 if (knightPawnImg.complete && knightPawnImg.naturalWidth > 0) {
                     try {
-                        ctx.shadowColor = "rgba(0,0,0,0.85)";
-                        ctx.shadowBlur = 10;
-                        ctx.shadowOffsetY = 4;
-                        ctx.drawImage(knightPawnImg, kPos.x - pawnW * 0.5, kPos.y - pawnH, pawnW, pawnH);
+                        ctx.shadowColor = "rgba(0,0,0,0.75)";
+                        ctx.shadowBlur = 8;
+                        ctx.shadowOffsetY = 3;
+                        ctx.drawImage(knightPawnImg, kX - pawnW * 0.5, kY - pawnH, pawnW, pawnH);
                     } catch (e) { }
                 } else {
                     ctx.beginPath();
-                    ctx.arc(kPos.x, kPos.y - pawnH * 0.5, 14, 0, Math.PI * 2);
+                    ctx.arc(kX, kY - pawnH * 0.5, 14, 0, Math.PI * 2);
                     ctx.fillStyle = "#dc2626";
                     ctx.fill();
                     ctx.lineWidth = 2;
                     ctx.strokeStyle = "#fef08a";
                     ctx.stroke();
                 }
-
-                ctx.font = "bold 9px Outfit, sans-serif";
-                var kTag = "⚔️ Udatný rytíř";
-                var kTagW = ctx.measureText(kTag).width + 8;
-                ctx.fillStyle = "rgba(10, 6, 4, 0.85)";
-                ctx.fillRect(kPos.x - kTagW * 0.5, kPos.y - pawnH - 14, kTagW, 13);
-                ctx.strokeStyle = "#facc15";
-                ctx.lineWidth = 1;
-                ctx.strokeRect(kPos.x - kTagW * 0.5, kPos.y - pawnH - 14, kTagW, 13);
-                ctx.fillStyle = "#fef08a";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(kTag, kPos.x, kPos.y - pawnH - 7);
                 ctx.restore();
 
-                // B. Druhá figurka v závěsu: Paní lovkyně (soupeřka na plánu)
-                var followerProgress = (questProgress - 0.48 + segCount) % segCount;
-                var fPos = getNodePos(followerProgress);
-                var fH = pawnH * 0.9;
-                var fW = fH * 0.65;
-
-                ctx.save();
-                ctx.fillStyle = "rgba(0,0,0,0.55)";
-                ctx.beginPath();
-                ctx.ellipse(fPos.x, fPos.groundY, fW * 0.55, fW * 0.22, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.strokeStyle = "#a855f7";
-                ctx.lineWidth = 1.8;
-                ctx.beginPath();
-                ctx.ellipse(fPos.x, fPos.groundY, fW * 0.5, fW * 0.2, 0, 0, Math.PI * 2);
-                ctx.stroke();
-
-                if (huntressPawnImg.complete && huntressPawnImg.naturalWidth > 0) {
-                    try {
-                        ctx.shadowColor = "rgba(0,0,0,0.75)";
-                        ctx.shadowBlur = 8;
-                        ctx.drawImage(huntressPawnImg, fPos.x - fW * 0.5, fPos.y - fH, fW, fH);
-                    } catch (e) { }
-                }
-
-                ctx.font = "bold 9px Outfit, sans-serif";
-                var fTag = "🏹 Lovkyně";
-                var fTagW = ctx.measureText(fTag).width + 8;
-                ctx.fillStyle = "rgba(10, 6, 4, 0.85)";
-                ctx.fillRect(fPos.x - fTagW * 0.5, fPos.y - fH - 13, fTagW, 12);
-                ctx.strokeStyle = "#c084fc";
-                ctx.lineWidth = 1;
-                ctx.strokeRect(fPos.x - fTagW * 0.5, fPos.y - fH - 13, fTagW, 12);
-                ctx.fillStyle = "#f5d0fe";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(fTag, fPos.x, fPos.y - fH - 7);
-                ctx.restore();
-
-                // --- 8. ZLATÉ JISKRY, SRDÍČKA A MAGICKÉ ČÁSTEČKY ---
+                // --- 7. Zlaté a růžové magické jiskry ---
                 for (var k = 0; k < sparks.length; k++) {
                     var sp = sparks[k];
                     sp.x += sp.vx;
@@ -1763,9 +1709,7 @@ window.PRS_App = {
                     }
                     ctx.beginPath();
                     ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2);
-                    if (sp.hue === 48) ctx.fillStyle = "rgba(250, 204, 21, " + sp.alpha + ")";
-                    else if (sp.hue === 12) ctx.fillStyle = "rgba(249, 115, 22, " + sp.alpha + ")";
-                    else ctx.fillStyle = "rgba(244, 114, 182, " + sp.alpha + ")";
+                    ctx.fillStyle = (sp.type === "gold") ? ("rgba(250, 204, 21, " + sp.alpha + ")") : ("rgba(244, 114, 182, " + sp.alpha + ")");
                     ctx.fill();
                 }
 
@@ -2614,9 +2558,9 @@ window.PRS_App = {
 
         else if (scenario === "classic") targetHearts = 30;
 
-        else if (scenario === "slayer") targetHearts = 20;
+        else if (scenario === "slayer") targetHearts = 30;
 
-        else if (scenario === "tycoon") targetHearts = 25;
+        else if (scenario === "tycoon") targetHearts = 30;
 
         else if (scenario === "epic") targetHearts = 45;
 

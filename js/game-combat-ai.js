@@ -92,14 +92,21 @@
 
             if (subtype === "U3") {
 
-                if (effStats.boj >= 14 && player.hp >= 3) {
-
-                    score += (pType === "Bot_Aggressive" ? 35 : 15);
-
+                var isSlayerMode = (state.config && state.config.scenario === "slayer");
+                if (isSlayerMode) {
+                    if (effStats.boj >= 10 && player.hp >= 2) {
+                        score += (pType === "Bot_Aggressive" ? 55 : 40);
+                    } else if (effStats.boj >= 7 && player.hp >= 2) {
+                        score += 25;
+                    } else {
+                        score -= 20;
+                    }
                 } else {
-
-                    score -= 40;
-
+                    if (effStats.boj >= 14 && player.hp >= 3) {
+                        score += (pType === "Bot_Aggressive" ? 35 : 15);
+                    } else {
+                        score -= 40;
+                    }
                 }
 
             } else if (subtype === "U2") {

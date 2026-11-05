@@ -95,35 +95,33 @@
         var winner = this.state.players[winIdx];
 
         var subEl = document.getElementById("victory-winner-subtitle");
+        var titleEl = document.querySelector("#victory-modal .victory-title");
+        var crownEl = document.querySelector("#victory-modal .victory-crown-icon");
 
         if (subEl) {
-
             var subText = "";
-
             var winType = this.state.winType || "";
 
             if (winType === "slayer_dragons") {
-
+                if (titleEl) titleEl.innerHTML = "🐉 Dračí triumf &amp; Královská svatba";
+                if (crownEl) crownEl.innerHTML = "🐉👑";
                 subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> skolil 2 obávané draky království a v ' + this.state.roundNumber + '. kole získává věčnou slávu i ruku princezny!';
-
             } else if (winType === "tycoon_estates") {
-
+                if (titleEl) titleEl.innerHTML = "🏰 Feudální triumf &amp; Královská svatba";
+                if (crownEl) crownEl.innerHTML = "🏰👑";
                 subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> ovládl 3 města i královský hrad a v ' + this.state.roundNumber + '. kole získává ruku princezny!';
-
             } else if (winType === "sole_survivor") {
-
+                if (titleEl) titleEl.innerHTML = "💀 Přeživší šampion &amp; Triumf";
+                if (crownEl) crownEl.innerHTML = "💀👑";
                 subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> jako jediný přežil kruté nástrahy království v režimu Na život a smrt!';
-
             } else {
-
+                if (titleEl) titleEl.innerHTML = "Královská svatba &amp; Triumf";
+                if (crownEl) crownEl.innerHTML = "👑";
                 var tgtH = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : winner.totalHearts;
-
                 subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> dosáhl cílových <strong>' + tgtH + ' 💖</strong> (získal celkem ' + winner.totalHearts + ' 💖) a v ' + this.state.roundNumber + '. kole získává ruku princezny!';
-
             }
 
             subEl.innerHTML = subText;
-
         }
 
         // Vítěz MUSÍ být vždy na 1. místě žebříčku i pódia!
@@ -240,7 +238,7 @@
 
                 tHtml.push('  <td>' + p.stats.heartsFromFestivals + ' 💖 (' + p.stats.festivalsWon + 'x výhra)</td>');
 
-                tHtml.push('  <td>' + p.stats.heartsFromQuests + ' 💖 (' + p.stats.questsWon + 'x skoleno)</td>');
+                tHtml.push('  <td>' + p.stats.heartsFromQuests + ' 💖 (' + p.stats.questsWon + 'x skoleno)' + (p.stats.dragonsSlain > 0 ? ' <strong style="color:#ef4444; display:block; font-size:0.8rem;">🐉 ' + p.stats.dragonsSlain + 'x drak</strong>' : '') + '</td>');
 
                 tHtml.push('  <td>' + (p.breedingHearts || 0) + ' 💖</td>');
 

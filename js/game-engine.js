@@ -123,9 +123,16 @@ window.PRS_GameEngine = {
 
             else if (cfg.scenario === "classic") cfg.targetHearts = 30;
 
-            else if (cfg.scenario === "slayer") cfg.targetHearts = 20;
+            else if (cfg.scenario === "slayer") {
+                cfg.targetHearts = 30;
+                cfg.targetDragons = 2;
+            }
 
-            else if (cfg.scenario === "tycoon") cfg.targetHearts = 25;
+            else if (cfg.scenario === "tycoon") {
+                cfg.targetHearts = 30;
+                cfg.targetTowns = 3;
+                cfg.targetCastles = 1;
+            }
 
             else if (cfg.scenario === "epic") cfg.targetHearts = 45;
 
@@ -295,7 +302,13 @@ window.PRS_GameEngine = {
 
         };
 
-        this.addLog(state, "👑 Královská trubačská fanfára! Hra „Princeznino srdce“ začíná. Cílem je získat " + cfg.targetHearts + " 💖.");
+        var startGoalMsg = "Cílem je získat " + cfg.targetHearts + " 💖.";
+        if (cfg.scenario === "slayer") {
+            startGoalMsg = "Cílem scénáře 🐉 LOVCI DRAKŮ je ulovit 2 obávané draky v Dračích slujích (U3)!";
+        } else if (cfg.scenario === "tycoon") {
+            startGoalMsg = "Cílem scénáře 🏰 FEUDÁLNÍ MAGNÁT je vybudovat panství o 3 městech a 1 hradu!";
+        }
+        this.addLog(state, "👑 Královská trubačská fanfára! Hra „Princeznino srdce“ začíná. " + startGoalMsg);
 
         this.recalculateBreedingAndVictory(state);
 
@@ -1162,76 +1175,43 @@ window.PRS_GameEngine = {
 
             if (scen === "slayer") {
 
-                // Lovci draků: ulovení 2 draků (z U3) nebo dosažení cílových srdcí (20 💖)
-
+                // Lovci draků: ulovení 2 draků (z U3). Pouhý sběr srdcí nestačí!
                 var dragonsSlain = (pl.stats && pl.stats.dragonsSlain) ? pl.stats.dragonsSlain : 0;
+                var targetDragons = (state.config && state.config.targetDragons) ? state.config.targetDragons : 2;
 
-                if (dragonsSlain >= 2) {
-
+                if (dragonsSlain >= targetDragons) {
                     isWin = true;
-
                     winTypeAchieved = "slayer_dragons";
-
-                    winReason = "🏆 VÍTĚZSTVÍ LOVCE DRAKŮ! " + pl.badge + " " + pl.name + " skolil 2 obávané draky království a získává věčnou slávu i ruku princezny!";
-
-                } else if (pl.totalHearts >= state.config.targetHearts) {
-
-                    isWin = true;
-
-                    winTypeAchieved = "target_hearts";
-
-                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " dosáhl cílových " + state.config.targetHearts + " 💖 a získává ruku princezny!";
-
+                    winReason = "🏆 VÍTĚZSTVÍ LOVCE DRAKŮ! " + pl.badge + " " + pl.name + " skolil " + dragonsSlain + " obávané draky království a získává věčnou slávu i ruku princezny!";
+                } else if (pl.totalHearts >= 20 && !pl._slayerHeartHintGiven) {
+                    pl._slayerHeartHintGiven = true;
+                    this.addLog(state, "🐉 " + pl.badge + " " + pl.name + " má již " + pl.totalHearts + " 💖! Ve scénáři Lovci draků však k vítězství musí ještě skolit " + (targetDragons - dragonsSlain) + " draka v Dračí sluji (U3)!", "info");
                 }
 
             } else if (scen === "tycoon") {
 
-                // Feudální magnát: ovládnutí 3 měst a 1 hradu nebo cílových srdcí
-
+                // Feudální magnát: ovládnutí 3 měst a 1 hradu. Pouhý sběr srdcí nestačí!
                 var cCount = 0, kCount = 0;
-
                 for (var oi = 0; oi < pl.ownedNodes.length; oi++) {
-
                     var oNd = state.board.nodes[pl.ownedNodes[oi]];
-
                     if (oNd) {
-
                         if (oNd.level === 3 || oNd.type === "CASTLE") kCount++;
-
                         else if (oNd.level === 2 || oNd.type === "TOWN") cCount++;
-
                     }
-
                 }
 
                 if (cCount >= 3 && kCount >= 1) {
-
                     isWin = true;
-
                     winTypeAchieved = "tycoon_estates";
-
                     winReason = "🏆 VÍTĚZSTVÍ FEUDÁLNÍHO MAGNÁTA! " + pl.badge + " " + pl.name + " ovládl 3 vzkvétající města a 1 hrad (" + cCount + " měst, " + kCount + " hradů)!";
-
-                } else if (pl.totalHearts >= state.config.targetHearts) {
-
-                    isWin = true;
-
-                    winTypeAchieved = "target_hearts";
-
-                    winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " dosáhl cílových " + state.config.targetHearts + " 💖 a získává ruku princezny!";
-
                 }
 
             } else {
 
                 if (pl.totalHearts >= state.config.targetHearts) {
-
                     isWin = true;
-
                     winTypeAchieved = "target_hearts";
-
                     winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " dosáhl cílových " + state.config.targetHearts + " 💖 a získává ruku princezny!";
-
                 }
 
             }
@@ -2054,11 +2034,19 @@ window.PRS_GameEngine = {
 
                     } else {
 
-                        var noAssetMsg = "💸 " + player.badge + " " + player.name + " zaplatil hotově jen " + actualPaid + " zl. (z " + rent + " zl.) a jako nemajetný nemá další majetek k odprodeji.";
+                        if (state.config.bankruptcyElimination) {
 
-                        this.addLog(state, noAssetMsg, "rent");
+                            this.eliminatePlayer(state, player.index, "Neschopnost uhradit nájem v módu Ultimate");
 
-                        state.pendingAction.summary = noAssetMsg;
+                        } else {
+
+                            var noAssetMsg = "💸 " + player.badge + " " + player.name + " zaplatil hotově jen " + actualPaid + " zl. (z " + rent + " zl.) a jako nemajetný nemá další majetek k odprodeji.";
+
+                            this.addLog(state, noAssetMsg, "rent");
+
+                            state.pendingAction.summary = noAssetMsg;
+
+                        }
 
                     }
 
@@ -3599,6 +3587,66 @@ window.PRS_GameEngine = {
 
         }
 
+        // Pokud po vyčerpání majetku stále zbývá nesplacený dluh v módu Ultimate
+        if (state.pendingAction && state.pendingAction.debt && state.pendingAction.debt.remainingDebt > 0) {
+            var hasMore = (player.items.length > 0 || player.ownedNodes.length > 0);
+            if (!hasMore) {
+                if (state.config.bankruptcyElimination) {
+                    this.eliminatePlayer(state, player.index, "Úplný bankrot a nesplacený dluh v módu Ultimate");
+                    delete state.pendingAction.debt;
+                } else {
+                    state.pendingAction.summary = "⚠️ Rytíř odprodal veškerý majetek. Zbytek dluhu " + state.pendingAction.debt.remainingDebt + " zl. je nedobytný.";
+                    delete state.pendingAction.debt;
+                }
+            }
+        }
+
+    },
+
+    eliminatePlayer: function (state, playerIndex, reason) {
+        if (!state || !state.players || playerIndex < 0 || playerIndex >= state.players.length) return;
+        var p = state.players[playerIndex];
+        if (!p || p.isEliminated) return;
+
+        p.isEliminated = true;
+        p.isBankrupt = true;
+        p.gold = 0;
+
+        // Uvolnění všech vlastněných polí zpět do neutrálního stavu
+        if (p.ownedNodes && p.ownedNodes.length > 0) {
+            for (var i = 0; i < p.ownedNodes.length; i++) {
+                var ndId = p.ownedNodes[i];
+                var nd = state.board && state.board.nodes ? state.board.nodes[ndId] : null;
+                if (nd) {
+                    nd.owner = null;
+                    if (nd.type === "VILLAGE") nd.villageLevel = 1;
+                }
+            }
+            p.ownedNodes = [];
+        }
+
+        var rMsg = reason || "Úplný bankrot a vyřazení v módu Ultimate";
+        var elimLog = "💀 HRÁČ ELIMINOVÁN! Rytíř " + p.badge + " " + p.name + " byl vyřazen ze hry (" + rMsg + "). Jeho figurka mizí z hracího plánu i hřbitova.";
+        this.addLog(state, elimLog, "danger");
+
+        if (state.pendingAction) {
+            state.pendingAction.summary = elimLog;
+        }
+
+        this.recalculateBreedingAndVictory(state);
+
+        // Kontrola vítězství posledního přeživšího rytíře
+        if (state.config && state.config.bankruptcyElimination && state.winnerIndex === null) {
+            var active = [];
+            for (var a = 0; a < state.players.length; a++) {
+                if (!state.players[a].isEliminated) active.push(state.players[a]);
+            }
+            if (active.length === 1) {
+                state.winnerIndex = active[0].index;
+                state.phase = "GAME_OVER";
+                this.addLog(state, "👑 POSLEDNÍ PŘEŽIVŠÍ RYTÍŘ! Všichni ostatní soupeři padli v módu Ultimate. " + active[0].badge + " " + active[0].name + " slaví triumfální vítězství!", "victory");
+            }
+        }
     },
 
     // Kontrola a využití specifické slabiny bestie / draka z Bestiáře (+2 k síle),

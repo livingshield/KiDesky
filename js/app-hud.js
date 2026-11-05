@@ -42,7 +42,27 @@
 
         var heartsEl = document.getElementById("mobile-dock-hearts");
 
-        if (heartsEl) heartsEl.textContent = "💖 " + player.totalHearts + "/" + this.state.config.targetHearts;
+        if (heartsEl) {
+            var scen = (this.state.config && this.state.config.scenario) ? this.state.config.scenario : "classic";
+            if (scen === "slayer") {
+                var dSlain = (player.stats && player.stats.dragonsSlain) ? player.stats.dragonsSlain : 0;
+                heartsEl.innerHTML = '<span style="color:#ef4444; font-weight:800;">🐉 ' + dSlain + '/2</span> <span style="font-size:0.75rem; color:#f472b6;">(' + player.totalHearts + '💖)</span>';
+            } else if (scen === "tycoon") {
+                var cCount = 0, kCount = 0;
+                if (player.ownedNodes) {
+                    for (var oi = 0; oi < player.ownedNodes.length; oi++) {
+                        var oNd = this.state.board.nodes[player.ownedNodes[oi]];
+                        if (oNd) {
+                            if (oNd.level === 3 || oNd.type === "CASTLE") kCount++;
+                            else if (oNd.level === 2 || oNd.type === "TOWN") cCount++;
+                        }
+                    }
+                }
+                heartsEl.innerHTML = '<span style="color:#f59e0b; font-weight:800;">🏰 ' + cCount + 'm/' + kCount + 'h</span> <span style="font-size:0.75rem; color:#f472b6;">(' + player.totalHearts + '💖)</span>';
+            } else {
+                heartsEl.textContent = "💖 " + player.totalHearts + "/" + this.state.config.targetHearts;
+            }
+        }
 
         var tileEl = document.getElementById("mobile-dock-tile");
 
@@ -672,12 +692,20 @@
 
     getPlayerPawnAvatarHtml: function (p, sizePx) {
         var sz = sizePx || 28;
+        var isDead = !!(p && p.isEliminated);
         var pawnObj = window.PRS_getPawnById ? window.PRS_getPawnById(p ? p.pawnId : null) : null;
         var img = pawnObj ? pawnObj.img : "assets/pawns/pawn_knight_valiant.png";
         var isPrem = pawnObj && pawnObj.category === "premium";
-        var borderCol = isPrem ? "#ffd86b" : (p ? p.color : "#d4af37");
-        var glow = isPrem ? ("0 0 8px " + (pawnObj.accentColor || "#ffd86b")) : "0 2px 4px rgba(0,0,0,0.6)";
-        return '<span class="pawn-hud-avatar" style="display:inline-flex; align-items:center; justify-content:center; width:' + sz + 'px; height:' + sz + 'px; border-radius:50%; background:radial-gradient(circle, ' + (p ? p.color : '#334155') + ' 0%, #1a0f0a 85%); border:2px solid ' + borderCol + '; box-shadow:' + glow + '; overflow:hidden; flex-shrink:0; vertical-align:middle;"><img src="' + img + '" alt="" style="width:108%; height:108%; object-fit:contain; transform:translateY(1px);"/></span>';
+        var borderCol = isDead ? "#ef4444" : (isPrem ? "#ffd86b" : (p ? p.color : "#d4af37"));
+        var glow = isDead ? "0 0 8px rgba(239, 68, 68, 0.85)" : (isPrem ? ("0 0 8px " + (pawnObj.accentColor || "#ffd86b")) : "0 2px 4px rgba(0,0,0,0.6)");
+        var bgGrad = isDead ? "radial-gradient(circle, #7f1d1d 0%, #180505 90%)" : ("radial-gradient(circle, " + (p ? p.color : '#334155') + " 0%, #1a0f0a 85%)");
+        var imgStyle = "width:108%; height:108%; object-fit:contain; transform:translateY(1px); border-radius:50%;" + (isDead ? " filter:grayscale(100%) brightness(0.5) contrast(1.3); opacity:0.65;" : "");
+        var skullBadge = isDead ? ('<span class="dead-skull-overlay" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:' + Math.round(sz * 0.58) + 'px; line-height:1; z-index:3; text-shadow:0 0 4px #000, 0 0 8px #dc2626; pointer-events:none;">💀</span>') : '';
+
+        return '<span class="pawn-hud-avatar ' + (isDead ? 'pawn-avatar-dead' : '') + '" style="position:relative; display:inline-flex; align-items:center; justify-content:center; width:' + sz + 'px; height:' + sz + 'px; border-radius:50%; background:' + bgGrad + '; border:2px solid ' + borderCol + '; box-shadow:' + glow + '; flex-shrink:0; vertical-align:middle;">' +
+            '<img src="' + img + '" alt="" style="' + imgStyle + '"/>' +
+            skullBadge +
+            '</span>';
     },
 
     renderTopPlayersHud: function () {
@@ -702,7 +730,31 @@
 
             var isInspected = (i === inspIdx);
 
-            var pct = Math.min(100, Math.round((p.totalHearts / target) * 100));
+            var scen = (this.state.config && this.state.config.scenario) ? this.state.config.scenario : "classic";
+            var pct = 0;
+            var statsHeartsHtml = "";
+            if (scen === "slayer") {
+                var dSlain = (p.stats && p.stats.dragonsSlain) ? p.stats.dragonsSlain : 0;
+                var targetD = (this.state.config && this.state.config.targetDragons) ? this.state.config.targetDragons : 2;
+                pct = Math.min(100, Math.round((dSlain / targetD) * 100));
+                statsHeartsHtml = '<div class="top-hud-hearts" style="color:#ef4444; font-weight:bold;" title="Ulovení draci (cíl scénáře): ' + dSlain + '/' + targetD + ', Srdce: ' + p.totalHearts + ' 💖">🐉 ' + dSlain + ' / ' + targetD + ' <span style="font-size:0.75rem; color:#f472b6; font-weight:600;">(' + p.totalHearts + '💖)</span></div>';
+            } else if (scen === "tycoon") {
+                var cCount = 0, kCount = 0;
+                if (p.ownedNodes) {
+                    for (var oi = 0; oi < p.ownedNodes.length; oi++) {
+                        var oNd = this.state.board.nodes[p.ownedNodes[oi]];
+                        if (oNd) {
+                            if (oNd.level === 3 || oNd.type === "CASTLE") kCount++;
+                            else if (oNd.level === 2 || oNd.type === "TOWN") cCount++;
+                        }
+                    }
+                }
+                pct = Math.min(100, Math.round(((cCount + kCount) / 4) * 100));
+                statsHeartsHtml = '<div class="top-hud-hearts" style="color:#f59e0b; font-weight:bold;" title="Ovládnutá panství: ' + cCount + '/3 měst, ' + kCount + '/1 hrad">🏰 ' + cCount + 'm/' + kCount + 'h <span style="font-size:0.75rem; color:#f472b6; font-weight:600;">(' + p.totalHearts + '💖)</span></div>';
+            } else {
+                pct = Math.min(100, Math.round((p.totalHearts / target) * 100));
+                statsHeartsHtml = '<div class="top-hud-hearts">💖 ' + p.totalHearts + ' / ' + target + '</div>';
+            }
 
             html.push('<div class="top-hud-card ' + (isTurn ? 'is-turn' : '') + ' ' + (isInspected ? 'is-inspected' : '') + ' ' + (p.isEliminated ? 'is-eliminated' : '') + '" ' +
 
@@ -730,7 +782,7 @@
 
                 this.escapeHtml(p.name) +
 
-                (p.isEliminated ? ' <small style="color:#ef4444; font-weight:bold;">💀</small>' : '') +
+                (p.isEliminated ? ' <span style="background:#dc2626; color:#fff; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px; margin-left:4px; letter-spacing:0.5px; box-shadow:0 0 6px rgba(220,38,38,0.7);">💀 MRTEV</span>' : '') +
 
                 '        </div>' +
 
@@ -742,9 +794,7 @@
 
                 '    <div class="top-hud-stats">' +
 
-                '      <div class="top-hud-gold">🪙 <strong>' + p.gold.toLocaleString("cs-CZ") + '</strong> zl.</div>' +
-
-                '      <div class="top-hud-hearts">💖 ' + p.totalHearts + ' / ' + target + '</div>' +
+                (p.isEliminated ? '      <div class="top-hud-gold" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">🪙 0 zl.</div><div class="top-hud-hearts" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">💀 ELIMINOVÁN</div>' : '      <div class="top-hud-gold">🪙 <strong>' + p.gold.toLocaleString("cs-CZ") + '</strong> zl.</div>' + statsHeartsHtml) +
 
                 '    </div>' +
 
@@ -776,58 +826,88 @@
 
         if (raceEl) {
 
+            var scen = (this.state.config && this.state.config.scenario) ? this.state.config.scenario : "classic";
+            var raceHeaderTitle = '🏆 ZÁVOD O PRINCEZNINO SRDCE';
+            var raceGoalBadge = '<span style="color:#f472b6;">Cíl: ' + target + ' ❤️</span>';
+            var finishIcon = '👑🏰';
+            var finishTitle = 'Královský hrad & Princezna';
+
+            if (scen === "slayer") {
+                raceHeaderTitle = '🐉 SCÉNÁŘ: LOVCI DRAKŮ';
+                raceGoalBadge = '<span style="color:#ef4444; font-weight:800;">Cíl: 2 draci v Dračích slujích (U3) 🐉</span>';
+                finishIcon = '🐉👑';
+                finishTitle = 'Skolený drak & Královský triumf';
+            } else if (scen === "tycoon") {
+                raceHeaderTitle = '🏰 SCÉNÁŘ: FEUDÁLNÍ MAGNÁT';
+                raceGoalBadge = '<span style="color:#f59e0b; font-weight:800;">Cíl: 3 města + 1 hrad 🏰</span>';
+                finishIcon = '🏰👑';
+                finishTitle = 'Feudální panství';
+            }
+
             var raceHtml = '<div class="princess-race-header">' +
-
-                '<span>🏆 ZÁVOD O PRINCEZNINO SRDCE</span>' +
-
-                '<span style="color:#f472b6;">Cíl: ' + target + ' ❤️</span>' +
-
+                '<span>' + raceHeaderTitle + '</span>' +
+                raceGoalBadge +
                 '</div>' +
-
                 '<div class="princess-race-track">' +
-
                 '  <div class="race-milestones">';
 
-            var stepCount = 5;
-
-            for (var m = 0; m <= stepCount; m++) {
-
-                var stepVal = Math.round((target / stepCount) * m);
-
-                raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>' + stepVal + ' ❤️</span></div>';
-
+            if (scen === "slayer") {
+                raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>0 🐉</span></div>';
+                raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>1 🐉</span></div>';
+                raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>2 🐉 (Cíl)</span></div>';
+            } else if (scen === "tycoon") {
+                raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>Start</span></div>';
+                raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>2 sídla</span></div>';
+                raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>3m + 1h (Cíl)</span></div>';
+            } else {
+                var stepCount = 5;
+                for (var m = 0; m <= stepCount; m++) {
+                    var stepVal = Math.round((target / stepCount) * m);
+                    raceHtml += '<div class="race-milestone"><div class="race-milestone-tick"></div><span>' + stepVal + ' ❤️</span></div>';
+                }
             }
 
             raceHtml += '  </div>';
 
             for (var rIdx = 0; rIdx < this.state.players.length; rIdx++) {
-
                 var plTrack = this.state.players[rIdx];
-
                 var isActTrack = (rIdx === this.state.currentPlayerIndex);
-
                 var isInspTrack = (rIdx === inspIdx);
+                var pctTrack = 3;
+                var trackTooltip = "";
 
-                var pctTrack = Math.min(94, Math.max(3, (plTrack.totalHearts / target) * 88 + 3));
+                if (scen === "slayer") {
+                    var dCount = (plTrack.stats && plTrack.stats.dragonsSlain) ? plTrack.stats.dragonsSlain : 0;
+                    pctTrack = Math.min(94, Math.max(3, (dCount / 2) * 88 + 3));
+                    trackTooltip = this.escapeHtml(plTrack.name) + ': ' + dCount + '/2 draků (' + plTrack.totalHearts + ' ❤️, ' + plTrack.gold.toLocaleString("cs-CZ") + ' zl.)';
+                } else if (scen === "tycoon") {
+                    var cCount = 0, kCount = 0;
+                    if (plTrack.ownedNodes) {
+                        for (var oi = 0; oi < plTrack.ownedNodes.length; oi++) {
+                            var oNd = this.state.board.nodes[plTrack.ownedNodes[oi]];
+                            if (oNd) {
+                                if (oNd.level === 3 || oNd.type === "CASTLE") kCount++;
+                                else if (oNd.level === 2 || oNd.type === "TOWN") cCount++;
+                            }
+                        }
+                    }
+                    pctTrack = Math.min(94, Math.max(3, ((cCount + kCount) / 4) * 88 + 3));
+                    trackTooltip = this.escapeHtml(plTrack.name) + ': ' + cCount + 'm/' + kCount + 'h (' + plTrack.totalHearts + ' ❤️, ' + plTrack.gold.toLocaleString("cs-CZ") + ' zl.)';
+                } else {
+                    pctTrack = Math.min(94, Math.max(3, (plTrack.totalHearts / target) * 88 + 3));
+                    trackTooltip = this.escapeHtml(plTrack.name) + ': ' + plTrack.totalHearts + ' ❤️ (' + plTrack.gold.toLocaleString("cs-CZ") + ' zl.)';
+                }
 
                 raceHtml += '<div class="race-token ' + (isInspTrack ? 'inspected-race-token' : '') + '" ' +
-
                     'style="left:' + pctTrack + '%;background:' + plTrack.color + ';border-color:' + (isActTrack ? '#fbbf24' : (isInspTrack ? '#38bdf8' : '#ffffff')) + ';box-shadow:0 0 ' + (isActTrack ? '14px #fbbf24' : (isInspTrack ? '12px #38bdf8' : '6px rgba(0,0,0,0.6)')) + '; cursor:pointer;" ' +
-
                     'onclick="PRS_App.selectPlayerToInspect(' + rIdx + ')" ' +
-
                     'onmouseenter="PRS_App.showPlayerTooltip(event, ' + rIdx + ')" ' +
-
                     'onmousemove="PRS_App.movePlayerTooltip(event)" ' +
-
                     'onmouseleave="PRS_App.hidePlayerTooltip()" ' +
-
-                    'title="' + this.escapeHtml(plTrack.name) + ': ' + plTrack.totalHearts + ' ❤️ (' + plTrack.gold.toLocaleString("cs-CZ") + ' zl.) - Klepni pro zobrazení statistik" style="padding:0; overflow:hidden; display:inline-flex; align-items:center; justify-content:center;"><img src="' + (window.PRS_getPawnById && window.PRS_getPawnById(plTrack.pawnId) ? window.PRS_getPawnById(plTrack.pawnId).img : 'assets/pawns/pawn_knight_valiant.png') + '" style="width:100%; height:100%; object-fit:contain;"/></div>';
-
+                    'title="' + trackTooltip + ' - Klepni pro zobrazení statistik" style="padding:0; overflow:hidden; display:inline-flex; align-items:center; justify-content:center;"><img src="' + (window.PRS_getPawnById && window.PRS_getPawnById(plTrack.pawnId) ? window.PRS_getPawnById(plTrack.pawnId).img : 'assets/pawns/pawn_knight_valiant.png') + '" style="width:100%; height:100%; object-fit:contain;"/></div>';
             }
 
-            raceHtml += '  <div class="race-finish-crown" title="Královský hrad &amp; Princezna">👑🏰</div>' +
-
+            raceHtml += '  <div class="race-finish-crown" title="' + finishTitle + '">' + finishIcon + '</div>' +
                 '</div>';
 
             raceEl.innerHTML = raceHtml;
@@ -2598,7 +2678,7 @@
 
                 '    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + player.gold.toLocaleString("cs-CZ") + ' zl.</div>' +
 
-                '    <div style="font-size:0.76rem; font-weight:bold; color:#f472b6;">💖 ' + player.totalHearts + ' / ' + targetHearts + '</div>' +
+                '    <div style="font-size:0.76rem; font-weight:bold;">' + (this.state.config && this.state.config.scenario === "slayer" ? ('<span style="color:#ef4444;">🐉 ' + ((player.stats && player.stats.dragonsSlain) ? player.stats.dragonsSlain : 0) + ' / 2 draků</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : (this.state.config && this.state.config.scenario === "tycoon" ? ('<span style="color:#f59e0b;">🏰 ' + (player.ownedNodes ? player.ownedNodes.length : 0) + ' sídel</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : ('<span style="color:#f472b6;">💖 ' + player.totalHearts + ' / ' + targetHearts + '</span>'))) + '</div>' +
 
                 '  </div>' +
 
@@ -3454,7 +3534,7 @@
 
             '    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + player.gold.toLocaleString("cs-CZ") + ' zl.</div>' +
 
-            '    <div style="font-size:0.76rem; font-weight:bold; color:#f472b6;">💖 ' + player.totalHearts + ' / ' + targetHeartsAction + '</div>' +
+            '    <div style="font-size:0.76rem; font-weight:bold;">' + (this.state.config && this.state.config.scenario === "slayer" ? ('<span style="color:#ef4444;">🐉 ' + ((player.stats && player.stats.dragonsSlain) ? player.stats.dragonsSlain : 0) + ' / 2 draků</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : (this.state.config && this.state.config.scenario === "tycoon" ? ('<span style="color:#f59e0b;">🏰 ' + (player.ownedNodes ? player.ownedNodes.length : 0) + ' sídel</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : ('<span style="color:#f472b6;">💖 ' + player.totalHearts + ' / ' + targetHeartsAction + '</span>'))) + '</div>' +
 
             '  </div>' +
 

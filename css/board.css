@@ -2680,9 +2680,63 @@
 
 .top-hud-card.is-eliminated {
 
-    opacity: 0.5;
+    opacity: 0.55;
 
-    filter: grayscale(0.7);
+    filter: grayscale(0.8);
+
+    border-left: 4px solid #dc2626 !important;
+
+    background: linear-gradient(135deg, rgba(35, 10, 10, 0.88), rgba(18, 5, 5, 0.92)) !important;
+
+    cursor: not-allowed;
+
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.35);
+
+}
+
+.top-hud-card.is-eliminated .top-hud-name {
+
+    text-decoration: line-through;
+
+    opacity: 0.75;
+
+}
+
+.pawn-avatar-dead {
+
+    position: relative;
+
+    border-color: #ef4444 !important;
+
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.85) !important;
+
+}
+
+.dead-skull-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    pointer-events: none;
+
+    z-index: 5;
+
+    animation: deadSkullPulse 2.5s ease-in-out infinite alternate;
+
+}
+
+@keyframes deadSkullPulse {
+
+    from { transform: scale(0.92); opacity: 0.85; }
+
+    to { transform: scale(1.08); opacity: 1; }
 
 }
 

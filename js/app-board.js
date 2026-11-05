@@ -1573,6 +1573,9 @@
 
             var pl = this.state.players[k];
 
+            // ELIMINOVANÝ HRÁČ: Jeho figurka se nesmí vykreslovat na hracím plánu ani na hřbitově
+            if (pl.isEliminated) continue;
+
             if (!playersByNode[pl.nodeId]) playersByNode[pl.nodeId] = [];
 
             playersByNode[pl.nodeId].push(pl);
