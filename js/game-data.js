@@ -101,7 +101,7 @@ window.PRS_GRAPHICS_CONFIG = {
         JESTER: "assets/tiles/jester.png",
         staje: "assets/tiles/kun.jpg",
         kovarna: "assets/tiles/kovarna.png",
-        krejci: "",
+        krejci: "assets/tiles/krejci.png",
         sokolnik: "assets/tiles/sokol.jpg",
         psovod: "assets/tiles/pes.jpg",
         U1: "assets/tiles/u1_zver.png",
@@ -111,8 +111,8 @@ window.PRS_GRAPHICS_CONFIG = {
         PRISON: "assets/tiles/prison.png",
         HOSPITAL: "assets/tiles/hospital.png",
         TAVERN: "assets/tiles/tavern.png",
-        CHANCE: "",
-        BONUS: ""
+        CHANCE: "assets/tiles/chance.png",
+        BONUS: "assets/tiles/bonus.png"
     },
     // Možnost přiřadit unikátní bitmapu konkrétnímu kódu políčka (např. "H1", "H2")
     tileBitmapsByCode: {

@@ -1,8 +1,8 @@
 # Komplexní analýza stavu projektu KiDesky: Princeznino srdce (Handoff pro nový chat)
 
 > **Datum vyhotovení:** 5. 11. 2026  
-> **Aktuální verze cache-busteru:** `?v=202611050074`  
-> **Poslední Git commit:** `7a49cb5` (`feat(biome-audio, chronicle, content): add procedural footsteps & bridge sounds, river Doubravka chronicle events, telemetry, 4th festival (Lov), and chance cards ch_51-ch_57`)  
+> **Aktuální verze cache-busteru:** `?v=202611050075`  
+> **Poslední Git commit:** v přípravě (přirozený terén na všech plánech, silniční reliéf, mlha, monstra U1/U2 a medailony políček)  
 > **Produkční URL:** https://www.ekobio.org/apps/KiDesky/  
 > **Lokální pracovní adresář:** `c:\Users\janky\.gemini\antigravity\scratch\KiDesky`
 
@@ -129,42 +129,37 @@ Všechny tabulky používají schéma `prs` a prefix `prs_`. Jsou automaticky vy
 
 Při kontrole grafických assetů (`KATALOG_GRAFIKY_A_ASSETU.md` a `js/game-data.js`) byly identifikovány dvě volitelné grafické oblasti, které lze v novém chatu dogenerovat:
 
-### 5.1 Dogenerování 8 unikátních ilustrací pro původní bytosti (U1 a U2)
-Všechny nově přidané příšery (34 monster v `assets/monsters/` a 20 draků v `assets/dragons/`) již mají své vlastní průhledné PNG ilustrace i zrcadlové `_flip.png` varianty. První 4 zvířata v `U1` a první 4 protivníci v `U2` však zatím v `js/game-data.js` (řádky 830–833 a 847–850) dočasně odkazují na obrázky dekorací z `assets/decorations/`:
+### 5.1 Dogenerování 8 unikátních ilustrací pro původní bytosti U1 a U2 (DOKONČENO)
+Všechny bytosti v `U1` i `U2` mají nyní své vlastní transparentní PNG ilustrace i zrcadlové `_flip.png` varianty zpracované přes rembg v `assets/monsters/`:
+1. **`u1_1` – Divoký kňour** -> `assets/monsters/monster_boar.png` + `_flip.png`
+2. **`u1_2` – Smečka šedých vlků** -> `assets/monsters/monster_wolf_pack.png` + `_flip.png`
+3. **`u1_3` – Horský medvěd** -> `assets/monsters/monster_bear.png` + `_flip.png`
+4. **`u1_4` – Královský bílý jelen** -> `assets/monsters/monster_white_stag.png` + `_flip.png`
+5. **`u2_1` – Skalní obr** -> `assets/monsters/monster_rock_giant.png` + `_flip.png`
+6. **`u2_2` – Temný černokněžník** -> `assets/monsters/monster_warlock.png` + `_flip.png`
+7. **`u2_3` – Černý loupeživý rytíř** -> `assets/monsters/monster_black_knight.png` + `_flip.png`
+8. **`u2_4` – Jeskynní vlkodlak** -> `assets/monsters/monster_cave_werewolf.png` + `_flip.png`
 
-1. **`u1_1` – Divoký kňour** (aktuálně používá `assets/decorations/cave_bear_den.png`) -> vytvořit `assets/monsters/monster_boar.png` + `_flip.png`
-2. **`u1_2` – Smečka šedých vlků** (aktuálně používá `assets/decorations/bandit_cave.png`) -> vytvořit `assets/monsters/monster_wolf_pack.png` + `_flip.png`
-3. **`u1_3` – Horský medvěd** (aktuálně používá `assets/decorations/snow_troll_cave.png`) -> vytvořit `assets/monsters/monster_bear.png` + `_flip.png`
-4. **`u1_4` – Královský bílý jelen** (aktuálně používá `assets/decorations/unicorn_grove.png`) -> vytvořit `assets/monsters/monster_white_stag.png` + `_flip.png`
-5. **`u2_1` – Skalní obr** (aktuálně používá `assets/decorations/swamp_troll.png`) -> vytvořit `assets/monsters/monster_rock_giant.png` + `_flip.png`
-6. **`u2_2` – Temný černokněžník** (aktuálně používá `assets/decorations/witch_hut.png`) -> vytvořit `assets/monsters/monster_warlock.png` + `_flip.png`
-7. **`u2_3` – Černý loupeživý rytíř** (aktuálně používá `assets/decorations/ancient_ruins.png`) -> vytvořit `assets/monsters/monster_black_knight.png` + `_flip.png`
-8. **`u2_4` – Jeskynní vlkodlak** (aktuálně používá `assets/decorations/basilisk_cave.png`) -> vytvořit `assets/monsters/monster_cave_werewolf.png` + `_flip.png`
+### 5.2 Dogenerování všech 7 bitmapových medailonů políček (DOKONČENO)
+Všechna políčka v `window.PRS_GRAPHICS_CONFIG.tileBitmapsByType` (`js/game-data.js`) mají své vlastní 384x384 bitmapové medailony se zlatým reliéfním kováním i zrcadlené varianty v `assets/tiles/`:
+1. **`MASTER`** -> `assets/tiles/master.png` + `_flip.png`
+2. **`TAX`** -> `assets/tiles/tax.png` + `_flip.png`
+3. **`JESTER`** -> `assets/tiles/jester.png` + `_flip.png`
+4. **`kovarna`** -> `assets/tiles/kovarna.png` + `_flip.png`
+5. **`krejci`** -> `assets/tiles/krejci.png` + `_flip.png`
+6. **`CHANCE`** -> `assets/tiles/chance.png` + `_flip.png`
+7. **`BONUS`** -> `assets/tiles/bonus.png` + `_flip.png`
 
-### 5.2 Dogenerování 7 bitmapových medailonů políček (`assets/tiles/`)
-V `window.PRS_GRAPHICS_CONFIG.tileBitmapsByType` (`js/game-data.js`, řádky 97–115) mají následující typy políček prázdnou cestu `""` a používají procedurální vektorový SVG medailon:
-1. **`MASTER`** (Cvičební mistr rytířských ctností) -> `assets/tiles/master.png`
-2. **`TAX`** (Královský výběrčí daní / Výnos panství) -> `assets/tiles/tax.png`
-3. **`JESTER`** (Královský šašek / Kejklíř) -> `assets/tiles/jester.png`
-4. **`kovarna`** (Mistr kovář / Zbrojíř) -> `assets/tiles/kovarna.png`
-5. **`krejci`** (Dvorní krejčí) -> `assets/tiles/krejci.png`
-6. **`CHANCE`** (Karta Náhody & Osudu – otazník / svitek) -> `assets/tiles/chance.png`
-7. **`BONUS`** (Rozcestní prémie +200 / +300 / +400 zl.) -> `assets/tiles/bonus.png`
-
-### 5.3 Implementace přirozeného terénu a dynamického procedurálního generátoru mapy (DOKONČENO)
-1. **Deterministický procedurální generátor (`window.KiDeskyMapGenerator`):**
-   - Vytvořen parametrický LCG generátor podle `seed`, který syntetizuje topologii grafu (112 uzlů: 78 vnějších + 3 strategické vnitřní větvy: Dračí stezka 13 uzlů, Most Slavností 14 uzlů, Hradní smyčka 7 uzlů).
-   - Náhodný výběr 2 tematických hradů ze seznamu 9 hradů (`THEMATIC_CASTLES`) pro políčka `H1` a `H2`.
-   - Všechny uzly mají garantované herní parametry (`code`, `type`, `subtype`, `setId`, `estateId`, `hasRoof`, `isJunction`, `branchLow`, `branchHigh`).
-2. **Přirozený terén a akvarelové biomy:**
-   - 4 sémantické biomy (Hluboký hvozd, Dračí pohoří, Zlaté lučiny, Vodní mokřady) s měkkým rozostřením `url(#biomeBlur)` a vrstevnicemi pro hory.
-   - Meandrující řeka Doubravka se stínem břehů, leskem hladiny a automatickými kamennými mosty na všech kříženích s cestami.
-   - Ekosystémové shluky stromů a pohoří (`spawnForestThicket`, `spawnMountainRidge`), stromy se přirozeně překrývají a netvoří izolované tečky.
-   - Zušlechtění 8 balíčků karet: pergamenový poloprůsvitný podklad `url(#cardParchmentGrad)` se zlatým filigránovým kováním, který již nedusí střed mapy.
-3. **UI a živé ovládání:**
-   - V herní liště i v Lobby přidáno tlačítko `🎲 Nová mapa (Seed)` s možností rerollu mapy.
-   - Integrace do `index.html` (cache-buster `?v=202611050074`), `js/game-boards.js`, `js/app-board.js`, `js/game-engine.js`, `js/app.js`.
-   - Otestováno a nasazeno na produkci (HTTP 200 OK na `https://www.ekobio.org/apps/KiDesky/`).
+### 5.3 Implementace přirozeného terénu na všech herních plánech (DOKONČENO)
+1. **Přirozené terénní biomy napříč všemi plány (`classic_96`, `dragon_4598`, `compact_48`, `procedural`):**
+   - 4 živé akvarelové biomy se sytými gradienty (`forestBiomeGrad`, `mountainBiomeGrad`, `meadowsBiomeGrad`, `waterBiomeGrad`) s měkkým rozostřením `url(#biomeBlur)` a topografickými vrstevnicemi hor a luk.
+   - Meandrující řeka Doubravka s širokým písčito-kamenným korytem, hlubokým stínem, tyrkysovým proudem a animovanými světelnými odlesky proudu.
+   - Architektonické kamenné mosty na všech kříženích cest s řekou.
+   - Ekosystémové shluky lesů a pohoří (`spawnForestThicket`, `spawnMountainRidge`) s překrýváním korun stromů v izometrii.
+2. **Reliéfní královské cesty a atmosférická ranní mlha:**
+   - Cesty mají nyní 5 vrstev reliéfu: štěrkový hliněný podklad, stín příkopu, kamenné dláždění, tečkované reliéfní kamenné obrubníky a vnitřní zlatou vyježděnou stopu.
+   - Animovaný závoj ranní mlhy (`#prs-mist-layer`) vznášející se nad Dračím pohořím a Hlubokým hvozdem.
+   - Vše nasazeno s cache-busterem `?v=202611050075`.
 
 ### 5.4 Audio biomů, kronika přechodu mostů a hradů, telemetrie a rozšíření karet (DOKONČENO)
 1. **Audio a ambientní atmosféra podle biomu (`js/app-audio.js` & `js/app-hud.js`):**

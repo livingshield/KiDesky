@@ -988,34 +988,58 @@ window.KiDeskyMapGenerator = {
             {
                 id: "mountain_ridge",
                 name: "Dračí pohoří & Skalní srázy",
-                fill: "rgba(68, 64, 60, 0.28)",
-                opacity: 0.6,
+                fillGrad: "mountainBiomeGrad",
+                fill: "rgba(68, 64, 60, 0.55)",
+                opacity: 0.82,
                 path: "M 960 60 C 1150 40 1350 180 1370 420 C 1380 620 1250 780 1080 770 C 1040 550 1020 320 960 60 Z",
                 contours: [
                     "M 1040 120 Q 1200 90 1280 260 Q 1320 450 1240 650",
                     "M 1080 180 Q 1220 160 1270 340 Q 1280 520 1190 680"
-                ]
+                ],
+                contourStroke: "rgba(251,191,36,0.38)",
+                contourDash: "8,5"
             },
             {
                 id: "forest_deep",
                 name: "Královský hvozd Doubrava",
-                fill: "rgba(22, 101, 52, 0.25)",
-                opacity: 0.65,
-                path: "M 280 60 C 460 50 680 70 660 220 C 520 280 320 320 150 280 C 100 160 180 70 280 60 Z"
+                fillGrad: "forestBiomeGrad",
+                fill: "rgba(22, 101, 52, 0.50)",
+                opacity: 0.78,
+                path: "M 280 60 C 460 50 680 70 660 220 C 520 280 320 320 150 280 C 100 160 180 70 280 60 Z",
+                contours: [
+                    "M 260 90 Q 420 80 560 180 Q 450 240 280 250",
+                    "M 180 150 Q 320 160 480 210"
+                ],
+                contourStroke: "rgba(134,239,172,0.30)",
+                contourDash: "6,6"
             },
             {
                 id: "meadows_valley",
                 name: "Královské louky a lánová pole",
-                fill: "rgba(202, 138, 4, 0.18)",
-                opacity: 0.65,
-                path: "M 180 620 C 350 560 600 580 620 780 C 500 830 280 840 150 790 C 120 720 130 650 180 620 Z"
+                fillGrad: "meadowsBiomeGrad",
+                fill: "rgba(202, 138, 4, 0.42)",
+                opacity: 0.75,
+                path: "M 180 620 C 350 560 600 580 620 780 C 500 830 280 840 150 790 C 120 720 130 650 180 620 Z",
+                contours: [
+                    "M 220 660 Q 380 610 540 680",
+                    "M 260 720 Q 410 670 510 750"
+                ],
+                contourStroke: "rgba(253,224,71,0.32)",
+                contourDash: "5,5"
             },
             {
                 id: "water_wetlands",
                 name: "Meandry řeky a jezerní tůně",
-                fill: "rgba(14, 116, 144, 0.22)",
-                opacity: 0.6,
-                path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z"
+                fillGrad: "waterBiomeGrad",
+                fill: "rgba(14, 116, 144, 0.48)",
+                opacity: 0.72,
+                path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z",
+                contours: [
+                    "M 1100 160 Q 990 350 860 520 Q 770 660 720 780",
+                    "M 1150 220 Q 1040 410 910 580"
+                ],
+                contourStroke: "rgba(56,189,248,0.35)",
+                contourDash: "7,5"
             }
         ];
 
@@ -1158,7 +1182,7 @@ window.PRS_BoardBuilder = {
                 var dx = n.x - x;
                 var dy = n.y - y;
                 var distSq = dx * dx + dy * dy;
-                var minDist = radius + 32;
+                var minDist = radius + 20;
                 if (distSq < minDist * minDist) return false;
             }
 
@@ -1196,13 +1220,30 @@ window.PRS_BoardBuilder = {
             return true;
         }
 
+        function findClearSpot(cx, cy, radius) {
+            if (isPositionClear(cx, cy, radius, false)) return { x: cx, y: cy };
+            var offsets = [
+                { x: 35, y: 0 }, { x: -35, y: 0 }, { x: 0, y: 35 }, { x: 0, y: -35 },
+                { x: 30, y: 30 }, { x: -30, y: 30 }, { x: 30, y: -30 }, { x: -30, y: -30 },
+                { x: 55, y: 0 }, { x: -55, y: 0 }, { x: 0, y: 55 }, { x: 0, y: -55 }
+            ];
+            for (var o = 0; o < offsets.length; o++) {
+                var tx = cx + offsets[o].x;
+                var ty = cy + offsets[o].y;
+                if (isPositionClear(tx, ty, radius, false)) return { x: tx, y: ty };
+            }
+            return null;
+        }
+
         // 1. Shlukové lesní hvozdy (Forest Thickets)
         function spawnForestThicket(cx, cy, type) {
             var groveKey = (type === "pine") ? "grove_pine" : "grove_oak";
             var treeKeys = (type === "pine") ? ["tree_pine", "tree_pine", "tree_birch"] : ["tree_oak", "tree_birch", "tree_oak"];
             if (!catalog[groveKey]) return;
             var gItem = catalog[groveKey];
-            if (!isPositionClear(cx, cy, gItem.clearance, false)) return;
+            var spot = findClearSpot(cx, cy, gItem.clearance);
+            if (!spot) return;
+            cx = spot.x; cy = spot.y;
 
             decorList.push({
                 id: "cluster_g_" + cx + "_" + cy,
@@ -1263,7 +1304,9 @@ window.PRS_BoardBuilder = {
         function spawnMountainRidge(cx, cy) {
             if (!catalog["mountain_peaks"]) return;
             var mItem = catalog["mountain_peaks"];
-            if (!isPositionClear(cx, cy, mItem.clearance, false)) return;
+            var spot = findClearSpot(cx, cy, mItem.clearance);
+            if (!spot) return;
+            cx = spot.x; cy = spot.y;
 
             decorList.push({
                 id: "ridge_m1_" + cx + "_" + cy,
@@ -1314,13 +1357,16 @@ window.PRS_BoardBuilder = {
         }
 
         // Generování ekosystémových shluků v klíčových zónách
-        spawnMountainRidge(1230, 240);
-        spawnMountainRidge(1260, 480);
-        spawnForestThicket(330, 160, "oak");
-        spawnForestThicket(210, 240, "oak");
-        spawnForestThicket(410, 310, "birch");
+        spawnMountainRidge(1210, 260);
+        spawnMountainRidge(1250, 490);
+        spawnMountainRidge(1180, 680);
+        spawnForestThicket(310, 160, "oak");
+        spawnForestThicket(200, 240, "oak");
+        spawnForestThicket(380, 290, "birch");
+        spawnForestThicket(180, 460, "oak");
+        spawnForestThicket(480, 710, "pine");
         spawnForestThicket(890, 720, "pine");
-        spawnForestThicket(1020, 680, "pine");
+        spawnForestThicket(1040, 660, "pine");
 
         // 3. Ukotvené rekvizity k políčkům (Node-Anchored Props)
         for (var nIdx = 0; nIdx < nodes.length; nIdx++) {
@@ -1839,35 +1885,59 @@ buildClassic4599Board: function () {
         var biomes = [
             {
                 id: "mountain_ridge",
-                name: "Dračí pohoří & Hrad 2",
-                fill: "rgba(68, 64, 60, 0.28)",
-                opacity: 0.55,
+                name: "Dračí pohoří & Skalní srázy",
+                fillGrad: "mountainBiomeGrad",
+                fill: "rgba(68, 64, 60, 0.55)",
+                opacity: 0.82,
                 path: "M 960 60 C 1150 40 1350 180 1370 420 C 1380 620 1250 780 1080 770 C 1040 550 1020 320 960 60 Z",
                 contours: [
                     "M 1040 120 Q 1200 90 1280 260 Q 1320 450 1240 650",
                     "M 1080 180 Q 1220 160 1270 340 Q 1280 520 1190 680"
-                ]
+                ],
+                contourStroke: "rgba(251,191,36,0.38)",
+                contourDash: "8,5"
             },
             {
                 id: "forest_deep",
                 name: "Královský hvozd Doubrava",
-                fill: "rgba(22, 101, 52, 0.25)",
-                opacity: 0.6,
-                path: "M 280 60 C 460 50 680 70 660 220 C 520 280 320 320 150 280 C 100 160 180 70 280 60 Z"
+                fillGrad: "forestBiomeGrad",
+                fill: "rgba(22, 101, 52, 0.50)",
+                opacity: 0.78,
+                path: "M 280 60 C 460 50 680 70 660 220 C 520 280 320 320 150 280 C 100 160 180 70 280 60 Z",
+                contours: [
+                    "M 260 90 Q 420 80 560 180 Q 450 240 280 250",
+                    "M 180 150 Q 320 160 480 210"
+                ],
+                contourStroke: "rgba(134,239,172,0.30)",
+                contourDash: "6,6"
             },
             {
                 id: "meadows_valley",
                 name: "Královské louky a lánová pole",
-                fill: "rgba(202, 138, 4, 0.18)",
-                opacity: 0.6,
-                path: "M 180 620 C 350 560 600 580 620 780 C 500 830 280 840 150 790 C 120 720 130 650 180 620 Z"
+                fillGrad: "meadowsBiomeGrad",
+                fill: "rgba(202, 138, 4, 0.42)",
+                opacity: 0.75,
+                path: "M 180 620 C 350 560 600 580 620 780 C 500 830 280 840 150 790 C 120 720 130 650 180 620 Z",
+                contours: [
+                    "M 220 660 Q 380 610 540 680",
+                    "M 260 720 Q 410 670 510 750"
+                ],
+                contourStroke: "rgba(253,224,71,0.32)",
+                contourDash: "5,5"
             },
             {
                 id: "water_wetlands",
                 name: "Meandry řeky Doubravky",
-                fill: "rgba(14, 116, 144, 0.22)",
-                opacity: 0.55,
-                path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z"
+                fillGrad: "waterBiomeGrad",
+                fill: "rgba(14, 116, 144, 0.48)",
+                opacity: 0.72,
+                path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z",
+                contours: [
+                    "M 1100 160 Q 990 350 860 520 Q 770 660 720 780",
+                    "M 1150 220 Q 1040 410 910 580"
+                ],
+                contourStroke: "rgba(56,189,248,0.35)",
+                contourDash: "7,5"
             }
         ];
 
@@ -1875,7 +1945,7 @@ buildClassic4599Board: function () {
             {
                 id: "river_classic",
                 name: "Královská řeka Doubravka",
-                width: 10,
+                width: 12,
                 color: "#0284c7",
                 path: "M 1220 35 C 1140 220, 1040 400, 860 580 S 740 730, 705 855"
             }
@@ -2012,7 +2082,9 @@ buildClassic4599Board: function () {
                 { id: "royalCastle", name: "Trojvěžový Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 675, y: 405, w: 230, h: 190 },
                 { id: "dragonLair", name: "Tříhlavá Saň (U3)", icon: "🐲", image: "assets/dragons/dragon_3headed.png", x: 425, y: 330, w: 145, h: 125 },
                 { id: "forestTower", name: "Lesní Bašta (+200 zl.)", icon: "🌲", image: "assets/castles/castle_forest.png", x: 1140, y: 95, w: 130, h: 115 }
-            ]
+            ],
+            biomes: this.buildClassic4599Board().biomes,
+            rivers: this.buildClassic4599Board().rivers
         };
     },
 
@@ -2095,7 +2167,9 @@ buildClassic4599Board: function () {
             landmarks: [
                 { id: "royalCastle", name: "Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 700, y: 320, w: 240, h: 200 },
                 { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 990, y: 430, w: 150, h: 130 }
-            ]
+            ],
+            biomes: full.biomes,
+            rivers: full.rivers
         };
     },
 

@@ -670,8 +670,34 @@
         var activePalette = themePalettes[th] || themePalettes.light;
 
         return '<defs>' +
-            '<filter id="biomeBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="22" /></filter>' +
+            '<filter id="biomeBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28" /></filter>' +
+            '<filter id="mistBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="32" /></filter>' +
             '<filter id="riverGlow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+            '<linearGradient id="forestBiomeGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+            '  <stop offset="0%" stop-color="#14532d" stop-opacity="0.65" />' +
+            '  <stop offset="60%" stop-color="#15803d" stop-opacity="0.55" />' +
+            '  <stop offset="100%" stop-color="#166534" stop-opacity="0.45" />' +
+            '</linearGradient>' +
+            '<linearGradient id="mountainBiomeGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+            '  <stop offset="0%" stop-color="#44403c" stop-opacity="0.75" />' +
+            '  <stop offset="50%" stop-color="#292524" stop-opacity="0.65" />' +
+            '  <stop offset="100%" stop-color="#1c1917" stop-opacity="0.55" />' +
+            '</linearGradient>' +
+            '<linearGradient id="meadowsBiomeGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+            '  <stop offset="0%" stop-color="#ca8a04" stop-opacity="0.50" />' +
+            '  <stop offset="60%" stop-color="#65a30d" stop-opacity="0.45" />' +
+            '  <stop offset="100%" stop-color="#4d7c0f" stop-opacity="0.38" />' +
+            '</linearGradient>' +
+            '<linearGradient id="waterBiomeGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+            '  <stop offset="0%" stop-color="#0284c7" stop-opacity="0.55" />' +
+            '  <stop offset="50%" stop-color="#0ea5e9" stop-opacity="0.48" />' +
+            '  <stop offset="100%" stop-color="#0369a1" stop-opacity="0.40" />' +
+            '</linearGradient>' +
+            '<radialGradient id="mistSoftGrad" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="rgba(224,242,254,0.35)" />' +
+            '  <stop offset="60%" stop-color="rgba(186,230,253,0.18)" />' +
+            '  <stop offset="100%" stop-color="rgba(186,230,253,0)" />' +
+            '</radialGradient>' +
             '<linearGradient id="cardParchmentGrad" x1="0%" y1="0%" x2="0%" y2="100%">' +
             '  <stop offset="0%" stop-color="rgba(34,25,18,0.85)" />' +
             '  <stop offset="100%" stop-color="rgba(18,12,8,0.92)" />' +
@@ -814,11 +840,12 @@
         out.push('  <g id="prs-biomes-layer">');
         for (var b = 0; b < board.biomes.length; b++) {
             var bm = board.biomes[b];
+            var fillVal = bm.fillGrad ? ("url(#" + bm.fillGrad + ")") : bm.fill;
             out.push('    <g class="biome-region" data-biome-id="' + bm.id + '">');
-            out.push('      <path d="' + bm.path + '" fill="' + bm.fill + '" opacity="' + (bm.opacity || 0.5) + '" filter="url(#biomeBlur)"/>');
+            out.push('      <path d="' + bm.path + '" fill="' + fillVal + '" opacity="' + (bm.opacity || 0.72) + '" filter="url(#biomeBlur)"/>');
             if (bm.contours && bm.contours.length > 0) {
                 for (var c = 0; c < bm.contours.length; c++) {
-                    out.push('      <path d="' + bm.contours[c] + '" fill="none" stroke="' + (bm.contourStroke || 'rgba(212,175,55,0.18)') + '" stroke-width="0.85" stroke-dasharray="' + (bm.contourDash || '6,6') + '"/>');
+                    out.push('      <path d="' + bm.contours[c] + '" fill="none" stroke="' + (bm.contourStroke || 'rgba(251,191,36,0.36)') + '" stroke-width="1.15" stroke-dasharray="' + (bm.contourDash || '7,5') + '"/>');
                 }
             }
             out.push('    </g>');
@@ -833,14 +860,18 @@
         out.push('  <g id="prs-rivers-layer">');
         for (var r = 0; r < board.rivers.length; r++) {
             var riv = board.rivers[r];
-            var rw = riv.width || 10;
-            // 1. Spodní stín/břeh řeky
-            out.push('    <path d="' + riv.path + '" stroke="rgba(12,24,36,0.65)" stroke-width="' + (rw + 6) + '" stroke-linecap="round" fill="none"/>');
-            // 2. Vodní hladina
-            out.push('    <path d="' + riv.path + '" stroke="' + (riv.color || '#0284c7') + '" stroke-width="' + rw + '" stroke-linecap="round" fill="none" opacity="0.82"/>');
+            var rw = riv.width || 12;
+            // 0. Břehy řeky s pískem a kameny
+            out.push('    <path d="' + riv.path + '" stroke="rgba(70,50,30,0.65)" stroke-width="' + (rw + 14) + '" stroke-linecap="round" fill="none" opacity="0.8"/>');
+            // 1. Spodní stín/hluboké koryto řeky
+            out.push('    <path d="' + riv.path + '" stroke="rgba(8,24,32,0.92)" stroke-width="' + (rw + 7) + '" stroke-linecap="round" fill="none"/>');
+            // 2. Tmavomodrá hlubina
+            out.push('    <path d="' + riv.path + '" stroke="' + (riv.color || '#0284c7') + '" stroke-width="' + rw + '" stroke-linecap="round" fill="none" opacity="0.9"/>');
+            // 2b. Tyrkysový zářící střední proud
+            out.push('    <path d="' + riv.path + '" stroke="#38bdf8" stroke-width="' + Math.max(3, rw * 0.55) + '" stroke-linecap="round" fill="none" opacity="0.85"/>');
             // 3. Světelné odlesky na vlnkách s animací proudu vody
-            out.push('    <path d="' + riv.path + '" stroke="#bae6fd" stroke-width="' + Math.max(2, rw * 0.28) + '" stroke-linecap="round" stroke-dasharray="12,18" fill="none" opacity="0.78">');
-            out.push('      <animate attributeName="stroke-dashoffset" values="0;-30" dur="2.4s" repeatCount="indefinite"/>');
+            out.push('    <path d="' + riv.path + '" stroke="#f0f9ff" stroke-width="' + Math.max(1.8, rw * 0.26) + '" stroke-linecap="round" stroke-dasharray="12,20" fill="none" opacity="0.92">');
+            out.push('      <animate attributeName="stroke-dashoffset" values="0;-40" dur="2.0s" repeatCount="indefinite"/>');
             out.push('    </path>');
         }
         out.push('  </g>');
@@ -962,6 +993,16 @@
         if (this.state.board && this.state.board.bridges && this.state.board.bridges.length > 0) {
             out.push(this.renderBoardBridgesHTML(this.state.board));
         }
+
+        // 1e. Plovoucí ranní mlha nad horami a hvozdem (Atmosférický opar)
+        out.push('  <g id="prs-mist-layer" pointer-events="none" opacity="0.65">');
+        out.push('    <g>');
+        out.push('      <animateTransform attributeName="transform" type="translate" values="0,0; 32,-12; 0,0" dur="22s" repeatCount="indefinite" />');
+        out.push('      <ellipse cx="1160" cy="320" rx="200" ry="110" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
+        out.push('      <ellipse cx="320" cy="180" rx="220" ry="120" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
+        out.push('      <ellipse cx="880" cy="540" rx="170" ry="95" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
+        out.push('    </g>');
+        out.push('  </g>');
 
         // 2. Plastické 3D balíčky karet na plánu (Interactive Card Decks)
 
@@ -1194,22 +1235,22 @@
 
                 var pthD = 'M ' + n.x + ' ' + n.y + ' Q ' + qx + ' ' + qy + ' ' + targetNode.x + ' ' + targetNode.y;
 
+                // 0. Vyšlapaný štěrkový/hliněný násep cesty (zemní podklad)
+                out.push('  <path d="' + pthD + '" stroke="rgba(48,32,18,0.68)" stroke-width="19" stroke-linecap="round" fill="none"/>');
+
                 // 1. Spodní stín/příkop cesty
+                out.push('  <path d="' + pthD + '" stroke="rgba(10,7,5,0.92)" stroke-width="14" stroke-linecap="round" fill="none"/>');
 
-                out.push('  <path d="' + pthD + '" stroke="rgba(12,9,6,0.88)" stroke-width="13" stroke-linecap="round" fill="none"/>');
+                // 2. Kamenný dlážděný pruh s patinou
+                out.push('  <path d="' + pthD + '" stroke="rgba(195,148,82,0.68)" stroke-width="9.5" stroke-linecap="round" fill="none"/>');
 
-                // 2. Kamenný dlážděný pruh
+                // 2b. Kamenné reliéfní obrubníky (kostky podél trasy)
+                out.push('  <path d="' + pthD + '" stroke="rgba(255,235,175,0.42)" stroke-width="8.2" stroke-dasharray="2.5,3" stroke-linecap="round" fill="none"/>');
 
-                out.push('  <path d="' + pthD + '" stroke="rgba(180,140,85,0.48)" stroke-width="8.5" stroke-linecap="round" fill="none"/>');
-
-                // 3. Vnitřní vyježděná stopa
-
-                var trackColor = targets[t].isBranch ? targets[t].color : 'rgba(253,224,71,0.52)';
-
+                // 3. Vnitřní vyježděná stopa se zlatým odleskem
+                var trackColor = targets[t].isBranch ? targets[t].color : 'rgba(253,224,71,0.58)';
                 var trackWidth = targets[t].isBranch ? '3.5' : '4.2';
-
                 var trackDash = targets[t].isBranch ? '4,4' : '6,5';
-
                 out.push('  <path d="' + pthD + '" stroke="' + trackColor + '" stroke-width="' + trackWidth + '" stroke-dasharray="' + trackDash + '" stroke-linecap="round" fill="none"/>');
 
                 // Bod uprostřed křivky (t = 0.5)
