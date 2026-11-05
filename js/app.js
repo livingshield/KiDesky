@@ -1786,6 +1786,30 @@ window.PRS_App = {
 
     },
 
+    rerollProceduralMap: function () {
+        var newSeed = Math.floor(Math.random() * 899999 + 100000);
+        this.currentBoardSeed = newSeed;
+
+        var lobbySel = document.getElementById("lobby-board-select");
+        if (lobbySel) lobbySel.value = "procedural";
+
+        var bSel = document.getElementById("board-template-select");
+        if (bSel) bSel.value = "procedural";
+
+        if (this.state && this.state.turnNumber > 0) {
+            var conf = confirm("Generování nového světa vyžaduje novou partii.\nPřeješ si vygenerovat nové království (Seed #" + newSeed + ") a začít novou hru?");
+            if (!conf) return;
+        }
+
+        this.startNewGame(true);
+        if (this.state && this.state.board) {
+            var name = this.state.board.name || ("Království osudu #" + newSeed);
+            if (this.showPawnToast) {
+                this.showPawnToast(this.state.currentPlayerIndex, name, "🎲", "#38bdf8", "rgba(15, 23, 42, 0.96)");
+            }
+        }
+    },
+
     changeBoardTemplateLive: function (boardCode) {
 
         if (this.state && this.state.turnNumber > 0) {
@@ -1863,6 +1887,8 @@ window.PRS_App = {
             config: this.activeConfig,
 
             boardCode: boardCode,
+            boardSeed: (boardCode === "procedural" ? (this.currentBoardSeed || (this.currentBoardSeed = Math.floor(Math.random() * 899999 + 100000))) : null),
+            seed: (boardCode === "procedural" ? (this.currentBoardSeed || (this.currentBoardSeed = Math.floor(Math.random() * 899999 + 100000))) : null),
 
             scenario: scenario,
 

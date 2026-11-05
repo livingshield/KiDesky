@@ -36,13 +36,13 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611050071">
+    <link rel="stylesheet" href="css/main.css?v=202611050072">
 
-    <link rel="stylesheet" href="css/board.css?v=202611050071">
+    <link rel="stylesheet" href="css/board.css?v=202611050072">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611050071">
+    <link rel="stylesheet" href="css/modals.css?v=202611050072">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611050071">
+    <link rel="stylesheet" href="css/mobile.css?v=202611050072">
 
 </head>
 
@@ -481,7 +481,8 @@
 
                                 <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🗺️ Herní plán:</label>
 
-                                <select id="lobby-board-select" class="prs-select" style="font-size:0.82rem; padding:0.4rem;">
+                                <div style="display:flex; gap:0.35rem; align-items:center;">
+                                    <select id="lobby-board-select" class="prs-select" style="font-size:0.82rem; padding:0.4rem; flex:1;">
 
                                     <option value="classic_96" selected>Klasický plán (96 polí)</option>
 
@@ -492,6 +493,8 @@
                                     <option value="procedural">Procedurální mapa</option>
 
                                 </select>
+                                    <button type="button" class="btn-zoom" onclick="PRS_App.rerollProceduralMap()" title="Vygenerovat nový náhodný svět (Seed)" style="padding:0.4rem 0.65rem; font-size:0.82rem;">🎲</button>
+                                </div>
 
                             </div>
 
@@ -907,6 +910,7 @@
 
                             </select>
 
+                            <button id="btn-reroll-map" class="btn-zoom" onclick="PRS_App.rerollProceduralMap()" title="Vygenerovat nové unikátní království, biomy, řeku a hrady (Seed)">🎲 Nová mapa</button>
                             <button class="btn-zoom" onclick="PRS_App.openSettingsModal()" title="Nastavení živlů, zvuku, tempa hry a grafiky">⚙️ Nastavení</button>
 
                         </div>
@@ -2454,18 +2458,18 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611050071" defer></script>
-    <script src="js/game-boards.js?v=202611050071" defer></script>
-    <script src="js/game-engine.js?v=202611050071" defer></script>
-    <script src="js/game-combat-ai.js?v=202611050071" defer></script>
-    <script src="js/app-audio.js?v=202611050071" defer></script>
-    <script src="js/app.js?v=202611050071" defer></script>
-    <script src="js/app-board.js?v=202611050071" defer></script>
-    <script src="js/app-hud.js?v=202611050071" defer></script>
-    <script src="js/app-modals.js?v=202611050071" defer></script>
-    <script src="js/app-online.js?v=202611050071" defer></script>
-    <script src="js/app-catalog.js?v=202611050071" defer></script>
-    <script src="js/app-admin.js?v=202611050071" defer></script>
+    <script src="js/game-data.js?v=202611050072" defer></script>
+    <script src="js/game-boards.js?v=202611050072" defer></script>
+    <script src="js/game-engine.js?v=202611050072" defer></script>
+    <script src="js/game-combat-ai.js?v=202611050072" defer></script>
+    <script src="js/app-audio.js?v=202611050072" defer></script>
+    <script src="js/app.js?v=202611050072" defer></script>
+    <script src="js/app-board.js?v=202611050072" defer></script>
+    <script src="js/app-hud.js?v=202611050072" defer></script>
+    <script src="js/app-modals.js?v=202611050072" defer></script>
+    <script src="js/app-online.js?v=202611050072" defer></script>
+    <script src="js/app-catalog.js?v=202611050072" defer></script>
+    <script src="js/app-admin.js?v=202611050072" defer></script>
     <script>
         (function () {
             function bootApp() {

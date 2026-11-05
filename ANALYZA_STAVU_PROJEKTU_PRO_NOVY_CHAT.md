@@ -151,6 +151,21 @@ V `window.PRS_GRAPHICS_CONFIG.tileBitmapsByType` (`js/game-data.js`, řádky 97�
 6. **`CHANCE`** (Karta Náhody & Osudu – otazník / svitek) -> `assets/tiles/chance.png`
 7. **`BONUS`** (Rozcestní prémie +200 / +300 / +400 zl.) -> `assets/tiles/bonus.png`
 
+### 5.3 Implementace přirozeného terénu a dynamického procedurálního generátoru mapy (DOKONČENO)
+1. **Deterministický procedurální generátor (`window.KiDeskyMapGenerator`):**
+   - Vytvořen parametrický LCG generátor podle `seed`, který syntetizuje topologii grafu (112 uzlů: 78 vnějších + 3 strategické vnitřní větvy: Dračí stezka 13 uzlů, Most Slavností 14 uzlů, Hradní smyčka 7 uzlů).
+   - Náhodný výběr 2 tematických hradů ze seznamu 9 hradů (`THEMATIC_CASTLES`) pro políčka `H1` a `H2`.
+   - Všechny uzly mají garantované herní parametry (`code`, `type`, `subtype`, `setId`, `estateId`, `hasRoof`, `isJunction`, `branchLow`, `branchHigh`).
+2. **Přirozený terén a akvarelové biomy:**
+   - 4 sémantické biomy (Hluboký hvozd, Dračí pohoří, Zlaté lučiny, Vodní mokřady) s měkkým rozostřením `url(#biomeBlur)` a vrstevnicemi pro hory.
+   - Meandrující řeka Doubravka se stínem břehů, leskem hladiny a automatickými kamennými mosty na všech kříženích s cestami.
+   - Ekosystémové shluky stromů a pohoří (`spawnForestThicket`, `spawnMountainRidge`), stromy se přirozeně překrývají a netvoří izolované tečky.
+   - Zušlechtění 8 balíčků karet: pergamenový poloprůsvitný podklad `url(#cardParchmentGrad)` se zlatým filigránovým kováním, který již nedusí střed mapy.
+3. **UI a živé ovládání:**
+   - V herní liště i v Lobby přidáno tlačítko `🎲 Nová mapa (Seed)` s možností rerollu mapy.
+   - Integrace do `index.html` (cache-buster `?v=202611050072`), `js/game-boards.js`, `js/app-board.js`, `js/game-engine.js`, `js/app.js`.
+   - Otestováno a nasazeno na produkci (HTTP 200 OK na `https://www.ekobio.org/apps/KiDesky/`).
+
 ---
 
 ## 6. DOPORUČENÝ STARTOVNÍ PROMPT PRO NOVÝ CHAT
@@ -160,5 +175,5 @@ Pro plynulé navázání v novém okně konverzace stačí zkopírovat a vložit
 ```text
 Pokračujeme ve vývoji projektu KiDesky: Princeznino srdce v adresáři c:\Users\janky\.gemini\antigravity\scratch\KiDesky.
 Nejprve si přečti kompletní handoff dokument ANALYZA_STAVU_PROJEKTU_PRO_NOVY_CHAT.md a pravidla v AGENTS.md (přísný zákaz nahrávání .exe souborů na FTP ASPONE).
-Zkontroluj aktuální stav a dej mi vědět, že jsi připraven pokračovat (např. dogenerováním zbývajících 8 ilustrací monster U1/U2 a 7 medailonů políček, nebo dalšími úpravami).
+Zkontroluj aktuální stav a dej mi vědět, že jsi připraven pokračovat.
 ```

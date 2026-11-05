@@ -670,6 +670,12 @@
         var activePalette = themePalettes[th] || themePalettes.light;
 
         return '<defs>' +
+            '<filter id="biomeBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="22" /></filter>' +
+            '<filter id="riverGlow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+            '<linearGradient id="cardParchmentGrad" x1="0%" y1="0%" x2="0%" y2="100%">' +
+            '  <stop offset="0%" stop-color="rgba(34,25,18,0.85)" />' +
+            '  <stop offset="100%" stop-color="rgba(18,12,8,0.92)" />' +
+            '</linearGradient>' +
 
             '<radialGradient id="parchmentGrad" cx="50%" cy="48%" r="72%">' +
 
@@ -801,6 +807,67 @@
 
     },
 
+    
+    renderBoardBiomesHTML: function (board) {
+        if (!board || !board.biomes || board.biomes.length === 0) return "";
+        var out = [];
+        out.push('  <g id="prs-biomes-layer">');
+        for (var b = 0; b < board.biomes.length; b++) {
+            var bm = board.biomes[b];
+            out.push('    <g class="biome-region" data-biome-id="' + bm.id + '">');
+            out.push('      <path d="' + bm.path + '" fill="' + bm.fill + '" opacity="' + (bm.opacity || 0.5) + '" filter="url(#biomeBlur)"/>');
+            if (bm.contours && bm.contours.length > 0) {
+                for (var c = 0; c < bm.contours.length; c++) {
+                    out.push('      <path d="' + bm.contours[c] + '" fill="none" stroke="' + (bm.contourStroke || 'rgba(212,175,55,0.18)') + '" stroke-width="0.85" stroke-dasharray="' + (bm.contourDash || '6,6') + '"/>');
+                }
+            }
+            out.push('    </g>');
+        }
+        out.push('  </g>');
+        return out.join("\n");
+    },
+
+    renderBoardRiversHTML: function (board) {
+        if (!board || !board.rivers || board.rivers.length === 0) return "";
+        var out = [];
+        out.push('  <g id="prs-rivers-layer">');
+        for (var r = 0; r < board.rivers.length; r++) {
+            var riv = board.rivers[r];
+            var rw = riv.width || 10;
+            // 1. Spodní stín/břeh řeky
+            out.push('    <path d="' + riv.path + '" stroke="rgba(12,24,36,0.65)" stroke-width="' + (rw + 6) + '" stroke-linecap="round" fill="none"/>');
+            // 2. Vodní hladina
+            out.push('    <path d="' + riv.path + '" stroke="' + (riv.color || '#0284c7') + '" stroke-width="' + rw + '" stroke-linecap="round" fill="none" opacity="0.82"/>');
+            // 3. Světelné odlesky na vlnkách
+            out.push('    <path d="' + riv.path + '" stroke="#bae6fd" stroke-width="' + Math.max(2, rw * 0.28) + '" stroke-linecap="round" stroke-dasharray="14,18" fill="none" opacity="0.75"/>');
+        }
+        out.push('  </g>');
+        return out.join("\n");
+    },
+
+    renderBoardBridgesHTML: function (board) {
+        if (!board || !board.bridges || board.bridges.length === 0) return "";
+        var out = [];
+        out.push('  <g id="prs-bridges-layer">');
+        for (var b = 0; b < board.bridges.length; b++) {
+            var brg = board.bridges[b];
+            out.push('    <g class="board-bridge-item" transform="translate(' + brg.x + ',' + brg.y + ') rotate(' + brg.angle + ')">');
+            // Mostovka (kamenná deska pod cestou)
+            out.push('      <rect x="-18" y="-13" width="36" height="26" rx="4" fill="#3f3f46" stroke="#18181b" stroke-width="1.6"/>');
+            out.push('      <rect x="-16" y="-11" width="32" height="22" rx="3" fill="#71717a" stroke="#d4af37" stroke-width="0.9"/>');
+            // Zábradlí po obou stranách
+            out.push('      <line x1="-18" y1="-13" x2="18" y2="-13" stroke="#d4af37" stroke-width="2.4"/>');
+            out.push('      <line x1="-18" y1="13" x2="18" y2="13" stroke="#d4af37" stroke-width="2.4"/>');
+            out.push('      <circle cx="-16" cy="-13" r="2.5" fill="#fef08a"/>');
+            out.push('      <circle cx="16" cy="-13" r="2.5" fill="#fef08a"/>');
+            out.push('      <circle cx="-16" cy="13" r="2.5" fill="#fef08a"/>');
+            out.push('      <circle cx="16" cy="13" r="2.5" fill="#fef08a"/>');
+            out.push('    </g>');
+        }
+        out.push('  </g>');
+        return out.join("\n");
+    },
+
     renderBoardTokens: function () {
 
         var tokensLayer = document.getElementById("prs-tokens-layer");
@@ -873,6 +940,21 @@
 
         out.push('  <rect x="14" y="14" width="1372" height="832" rx="16" fill="none" stroke="rgba(212,175,55,0.25)" stroke-width="1.5"/>');
 
+        // 1b. Sémantické akvarelové biomy a vrstevnice
+        if (this.state.board && this.state.board.biomes && this.state.board.biomes.length > 0) {
+            out.push(this.renderBoardBiomesHTML(this.state.board));
+        }
+
+        // 1c. Meandrující říční síť a vodní toky
+        if (this.state.board && this.state.board.rivers && this.state.board.rivers.length > 0) {
+            out.push(this.renderBoardRiversHTML(this.state.board));
+        }
+
+        // 1d. Architektonické mosty přes řeku na křížení cest
+        if (this.state.board && this.state.board.bridges && this.state.board.bridges.length > 0) {
+            out.push(this.renderBoardBridgesHTML(this.state.board));
+        }
+
         // 2. Plastické 3D balíčky karet na plánu (Interactive Card Decks)
 
         for (var cz = 0; cz < cardZones.length; cz++) {
@@ -899,7 +981,12 @@
 
             // Vrchní lícová karta balíčku
 
-            out.push('    <rect class="deck-top-card" x="0" y="0" width="' + z.w + '" height="' + z.h + '" rx="8" fill="#241b16" stroke="' + col + '" stroke-width="1.8"/>');
+            out.push('    <rect class="deck-top-card" x="0" y="0" width="' + z.w + '" height="' + z.h + '" rx="8" fill="url(#cardParchmentGrad)" stroke="' + col + '" stroke-width="1.6" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.65))"/>');
+            // Zlaté filigránové rohové kování balíčku
+            out.push('    <path d="M 4 10 L 4 4 L 10 4" fill="none" stroke="' + col + '" stroke-width="1.2" opacity="0.8"/>');
+            out.push('    <path d="M ' + (z.w - 10) + ' 4 L ' + (z.w - 4) + ' 4 L ' + (z.w - 4) + ' 10" fill="none" stroke="' + col + '" stroke-width="1.2" opacity="0.8"/>');
+            out.push('    <path d="M 4 ' + (z.h - 10) + ' L 4 ' + (z.h - 4) + ' L 10 ' + (z.h - 4) + '" fill="none" stroke="' + col + '" stroke-width="1.2" opacity="0.8"/>');
+            out.push('    <path d="M ' + (z.w - 10) + ' ' + (z.h - 4) + ' L ' + (z.w - 4) + ' ' + (z.h - 4) + ' L ' + (z.w - 4) + ' ' + (z.h - 10) + '" fill="none" stroke="' + col + '" stroke-width="1.2" opacity="0.8"/>');
 
             out.push('    <rect x="3.5" y="3.5" width="' + (z.w - 7) + '" height="' + (z.h - 7) + '" rx="5.5" fill="none" stroke="rgba(212,175,55,0.35)" stroke-width="0.9" stroke-dasharray="6,3"/>');
 

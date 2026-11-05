@@ -137,7 +137,7 @@ window.PRS_GameEngine = {
 
         var boardCode = options.boardCode || "classic_96";
 
-        var board = window.PRS_BoardBuilder.createBoard(boardCode);
+        var board = window.PRS_BoardBuilder.createBoard(boardCode, options);
 
         var playerDefs = options.players || [
 
