@@ -2,7 +2,7 @@
 
 > **Datum vyhotovení:** 5. 11. 2026  
 > **Aktuální verze cache-busteru:** `?v=202611050076`  
-> **Poslední Git commit:** v přípravě (oprava UTF-8 kódování v index.html po chybě powershell nahrazení)  
+> **Poslední Git commit:** `aee4d2c` (`fix(encoding): restore clean UTF-8 encoding in index.html after PowerShell cp1252 mojibake and bump cache-buster to v=202611050076`)  
 > **Produkční URL:** https://www.ekobio.org/apps/KiDesky/  
 > **Lokální pracovní adresář:** `c:\Users\janky\.gemini\antigravity\scratch\KiDesky`
 
