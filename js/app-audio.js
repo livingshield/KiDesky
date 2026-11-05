@@ -392,6 +392,69 @@ window.PRS_Audio = {
         this._playChime(now, 587.3, 0.18, 0.12 * this.sfxVolume);
         this._playChime(now + 0.05, 880.0, 0.22, 0.10 * this.sfxVolume);
         this._playChime(now + 0.11, 739.9, 0.25, 0.09 * this.sfxVolume);
+    },
+
+    // --- BIOME AMBIENCE & PROCEDURAL ENVIRONMENT AUDIO ---
+    currentBiome: "plains",
+    isBiomeAmbientEnabled: true,
+
+    setBiome: function (biome) {
+        if (!biome) biome = "plains";
+        if (this.currentBiome === biome) return;
+        this.currentBiome = biome;
+    },
+
+    playBiomeStep: function (biome) {
+        if (this.muted) return;
+        this.ensureContext();
+        if (!this.ctx) return;
+        var now = this.ctx.currentTime;
+        var b = biome || this.currentBiome || "plains";
+
+        if (b === "forest") {
+            // Šelest větvičky a měkký mechový krok
+            this._playWoodTap(now, 260, 0.04);
+            this._playChime(now + 0.015, 1850, 0.06, 0.04 * this.sfxVolume);
+        } else if (b === "mountain") {
+            // Křupnutí horského štěrku a ozvěna skály
+            this._playWoodTap(now, 540, 0.025);
+            this._playWoodTap(now + 0.02, 680, 0.02);
+            this._playChime(now + 0.03, 920, 0.08, 0.05 * this.sfxVolume);
+        } else if (b === "water") {
+            // Šplouchnutí břehu řeky
+            this.playWater();
+        } else if (b === "castle") {
+            // Kamenná hradní dlažba
+            this._playWoodTap(now, 420, 0.04);
+            this._playChime(now + 0.02, 659.2, 0.15, 0.08 * this.sfxVolume);
+        } else {
+            // Běžná polní cesta / lučiny
+            this.playStep();
+        }
+    },
+
+    playBridgeCrossing: function () {
+        if (this.muted) return;
+        this.ensureContext();
+        if (!this.ctx) return;
+        var now = this.ctx.currentTime;
+        // Dvojí zaklapání podkov po dřevěných prknech mostu + vodní ozvěna
+        this._playWoodTap(now, 320, 0.045);
+        this._playWoodTap(now + 0.08, 290, 0.045);
+        this._playWoodTap(now + 0.16, 330, 0.04);
+        this._playChime(now + 0.04, 880, 0.14, 0.06 * this.sfxVolume);
+        this._playChime(now + 0.12, 1174.6, 0.18, 0.07 * this.sfxVolume);
+    },
+
+    playCastleArrival: function () {
+        if (this.muted) return;
+        this.ensureContext();
+        if (!this.ctx) return;
+        var now = this.ctx.currentTime;
+        // Vznešený dvorský fanfárový souzvuk (kvinta a oktáva)
+        this._playChime(now, 440.0, 0.45, 0.20 * this.sfxVolume);
+        this._playChime(now + 0.08, 659.25, 0.55, 0.22 * this.sfxVolume);
+        this._playChime(now + 0.16, 880.0, 0.70, 0.25 * this.sfxVolume);
     }
 };
 

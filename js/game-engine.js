@@ -1409,6 +1409,10 @@ window.PRS_GameEngine = {
 
         this.addLog(state, "🎲 " + player.badge + " " + player.name + " dokončil tah (" + pbc.totalRoll + ") a dorazil na pole **" + landedNode.name + "**.");
 
+        if (landedNode.type === "CASTLE") {
+            this.addLog(state, "🏰 " + player.badge + " " + player.name + " dorazil k branám hrdého sídla **" + landedNode.name + "** (" + (landedNode.icon || "🏰") + ")!", "milestone");
+        }
+
         this.resolveLandedNode(state, player, landedNode, pbc.totalRoll);
 
         this.attachPlayerInteractions(state, player, landedNode);
@@ -1664,6 +1668,30 @@ window.PRS_GameEngine = {
         var landedNode = state.board.nodes[currentId];
 
         this.addLog(state, "🎲 " + player.badge + " " + player.name + " hodil **" + roll + "** a dorazil na pole **" + landedNode.name + "**.");
+
+        // Záznam o přejetí mostu přes řeku Doubravku
+        if (state.board && state.board.bridges && path && path.length > 1) {
+            var crossedBridge = false;
+            for (var pi = 0; pi < path.length; pi++) {
+                var pNode = state.board.nodes[path[pi]];
+                if (pNode) {
+                    for (var bi = 0; bi < state.board.bridges.length; bi++) {
+                        var br = state.board.bridges[bi];
+                        var dSq = (pNode.x - br.x) * (pNode.x - br.x) + (pNode.y - br.y) * (pNode.y - br.y);
+                        if (dSq < 1600) { crossedBridge = true; break; }
+                    }
+                }
+                if (crossedBridge) break;
+            }
+            if (crossedBridge) {
+                this.addLog(state, "🌉 " + player.badge + " " + player.name + " s rachotem podkov přejel kamenný most přes řeku Doubravku do nového kraje.", "action");
+            }
+        }
+
+        // Záznam o slavnostním vstupu do bran Hradu
+        if (landedNode.type === "CASTLE") {
+            this.addLog(state, "🏰 " + player.badge + " " + player.name + " dorazil k branám hrdého sídla **" + landedNode.name + "** (" + (landedNode.icon || "🏰") + ")!", "milestone");
+        }
 
         this.resolveLandedNode(state, player, landedNode, roll);
 
@@ -2849,7 +2877,11 @@ window.PRS_GameEngine = {
 
         pa.summary = "Zakoupil jsi **" + node.name + "** za " + price + " zl.";
 
-        this.addLog(state, "📜 " + player.badge + " " + player.name + " zakoupil **" + node.name + "** za " + price + " zl.", "buy");
+        if (node.type === "CASTLE") {
+            this.addLog(state, "👑 " + player.badge + " " + player.name + " se stává svrchovaným pánem velkolepé pevnosti **" + node.name + "** a získává královský šlechtický titul!", "win");
+        } else {
+            this.addLog(state, "📜 " + player.badge + " " + player.name + " zakoupil **" + node.name + "** za " + price + " zl.", "buy");
+        }
 
         this.recalculateBreedingAndVictory(state);
 

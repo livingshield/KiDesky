@@ -1,8 +1,8 @@
 # Komplexní analýza stavu projektu KiDesky: Princeznino srdce (Handoff pro nový chat)
 
 > **Datum vyhotovení:** 5. 11. 2026  
-> **Aktuální verze cache-busteru:** `?v=202611050071`  
-> **Poslední Git commit:** `1be8360` (`fix(admin/encoding): fix api.ashx syntax error, repair Czech diacritics in DB, add customErrors Off in web.config, and compact duel ceremony modal`)  
+> **Aktuální verze cache-busteru:** `?v=202611050074`  
+> **Poslední Git commit:** v přípravě (Audio biomy, kronika mostů a telemetry, karty Náhody ch_51-ch_57, 4. slavnost Lov)  
 > **Produkční URL:** https://www.ekobio.org/apps/KiDesky/  
 > **Lokální pracovní adresář:** `c:\Users\janky\.gemini\antigravity\scratch\KiDesky`
 
@@ -163,8 +163,20 @@ V `window.PRS_GRAPHICS_CONFIG.tileBitmapsByType` (`js/game-data.js`, řádky 97�
    - Zušlechtění 8 balíčků karet: pergamenový poloprůsvitný podklad `url(#cardParchmentGrad)` se zlatým filigránovým kováním, který již nedusí střed mapy.
 3. **UI a živé ovládání:**
    - V herní liště i v Lobby přidáno tlačítko `🎲 Nová mapa (Seed)` s možností rerollu mapy.
-   - Integrace do `index.html` (cache-buster `?v=202611050072`), `js/game-boards.js`, `js/app-board.js`, `js/game-engine.js`, `js/app.js`.
+   - Integrace do `index.html` (cache-buster `?v=202611050074`), `js/game-boards.js`, `js/app-board.js`, `js/game-engine.js`, `js/app.js`.
    - Otestováno a nasazeno na produkci (HTTP 200 OK na `https://www.ekobio.org/apps/KiDesky/`).
+
+### 5.4 Audio biomů, kronika přechodu mostů a hradů, telemetrie a rozšíření karet (DOKONČENO)
+1. **Audio a ambientní atmosféra podle biomu (`js/app-audio.js` & `js/app-hud.js`):**
+   - Implementovány syntetické procedurální Web Audio efekty: `playBiomeStep(biome)` (měkký došlap v lese, křupání štěrku v horách, šplouchání u vody, mramorová dlažba v hradu, šustění trávy na lučinách).
+   - `playBridgeCrossing()`: zvuk přechodu dřevěného/kamenného mostu s ozvěnou vody a dvojím klapnutím podkov.
+   - `playCastleArrival()`: fanfára kvinty a oktávy při příjezdu k hradním branám.
+2. **Královská kronika a telemetrie (`js/game-engine.js` & `js/app.js`):**
+   - V kronice se automaticky zaznamenává přechod mostu přes řeku Doubravku i slavnostní příjezd a koupě hradu.
+   - Při vygenerování nového procedurálního světa se automaticky odesílá telemetrie `WorldGenerated` na `api.ashx?action=log-telemetry` se všemi parametry (seed, scénář, hráči).
+3. **Herní obsah a 4. slavnost (`js/game-data.js`):**
+   - Přidána 4. královská slavnost: **Královský hon** (`lov: [1400, 700, 350] zl.`).
+   - Přidáno 7 nových karet Náhody (`ch_51` až `ch_57`): *Zlatá rybka z řeky Doubravky* (+1 💖), *Přízeň hradního pána* (+2 000 zl.), *Tajemství starého mostu* (Předmět 1. stupně zdarma), *Mýtné na mostě Doubravka* (-800 zl.), *Horská vichřice z Dračích skal* (-1 000 zl.), *Dilema: Převozník u soutoku Doubravky* a *Dilema: Potulný alchymista z Křišťálového zámku*.
 
 ---
 

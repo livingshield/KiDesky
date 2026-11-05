@@ -1904,6 +1904,26 @@ window.PRS_App = {
 
         this.lastKnownTurnNumber = 1;
 
+        if (boardCode === "procedural" && typeof fetch === "function") {
+            try {
+                fetch("api.ashx?action=log-telemetry", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        eventType: "WorldGenerated",
+                        turnNumber: 1,
+                        message: "Vygenerováno království #" + this.currentBoardSeed + " (" + (this.state.board ? this.state.board.name : "Neznámé") + ")",
+                        payloadJson: JSON.stringify({
+                            seed: this.currentBoardSeed,
+                            scenario: scenario,
+                            difficulty: difficultyMode,
+                            playerCount: this.state.players.length
+                        })
+                    })
+                }).catch(function () { });
+            } catch (e) { }
+        }
+
         this.isBoardStaticDirty = true;
 
         this.resetZoomAndPan();

@@ -3545,7 +3545,25 @@
 
                 } else {
 
-                    if (window.PRS_Audio) window.PRS_Audio.playStep();
+                    if (window.PRS_Audio) {
+                        var isBridge = false;
+                        if (self.state.board && self.state.board.bridges) {
+                            for (var bri = 0; bri < self.state.board.bridges.length; bri++) {
+                                var bObj = self.state.board.bridges[bri];
+                                var distB = (endNode.x - bObj.x) * (endNode.x - bObj.x) + (endNode.y - bObj.y) * (endNode.y - bObj.y);
+                                if (distB < 1600) { isBridge = true; break; }
+                            }
+                        }
+                        if (isBridge && window.PRS_Audio.playBridgeCrossing) {
+                            window.PRS_Audio.playBridgeCrossing();
+                        } else if (endNode.type === "CASTLE" && window.PRS_Audio.playCastleArrival) {
+                            window.PRS_Audio.playCastleArrival();
+                        } else {
+                            var nBiome = endNode.biome || (endNode.x > 950 && endNode.y > 350 ? "mountain" : (endNode.x < 450 && endNode.y > 350 ? "forest" : (endNode.y > 600 ? "water" : "plains")));
+                            if (window.PRS_Audio.playBiomeStep) window.PRS_Audio.playBiomeStep(nBiome);
+                            else window.PRS_Audio.playStep();
+                        }
+                    }
 
                     self.renderBoardTokens();
 

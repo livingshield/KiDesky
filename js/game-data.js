@@ -69,7 +69,8 @@ window.PRS_DEFAULT_CONFIG = {
     festivalGoldPrizes: {
         turnaj: [1500, 800, 400],
         ples: [1000, 500, 250],
-        zavod: [1200, 600, 300]
+        zavod: [1200, 600, 300],
+        lov: [1400, 700, 350]
     }
 };
 
@@ -1066,6 +1067,29 @@ window.PRS_CHANCE_CARDS = [
         options: [
             { id: "opt_witch_fortune", title: "Zaplatit 500 zl. za věštbu", icon: "✨", costGold: 500, gainHearts: 1.0, desc: "Vědma ti požehná a předpoví tvůj triumf u princezny (+1,0 💖)!" },
             { id: "opt_witch_refuse", title: "Spoléhat na vlastní meč a rozum", icon: "⚔️", gainHearts: 0.5, desc: "Odmítneš pověry. Princezna oceňuje tvou chladnou hlavu a střídmost (+0,5 💖)." }
+        ]
+    },
+
+    // --- 4. EXPANDOVANÉ KARTY PRO NOVÁ KRÁLOVSTVÍ, ŘEKU A HRADY (ch_51 až ch_57) ---
+    { id: "ch_51", category: "positive", title: "Zlatá rybka z řeky Doubravky", icon: "🐟", effect: "hearts", value: 1.0, text: "Při odpočinku u meandrů Doubravky vytáhl tvůj panoš třpytivou rybku. Za její propuštění zpět do vln získáváš přízeň princezny (+1 💖)!" },
+    { id: "ch_52", category: "positive", title: "Přízeň hradního pána", icon: "🏰", effect: "gold_gain", value: 2000, text: "Vládce sousední pevnosti ocenil tvou udatnost a posílá ti čestný dar +2 000 zl. na rozvoj družiny!" },
+    { id: "ch_53", category: "positive", title: "Tajemství starého mostu", icon: "🌉", effect: "free_item_1", value: 1, text: "V dutině kamenného pilíře mostu jsi nalezl starou zbrojířskou relikvii (Předmět 1. stupně zdarma do tvé výbavy)!" },
+    { id: "ch_54", category: "negative", title: "Mýtné na mostě Doubravka", icon: "🪙", effect: "gold_loss", value: 800, text: "Rychtář vybírá mimořádné mýto na zpevnění říčních pilířů po jarních záplavách. Platíš 800 zl." },
+    { id: "ch_55", category: "negative", title: "Horská vichřice z Dračích skal", icon: "🏔️", effect: "gold_loss", value: 1000, text: "Ledový poryv větru z horských štítů potrhal tvé slavnostní korouhve. Obnova tě stojí 1 000 zl." },
+    {
+        id: "ch_56", category: "dilemma", title: "Převozník u soutoku Doubravky", icon: "⛵",
+        text: "Řeka je rozvodněná a starý převozník nabízí bezpečný převoz tvého povozu. Jak se rozhodneš?",
+        options: [
+            { id: "opt_ferry", title: "Zaplatit bezpečný převoz", icon: "🛡️", costGold: 600, gainHearts: 0.5, desc: "Zaplatíš převozníkovi 600 zl. Princezna ocení tvou rozvahu a péči o družinu (+0,5 💖)." },
+            { id: "opt_ford", title: "Riskantně přebrodit dravý proud", icon: "🌊", gainGold: 1400, lossHearts: 0.5, desc: "Ušetříš za mýto a získáš nalezené sudy (+1 400 zl.), avšak riskuješ pověst rytíře (-0,5 💖)." }
+        ]
+    },
+    {
+        id: "ch_57", category: "dilemma", title: "Potulný alchymista z Křišťálového zámku", icon: "🧪",
+        text: "Před branami hradu tě oslovil tajemný učenec a nabízí flakón s elixírem vznešenosti.",
+        options: [
+            { id: "opt_potion", title: "Zakoupit elixír charismatu", icon: "✨", costGold: 1000, gainHearts: 0.5, desc: "Zaplatíš 1 000 zl. Získáváš lekci dvorní etikety a přízeň dvora (+0,5 💖)!" },
+            { id: "opt_alms", title: "Podarovat chudé v podhradí", icon: "🤲", costGold: 400, gainHearts: 1.0, desc: "Místo lektvaru rozdáš 400 zl. poddaným. Lid tě velebí a princezna ti posílá vzkaz (+1,0 💖)!" }
         ]
     }
 ];
