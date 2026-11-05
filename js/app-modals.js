@@ -2792,6 +2792,17 @@
 
         var p2 = res.p2;
 
+        var p1Obj = (this.state && this.state.players && p1 && p1.index !== undefined) ? this.state.players[p1.index] : null;
+        var p2Obj = (this.state && this.state.players && p2 && p2.index !== undefined) ? this.state.players[p2.index] : null;
+        var p1IsBot = (p1 && p1.type && p1.type !== "Human") || (p1Obj && p1Obj.type !== "Human");
+        var p2IsBot = (p2 && p2.type && p2.type !== "Human") || (p2Obj && p2Obj.type !== "Human");
+        var isBothBots = Boolean(p1IsBot && p2IsBot);
+
+        if (this.botDuelAutoCloseTimer) {
+            clearTimeout(this.botDuelAutoCloseTimer);
+            this.botDuelAutoCloseTimer = null;
+        }
+
         var isDraw = res.isDraw;
 
         var p1Won = (res.winnerIndex === p1.index);
@@ -2919,14 +2930,26 @@
         html.push('</div>');
 
         // Tlačítko pokračovat
-
-        html.push('<button class="btn-gold-lg" style="width:100%; padding:0.75rem; font-size:1.02rem;" onclick="PRS_App.closeKnightDuelModal()">⚔️ Pokračovat ve hře</button>');
+        if (isBothBots) {
+            html.push('<button class="btn-gold-lg" style="width:100%; padding:0.75rem; font-size:1.02rem;" onclick="PRS_App.closeKnightDuelModal()">⚔️ Pokračovat ve hře <span style="font-size:0.8rem; opacity:0.85; margin-left:6px;">(BOT duel – zavře se za 0,5 s...)</span></button>');
+            html.push('<div style="height:3px; background:rgba(239,68,68,0.25); border-radius:2px; margin-top:8px; overflow:hidden;"><div style="height:100%; background:#ef4444; width:100%; animation:botDuelProgress 0.5s linear forwards;"></div></div>');
+        } else {
+            html.push('<button class="btn-gold-lg" style="width:100%; padding:0.75rem; font-size:1.02rem;" onclick="PRS_App.closeKnightDuelModal()">⚔️ Pokračovat ve hře</button>');
+        }
 
         bodyEl.innerHTML = html.join("\n");
 
         modal.style.display = "flex";
 
         this.updateBodyModalClass();
+
+        if (isBothBots) {
+            var self = this;
+            this.botDuelAutoCloseTimer = setTimeout(function () {
+                self.botDuelAutoCloseTimer = null;
+                self.closeKnightDuelModal();
+            }, 500);
+        }
 
         if (window.PRS_Audio) {
 
@@ -2943,6 +2966,11 @@
     },
 
     closeKnightDuelModal: function () {
+
+        if (this.botDuelAutoCloseTimer) {
+            clearTimeout(this.botDuelAutoCloseTimer);
+            this.botDuelAutoCloseTimer = null;
+        }
 
         var modal = document.getElementById("knight-duel-modal");
 

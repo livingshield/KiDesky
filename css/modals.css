@@ -1322,8 +1322,10 @@
             border-color: #cbd5e1;
             color: #fff !important;
         }
-
-
+
+
+
+
         /* Rozcestník 3 herních režimů (Solo / Hot-Seat / Online Multiplayer) */
 
         .lp-section-heading {
@@ -4044,3 +4046,8 @@
     border-top: 1px solid rgba(212, 175, 55, 0.25);
     flex-shrink: 0;
 }
+
+@keyframes botDuelProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
