@@ -2,7 +2,7 @@
 
 > **Datum vyhotovení:** 5. 11. 2026  
 > **Aktuální verze cache-busteru:** `?v=202611050075`  
-> **Poslední Git commit:** v přípravě (přirozený terén na všech plánech, silniční reliéf, mlha, monstra U1/U2 a medailony políček)  
+> **Poslední Git commit:** `ef2ccf7` (`feat(terrain, visuals, assets): apply rich natural biomes and road relief to all boards, add morning mist, finish 8 monsters and 7 tile medallions`)  
 > **Produkční URL:** https://www.ekobio.org/apps/KiDesky/  
 > **Lokální pracovní adresář:** `c:\Users\janky\.gemini\antigravity\scratch\KiDesky`
 
