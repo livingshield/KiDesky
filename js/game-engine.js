@@ -199,6 +199,12 @@ window.PRS_GameEngine = {
 
                 ownedNodes: [], // pole nodeId
 
+                livestock: {
+                    cattle: 0,
+                    sheep: 0,
+                    pigs: 0
+                },
+
                 skipTurns: 0,
 
                 isEliminated: false,
@@ -653,11 +659,13 @@ window.PRS_GameEngine = {
 
         // Bonusy z vlastněných Hradů, Měst, Vesnic a Řemeslných budov
 
-        var ownedCastles = 0, ownedTowns = 0, ownedVillages = 0;
+        var ownedCastles = 0, ownedTowns = 0, ownedVillages = 0, ownedBuildings = 0, ownedJesters = 0;
 
         var hasStaje = false, hasKovarna = false, hasKrejci = false, hasSokolnik = false, hasPsovod = false;
 
         var horses = 0, dogs = 0, falcons = 0;
+
+        var villageCattle = 0, villageSheep = 0, villagePigs = 0;
 
         for (var i = 0; i < player.ownedNodes.length; i++) {
 
@@ -669,9 +677,19 @@ window.PRS_GameEngine = {
 
             if (nd.type === "TOWN") ownedTowns++;
 
-            if (nd.type === "VILLAGE") ownedVillages++;
+            if (nd.type === "VILLAGE") {
+                ownedVillages++;
+                var vLvl = nd.villageLevel || 1;
+                if (vLvl >= 1) villageSheep++;
+                if (vLvl >= 2) villagePigs++;
+                if (vLvl >= 3) villageCattle++;
+            }
+
+            if (nd.type === "JESTER") ownedJesters++;
 
             if (nd.type === "BUILDING") {
+
+                ownedBuildings++;
 
                 if (nd.subtype === "staje") hasStaje = true;
 
@@ -696,6 +714,23 @@ window.PRS_GameEngine = {
             }
 
         }
+
+        if (!player.livestock) {
+            player.livestock = { cattle: 0, sheep: 0, pigs: 0 };
+        }
+
+        var extraCattle = Number(player.livestock.cattle) || 0;
+        var extraSheep = Number(player.livestock.sheep) || 0;
+        var extraPigs = Number(player.livestock.pigs) || 0;
+
+        var totalCattle = villageCattle + extraCattle;
+        var totalSheep = villageSheep + extraSheep;
+        var totalPigs = villagePigs + extraPigs;
+
+        var livestockCapacity = (ownedVillages * 3) + (ownedTowns * 2) + (hasStaje ? 4 : 0);
+        var extraLivestockCount = extraCattle + extraSheep + extraPigs;
+        var livestockTaxBonus = (totalCattle * 200) + (totalPigs * 150) + (totalSheep * 120);
+        var livestockVillageRentBonus = (extraCattle * 100) + (extraPigs * 75) + (extraSheep * 50);
 
         var castleBonus = (state.config && state.config.estates) ? (state.config.estates.castleCharismaBonus || 1) : 1;
 
@@ -723,11 +758,41 @@ window.PRS_GameEngine = {
 
             falcons: falcons,
 
+            cattle: totalCattle,
+
+            sheep: totalSheep,
+
+            pigs: totalPigs,
+
+            villageCattle: villageCattle,
+
+            villageSheep: villageSheep,
+
+            villagePigs: villagePigs,
+
+            extraCattle: extraCattle,
+
+            extraSheep: extraSheep,
+
+            extraPigs: extraPigs,
+
+            livestockCapacity: livestockCapacity,
+
+            extraLivestockCount: extraLivestockCount,
+
+            livestockTaxBonus: livestockTaxBonus,
+
+            livestockVillageRentBonus: livestockVillageRentBonus,
+
             ownedCastles: ownedCastles,
 
             ownedTowns: ownedTowns,
 
             ownedVillages: ownedVillages,
+
+            ownedBuildings: ownedBuildings,
+
+            ownedJesters: ownedJesters,
 
             hasDress: !!eq.dress,
 
@@ -2199,7 +2264,16 @@ window.PRS_GameEngine = {
 
             var lvl = (node.villageLevel || 1) - 1;
 
-            return cfg.estates.villageRent[lvl] || 300;
+            var baseVillRent = cfg.estates.villageRent[lvl] || 300;
+
+            if (owner && owner.livestock) {
+                var exC = Number(owner.livestock.cattle) || 0;
+                var exP = Number(owner.livestock.pigs) || 0;
+                var exS = Number(owner.livestock.sheep) || 0;
+                baseVillRent += (exC * 100) + (exP * 75) + (exS * 50);
+            }
+
+            return baseVillRent;
 
         }
 
@@ -2227,7 +2301,9 @@ window.PRS_GameEngine = {
 
             }
 
-            return moveRoll * (cfg.jesterRentMultiplier || 100) * Math.max(1, jesterCount);
+            var effRoll = (typeof moveRoll === "number" && moveRoll > 0) ? moveRoll : 4;
+
+            return effRoll * (cfg.jesterRentMultiplier || 100) * Math.max(1, jesterCount);
 
         }
 
@@ -2265,14 +2341,130 @@ window.PRS_GameEngine = {
 
     computeNodeRent: function (state, node, owner, moveRoll) {
 
-        return this.calculateNodeRent(state, node, owner, moveRoll || 1);
+        return this.calculateNodeRent(state, node, owner, moveRoll || 4);
 
     },
 
     calculateRent: function (state, node, owner, moveRoll) {
 
-        return this.calculateNodeRent(state, node, owner, moveRoll || 1);
+        return this.calculateNodeRent(state, node, owner, moveRoll || 4);
 
+    },
+
+    // Kompletní ekonomický souhrn hráče pro HUD (Panství, Chov, Daně, Mýtné, Očekávaný příjem za okruh),
+    calculatePlayerEconomySummary: function (state, player) {
+        if (!state || !player) return null;
+        var cfg = state.config || {};
+        var estCfg = cfg.estates || {};
+        var st = this.getEffectiveStats(state, player);
+
+        var villageCount = 0, townCount = 0, castleCount = 0, craftCount = 0, jesterCount = 0;
+        var horseCount = 0, dogCount = 0, falconCount = 0;
+        var estateTaxYield = 0;
+        var totalRentSum = 0;
+
+        var nodes = (state.board && state.board.nodes) ? state.board.nodes : [];
+        for (var i = 0; i < player.ownedNodes.length; i++) {
+            var nd = nodes[player.ownedNodes[i]];
+            if (!nd) continue;
+
+            var rent = this.calculateNodeRent(state, nd, player, 4);
+            totalRentSum += rent;
+
+            if (nd.type === "ANIMAL") {
+                if (nd.subtype === "kun") horseCount++;
+                else if (nd.subtype === "pes") dogCount++;
+                else falconCount++;
+            } else if (nd.type === "VILLAGE") {
+                villageCount++;
+                var lvl = (nd.villageLevel || 1) - 1;
+                estateTaxYield += ((estCfg.villageTaxYield && estCfg.villageTaxYield[lvl]) || 500);
+            } else if (nd.type === "TOWN") {
+                townCount++;
+                estateTaxYield += (estCfg.townTaxYield || 1200);
+            } else if (nd.type === "CASTLE") {
+                castleCount++;
+                estateTaxYield += (estCfg.castleTaxYield || 2500);
+            } else if (nd.type === "BUILDING") {
+                craftCount++;
+            } else if (nd.type === "JESTER") {
+                jesterCount++;
+            }
+        }
+
+        var livestockTaxBonus = st.livestockTaxBonus || 0;
+        var totalTaxYield = estateTaxYield + livestockTaxBonus;
+        var isLandless = (!player.ownedNodes || player.ownedNodes.length === 0);
+        var startStipend = isLandless ? (cfg.passStartGoldLandless || 5000) : (cfg.passStartGold || 3000);
+        var estimatedRoundYield = totalTaxYield + totalRentSum;
+
+        return {
+            totalOwned: player.ownedNodes.length,
+            horses: horseCount,
+            dogs: dogCount,
+            falcons: falconCount,
+            animalsTotal: horseCount + dogCount + falconCount,
+            villages: villageCount,
+            towns: townCount,
+            castles: castleCount,
+            crafts: craftCount,
+            jesters: jesterCount,
+            craftsAndJesters: craftCount + jesterCount,
+            cattle: st.cattle || 0,
+            sheep: st.sheep || 0,
+            pigs: st.pigs || 0,
+            extraCattle: st.extraCattle || 0,
+            extraSheep: st.extraSheep || 0,
+            extraPigs: st.extraPigs || 0,
+            livestockCapacity: st.livestockCapacity || 0,
+            extraLivestockCount: st.extraLivestockCount || 0,
+            estateTaxYield: estateTaxYield,
+            livestockTaxBonus: livestockTaxBonus,
+            totalTaxYield: totalTaxYield,
+            totalRentSum: totalRentSum,
+            startStipend: startStipend,
+            estimatedRoundYield: estimatedRoundYield,
+            completeSetsCount: player.completeSetsCount || 0,
+            breedingHearts: player.breedingHearts || 0,
+            setHeartsBonus: player.setHeartsBonus || 0,
+            hasStaje: st.hasStaje
+        };
+    },
+
+    // Nákup hospodářské zvěře (Kráva, Ovce, Prase) na pastviny vesnic nebo do královských stájí,
+    buyLivestock: function (state, playerIndex, animalType) {
+        if (!state || !state.players) return { ok: false, message: "Hra není aktivní." };
+        var pIdx = (typeof playerIndex === "number") ? playerIndex : state.currentPlayerIndex;
+        var player = state.players[pIdx];
+        if (!player) return { ok: false, message: "Hráč nebyl nalezen." };
+
+        var st = this.getEffectiveStats(state, player);
+        if (st.livestockCapacity <= 0) {
+            return { ok: false, message: "Pro chov hospodářského dobytka musíš nejprve vlastnit alespoň 1 Vesnici, Město nebo Královské stáje!" };
+        }
+        if (st.extraLivestockCount >= st.livestockCapacity) {
+            return { ok: false, message: "Tvé pastviny a stáje jsou plné (" + st.extraLivestockCount + "/" + st.livestockCapacity + " přikoupených kusů). Kup další Vesnici, Město nebo Stáje!" };
+        }
+
+        var catalog = {
+            sheep: { price: 500, name: "Ovci", icon: "🐑", taxBonus: 120, rentBonus: 50 },
+            pigs: { price: 600, name: "Prase", icon: "🐖", taxBonus: 150, rentBonus: 75 },
+            cattle: { price: 800, name: "Krávu", icon: "🐄", taxBonus: 200, rentBonus: 100 }
+        };
+        var info = catalog[animalType];
+        if (!info) return { ok: false, message: "Neznámý druh hospodářského zvířete." };
+
+        if (player.gold < info.price) {
+            return { ok: false, message: "Nemáš dostatek zlata (" + info.price + " zl.) na zakoupení " + info.icon + " " + info.name + "." };
+        }
+
+        if (!player.livestock) player.livestock = { cattle: 0, sheep: 0, pigs: 0 };
+        player.gold -= info.price;
+        player.livestock[animalType] = (Number(player.livestock[animalType]) || 0) + 1;
+
+        var msg = info.icon + " " + player.badge + " " + player.name + " přikoupil do svého hospodářství **" + info.name + "** za " + info.price + " zl. (Daňový výnos +" + info.taxBonus + " zl., nájem vesnic +" + info.rentBonus + " zl.)!";
+        this.addLog(state, msg, "buy");
+        return { ok: true, message: msg, animal: info };
     },
 
     // Převod zlata mezi hráči (pokud plátce nemá dost, zaplatí co má),
@@ -2333,6 +2525,11 @@ window.PRS_GameEngine = {
 
             }
 
+            var stTax = this.getEffectiveStats(state, p);
+            if (stTax && stTax.livestockTaxBonus > 0) {
+                playerYield += stTax.livestockTaxBonus;
+            }
+
             if (playerYield > 0) {
 
                 p.gold += playerYield;
@@ -2341,7 +2538,7 @@ window.PRS_GameEngine = {
 
                 totalTaxes += playerYield;
 
-                summaryParts.push(p.name + " +" + playerYield + " zl.");
+                summaryParts.push(p.name + " +" + playerYield + " zl." + (stTax && stTax.livestockTaxBonus > 0 ? " (vč. chovu +" + stTax.livestockTaxBonus + " zl.)" : ""));
 
             }
 
@@ -2519,7 +2716,10 @@ window.PRS_GameEngine = {
 
             player.gold += gain;
 
-            msg += " (Získáno +" + gain + " zl.)";
+            if (!player.livestock) player.livestock = { cattle: 0, sheep: 0, pigs: 0 };
+            player.livestock.cattle = (Number(player.livestock.cattle) || 0) + 1;
+
+            msg += " (Získáno +" + gain + " zl. a dar poddaných: **+1 🐄 Kráva** do chovu!)";
 
         } else if (card.effect === "robbers") {
 
@@ -2585,7 +2785,11 @@ window.PRS_GameEngine = {
 
             player.gold += vGain;
 
-            msg += " (Získáno +" + vGain + " zl.)";
+            if (!player.livestock) player.livestock = { cattle: 0, sheep: 0, pigs: 0 };
+            player.livestock.sheep = (Number(player.livestock.sheep) || 0) + 1;
+            player.livestock.pigs = (Number(player.livestock.pigs) || 0) + 1;
+
+            msg += " (Získáno +" + vGain + " zl. a hospodářský přírůstek: **+1 🐑 Ovce a +1 🐖 Prase** do chovu!)";
 
         } else if (card.effect === "intrigue") {
 
