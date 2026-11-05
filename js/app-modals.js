@@ -172,7 +172,7 @@
 
                 podHtml.push('  <span class="podium-rank-badge" style="background:rgba(212,175,55,0.2); color:' + rInfo.badgeCls + ';">' + rInfo.title + '</span>');
 
-                podHtml.push('  <div style="font-size:1.75rem; margin:0.1rem 0;">' + rp.badge + '</div>');
+                podHtml.push('  <div style="margin:0.15rem 0;">' + (this.getPlayerPawnAvatarHtml ? this.getPlayerPawnAvatarHtml(rp, 48) : rp.badge) + '</div>');
 
                 podHtml.push('  <div style="font-weight:bold; font-size:0.95rem; color:' + rp.color + '; margin-bottom:0.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:145px;" title="' + this.escapeHtml(rp.name) + '">' + this.escapeHtml(rp.name) + '</div>');
 
@@ -1144,7 +1144,7 @@
 
         html.push('      <div class="duel-combatant" style="border-color:' + player.color + ';">');
 
-        html.push('        <div class="duel-fighter-role" style="color:' + player.color + ';">' + player.badge + ' ' + this.escapeHtml(player.name) + '</div>');
+        html.push('        <div class="duel-fighter-role" style="color:' + player.color + '; display:flex; align-items:center; justify-content:center; gap:0.4rem;">' + (this.getPlayerPawnAvatarHtml ? this.getPlayerPawnAvatarHtml(player, 34) : player.badge) + ' <span>' + this.escapeHtml(player.name) + '</span></div>');
 
         html.push('        <div class="duel-fighter-stat">⚔️ ' + basePower + ' <small>stálá síla</small></div>');
 

@@ -98,6 +98,7 @@ foreach ($rb in $remoteBases) {
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets"
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/monsters"
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/tiles"
+    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/pawns"
     foreach ($rel in $codeFiles) {
         $localF = Join-Path $localBase $rel.Replace('/', '\')
         if (Test-Path $localF) {
@@ -105,6 +106,16 @@ foreach ($rb in $remoteBases) {
             Upload-FtpFile $localF $remoteF
         } else {
             Write-Warning "Local file not found: $localF"
+        }
+    }
+
+    # Deploy pawns if any
+    $pawnsDir = Join-Path $localBase "assets\pawns"
+    if (Test-Path $pawnsDir) {
+        $pawnFiles = Get-ChildItem -Path $pawnsDir -Filter "*.png"
+        foreach ($pf in $pawnFiles) {
+            $remoteF = "ftp://$FtpServer$($rb)assets/pawns/$($pf.Name)"
+            Upload-FtpFile $pf.FullName $remoteF
         }
     }
 

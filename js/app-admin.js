@@ -538,7 +538,7 @@
                     '<td><span style="color:var(--gold-light); font-weight:600;">' + this.escapeHtml(u.displayName || u.username) + '</span></td>' +
                     '<td>' + roleBadge + '</td>' +
                     '<td>' + statusBadge + '<br><small style="color:var(--text-muted); font-size:0.72rem;">Přihlášen: ' + lastLogin + '</small></td>' +
-                    '<td style="text-align:center;">' + (u.gamesPlayed || 0) + ' / <strong style="color:var(--gold);">' + (u.gamesWon || 0) + ' 🏆</strong></td>' +
+                    '<td style="text-align:center;">' + (u.gamesPlayed || 0) + ' / <strong style="color:var(--gold);">' + (u.gamesWon || 0) + ' 🏆</strong><br><span style="font-size:0.76rem; color:#38bdf8; font-weight:700;">💎 ' + (typeof u.credits === "number" ? u.credits : 250) + ' kr.</span></td>' +
                     '<td style="text-align:right; white-space:nowrap;">' +
                         '<button class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem; margin-right:4px;" onclick="PRS_App.openEditUserModal(' + u.id + ')">✏️ Upravit</button>' +
                         '<button class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem; margin-right:4px;" onclick="PRS_App.promptResetPassword(' + u.id + ', \'' + this.escapeHtml(u.username) + '\')">🔑 Heslo</button>' +
@@ -560,6 +560,8 @@
             document.getElementById("admin-user-modal-title").textContent = "✏️ Úprava účtu: " + user.username;
             document.getElementById("admin-user-displayname").value = user.displayName || user.username;
             document.getElementById("admin-user-role").value = user.role || "Player";
+            var credInp = document.getElementById("admin-user-credits");
+            if (credInp) credInp.value = (typeof user.credits === "number" ? user.credits : 250);
             document.getElementById("admin-user-active").checked = (user.isActive !== false);
             document.getElementById("admin-user-feedback").textContent = "";
             document.getElementById("admin-user-modal").style.display = "flex";
@@ -576,10 +578,13 @@
             var active = document.getElementById("admin-user-active").checked;
             var fb = document.getElementById("admin-user-feedback");
 
+            var credInp = document.getElementById("admin-user-credits");
+            var creditsVal = credInp ? (parseInt(credInp.value, 10) || 0) : 250;
             var payload = {
                 id: this.editingUserId,
                 displayName: dn,
                 role: role,
+                credits: creditsVal,
                 isActive: active
             };
 

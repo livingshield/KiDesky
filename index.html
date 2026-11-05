@@ -36,13 +36,13 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611050077">
+    <link rel="stylesheet" href="css/main.css?v=202611050078">
 
-    <link rel="stylesheet" href="css/board.css?v=202611050077">
+    <link rel="stylesheet" href="css/board.css?v=202611050078">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611050077">
+    <link rel="stylesheet" href="css/modals.css?v=202611050078">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611050077">
+    <link rel="stylesheet" href="css/mobile.css?v=202611050078">
 
 </head>
 
@@ -92,6 +92,8 @@
         </nav>
 
         <div class="user-bar">
+
+            <button type="button" class="btn-secondary" onclick="PRS_App.openPawnShopModal(0)" title="Královská šatna a sbírka figurek (odemkni prémiové figurky za kredity)" style="padding:0.32rem 0.68rem; font-weight:700; border-color:var(--gold); color:var(--gold-light); display:inline-flex; align-items:center; gap:0.35rem;">🎭 Figurky (<span id="top-user-credits" style="color:#38bdf8;">250</span> 💎)</button>
 
             <div id="user-status-badge" class="user-pill" onclick="PRS_App.openAuthModal()">👤 Host: <strong>Host</strong></div>
 
@@ -469,9 +471,11 @@
 
                         <div id="lobby-players-list"></div>
 
-                        <div style="display:flex; gap:0.5rem; margin: 0.65rem 0 0.9rem;">
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin: 0.65rem 0 0.9rem;">
 
                             <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.addLobbyPlayer()">➕ Přidat rytíře (max. 6)</button>
+
+                            <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem; border-color:var(--gold); color:var(--gold-light); font-weight:600;" onclick="PRS_App.openPawnShopModal(0)">🎭 Výběr figurky &amp; Klenotnice (💎)</button>
 
                         </div>
 
@@ -2006,7 +2010,13 @@
 
                 </label>
 
-                <input type="text" id="online-player-custom-name" class="prs-input" placeholder="Zadej své jméno rytíře (např. Baron Jan)" maxlength="32" style="font-size:0.92rem; font-weight:bold;" />
+                <input type="text" id="online-player-custom-name" class="prs-input" placeholder="Zadej své jméno rytíře (např. Baron Jan)" maxlength="32" style="font-size:0.92rem; font-weight:bold; margin-bottom:0.65rem;" />
+
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.35rem;">
+                    <label style="font-size:0.82rem; font-weight:700; color:var(--gold-light);">🎭 Tvoje vlastní figurka (nahradí figurku PC bota na desce):</label>
+                    <button type="button" class="btn-secondary" style="font-size:0.74rem; padding:0.2rem 0.55rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.openPawnShopModal(0)">💎 Odemknout prémiové figurky</button>
+                </div>
+                <div id="online-role-pawn-picker" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; padding:0.25rem 0;"></div>
 
             </div>
 
@@ -2458,18 +2468,18 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611050077" defer></script>
-    <script src="js/game-boards.js?v=202611050077" defer></script>
-    <script src="js/game-engine.js?v=202611050077" defer></script>
-    <script src="js/game-combat-ai.js?v=202611050077" defer></script>
-    <script src="js/app-audio.js?v=202611050077" defer></script>
-    <script src="js/app.js?v=202611050077" defer></script>
-    <script src="js/app-board.js?v=202611050077" defer></script>
-    <script src="js/app-hud.js?v=202611050077" defer></script>
-    <script src="js/app-modals.js?v=202611050077" defer></script>
-    <script src="js/app-online.js?v=202611050077" defer></script>
-    <script src="js/app-catalog.js?v=202611050077" defer></script>
-    <script src="js/app-admin.js?v=202611050077" defer></script>
+    <script src="js/game-data.js?v=202611050078" defer></script>
+    <script src="js/game-boards.js?v=202611050078" defer></script>
+    <script src="js/game-engine.js?v=202611050078" defer></script>
+    <script src="js/game-combat-ai.js?v=202611050078" defer></script>
+    <script src="js/app-audio.js?v=202611050078" defer></script>
+    <script src="js/app.js?v=202611050078" defer></script>
+    <script src="js/app-board.js?v=202611050078" defer></script>
+    <script src="js/app-hud.js?v=202611050078" defer></script>
+    <script src="js/app-modals.js?v=202611050078" defer></script>
+    <script src="js/app-online.js?v=202611050078" defer></script>
+    <script src="js/app-catalog.js?v=202611050078" defer></script>
+    <script src="js/app-admin.js?v=202611050078" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -2960,12 +2970,18 @@
                     <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Přezdívka ve hře (DisplayName):</label>
                     <input id="admin-user-displayname" type="text" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.65rem;" placeholder="Zobrazované jméno hráče...">
                 </div>
-                <div style="margin-bottom:0.55rem;">
-                    <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Oprávnění / Role:</label>
-                    <select id="admin-user-role" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.5rem;">
-                        <option value="Player">🛡️ Hráč (Běžný uživatel)</option>
-                        <option value="Admin">👑 Administrátor (Plný přístup)</option>
-                    </select>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:0.55rem;">
+                    <div>
+                        <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Oprávnění / Role:</label>
+                        <select id="admin-user-role" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.5rem;">
+                            <option value="Player">🛡️ Hráč (Běžný uživatel)</option>
+                            <option value="Admin">👑 Administrátor (Plný přístup)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px; color:#38bdf8;">💎 Kredity (pro figurky):</label>
+                        <input id="admin-user-credits" type="number" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.65rem; font-weight:bold; color:#38bdf8;" value="250" min="0" step="50">
+                    </div>
                 </div>
                 <div style="margin-bottom:0.45rem;">
                     <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; cursor:pointer;">
@@ -2978,6 +2994,43 @@
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="PRS_App.closeAdminUserModal()" style="padding:0.45rem 1rem;">Zrušit</button>
                 <button class="btn-primary" onclick="PRS_App.saveAdminUser()" style="padding:0.45rem 1.15rem;">💾 Uložit změny</button>
+            </div>
+        </div>
+    </div>
+    <!-- MODÁL: KRÁLOVSKÁ ŠATNA A KLENOTNICE FIGUREK (#pawn-shop-modal) -->
+    <div id="pawn-shop-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closePawnShopModal()">
+        <div class="modal-box pawn-shop-modal-box">
+            <div class="pawn-shop-header">
+                <div>
+                    <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.25rem; display:flex; align-items:center; gap:0.5rem;">
+                        <span>🎭</span> <span>Královská šatna &amp; Sběratelské figurky</span>
+                    </h2>
+                    <div id="pawn-shop-slot-info" style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">
+                        Vyber figurku pro svého rytíře nebo odemkni unikátní prémiové šampiony s animovanou aurou!
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.65rem;">
+                    <div class="pawn-credits-pill" title="Tvůj zůstatek královských kreditů pro odemykání prémiových figurek">
+                        <span>💎</span> <strong id="pawn-shop-credits-val">250</strong> <small>kreditů</small>
+                    </div>
+                    <button class="btn-icon-danger" onclick="PRS_App.closePawnShopModal()" title="Zavřít šatnu">✕</button>
+                </div>
+            </div>
+
+            <div class="pawn-shop-tabs">
+                <button type="button" id="pawn-tab-all" class="armory-tab-btn active" onclick="PRS_App.setPawnShopCategory('all')">✨ Všechny figurky (17)</button>
+                <button type="button" id="pawn-tab-basic" class="armory-tab-btn" onclick="PRS_App.setPawnShopCategory('basic')">🛡️ Základní rytíři (6)</button>
+                <button type="button" id="pawn-tab-premium" class="armory-tab-btn" onclick="PRS_App.setPawnShopCategory('premium')">💎 Prémiové s aurou (6)</button>
+                <button type="button" id="pawn-tab-bot" class="armory-tab-btn" onclick="PRS_App.setPawnShopCategory('bot')">🤖 Figurky PC Botů (5)</button>
+            </div>
+
+            <div id="pawn-shop-grid" class="pawn-shop-grid"></div>
+
+            <div class="pawn-shop-footer">
+                <div style="font-size:0.78rem; color:var(--text-muted);">
+                    💡 <strong>Multiplayer Tip:</strong> Když se připojíš k online stolu na místo PC bota, botova figurka na herním plánu se automaticky vymění za tvou zvolenou figurku!
+                </div>
+                <button type="button" class="btn-primary" onclick="PRS_App.closePawnShopModal()" style="padding:0.42rem 1.2rem;">Hotovo</button>
             </div>
         </div>
     </div>

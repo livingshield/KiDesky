@@ -195,6 +195,17 @@ openAuthModal: function () {
                 if (data && data.ok && data.user) {
 
                     self.currentUser = data.user;
+                    if (typeof data.user.credits === "number") self.userCredits = data.user.credits;
+                    if (data.user.selectedPawnId) self.selectedPawnId = data.user.selectedPawnId;
+                    if (data.user.unlockedPawnsJson) {
+                        try {
+                            var unl = JSON.parse(data.user.unlockedPawnsJson);
+                            if (Array.isArray(unl) && unl.length > 0) self.unlockedPawns = unl;
+                        } catch (e2) { }
+                    }
+                    if (self.lobbyPlayers && self.lobbyPlayers[0]) {
+                        self.lobbyPlayers[0].pawnId = self.selectedPawnId || "knight_valiant";
+                    }
 
                     if (data.user.displayName && data.user.displayName.toLowerCase() !== "admin" && data.user.displayName.indexOf("@") === -1) {
 
@@ -382,10 +393,44 @@ openAuthModal: function () {
 
         }
 
+        this.renderOnlineRolePawnPicker();
+
         this.renderOnlineRoleGrid();
 
         modal.style.display = "flex";
 
+    },
+
+    renderOnlineRolePawnPicker: function () {
+        var el = document.getElementById("online-role-pawn-picker");
+        if (!el) return;
+        var catalog = window.PRS_PAWNS_CATALOG || [];
+        var curPawn = this.selectedPawnId || "knight_valiant";
+        var html = [];
+        for (var i = 0; i < catalog.length; i++) {
+            var pw = catalog[i];
+            if (pw.category === "bot") continue;
+            var unlocked = this.isPawnUnlocked ? this.isPawnUnlocked(pw.id) : pw.unlockedByDefault;
+            var isSel = (curPawn === pw.id);
+            html.push('<button type="button" onclick="' + (unlocked ? 'PRS_App.selectOnlineJoinPawn(&quot;' + pw.id + '&quot;)' : 'PRS_App.openPawnShopModal(0)') + '" title="' + this.escapeHtml(pw.name) + (unlocked ? '' : ' (Zamčeno: ' + pw.priceCredits + ' 💎)') + '" style="width:44px; height:44px; border-radius:50%; padding:0; background:radial-gradient(circle, ' + (pw.accentColor || '#334155') + ' 0%, #140d08 85%); border:2.5px solid ' + (isSel ? '#22c55e' : (unlocked ? '#ffd86b' : '#64748b')) + '; box-shadow:' + (isSel ? '0 0 12px #22c55e' : '0 2px 5px rgba(0,0,0,0.6)') + '; cursor:pointer; position:relative; opacity:' + (unlocked ? '1' : '0.55') + '; transition:transform 0.15s;">');
+            html.push('  <img src="' + pw.img + '" alt="" style="width:105%; height:105%; object-fit:contain; border-radius:50%;"/>');
+            if (!unlocked) {
+                html.push('  <span style="position:absolute; bottom:-2px; right:-2px; background:#0f172a; border:1px solid #ffd86b; border-radius:50%; width:16px; height:16px; font-size:9px; display:flex; align-items:center; justify-content:center;">🔒</span>');
+            } else if (isSel) {
+                html.push('  <span style="position:absolute; bottom:-2px; right:-2px; background:#16a34a; border:1px solid #fff; border-radius:50%; width:15px; height:15px; font-size:9px; color:#fff; display:flex; align-items:center; justify-content:center;">✓</span>');
+            }
+            html.push('</button>');
+        }
+        el.innerHTML = html.join("");
+    },
+
+    selectOnlineJoinPawn: function (pawnId) {
+        this.selectedPawnId = pawnId;
+        try { localStorage.setItem("prs_selected_pawn", pawnId); } catch (e) { }
+        if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+            this.lobbyPlayers[0].pawnId = pawnId;
+        }
+        this.renderOnlineRolePawnPicker();
     },
 
     closeOnlineRoleModal: function () {
@@ -448,7 +493,7 @@ openAuthModal: function () {
 
             html.push('  </div>');
 
-            html.push('  <div style="font-size:1.8rem; margin:0.2rem 0;">' + pl.badge + '</div>');
+            html.push('  <div style="margin:0.25rem 0;">' + (this.getPlayerPawnAvatarHtml ? this.getPlayerPawnAvatarHtml(pl, 52) : ('<div style="font-size:1.8rem;">' + pl.badge + '</div>')) + '</div>');
 
             html.push('  <div style="font-size:1rem; font-weight:bold; color:' + pl.color + '; margin-bottom:0.2rem;">' + this.escapeHtml(pl.name) + '</div>');
 
@@ -497,6 +542,8 @@ openAuthModal: function () {
             var pl = this.state.players[selIdx];
 
             pl.type = "Human"; // Povýšení na lidského hráče, aby za něj netahal automatický bot!
+
+            pl.pawnId = this.selectedPawnId || "knight_valiant"; // Nahrazení bot figurky vlastní zvolenou figurkou hráče!
 
             if (customName) {
 

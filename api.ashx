@@ -725,6 +725,12 @@ public class KiDeskyApiHandler : IHttpHandler
                 case "update_nickname":
                     HandleUpdateNickname(context);
                     break;
+                case "save-user-pawn":
+                    HandleSaveUserPawn(context);
+                    break;
+                case "unlock-pawn":
+                    HandleUnlockPawn(context);
+                    break;
                 case "list-videos":
                     HandleListVideos(context);
                     break;
@@ -1156,6 +1162,22 @@ END
 IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'IsActive')
 BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [IsActive] BIT NOT NULL DEFAULT 1;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'Credits')
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [Credits] INT NOT NULL DEFAULT 250;
+    EXEC(N'UPDATE [prs].[prs_Users] SET [Credits] = 2500 WHERE [Role] = N''Admin'' OR [Username] = N''rytir_jan''');
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'SelectedPawnId')
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [SelectedPawnId] NVARCHAR(64) NOT NULL DEFAULT N'knight_valiant';
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'UnlockedPawnsJson')
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [UnlockedPawnsJson] NVARCHAR(MAX) NULL;
 END
 
 IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL
@@ -2348,7 +2370,7 @@ END";
 
 
 
-                    user = new { id = userId, username = username, displayName = displayName, role = role, email = email }
+                    user = new { id = userId, username = username, displayName = displayName, role = role, email = email, credits = (role == "Admin" ? 2500 : 250), selectedPawnId = "knight_valiant", unlockedPawnsJson = "[\"knight_valiant\",\"knight_tourney\",\"lady_huntress\",\"lord_diplomat\",\"knight_warden\",\"lady_sorceress\"]" }
 
 
 
@@ -2454,6 +2476,112 @@ END";
 
     }
 
+    private void HandleSaveUserPawn(HttpContext context)
+    {
+        var body = ReadJsonBody(context);
+        string username = GetStr(body, "username").Trim();
+        string pawnId = GetStr(body, "selectedPawnId", "knight_valiant").Trim();
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(pawnId))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné parametry." }));
+            return;
+        }
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand("UPDATE [prs].[prs_Users] SET [SelectedPawnId] = @p WHERE [Username] = @u OR [Email] = @u", conn))
+            {
+                cmd.Parameters.AddWithValue("@p", pawnId);
+                cmd.Parameters.AddWithValue("@u", username);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", selectedPawnId = pawnId }));
+    }
+
+    private void HandleUnlockPawn(HttpContext context)
+    {
+        var body = ReadJsonBody(context);
+        string username = GetStr(body, "username").Trim();
+        string pawnId = GetStr(body, "pawnId").Trim();
+        int price = GetInt(body, "priceCredits", 150);
+        if (price < 0) price = 0;
+
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(pawnId))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné parametry." }));
+            return;
+        }
+
+        int curCredits = 250;
+        string unlockedJson = "[\"knight_valiant\",\"knight_tourney\",\"lady_huntress\",\"lord_diplomat\",\"knight_warden\",\"lady_sorceress\"]";
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand("SELECT [Credits], [UnlockedPawnsJson] FROM [prs].[prs_Users] WHERE [Username] = @u OR [Email] = @u", conn))
+            {
+                cmd.Parameters.AddWithValue("@u", username);
+                using (var r = cmd.ExecuteReader())
+                {
+                    if (r.Read())
+                    {
+                        if (r["Credits"] != DBNull.Value) curCredits = Convert.ToInt32(r["Credits"]);
+                        if (r["UnlockedPawnsJson"] != DBNull.Value && !string.IsNullOrEmpty(r["UnlockedPawnsJson"].ToString()))
+                        {
+                            unlockedJson = r["UnlockedPawnsJson"].ToString();
+                        }
+                    }
+                    else
+                    {
+                        context.Response.Write(_json.Serialize(new { ok = false, message = "Uživatel nenalezen." }));
+                        return;
+                    }
+                }
+            }
+
+            var unlockedList = new List<string>();
+            try
+            {
+                var parsed = _json.Deserialize<List<string>>(unlockedJson);
+                if (parsed != null) unlockedList = parsed;
+            }
+            catch { }
+
+            if (!unlockedList.Contains(pawnId))
+            {
+                if (curCredits < price)
+                {
+                    context.Response.Write(_json.Serialize(new { ok = false, message = "Nedostatek kreditů na účtu." }));
+                    return;
+                }
+                curCredits -= price;
+                unlockedList.Add(pawnId);
+            }
+
+            string newUnlockedJson = _json.Serialize(unlockedList);
+            using (var upd = new SqlCommand("UPDATE [prs].[prs_Users] SET [Credits] = @c, [UnlockedPawnsJson] = @uJson, [SelectedPawnId] = @p WHERE [Username] = @u OR [Email] = @u", conn))
+            {
+                upd.Parameters.AddWithValue("@c", curCredits);
+                upd.Parameters.AddWithValue("@uJson", newUnlockedJson);
+                upd.Parameters.AddWithValue("@p", pawnId);
+                upd.Parameters.AddWithValue("@u", username);
+                upd.ExecuteNonQuery();
+            }
+
+            context.Response.Write(_json.Serialize(new
+            {
+                ok = true,
+                status = "success",
+                credits = curCredits,
+                selectedPawnId = pawnId,
+                unlockedPawnsJson = newUnlockedJson
+            }));
+        }
+    }
+
 
 
     private void HandleLogin(HttpContext context)
@@ -2496,7 +2624,7 @@ END";
 
                 cmd = new SqlCommand(@"
 
-                    SELECT [Id], [Username], [Email], [Role], [DisplayName], [PasswordHash], [GamesPlayed], [GamesWon]
+                    SELECT [Id], [Username], [Email], [Role], [DisplayName], [PasswordHash], [GamesPlayed], [GamesWon], [Credits], [SelectedPawnId], [UnlockedPawnsJson]
 
                     FROM [prs].[prs_Users]
 
@@ -2632,6 +2760,20 @@ END";
 
                         int gw = Convert.ToInt32(r["GamesWon"]);
 
+                        int credits = (role == "Admin" || u == "rytir_jan") ? 2500 : 250;
+                        string selectedPawnId = "knight_valiant";
+                        string unlockedPawnsJson = "[\"knight_valiant\",\"knight_tourney\",\"lady_huntress\",\"lord_diplomat\",\"knight_warden\",\"lady_sorceress\"]";
+                        try
+                        {
+                            int cIdx = r.GetOrdinal("Credits");
+                            if (!r.IsDBNull(cIdx)) credits = Convert.ToInt32(r["Credits"]);
+                            int sIdx = r.GetOrdinal("SelectedPawnId");
+                            if (!r.IsDBNull(sIdx) && !string.IsNullOrEmpty(r.GetString(sIdx))) selectedPawnId = r.GetString(sIdx);
+                            int uIdx = r.GetOrdinal("UnlockedPawnsJson");
+                            if (!r.IsDBNull(uIdx) && !string.IsNullOrEmpty(r.GetString(uIdx))) unlockedPawnsJson = r.GetString(uIdx);
+                        }
+                        catch { }
+
 
 
                         r.Close();
@@ -2737,7 +2879,7 @@ END";
 
 
 
-                            user = new { id = id, username = u, displayName = dn, role = role, gamesPlayed = gp, gamesWon = gw }
+                            user = new { id = id, username = u, displayName = dn, role = role, gamesPlayed = gp, gamesWon = gw, credits = credits, selectedPawnId = selectedPawnId, unlockedPawnsJson = unlockedPawnsJson }
 
 
 
@@ -4559,7 +4701,7 @@ END";
             conn.Open();
             EnsureExtendedAdminSchema(conn);
             using (var cmd = new SqlCommand(@"
-                SELECT [Id], [Username], [Email], [Role], [DisplayName], [GamesPlayed], [GamesWon], [CreatedAt], [LastLoginAt], [IsActive]
+                SELECT [Id], [Username], [Email], [Role], [DisplayName], [GamesPlayed], [GamesWon], [CreatedAt], [LastLoginAt], [IsActive], [Credits], [SelectedPawnId]
                 FROM [prs].[prs_Users]
                 ORDER BY [Id] ASC", conn))
             using (var r = cmd.ExecuteReader())
@@ -4577,7 +4719,9 @@ END";
                         gamesWon = Convert.ToInt32(r["GamesWon"]),
                         createdAt = Convert.ToDateTime(r["CreatedAt"]).ToString("o"),
                         lastLoginAt = r["LastLoginAt"] == DBNull.Value ? null : Convert.ToDateTime(r["LastLoginAt"]).ToString("o"),
-                        isActive = Convert.ToBoolean(r["IsActive"])
+                        isActive = Convert.ToBoolean(r["IsActive"]),
+                        credits = r["Credits"] == DBNull.Value ? 250 : Convert.ToInt32(r["Credits"]),
+                        selectedPawnId = r["SelectedPawnId"] == DBNull.Value ? "knight_valiant" : r["SelectedPawnId"].ToString()
                     });
                 }
             }
@@ -4592,6 +4736,7 @@ END";
         int id = GetInt(body, "id", 0);
         string role = GetStr(body, "role", "Player").Trim();
         string displayName = GetStr(body, "displayName").Trim();
+        int credits = GetInt(body, "credits", 250);
         bool isActive = !body.ContainsKey("isActive") || Convert.ToBoolean(body["isActive"]);
 
         if (id <= 0)
@@ -4606,12 +4751,13 @@ END";
             EnsureExtendedAdminSchema(conn);
             using (var cmd = new SqlCommand(@"
                 UPDATE [prs].[prs_Users]
-                SET [Role] = @r, [DisplayName] = @d, [IsActive] = @a
+                SET [Role] = @r, [DisplayName] = @d, [IsActive] = @a, [Credits] = @c
                 WHERE [Id] = @id", conn))
             {
                 cmd.Parameters.AddWithValue("@r", role);
                 cmd.Parameters.AddWithValue("@d", string.IsNullOrEmpty(displayName) ? (object)DBNull.Value : displayName);
                 cmd.Parameters.AddWithValue("@a", isActive);
+                cmd.Parameters.AddWithValue("@c", credits);
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.ExecuteNonQuery();
             }

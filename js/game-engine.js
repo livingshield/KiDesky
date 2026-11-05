@@ -167,6 +167,8 @@ window.PRS_GameEngine = {
 
                 type: pDef.type || "Human",
 
+                pawnId: window.PRS_getDefaultPawnIdForPlayer ? window.PRS_getDefaultPawnIdForPlayer(pDef, i) : (pDef.pawnId || "knight_valiant"),
+
                 color: pDef.color || col.hex,
 
                 badge: col.badge,

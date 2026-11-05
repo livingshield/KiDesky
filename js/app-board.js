@@ -1723,39 +1723,31 @@
 
                 }
 
-                // 3. Kovový zkosený podstavec figurky
+                // 3. Kovový zkosený podstavec figurky s barvou hráče a případnou prémiovou aurou
+                var pawnObj = window.PRS_getPawnById ? window.PRS_getPawnById(tokenPlayer.pawnId) : null;
+                var pawnImg = pawnObj ? pawnObj.img : 'assets/pawns/pawn_knight_valiant.png';
+                var isPremPawn = pawnObj && pawnObj.category === 'premium';
+                var auraCol = (pawnObj && pawnObj.accentColor) ? pawnObj.accentColor : tokenPlayer.color;
 
-                out.push('    <ellipse cx="' + txToken + '" cy="' + (tyToken + 8) + '" rx="13" ry="5.5" fill="url(#pedestalGrad)" stroke="#d4af37" stroke-width="1.2"/>');
+                if (isPremPawn) {
+                    out.push('    <circle cx="' + txToken + '" cy="' + (tyToken - 3) + '" r="18" fill="none" stroke="' + auraCol + '" stroke-width="2" stroke-dasharray="4,3" opacity="0.85">');
+                    out.push('      <animateTransform attributeName="transform" type="rotate" from="0 ' + txToken + ' ' + (tyToken - 3) + '" to="360 ' + txToken + ' ' + (tyToken - 3) + '" dur="6s" repeatCount="indefinite"/>');
+                    out.push('    </circle>');
+                    out.push('    <circle cx="' + txToken + '" cy="' + (tyToken - 3) + '" r="14" fill="' + auraCol + '" opacity="0.22">');
+                    out.push('      <animate attributeName="r" values="12;17;12" dur="2.2s" repeatCount="indefinite"/>');
+                    out.push('      <animate attributeName="opacity" values="0.15;0.38;0.15" dur="2.2s" repeatCount="indefinite"/>');
+                    out.push('    </circle>');
+                }
 
-                // 4. Busta rytířské přilbice (uzavřené hledí s průzorem a chocholem v barvě hráče)
+                out.push('    <ellipse cx="' + txToken + '" cy="' + (tyToken + 9) + '" rx="13.5" ry="5.5" fill="' + tokenPlayer.color + '" stroke="#ffd86b" stroke-width="1.5"/>');
+                out.push('    <ellipse cx="' + txToken + '" cy="' + (tyToken + 7.2) + '" rx="11" ry="4" fill="url(#pedestalGrad)" stroke="' + tokenPlayer.color + '" stroke-width="1.1"/>');
 
-                out.push('    <path d="M ' + (txToken - 8) + ' ' + (tyToken + 5) + ' C ' + (txToken - 9) + ' ' + (tyToken - 4) + ' ' + (txToken - 6) + ' ' + (tyToken - 13) + ' ' + txToken + ' ' + (tyToken - 14) + ' C ' + (txToken + 6) + ' ' + (tyToken - 13) + ' ' + (txToken + 9) + ' ' + (tyToken - 4) + ' ' + (txToken + 8) + ' ' + (tyToken + 5) + ' Z" fill="#475569" stroke="#cbd5e1" stroke-width="1"/>');
+                // 4. 2.5D Sběratelská figurka rytíře / bota / prémiového hrdiny (256x256 RGBA PNG)
+                out.push('    <image href="' + pawnImg + '" x="' + (txToken - 17) + '" y="' + (tyToken - 24) + '" width="34" height="34" preserveAspectRatio="xMidYMid meet" style="filter:drop-shadow(0 3px 4px rgba(0,0,0,0.85));"/>');
 
-                out.push('    <path d="M ' + (txToken - 5) + ' ' + (tyToken - 4) + ' Q ' + txToken + ' ' + (tyToken - 2) + ' ' + (txToken + 5) + ' ' + (tyToken - 4) + '" fill="none" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round"/>');
-
-                // Vlající chochol (plume)
-
-                out.push('    <path d="M ' + txToken + ' ' + (tyToken - 14) + ' Q ' + (txToken - 8) + ' ' + (tyToken - 23) + ' ' + (txToken - 1) + ' ' + (tyToken - 25) + ' Q ' + (txToken + 4) + ' ' + (tyToken - 20) + ' ' + (txToken + 1) + ' ' + (tyToken - 14) + '" fill="' + tokenPlayer.color + '" stroke="#ffffff" stroke-width="1" style="filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));"/>');
-
-                // 5. Rytířský štít s číslem hráče v popředí
-
-                var shXl = txToken - 8.5;
-
-                var shXr = txToken + 8.5;
-
-                var shXm = txToken;
-
-                var shYtop = tyToken - 1;
-
-                var shYmid = tyToken + 7;
-
-                var shYcrv = tyToken + 13.5;
-
-                var shYbot = tyToken + 16;
-
-                out.push('    <path d="M ' + shXl + ' ' + shYtop + ' L ' + shXr + ' ' + shYtop + ' L ' + shXr + ' ' + shYmid + ' Q ' + shXr + ' ' + shYcrv + ' ' + shXm + ' ' + shYbot + ' Q ' + shXl + ' ' + shYcrv + ' ' + shXl + ' ' + shYmid + ' Z" fill="' + tokenPlayer.color + '" stroke="#ffffff" stroke-width="1.4" filter="url(#glowFilter)"/>');
-
-                out.push('    <text x="' + txToken + '" y="' + (tyToken + 9.5) + '" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold" font-family="Cinzel, serif">' + (tokenPlayer.index + 1) + '</text>');
+                // 5. Heraldický štítek s číslem hráče v popředí vpravo dole
+                out.push('    <circle cx="' + (txToken + 10.5) + '" cy="' + (tyToken + 7) + '" r="6" fill="' + tokenPlayer.color + '" stroke="#ffffff" stroke-width="1.3" filter="url(#glowFilter)"/>');
+                out.push('    <text x="' + (txToken + 10.5) + '" y="' + (tyToken + 10) + '" text-anchor="middle" fill="#ffffff" font-size="8.2" font-weight="bold" font-family="Cinzel, serif">' + (tokenPlayer.index + 1) + '</text>');
 
                 out.push('  </g>');
 

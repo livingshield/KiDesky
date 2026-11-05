@@ -670,6 +670,16 @@
 
     // ========================================================================,
 
+    getPlayerPawnAvatarHtml: function (p, sizePx) {
+        var sz = sizePx || 28;
+        var pawnObj = window.PRS_getPawnById ? window.PRS_getPawnById(p ? p.pawnId : null) : null;
+        var img = pawnObj ? pawnObj.img : "assets/pawns/pawn_knight_valiant.png";
+        var isPrem = pawnObj && pawnObj.category === "premium";
+        var borderCol = isPrem ? "#ffd86b" : (p ? p.color : "#d4af37");
+        var glow = isPrem ? ("0 0 8px " + (pawnObj.accentColor || "#ffd86b")) : "0 2px 4px rgba(0,0,0,0.6)";
+        return '<span class="pawn-hud-avatar" style="display:inline-flex; align-items:center; justify-content:center; width:' + sz + 'px; height:' + sz + 'px; border-radius:50%; background:radial-gradient(circle, ' + (p ? p.color : '#334155') + ' 0%, #1a0f0a 85%); border:2px solid ' + borderCol + '; box-shadow:' + glow + '; overflow:hidden; flex-shrink:0; vertical-align:middle;"><img src="' + img + '" alt="" style="width:108%; height:108%; object-fit:contain; transform:translateY(1px);"/></span>';
+    },
+
     renderTopPlayersHud: function () {
 
         var el = document.getElementById("board-top-players-hud");
@@ -712,7 +722,7 @@
 
                 '    <div class="top-hud-identity">' +
 
-                '      <span class="top-hud-avatar" style="background:' + p.color + ';">' + p.badge + '</span>' +
+                '      ' + this.getPlayerPawnAvatarHtml(p, 30) + 
 
                 '      <div class="top-hud-name-col">' +
 
@@ -812,7 +822,7 @@
 
                     'onmouseleave="PRS_App.hidePlayerTooltip()" ' +
 
-                    'title="' + this.escapeHtml(plTrack.name) + ': ' + plTrack.totalHearts + ' ❤️ (' + plTrack.gold.toLocaleString("cs-CZ") + ' zl.) - Klepni pro zobrazení statistik">' + (rIdx + 1) + '</div>';
+                    'title="' + this.escapeHtml(plTrack.name) + ': ' + plTrack.totalHearts + ' ❤️ (' + plTrack.gold.toLocaleString("cs-CZ") + ' zl.) - Klepni pro zobrazení statistik" style="padding:0; overflow:hidden; display:inline-flex; align-items:center; justify-content:center;"><img src="' + (window.PRS_getPawnById && window.PRS_getPawnById(plTrack.pawnId) ? window.PRS_getPawnById(plTrack.pawnId).img : 'assets/pawns/pawn_knight_valiant.png') + '" style="width:100%; height:100%; object-fit:contain;"/></div>';
 
             }
 
@@ -856,7 +866,7 @@
 
                     '<div class="hp-header">' +
 
-                    '  <span class="hp-name-wrap">' + p.badge + ' <strong class="hp-name-txt">' + this.escapeHtml(p.name) + '</strong> ' + (p.type !== "Human" ? '<small class="bot-tag">PC</small>' : '<small class="bot-tag" style="background:#0284c7;color:#fff;">Hráč</small>') + (isInspected ? ' <span style="font-size:0.72rem; color:#fde047; font-weight:600; margin-left:4px;">👁️ Zobrazen</span>' : '') + '</span>' +
+                    '  <span class="hp-name-wrap" style="display:inline-flex; align-items:center; gap:0.35rem;">' + this.getPlayerPawnAvatarHtml(p, 24) + ' <strong class="hp-name-txt">' + this.escapeHtml(p.name) + '</strong> ' + (p.type !== "Human" ? '<small class="bot-tag">PC</small>' : '<small class="bot-tag" style="background:#0284c7;color:#fff;">Hráč</small>') + (isInspected ? ' <span style="font-size:0.72rem; color:#fde047; font-weight:600; margin-left:4px;">👁️ Zobrazen</span>' : '') + '</span>' +
 
                     '  <span class="hp-hearts">' + p.totalHearts + ' / ' + target + ' ❤️</span>' +
 
@@ -1548,7 +1558,7 @@
 
             '    <div style="display:flex; align-items:center; gap:0.65rem;">' +
 
-            '      <span style="font-size:1.8rem;">' + p.badge + '</span>' +
+            '      ' + this.getPlayerPawnAvatarHtml(p, 46) + 
 
             '      <div>' +
 
@@ -1776,7 +1786,7 @@
 
             html += '  <div class="sp-info">' +
 
-                '    <span class="sp-badge" style="background:' + p.color + ';"></span>' +
+                '    ' + this.getPlayerPawnAvatarHtml(p, 22) + 
 
                 '    <span class="sp-name" style="' + (isTurn ? 'color:#fef08a; font-weight:700;' : '') + '">' +
 
@@ -1829,7 +1839,7 @@
         var eqText = eqList.length > 0 ? eqList.join(", ") : "Žádná výbava";
 
         var html = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.35rem;">' +
-            '  <span style="font-weight:700; color:' + p.color + '; font-size:0.95rem;">' + p.badge + ' ' + this.escapeHtml(p.name) + '</span>' +
+            '  <span style="font-weight:700; color:' + p.color + '; font-size:0.95rem; display:inline-flex; align-items:center; gap:0.4rem;">' + this.getPlayerPawnAvatarHtml(p, 28) + ' ' + this.escapeHtml(p.name) + '</span>' +
             '  <div style="display:flex; align-items:center; gap:0.4rem;">' +
             '    <span style="font-size:0.75rem; color:var(--text-muted);">' + (p.type === "Human" ? "Člověk" : "PC") + '</span>' +
             '    <button type="button" class="btn-close-tooltip" onclick="event.stopPropagation(); PRS_App.hidePlayerTooltip();" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; border-radius:50%; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; font-weight:bold; padding:0; line-height:1;" title="Zavřít">✕</button>' +
@@ -2165,7 +2175,7 @@
 
             '    <div style="display:flex; align-items:center; gap:0.45rem;">' +
 
-            '      <span class="ks-avatar" style="background:' + p.color + '; width:28px; height:28px; font-size:0.95rem; display:inline-flex; align-items:center; justify-content:center; border-radius:50%;">' + p.badge + '</span>' +
+            '      ' + this.getPlayerPawnAvatarHtml(p, 32) + 
 
             '      <strong style="color:var(--text-main); font-size:0.92rem;' + (p.isEliminated ? ' text-decoration:line-through; opacity:0.6;' : '') + '">' + this.escapeHtml(p.name) + '</strong>' +
 
@@ -2403,7 +2413,7 @@
 
                 '  <div style="display:flex; align-items:center; gap:0.45rem;">' +
 
-                '    <span class="top-hud-avatar" style="background:' + player.color + '; width:28px; height:28px; font-size:0.95rem;">' + player.badge + '</span>' +
+                '    ' + this.getPlayerPawnAvatarHtml(player, 34) + 
 
                 '    <div>' +
 

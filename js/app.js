@@ -22,15 +22,25 @@ window.PRS_App = {
 
     },
 
+    userCredits: 250,
+
+    selectedPawnId: "knight_valiant",
+
+    unlockedPawns: ["knight_valiant", "knight_tourney", "lady_huntress", "lord_diplomat", "knight_warden", "lady_sorceress"],
+
+    pawnPickerTargetSlot: 0,
+
+    pawnShopActiveCategory: "all",
+
     lobbyPlayers: [
 
-        { name: "Host (Ty)", type: "Human" },
+        { name: "Host (Ty)", type: "Human", pawnId: "knight_valiant" },
 
-        { name: "Černý Baron (PC)", type: "Bot_Aggressive" },
+        { name: "Černý Baron (PC)", type: "Bot_Aggressive", pawnId: "bot_aggressive" },
 
-        { name: "Zikmund z Chovu (PC)", type: "Bot_Breeder" },
+        { name: "Zikmund z Chovu (PC)", type: "Bot_Breeder", pawnId: "bot_breeder" },
 
-        { name: "Kněžna Eliška (PC)", type: "Bot_Noble" }
+        { name: "Kněžna Eliška (PC)", type: "Bot_Noble", pawnId: "bot_noble" }
 
     ],
     getDefaultPlayerName: function () {
@@ -1328,13 +1338,13 @@ window.PRS_App = {
 
         this.lobbyPlayers = [
 
-            { name: myName, type: "Human" },
+            { name: myName, type: "Human", pawnId: this.selectedPawnId || "knight_valiant" },
 
-            { name: "Černý Baron (PC)", type: "Bot_Aggressive" },
+            { name: "Černý Baron (PC)", type: "Bot_Aggressive", pawnId: "bot_aggressive" },
 
-            { name: "Zikmund z Chovu (PC)", type: "Bot_Breeder" },
+            { name: "Zikmund z Chovu (PC)", type: "Bot_Breeder", pawnId: "bot_breeder" },
 
-            { name: "Kněžna Eliška (PC)", type: "Bot_Noble" }
+            { name: "Kněžna Eliška (PC)", type: "Bot_Noble", pawnId: "bot_noble" }
 
         ];
 
@@ -1552,9 +1562,43 @@ window.PRS_App = {
 
                 }
 
+                if (this.currentUser && typeof this.currentUser.credits === "number") {
+                    this.userCredits = this.currentUser.credits;
+                }
+                if (this.currentUser && this.currentUser.selectedPawnId) {
+                    this.selectedPawnId = this.currentUser.selectedPawnId;
+                }
+                if (this.currentUser && this.currentUser.unlockedPawnsJson) {
+                    try {
+                        var arr = JSON.parse(this.currentUser.unlockedPawnsJson);
+                        if (Array.isArray(arr) && arr.length > 0) this.unlockedPawns = arr;
+                    } catch (e2) { }
+                }
+
+            }
+
+            var locPawn = localStorage.getItem("prs_selected_pawn");
+            if (locPawn && (!this.currentUser || this.currentUser.role === "Guest")) {
+                this.selectedPawnId = locPawn;
+            }
+            var locUnl = localStorage.getItem("prs_unlocked_pawns");
+            if (locUnl && (!this.currentUser || this.currentUser.role === "Guest")) {
+                try {
+                    var parsedUnl = JSON.parse(locUnl);
+                    if (Array.isArray(parsedUnl) && parsedUnl.length > 0) this.unlockedPawns = parsedUnl;
+                } catch (e3) { }
+            }
+            var locCred = localStorage.getItem("prs_guest_credits");
+            if (locCred && (!this.currentUser || this.currentUser.role === "Guest")) {
+                var cNum = parseInt(locCred, 10);
+                if (!isNaN(cNum)) this.userCredits = cNum;
             }
 
         } catch (e) { }
+
+        if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+            this.lobbyPlayers[0].pawnId = this.selectedPawnId || "knight_valiant";
+        }
 
         this.updateUserUI();
 
@@ -1652,6 +1696,14 @@ window.PRS_App = {
 
         }
 
+        var credEl = document.getElementById("top-user-credits");
+        if (credEl) {
+            if (this.currentUser && typeof this.currentUser.credits === "number") {
+                this.userCredits = this.currentUser.credits;
+            }
+            credEl.textContent = String(this.userCredits || 0);
+        }
+
     },
 
     // --- LOBBY & NASTAVENÍ NOVÉ HRY ---,
@@ -1670,11 +1722,21 @@ window.PRS_App = {
 
             var col = window.PRS_GameEngine.PLAYER_COLORS[i % window.PRS_GameEngine.PLAYER_COLORS.length];
 
+            if (!p.pawnId && window.PRS_getDefaultPawnIdForPlayer) {
+                p.pawnId = window.PRS_getDefaultPawnIdForPlayer(p, i);
+            }
+            var pawnObj = window.PRS_getPawnById ? window.PRS_getPawnById(p.pawnId) : null;
+            var pawnImg = pawnObj ? pawnObj.img : "assets/pawns/pawn_knight_valiant.png";
+            var pawnTitle = pawnObj ? pawnObj.name : "Zvolit figurku";
+
             var placeholder = (i === 0) ? ' placeholder="Tvoje rytířská přezdívka (např. Sir Gawain)" title="Zadej svou herní přezdívku (jméno rytíře u stolu)"' : ' placeholder="Jméno hráče / PC bota"';
 
             html += '<div class="lobby-player-row">' +
 
-                '<span class="player-color-dot" style="background:' + col.hex + '">' + col.badge + '</span>' +
+                '<button type="button" class="lobby-pawn-btn" onclick="PRS_App.openPawnShopModal(' + i + ')" title="Figurka: ' + this.escapeHtml(pawnTitle) + ' (klepni pro změnu figurky)" style="width:36px; height:36px; border-radius:50%; padding:0; background:radial-gradient(circle, ' + col.hex + ' 0%, #1a0f0a 85%); border:2px solid #ffd86b; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; position:relative; flex-shrink:0; box-shadow:0 2px 6px rgba(0,0,0,0.65);">' +
+                '  <img src="' + pawnImg + '" alt="" style="width:105%; height:105%; object-fit:contain; border-radius:50%;"/>' +
+                '  <span style="position:absolute; bottom:-3px; right:-3px; background:#1e130c; border:1px solid #ffd86b; border-radius:50%; width:14px; height:14px; font-size:8px; display:flex; align-items:center; justify-content:center; color:#ffd86b;">🎭</span>' +
+                '</button>' +
 
                 '<input type="text" class="prs-input" value="' + this.escapeHtml(p.name) + '"' + placeholder + ' oninput="PRS_App.updateLobbyPlayerName(' + i + ', this.value)" onchange="PRS_App.updateLobbyPlayerName(' + i + ', this.value)" />' +
 
@@ -1758,7 +1820,13 @@ window.PRS_App = {
 
     updateLobbyPlayerType: function (idx, val) {
 
-        if (this.lobbyPlayers[idx]) this.lobbyPlayers[idx].type = val;
+        if (this.lobbyPlayers[idx]) {
+            this.lobbyPlayers[idx].type = val;
+            if (window.PRS_getDefaultPawnIdForPlayer) {
+                this.lobbyPlayers[idx].pawnId = window.PRS_getDefaultPawnIdForPlayer({ type: val }, idx);
+            }
+            this.renderLobbyPlayers();
+        }
 
     },
 
@@ -1770,10 +1838,233 @@ window.PRS_App = {
 
         var col = window.PRS_GameEngine.PLAYER_COLORS[idx];
 
-        this.lobbyPlayers.push({ name: col.name, type: "Bot_Balanced" });
+        this.lobbyPlayers.push({ name: col.name, type: "Bot_Balanced", pawnId: "bot_balanced" });
 
         this.renderLobbyPlayers();
 
+    },
+
+    // --- KRÁLOVSKÁ ŠATNA A KLENOTNICE FIGUREK (#pawn-shop-modal) ---
+    isPawnUnlocked: function (pawnId) {
+        var pObj = window.PRS_getPawnById ? window.PRS_getPawnById(pawnId) : null;
+        if (!pObj) return true;
+        if (pObj.unlockedByDefault || pObj.priceCredits === 0) return true;
+        return Array.isArray(this.unlockedPawns) && this.unlockedPawns.indexOf(pawnId) !== -1;
+    },
+
+    openPawnShopModal: function (slotIdx) {
+        if (typeof slotIdx === "number" && slotIdx >= 0) {
+            this.pawnPickerTargetSlot = slotIdx;
+        } else {
+            this.pawnPickerTargetSlot = 0;
+        }
+        var modal = document.getElementById("pawn-shop-modal");
+        if (!modal) return;
+        this.renderPawnShopModal();
+        modal.style.display = "flex";
+        this.updateBodyModalClass();
+    },
+
+    closePawnShopModal: function () {
+        var modal = document.getElementById("pawn-shop-modal");
+        if (modal) modal.style.display = "none";
+        this.updateBodyModalClass();
+    },
+
+    setPawnShopCategory: function (cat) {
+        this.pawnShopActiveCategory = cat || "all";
+        this.renderPawnShopModal();
+    },
+
+    renderPawnShopModal: function () {
+        var grid = document.getElementById("pawn-shop-grid");
+        var credEl = document.getElementById("pawn-shop-credits-val");
+        var slotInfoEl = document.getElementById("pawn-shop-slot-info");
+        if (!grid) return;
+
+        if (credEl) credEl.textContent = String(this.userCredits || 0);
+
+        var slotIdx = this.pawnPickerTargetSlot || 0;
+        var targetPlayer = (this.lobbyPlayers && this.lobbyPlayers[slotIdx]) ? this.lobbyPlayers[slotIdx] : null;
+        var currentPawnId = targetPlayer ? (targetPlayer.pawnId || this.selectedPawnId) : this.selectedPawnId;
+
+        if (slotInfoEl) {
+            if (targetPlayer) {
+                slotInfoEl.innerHTML = 'Vybíráš figurku pro slot <strong>#' + (slotIdx + 1) + ': ' + this.escapeHtml(targetPlayer.name) + '</strong>';
+            } else {
+                slotInfoEl.innerHTML = 'Vybíráš svou hlavní osobní figurku';
+            }
+        }
+
+        var cat = this.pawnShopActiveCategory || "all";
+        var tabs = ["all", "basic", "premium", "bot"];
+        for (var t = 0; t < tabs.length; t++) {
+            var btn = document.getElementById("pawn-tab-" + tabs[t]);
+            if (btn) {
+                if (tabs[t] === cat) btn.classList.add("active");
+                else btn.classList.remove("active");
+            }
+        }
+
+        var catalog = window.PRS_PAWNS_CATALOG || [];
+        var html = [];
+        for (var i = 0; i < catalog.length; i++) {
+            var pw = catalog[i];
+            if (cat !== "all" && pw.category !== cat) continue;
+
+            var unlocked = this.isPawnUnlocked(pw.id);
+            var isSelected = (currentPawnId === pw.id);
+            var isPrem = (pw.category === "premium");
+            var isBot = (pw.category === "bot");
+
+            var catBadge = "";
+            if (isPrem) {
+                catBadge = '<span class="pawn-card-badge premium">💎 Prémiová</span>';
+            } else if (isBot) {
+                catBadge = '<span class="pawn-card-badge bot">🤖 PC Bot</span>';
+            } else {
+                catBadge = '<span class="pawn-card-badge basic">🛡️ Základní</span>';
+            }
+
+            var actionBtn = "";
+            if (isSelected) {
+                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; border-color:#86efac;">✅ Právě zvoleno</button>';
+            } else if (unlocked) {
+                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.selectPawnForSlot(&quot;' + pw.id + '&quot;)">🎭 Zvolit figurku</button>';
+            } else {
+                var canAfford = (this.userCredits >= pw.priceCredits);
+                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; ' + (!canAfford ? 'opacity:0.65;' : '') + '" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">🔓 Odemknout (' + pw.priceCredits + ' 💎)</button>';
+            }
+
+            html.push('<div class="pawn-shop-card ' + (isSelected ? 'selected' : '') + ' ' + (isPrem ? 'premium-card' : '') + '" style="border-color:' + (isSelected ? '#22c55e' : (isPrem ? pw.accentColor : 'rgba(212,175,55,0.3)')) + ';">');
+            html.push('  <div class="pawn-card-top">' + catBadge + (unlocked ? '<span style="font-size:0.72rem; color:#86efac;">✓ Odemčeno</span>' : '<span style="font-size:0.74rem; color:#fde047; font-weight:700;">🔒 ' + pw.priceCredits + ' 💎</span>') + '</div>');
+            html.push('  <div class="pawn-card-figure-wrap" onclick="PRS_App.selectPawnOrUnlock(&quot;' + pw.id + '&quot;)">');
+            html.push('    <div class="pawn-card-aura" style="background:radial-gradient(circle, ' + (pw.accentColor || '#d4af37') + ' 0%, transparent 70%);"></div>');
+            html.push('    <img src="' + pw.img + '" alt="' + this.escapeHtml(pw.name) + '" class="pawn-card-img"/>');
+            html.push('  </div>');
+            html.push('  <div class="pawn-card-name">' + this.escapeHtml(pw.name) + '</div>');
+            html.push('  <div class="pawn-card-title">' + this.escapeHtml(pw.title || "") + '</div>');
+            html.push('  <div class="pawn-card-desc">' + this.escapeHtml(pw.desc || "") + '</div>');
+            html.push('  <div class="pawn-card-action">' + actionBtn + '</div>');
+            html.push('</div>');
+        }
+        grid.innerHTML = html.join("\n");
+    },
+
+    selectPawnOrUnlock: function (pawnId) {
+        if (this.isPawnUnlocked(pawnId)) {
+            this.selectPawnForSlot(pawnId);
+        } else {
+            this.unlockPremiumPawn(pawnId);
+        }
+    },
+
+    selectPawnForSlot: function (pawnId) {
+        if (!this.isPawnUnlocked(pawnId)) {
+            this.unlockPremiumPawn(pawnId);
+            return;
+        }
+        var slotIdx = this.pawnPickerTargetSlot || 0;
+        if (this.lobbyPlayers && this.lobbyPlayers[slotIdx]) {
+            this.lobbyPlayers[slotIdx].pawnId = pawnId;
+        }
+        if (slotIdx === 0) {
+            this.selectedPawnId = pawnId;
+            try { localStorage.setItem("prs_selected_pawn", pawnId); } catch (e) { }
+            if (this.currentUser) {
+                this.currentUser.selectedPawnId = pawnId;
+                try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
+                if (this.currentUser.role !== "Guest" && this.currentUser.username) {
+                    fetch("api.ashx?action=save-user-pawn", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username: this.currentUser.username, selectedPawnId: pawnId })
+                    }).catch(function () { });
+                }
+            }
+        }
+        // Pokud už běží partie, aktualizujeme figurku i v živé hře!
+        if (this.state && this.state.players && this.state.players[slotIdx]) {
+            if (!this.state.roomCode || this.myOnlinePlayerIndex === slotIdx || slotIdx === 0) {
+                var targetLiveIdx = (this.state.roomCode && this.myOnlinePlayerIndex >= 0) ? this.myOnlinePlayerIndex : slotIdx;
+                if (this.state.players[targetLiveIdx]) {
+                    this.state.players[targetLiveIdx].pawnId = pawnId;
+                    this.renderGameScreen();
+                    if (this.state.roomCode && this.saveCurrentSessionToCloud) {
+                        this.saveCurrentSessionToCloud();
+                    }
+                }
+            }
+        }
+        this.renderLobbyPlayers();
+        this.renderPawnShopModal();
+        if (this.renderOnlineRolePawnPicker) this.renderOnlineRolePawnPicker();
+    },
+
+    unlockPremiumPawn: function (pawnId) {
+        var self = this;
+        var pw = window.PRS_getPawnById ? window.PRS_getPawnById(pawnId) : null;
+        if (!pw) return;
+        if (this.isPawnUnlocked(pawnId)) {
+            this.selectPawnForSlot(pawnId);
+            return;
+        }
+        var price = pw.priceCredits || 150;
+        if (this.userCredits < price) {
+            alert("Nemáš dostatek kreditů (💎) k odemčení této prémiové figurky!\n\nPotřebuješ: " + price + " 💎\nTvůj zůstatek: " + this.userCredits + " 💎\n\nTip: Kredity získáš za vítězství v partiích nebo od správce v administraci.");
+            return;
+        }
+        if (!confirm("Přeješ si trvale odemknout sběratelskou prémiovou figurku:\n\n✨ " + pw.name + " (" + pw.title + ")\nCena: " + price + " 💎 kreditů?")) {
+            return;
+        }
+
+        this.userCredits -= price;
+        if (!Array.isArray(this.unlockedPawns)) this.unlockedPawns = [];
+        if (this.unlockedPawns.indexOf(pawnId) === -1) this.unlockedPawns.push(pawnId);
+
+        try {
+            localStorage.setItem("prs_unlocked_pawns", JSON.stringify(this.unlockedPawns));
+            localStorage.setItem("prs_guest_credits", String(this.userCredits));
+        } catch (e) { }
+
+        if (this.currentUser) {
+            this.currentUser.credits = this.userCredits;
+            this.currentUser.unlockedPawnsJson = JSON.stringify(this.unlockedPawns);
+            try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
+
+            if (this.currentUser.role !== "Guest" && this.currentUser.username) {
+                fetch("api.ashx?action=unlock-pawn", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: this.currentUser.username,
+                        pawnId: pawnId,
+                        priceCredits: price
+                    })
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok) {
+                        if (typeof res.credits === "number") {
+                            self.userCredits = res.credits;
+                            self.currentUser.credits = res.credits;
+                        }
+                        if (res.unlockedPawnsJson) {
+                            self.currentUser.unlockedPawnsJson = res.unlockedPawnsJson;
+                            try { self.unlockedPawns = JSON.parse(res.unlockedPawnsJson); } catch (e2) { }
+                        }
+                        try { localStorage.setItem("prs_user", JSON.stringify(self.currentUser)); } catch (e3) { }
+                        self.updateUserUI();
+                        self.renderPawnShopModal();
+                    }
+                })
+                .catch(function () { });
+            }
+        }
+
+        if (window.PRS_Audio && window.PRS_Audio.playFanfare) window.PRS_Audio.playFanfare();
+        this.updateUserUI();
+        this.selectPawnForSlot(pawnId);
     },
 
     removeLobbyPlayer: function (idx) {

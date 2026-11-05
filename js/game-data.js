@@ -1093,3 +1093,255 @@ window.PRS_CHANCE_CARDS = [
         ]
     }
 ];
+
+// ============================================================================
+// 5. KATALOG HRÁČSKÝCH, BOTOVSKÝCH A PRÉMIOVÝCH FIGUREK (PRS_PAWNS_CATALOG)
+// ============================================================================
+window.PRS_PAWNS_CATALOG = [
+    // --- A) ZÁKLADNÍ SADA PRO HRÁČE (Zdarma - 6 archetypů) ---
+    {
+        id: "knight_valiant",
+        name: "Sir Roland",
+        title: "Rytíř Královské Koruny",
+        category: "basic",
+        priceCredits: 0,
+        icon: "🛡️",
+        img: "assets/pawns/pawn_knight_valiant.png",
+        auraType: null,
+        accentColor: "#3b82f6",
+        desc: "Ušlechtilý královský paladin v zářivé zlatostříbrné zbroji se lvím erbem na rameni."
+    },
+    {
+        id: "knight_tourney",
+        name: "Baron z Růže",
+        title: "Turnajový Šampion",
+        category: "basic",
+        priceCredits: 0,
+        icon: "🌹",
+        img: "assets/pawns/pawn_knight_tourney.png",
+        auraType: null,
+        accentColor: "#ef4444",
+        desc: "Neporažený mistr klání na dřevce s chocholem z rudých růží a zdobenou přilbicí."
+    },
+    {
+        id: "lady_huntress",
+        name: "Lady Sylva",
+        title: "Královská Lovkyně",
+        category: "basic",
+        priceCredits: 0,
+        icon: "🦅",
+        img: "assets/pawns/pawn_lady_huntress.png",
+        auraType: null,
+        accentColor: "#10b981",
+        desc: "Vznešená paní hvozdů v zeleném sametu s loveckým sokolem na rameni a lukem."
+    },
+    {
+        id: "lord_diplomat",
+        name: "Vévoda Armand",
+        title: "Mistr Královské Dvorany",
+        category: "basic",
+        priceCredits: 0,
+        icon: "👑",
+        img: "assets/pawns/pawn_lord_diplomat.png",
+        auraType: null,
+        accentColor: "#a855f7",
+        desc: "Charismatický dvořan a diplomat v purpurovém plášti se zlatým řetězem a kordem."
+    },
+    {
+        id: "knight_warden",
+        name: "Strážce Hvozdů",
+        title: "Smaragdový Rytíř",
+        category: "basic",
+        priceCredits: 0,
+        icon: "🦌",
+        img: "assets/pawns/pawn_knight_warden.png",
+        auraType: null,
+        accentColor: "#22c55e",
+        desc: "Prastarý ochránce královských lesů s korunou z jeleního paroží a dubovým pláštěm."
+    },
+    {
+        id: "lady_sorceress",
+        name: "Čarodějka Astrida",
+        title: "Hvězdná Dáma",
+        category: "basic",
+        priceCredits: 0,
+        icon: "🔮",
+        img: "assets/pawns/pawn_lady_sorceress.png",
+        auraType: null,
+        accentColor: "#6366f1",
+        desc: "Tajemná šlechtična a hvězdopravkyně s diadémem souhvězdí a zářícím křišťálem."
+    },
+
+    // --- B) FIGURKY PRO PC BOTY (Automatické pro AI soupeře - 5 archetypů) ---
+    {
+        id: "bot_aggressive",
+        name: "Černý Baron",
+        title: "PC Válečník (Lovec draků)",
+        category: "bot",
+        botType: "Bot_Aggressive",
+        priceCredits: 0,
+        icon: "⚔️",
+        img: "assets/pawns/pawn_bot_aggressive.png",
+        auraType: null,
+        accentColor: "#dc2626",
+        desc: "Obávaný železný baron v rohaté černé přilbici s rudě žhnoucím hledím."
+    },
+    {
+        id: "bot_breeder",
+        name: "Zikmund z Chovu",
+        title: "PC Chovatel (Pán hřebčínů)",
+        category: "bot",
+        botType: "Bot_Breeder",
+        priceCredits: 0,
+        icon: "📯",
+        img: "assets/pawns/pawn_bot_breeder.png",
+        auraType: null,
+        accentColor: "#d97706",
+        desc: "Bohatý správce královských obor v kožešinovém plášti se zlatým loveckým rohem."
+    },
+    {
+        id: "bot_noble",
+        name: "Kněžna Eliška",
+        title: "PC Dvořan (Diplomacie & Ples)",
+        category: "bot",
+        botType: "Bot_Noble",
+        priceCredits: 0,
+        icon: "🪭",
+        img: "assets/pawns/pawn_bot_noble.png",
+        auraType: null,
+        accentColor: "#ec4899",
+        desc: "Hrdá vévodkyně s vysokou zlatou korunou, perlami a krajkovým dvorním vějířem."
+    },
+    {
+        id: "bot_balanced",
+        name: "Železný Strážce",
+        title: "PC Rytíř (Královský automat)",
+        category: "bot",
+        botType: "Bot_Balanced",
+        priceCredits: 0,
+        icon: "⚙️",
+        img: "assets/pawns/pawn_bot_balanced.png",
+        auraType: null,
+        accentColor: "#94a3b8",
+        desc: "Mechanický rytířský golem z tepané mosazi a oceli poháněný královskými runami."
+    },
+    {
+        id: "bot_easy",
+        name: "Panoš Vítek",
+        title: "PC Panoš (Opatrný nováček)",
+        category: "bot",
+        botType: "Bot_Easy",
+        priceCredits: 0,
+        icon: "🛡️",
+        img: "assets/pawns/pawn_bot_easy.png",
+        auraType: null,
+        accentColor: "#84cc16",
+        desc: "Mladý usměvavý panoš v prošívanici s dřevěným štítem a železným kloboukem nakřivo."
+    },
+
+    // --- C) PRÉMIOVÉ A LEGENDÁRNÍ FIGURKY ZA KREDITY 💎 (6 exkluzivních figurek s aurou) ---
+    {
+        id: "prem_dragon_lord",
+        name: "Dračí Vojevůdce",
+        title: "Legendární Pán Plamenů",
+        category: "premium",
+        priceCredits: 500,
+        icon: "🐉",
+        img: "assets/pawns/pawn_prem_dragon_lord.png",
+        auraType: "fire",
+        accentColor: "#f97316",
+        desc: "Epický vojevůdce v dračí šupinové zbroji s ohnivými křídly a planoucí aurou na herním plánu."
+    },
+    {
+        id: "prem_ice_queen",
+        name: "Ledová Královna",
+        title: "Panovnice Severních Štítů",
+        category: "premium",
+        priceCredits: 500,
+        icon: "❄️",
+        img: "assets/pawns/pawn_prem_ice_queen.png",
+        auraType: "ice",
+        accentColor: "#38bdf8",
+        desc: "Majestátní královna s korunou z ledových krystalů, obklopená mrazivou krystalovou září."
+    },
+    {
+        id: "prem_shadow_assassin",
+        name: "Rytíř Stínů",
+        title: "Přízračný Mistr Noci",
+        category: "premium",
+        priceCredits: 600,
+        icon: "🌑",
+        img: "assets/pawns/pawn_prem_shadow_assassin.png",
+        auraType: "shadow",
+        accentColor: "#c084fc",
+        desc: "Tajemný bojovník zahalený v temné kápi s fialovou přízračnou mlhou a runovými dýkami."
+    },
+    {
+        id: "prem_golden_king",
+        name: "Zlatý Král Slunce",
+        title: "Svrchovaný Panovník",
+        category: "premium",
+        priceCredits: 750,
+        icon: "☀️",
+        img: "assets/pawns/pawn_prem_golden_king.png",
+        auraType: "sun",
+        accentColor: "#fbbf24",
+        desc: "Oslnivý panovník v celozlaté zbroji se svatozáří slunečních paprsků a zlatým třpytem."
+    },
+    {
+        id: "prem_unicorn_rider",
+        name: "Jezdec na Jednorožci",
+        title: "Nebeský Šampion",
+        category: "premium",
+        priceCredits: 800,
+        icon: "🦄",
+        img: "assets/pawns/pawn_prem_unicorn_rider.png",
+        auraType: "star",
+        accentColor: "#f472b6",
+        desc: "Stříbrný paladin doprovázený bájným jednorožcem s duhovou hvězdnou aurou."
+    },
+    {
+        id: "prem_phoenix_paladin",
+        name: "Paladin Fénixe",
+        title: "Nesmrtelný Strážce Srdce",
+        category: "premium",
+        priceCredits: 1000,
+        icon: "🔥",
+        img: "assets/pawns/pawn_prem_phoenix_paladin.png",
+        auraType: "phoenix",
+        accentColor: "#facc15",
+        desc: "Nejvyšší prémiová figurka se zlatými křídly ohnivého fénixe a královskou jiskřící korónou."
+    }
+];
+
+window.PRS_PAWNS_BY_ID = {};
+for (var _pi = 0; _pi < window.PRS_PAWNS_CATALOG.length; _pi++) {
+    var _pItem = window.PRS_PAWNS_CATALOG[_pi];
+    window.PRS_PAWNS_BY_ID[_pItem.id] = _pItem;
+}
+
+window.PRS_getPawnById = function (pawnId) {
+    if (pawnId && window.PRS_PAWNS_BY_ID[pawnId]) {
+        return window.PRS_PAWNS_BY_ID[pawnId];
+    }
+    return window.PRS_PAWNS_BY_ID["knight_valiant"] || window.PRS_PAWNS_CATALOG[0];
+};
+
+window.PRS_getDefaultPawnIdForPlayer = function (pDef, index) {
+    if (pDef && pDef.pawnId && window.PRS_PAWNS_BY_ID[pDef.pawnId]) {
+        return pDef.pawnId;
+    }
+    var pType = (pDef && pDef.type) ? pDef.type : "Human";
+    if (pType !== "Human") {
+        var botMap = {
+            "Bot_Aggressive": "bot_aggressive",
+            "Bot_Breeder": "bot_breeder",
+            "Bot_Noble": "bot_noble",
+            "Bot_Balanced": "bot_balanced",
+            "Bot_Easy": "bot_easy"
+        };
+        return botMap[pType] || "bot_balanced";
+    }
+    var basicIds = ["knight_valiant", "knight_tourney", "lady_huntress", "lord_diplomat", "knight_warden", "lady_sorceress"];
+    return basicIds[(index || 0) % basicIds.length];
+};
