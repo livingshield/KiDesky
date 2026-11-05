@@ -1,7 +1,7 @@
 # Komplexní analýza stavu projektu KiDesky: Princeznino srdce (Handoff pro nový chat)
 
 > **Datum vyhotovení:** 5. 11. 2026  
-> **Aktuální verze cache-busteru:** `?v=202611050070`  
+> **Aktuální verze cache-busteru:** `?v=202611050071`  
 > **Poslední Git commit:** `1be8360` (`fix(admin/encoding): fix api.ashx syntax error, repair Czech diacritics in DB, add customErrors Off in web.config, and compact duel ceremony modal`)  
 > **Produkční URL:** https://www.ekobio.org/apps/KiDesky/  
 > **Lokální pracovní adresář:** `c:\Users\janky\.gemini\antigravity\scratch\KiDesky`

@@ -94,12 +94,12 @@ window.PRS_GRAPHICS_CONFIG = {
         VILLAGE: "assets/tiles/village.png",
         TOWN: "assets/tiles/town.png",
         CASTLE: "assets/tiles/castle.png",
-        MASTER: "",
+        MASTER: "assets/tiles/master.png",
         MERCHANT: "assets/tiles/merchant.png",
-        TAX: "",
-        JESTER: "",
+        TAX: "assets/tiles/tax.png",
+        JESTER: "assets/tiles/jester.png",
         staje: "assets/tiles/kun.jpg",
-        kovarna: "",
+        kovarna: "assets/tiles/kovarna.png",
         krejci: "",
         sokolnik: "assets/tiles/sokol.jpg",
         psovod: "assets/tiles/pes.jpg",
@@ -827,10 +827,10 @@ window.PRS_TROPHIES = {
 // Katalog úkolů a monster: U1 (Zvěř: 4–6), U2 (Monstra: 8–10), U3 (Draci: 12–14)
 window.PRS_QUESTS = {
     U1: [
-        { id: "u1_1", name: "Divoký kňour", icon: "🐗", difficulty: 4, diffOffset: -1, gold: 1200, hearts: 0.5, trophyId: "trophy_boar", img: "assets/decorations/cave_bear_den.png", imgFlip: "assets/decorations/cave_bear_den_flip.png", weakness: "dogs", desc: "V hlubokém lese na tebe vyrazil rozzuřený kanec. Lovečtí psi snadno odlákají jeho pozornost!" },
-        { id: "u1_2", name: "Smečka šedých vlků", icon: "🐺", difficulty: 5, diffOffset: 0, gold: 1500, hearts: 0.5, trophyId: "trophy_wolf", img: "assets/decorations/bandit_cave.png", imgFlip: "assets/decorations/bandit_cave_flip.png", weakness: "spear", desc: "Vlčí smečka ohrožuje kupecké vozy u vesnice. Dlouhé kopí udrží vlky v bezpečném odstupu." },
-        { id: "u1_3", name: "Horský medvěd", icon: "🐻", difficulty: 5, diffOffset: 0, gold: 1800, hearts: 0.5, trophyId: "trophy_bear", img: "assets/decorations/snow_troll_cave.png", imgFlip: "assets/decorations/snow_troll_cave_flip.png", weakness: "horse", desc: "Obrovský medvěd brání průsmyk ke hradu. Rychlý útok na koni zaskočí jeho těžkopádnost." },
-        { id: "u1_4", name: "Královský bílý jelen", icon: "🦌", difficulty: 6, diffOffset: 1, gold: 2200, hearts: 1.0, trophyId: "trophy_stag", img: "assets/decorations/unicorn_grove.png", imgFlip: "assets/decorations/unicorn_grove_flip.png", weakness: "falcons", desc: "Vzácný jelen v kouzelném háji. Lovecký sokol vystopuje jeho stopy v houštinách." },
+        { id: "u1_1", name: "Divoký kňour", icon: "🐗", difficulty: 4, diffOffset: -1, gold: 1200, hearts: 0.5, trophyId: "trophy_boar", img: "assets/monsters/monster_boar.png", imgFlip: "assets/monsters/monster_boar_flip.png", weakness: "dogs", desc: "V hlubokém lese na tebe vyrazil rozzuřený kanec. Lovečtí psi snadno odlákají jeho pozornost!" },
+        { id: "u1_2", name: "Smečka šedých vlků", icon: "🐺", difficulty: 5, diffOffset: 0, gold: 1500, hearts: 0.5, trophyId: "trophy_wolf", img: "assets/monsters/monster_wolf_pack.png", imgFlip: "assets/monsters/monster_wolf_pack_flip.png", weakness: "spear", desc: "Vlčí smečka ohrožuje kupecké vozy u vesnice. Dlouhé kopí udrží vlky v bezpečném odstupu." },
+        { id: "u1_3", name: "Horský medvěd", icon: "🐻", difficulty: 5, diffOffset: 0, gold: 1800, hearts: 0.5, trophyId: "trophy_bear", img: "assets/monsters/monster_bear.png", imgFlip: "assets/monsters/monster_bear_flip.png", weakness: "horse", desc: "Obrovský medvěd brání průsmyk ke hradu. Rychlý útok na koni zaskočí jeho těžkopádnost." },
+        { id: "u1_4", name: "Královský bílý jelen", icon: "🦌", difficulty: 6, diffOffset: 1, gold: 2200, hearts: 1.0, trophyId: "trophy_stag", img: "assets/monsters/monster_white_stag.png", imgFlip: "assets/monsters/monster_white_stag_flip.png", weakness: "falcons", desc: "Vzácný jelen v kouzelném háji. Lovecký sokol vystopuje jeho stopy v houštinách." },
         // --- Nová zvěř a lesní strážci (Tier U1) ---
         { id: "u1_lynx", name: "Rys ostrovid", icon: "🐱", difficulty: 4, diffOffset: -1, gold: 1100, hearts: 0.5, trophyId: "trophy_lynx", img: "assets/monsters/monster_lynx.png", imgFlip: "assets/monsters/monster_lynx_flip.png", weakness: "falcons", desc: "Opatrný rys číhající ve větvích dubu. Lovecký sokol vystopuje jeho úkryt v korunách stromů." },
         { id: "u1_bison", name: "Zuřivý pralesní zubr", icon: "🦬", difficulty: 5, diffOffset: 0, gold: 1400, hearts: 0.5, trophyId: "trophy_bison", img: "assets/monsters/monster_bison.png", imgFlip: "assets/monsters/monster_bison_flip.png", weakness: "horse", desc: "Těžký zubr střežící pralesní mýtinu. Rychlý nájezd na koni vyvede mohutné zvíře z rovnováhy." },
@@ -844,10 +844,10 @@ window.PRS_QUESTS = {
         { id: "u1_unicorn", name: "Magický bílý jednorožec", icon: "🦄", difficulty: 7, diffOffset: 2, gold: 2600, hearts: 1.5, trophyId: "trophy_unicorn", img: "assets/monsters/monster_unicorn.png", imgFlip: "assets/monsters/monster_unicorn_flip.png", weakness: "dance", desc: "Bájný jednorožec z kouzelného háje. Lze jej zkrotit pouze vznešeným tancem, čistotou a šaty!" }
     ],
     U2: [
-        { id: "u2_1", name: "Skalní obr", icon: "👹", difficulty: 8, diffOffset: -1, gold: 3000, hearts: 1.0, itemTier: 1, trophyId: "trophy_giant", img: "assets/decorations/swamp_troll.png", imgFlip: "assets/decorations/swamp_troll_flip.png", weakness: "horse", desc: "Obr s obřím kyjem vybírá mýto u mostu. Rychlý kůň dovolí rytíři manévrovat kolem jeho úderů." },
-        { id: "u2_2", name: "Temný černokněžník", icon: "🧙‍♂️", difficulty: 9, diffOffset: 0, gold: 3500, hearts: 1.0, itemTier: 1, trophyId: "trophy_warlock", img: "assets/decorations/witch_hut.png", imgFlip: "assets/decorations/witch_hut_flip.png", weakness: "spear", desc: "Zlý čaroděj sesílá kletby ze své chatrče. Dlouhé kopí probodne jeho magické bariéry." },
-        { id: "u2_3", name: "Černý loupeživý rytíř", icon: "⚔️", difficulty: 9, diffOffset: 0, gold: 4000, hearts: 1.5, itemTier: 2, trophyId: "trophy_black_knight", img: "assets/decorations/ancient_ruins.png", imgFlip: "assets/decorations/ancient_ruins_flip.png", weakness: "armor", desc: "Obávaný rytíř ve starých ruinách tě vyzval na souboj. Pevná plátová zbroj odrazí jeho úder." },
-        { id: "u2_4", name: "Jeskynní vlkodlak", icon: "🐺", difficulty: 10, diffOffset: 1, gold: 4500, hearts: 1.5, itemTier: 2, trophyId: "trophy_werewolf", img: "assets/decorations/basilisk_cave.png", imgFlip: "assets/decorations/basilisk_cave_flip.png", weakness: "dogs", desc: "V tajemné jeskyni číhá bestie. Lovecká smečka vycítí pach vlkodlaka a pomůže v boji." },
+        { id: "u2_1", name: "Skalní obr", icon: "👹", difficulty: 8, diffOffset: -1, gold: 3000, hearts: 1.0, itemTier: 1, trophyId: "trophy_giant", img: "assets/monsters/monster_rock_giant.png", imgFlip: "assets/monsters/monster_rock_giant_flip.png", weakness: "horse", desc: "Obr s obřím kyjem vybírá mýto u mostu. Rychlý kůň dovolí rytíři manévrovat kolem jeho úderů." },
+        { id: "u2_2", name: "Temný černokněžník", icon: "🧙‍♂️", difficulty: 9, diffOffset: 0, gold: 3500, hearts: 1.0, itemTier: 1, trophyId: "trophy_warlock", img: "assets/monsters/monster_warlock.png", imgFlip: "assets/monsters/monster_warlock_flip.png", weakness: "spear", desc: "Zlý čaroděj sesílá kletby ze své chatrče. Dlouhé kopí probodne jeho magické bariéry." },
+        { id: "u2_3", name: "Černý loupeživý rytíř", icon: "⚔️", difficulty: 9, diffOffset: 0, gold: 4000, hearts: 1.5, itemTier: 2, trophyId: "trophy_black_knight", img: "assets/monsters/monster_black_knight.png", imgFlip: "assets/monsters/monster_black_knight_flip.png", weakness: "armor", desc: "Obávaný rytíř ve starých ruinách tě vyzval na souboj. Pevná plátová zbroj odrazí jeho úder." },
+        { id: "u2_4", name: "Jeskynní vlkodlak", icon: "🐺", difficulty: 10, diffOffset: 1, gold: 4500, hearts: 1.5, itemTier: 2, trophyId: "trophy_werewolf", img: "assets/monsters/monster_cave_werewolf.png", imgFlip: "assets/monsters/monster_cave_werewolf_flip.png", weakness: "dogs", desc: "V tajemné jeskyni číhá bestie. Lovecká smečka vycítí pach vlkodlaka a pomůže v boji." },
         // --- Nová bájná monstra a protivníci (Tier U2 • Obtížnost 8–11) ---
         { id: "u2_basilisk", name: "Zkamenělý bazilišek", icon: "🦎", difficulty: 8, diffOffset: -1, gold: 3200, hearts: 1.0, itemTier: 1, trophyId: "trophy_basilisk", img: "assets/monsters/monster_basilisk.png", imgFlip: "assets/monsters/monster_basilisk_flip.png", weakness: "armor", desc: "Plaz s vražedným pohledem číhající v jeskyni. Vyleštěný štít a pevná zbroj odrazí jeho zkázonosný zrak." },
         { id: "u2_wisp", name: "Močálová jezinka / Bludička", icon: "🕯️", difficulty: 8, diffOffset: -1, gold: 3400, hearts: 1.0, itemTier: 1, trophyId: "trophy_wisp", img: "assets/monsters/monster_wisp.png", imgFlip: "assets/monsters/monster_wisp_flip.png", weakness: "light", desc: "Zákeřný přelud lákající pocestné do bezedného bahna. Svaté světlo relikvií rozežene její klamná světla." },

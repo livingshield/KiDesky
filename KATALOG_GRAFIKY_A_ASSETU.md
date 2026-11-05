@@ -147,7 +147,7 @@ Dominanty jsou klíčové prostorové orientační body s pevnou herní pozicí 
 
 ---
 
-## 🔘 Kapitola 5: Medailony herních políček (14 typů)
+## 🔘 Kapitola 5: Medailony herních políček (18 typů)
 
 Herní políčka jsou tvořena kruhovými erbovními medailony (`assets/tiles/*.png`):
 
@@ -165,6 +165,10 @@ Herní políčka jsou tvořena kruhovými erbovními medailony (`assets/tiles/*.
 | `PRISON` | **Královské vězení** | `prison.png` – Masivní mříže a kamenná kobka v hradu |
 | `HOSPITAL` | **Královský lazaret** | `hospital.png` – Léčitelé, byliny a hojivé balzámy |
 | `TAVERN` | **Zájezdní hostinec** | `tavern.png` – Dřevěný korbel piva, pečeně a hudebníci |
+| `MASTER` | **Mistr rytířských ctností** | `master.png` – Mistr šermu a výcviku s cvičným mečem na nádvoří |
+| `TAX` | **Královská berně (Daň)** | `tax.png` – Královský výběrčí s váhami a měšci zlata |
+| `JESTER` | **Královský šašek** | `jester.png` – Kejklíř a šašek žonglující v paláci |
+| `kovarna` | **Mistr kovář a zbrojíř** | `kovarna.png` – Kovář u kovadliny s žhavým mečem a jiskrami |
 | `U1` | **Lov zvěře (U1)** | `u1_zver.png` – Kanec, jelen a vlk v hlubokém hvozdu |
 | `U2` | **Zkouška udatnosti (U2)** | `u2_monstrum.png` – Skalní obr, černý rytíř a vlkodlak |
 | `U3` | **Dračí sluj (U3)** | `u3_drak.png` – Zlatý a ohnivý drak chrlící plameny |
