@@ -987,36 +987,271 @@ window.PRS_App = {
 
         // --- LANDING PAGE INTERAKTIVNÍ PRVKY (VIDEO / YOUTUBE / ŽIVÁ ANIMACE / MEDAILONKY) ---,
 
+    heroVideosList: [],
+    currentHeroVideoIndex: 0,
     currentHeroVideo: null,
+    _likedVideoIds: {},
 
-    getYoutubeEmbedUrl: function (url) {
+    isYoutubeVideo: function (video) {
+        if (!video) return false;
+        var type = (video.videoType || "").toLowerCase();
+        if (type === "youtube") return true;
+        var url = (video.url || "").toLowerCase();
+        return url.indexOf("youtube.com") !== -1 || url.indexOf("youtu.be") !== -1;
+    },
+
+    getYoutubeId: function (url) {
         if (!url) return "";
-        var match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
-        if (match && match[1]) {
-            return "https://www.youtube-nocookie.com/embed/" + match[1] + "?autoplay=1&rel=0";
+        var match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/i);
+        return (match && match[1]) ? match[1] : "";
+    },
+
+    getYoutubeEmbedUrl: function (url, autoplay) {
+        var videoId = this.getYoutubeId(url);
+        if (videoId) {
+            var autoParam = autoplay ? "1" : "0";
+            return "https://www.youtube-nocookie.com/embed/" + videoId + "?autoplay=" + autoParam + "&rel=0&enablejsapi=1&playsinline=1";
         }
-        return url;
+        return url || "";
     },
 
     loadActiveHeroVideo: function () {
+        var self = this;
+        fetch("api.ashx?action=list-videos")
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res && res.ok && Array.isArray(res.videos)) {
+                    var trailers = res.videos.filter(function (v) {
+                        return v.category === "trailer" || v.isHeroActive;
+                    });
+                    if (trailers.length === 0) trailers = res.videos;
+
+                    self.heroVideosList = trailers;
+
+                    var activeIdx = trailers.findIndex(function (v) { return v.isHeroActive; });
+                    if (activeIdx < 0) activeIdx = 0;
+                    self.currentHeroVideoIndex = activeIdx;
+                    self.currentHeroVideo = trailers[activeIdx] || null;
+
+                    self.renderHeroVideoControls();
+                } else {
+                    self.fetchSingleHeroFallback();
+                }
+            })
+            .catch(function () {
+                self.fetchSingleHeroFallback();
+            });
+    },
+
+    fetchSingleHeroFallback: function () {
         var self = this;
         fetch("api.ashx?action=hero-video")
             .then(function (r) { return r.json(); })
             .then(function (res) {
                 if (res && res.ok && res.hero) {
+                    self.heroVideosList = [res.hero];
+                    self.currentHeroVideoIndex = 0;
                     self.currentHeroVideo = res.hero;
-                    var btnVideo = document.getElementById("lp-tab-btn-video");
-                    if (btnVideo && res.hero.title) {
-                        btnVideo.innerHTML = "🎬 " + self.escapeHtml(res.hero.title);
-                    }
-                    var videoEl = document.getElementById("lp-promo-video");
-                    if (videoEl && res.hero.videoType === "mp4" && res.hero.url) {
-                        videoEl.src = res.hero.url;
-                        if (res.hero.posterUrl) videoEl.poster = res.hero.posterUrl;
-                    }
+                    self.renderHeroVideoControls();
                 }
             })
             .catch(function () { });
+    },
+
+    renderHeroVideoControls: function () {
+        var v = this.currentHeroVideo;
+        var list = this.heroVideosList || [];
+        var total = list.length;
+        var idx = this.currentHeroVideoIndex;
+
+        var btnVideo = document.getElementById("lp-tab-btn-video");
+        if (btnVideo && v && v.title) {
+            btnVideo.innerHTML = "🎬 " + this.escapeHtml(v.title);
+        }
+
+        var prevBtn = document.getElementById("lp-video-prev-btn");
+        var nextBtn = document.getElementById("lp-video-next-btn");
+        if (prevBtn && nextBtn) {
+            var showArrows = total > 1;
+            prevBtn.style.display = showArrows ? "flex" : "none";
+            nextBtn.style.display = showArrows ? "flex" : "none";
+        }
+
+        var bar = document.getElementById("lp-video-interaction-bar");
+        if (bar) {
+            if (this.currentLandingMedia === "video" && v) {
+                bar.style.display = "flex";
+            } else {
+                bar.style.display = "none";
+            }
+
+            var titleEl = document.getElementById("lp-video-active-title");
+            if (titleEl && v) {
+                var prefix = total > 1 ? ("(" + (idx + 1) + "/" + total + ") ") : "";
+                titleEl.textContent = prefix + (v.title || "Intro video");
+                titleEl.title = v.title || "";
+            }
+
+            var dotsEl = document.getElementById("lp-video-counter-dots");
+            if (dotsEl) {
+                dotsEl.innerHTML = "";
+                if (total > 1) {
+                    var self = this;
+                    for (var i = 0; i < total; i++) {
+                        var dot = document.createElement("span");
+                        dot.className = "lp-video-dot" + (i === idx ? " active" : "");
+                        dot.title = (list[i] && list[i].title) ? list[i].title : ("Video " + (i + 1));
+                        (function (targetIdx) {
+                            dot.addEventListener("click", function () {
+                                self.selectHeroVideo(targetIdx);
+                            });
+                        })(i);
+                        dotsEl.appendChild(dot);
+                    }
+                }
+            }
+
+            var likeCountEl = document.getElementById("lp-like-count");
+            var likeBtn = document.getElementById("lp-btn-like-video");
+            if (likeCountEl && v) {
+                likeCountEl.textContent = v.likesCount || 0;
+            }
+            if (likeBtn && v) {
+                if (this._likedVideoIds[v.id]) {
+                    likeBtn.classList.add("liked");
+                    likeBtn.title = "Tomuto videu jsi již dal like! 👍";
+                } else {
+                    likeBtn.classList.remove("liked");
+                    likeBtn.title = "Líbí se mi toto video";
+                }
+            }
+
+            var subBtn = document.getElementById("lp-btn-yt-sub");
+            var ytWatchBtn = document.getElementById("lp-btn-yt-watch");
+            var isYt = this.isYoutubeVideo(v);
+            var ytid = isYt ? this.getYoutubeId(v ? v.url : "") : "";
+
+            if (subBtn) {
+                if (isYt && ytid) {
+                    subBtn.href = "https://www.youtube.com/watch?v=" + ytid + "&sub_confirmation=1";
+                    subBtn.style.display = "inline-flex";
+                } else {
+                    subBtn.style.display = "none";
+                }
+            }
+            if (ytWatchBtn) {
+                if (isYt && ytid) {
+                    ytWatchBtn.href = "https://www.youtube.com/watch?v=" + ytid;
+                    ytWatchBtn.style.display = "inline-flex";
+                } else {
+                    ytWatchBtn.style.display = "none";
+                }
+            }
+        }
+    },
+
+    nextHeroVideo: function (e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        var list = this.heroVideosList || [];
+        if (list.length <= 1) return;
+        var nextIdx = (this.currentHeroVideoIndex + 1) % list.length;
+        this.selectHeroVideo(nextIdx);
+    },
+
+    prevHeroVideo: function (e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        var list = this.heroVideosList || [];
+        if (list.length <= 1) return;
+        var prevIdx = (this.currentHeroVideoIndex - 1 + list.length) % list.length;
+        this.selectHeroVideo(prevIdx);
+    },
+
+    selectHeroVideo: function (index) {
+        var list = this.heroVideosList || [];
+        if (index < 0 || index >= list.length) return;
+        this.currentHeroVideoIndex = index;
+        this.currentHeroVideo = list[index];
+
+        this.renderHeroVideoControls();
+        if (this.currentLandingMedia === "video") {
+            this.applyHeroVideoChange(true);
+        }
+    },
+
+    applyHeroVideoChange: function (autoPlay) {
+        var v = this.currentHeroVideo;
+        if (!v) return;
+
+        var vid = document.getElementById("lp-promo-video");
+        var yt = document.getElementById("lp-hero-youtube-player");
+        var statusLbl = document.getElementById("lp-media-status-label");
+
+        if (statusLbl) {
+            statusLbl.textContent = "🎬 " + (v.title || "Královská upoutávka");
+        }
+
+        var isYt = this.isYoutubeVideo(v);
+
+        if (isYt) {
+            if (vid) {
+                vid.style.display = "none";
+                try { vid.pause(); } catch (e) { }
+            }
+            if (yt) {
+                yt.style.display = "block";
+                var embedUrl = this.getYoutubeEmbedUrl(v.url, autoPlay);
+                if (yt.src !== embedUrl) {
+                    yt.src = embedUrl;
+                }
+            }
+        } else {
+            if (yt) {
+                yt.src = "";
+                yt.style.display = "none";
+            }
+            if (vid) {
+                vid.style.display = "block";
+                if (v.posterUrl) vid.poster = v.posterUrl;
+                if (vid.src !== v.url) {
+                    vid.src = v.url;
+                }
+                if (autoPlay) {
+                    try { vid.play(); } catch (e) { }
+                }
+            }
+        }
+    },
+
+    likeCurrentHeroVideo: function () {
+        var v = this.currentHeroVideo;
+        if (!v || !v.id) return;
+        if (this._likedVideoIds[v.id]) {
+            this.showToast("Tomuto videu jsi již vyjádřil rytířskou přízeň! 👍", "info");
+            return;
+        }
+
+        var self = this;
+        var likeBtn = document.getElementById("lp-btn-like-video");
+        var likeCountEl = document.getElementById("lp-like-count");
+
+        fetch("api.ashx?action=like-video&id=" + encodeURIComponent(v.id), { method: "POST" })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res && res.ok) {
+                    self._likedVideoIds[v.id] = true;
+                    v.likesCount = res.likesCount;
+                    if (likeCountEl) likeCountEl.textContent = v.likesCount;
+                    if (likeBtn) likeBtn.classList.add("liked");
+                    self.showToast("💖 Děkujeme za like! Video má nyní " + res.likesCount + " lajků.", "success");
+                }
+            })
+            .catch(function () {
+                self._likedVideoIds[v.id] = true;
+                v.likesCount = (v.likesCount || 0) + 1;
+                if (likeCountEl) likeCountEl.textContent = v.likesCount;
+                if (likeBtn) likeBtn.classList.add("liked");
+                self.showToast("💖 Like byl započítán!", "success");
+            });
     },
 
     loadAnnouncement: function () {
@@ -1063,26 +1298,8 @@ window.PRS_App = {
             if (btnAnim) btnAnim.classList.remove("active");
             if (btnVideo) btnVideo.classList.add("active");
 
-            var videoTitle = (this.currentHeroVideo && this.currentHeroVideo.title) ? this.currentHeroVideo.title : "Královská upoutávka";
-            if (statusLbl) statusLbl.textContent = "🎬 " + videoTitle;
-
-            if (this.currentHeroVideo && this.currentHeroVideo.videoType === "youtube") {
-                if (vid) { vid.style.display = "none"; try { vid.pause(); } catch (e) { } }
-                if (yt) {
-                    yt.style.display = "block";
-                    var embedUrl = this.getYoutubeEmbedUrl(this.currentHeroVideo.url);
-                    if (yt.src !== embedUrl) yt.src = embedUrl;
-                }
-            } else {
-                if (yt) { yt.style.display = "none"; yt.src = ""; }
-                if (vid) {
-                    vid.style.display = "block";
-                    if (this.currentHeroVideo && this.currentHeroVideo.url && vid.currentSrc !== this.currentHeroVideo.url) {
-                        vid.src = this.currentHeroVideo.url;
-                    }
-                    try { vid.play(); } catch (e) { }
-                }
-            }
+            this.applyHeroVideoChange(true);
+            this.renderHeroVideoControls();
         } else {
             if (vid && !vid.paused) {
                 try { vid.pause(); } catch (e) { }
@@ -1093,6 +1310,12 @@ window.PRS_App = {
             if (btnVideo) btnVideo.classList.remove("active");
             if (btnAnim) btnAnim.classList.add("active");
             if (statusLbl) statusLbl.textContent = "✨ Plynulá ukázka herních medailonků, rytířů a slavností";
+            var bar = document.getElementById("lp-video-interaction-bar");
+            if (bar) bar.style.display = "none";
+            var prevBtn = document.getElementById("lp-video-prev-btn");
+            var nextBtn = document.getElementById("lp-video-next-btn");
+            if (prevBtn) prevBtn.style.display = "none";
+            if (nextBtn) nextBtn.style.display = "none";
             this.initLandingLiveCanvas();
         }
     },

@@ -36,13 +36,13 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611050079">
+    <link rel="stylesheet" href="css/main.css?v=202611050080">
 
-    <link rel="stylesheet" href="css/board.css?v=202611050079">
+    <link rel="stylesheet" href="css/board.css?v=202611050080">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611050079">
+    <link rel="stylesheet" href="css/modals.css?v=202611050080">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611050079">
+    <link rel="stylesheet" href="css/mobile.css?v=202611050080">
 
 </head>
 
@@ -314,11 +314,32 @@
                                     <source src="assets/video/RuzeProDanielku.mp4" type="video/mp4" />
                                     Tvůj prohlížeč nepodporuje přehrávání MP4 videa.
                                 </video>
-                                <iframe id="lp-hero-youtube-player" style="position:absolute; inset:0; width:100%; height:100%; border:none; display:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                <iframe id="lp-hero-youtube-player" style="position:absolute; inset:0; width:100%; height:100%; border:none; display:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                             </div>
 
+                            <!-- Navigační šipky pro cyklování intro videí -->
+                            <button type="button" id="lp-video-prev-btn" class="lp-video-stage-arrow lp-arrow-prev" onclick="PRS_App.prevHeroVideo(event)" title="Předchozí intro video" style="display:none;">❮</button>
+                            <button type="button" id="lp-video-next-btn" class="lp-video-stage-arrow lp-arrow-next" onclick="PRS_App.nextHeroVideo(event)" title="Další intro video" style="display:none;">❯</button>
 
+                        </div>
 
+                        <!-- Interakční lišta intro videa (Titul, Dots, Like, Odběr na YouTube) -->
+                        <div id="lp-video-interaction-bar" class="lp-video-interaction-bar" style="display:none; margin-top:0.4rem;">
+                            <div class="lp-video-meta-col">
+                                <div id="lp-video-active-title" class="lp-video-title-txt">Intro video</div>
+                                <div id="lp-video-counter-dots" class="lp-video-dots-wrap"></div>
+                            </div>
+                            <div class="lp-video-actions-col">
+                                <button type="button" id="lp-btn-like-video" class="lp-btn-action-like" onclick="PRS_App.likeCurrentHeroVideo()" title="Líbí se mi toto video">
+                                    <span id="lp-like-icon">👍</span> <span id="lp-like-count">0</span>
+                                </button>
+                                <a id="lp-btn-yt-sub" href="#" target="_blank" rel="noopener noreferrer" class="lp-btn-action-sub" title="Odebírat kanál na YouTube" style="display:none;">
+                                    <span style="font-size:1.05rem;">🔔</span> <span>Odebírat</span>
+                                </a>
+                                <a id="lp-btn-yt-watch" href="#" target="_blank" rel="noopener noreferrer" class="lp-btn-action-yt" title="Přehrát přímo na YouTube s možností lajkování a komentářů" style="display:none;">
+                                    <span>📺 YouTube</span>
+                                </a>
+                            </div>
                         </div>
 
                     <div class="lp-media-caption">
@@ -2468,18 +2489,18 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611050079" defer></script>
-    <script src="js/game-boards.js?v=202611050079" defer></script>
-    <script src="js/game-engine.js?v=202611050079" defer></script>
-    <script src="js/game-combat-ai.js?v=202611050079" defer></script>
-    <script src="js/app-audio.js?v=202611050079" defer></script>
-    <script src="js/app.js?v=202611050079" defer></script>
-    <script src="js/app-board.js?v=202611050079" defer></script>
-    <script src="js/app-hud.js?v=202611050079" defer></script>
-    <script src="js/app-modals.js?v=202611050079" defer></script>
-    <script src="js/app-online.js?v=202611050079" defer></script>
-    <script src="js/app-catalog.js?v=202611050079" defer></script>
-    <script src="js/app-admin.js?v=202611050079" defer></script>
+    <script src="js/game-data.js?v=202611050080" defer></script>
+    <script src="js/game-boards.js?v=202611050080" defer></script>
+    <script src="js/game-engine.js?v=202611050080" defer></script>
+    <script src="js/game-combat-ai.js?v=202611050080" defer></script>
+    <script src="js/app-audio.js?v=202611050080" defer></script>
+    <script src="js/app.js?v=202611050080" defer></script>
+    <script src="js/app-board.js?v=202611050080" defer></script>
+    <script src="js/app-hud.js?v=202611050080" defer></script>
+    <script src="js/app-modals.js?v=202611050080" defer></script>
+    <script src="js/app-online.js?v=202611050080" defer></script>
+    <script src="js/app-catalog.js?v=202611050080" defer></script>
+    <script src="js/app-admin.js?v=202611050080" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -2921,7 +2942,7 @@
                 <div style="margin-bottom:0.45rem;">
                     <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Nebo zadejte URL adresu / YouTube odkaz:</label>
                     <div style="display:flex; gap:0.4rem;">
-                        <input id="admin-vid-url" type="text" class="form-input" style="flex:1; box-sizing:border-box; padding:0.35rem 0.65rem;" placeholder="assets/video/RuzeProDanielku.mp4 nebo https://youtube.com/...">
+                        <input id="admin-vid-url" type="text" class="form-input" style="flex:1; box-sizing:border-box; padding:0.35rem 0.65rem;" placeholder="assets/video/RuzeProDanielku.mp4 nebo https://youtube.com/..." oninput="PRS_App.handleVideoUrlInput(this.value)">
                         <button type="button" class="btn-secondary" style="font-size:0.76rem; padding:0.3rem 0.6rem; white-space:nowrap;" onclick="PRS_App.autoFetchYoutubeMeta()" title="Automaticky načíst název a náhled z YouTube">
                             ✨ Z YouTube
                         </button>

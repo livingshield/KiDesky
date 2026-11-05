@@ -387,6 +387,16 @@
                 });
         },
 
+        handleVideoUrlInput: function (val) {
+            val = (val || "").trim();
+            if (val.indexOf("youtube.com") !== -1 || val.indexOf("youtu.be") !== -1) {
+                var typeSel = document.getElementById("admin-vid-type");
+                if (typeSel && typeSel.value !== "youtube") {
+                    typeSel.value = "youtube";
+                }
+            }
+        },
+
         saveAdminVideo: function () {
             var self = this;
             var title = (document.getElementById("admin-vid-title").value || "").trim();
@@ -402,6 +412,11 @@
             if (!title || !url) {
                 if (fb) fb.textContent = "Vyplňte prosím název a URL adresu videa.";
                 return;
+            }
+
+            // Automatická oprava typu videa na youtube, pokud URL obsahuje odkaz na YouTube
+            if (url.indexOf("youtube.com") !== -1 || url.indexOf("youtu.be") !== -1) {
+                type = "youtube";
             }
 
             var payload = {

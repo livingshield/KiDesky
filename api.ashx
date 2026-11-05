@@ -737,6 +737,12 @@ public class KiDeskyApiHandler : IHttpHandler
                 case "hero-video":
                     HandleGetHeroVideo(context);
                     break;
+
+                case "like-video":
+
+                    HandleLikeVideo(context);
+
+                    break;
                 case "upload-video":
                 case "admin-upload-video":
                     HandleUploadVideo(context);
@@ -1183,6 +1189,16 @@ END
 IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL
 BEGIN
     EXEC(N'UPDATE [prs].[prs_Users] SET [DisplayName] = [Username] WHERE [DisplayName] IS NULL OR [DisplayName] = ''''');
+END
+
+IF OBJECT_ID(N'[prs].[prs_Videos]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Videos]') AND name = 'LikesCount')
+BEGIN
+    ALTER TABLE [prs].[prs_Videos] ADD [LikesCount] INT NOT NULL DEFAULT 0;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Videos]', N'U') IS NOT NULL
+BEGIN
+    EXEC(N'UPDATE [prs].[prs_Videos] SET [VideoType] = ''youtube'' WHERE ([Url] LIKE ''%youtube.com%'' OR [Url] LIKE ''%youtu.be%'') AND [VideoType] <> ''youtube''');
 END
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_Videos]') AND type in (N'U'))
@@ -4348,7 +4364,8 @@ END";
             conn.Open();
             EnsureExtendedAdminSchema(conn);
             using (var cmd = new SqlCommand(@"
-                SELECT [Id], [Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive], [SortOrder], [CreatedAt]
+                SELECT [Id], [Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive], [SortOrder], [CreatedAt],
+                       ISNULL([LikesCount], 0) AS [LikesCount]
                 FROM [prs].[prs_Videos]
                 ORDER BY [SortOrder] ASC, [Id] DESC", conn))
             using (var r = cmd.ExecuteReader())
@@ -4365,6 +4382,7 @@ END";
                         posterUrl = r["PosterUrl"] == DBNull.Value ? "" : r["PosterUrl"].ToString(),
                         category = r["Category"].ToString(),
                         isHeroActive = Convert.ToBoolean(r["IsHeroActive"]),
+                        likesCount = Convert.ToInt32(r["LikesCount"]),
                         sortOrder = Convert.ToInt32(r["SortOrder"]),
                         createdAt = Convert.ToDateTime(r["CreatedAt"]).ToString("o")
                     });
@@ -4373,6 +4391,46 @@ END";
         }
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", videos = videos }));
     }
+
+    
+    private void HandleLikeVideo(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        int id = 0;
+        int.TryParse(context.Request.QueryString["id"], out id);
+        if (id <= 0 && context.Request.HttpMethod == "POST")
+        {
+            var body = ReadJsonBody(context);
+            id = GetInt(body, "id", 0);
+        }
+        if (id <= 0)
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Chybi ID videa." }));
+            return;
+        }
+
+        int newLikes = 0;
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                UPDATE [prs].[prs_Videos]
+                SET [LikesCount] = ISNULL([LikesCount], 0) + 1
+                OUTPUT INSERTED.[LikesCount]
+                WHERE [Id] = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                object res = cmd.ExecuteScalar();
+                if (res != null && res != DBNull.Value)
+                {
+                    newLikes = Convert.ToInt32(res);
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", videoId = id, likesCount = newLikes }));
+    }
+
 
     private void HandleGetHeroVideo(HttpContext context)
     {
@@ -4383,7 +4441,8 @@ END";
             conn.Open();
             EnsureExtendedAdminSchema(conn);
             using (var cmd = new SqlCommand(@"
-                SELECT TOP 1 [Id], [Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive]
+                SELECT TOP 1 [Id], [Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive],
+                             ISNULL([LikesCount], 0) AS [LikesCount]
                 FROM [prs].[prs_Videos]
                 ORDER BY [IsHeroActive] DESC, [SortOrder] ASC, [Id] ASC", conn))
             using (var r = cmd.ExecuteReader())
@@ -4399,7 +4458,8 @@ END";
                         url = r["Url"].ToString(),
                         posterUrl = r["PosterUrl"] == DBNull.Value ? "" : r["PosterUrl"].ToString(),
                         category = r["Category"].ToString(),
-                        isHeroActive = Convert.ToBoolean(r["IsHeroActive"])
+                        isHeroActive = Convert.ToBoolean(r["IsHeroActive"]),
+                        likesCount = Convert.ToInt32(r["LikesCount"])
                     };
                 }
             }
@@ -4515,6 +4575,10 @@ END";
         string description = GetStr(body, "description").Trim();
         string videoType = GetStr(body, "videoType", "mp4").Trim().ToLowerInvariant();
         string url = GetStr(body, "url").Trim();
+        if (!string.IsNullOrEmpty(url) && (url.IndexOf("youtube.com", StringComparison.OrdinalIgnoreCase) >= 0 || url.IndexOf("youtu.be", StringComparison.OrdinalIgnoreCase) >= 0))
+        {
+            videoType = "youtube";
+        }
         string posterUrl = GetStr(body, "posterUrl").Trim();
         string category = GetStr(body, "category", "trailer").Trim();
         bool isHeroActive = body.ContainsKey("isHeroActive") && Convert.ToBoolean(body["isHeroActive"]);
