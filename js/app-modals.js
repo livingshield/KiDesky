@@ -1383,171 +1383,104 @@
     },
 
     renderDuelCeremony: function (res) {
-
         var body = document.getElementById("quest-duel-modal-body");
-
         if (!body || !res) return;
 
         var q = res.quest || {};
-
         var won = res.won;
-
         var player = this.state.players[this.state.currentPlayerIndex];
-
         var html = [];
 
         html.push('<div class="quest-ceremony-wrap">');
 
         if (won) {
-
             html.push('  <div class="quest-ceremony-banner win">⚔️ HRDINSKÉ VÍTĚZSTVÍ!</div>');
-
-            html.push('  <p style="font-size:1.05rem; color:#fef08a; margin-bottom:1rem;">');
-
+            html.push('  <p style="font-size:0.95rem; color:#fef08a; margin:0 0 0.35rem 0;">');
             html.push('    ' + player.badge + ' <strong>' + this.escapeHtml(player.name) + '</strong> přemohl v souboji <strong>' + q.icon + ' ' + this.escapeHtml(q.name) + '</strong>!');
-
             html.push('  </p>');
 
-            html.push('  <div style="font-size:0.9rem; color:#cbd5e1; margin-bottom:1rem;">');
-
-            html.push('    Hod kostkou: 🎲 <strong>' + res.roll + '</strong> &nbsp;|&nbsp; Celková bojová síla: ⚔️ <strong>' + res.totalPower + '</strong> (vs. obtížnost ' + res.difficulty + ')');
-
-            if (res.stanceName) html.push('    <div style="font-size:0.82rem; color:#fef08a; margin-top:3px;">Bojový postoj: <strong>' + this.escapeHtml(res.stanceName) + '</strong></div>');
-
-            if (res.tacticName) html.push('    <div style="font-size:0.8rem; color:#86efac; margin-top:3px;">Použitá taktika: ' + this.escapeHtml(res.tacticName) + '</div>');
-
-            if (res.weaknessExploited) html.push('    <div style="font-size:0.85rem; color:#fef08a; font-weight:700; margin-top:4px;">🎯 Využita slabina bestie (+2 k síle): ' + this.escapeHtml(res.weaknessReason) + '</div>');
-
+            html.push('  <div style="font-size:0.83rem; color:#cbd5e1; margin-bottom:0.45rem;">');
+            html.push('    Hod kostkou: 🎲 <strong>' + res.roll + '</strong> &nbsp;|&nbsp; Celková síla: ⚔️ <strong>' + res.totalPower + '</strong> (vs. obtížnost ' + res.difficulty + ')');
+            if (res.stanceName) html.push('    <span style="color:#fef08a; margin-left:8px;">Postoj: <strong>' + this.escapeHtml(res.stanceName) + '</strong></span>');
+            if (res.tacticName) html.push('    <span style="color:#86efac; margin-left:8px;">Taktika: <strong>' + this.escapeHtml(res.tacticName) + '</strong></span>');
+            if (res.weaknessExploited) html.push('    <div style="font-size:0.8rem; color:#fef08a; font-weight:700; margin-top:2px;">🎯 Využita slabina bestie (+2 síla): ' + this.escapeHtml(res.weaknessReason) + '</div>');
             html.push('  </div>');
 
-            html.push('  <div class="quest-bounty-badge-row" style="margin-bottom:1.25rem;">');
-
-            html.push('    <span class="quest-bounty-pill quest-bounty-gold" style="font-size:1.05rem; padding:6px 16px;">💰 +' + res.goldWon.toLocaleString("cs-CZ") + ' zl.</span>');
-
+            html.push('  <div class="quest-bounty-badge-row" style="margin-bottom:0.45rem;">');
+            html.push('    <span class="quest-bounty-pill quest-bounty-gold" style="font-size:0.92rem; padding:4px 14px;">💰 +' + res.goldWon.toLocaleString("cs-CZ") + ' zl.</span>');
             if (res.heartsWon > 0) {
-
-                html.push('    <span class="quest-bounty-pill quest-bounty-heart" style="font-size:1.05rem; padding:6px 16px;">💖 +' + res.heartsWon + ' Srdce princezny</span>');
-
+                html.push('    <span class="quest-bounty-pill quest-bounty-heart" style="font-size:0.92rem; padding:4px 14px;">💖 +' + res.heartsWon + ' Srdce princezny</span>');
             }
-
             html.push('  </div>');
 
             if (res.trophyWon) {
-
                 var tr = res.trophyWon;
-
                 var statParts = [];
-
                 if (tr.boj) statParts.push("⚔️ +" + tr.boj + " Boj");
-
                 if (tr.jizda) statParts.push("🏇 +" + tr.jizda + " Jízda");
-
                 if (tr.tanec) statParts.push("💃 +" + tr.tanec + " Tanec");
-
                 if (tr.charisma) statParts.push("✨ +" + tr.charisma + " Charisma");
 
                 html.push('  <div class="quest-trophy-ceremony-card">');
-
                 html.push('    <div class="quest-trophy-ceremony-icon">' + tr.icon + '</div>');
-
-                html.push('    <div class="quest-trophy-ceremony-name">🏆 Získána relikvie: ' + this.escapeHtml(tr.name) + '</div>');
-
-                html.push('    <div class="quest-trophy-ceremony-stats">' + statParts.join(" &nbsp;•&nbsp; ") + '</div>');
-
-                html.push('    <div class="quest-trophy-ceremony-desc">' + this.escapeHtml(tr.desc || "Vzácná trofej potvrzující slavný triumf rytíře.") + '</div>');
-
-                html.push('    <div id="quest-trophy-equip-box">');
-
+                html.push('    <div class="quest-trophy-content-wrap">');
+                html.push('      <div class="quest-trophy-ceremony-name">🏆 Získána relikvie: ' + this.escapeHtml(tr.name) + '</div>');
+                html.push('      <div class="quest-trophy-ceremony-stats">' + statParts.join(" &nbsp;•&nbsp; ") + '</div>');
+                html.push('      <div class="quest-trophy-ceremony-desc">' + this.escapeHtml(tr.desc || "Vzácná trofej potvrzující slavný triumf rytíře.") + '</div>');
+                html.push('      <div id="quest-trophy-equip-box">');
                 if (tr.isEquipped) {
-
-                    html.push('      <span style="color:#86efac; font-weight:700; font-size:0.88rem;">✅ Trofej je automaticky nasazena v 5. slotu zbrojnice!</span>');
-
+                    html.push('        <span style="color:#86efac; font-weight:700; font-size:0.8rem;">✅ Trofej automaticky nasazena v 5. slotu zbrojnice!</span>');
                 } else {
-
-                    html.push('      <button class="quest-btn-equip-trophy" onclick="PRS_App.equipDuelTrophyNow(\'' + tr.id + '\')">👑 Nasadit trofej do 5. slotu zbrojnice</button>');
-
+                    html.push('        <button class="quest-btn-equip-trophy" onclick="PRS_App.equipDuelTrophyNow(\'' + tr.id + '\')">👑 Nasadit trofej do 5. slotu</button>');
                 }
-
+                html.push('      </div>');
                 html.push('    </div>');
-
                 html.push('  </div>');
-
             }
 
             if (res.lootWon) {
-
                 var loot = res.lootWon;
-
-                html.push('  <div style="background:rgba(212,175,55,0.15); border:1px solid #d4af37; border-radius:8px; padding:0.6rem; max-width:380px; margin:0 auto 1rem auto; font-size:0.86rem; color:#fef08a;">');
-
-                html.push('    🎁 Nalezena vzácná výbava: <strong>' + loot.icon + ' ' + this.escapeHtml(loot.name) + '</strong> (uložena do zbrojnice)!');
-
+                html.push('  <div style="background:rgba(212,175,55,0.15); border:1px solid #d4af37; border-radius:8px; padding:0.35rem 0.65rem; max-width:440px; margin:0 auto 0.45rem auto; font-size:0.82rem; color:#fef08a;">');
+                html.push('    🎁 Nalezena výbava: <strong>' + loot.icon + ' ' + this.escapeHtml(loot.name) + '</strong> (uložena do zbrojnice)');
                 html.push('  </div>');
-
             }
 
             html.push('  <button class="quest-btn-continue" onclick="PRS_App.closeQuestDuelModal()">🏆 Sláva vítězům (Pokračovat ve hře)</button>');
 
         } else {
-
             html.push('  <div class="quest-ceremony-banner loss">💀 PORÁŽKA V SOUBOJI</div>');
-
-            html.push('  <p style="font-size:1.02rem; color:#fca5a5; margin-bottom:1rem;">');
-
+            html.push('  <p style="font-size:0.95rem; color:#fca5a5; margin:0 0 0.35rem 0;">');
             html.push('    <strong>' + q.icon + ' ' + this.escapeHtml(q.name) + '</strong> byl nad síly rytíře (Hod: 🎲 ' + res.roll + ', Síla ' + res.totalPower + ' vs. ' + res.difficulty + ').');
-
-            if (res.weaknessExploited) html.push('    <div style="font-size:0.82rem; color:#fde047; margin-top:4px;">🎯 Využil jsi slabinu bestie (+2 k síle: ' + this.escapeHtml(res.weaknessReason) + '), ale hod kostkou bohužel nestačil.</div>');
-
+            if (res.weaknessExploited) html.push('    <div style="font-size:0.78rem; color:#fde047; margin-top:2px;">🎯 Využil jsi slabinu bestie (+2 síla: ' + this.escapeHtml(res.weaknessReason) + '), ale hod kostkou bohužel nestačil.</div>');
             html.push('  </p>');
 
             if (res.canTacticalReroll) {
-
-                html.push('  <div style="background:rgba(245,158,11,0.22); border:1.5px dashed #f59e0b; border-radius:10px; padding:0.85rem; max-width:440px; margin:0 auto 1.15rem auto;">');
-
-                html.push('    <div style="font-weight:bold; color:#fef08a; font-size:0.92rem; margin-bottom:0.3rem;">🎯 Šance na taktický opravný hod!</div>');
-
-                html.push('    <div style="font-size:0.82rem; color:#fde68a; margin-bottom:0.6rem;">Prohrál jsi o pouhé ' + (res.difficulty - res.totalPower) + ' body! Tvé zkušenosti a lovecká zvířata ti umožňují hodit kostkou ještě jednou.</div>');
-
-                html.push('    <button class="quest-btn-roll-action" style="background:linear-gradient(135deg, #f59e0b, #d97706); font-size:0.92rem; padding:0.5rem 1.15rem; margin:0;" onclick="PRS_App.executeTacticalReroll()">🎲 Taktický opravný hod (Reroll 1 kostky)</button>');
-
+                html.push('  <div style="background:rgba(245,158,11,0.22); border:1.5px dashed #f59e0b; border-radius:10px; padding:0.55rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto;">');
+                html.push('    <div style="font-weight:bold; color:#fef08a; font-size:0.88rem; margin-bottom:0.2rem;">🎯 Šance na taktický opravný hod!</div>');
+                html.push('    <div style="font-size:0.78rem; color:#fde68a; margin-bottom:0.45rem;">Prohrál jsi o pouhé ' + (res.difficulty - res.totalPower) + ' body! Zkušenosti a zvířata ti dávají druhou šanci.</div>');
+                html.push('    <button class="quest-btn-roll-action" style="background:linear-gradient(135deg, #f59e0b, #d97706); font-size:0.88rem; padding:0.4rem 1rem; margin:0;" onclick="PRS_App.executeTacticalReroll()">🎲 Taktický opravný hod (Reroll 1 kostky)</button>');
                 html.push('  </div>');
-
             }
 
             if (res.preventedHospital) {
-
-                html.push('  <div style="background:rgba(16,185,129,0.18); border:1.5px solid #10b981; border-radius:10px; padding:0.85rem; max-width:440px; margin:0 auto 1.25rem auto; color:#86efac; font-size:0.88rem;">');
-
-                html.push('    🧪 <strong>Záchrana lektvarem!</strong> Díky vypitému elixíru z Lazaretu neutrpěl rytíř fatální zranění a nemusí do Špitálu. Může ihned pokračovat ve hře!');
-
+                html.push('  <div style="background:rgba(16,185,129,0.18); border:1.5px solid #10b981; border-radius:8px; padding:0.5rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto; color:#86efac; font-size:0.84rem;">');
+                html.push('    🧪 <strong>Záchrana lektvarem!</strong> Díky elixíru z Lazaretu neutrpěl rytíř fatální zranění a nemusí do Špitálu.');
                 html.push('  </div>');
-
             } else if (q.questTier === "U1") {
-
-                html.push('  <div style="background:rgba(239,68,68,0.18); border:1.5px solid #ef4444; border-radius:10px; padding:0.85rem; max-width:440px; margin:0 auto 1.25rem auto; color:#fca5a5; font-size:0.88rem;">');
-
+                html.push('  <div style="background:rgba(239,68,68,0.18); border:1.5px solid #ef4444; border-radius:8px; padding:0.5rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto; color:#fca5a5; font-size:0.84rem;">');
                 html.push('    🐗 Zvíře uniklo do hlubokého lesa. Ošetření lehkých ran stálo rytíře zlaťáky.');
-
                 html.push('  </div>');
-
             } else {
-
-                html.push('  <div style="background:rgba(239,68,68,0.22); border:1.5px solid #ef4444; border-radius:10px; padding:0.85rem; max-width:440px; margin:0 auto 1.25rem auto; color:#fca5a5; font-size:0.88rem;">');
-
+                html.push('  <div style="background:rgba(239,68,68,0.22); border:1.5px solid #ef4444; border-radius:8px; padding:0.5rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto; color:#fca5a5; font-size:0.84rem;">');
                 html.push('    🏥 Raněný rytíř byl převezen do Královského lazaretu (Špitál), kde se 1 tah léčí ze svých zranění.');
-
                 html.push('  </div>');
-
             }
 
-            html.push('  <button class="quest-btn-continue" onclick="PRS_App.closeQuestDuelModal()">Pokračovat ve hře</button>');
-
+            html.push('  <button class="quest-btn-continue" onclick="PRS_App.closeQuestDuelModal()">⚔️ Ustoupit z bojiště (Pokračovat)</button>');
         }
 
         html.push('</div>');
-
         body.innerHTML = html.join("");
-
     },
 
     equipDuelTrophyNow: function (trophyId) {

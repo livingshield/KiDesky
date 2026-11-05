@@ -1204,7 +1204,7 @@ ELSE
 BEGIN
     UPDATE [prs].[prs_Videos]
     SET [Title] = @vt, [Description] = @vd
-    WHERE [Id] = 1 OR [Url] LIKE '%RuzeProDanielku%';
+    WHERE [Id] = 1 OR [Url] LIKE '%RuzeProDanielku%' OR [Title] LIKE '%Ã%' OR [Title] LIKE '%Å%' OR [Description] LIKE '%Ã%' OR [Description] LIKE '%Å%';
 END
 
 IF NOT EXISTS (SELECT 1 FROM [prs].[prs_Announcements] WHERE [Id] = 1)
@@ -1216,7 +1216,12 @@ ELSE
 BEGIN
     UPDATE [prs].[prs_Announcements]
     SET [Message] = @am
-    WHERE [Id] = 1;
+    WHERE [Id] = 1 OR [Message] LIKE '%Ã%' OR [Message] LIKE '%Å%' OR [Message] LIKE '%kr%lovstv%';
+END
+
+UPDATE [prs].[prs_Users]
+SET [DisplayName] = [Username]
+WHERE [DisplayName] LIKE '%Ã%' OR [DisplayName] LIKE '%Å%';
 END", conn))
             {
                 seedCmd.Parameters.Add("@vt", SqlDbType.NVarChar, 128).Value = "Královská upoutávka (Růže pro Danielku)";
@@ -4343,6 +4348,7 @@ END";
                     System.IO.File.Copy(fullPath, System.IO.Path.Combine(altDir, safeFileName), true);
                 }
             }
+        }
         catch { }
 
         string relativeUrl = "assets/" + subFolder + "/" + safeFileName;

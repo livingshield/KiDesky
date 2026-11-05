@@ -1032,115 +1032,126 @@
     cursor: not-allowed;
 }
 
-/* Ceremoniál vítězství a zobrazení trofeje */
-.quest-ceremony-wrap {
-    text-align: center;
-    padding: 1.25rem 0.5rem;
-    animation: fadeInModal 0.4s ease forwards;
-}
-
-.quest-ceremony-banner {
-    font-family: 'Cinzel', serif;
-    font-size: 1.7rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-    letter-spacing: 1px;
-}
-
-.quest-ceremony-banner.win {
-    color: #fef08a;
-    text-shadow: 0 0 20px rgba(250, 204, 21, 0.6);
-}
-
-.quest-ceremony-banner.loss {
-    color: #f87171;
-    text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-}
-
-.quest-trophy-ceremony-card {
-    background: radial-gradient(circle at center, #2e2008 0%, #171105 85%);
-    border: 2.5px solid #d4af37;
-    border-radius: 14px;
-    padding: 1.25rem;
-    max-width: 440px;
-    margin: 1.25rem auto;
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.35);
-    position: relative;
-    animation: trophyGlow 2.5s infinite alternate;
-}
-
-@keyframes trophyGlow {
-    0% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.25); }
-    100% { box-shadow: 0 0 35px rgba(212, 175, 55, 0.6); }
-}
-
-.quest-trophy-ceremony-icon {
-    font-size: 3.2rem;
-    margin-bottom: 0.45rem;
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
-}
-
-.quest-trophy-ceremony-name {
-    font-family: 'Cinzel', serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #fef08a;
-    margin-bottom: 0.3rem;
-}
-
-.quest-trophy-ceremony-stats {
-    display: flex;
-    justify-content: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    font-size: 0.86rem;
-    color: #86efac;
-    font-weight: 700;
-    margin-bottom: 0.6rem;
-}
-
-.quest-trophy-ceremony-desc {
-    font-size: 0.8rem;
-    color: #cbd5e1;
-    line-height: 1.4;
-    margin-bottom: 0.9rem;
-}
-
-.quest-btn-equip-trophy {
-    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
-    border: 1.5px solid #6ee7b7;
-    color: #fff;
-    padding: 0.55rem 1.15rem;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.88rem;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    transition: all 0.2s ease;
-}
-
-.quest-btn-equip-trophy:hover {
-    background: linear-gradient(135deg, #059669 0%, #065f46 100%);
-    transform: scale(1.03);
-}
-
-.quest-btn-continue {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1.5px solid var(--border-gold);
-    color: var(--text-main);
-    padding: 0.65rem 1.4rem;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 0.85rem;
-}
-
-.quest-btn-continue:hover {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: #fef08a;
-    color: #fff;
+/* Ceremoniál vítězství a zobrazení trofeje - Kompaktní verze bez přetékání a scrollbaru */
+.quest-ceremony-wrap {
+    text-align: center;
+    padding: 0.5rem 0.25rem 0.35rem 0.25rem;
+    animation: fadeInModal 0.4s ease forwards;
+}
+
+.quest-ceremony-banner {
+    font-family: 'Cinzel', serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    letter-spacing: 1px;
+}
+
+.quest-ceremony-banner.win {
+    color: #fef08a;
+    text-shadow: 0 0 16px rgba(250, 204, 21, 0.6);
+}
+
+.quest-ceremony-banner.loss {
+    color: #f87171;
+    text-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+}
+
+.quest-trophy-ceremony-card {
+    background: radial-gradient(circle at center, #2e2008 0%, #171105 85%);
+    border: 1.8px solid #d4af37;
+    border-radius: 12px;
+    padding: 0.55rem 0.85rem;
+    max-width: 520px;
+    margin: 0.4rem auto 0.55rem auto;
+    box-shadow: 0 0 22px rgba(212, 175, 55, 0.35);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-align: left;
+    animation: trophyGlow 2.5s infinite alternate;
+}
+
+@keyframes trophyGlow {
+    0% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.25); }
+    100% { box-shadow: 0 0 28px rgba(212, 175, 55, 0.55); }
+}
+
+.quest-trophy-ceremony-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.6));
+}
+
+.quest-trophy-content-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.quest-trophy-ceremony-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #fef08a;
+    margin-bottom: 2px;
+}
+
+.quest-trophy-ceremony-stats {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: #86efac;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.quest-trophy-ceremony-desc {
+    font-size: 0.74rem;
+    color: #cbd5e1;
+    line-height: 1.25;
+    margin-bottom: 4px;
+}
+
+.quest-btn-equip-trophy {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    border: 1.5px solid #6ee7b7;
+    color: #fff;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quest-btn-equip-trophy:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+    transform: translateY(-1px);
+}
+
+.quest-btn-continue {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(180, 83, 9, 0.4));
+    border: 1.5px solid var(--border-gold);
+    color: #fef08a;
+    padding: 0.55rem 1.6rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.94rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.45rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.quest-btn-continue:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: #fef08a;
+    color: #fff;
 }
 
 
