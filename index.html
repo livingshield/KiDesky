@@ -36,13 +36,13 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611050076">
+    <link rel="stylesheet" href="css/main.css?v=202611050077">
 
-    <link rel="stylesheet" href="css/board.css?v=202611050076">
+    <link rel="stylesheet" href="css/board.css?v=202611050077">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611050076">
+    <link rel="stylesheet" href="css/modals.css?v=202611050077">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611050076">
+    <link rel="stylesheet" href="css/mobile.css?v=202611050077">
 
 </head>
 
@@ -2458,18 +2458,18 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611050076" defer></script>
-    <script src="js/game-boards.js?v=202611050076" defer></script>
-    <script src="js/game-engine.js?v=202611050076" defer></script>
-    <script src="js/game-combat-ai.js?v=202611050076" defer></script>
-    <script src="js/app-audio.js?v=202611050076" defer></script>
-    <script src="js/app.js?v=202611050076" defer></script>
-    <script src="js/app-board.js?v=202611050076" defer></script>
-    <script src="js/app-hud.js?v=202611050076" defer></script>
-    <script src="js/app-modals.js?v=202611050076" defer></script>
-    <script src="js/app-online.js?v=202611050076" defer></script>
-    <script src="js/app-catalog.js?v=202611050076" defer></script>
-    <script src="js/app-admin.js?v=202611050076" defer></script>
+    <script src="js/game-data.js?v=202611050077" defer></script>
+    <script src="js/game-boards.js?v=202611050077" defer></script>
+    <script src="js/game-engine.js?v=202611050077" defer></script>
+    <script src="js/game-combat-ai.js?v=202611050077" defer></script>
+    <script src="js/app-audio.js?v=202611050077" defer></script>
+    <script src="js/app.js?v=202611050077" defer></script>
+    <script src="js/app-board.js?v=202611050077" defer></script>
+    <script src="js/app-hud.js?v=202611050077" defer></script>
+    <script src="js/app-modals.js?v=202611050077" defer></script>
+    <script src="js/app-online.js?v=202611050077" defer></script>
+    <script src="js/app-catalog.js?v=202611050077" defer></script>
+    <script src="js/app-admin.js?v=202611050077" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -2850,31 +2850,31 @@
 
     <!-- MODÁL: PŘIDAT / UPRAVIT VIDEO -->
     <div id="admin-video-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeAdminVideoModal()">
-        <div class="modal-box" style="max-width:540px;">
+        <div class="modal-box" style="max-width:560px;">
             <div class="modal-header">
-                <h3 id="admin-video-modal-title" style="margin:0; color:var(--gold-light); font-family:'Cinzel',serif;">🎬 Správa videa</h3>
-                <button class="modal-close" onclick="PRS_App.closeAdminVideoModal()">&times;</button>
+                <h3 id="admin-video-modal-title" style="margin:0; font-size:1.1rem; color:var(--gold-light); font-family:'Cinzel',serif; display:flex; align-items:center; gap:0.5rem;">🎬 Správa videa</h3>
+                <button class="modal-close" onclick="PRS_App.closeAdminVideoModal()" title="Zavřít okno">&times;</button>
             </div>
-            <div class="modal-body" style="padding:1rem 0;">
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Název videa:</label>
-                    <input id="admin-vid-title" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="Např. Královská upoutávka...">
+            <div class="modal-body" style="padding:0.35rem 0.2rem;">
+                <div style="margin-bottom:0.45rem;">
+                    <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Název videa:</label>
+                    <input id="admin-vid-title" type="text" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.65rem;" placeholder="Např. Královská upoutávka...">
                 </div>
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Popis videa:</label>
-                    <input id="admin-vid-desc" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="Krátký popis upoutávky...">
+                <div style="margin-bottom:0.45rem;">
+                    <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Popis videa:</label>
+                    <input id="admin-vid-desc" type="text" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.65rem;" placeholder="Krátký popis upoutávky...">
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:0.45rem;">
                     <div>
-                        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Typ videa:</label>
-                        <select id="admin-vid-type" class="form-input" style="width:100%; box-sizing:border-box;">
+                        <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Typ videa:</label>
+                        <select id="admin-vid-type" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.5rem;">
                             <option value="mp4">MP4 soubor</option>
                             <option value="youtube">YouTube video / embed</option>
                         </select>
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Kategorie:</label>
-                        <select id="admin-vid-category" class="form-input" style="width:100%; box-sizing:border-box;">
+                        <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Kategorie:</label>
+                        <select id="admin-vid-category" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.5rem;">
                             <option value="trailer">Trailer / Upoutávka</option>
                             <option value="gameplay">Gameplay ukázka</option>
                             <option value="tutorial">Videomanuál / Pravidla</option>
@@ -2883,67 +2883,67 @@
                     </div>
                 </div>
                 <!-- 1. Přímé nahrání MP4 souboru na server -->
-                <div style="margin-bottom:0.85rem; background:rgba(212,175,55,0.08); border:1px dashed var(--gold); border-radius:8px; padding:0.75rem;">
-                    <label style="display:block; font-size:0.82rem; font-weight:700; color:var(--gold-light); margin-bottom:5px;">
+                <div style="margin-bottom:0.45rem; background:rgba(212,175,55,0.08); border:1px dashed var(--gold); border-radius:8px; padding:0.45rem 0.65rem;">
+                    <label style="display:block; font-size:0.8rem; font-weight:700; color:var(--gold-light); margin-bottom:4px;">
                         📤 Nahrát MP4 video přímo na server:
                     </label>
                     <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
                         <input type="file" id="admin-vid-file-input" accept="video/mp4,video/webm,video/*" style="display:none;" onchange="PRS_App.handleVideoFileSelected(event)">
-                        <button type="button" class="btn-primary" style="font-size:0.8rem; padding:0.4rem 0.85rem; display:inline-flex; align-items:center; gap:0.4rem;" onclick="document.getElementById('admin-vid-file-input').click()">
+                        <button type="button" class="btn-primary" style="font-size:0.78rem; padding:0.3rem 0.75rem; display:inline-flex; align-items:center; gap:0.35rem;" onclick="document.getElementById('admin-vid-file-input').click()">
                             📁 Vybrat MP4 soubor...
                         </button>
-                        <span id="admin-vid-file-name" style="font-size:0.78rem; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;">
+                        <span id="admin-vid-file-name" style="font-size:0.78rem; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:280px;">
                             Žádný soubor nevybrán
                         </span>
                     </div>
-                    <div id="admin-vid-upload-progress-wrap" style="display:none; margin-top:0.6rem;">
-                        <div style="width:100%; height:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(212,175,55,0.3); border-radius:4px; overflow:hidden;">
+                    <div id="admin-vid-upload-progress-wrap" style="display:none; margin-top:0.45rem;">
+                        <div style="width:100%; height:7px; background:rgba(0,0,0,0.5); border:1px solid rgba(212,175,55,0.3); border-radius:4px; overflow:hidden;">
                             <div id="admin-vid-upload-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg, #f59e0b, #ec4899); transition:width 0.2s;"></div>
                         </div>
-                        <div style="display:flex; justify-content:space-between; margin-top:3px;">
-                            <span id="admin-vid-upload-status" style="font-size:0.75rem; color:#fde047;">Nahrávám na server...</span>
-                            <span id="admin-vid-upload-pct" style="font-size:0.75rem; color:#fde047; font-weight:bold;">0%</span>
+                        <div style="display:flex; justify-content:space-between; margin-top:2px;">
+                            <span id="admin-vid-upload-status" style="font-size:0.72rem; color:#fde047;">Nahrávám na server...</span>
+                            <span id="admin-vid-upload-pct" style="font-size:0.72rem; color:#fde047; font-weight:bold;">0%</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2. Nebo zadat URL / YouTube odkaz -->
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Nebo zadejte URL adresu / YouTube odkaz:</label>
-                    <div style="display:flex; gap:0.45rem;">
-                        <input id="admin-vid-url" type="text" class="form-input" style="flex:1; box-sizing:border-box;" placeholder="assets/video/RuzeProDanielku.mp4 nebo https://youtube.com/...">
-                        <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.4rem 0.65rem; white-space:nowrap;" onclick="PRS_App.autoFetchYoutubeMeta()" title="Automaticky načíst název a náhled z YouTube">
+                <div style="margin-bottom:0.45rem;">
+                    <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Nebo zadejte URL adresu / YouTube odkaz:</label>
+                    <div style="display:flex; gap:0.4rem;">
+                        <input id="admin-vid-url" type="text" class="form-input" style="flex:1; box-sizing:border-box; padding:0.35rem 0.65rem;" placeholder="assets/video/RuzeProDanielku.mp4 nebo https://youtube.com/...">
+                        <button type="button" class="btn-secondary" style="font-size:0.76rem; padding:0.3rem 0.6rem; white-space:nowrap;" onclick="PRS_App.autoFetchYoutubeMeta()" title="Automaticky načíst název a náhled z YouTube">
                             ✨ Z YouTube
                         </button>
                     </div>
                 </div>
 
                 <!-- 3. Plakát -->
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Náhledový plakát (Poster URL):</label>
-                    <div style="display:flex; gap:0.45rem;">
-                        <input id="admin-vid-poster" type="text" class="form-input" style="flex:1; box-sizing:border-box;" placeholder="assets/board/parchment_board_bg.jpg">
+                <div style="margin-bottom:0.45rem;">
+                    <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Náhledový plakát (Poster URL):</label>
+                    <div style="display:flex; gap:0.4rem;">
+                        <input id="admin-vid-poster" type="text" class="form-input" style="flex:1; box-sizing:border-box; padding:0.35rem 0.65rem;" placeholder="assets/board/parchment_board_bg.jpg">
                         <input type="file" id="admin-poster-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="PRS_App.handlePosterFileSelected(event)">
-                        <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.4rem 0.65rem; white-space:nowrap;" onclick="document.getElementById('admin-poster-file-input').click()" title="Nahrát vlastní obrázek plakátu">
+                        <button type="button" class="btn-secondary" style="font-size:0.76rem; padding:0.3rem 0.6rem; white-space:nowrap;" onclick="document.getElementById('admin-poster-file-input').click()" title="Nahrát vlastní obrázek plakátu">
                             🖼️ Nahrát plakát
                         </button>
                     </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; cursor:pointer;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem; padding:0.15rem 0;">
+                    <label style="display:flex; align-items:center; gap:0.45rem; font-size:0.8rem; cursor:pointer;">
                         <input id="admin-vid-hero" type="checkbox" style="width:16px; height:16px;">
                         <span>Aktivní Hero video na Landing Page</span>
                     </label>
                     <div style="display:flex; align-items:center; gap:0.4rem;">
-                        <span style="font-size:0.8rem;">Pořadí:</span>
-                        <input id="admin-vid-order" type="number" class="form-input" style="width:60px; font-size:0.8rem; padding:0.25rem;" value="10">
+                        <span style="font-size:0.78rem;">Pořadí:</span>
+                        <input id="admin-vid-order" type="number" class="form-input" style="width:55px; font-size:0.78rem; padding:0.25rem 0.4rem;" value="10">
                     </div>
                 </div>
-                <div id="admin-vid-feedback" style="color:#ef4444; font-size:0.82rem; min-height:1.2rem;"></div>
+                <div id="admin-vid-feedback" style="color:#ef4444; font-size:0.8rem; min-height:0;"></div>
             </div>
-            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:0.5rem;">
-                <button class="btn-secondary" onclick="PRS_App.closeAdminVideoModal()">Zrušit</button>
-                <button class="btn-primary" onclick="PRS_App.saveAdminVideo()">💾 Uložit video</button>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="PRS_App.closeAdminVideoModal()" style="padding:0.45rem 1rem;">Zrušit</button>
+                <button class="btn-primary" onclick="PRS_App.saveAdminVideo()" style="padding:0.45rem 1.15rem;">💾 Uložit video</button>
             </div>
         </div>
     </div>
@@ -2952,32 +2952,32 @@
     <div id="admin-user-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeAdminUserModal()">
         <div class="modal-box" style="max-width:480px;">
             <div class="modal-header">
-                <h3 id="admin-user-modal-title" style="margin:0; color:var(--gold-light); font-family:'Cinzel',serif;">✏️ Úprava účtu</h3>
-                <button class="modal-close" onclick="PRS_App.closeAdminUserModal()">&times;</button>
+                <h3 id="admin-user-modal-title" style="margin:0; font-size:1.1rem; color:var(--gold-light); font-family:'Cinzel',serif; display:flex; align-items:center; gap:0.5rem;">✏️ Úprava účtu</h3>
+                <button class="modal-close" onclick="PRS_App.closeAdminUserModal()" title="Zavřít okno">&times;</button>
             </div>
-            <div class="modal-body" style="padding:1rem 0;">
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Přezdívka ve hře (DisplayName):</label>
-                    <input id="admin-user-displayname" type="text" class="form-input" style="width:100%; box-sizing:border-box;" placeholder="Zobrazované jméno hráče...">
+            <div class="modal-body" style="padding:0.4rem 0.2rem;">
+                <div style="margin-bottom:0.55rem;">
+                    <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Přezdívka ve hře (DisplayName):</label>
+                    <input id="admin-user-displayname" type="text" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.65rem;" placeholder="Zobrazované jméno hráče...">
                 </div>
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:3px;">Oprávnění / Role:</label>
-                    <select id="admin-user-role" class="form-input" style="width:100%; box-sizing:border-box;">
+                <div style="margin-bottom:0.55rem;">
+                    <label style="display:block; font-size:0.78rem; font-weight:600; margin-bottom:2px;">Oprávnění / Role:</label>
+                    <select id="admin-user-role" class="form-input" style="width:100%; box-sizing:border-box; padding:0.35rem 0.5rem;">
                         <option value="Player">🛡️ Hráč (Běžný uživatel)</option>
                         <option value="Admin">👑 Administrátor (Plný přístup)</option>
                     </select>
                 </div>
-                <div style="margin-bottom:0.75rem;">
-                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; cursor:pointer;">
+                <div style="margin-bottom:0.45rem;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; cursor:pointer;">
                         <input id="admin-user-active" type="checkbox" checked style="width:16px; height:16px;">
                         <span>Účet je aktivní (povoleno přihlášení)</span>
                     </label>
                 </div>
-                <div id="admin-user-feedback" style="color:#ef4444; font-size:0.82rem; min-height:1.2rem;"></div>
+                <div id="admin-user-feedback" style="color:#ef4444; font-size:0.8rem; min-height:0;"></div>
             </div>
-            <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:0.5rem;">
-                <button class="btn-secondary" onclick="PRS_App.closeAdminUserModal()">Zrušit</button>
-                <button class="btn-primary" onclick="PRS_App.saveAdminUser()">💾 Uložit změny</button>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="PRS_App.closeAdminUserModal()" style="padding:0.45rem 1rem;">Zrušit</button>
+                <button class="btn-primary" onclick="PRS_App.saveAdminUser()" style="padding:0.45rem 1.15rem;">💾 Uložit změny</button>
             </div>
         </div>
     </div>
