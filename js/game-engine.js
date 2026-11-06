@@ -740,10 +740,21 @@ window.PRS_GameEngine = {
         var totalSheep = villageSheep + extraSheep;
         var totalPigs = villagePigs + extraPigs;
 
-        var livestockCapacity = (ownedVillages * 3) + (ownedTowns * 2) + (hasStaje ? 4 : 0);
+        var lsCfg = (state && state.config && state.config.livestock) ? state.config.livestock : {};
+        var capVil = (lsCfg.capacityPerVillage !== undefined) ? Number(lsCfg.capacityPerVillage) : 3;
+        var capTown = (lsCfg.capacityPerTown !== undefined) ? Number(lsCfg.capacityPerTown) : 2;
+        var capStaje = (lsCfg.capacityPerStaje !== undefined) ? Number(lsCfg.capacityPerStaje) : 4;
+        var taxCattle = (lsCfg.cattleTax !== undefined) ? Number(lsCfg.cattleTax) : 200;
+        var taxPigs = (lsCfg.pigsTax !== undefined) ? Number(lsCfg.pigsTax) : 150;
+        var taxSheep = (lsCfg.sheepTax !== undefined) ? Number(lsCfg.sheepTax) : 120;
+        var rentCattle = (lsCfg.cattleRent !== undefined) ? Number(lsCfg.cattleRent) : 100;
+        var rentPigs = (lsCfg.pigsRent !== undefined) ? Number(lsCfg.pigsRent) : 75;
+        var rentSheep = (lsCfg.sheepRent !== undefined) ? Number(lsCfg.sheepRent) : 50;
+
+        var livestockCapacity = (ownedVillages * capVil) + (ownedTowns * capTown) + (hasStaje ? capStaje : 0);
         var extraLivestockCount = extraCattle + extraSheep + extraPigs;
-        var livestockTaxBonus = (totalCattle * 200) + (totalPigs * 150) + (totalSheep * 120);
-        var livestockVillageRentBonus = (extraCattle * 100) + (extraPigs * 75) + (extraSheep * 50);
+        var livestockTaxBonus = (totalCattle * taxCattle) + (totalPigs * taxPigs) + (totalSheep * taxSheep);
+        var livestockVillageRentBonus = (extraCattle * rentCattle) + (extraPigs * rentPigs) + (extraSheep * rentSheep);
 
         var castleBonus = (state.config && state.config.estates) ? (state.config.estates.castleCharismaBonus || 1) : 1;
 
@@ -2267,10 +2278,13 @@ window.PRS_GameEngine = {
             var baseVillRent = cfg.estates.villageRent[lvl] || 300;
 
             if (owner && owner.livestock) {
+                var lsCfg = (cfg && cfg.livestock) ? cfg.livestock : {};
                 var exC = Number(owner.livestock.cattle) || 0;
                 var exP = Number(owner.livestock.pigs) || 0;
                 var exS = Number(owner.livestock.sheep) || 0;
-                baseVillRent += (exC * 100) + (exP * 75) + (exS * 50);
+                baseVillRent += (exC * ((lsCfg.cattleRent !== undefined) ? Number(lsCfg.cattleRent) : 100)) +
+                                (exP * ((lsCfg.pigsRent !== undefined) ? Number(lsCfg.pigsRent) : 75)) +
+                                (exS * ((lsCfg.sheepRent !== undefined) ? Number(lsCfg.sheepRent) : 50));
             }
 
             return baseVillRent;
@@ -2446,10 +2460,11 @@ window.PRS_GameEngine = {
             return { ok: false, message: "Tvé pastviny a stáje jsou plné (" + st.extraLivestockCount + "/" + st.livestockCapacity + " přikoupených kusů). Kup další Vesnici, Město nebo Stáje!" };
         }
 
+        var lsCfg = (state.config && state.config.livestock) ? state.config.livestock : {};
         var catalog = {
-            sheep: { price: 500, name: "Ovci", icon: "🐑", taxBonus: 120, rentBonus: 50 },
-            pigs: { price: 600, name: "Prase", icon: "🐖", taxBonus: 150, rentBonus: 75 },
-            cattle: { price: 800, name: "Krávu", icon: "🐄", taxBonus: 200, rentBonus: 100 }
+            sheep: { price: (lsCfg.sheepPrice !== undefined) ? Number(lsCfg.sheepPrice) : 500, name: "Ovci", icon: "🐑", taxBonus: (lsCfg.sheepTax !== undefined) ? Number(lsCfg.sheepTax) : 120, rentBonus: (lsCfg.sheepRent !== undefined) ? Number(lsCfg.sheepRent) : 50 },
+            pigs: { price: (lsCfg.pigsPrice !== undefined) ? Number(lsCfg.pigsPrice) : 600, name: "Prase", icon: "🐖", taxBonus: (lsCfg.pigsTax !== undefined) ? Number(lsCfg.pigsTax) : 150, rentBonus: (lsCfg.pigsRent !== undefined) ? Number(lsCfg.pigsRent) : 75 },
+            cattle: { price: (lsCfg.cattlePrice !== undefined) ? Number(lsCfg.cattlePrice) : 800, name: "Krávu", icon: "🐄", taxBonus: (lsCfg.cattleTax !== undefined) ? Number(lsCfg.cattleTax) : 200, rentBonus: (lsCfg.cattleRent !== undefined) ? Number(lsCfg.cattleRent) : 100 }
         };
         var info = catalog[animalType];
         if (!info) return { ok: false, message: "Neznámý druh hospodářského zvířete." };

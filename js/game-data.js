@@ -35,6 +35,20 @@ window.PRS_DEFAULT_CONFIG = {
         castleCharismaBonus: 1,
         landlessTaxPenalty: 500
     },
+    livestock: {
+        sheepPrice: 500,
+        sheepTax: 120,
+        sheepRent: 50,
+        pigsPrice: 600,
+        pigsTax: 150,
+        pigsRent: 75,
+        cattlePrice: 800,
+        cattleTax: 200,
+        cattleRent: 100,
+        capacityPerVillage: 3,
+        capacityPerTown: 2,
+        capacityPerStaje: 4
+    },
     jesterPrice: 2000,
     jesterRentMultiplier: 100, // hod kostkou * 100 * počet kejklířů
     buildingPrice: 3000,

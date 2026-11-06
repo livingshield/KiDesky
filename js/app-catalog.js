@@ -391,24 +391,75 @@
         this.closeImageModal();
     },
 
-    // --- BALANCOVACÍ STUDIO & SIMULÁTOR EKONOMIKY ---
+    // --- BALANCOVACÍ STUDIO & SIMULÁTOR NOVÉ EKONOMIKY (V ADMINISTRACI) ---
     renderBalanceStudioInputs: function () {
-        var c = this.activeConfig;
-        this.setInputValue("cfg-targetHearts", c.targetHearts);
-        this.setInputValue("cfg-startGold", c.startGold);
-        this.setInputValue("cfg-passStartGold", c.passStartGold);
-        this.setInputValue("cfg-sokol", c.animalBasePrices.sokol);
-        this.setInputValue("cfg-pes", c.animalBasePrices.pes);
-        this.setInputValue("cfg-kun", c.animalBasePrices.kun);
-        this.setInputValue("cfg-villagePrice", c.estates.villagePrices[0]);
-        this.setInputValue("cfg-townPrice", c.estates.townPrice);
-        this.setInputValue("cfg-castlePrice", c.estates.castlePrice);
-        this.setInputValue("cfg-pack1", c.itemPackPrices.tier1);
-        this.setInputValue("cfg-pack2", c.itemPackPrices.tier2);
-        this.setInputValue("cfg-pack3", c.itemPackPrices.tier3);
-        this.setInputValue("cfg-u1Diff", c.quests ? (c.quests.u1BaseDiff || 5) : 5);
-        this.setInputValue("cfg-u2Diff", c.quests ? (c.quests.u2BaseDiff || 9) : 9);
-        this.setInputValue("cfg-u3Diff", c.quests ? (c.quests.u3BaseDiff || 13) : 13);
+        var c = this.activeConfig || window.PRS_DEFAULT_CONFIG;
+        if (!c.estates) c.estates = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG.estates);
+        if (!c.livestock) c.livestock = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG.livestock || {});
+        if (!c.animalBasePrices) c.animalBasePrices = { sokol: 400, pes: 500, kun: 600 };
+        if (!c.animalRentRatios) c.animalRentRatios = { single: 0.20, pair: 0.40, fullSet: 0.80 };
+        if (!c.itemPackPrices) c.itemPackPrices = { tier1: 2500, tier2: 7000, tier3: 12000 };
+        if (!c.quests) c.quests = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG.quests);
+
+        // 1. Makroekonomika
+        this.setInputValue("cfg-targetHearts", c.targetHearts || 30);
+        this.setInputValue("cfg-startGold", c.startGold || 10000);
+        this.setInputValue("cfg-passStartGold", c.passStartGold || 3000);
+        this.setInputValue("cfg-passStartGoldLandless", c.passStartGoldLandless || 5000);
+        this.setInputValue("cfg-landlessPenalty", (c.estates && c.estates.landlessTaxPenalty !== undefined) ? c.estates.landlessTaxPenalty : 500);
+
+        // 2. Panství (Vesnice, Města, Hrady)
+        var vp = c.estates.villagePrices || [2000, 1500, 1500];
+        var vt = c.estates.villageTaxYield || [500, 900, 1400];
+        var vr = c.estates.villageRent || [300, 500, 800];
+        this.setInputValue("cfg-villagePrice", vp[0] || 2000);
+        this.setInputValue("cfg-villageUpgPrice", vp[1] || 1500);
+        this.setInputValue("cfg-villageTax1", vt[0] || 500);
+        this.setInputValue("cfg-villageTax2", vt[1] || 900);
+        this.setInputValue("cfg-villageTax3", vt[2] || 1400);
+        this.setInputValue("cfg-villageRent1", vr[0] || 300);
+        this.setInputValue("cfg-villageRent2", vr[1] || 500);
+        this.setInputValue("cfg-villageRent3", vr[2] || 800);
+        this.setInputValue("cfg-townPrice", c.estates.townPrice || 4500);
+        this.setInputValue("cfg-townTax", c.estates.townTaxYield || 1200);
+        this.setInputValue("cfg-townRent", c.estates.townRent || 700);
+        this.setInputValue("cfg-castlePrice", c.estates.castlePrice || 8000);
+        this.setInputValue("cfg-castleTax", c.estates.castleTaxYield || 2500);
+        this.setInputValue("cfg-castleRent", c.estates.castleRent || 1500);
+
+        // 3. Dobytčí trh & Pastviny
+        var ls = c.livestock || {};
+        this.setInputValue("cfg-sheepPrice", ls.sheepPrice !== undefined ? ls.sheepPrice : 500);
+        this.setInputValue("cfg-sheepTax", ls.sheepTax !== undefined ? ls.sheepTax : 120);
+        this.setInputValue("cfg-sheepRent", ls.sheepRent !== undefined ? ls.sheepRent : 50);
+        this.setInputValue("cfg-pigsPrice", ls.pigsPrice !== undefined ? ls.pigsPrice : 600);
+        this.setInputValue("cfg-pigsTax", ls.pigsTax !== undefined ? ls.pigsTax : 150);
+        this.setInputValue("cfg-pigsRent", ls.pigsRent !== undefined ? ls.pigsRent : 75);
+        this.setInputValue("cfg-cattlePrice", ls.cattlePrice !== undefined ? ls.cattlePrice : 800);
+        this.setInputValue("cfg-cattleTax", ls.cattleTax !== undefined ? ls.cattleTax : 200);
+        this.setInputValue("cfg-cattleRent", ls.cattleRent !== undefined ? ls.cattleRent : 100);
+        this.setInputValue("cfg-capVillage", ls.capacityPerVillage !== undefined ? ls.capacityPerVillage : 3);
+        this.setInputValue("cfg-capTown", ls.capacityPerTown !== undefined ? ls.capacityPerTown : 2);
+        this.setInputValue("cfg-capStaje", ls.capacityPerStaje !== undefined ? ls.capacityPerStaje : 4);
+
+        // 4. Ušlechtilá zvířata, Zbrojnice & Výpravy
+        this.setInputValue("cfg-sokol", c.animalBasePrices.sokol || 400);
+        this.setInputValue("cfg-pes", c.animalBasePrices.pes || 500);
+        this.setInputValue("cfg-kun", c.animalBasePrices.kun || 600);
+        this.setInputValue("cfg-rentSingle", Math.round((c.animalRentRatios.single || 0.20) * 100));
+        this.setInputValue("cfg-rentPair", Math.round((c.animalRentRatios.pair || 0.40) * 100));
+        this.setInputValue("cfg-rentSet", Math.round((c.animalRentRatios.fullSet || 0.80) * 100));
+        this.setInputValue("cfg-pack1", c.itemPackPrices.tier1 || 2500);
+        this.setInputValue("cfg-pack2", c.itemPackPrices.tier2 || 7000);
+        this.setInputValue("cfg-pack3", c.itemPackPrices.tier3 || 12000);
+        this.setInputValue("cfg-u1Diff", c.quests.u1BaseDiff || 5);
+        this.setInputValue("cfg-u1Gold", c.quests.u1GoldReward || 1500);
+        this.setInputValue("cfg-u2Diff", c.quests.u2BaseDiff || 9);
+        this.setInputValue("cfg-u2Gold", c.quests.u2GoldReward || 3500);
+        this.setInputValue("cfg-u2Hearts", c.quests.u2HeartReward !== undefined ? c.quests.u2HeartReward : 1.0);
+        this.setInputValue("cfg-u3Diff", c.quests.u3BaseDiff || 13);
+        this.setInputValue("cfg-u3Gold", c.quests.u3GoldReward || 8000);
+        this.setInputValue("cfg-u3Hearts", c.quests.u3HeartReward !== undefined ? c.quests.u3HeartReward : 3.0);
     },
 
     setInputValue: function (id, val) {
@@ -416,60 +467,184 @@
         if (el) el.value = val;
     },
 
+    getInputNum: function (id, fallback) {
+        var el = document.getElementById(id);
+        if (!el || el.value === "") return fallback;
+        var n = Number(el.value);
+        return isNaN(n) ? fallback : n;
+    },
+
     readBalanceStudioInputs: function () {
-        var c = window.PRS_GameEngine.deepClone(this.activeConfig);
-        c.targetHearts = Number(document.getElementById("cfg-targetHearts").value) || 30;
-        c.startGold = Number(document.getElementById("cfg-startGold").value) || 10000;
-        c.passStartGold = Number(document.getElementById("cfg-passStartGold").value) || 3000;
-        c.animalBasePrices.sokol = Number(document.getElementById("cfg-sokol").value) || 400;
-        c.animalBasePrices.pes = Number(document.getElementById("cfg-pes").value) || 500;
-        c.animalBasePrices.kun = Number(document.getElementById("cfg-kun").value) || 600;
-        c.estates.villagePrices[0] = Number(document.getElementById("cfg-villagePrice").value) || 2000;
-        c.estates.townPrice = Number(document.getElementById("cfg-townPrice").value) || 4500;
-        c.estates.castlePrice = Number(document.getElementById("cfg-castlePrice").value) || 8000;
-        c.itemPackPrices.tier1 = Number(document.getElementById("cfg-pack1").value) || 2500;
-        c.itemPackPrices.tier2 = Number(document.getElementById("cfg-pack2").value) || 7000;
-        c.itemPackPrices.tier3 = Number(document.getElementById("cfg-pack3").value) || 12000;
+        var c = window.PRS_GameEngine.deepClone(this.activeConfig || window.PRS_DEFAULT_CONFIG);
+        if (!c.estates) c.estates = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG.estates);
+        if (!c.livestock) c.livestock = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG.livestock || {});
+        if (!c.animalBasePrices) c.animalBasePrices = {};
+        if (!c.animalRentRatios) c.animalRentRatios = {};
+        if (!c.itemPackPrices) c.itemPackPrices = {};
         if (!c.quests) c.quests = {};
-        c.quests.u1BaseDiff = Number(document.getElementById("cfg-u1Diff").value) || 5;
-        c.quests.u2BaseDiff = Number(document.getElementById("cfg-u2Diff").value) || 9;
-        c.quests.u3BaseDiff = Number(document.getElementById("cfg-u3Diff").value) || 13;
+
+        c.targetHearts = this.getInputNum("cfg-targetHearts", 30);
+        c.startGold = this.getInputNum("cfg-startGold", 10000);
+        c.passStartGold = this.getInputNum("cfg-passStartGold", 3000);
+        c.passStartGoldLandless = this.getInputNum("cfg-passStartGoldLandless", 5000);
+        c.estates.landlessTaxPenalty = this.getInputNum("cfg-landlessPenalty", 500);
+
+        var upgPrice = this.getInputNum("cfg-villageUpgPrice", 1500);
+        c.estates.villagePrices = [
+            this.getInputNum("cfg-villagePrice", 2000),
+            upgPrice,
+            upgPrice
+        ];
+        c.estates.villageTaxYield = [
+            this.getInputNum("cfg-villageTax1", 500),
+            this.getInputNum("cfg-villageTax2", 900),
+            this.getInputNum("cfg-villageTax3", 1400)
+        ];
+        c.estates.villageRent = [
+            this.getInputNum("cfg-villageRent1", 300),
+            this.getInputNum("cfg-villageRent2", 500),
+            this.getInputNum("cfg-villageRent3", 800)
+        ];
+        c.estates.townPrice = this.getInputNum("cfg-townPrice", 4500);
+        c.estates.townTaxYield = this.getInputNum("cfg-townTax", 1200);
+        c.estates.townRent = this.getInputNum("cfg-townRent", 700);
+        c.estates.castlePrice = this.getInputNum("cfg-castlePrice", 8000);
+        c.estates.castleTaxYield = this.getInputNum("cfg-castleTax", 2500);
+        c.estates.castleRent = this.getInputNum("cfg-castleRent", 1500);
+
+        c.livestock.sheepPrice = this.getInputNum("cfg-sheepPrice", 500);
+        c.livestock.sheepTax = this.getInputNum("cfg-sheepTax", 120);
+        c.livestock.sheepRent = this.getInputNum("cfg-sheepRent", 50);
+        c.livestock.pigsPrice = this.getInputNum("cfg-pigsPrice", 600);
+        c.livestock.pigsTax = this.getInputNum("cfg-pigsTax", 150);
+        c.livestock.pigsRent = this.getInputNum("cfg-pigsRent", 75);
+        c.livestock.cattlePrice = this.getInputNum("cfg-cattlePrice", 800);
+        c.livestock.cattleTax = this.getInputNum("cfg-cattleTax", 200);
+        c.livestock.cattleRent = this.getInputNum("cfg-cattleRent", 100);
+        c.livestock.capacityPerVillage = this.getInputNum("cfg-capVillage", 3);
+        c.livestock.capacityPerTown = this.getInputNum("cfg-capTown", 2);
+        c.livestock.capacityPerStaje = this.getInputNum("cfg-capStaje", 4);
+
+        c.animalBasePrices.sokol = this.getInputNum("cfg-sokol", 400);
+        c.animalBasePrices.pes = this.getInputNum("cfg-pes", 500);
+        c.animalBasePrices.kun = this.getInputNum("cfg-kun", 600);
+        c.animalRentRatios.single = Math.max(0.05, this.getInputNum("cfg-rentSingle", 20) / 100);
+        c.animalRentRatios.pair = Math.max(0.10, this.getInputNum("cfg-rentPair", 40) / 100);
+        c.animalRentRatios.fullSet = Math.max(0.20, this.getInputNum("cfg-rentSet", 80) / 100);
+
+        c.itemPackPrices.tier1 = this.getInputNum("cfg-pack1", 2500);
+        c.itemPackPrices.tier2 = this.getInputNum("cfg-pack2", 7000);
+        c.itemPackPrices.tier3 = this.getInputNum("cfg-pack3", 12000);
+
+        c.quests.u1BaseDiff = this.getInputNum("cfg-u1Diff", 5);
+        c.quests.u1GoldReward = this.getInputNum("cfg-u1Gold", 1500);
+        c.quests.u2BaseDiff = this.getInputNum("cfg-u2Diff", 9);
+        c.quests.u2GoldReward = this.getInputNum("cfg-u2Gold", 3500);
+        c.quests.u2HeartReward = this.getInputNum("cfg-u2Hearts", 1.0);
+        c.quests.u3BaseDiff = this.getInputNum("cfg-u3Diff", 13);
+        c.quests.u3GoldReward = this.getInputNum("cfg-u3Gold", 8000);
+        c.quests.u3HeartReward = this.getInputNum("cfg-u3Hearts", 3.0);
+
         this.activeConfig = c;
+        if (this.state && this.state.config) {
+            this.state.config = window.PRS_GameEngine.deepClone(c);
+        }
         return c;
+    },
+
+    resetBalanceToDefaults: function () {
+        this.activeConfig = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG);
+        if (this.state && this.state.config) {
+            this.state.config = window.PRS_GameEngine.deepClone(this.activeConfig);
+        }
+        this.renderBalanceStudioInputs();
+        var msgEl = document.getElementById("save-config-feedback");
+        if (msgEl) msgEl.textContent = "↺ Obnoveny původní výchozí hodnoty královské ekonomiky.";
     },
 
     runEconomySimulation: function (numGames) {
         var cfg = this.readBalanceStudioInputs();
         var simBoardSel = document.getElementById("sim-board-select");
-        var bCode = simBoardSel ? simBoardSel.value : "classic_96";
+        var simScenSel = document.getElementById("sim-scenario-select");
+        var simDiffSel = document.getElementById("sim-diff-select");
+        var simPlSel = document.getElementById("sim-players-select");
 
-        var result = window.PRS_GameEngine.simulateGames(numGames || 30, cfg, bCode);
+        var bCode = simBoardSel ? simBoardSel.value : "classic_96";
+        var simOpts = {
+            scenario: simScenSel ? simScenSel.value : "standard",
+            difficultyMode: simDiffSel ? simDiffSel.value : "normal",
+            playerCount: simPlSel ? Number(simPlSel.value) : 4
+        };
+
+        var result = window.PRS_GameEngine.simulateGames(numGames || 30, cfg, bCode, simOpts);
         var outBox = document.getElementById("sim-results-box");
         if (!outBox) return;
 
         var hb = result.avgWinnerHeartsBreakdown;
+        var wt = result.winsByType || {};
+        var botLabels = [
+            { key: "Bot_Aggressive", name: "⚔️ Válečník (Boj & Draci)", color: "#f87171" },
+            { key: "Bot_Breeder", name: "🌾 Chovatel (Sady & Dobytek)", color: "#4ade80" },
+            { key: "Bot_Noble", name: "👑 Šlechtic (Panství & Plesy)", color: "#facc15" },
+            { key: "Bot_Balanced", name: "⚖️ Všestranný rytíř", color: "#38bdf8" },
+            { key: "Bot_Easy", name: "🛡️ Opatrný panoš", color: "#cbd5e1" }
+        ];
+        var winRowsHtml = "";
+        for (var bi = 0; bi < botLabels.length; bi++) {
+            var bl = botLabels[bi];
+            var wins = wt[bl.key] || 0;
+            var pct = Math.round((wins / result.gamesSimulated) * 100);
+            winRowsHtml +=
+                '<div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.35rem; font-size:0.8rem;">' +
+                '  <div style="width:190px; color:' + bl.color + '; font-weight:600;">' + bl.name + '</div>' +
+                '  <div style="flex:1; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">' +
+                '    <div style="width:' + pct + '%; height:100%; background:' + bl.color + ';"></div>' +
+                '  </div>' +
+                '  <div style="width:85px; text-align:right; color:#f8fafc; font-weight:700;">' + wins + '× (' + pct + ' %)</div>' +
+                '</div>';
+        }
+
         outBox.innerHTML =
-            '<div class="sim-metrics-grid">' +
+            '<div class="sim-metrics-grid" style="margin-bottom:0.9rem;">' +
             '  <div class="sim-metric-card">' +
-            '    <span>⏱️ Odhad stolní herní doby (4 hráči)</span>' +
+            '    <span>⏱️ Odhad stolní herní doby (' + result.playerCount + ' hráči)</span>' +
             '    <strong>' + result.estTabletopHoursText + '</strong>' +
-            '    <small>(' + result.estTabletopMinutes + ' minut u stolu s kostkami)</small>' +
+            '    <small>(' + result.estTabletopMinutes + ' min u stolu | ' + result.gamesSimulated + ' her)</small>' +
             '  </div>' +
             '  <div class="sim-metric-card">' +
-            '    <span>🔄 Průměrný počet kol do ' + result.targetHearts + ' 💖</span>' +
+            '    <span>🔄 Průměrná délka partie</span>' +
             '    <strong>' + result.avgRounds + ' kol</strong>' +
             '    <small>(celkem ' + result.avgTurns + ' jednotlivých tahů)</small>' +
             '  </div>' +
             '  <div class="sim-metric-card">' +
-            '    <span>💰 Průměrná hotovost vítěze</span>' +
+            '    <span>💰 Hotovost &amp; Celkové jmění vítěze</span>' +
             '    <strong>' + result.avgWinnerGold.toLocaleString("cs-CZ") + ' zl.</strong>' +
-            '    <small>Testováno na ' + result.gamesSimulated + ' partiích</small>' +
+            '    <small>Čisté jmění vč. panství: ' + (result.avgWinnerNetWorth || 0).toLocaleString("cs-CZ") + ' zl.</small>' +
             '  </div>' +
             '  <div class="sim-metric-card">' +
-            '    <span>💖 Odkud plynou vítězná Srdce</span>' +
-            '    <strong>Slavnosti: ' + hb.festivals + ' | Úkoly: ' + hb.quests + '</strong>' +
-            '    <small>Chov zvířat: ' + hb.breeding + ' 💖 | Náhoda: ' + hb.chance + ' 💖</small>' +
+            '    <span>🏛️ Výběr daní &amp; Nájemného vítěze</span>' +
+            '    <strong>+' + (result.avgTaxesCollected || 0).toLocaleString("cs-CZ") + ' zl. daně</strong>' +
+            '    <small>Vybrané mýtné od soupeřů: +' + (result.avgRentCollected || 0).toLocaleString("cs-CZ") + ' zl.</small>' +
             '  </div>' +
+            '  <div class="sim-metric-card">' +
+            '    <span>🏰 Panství vítěze na konci hry</span>' +
+            '    <strong>' + result.avgWinnerVillages + ' 🏘️ | ' + result.avgWinnerTowns + ' 🏙️ | ' + result.avgWinnerCastles + ' 🏯</strong>' +
+            '    <small>Vesnice / Města / Hrady v držení vítěze</small>' +
+            '  </div>' +
+            '  <div class="sim-metric-card">' +
+            '    <span>🌾 Chov dobytka &amp; Skolení draci</span>' +
+            '    <strong>' + result.avgWinnerLivestock + ' ks dobytka | ' + result.avgDragonsSlain + ' 🐉</strong>' +
+            '    <small>Přikoupená stáda na pastvinách &amp; draci (Bankroty: ' + result.avgEliminations + ')</small>' +
+            '  </div>' +
+            '  <div class="sim-metric-card" style="grid-column: span 2;">' +
+            '    <span>💖 Odkud plynou vítězná Srdce princezny</span>' +
+            '    <strong>Slavnosti: ' + hb.festivals + ' 💖 &nbsp;|&nbsp; Výpravy (U2/U3): ' + hb.quests + ' 💖 &nbsp;|&nbsp; Chov &amp; Sady: ' + hb.breeding + ' 💖</strong>' +
+            '    <small>Karty Náhody, Rytířské duely a Přípitky: ' + hb.chance + ' 💖</small>' +
+            '  </div>' +
+            '</div>' +
+            '<div style="background:rgba(0,0,0,0.38); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.85rem 1rem;">' +
+            '  <div style="font-weight:700; color:var(--gold-light); font-size:0.86rem; margin-bottom:0.55rem;">🏆 Úspěšnost strategií (Win-Rate archetypů za ' + result.gamesSimulated + ' her)</div>' +
+            winRowsHtml +
             '</div>';
 
         fetch("api.ashx?action=log-telemetry", {
@@ -478,7 +653,7 @@
             body: JSON.stringify({
                 eventType: "SimulationRun",
                 turnNumber: Math.round(result.avgRounds),
-                message: "Simulace " + result.gamesSimulated + " her (" + result.estTabletopHoursText + ")",
+                message: "Simulace " + result.gamesSimulated + " her [" + bCode + "/" + simOpts.scenario + "] (" + result.estTabletopHoursText + ")",
                 payloadJson: JSON.stringify(result)
             })
         }).catch(function () { });
@@ -487,25 +662,25 @@
     saveConfigToServer: function () {
         var cfg = this.readBalanceStudioInputs();
         var msgEl = document.getElementById("save-config-feedback");
-        if (msgEl) msgEl.textContent = "Ukládám konfiguraci do databáze [prs].[prs_GameConfigs]...";
+        if (msgEl) msgEl.textContent = "⏳ Ukládám konfiguraci do databáze [prs].[prs_GameConfigs]...";
 
         fetch("api.ashx?action=save-config", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                versionName: "v1.1-upraveny-balanc",
+                versionName: "v2.0-nova-ekonomika",
                 targetHearts: cfg.targetHearts,
                 startGold: cfg.startGold,
                 passStartGold: cfg.passStartGold,
                 configJson: JSON.stringify(cfg),
-                notes: "Uloženo z Balancovacího studia"
+                notes: "Uloženo z Administrace – Balancovací studio v2.0"
             })
         })
             .then(function (r) { return r.json(); })
             .then(function (res) {
                 if (msgEl) {
                     msgEl.textContent = (res && res.ok)
-                        ? "✅ Konfigurace úspěšně uložena do databáze a aktivována pro nové hry!"
+                        ? "✅ Konfigurace uložena do DB a aktivována pro všechny nové hry!"
                         : "✅ Konfigurace aktivována pro tuto relaci.";
                 }
             })

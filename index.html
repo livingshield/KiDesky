@@ -36,13 +36,13 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611050090">
+    <link rel="stylesheet" href="css/main.css?v=202611050091">
 
-    <link rel="stylesheet" href="css/board.css?v=202611050090">
+    <link rel="stylesheet" href="css/board.css?v=202611050091">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611050090">
+    <link rel="stylesheet" href="css/modals.css?v=202611050091">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611050090">
+    <link rel="stylesheet" href="css/mobile.css?v=202611050091">
 
 </head>
 
@@ -86,7 +86,6 @@
 
             <button id="nav-btn-rules" class="nav-tab-btn" onclick="PRS_App.switchTab('rules')">📜 Pravidla &amp; Katalog</button>
 
-            <button id="nav-btn-balance" class="nav-tab-btn" onclick="PRS_App.switchTab('balance')">⚖️ Balancovací Studio</button>
             <button id="nav-btn-admin" class="nav-tab-btn" onclick="PRS_App.switchTab('admin')" style="display:none; color:var(--gold-light); border-color:var(--gold);">🛡️ Administrace</button>
 
         </nav>
@@ -1530,182 +1529,8 @@
 
         </section>
 
-        <!-- ================================================================
-
-             ZÁLOŽKA 4: BALANCOVACÍ STUDIO & SIMULÁTOR EKONOMIKY
-
-             ================================================================ -->
-
-        <section id="tab-balance" style="display:none">
-
-            <div class="prs-card">
-
-                <h2>⚖️ Balancovací Studio &amp; Automatický Simulátor Ekonomiky</h2>
-
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.1rem;">
-
-                    Zde můžeš upravovat ceny, výnosy a cílový počet Srdcí a jedním kliknutím nechat <strong>4 PC rytíře odehrát 30 nebo 100 celých her</strong>,
-
-                    abychom okamžitě viděli, jak dlouho hra trvá u stolu (cíl: <strong>1–2 hodiny</strong>) a zda hráči příliš rychle nebohatnou či neprodělávají.
-
-                </p>
-
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:0.85rem; margin-bottom:1.2rem;">
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">💖 Cílový počet Srdcí:</label>
-
-                        <input type="number" id="cfg-targetHearts" class="prs-input" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">💰 Startovní zlato (zl.):</label>
-
-                        <input type="number" id="cfg-startGold" class="prs-input" step="500" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🏰 Průchod STARTem (+zl.):</label>
-
-                        <input type="number" id="cfg-passStartGold" class="prs-input" step="500" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🦅 Základ ceny Sokola (× sada):</label>
-
-                        <input type="number" id="cfg-sokol" class="prs-input" step="50" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🐕 Základ ceny Psa (× sada):</label>
-
-                        <input type="number" id="cfg-pes" class="prs-input" step="50" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🐎 Základ ceny Koně (× sada):</label>
-
-                        <input type="number" id="cfg-kun" class="prs-input" step="50" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🏘️ Cena Malé vesnice (zl.):</label>
-
-                        <input type="number" id="cfg-villagePrice" class="prs-input" step="250" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🏙️ Cena Města (zl.):</label>
-
-                        <input type="number" id="cfg-townPrice" class="prs-input" step="500" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🏯 Cena Hradu (zl.):</label>
-
-                        <input type="number" id="cfg-castlePrice" class="prs-input" step="500" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🎒 Balíček Věci 1 (zl.):</label>
-
-                        <input type="number" id="cfg-pack1" class="prs-input" step="500" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">⚔️ Balíček Věci 2 (zl.):</label>
-
-                        <input type="number" id="cfg-pack2" class="prs-input" step="500" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">👑 Balíček Věci 3 (zl.):</label>
-
-                        <input type="number" id="cfg-pack3" class="prs-input" step="500" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🐗 Střední obtížnost Zvěře (U1):</label>
-
-                        <input type="number" id="cfg-u1Diff" class="prs-input" min="2" max="15" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">👹 Střední obtížnost Monster (U2):</label>
-
-                        <input type="number" id="cfg-u2Diff" class="prs-input" min="4" max="20" />
-
-                    </div>
-
-                    <div>
-
-                        <label style="font-size:0.8rem; color:var(--gold-light);">🐲 Střední obtížnost Draků (U3):</label>
-
-                        <input type="number" id="cfg-u3Diff" class="prs-input" min="6" max="25" />
-
-                    </div>
-
-                </div>
-
-                <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.75rem; padding-top:0.5rem; border-top:1px solid rgba(255,255,255,0.08);">
-
-                    <select id="sim-board-select" class="prs-select" style="width:auto">
-
-                        <option value="classic_96">Plán: Klasický (96 polí)</option>
-
-                        <option value="dragon_4598">Plán: Drak &amp; Lesní věž</option>
-
-                        <option value="compact_48">Plán: Zkrácený okruh</option>
-
-                        <option value="procedural">Plán: Procedurální</option>
-
-                    </select>
-
-                    <button class="btn-gold-lg" onclick="PRS_App.runEconomySimulation(30)">⚡ Odsimulovat 30 her (Rychlý test)</button>
-
-                    <button class="btn-secondary" onclick="PRS_App.runEconomySimulation(100)">📊 Hloubkový test (100 her)</button>
-
-                    <button class="btn-action-buy" onclick="PRS_App.saveConfigToServer()">💾 Uložit tento balanc do DB (`prs_GameConfigs`)</button>
-
-                    <span id="save-config-feedback" style="font-size:0.85rem; color:var(--gold-light);"></span>
-
-                </div>
-
-                <div id="sim-results-box"></div>
-
-            </div>
-
-        </section>
-
         <!-- ========================================================================
-             ZÁLOŽKA 5: 🛡️ KRÁLOVSKÁ ADMINISTRACE (VIDEA, UŽIVATELÉ, RELACE, SYSTÉM)
+             ZÁLOŽKA 4: 🛡️ KRÁLOVSKÁ ADMINISTRACE (VIDEA, HUDBA, UŽIVATELÉ, BALANC, SYSTÉM)
              ======================================================================== -->
         <section id="tab-admin" style="display:none">
             <div class="admin-container" style="max-width:1200px; margin:0 auto; padding:1.25rem;">
@@ -1874,15 +1699,223 @@
                         </div>
                     </div>
 
-                    <!-- 5. Herní pravidla & Balanc -->
+                    <!-- 5. Herní pravidla & Balanc (Kompletní Balancovací Studio v2.0) -->
                     <div id="admin-subtab-balance" class="admin-subtab-pane" style="display:none;">
-                        <div style="margin-bottom:1rem; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:1rem;">
-                            <div style="font-weight:700; color:var(--gold-light);">⚖️ Globální ekonomika a parametry království (prs_GameConfigs)</div>
-                            <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">Zde můžete upravit globální startovní zlato, odměny za draky, mýtné a násobitele přímo pro ostrý server.</div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.1rem; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); border-radius:10px; padding:1rem;">
+                            <div>
+                                <h3 style="margin:0; color:var(--gold-light); font-family:'Cinzel',serif;">⚖️ Balancovací Studio &amp; Simulátor Nové Ekonomiky</h3>
+                                <div style="font-size:0.83rem; color:var(--text-muted); margin-top:4px;">
+                                    Upravte makroekonomiku království, výnosy panství, ceny dobytčího trhu, sady zvířat i odměny za draky. Simulátor okamžitě odehraje desítky celých her se všemi 5 plány a 4 scénáři.
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                                <button type="button" class="btn-secondary" style="font-size:0.8rem;" onclick="PRS_App.resetBalanceToDefaults()">↺ Obnovit výchozí hodnoty</button>
+                                <button type="button" class="btn-action-buy" style="font-size:0.8rem;" onclick="PRS_App.saveConfigToServer()">💾 Uložit balanc do DB (prs_GameConfigs)</button>
+                            </div>
                         </div>
-                        <div style="text-align:center; padding:2rem;">
-                            <button class="btn-primary" onclick="PRS_App.switchTab('balance')">⚡ Otevřít kompletní Balancovací Studio &amp; Simulátor</button>
+
+                        <!-- SEKCE 1: Makroekonomika & Start -->
+                        <div style="background:rgba(0,0,0,0.32); border:1px solid rgba(212,175,55,0.22); border-radius:10px; padding:0.9rem 1rem; margin-bottom:0.9rem;">
+                            <div style="font-weight:700; color:var(--gold-light); font-size:0.9rem; margin-bottom:0.65rem;">👑 1. Základní makroekonomika, Start &amp; Bezzemci</div>
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap:0.75rem;">
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">💖 Cílový počet Srdcí (Standard):</label>
+                                    <input type="number" id="cfg-targetHearts" class="prs-input" min="10" max="60" />
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">💰 Startovní zlato rytíře (zl.):</label>
+                                    <input type="number" id="cfg-startGold" class="prs-input" step="500" />
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">🏰 Průchod STARTem – majitel (zl.):</label>
+                                    <input type="number" id="cfg-passStartGold" class="prs-input" step="500" />
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">🌱 Průchod STARTem – bezzemek (zl.):</label>
+                                    <input type="number" id="cfg-passStartGoldLandless" class="prs-input" step="500" />
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">⚖️ Pokuta bezzemka u Výběrčího (zl.):</label>
+                                    <input type="number" id="cfg-landlessPenalty" class="prs-input" step="100" />
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- SEKCE 2: Panství (Vesnice, Města, Hrady) -->
+                        <div style="background:rgba(0,0,0,0.32); border:1px solid rgba(212,175,55,0.22); border-radius:10px; padding:0.9rem 1rem; margin-bottom:0.9rem;">
+                            <div style="font-weight:700; color:var(--gold-light); font-size:0.9rem; margin-bottom:0.65rem;">🏰 2. Panství – Vesnice (1★–3★), Královská města &amp; Hrady (Ceny, Daně a Nájemné)</div>
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap:0.75rem;">
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">🏘️ Cena Malé vesnice 1★ (zl.):</label>
+                                    <input type="number" id="cfg-villagePrice" class="prs-input" step="250" />
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">⬆️ Cena povýšení vesnice 2★/3★:</label>
+                                    <input type="number" id="cfg-villageUpgPrice" class="prs-input" step="250" />
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#fde047;">🪙 Daň z vesnice 1★ / 2★ / 3★:</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-villageTax1" class="prs-input" step="50" title="Daň 1★" />
+                                        <input type="number" id="cfg-villageTax2" class="prs-input" step="50" title="Daň 2★" />
+                                        <input type="number" id="cfg-villageTax3" class="prs-input" step="50" title="Daň 3★" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#fca5a5;">🤝 Nájem vesnice 1★ / 2★ / 3★:</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-villageRent1" class="prs-input" step="50" title="Nájem 1★" />
+                                        <input type="number" id="cfg-villageRent2" class="prs-input" step="50" title="Nájem 2★" />
+                                        <input type="number" id="cfg-villageRent3" class="prs-input" step="50" title="Nájem 3★" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">🏙️ Město: Cena / Daň / Nájem:</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-townPrice" class="prs-input" step="500" title="Cena Města" />
+                                        <input type="number" id="cfg-townTax" class="prs-input" step="100" title="Daň z Města" />
+                                        <input type="number" id="cfg-townRent" class="prs-input" step="100" title="Nájem Města" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">🏯 Hrad: Cena / Daň / Nájem:</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-castlePrice" class="prs-input" step="500" title="Cena Hradu" />
+                                        <input type="number" id="cfg-castleTax" class="prs-input" step="100" title="Daň z Hradu" />
+                                        <input type="number" id="cfg-castleRent" class="prs-input" step="100" title="Nájem Hradu" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEKCE 3: Dobytčí trh & Pastviny -->
+                        <div style="background:rgba(20,83,45,0.18); border:1px solid rgba(74,222,128,0.3); border-radius:10px; padding:0.9rem 1rem; margin-bottom:0.9rem;">
+                            <div style="font-weight:700; color:#86efac; font-size:0.9rem; margin-bottom:0.65rem;">🌾 3. Dobytčí trh, Pastviny &amp; Královské stáje (Nová ekonomika chovu)</div>
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem;">
+                                <div>
+                                    <label style="font-size:0.76rem; color:#bbf7d0;">🐑 Ovce (Cena / Daň +zl. / Nájem +zl.):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-sheepPrice" class="prs-input" step="50" title="Cena Ovce" />
+                                        <input type="number" id="cfg-sheepTax" class="prs-input" step="10" title="Daňový výnos Ovce" />
+                                        <input type="number" id="cfg-sheepRent" class="prs-input" step="10" title="Bonus k nájmu vesnice" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#bbf7d0;">🐖 Prase (Cena / Daň +zl. / Nájem +zl.):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-pigsPrice" class="prs-input" step="50" title="Cena Prasete" />
+                                        <input type="number" id="cfg-pigsTax" class="prs-input" step="10" title="Daňový výnos Prasete" />
+                                        <input type="number" id="cfg-pigsRent" class="prs-input" step="10" title="Bonus k nájmu vesnice" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#bbf7d0;">🐄 Kráva (Cena / Daň +zl. / Nájem +zl.):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-cattlePrice" class="prs-input" step="50" title="Cena Krávy" />
+                                        <input type="number" id="cfg-cattleTax" class="prs-input" step="10" title="Daňový výnos Krávy" />
+                                        <input type="number" id="cfg-cattleRent" class="prs-input" step="10" title="Bonus k nájmu vesnice" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#bbf7d0;">🏡 Kapacita pastvin (Vesnice / Město / Stáje):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-capVillage" class="prs-input" min="1" max="10" title="Sloty za každou Vesnici" />
+                                        <input type="number" id="cfg-capTown" class="prs-input" min="0" max="10" title="Sloty za každé Město" />
+                                        <input type="number" id="cfg-capStaje" class="prs-input" min="0" max="12" title="Sloty za Královské stáje" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEKCE 4: Ušlechtilá zvířata, Zbrojnice & Bojové výpravy -->
+                        <div style="background:rgba(0,0,0,0.32); border:1px solid rgba(212,175,55,0.22); border-radius:10px; padding:0.9rem 1rem; margin-bottom:1rem;">
+                            <div style="font-weight:700; color:var(--gold-light); font-size:0.9rem; margin-bottom:0.65rem;">🐎 4. Ušlechtilá zvířata (Sady), Zbrojnice &amp; Bojové výpravy (U1 / U2 / U3)</div>
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap:0.75rem;">
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">🦅🐕🐎 Základ ceny (Sokol / Pes / Kůň × sada):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-sokol" class="prs-input" step="50" title="Sokol × sada" />
+                                        <input type="number" id="cfg-pes" class="prs-input" step="50" title="Pes × sada" />
+                                        <input type="number" id="cfg-kun" class="prs-input" step="50" title="Kůň × sada" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">📈 Nájem zvířat % (1 kus / Pár / Sada 3):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-rentSingle" class="prs-input" step="5" min="5" max="100" title="1 kus (%)" />
+                                        <input type="number" id="cfg-rentPair" class="prs-input" step="5" min="10" max="150" title="Pár (%)" />
+                                        <input type="number" id="cfg-rentSet" class="prs-input" step="5" min="20" max="200" title="Celá sada (%)" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">🎒 Balíčky výbavy 1 / 2 / 3 (zl.):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-pack1" class="prs-input" step="500" title="Balíček 1" />
+                                        <input type="number" id="cfg-pack2" class="prs-input" step="500" title="Balíček 2" />
+                                        <input type="number" id="cfg-pack3" class="prs-input" step="500" title="Balíček 3" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">🐗 Zvěř U1 (Obtížnost / Odměna zl.):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-u1Diff" class="prs-input" min="2" max="15" title="Obtížnost U1" />
+                                        <input type="number" id="cfg-u1Gold" class="prs-input" step="250" title="Odměna zl. U1" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#cbd5e1;">👹 Monstra U2 (Obtíž. / Zlato / 💖):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-u2Diff" class="prs-input" min="4" max="20" title="Obtížnost U2" />
+                                        <input type="number" id="cfg-u2Gold" class="prs-input" step="500" title="Odměna zl. U2" />
+                                        <input type="number" id="cfg-u2Hearts" class="prs-input" step="0.5" title="Odměna Srdcí U2" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style="font-size:0.76rem; color:#fca5a5;">🐲 Draci U3 (Obtíž. / Zlato / 💖):</label>
+                                    <div style="display:flex; gap:4px;">
+                                        <input type="number" id="cfg-u3Diff" class="prs-input" min="6" max="25" title="Obtížnost U3" />
+                                        <input type="number" id="cfg-u3Gold" class="prs-input" step="500" title="Odměna zl. U3" />
+                                        <input type="number" id="cfg-u3Hearts" class="prs-input" step="0.5" title="Odměna Srdcí U3" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OVLÁDACÍ PANEL SIMULÁTORU -->
+                        <div style="background:rgba(15,23,42,0.75); border:1.5px solid var(--gold); border-radius:10px; padding:0.9rem 1rem; margin-bottom:1rem;">
+                            <div style="font-weight:700; color:var(--gold-light); font-size:0.9rem; margin-bottom:0.6rem;">🧪 Spustit Monte-Carlo Simulaci Partiček (AI Rytíři)</div>
+                            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.65rem;">
+                                <select id="sim-board-select" class="prs-select" style="width:auto; font-size:0.82rem;">
+                                    <option value="classic_96">🗺️ Plán: Klasický (96 polí)</option>
+                                    <option value="grand_120">👑 Plán: Královská pouť (120 polí)</option>
+                                    <option value="dragon_4598">🐉 Plán: Drak &amp; Lesní věž (64 polí)</option>
+                                    <option value="compact_48">⚡ Plán: Zkrácený okruh (48 polí)</option>
+                                    <option value="procedural">🎲 Plán: Procedurální</option>
+                                </select>
+                                <select id="sim-scenario-select" class="prs-select" style="width:auto; font-size:0.82rem;">
+                                    <option value="standard">💖 Scénář: Ruka princezny (Standard)</option>
+                                    <option value="slayer">🐉 Scénář: Lovci draků (2 draci + 15 💖)</option>
+                                    <option value="tycoon">🏰 Scénář: Královský magnát (8 sídel + 15 💖)</option>
+                                    <option value="blitz">⏱️ Scénář: Rychlá truhlice (15 kol)</option>
+                                </select>
+                                <select id="sim-diff-select" class="prs-select" style="width:auto; font-size:0.82rem;">
+                                    <option value="normal">🛡️ Režim: Normální</option>
+                                    <option value="hard">⚔️ Režim: Těžký</option>
+                                    <option value="ultimate">💀 Režim: Ultimate (Eliminace při bankrotu)</option>
+                                </select>
+                                <select id="sim-players-select" class="prs-select" style="width:auto; font-size:0.82rem;">
+                                    <option value="3">👥 3 rytíři u stolu</option>
+                                    <option value="4" selected>👥 4 rytíři u stolu</option>
+                                    <option value="5">👥 5 rytířů u stolu</option>
+                                    <option value="6">👥 6 rytířů u stolu</option>
+                                </select>
+                                <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.45rem 0.95rem;" onclick="PRS_App.runEconomySimulation(30)">⚡ Odsimulovat 30 her</button>
+                                <button class="btn-secondary" style="font-size:0.84rem; padding:0.45rem 0.95rem;" onclick="PRS_App.runEconomySimulation(100)">📊 Hloubkový test (100 her)</button>
+                                <span id="save-config-feedback" style="font-size:0.83rem; color:#4ade80; font-weight:600;"></span>
+                            </div>
+                        </div>
+
+                        <div id="sim-results-box"></div>
                     </div>
 
                     <!-- 6. Telemetrie & Statistiky -->
@@ -2520,19 +2553,19 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611050090" defer></script>
-    <script src="js/game-boards.js?v=202611050090" defer></script>
-    <script src="js/game-engine.js?v=202611050090" defer></script>
-    <script src="js/game-combat-ai.js?v=202611050090" defer></script>
-    <script src="js/app-audio.js?v=202611050090" defer></script>
-    <script src="js/app.js?v=202611050090" defer></script>
-    <script src="js/app-board.js?v=202611050090" defer></script>
-    <script src="js/app-hud.js?v=202611050090" defer></script>
-    <script src="js/app-modals.js?v=202611050090" defer></script>
-    <script src="js/app-online.js?v=202611050090" defer></script>
-    <script src="js/app-catalog.js?v=202611050090" defer></script>
-    <script src="js/app-admin.js?v=202611050090" defer></script>
-    <script src="js/app-musicwidget.js?v=202611050090" defer></script>
+    <script src="js/game-data.js?v=202611050091" defer></script>
+    <script src="js/game-boards.js?v=202611050091" defer></script>
+    <script src="js/game-engine.js?v=202611050091" defer></script>
+    <script src="js/game-combat-ai.js?v=202611050091" defer></script>
+    <script src="js/app-audio.js?v=202611050091" defer></script>
+    <script src="js/app.js?v=202611050091" defer></script>
+    <script src="js/app-board.js?v=202611050091" defer></script>
+    <script src="js/app-hud.js?v=202611050091" defer></script>
+    <script src="js/app-modals.js?v=202611050091" defer></script>
+    <script src="js/app-online.js?v=202611050091" defer></script>
+    <script src="js/app-catalog.js?v=202611050091" defer></script>
+    <script src="js/app-admin.js?v=202611050091" defer></script>
+    <script src="js/app-musicwidget.js?v=202611050091" defer></script>
     <script>
         (function () {
             function bootApp() {

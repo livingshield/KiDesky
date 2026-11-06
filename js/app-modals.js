@@ -720,10 +720,21 @@
             html.push('  </div>');
             html.push('</div>');
 
+            var lsCfgMod = (this.state && this.state.config && this.state.config.livestock) ? this.state.config.livestock : {};
+            var sPr = (lsCfgMod.sheepPrice !== undefined) ? Number(lsCfgMod.sheepPrice) : 500;
+            var sTx = (lsCfgMod.sheepTax !== undefined) ? Number(lsCfgMod.sheepTax) : 120;
+            var sRn = (lsCfgMod.sheepRent !== undefined) ? Number(lsCfgMod.sheepRent) : 50;
+            var pPr = (lsCfgMod.pigsPrice !== undefined) ? Number(lsCfgMod.pigsPrice) : 600;
+            var pTx = (lsCfgMod.pigsTax !== undefined) ? Number(lsCfgMod.pigsTax) : 150;
+            var pRn = (lsCfgMod.pigsRent !== undefined) ? Number(lsCfgMod.pigsRent) : 75;
+            var cPr = (lsCfgMod.cattlePrice !== undefined) ? Number(lsCfgMod.cattlePrice) : 800;
+            var cTx = (lsCfgMod.cattleTax !== undefined) ? Number(lsCfgMod.cattleTax) : 200;
+            var cRn = (lsCfgMod.cattleRent !== undefined) ? Number(lsCfgMod.cattleRent) : 100;
+
             var catalog = [
-                { id: "sheep", name: "Chovná ovce", icon: "🐑", price: 500, taxBonus: 120, rentBonus: 50, desc: "Nenáročný chov pro pastviny. Trvale zvyšuje daň u Výběrčího daní o +120 zl. a mýtné tvých vesnic o +50 zl." },
-                { id: "pigs", name: "Královské prase", icon: "🐖", price: 600, taxBonus: 150, rentBonus: 75, desc: "Tučný výnos pro osady. Trvale zvyšuje daň u Výběrčího daní o +150 zl. a mýtné tvých vesnic o +75 zl." },
-                { id: "cattle", name: "Ušlechtilý skot (Kráva)", icon: "🐄", price: 800, taxBonus: 200, rentBonus: 100, desc: "Špičkový velký dobytek. Trvale zvyšuje daň u Výběrčího daní o +200 zl. a mýtné tvých vesnic o +100 zl." }
+                { id: "sheep", name: "Chovná ovce", icon: "🐑", price: sPr, taxBonus: sTx, rentBonus: sRn, desc: "Nenáročný chov pro pastviny. Trvale zvyšuje daň u Výběrčího daní o +" + sTx + " zl. a mýtné tvých vesnic o +" + sRn + " zl." },
+                { id: "pigs", name: "Královské prase", icon: "🐖", price: pPr, taxBonus: pTx, rentBonus: pRn, desc: "Tučný výnos pro osady. Trvale zvyšuje daň u Výběrčího daní o +" + pTx + " zl. a mýtné tvých vesnic o +" + pRn + " zl." },
+                { id: "cattle", name: "Ušlechtilý skot (Kráva)", icon: "🐄", price: cPr, taxBonus: cTx, rentBonus: cRn, desc: "Špičkový velký dobytek. Trvale zvyšuje daň u Výběrčího daní o +" + cTx + " zl. a mýtné tvých vesnic o +" + cRn + " zl." }
             ];
 
             for (var c = 0; c < catalog.length; c++) {

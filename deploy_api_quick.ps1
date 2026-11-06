@@ -18,7 +18,7 @@ if (Test-Path $configPath) {
 $credentials = New-Object System.Net.NetworkCredential($FtpUsername, $FtpPassword)
 $remoteBases = @("/www/apps/KiDesky/", "/www/wwwroot/apps/KiDesky/")
 
-$filesToDeploy = @("index.html", "js/app-musicwidget.js")
+$filesToDeploy = @("index.html", "js/game-data.js", "js/game-engine.js", "js/game-combat-ai.js", "js/app.js", "js/app-hud.js", "js/app-modals.js", "js/app-catalog.js")
 
 foreach ($relPath in $filesToDeploy) {
     if ($relPath -like "*.exe*") { continue }
@@ -50,4 +50,5 @@ foreach ($relPath in $filesToDeploy) {
     }
 }
 Write-Host "All files deployed to both roots successfully!" -ForegroundColor Green
+
 

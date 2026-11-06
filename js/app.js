@@ -255,6 +255,33 @@ window.PRS_App = {
 
             self.checkUrlRoomParam();
 
+            fetch("api.ashx?action=get-config")
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok && res.configJson) {
+                        try {
+                            var srvCfg = JSON.parse(res.configJson);
+                            if (srvCfg && typeof srvCfg === "object") {
+                                var merged = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG);
+                                for (var k in srvCfg) {
+                                    if (srvCfg.hasOwnProperty(k)) {
+                                        if (srvCfg[k] && typeof srvCfg[k] === "object" && !Array.isArray(srvCfg[k]) && merged[k] && typeof merged[k] === "object") {
+                                            for (var sk in srvCfg[k]) {
+                                                if (srvCfg[k].hasOwnProperty(sk)) merged[k][sk] = srvCfg[k][sk];
+                                            }
+                                        } else {
+                                            merged[k] = srvCfg[k];
+                                        }
+                                    }
+                                }
+                                self.activeConfig = merged;
+                                self.renderBalanceStudioInputs();
+                            }
+                        } catch (e) { }
+                    }
+                })
+                .catch(function () { });
+
         }, 60);
 
         // Prevence nežádoucího autofillu prohlížeče (např. automatické vyplnění e-mailu do kódu stolu)
@@ -883,9 +910,15 @@ window.PRS_App = {
 
     switchTab: function (tabId) {
 
+        if (tabId === "balance") {
+            this.switchTab("admin");
+            if (this.switchAdminSubtab) this.switchAdminSubtab("balance");
+            return;
+        }
+
         this.activeTab = tabId;
 
-        var tabs = ["lobby", "board", "rules", "balance", "admin"];
+        var tabs = ["lobby", "board", "rules", "admin"];
 
         for (var i = 0; i < tabs.length; i++) {
 

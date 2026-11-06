@@ -2051,6 +2051,29 @@
 
         }
 
+        // 7b. Dobytčí trh & Pastviny (nákup skotu, prasat a ovcí u Obchodníka nebo ve Stájích)
+        if ((pa.canShopLivestock || pa.canShopMerchant) && this.buyLivestock) {
+            var lsSt = this.getEffectiveStats(state, bot);
+            var lsCfg = (state.config && state.config.livestock) ? state.config.livestock : {};
+            var cPrice = Number(lsCfg.cattlePrice) || 800;
+            var pPrice = Number(lsCfg.pigsPrice) || 600;
+            var sPrice = Number(lsCfg.sheepPrice) || 500;
+            var minKeep = (bot.type === "Bot_Breeder" || bot.type === "Bot_Noble") ? Math.round(reserveGold * 0.4) : reserveGold;
+            var maxBuysThisTurn = (bot.type === "Bot_Breeder") ? 3 : 2;
+            var boughtCnt = 0;
+            while (lsSt.extraLivestockCount < lsSt.livestockCapacity && boughtCnt < maxBuysThisTurn) {
+                var chosenLs = null;
+                if (bot.gold - cPrice >= minKeep) chosenLs = "cattle";
+                else if (bot.gold - pPrice >= minKeep) chosenLs = "pigs";
+                else if (bot.gold - sPrice >= minKeep) chosenLs = "sheep";
+                if (!chosenLs) break;
+                var buyRes = this.buyLivestock(state, bot.index, chosenLs);
+                if (!buyRes || !buyRes.ok) break;
+                boughtCnt++;
+                lsSt = this.getEffectiveStats(state, bot);
+            }
+        }
+
         // 8. Šatlava
 
         if (pa.canPayPrisonBail) {
@@ -2223,7 +2246,7 @@
 
     // ========================================================================,
 
-    simulateGames: function (numGames, configOverride, boardCode) {
+    simulateGames: function (numGames, configOverride, boardCode, simOptions) {
 
         numGames = Math.min(200, Math.max(1, Number(numGames) || 25));
 
@@ -2236,6 +2259,8 @@
             configOverride = tmp;
 
         }
+
+        simOptions = simOptions || {};
 
         var baseConfig = window.PRS_DEFAULT_CONFIG || {};
 
@@ -2251,19 +2276,45 @@
 
         }
 
+        if (simOptions.scenario) cfg.scenario = simOptions.scenario;
+
+        if (simOptions.difficultyMode) cfg.difficultyMode = simOptions.difficultyMode;
+
         var bCode = boardCode || "classic_96";
+
+        var playerCount = Math.min(6, Math.max(2, Number(simOptions.playerCount) || 4));
+
+        var allBotPool = [
+            { name: "Válečník Bořivoj", type: "Bot_Aggressive" },
+            { name: "Chovatel Zikmund", type: "Bot_Breeder" },
+            { name: "Kněžna Eliška", type: "Bot_Noble" },
+            { name: "Rytíř Vladislav", type: "Bot_Balanced" },
+            { name: "Opatrný Panoš", type: "Bot_Easy" },
+            { name: "Černý Baron", type: "Bot_Aggressive" }
+        ];
+
+        var simPlayers = allBotPool.slice(0, playerCount);
 
         var totalRounds = 0;
 
         var totalTurns = 0;
 
-        var maxRoundsSafety = 150;
+        var maxRoundsSafety = 160;
 
         var winsByType = { Bot_Aggressive: 0, Bot_Breeder: 0, Bot_Noble: 0, Bot_Balanced: 0, Bot_Easy: 0 };
 
         var heartBreakdown = { festivals: 0, quests: 0, chance: 0, breeding: 0 };
 
         var avgWinnerGold = 0;
+        var avgWinnerNetWorth = 0;
+        var avgTaxesCollected = 0;
+        var avgRentCollected = 0;
+        var avgWinnerVillages = 0;
+        var avgWinnerTowns = 0;
+        var avgWinnerCastles = 0;
+        var avgWinnerLivestock = 0;
+        var avgDragonsSlain = 0;
+        var avgEliminations = 0;
 
         var sampleLogs = [];
 
@@ -2275,23 +2326,17 @@
 
                 boardCode: bCode,
 
-                players: [
+                scenario: cfg.scenario || "standard",
 
-                    { name: "Válečník Bořivoj", type: "Bot_Aggressive" },
+                difficultyMode: cfg.difficultyMode || "normal",
 
-                    { name: "Chovatel Zikmund", type: "Bot_Breeder" },
-
-                    { name: "Kněžna Eliška", type: "Bot_Noble" },
-
-                    { name: "Opatrný Panoš", type: "Bot_Easy" }
-
-                ]
+                players: simPlayers
 
             });
 
             var guard = 0;
 
-            while (simState.phase !== "GAME_OVER" && simState.roundNumber <= maxRoundsSafety && guard < 1200) {
+            while (simState.phase !== "GAME_OVER" && simState.roundNumber <= maxRoundsSafety && guard < 1600) {
 
                 this.executeBotTurn(simState);
 
@@ -2303,6 +2348,8 @@
 
             var winner = simState.players[winIdx];
 
+            var winStats = this.getEffectiveStats(simState, winner);
+
             totalRounds += simState.roundNumber;
 
             totalTurns += simState.turnNumber;
@@ -2311,13 +2358,37 @@
 
             avgWinnerGold += winner.gold;
 
-            heartBreakdown.festivals += winner.stats.heartsFromFestivals;
+            var netW = winner.gold;
+            for (var ni = 0; ni < (winner.ownedNodes || []).length; ni++) {
+                var nd = simState.board.nodes[winner.ownedNodes[ni]];
+                if (nd) netW += this.getNodeInvestedValue(simState, nd);
+            }
+            for (var ii = 0; ii < (winner.items || []).length; ii++) {
+                netW += (winner.items[ii].price || 0);
+            }
+            avgWinnerNetWorth += netW;
 
-            heartBreakdown.quests += winner.stats.heartsFromQuests;
+            avgTaxesCollected += (winner.stats.taxesCollected || 0);
+            avgRentCollected += (winner.stats.rentCollected || 0);
+            avgWinnerVillages += (winStats.ownedVillages || 0);
+            avgWinnerTowns += (winStats.ownedTowns || 0);
+            avgWinnerCastles += (winStats.ownedCastles || 0);
+            avgWinnerLivestock += (winStats.extraLivestockCount || 0);
+            avgDragonsSlain += (winner.stats.dragonsSlain || 0);
 
-            heartBreakdown.chance += winner.stats.heartsFromChance;
+            var elimCnt = 0;
+            for (var ei = 0; ei < simState.players.length; ei++) {
+                if (simState.players[ei].isEliminated) elimCnt++;
+            }
+            avgEliminations += elimCnt;
 
-            heartBreakdown.breeding += winner.breedingHearts;
+            heartBreakdown.festivals += (winner.stats.heartsFromFestivals || 0);
+
+            heartBreakdown.quests += (winner.stats.heartsFromQuests || 0);
+
+            heartBreakdown.chance += (winner.stats.heartsFromChance || 0);
+
+            heartBreakdown.breeding += (winner.breedingHearts || 0) + (winner.setHeartsBonus || 0);
 
             if (g === 0) {
 
@@ -2331,15 +2402,20 @@
 
         var avgTurns = Math.round(totalTurns / numGames);
 
-        // Odhad stolní doby: cca 1.6 minuty na 1 celé kolo 4 hráčů u stolu s kostkami
-
-        var estTabletopMinutes = Math.round(avgRounds * 1.6);
+        // Odhad stolní doby podle počtu hráčů (cca 0.4 min na tah u stolu)
+        var estTabletopMinutes = Math.round(avgTurns * 0.4);
 
         return {
 
             gamesSimulated: numGames,
 
             boardCode: bCode,
+
+            scenario: cfg.scenario || "standard",
+
+            difficultyMode: cfg.difficultyMode || "normal",
+
+            playerCount: playerCount,
 
             targetHearts: cfg.targetHearts,
 
@@ -2352,6 +2428,24 @@
             estTabletopHoursText: Math.floor(estTabletopMinutes / 60) + " h " + (estTabletopMinutes % 60) + " min",
 
             avgWinnerGold: Math.round(avgWinnerGold / numGames),
+
+            avgWinnerNetWorth: Math.round(avgWinnerNetWorth / numGames),
+
+            avgTaxesCollected: Math.round(avgTaxesCollected / numGames),
+
+            avgRentCollected: Math.round(avgRentCollected / numGames),
+
+            avgWinnerVillages: Math.round((avgWinnerVillages / numGames) * 10) / 10,
+
+            avgWinnerTowns: Math.round((avgWinnerTowns / numGames) * 10) / 10,
+
+            avgWinnerCastles: Math.round((avgWinnerCastles / numGames) * 10) / 10,
+
+            avgWinnerLivestock: Math.round((avgWinnerLivestock / numGames) * 10) / 10,
+
+            avgDragonsSlain: Math.round((avgDragonsSlain / numGames) * 10) / 10,
+
+            avgEliminations: Math.round((avgEliminations / numGames) * 10) / 10,
 
             winsByType: winsByType,
 

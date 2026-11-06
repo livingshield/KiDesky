@@ -1297,14 +1297,18 @@
             html.push('    <div style="color:#94a3b8; font-size:0.69rem; margin-bottom:0.35rem;">Přikoupený dobytek na pastvinách: <strong>' + extraLivestock + ' / ' + livestockCap + ' ks</strong> (zvyšuje daně u VD i nájem vesnic):</div>');
 
             if (isMyTurn) {
+                var lsCfgHud = (this.state && this.state.config && this.state.config.livestock) ? this.state.config.livestock : {};
+                var sPr = (lsCfgHud.sheepPrice !== undefined) ? Number(lsCfgHud.sheepPrice) : 500;
+                var pPr = (lsCfgHud.pigsPrice !== undefined) ? Number(lsCfgHud.pigsPrice) : 600;
+                var cPr = (lsCfgHud.cattlePrice !== undefined) ? Number(lsCfgHud.cattlePrice) : 800;
 
                 html.push('    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.3rem;">');
 
-                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < 500 ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;sheep&quot;)" title="Přikoupit ovci (+120 zl. k daním, +50 zl. k nájmu vesnic)">+🐑 Ovce (500)</button>');
+                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < sPr ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;sheep&quot;)" title="Přikoupit ovci">+🐑 Ovce (' + sPr + ')</button>');
 
-                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < 600 ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;pigs&quot;)" title="Přikoupit prase (+150 zl. k daním, +75 zl. k nájmu vesnic)">+🐖 Prase (600)</button>');
+                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < pPr ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;pigs&quot;)" title="Přikoupit prase">+🐖 Prase (' + pPr + ')</button>');
 
-                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < 800 ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;cattle&quot;)" title="Přikoupit krávu (+200 zl. k daním, +100 zl. k nájmu vesnic)">+🐄 Kráva (800)</button>');
+                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < cPr ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;cattle&quot;)" title="Přikoupit krávu">+🐄 Kráva (' + cPr + ')</button>');
 
                 html.push('    </div>');
 
