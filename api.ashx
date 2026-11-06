@@ -1156,6 +1156,32 @@ public class KiDeskyApiHandler : IHttpHandler
 
 
 
+    private bool GetBool(Dictionary<string, object> dict, string key, bool defVal = false)
+
+    {
+
+        if (dict != null && dict.ContainsKey(key) && dict[key] != null)
+
+        {
+
+            bool val;
+
+            if (bool.TryParse(dict[key].ToString(), out val)) return val;
+
+            string s = dict[key].ToString().ToLowerInvariant();
+
+            if (s == "1" || s == "true" || s == "yes") return true;
+
+            if (s == "0" || s == "false" || s == "no") return false;
+
+        }
+
+        return defVal;
+
+    }
+
+
+
     private static bool _extendedAdminSchemaChecked = false;
     private void EnsureExtendedAdminSchema(SqlConnection conn)
     {
@@ -4933,7 +4959,7 @@ END";
             conn.Open();
             EnsureExtendedAdminSchema(conn);
             using (var cmd = new SqlCommand(@"
-                SELECT TOP 40 s.[Id], s.[SessionGuid], s.[RoomCode], s.[TemplateCode], s.[HostUsername], s.[Mode], s.[Difficulty], s.[Status], s.[WinnerName], s.[TurnCount], s.[CreatedAt], s.[UpdatedAt],
+                SELECT TOP 40 s.[Id], s.[SessionGuid], s.[RoomCode], s.[TemplateCode], s.[HostUsername], s.[Mode], s.[Status], s.[WinnerName], s.[TurnNumber], s.[CreatedAt], s.[UpdatedAt],
                        (SELECT COUNT(*) FROM [prs].[prs_SessionPlayers] p WHERE p.[SessionGuid] = s.[SessionGuid]) AS [PlayerCount]
                 FROM [prs].[prs_GameSessions] s
                 ORDER BY s.[UpdatedAt] DESC", conn))
@@ -4949,10 +4975,10 @@ END";
                         templateCode = r["TemplateCode"].ToString(),
                         hostUsername = r["HostUsername"].ToString(),
                         mode = r["Mode"].ToString(),
-                        difficulty = r["Difficulty"].ToString(),
+                        difficulty = "standard",
                         status = r["Status"].ToString(),
                         winnerName = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString(),
-                        turnCount = Convert.ToInt32(r["TurnCount"]),
+                        turnCount = (r["TurnNumber"] == DBNull.Value) ? 0 : Convert.ToInt32(r["TurnNumber"]),
                         playerCount = Convert.ToInt32(r["PlayerCount"]),
                         createdAt = Convert.ToDateTime(r["CreatedAt"]).ToString("o"),
                         updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o")
