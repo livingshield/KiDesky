@@ -1,4 +1,4 @@
-﻿<%@ WebHandler Language="C#" Class="KiDeskyApiHandler" %>
+<%@ WebHandler Language="C#" Class="KiDeskyApiHandler" %>
 
 
 
@@ -759,6 +759,19 @@ public class KiDeskyApiHandler : IHttpHandler
                 case "admin-set-hero-video":
                     HandleAdminSetHeroVideo(context);
                     break;
+                case "list-audio":
+                    HandleListAudio(context);
+                    break;
+                case "upload-audio":
+                case "admin-upload-audio":
+                    HandleUploadAudio(context);
+                    break;
+                case "admin-save-audio":
+                    HandleAdminSaveAudio(context);
+                    break;
+                case "admin-delete-audio":
+                    HandleAdminDeleteAudio(context);
+                    break;
                 case "get-announcement":
                     HandleGetAnnouncement(context);
                     break;
@@ -1241,6 +1254,21 @@ BEGIN
         [PosterUrl] NVARCHAR(500) NULL,
         [Category] NVARCHAR(64) NOT NULL DEFAULT N'trailer',
         [IsHeroActive] BIT NOT NULL DEFAULT 0,
+        [SortOrder] INT NOT NULL DEFAULT 0,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_Audio]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [prs].[prs_Audio] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [Title] NVARCHAR(128) NOT NULL,
+        [Author] NVARCHAR(128) NULL,
+        [AudioType] NVARCHAR(32) NOT NULL DEFAULT N'mp3',
+        [Url] NVARCHAR(500) NOT NULL,
+        [Category] NVARCHAR(64) NOT NULL DEFAULT N'bgm',
+        [IsActive] BIT NOT NULL DEFAULT 1,
         [SortOrder] INT NOT NULL DEFAULT 0,
         [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
@@ -4760,6 +4788,198 @@ END";
             }
         }
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Aktivní video bylo změněno." }));
+    }
+
+    // ========================================================================
+    // HUDBA / AUDIO (MP3 soubory na serveru + YouTube)
+    // ========================================================================
+
+    private void SeedDefaultAudio(SqlConnection conn)
+    {
+        int cnt;
+        using (var c = new SqlCommand("SELECT COUNT(*) FROM [prs].[prs_Audio]", conn))
+        {
+            cnt = Convert.ToInt32(c.ExecuteScalar());
+        }
+        if (cnt > 0) return;
+
+        string[,] defaults = new string[,] {
+            { "Flight of the High Queen", "Epic Orchestral", "assets/audio/Flight_of_the_High_Queen.mp3" },
+            { "Army of Light", "Epic Heroic Fantasy Orchestral Choirs", "assets/audio/army_of_light.mp3" },
+            { "Heavenly Warrior", "Epic Heroic Fantasy Orchestral", "assets/audio/heavenly_warrior.mp3" },
+            { "We Fight As One", "Epic Heroic Fantasy Orchestral (Remastered)", "assets/audio/we_fight_as_one.mp3" },
+            { "Together", "Epic Vocal Fantasy Orchestral", "assets/audio/together.mp3" },
+            { "Tomorrow is Here", "Epic Hybrid Orchestral", "assets/audio/tomorrow_is_here.mp3" },
+            { "I Will Do Everything To See You Just One More Time", "Hypersonic Music", "assets/audio/i_will_do_everything.mp3" },
+            { "Adventure Fantasy Music - Epic Orchestral RPG Soundtrack", "Fantasy Soundtrack (Preview)", "assets/audio/adventure_fantasy_music.mp3" }
+        };
+        for (int i = 0; i < defaults.GetLength(0); i++)
+        {
+            using (var cmd = new SqlCommand(@"INSERT INTO [prs].[prs_Audio] ([Title], [Author], [AudioType], [Url], [Category], [IsActive], [SortOrder])
+                VALUES (@t, @a, N'mp3', @u, N'bgm', 1, @s)", conn))
+            {
+                cmd.Parameters.Add("@t", SqlDbType.NVarChar, 128).Value = defaults[i, 0];
+                cmd.Parameters.Add("@a", SqlDbType.NVarChar, 128).Value = defaults[i, 1];
+                cmd.Parameters.Add("@u", SqlDbType.NVarChar, 500).Value = defaults[i, 2];
+                cmd.Parameters.Add("@s", SqlDbType.Int).Value = (i + 1) * 10;
+                cmd.ExecuteNonQuery();
+            }
+        }
+    }
+
+    private void HandleListAudio(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        bool all = context.Request.QueryString["all"] == "1";
+        var tracks = new List<object>();
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            SeedDefaultAudio(conn);
+            using (var cmd = new SqlCommand("SELECT [Id], [Title], [Author], [AudioType], [Url], [Category], [IsActive], [SortOrder] FROM [prs].[prs_Audio] " + (all ? "" : "WHERE [IsActive] = 1 ") + "ORDER BY [SortOrder], [Id]", conn))
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    tracks.Add(new
+                    {
+                        id = Convert.ToInt32(r["Id"]),
+                        title = r["Title"].ToString(),
+                        author = r["Author"] == DBNull.Value ? "" : r["Author"].ToString(),
+                        audioType = r["AudioType"].ToString(),
+                        url = r["Url"].ToString(),
+                        category = r["Category"].ToString(),
+                        isActive = Convert.ToBoolean(r["IsActive"]),
+                        sortOrder = Convert.ToInt32(r["SortOrder"])
+                    });
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", tracks = tracks }));
+    }
+
+    private void HandleUploadAudio(HttpContext context)
+    {
+        if (context.Request.HttpMethod != "POST")
+        {
+            context.Response.StatusCode = 405;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Pouze metoda POST je povolena." }));
+            return;
+        }
+        if (context.Request.Files.Count == 0 || context.Request.Files[0] == null || context.Request.Files[0].ContentLength == 0)
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Nebyl odeslán žádný (neprázdný) soubor." }));
+            return;
+        }
+        HttpPostedFile file = context.Request.Files[0];
+        string originalName = System.IO.Path.GetFileName(file.FileName);
+        string ext = System.IO.Path.GetExtension(originalName).ToLowerInvariant();
+        if (ext != ".mp3" && ext != ".ogg" && ext != ".wav" && ext != ".m4a" && ext != ".aac" && ext != ".opus")
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Povoleny jsou pouze audio soubory (.mp3, .ogg, .wav, .m4a, .aac, .opus)." }));
+            return;
+        }
+
+        string appDir = System.IO.Path.GetDirectoryName(context.Request.PhysicalPath);
+        string targetDir = System.IO.Path.Combine(appDir, "assets", "audio");
+        if (!System.IO.Directory.Exists(targetDir)) System.IO.Directory.CreateDirectory(targetDir);
+
+        string rawName = System.IO.Path.GetFileNameWithoutExtension(originalName);
+        string safeBase = System.Text.RegularExpressions.Regex.Replace(rawName, @"[^a-zA-Z0-9_\-]", "_");
+        if (safeBase.Length > 80) safeBase = safeBase.Substring(0, 80);
+        if (string.IsNullOrEmpty(safeBase)) safeBase = "audio_" + DateTime.UtcNow.Ticks;
+        string safeFileName = safeBase + ext;
+        string fullPath = System.IO.Path.Combine(targetDir, safeFileName);
+        file.SaveAs(fullPath);
+
+        // Synchronizace do paralelní webroot složky (/www/apps vs /www/wwwroot/apps)
+        try
+        {
+            string relSub = System.IO.Path.Combine("assets", "audio");
+            string altDir = null;
+            if (appDir.IndexOf("wwwroot", StringComparison.OrdinalIgnoreCase) >= 0)
+                altDir = System.IO.Path.Combine(appDir.Replace("wwwroot\\", "").Replace("wwwroot/", ""), relSub);
+            else
+                altDir = System.IO.Path.GetFullPath(System.IO.Path.Combine(appDir, "..", "..", "wwwroot", "apps", "KiDesky", relSub));
+            if (System.IO.Directory.Exists(altDir))
+                System.IO.File.Copy(fullPath, System.IO.Path.Combine(altDir, safeFileName), true);
+        }
+        catch { }
+
+        string relativeUrl = "assets/audio/" + safeFileName;
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", url = relativeUrl, fileName = safeFileName, fileSize = file.ContentLength, message = "Soubor byl nahrán: " + relativeUrl }));
+    }
+
+    private void HandleAdminSaveAudio(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        string title = GetStr(body, "title").Trim();
+        string author = GetStr(body, "author").Trim();
+        string audioType = GetStr(body, "audioType", "mp3").Trim().ToLowerInvariant();
+        string url = GetStr(body, "url").Trim();
+        string category = GetStr(body, "category", "bgm").Trim();
+        bool isActive = !body.ContainsKey("isActive") || Convert.ToBoolean(body["isActive"]);
+        int sortOrder = GetInt(body, "sortOrder", 0);
+
+        if (!string.IsNullOrEmpty(url) && (url.IndexOf("youtube.com", StringComparison.OrdinalIgnoreCase) >= 0 || url.IndexOf("youtu.be", StringComparison.OrdinalIgnoreCase) >= 0))
+            audioType = "youtube";
+        if (audioType != "youtube") audioType = "mp3";
+
+        if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(url))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Název a URL skladby jsou povinné." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            string sql = id > 0
+                ? "UPDATE [prs].[prs_Audio] SET [Title]=@t, [Author]=@a, [AudioType]=@at, [Url]=@u, [Category]=@c, [IsActive]=@ia, [SortOrder]=@s WHERE [Id]=@id"
+                : "INSERT INTO [prs].[prs_Audio] ([Title],[Author],[AudioType],[Url],[Category],[IsActive],[SortOrder]) VALUES (@t,@a,@at,@u,@c,@ia,@s)";
+            using (var cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@t", title);
+                cmd.Parameters.AddWithValue("@a", author);
+                cmd.Parameters.AddWithValue("@at", audioType);
+                cmd.Parameters.AddWithValue("@u", url);
+                cmd.Parameters.AddWithValue("@c", category);
+                cmd.Parameters.AddWithValue("@ia", isActive);
+                cmd.Parameters.AddWithValue("@s", sortOrder);
+                if (id > 0) cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Skladba byla uložena." }));
+    }
+
+    private void HandleAdminDeleteAudio(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        if (id <= 0)
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné ID skladby." }));
+            return;
+        }
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand("DELETE FROM [prs].[prs_Audio] WHERE [Id] = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Skladba byla smazána." }));
     }
 
     private void HandleGetAnnouncement(HttpContext context)

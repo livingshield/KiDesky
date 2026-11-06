@@ -29,6 +29,7 @@ window.PRS_Audio = {
             if (savedSfxVol !== null) this.sfxVolume = Math.max(0, Math.min(1, parseFloat(savedSfxVol)));
         }
         this._ensureBgmAudio();
+        this.loadServerTracks();
     },
 
     _ensureBgmAudio: function () {
@@ -42,6 +43,7 @@ window.PRS_Audio = {
                 this.bgmAudio.loop = true;
                 document.body.appendChild(this.bgmAudio);
             }
+            this.bgmAudio.loop = false;
             this.bgmAudio.volume = this.muted ? 0 : this.bgmVolume;
             var self = this;
             this.bgmAudio.addEventListener("ended", function () {
@@ -74,6 +76,7 @@ window.PRS_Audio = {
         if (this.bgmAudio) {
             this.bgmAudio.volume = this.muted ? 0 : this.bgmVolume;
         }
+        this._applyYoutubeVolume();
         if (this.muted && this.proceduralTimer) {
             this.stopProceduralLute();
         } else if (!this.muted && this.isMusicPlaying && this.getCurrentTrack().isProcedural) {
@@ -96,10 +99,16 @@ window.PRS_Audio = {
         this.stopProceduralLute();
 
         if (tr.isProcedural) {
+            this._stopYoutube();
             if (this.bgmAudio) this.bgmAudio.pause();
             this.isMusicPlaying = true;
             this.startProceduralLute();
+        } else if (tr.isYoutube) {
+            if (this.bgmAudio) this.bgmAudio.pause();
+            this.isMusicPlaying = true;
+            this._playYoutubeTrack(tr);
         } else if (tr.src && this.bgmAudio) {
+            this._stopYoutube();
             this.bgmAudio.src = tr.src;
             this.bgmAudio.volume = this.muted ? 0 : this.bgmVolume;
             this.isMusicPlaying = true;
@@ -118,6 +127,7 @@ window.PRS_Audio = {
     pauseTrack: function () {
         this.isMusicPlaying = false;
         if (this.bgmAudio) this.bgmAudio.pause();
+        this._stopYoutube();
         this.stopProceduralLute();
         if (window.PRS_App && window.PRS_App.updateMusicUI) {
             window.PRS_App.updateMusicUI();
@@ -150,6 +160,128 @@ window.PRS_Audio = {
         }
         if (this.bgmAudio) {
             this.bgmAudio.volume = this.muted ? 0 : this.bgmVolume;
+        }
+        this._applyYoutubeVolume();
+    },
+
+    // --- SERVEROVÉ SKLADBY (spravované v administraci) + YOUTUBE ---
+    loadServerTracks: function (done) {
+        var self = this;
+        if (typeof fetch === "undefined") return;
+        fetch("api.ashx?action=list-audio")
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res || !res.ok || !res.tracks) return;
+                var current = self.getCurrentTrack();
+                var curId = current ? current.id : null;
+                self.playlist = self.playlist.filter(function (t) { return !t.isServer; });
+                var server = [];
+                for (var i = 0; i < res.tracks.length; i++) {
+                    var t = res.tracks[i];
+                    var yt = (t.audioType === "youtube") ? self._extractYoutubeId(t.url) : null;
+                    if (t.audioType === "youtube" && !yt) continue;
+                    server.push({
+                        id: "srv_" + t.id,
+                        title: t.title,
+                        author: t.author || "Královská kapela",
+                        src: yt ? null : t.url,
+                        isYoutube: !!yt,
+                        youtubeId: yt,
+                        isServer: true
+                    });
+                }
+                var procIdx = -1;
+                for (var p = 0; p < self.playlist.length; p++) { if (self.playlist[p].isProcedural) procIdx = p; }
+                var head = procIdx >= 0 ? self.playlist.slice(0, procIdx) : self.playlist.slice();
+                var tail = procIdx >= 0 ? self.playlist.slice(procIdx) : [];
+                self.playlist = head.concat(server, tail);
+                if (curId) {
+                    for (var k = 0; k < self.playlist.length; k++) {
+                        if (self.playlist[k].id === curId) { self.currentTrackIndex = k; break; }
+                    }
+                }
+                if (!self.isMusicPlaying && server.length > 0) {
+                    for (var f = 0; f < self.playlist.length; f++) {
+                        if (self.playlist[f].isServer) { self.currentTrackIndex = f; break; }
+                    }
+                }
+                if (window.PRS_App && window.PRS_App.renderMusicPlaylistOptions) window.PRS_App.renderMusicPlaylistOptions();
+                if (done) done();
+            })
+            .catch(function (e) { console.warn("Načtení serverových skladeb selhalo", e); });
+    },
+
+    _extractYoutubeId: function (url) {
+        var m = String(url || "").match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
+        return m ? m[1] : null;
+    },
+
+    _ytReady: false,
+    _ytPlayer: null,
+    _ytPending: null,
+
+    _ensureYoutubeApi: function () {
+        var self = this;
+        if (this._ytPlayer || this._ytApiLoading) return;
+        this._ytApiLoading = true;
+        var holder = document.getElementById("prs-yt-holder");
+        if (!holder) {
+            holder = document.createElement("div");
+            holder.id = "prs-yt-holder";
+            holder.style.cssText = "position:fixed; width:1px; height:1px; left:-9999px; top:0; overflow:hidden; opacity:0; pointer-events:none;";
+            holder.innerHTML = '<div id="prs-yt-player"></div>';
+            document.body.appendChild(holder);
+        }
+        var create = function () {
+            self._ytPlayer = new YT.Player("prs-yt-player", {
+                height: "1", width: "1",
+                playerVars: { autoplay: 1, controls: 0, playsinline: 1 },
+                events: {
+                    onReady: function () {
+                        self._ytReady = true;
+                        self._applyYoutubeVolume();
+                        if (self._ytPending) { var id = self._ytPending; self._ytPending = null; self._ytPlayer.loadVideoById(id); }
+                    },
+                    onStateChange: function (ev) {
+                        if (ev.data === 0 && self.isMusicPlaying && self.getCurrentTrack().isYoutube) self.nextTrack();
+                    },
+                    onError: function () {
+                        if (self.isMusicPlaying && self.getCurrentTrack().isYoutube) self.nextTrack();
+                    }
+                }
+            });
+        };
+        if (window.YT && window.YT.Player) {
+            create();
+        } else {
+            var prev = window.onYouTubeIframeAPIReady;
+            window.onYouTubeIframeAPIReady = function () { if (prev) prev(); create(); };
+            var s = document.createElement("script");
+            s.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(s);
+        }
+    },
+
+    _playYoutubeTrack: function (tr) {
+        this._ensureYoutubeApi();
+        if (this._ytReady && this._ytPlayer) {
+            this._ytPlayer.loadVideoById(tr.youtubeId);
+            this._applyYoutubeVolume();
+        } else {
+            this._ytPending = tr.youtubeId;
+        }
+    },
+
+    _stopYoutube: function () {
+        this._ytPending = null;
+        if (this._ytReady && this._ytPlayer && this._ytPlayer.pauseVideo) {
+            try { this._ytPlayer.pauseVideo(); } catch (e) { }
+        }
+    },
+
+    _applyYoutubeVolume: function () {
+        if (this._ytReady && this._ytPlayer && this._ytPlayer.setVolume) {
+            try { this._ytPlayer.setVolume(this.muted ? 0 : Math.round(this.bgmVolume * 100)); } catch (e) { }
         }
     },
 

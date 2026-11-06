@@ -667,7 +667,7 @@ window.PRS_App = {
 
             var tr = pl[i];
 
-            var icon = tr.isProcedural ? "🪕" : (tr.isCustom ? "📁" : "🎵");
+            var icon = tr.isProcedural ? "🪕" : (tr.isYoutube ? "▶️" : (tr.isCustom ? "📁" : "🎵"));
 
             html += '<option value="' + i + '" ' + (i === curIdx ? "selected" : "") + '>' + icon + ' ' + this.escapeHtml(tr.title) + ' (' + this.escapeHtml(tr.author) + ')</option>';
 

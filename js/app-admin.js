@@ -45,7 +45,7 @@
 
         switchAdminSubtab: function (subtab) {
             this.activeAdminSubtab = subtab;
-            var subtabs = ["videos", "users", "sessions", "announcements", "balance", "telemetry", "system"];
+            var subtabs = ["videos", "audio", "users", "sessions", "announcements", "balance", "telemetry", "system"];
             for (var i = 0; i < subtabs.length; i++) {
                 var s = subtabs[i];
                 var sec = document.getElementById("admin-subtab-" + s);
@@ -60,6 +60,9 @@
             switch (subtab) {
                 case "videos":
                     this.loadAdminVideos();
+                    break;
+                case "audio":
+                    this.loadAdminAudio();
                     break;
                 case "users":
                     this.loadAdminUsers();
@@ -80,6 +83,273 @@
                     this.loadAdminSystemInfo();
                     break;
             }
+        },
+
+        // ==========================================
+        // 1b. SPRÁVA HUDBY & AUDIA
+        // ==========================================
+
+        adminAudioList: [],
+        editingAudioId: 0,
+
+        loadAdminAudio: function () {
+            var self = this;
+            var listEl = document.getElementById("admin-audio-table-body");
+            if (listEl) listEl.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem;">⏳ Načítám skladby...</td></tr>';
+            fetch("api.ashx?action=list-audio&all=1")
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok && res.tracks) {
+                        self.adminAudioList = res.tracks;
+                        self.renderAdminAudioTable();
+                    } else if (listEl) {
+                        listEl.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:1.5rem;">Chyba načítání skladeb: ' + self.escapeHtml((res && res.message) || "Neznámá chyba") + '</td></tr>';
+                    }
+                })
+                .catch(function () {
+                    if (listEl) listEl.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:1.5rem;">Chyba sítě při načítání skladeb.</td></tr>';
+                });
+        },
+
+        renderAdminAudioTable: function () {
+            var listEl = document.getElementById("admin-audio-table-body");
+            if (!listEl) return;
+            if (!this.adminAudioList || this.adminAudioList.length === 0) {
+                listEl.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">Zatím nejsou uloženy žádné skladby. Klikněte na "Přidat novou skladbu".</td></tr>';
+                return;
+            }
+            var html = "";
+            for (var i = 0; i < this.adminAudioList.length; i++) {
+                var a = this.adminAudioList[i];
+                var typeBadge = (a.audioType === "youtube")
+                    ? '<span class="badge-pill" style="background:#dc2626; color:#fff;">YouTube</span>'
+                    : '<span class="badge-pill" style="background:#2563eb; color:#fff;">Audio soubor</span>';
+                var activeBadge = a.isActive
+                    ? '<span class="badge-pill" style="background:#16a34a; color:#fff;">Ano</span>'
+                    : '<span class="badge-pill" style="background:#57534e; color:#fff;">Skryto</span>';
+                html += '<tr>' +
+                    '<td style="font-weight:700; color:var(--gold-light);">' + a.id + '</td>' +
+                    '<td><strong>' + this.escapeHtml(a.title) + '</strong><br><small style="color:var(--text-muted);">' + this.escapeHtml(a.author || "") + '</small></td>' +
+                    '<td>' + typeBadge + '</td>' +
+                    '<td style="word-break:break-all; font-family:monospace; font-size:0.75rem;"><a href="' + this.escapeHtml(a.url) + '" target="_blank" style="color:var(--gold);">' + this.escapeHtml(a.url) + '</a></td>' +
+                    '<td style="text-align:center;">' + activeBadge + '</td>' +
+                    '<td style="text-align:right; white-space:nowrap;">' +
+                        '<button class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem; margin-right:4px;" onclick="PRS_App.openEditAudioModal(' + a.id + ')">✏️ Upravit</button>' +
+                        '<button class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem; color:#ef4444; border-color:#ef4444;" onclick="PRS_App.deleteAdminAudio(' + a.id + ')">🗑️ Smazat</button>' +
+                    '</td>' +
+                '</tr>';
+            }
+            listEl.innerHTML = html;
+        },
+
+        _resetAudioModalUpload: function (fileLabel) {
+            var fileInput = document.getElementById("admin-aud-file-input");
+            if (fileInput) fileInput.value = "";
+            var fileNameEl = document.getElementById("admin-aud-file-name");
+            if (fileNameEl) fileNameEl.textContent = fileLabel || "Žádný soubor nevybrán";
+            var progWrap = document.getElementById("admin-aud-upload-progress-wrap");
+            if (progWrap) progWrap.style.display = "none";
+            var fb = document.getElementById("admin-aud-feedback");
+            if (fb) fb.textContent = "";
+        },
+
+        openAddAudioModal: function () {
+            this.editingAudioId = 0;
+            document.getElementById("admin-audio-modal-title").textContent = "➕ Přidat novou skladbu";
+            document.getElementById("admin-aud-title").value = "";
+            document.getElementById("admin-aud-author").value = "";
+            document.getElementById("admin-aud-type").value = "mp3";
+            document.getElementById("admin-aud-url").value = "";
+            document.getElementById("admin-aud-active").checked = true;
+            document.getElementById("admin-aud-order").value = "100";
+            this._resetAudioModalUpload();
+            document.getElementById("admin-audio-modal").style.display = "flex";
+        },
+
+        openEditAudioModal: function (id) {
+            var a = null;
+            for (var i = 0; i < this.adminAudioList.length; i++) {
+                if (this.adminAudioList[i].id === id) { a = this.adminAudioList[i]; break; }
+            }
+            if (!a) return;
+            this.editingAudioId = id;
+            document.getElementById("admin-audio-modal-title").textContent = "✏️ Upravit skladbu #" + id;
+            document.getElementById("admin-aud-title").value = a.title || "";
+            document.getElementById("admin-aud-author").value = a.author || "";
+            document.getElementById("admin-aud-type").value = a.audioType || "mp3";
+            document.getElementById("admin-aud-url").value = a.url || "";
+            document.getElementById("admin-aud-active").checked = !!a.isActive;
+            document.getElementById("admin-aud-order").value = a.sortOrder || 0;
+            this._resetAudioModalUpload(a.url ? ("Aktuální: " + a.url) : "");
+            document.getElementById("admin-audio-modal").style.display = "flex";
+        },
+
+        closeAdminAudioModal: function () {
+            document.getElementById("admin-audio-modal").style.display = "none";
+        },
+
+        handleAudioUrlInput: function (val) {
+            val = (val || "").trim();
+            if (val.indexOf("youtube.com") !== -1 || val.indexOf("youtu.be") !== -1) {
+                var typeSel = document.getElementById("admin-aud-type");
+                if (typeSel && typeSel.value !== "youtube") typeSel.value = "youtube";
+            }
+        },
+
+        handleAudioFileSelected: function (e) {
+            var file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            var nameEl = document.getElementById("admin-aud-file-name");
+            if (nameEl) nameEl.textContent = file.name + " (" + (file.size / (1024 * 1024)).toFixed(1) + " MB)";
+            var progWrap = document.getElementById("admin-aud-upload-progress-wrap");
+            var progBar = document.getElementById("admin-aud-upload-progress-bar");
+            var progStatus = document.getElementById("admin-aud-upload-status");
+            var progPct = document.getElementById("admin-aud-upload-pct");
+            var fb = document.getElementById("admin-aud-feedback");
+
+            if (progWrap) progWrap.style.display = "block";
+            if (progBar) progBar.style.width = "0%";
+            if (progPct) progPct.textContent = "0%";
+            if (progStatus) { progStatus.textContent = "Nahrávám audio na server..."; progStatus.style.color = "#fde047"; }
+            if (fb) fb.textContent = "";
+
+            var fd = new FormData();
+            fd.append("file", file);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "api.ashx?action=upload-audio", true);
+
+            xhr.upload.onprogress = function (ev) {
+                if (ev.lengthComputable) {
+                    var pct = Math.round((ev.loaded / ev.total) * 100);
+                    if (progBar) progBar.style.width = pct + "%";
+                    if (progPct) progPct.textContent = pct + "%";
+                }
+            };
+
+            var fail = function (msg) {
+                if (fb) { fb.style.color = "#ef4444"; fb.textContent = msg; }
+                if (progStatus) { progStatus.textContent = "❌ Chyba nahrávání"; progStatus.style.color = "#ef4444"; }
+            };
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    try {
+                        var res = JSON.parse(xhr.responseText);
+                        if (res && res.ok && res.url) {
+                            document.getElementById("admin-aud-url").value = res.url;
+                            document.getElementById("admin-aud-type").value = "mp3";
+                            var titleInput = document.getElementById("admin-aud-title");
+                            if (titleInput && !titleInput.value.trim()) {
+                                var base = file.name.replace(/\.[^/.]+$/, "").replace(/[_\-]+/g, " ");
+                                titleInput.value = base.charAt(0).toUpperCase() + base.slice(1);
+                            }
+                            if (progBar) progBar.style.width = "100%";
+                            if (progPct) progPct.textContent = "100%";
+                            if (progStatus) { progStatus.textContent = "✅ Nahráno: " + res.url; progStatus.style.color = "#4ade80"; }
+                            if (fb) { fb.style.color = "#4ade80"; fb.textContent = "✅ Soubor byl úspěšně nahrán na server."; }
+                            return;
+                        }
+                        fail((res && res.message) || "Nahrání selhalo.");
+                    } catch (err) {
+                        fail("Chyba při zpracování odpovědi serveru.");
+                    }
+                } else {
+                    fail("Chyba serveru při nahrávání (kód " + xhr.status + ").");
+                }
+            };
+            xhr.onerror = function () { fail("Chyba sítě při odesílání souboru."); };
+            xhr.send(fd);
+        },
+
+        autoFetchYoutubeAudioMeta: function () {
+            var u = (document.getElementById("admin-aud-url").value || "").trim();
+            var fb = document.getElementById("admin-aud-feedback");
+            var ytMatch = u.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|watch\?v=|watch\?.+&v=))([\w-]{11})/i);
+            if (!ytMatch) {
+                if (fb) { fb.style.color = "#ef4444"; fb.textContent = "Zadaná adresa není platným YouTube odkazem."; }
+                return;
+            }
+            document.getElementById("admin-aud-type").value = "youtube";
+            if (fb) { fb.style.color = "#fde047"; fb.textContent = "Načítám informace z YouTube..."; }
+            fetch("https://noembed.com/embed?url=" + encodeURIComponent("https://www.youtube.com/watch?v=" + ytMatch[1]))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data && data.title) {
+                        var t = document.getElementById("admin-aud-title");
+                        if (t && !t.value.trim()) t.value = data.title;
+                        var a = document.getElementById("admin-aud-author");
+                        if (a && !a.value.trim() && data.author_name) a.value = data.author_name;
+                    }
+                    if (fb) { fb.style.color = "#4ade80"; fb.textContent = "✅ YouTube odkaz rozpoznán."; }
+                })
+                .catch(function () {
+                    if (fb) { fb.style.color = "#4ade80"; fb.textContent = "✅ YouTube odkaz rozpoznán."; }
+                });
+        },
+
+        saveAdminAudio: function () {
+            var self = this;
+            var title = (document.getElementById("admin-aud-title").value || "").trim();
+            var url = (document.getElementById("admin-aud-url").value || "").trim();
+            var type = document.getElementById("admin-aud-type").value;
+            var fb = document.getElementById("admin-aud-feedback");
+            if (!title || !url) {
+                if (fb) { fb.style.color = "#ef4444"; fb.textContent = "Vyplňte prosím název a URL adresu skladby."; }
+                return;
+            }
+            if (url.indexOf("youtube.com") !== -1 || url.indexOf("youtu.be") !== -1) type = "youtube";
+
+            var payload = {
+                id: this.editingAudioId,
+                title: title,
+                author: (document.getElementById("admin-aud-author").value || "").trim(),
+                audioType: type,
+                url: url,
+                category: "bgm",
+                isActive: document.getElementById("admin-aud-active").checked,
+                sortOrder: parseInt(document.getElementById("admin-aud-order").value, 10) || 0
+            };
+
+            fetch("api.ashx?action=admin-save-audio", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok) {
+                        self.closeAdminAudioModal();
+                        self.loadAdminAudio();
+                        if (window.PRS_Audio && window.PRS_Audio.loadServerTracks) window.PRS_Audio.loadServerTracks();
+                    } else if (fb) {
+                        fb.style.color = "#ef4444";
+                        fb.textContent = (res && res.message) || "Uložení skladby se nezdařilo.";
+                    }
+                })
+                .catch(function () {
+                    if (fb) { fb.style.color = "#ef4444"; fb.textContent = "Chyba sítě při ukládání."; }
+                });
+        },
+
+        deleteAdminAudio: function (id) {
+            if (!confirm("Opravdu si přejete smazat tuto skladbu ze seznamu? (Soubor na serveru zůstane zachován.)")) return;
+            var self = this;
+            fetch("api.ashx?action=admin-delete-audio", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: id })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok) {
+                        self.loadAdminAudio();
+                        if (window.PRS_Audio && window.PRS_Audio.loadServerTracks) window.PRS_Audio.loadServerTracks();
+                    } else {
+                        alert((res && res.message) || "Smazání skladby selhalo.");
+                    }
+                })
+                .catch(function () { alert("Chyba sítě při mazání."); });
         },
 
         // ==========================================
