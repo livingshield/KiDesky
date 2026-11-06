@@ -1916,7 +1916,7 @@ window.PRS_GameEngine = {
 
             var price = this.getNodePrice(state, node);
 
-            if (node.owner === null) {
+            if (node.owner === null || node.owner === undefined) {
 
                 state.pendingAction.canBuyNode = true;
 

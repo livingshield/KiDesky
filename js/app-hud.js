@@ -296,6 +296,16 @@
 
                 '</div>');
 
+        } else if (pa.canShopLivestock) {
+
+            htmlBtns.push('<div style="display:flex; gap:6px; width:100%;">' +
+
+                '<button class="mobile-btn-primary" style="flex:1.4; background:linear-gradient(135deg, #15803d, #16a34a); color:#fff;" onclick="PRS_App.openLivestockMarket()">🌾 STÁJE & CHOV</button>' +
+
+                '<button class="mobile-btn-primary" style="flex:1; background:rgba(255,255,255,0.12); border-color:var(--border-gold); color:var(--text-main);" onclick="PRS_App.handleEndTurn()">➡️ Konec tahu</button>' +
+
+                '</div>');
+
         } else if (pa.canShopMerchant) {
 
             htmlBtns.push('<div style="display:flex; gap:6px; width:100%;">' +
@@ -2536,6 +2546,8 @@
         }
 
         var player = this.state.players[this.state.currentPlayerIndex];
+
+        var currNode = (this.state.board && this.state.board.nodes) ? this.state.board.nodes[player.nodeId] : null;
 
         var isBot = (player.type !== "Human");
 

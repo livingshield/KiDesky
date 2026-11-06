@@ -18,32 +18,35 @@ if (Test-Path $configPath) {
 $credentials = New-Object System.Net.NetworkCredential($FtpUsername, $FtpPassword)
 $remoteBases = @("/www/apps/KiDesky/", "/www/wwwroot/apps/KiDesky/")
 
-$localFile = Join-Path $localBase "api.ashx"
-if (-not (Test-Path $localFile)) {
-    Write-Error "api.ashx not found!"
-    exit 1
-}
+$filesToDeploy = @("index.html", "js/app-hud.js", "js/game-engine.js")
 
-$fileBytes = [System.IO.File]::ReadAllBytes($localFile)
-
-foreach ($rb in $remoteBases) {
-    $remoteUri = "ftp://$FtpServer$($rb)api.ashx"
-    try {
-        $req = [System.Net.FtpWebRequest]::Create($remoteUri)
-        $req.Credentials = $credentials
-        $req.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
-        $req.UseBinary = $true
-        $req.KeepAlive = $false
-        $req.EnableSsl = $false
-        $req.ContentLength = $fileBytes.Length
-        $stream = $req.GetRequestStream()
-        $stream.Write($fileBytes, 0, $fileBytes.Length)
-        $stream.Close()
-        $resp = $req.GetResponse()
-        $resp.Close()
-        Write-Host "Uploaded api.ashx -> $remoteUri" -ForegroundColor Green
-    } catch {
-        Write-Warning "Failed uploading api.ashx to $remoteUri : $_"
+foreach ($relPath in $filesToDeploy) {
+    if ($relPath -like "*.exe*") { continue }
+    $localFile = Join-Path $localBase ($relPath -replace "/", "\")
+    if (-not (Test-Path $localFile)) {
+        Write-Warning "$relPath not found!"
+        continue
+    }
+    $fileBytes = [System.IO.File]::ReadAllBytes($localFile)
+    foreach ($rb in $remoteBases) {
+        $remoteUri = "ftp://$FtpServer$($rb)$relPath"
+        try {
+            $req = [System.Net.FtpWebRequest]::Create($remoteUri)
+            $req.Credentials = $credentials
+            $req.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
+            $req.UseBinary = $true
+            $req.KeepAlive = $false
+            $req.EnableSsl = $false
+            $req.ContentLength = $fileBytes.Length
+            $stream = $req.GetRequestStream()
+            $stream.Write($fileBytes, 0, $fileBytes.Length)
+            $stream.Close()
+            $resp = $req.GetResponse()
+            $resp.Close()
+            Write-Host "Uploaded $relPath -> $remoteUri" -ForegroundColor Green
+        } catch {
+            Write-Warning "Failed uploading $relPath to $remoteUri : $_"
+        }
     }
 }
-Write-Host "api.ashx deployed to both roots successfully!" -ForegroundColor Green
+Write-Host "All files deployed to both roots successfully!" -ForegroundColor Green
