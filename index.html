@@ -36,13 +36,13 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611050089">
+    <link rel="stylesheet" href="css/main.css?v=202611050090">
 
-    <link rel="stylesheet" href="css/board.css?v=202611050089">
+    <link rel="stylesheet" href="css/board.css?v=202611050090">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611050089">
+    <link rel="stylesheet" href="css/modals.css?v=202611050090">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611050089">
+    <link rel="stylesheet" href="css/mobile.css?v=202611050090">
 
 </head>
 
@@ -2418,7 +2418,7 @@
 
     <!-- MODAL: KRÁLOVSKÝ HUDEBNÍ PŘEHRÁVAČ & LOUTNA -->
 
-    <div id="prs-music-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeMusicPopup()">
+    <div id="prs-music-modal" class="modal-backdrop" style="display:none; z-index:10050;" onclick="if(event.target===this)PRS_App.closeMusicPopup()">
 
         <div class="music-player-card">
 
@@ -2520,18 +2520,19 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611050089" defer></script>
-    <script src="js/game-boards.js?v=202611050089" defer></script>
-    <script src="js/game-engine.js?v=202611050089" defer></script>
-    <script src="js/game-combat-ai.js?v=202611050089" defer></script>
-    <script src="js/app-audio.js?v=202611050089" defer></script>
-    <script src="js/app.js?v=202611050089" defer></script>
-    <script src="js/app-board.js?v=202611050089" defer></script>
-    <script src="js/app-hud.js?v=202611050089" defer></script>
-    <script src="js/app-modals.js?v=202611050089" defer></script>
-    <script src="js/app-online.js?v=202611050089" defer></script>
-    <script src="js/app-catalog.js?v=202611050089" defer></script>
-    <script src="js/app-admin.js?v=202611050089" defer></script>
+    <script src="js/game-data.js?v=202611050090" defer></script>
+    <script src="js/game-boards.js?v=202611050090" defer></script>
+    <script src="js/game-engine.js?v=202611050090" defer></script>
+    <script src="js/game-combat-ai.js?v=202611050090" defer></script>
+    <script src="js/app-audio.js?v=202611050090" defer></script>
+    <script src="js/app.js?v=202611050090" defer></script>
+    <script src="js/app-board.js?v=202611050090" defer></script>
+    <script src="js/app-hud.js?v=202611050090" defer></script>
+    <script src="js/app-modals.js?v=202611050090" defer></script>
+    <script src="js/app-online.js?v=202611050090" defer></script>
+    <script src="js/app-catalog.js?v=202611050090" defer></script>
+    <script src="js/app-admin.js?v=202611050090" defer></script>
+    <script src="js/app-musicwidget.js?v=202611050090" defer></script>
     <script>
         (function () {
             function bootApp() {

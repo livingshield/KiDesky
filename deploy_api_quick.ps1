@@ -1,4 +1,4 @@
-param()
+﻿param()
 
 $localBase = $PSScriptRoot
 if (-not $localBase) { $localBase = (Get-Location).Path }
@@ -18,7 +18,7 @@ if (Test-Path $configPath) {
 $credentials = New-Object System.Net.NetworkCredential($FtpUsername, $FtpPassword)
 $remoteBases = @("/www/apps/KiDesky/", "/www/wwwroot/apps/KiDesky/")
 
-$filesToDeploy = @("index.html", "js/app-hud.js", "js/game-engine.js")
+$filesToDeploy = @("index.html", "js/app-musicwidget.js")
 
 foreach ($relPath in $filesToDeploy) {
     if ($relPath -like "*.exe*") { continue }
@@ -50,3 +50,4 @@ foreach ($relPath in $filesToDeploy) {
     }
 }
 Write-Host "All files deployed to both roots successfully!" -ForegroundColor Green
+
