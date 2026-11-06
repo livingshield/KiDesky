@@ -731,6 +731,9 @@ public class KiDeskyApiHandler : IHttpHandler
                 case "unlock-pawn":
                     HandleUnlockPawn(context);
                     break;
+                case "award-credits":
+                    HandleAwardCredits(context);
+                    break;
                 case "list-videos":
                     HandleListVideos(context);
                     break;
@@ -2514,6 +2517,45 @@ END";
             }
         }
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", selectedPawnId = pawnId }));
+    }
+
+    private void HandleAwardCredits(HttpContext context)
+    {
+        var body = ReadJsonBody(context);
+        string username = GetStr(body, "username").Trim();
+        int amount = GetInt(body, "amount", 0);
+        bool isWin = GetBool(body, "isWin", false);
+        if (string.IsNullOrEmpty(username) || amount <= 0)
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné parametry." }));
+            return;
+        }
+
+        int newCredits = 250;
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                UPDATE [prs].[prs_Users] 
+                SET [Credits] = ISNULL([Credits], 250) + @amt,
+                    [GamesPlayed] = ISNULL([GamesPlayed], 0) + 1,
+                    [GamesWon] = ISNULL([GamesWon], 0) + (CASE WHEN @isWin = 1 THEN 1 ELSE 0 END)
+                WHERE [Username] = @u OR [Email] = @u;
+                SELECT [Credits] FROM [prs].[prs_Users] WHERE [Username] = @u OR [Email] = @u;
+            ", conn))
+            {
+                cmd.Parameters.AddWithValue("@amt", amount);
+                cmd.Parameters.AddWithValue("@isWin", isWin ? 1 : 0);
+                cmd.Parameters.AddWithValue("@u", username);
+                var scalar = cmd.ExecuteScalar();
+                if (scalar != null && scalar != DBNull.Value)
+                {
+                    newCredits = Convert.ToInt32(scalar);
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", credits = newCredits, awarded = amount }));
     }
 
     private void HandleUnlockPawn(HttpContext context)

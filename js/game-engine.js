@@ -1898,6 +1898,8 @@ window.PRS_GameEngine = {
 
             canShopMerchant: false,
 
+            canShopLivestock: false,
+
             canResolveQuest: false,
 
             questCard: null,
@@ -1937,6 +1939,14 @@ window.PRS_GameEngine = {
                 } else {
 
                     state.pendingAction.summary = "Odpočíváš na svém vlastním panství.";
+
+                }
+
+                if (node.type === "BUILDING" && node.subtype === "staje") {
+
+                    state.pendingAction.canShopLivestock = true;
+
+                    state.pendingAction.summary = "Vstoupil jsi do svých Královských stájí! Můžeš zde nakupovat chovný dobytek a spravovat pastviny.";
 
                 }
 
@@ -2094,7 +2104,9 @@ window.PRS_GameEngine = {
 
             state.pendingAction.canShopMerchant = true;
 
-            state.pendingAction.summary = "Vítej u Královského obchodníka! Můžeš nakupovat Věci 1–3 nebo výhodně prodávat majetek.";
+            state.pendingAction.canShopLivestock = true;
+
+            state.pendingAction.summary = "Vítej u Královského obchodníka! Můžeš nakupovat Věci 1–3, dobytek na dobytčím trhu nebo výhodně prodávat majetek.";
 
             return;
 

@@ -1182,11 +1182,19 @@
 
                     }
 
-                    catLabel = "Chov (Sada #" + pNode.setId + " • " + countInSet + "/3 ks)";
+                    var aTypeLabel = pNode.subtype === "kun" ? "Chov koní" : (pNode.subtype === "pes" ? "Chov psů" : "Chov sokolů");
+
+                    catLabel = aTypeLabel + " (Sada #" + pNode.setId + " • " + countInSet + "/3 ks)";
 
                 } else if (pNode.type === "BUILDING") {
 
-                    catLabel = "Řemeslná živnost";
+                    var bName = pNode.subtype === "staje" ? "Královské stáje (+1 Jízda)" :
+                               (pNode.subtype === "kovarna" ? "Kovárna (+1 Boj)" :
+                               (pNode.subtype === "krejci" ? "Krejčovská dílna (+1 Tanec)" :
+                               (pNode.subtype === "sokolnik" ? "Sokolník" :
+                               (pNode.subtype === "psovod" ? "Psovod" : "Živnost"))));
+
+                    catLabel = "Živnost: " + bName;
 
                 } else if (pNode.type === "JESTER") {
 
@@ -1314,6 +1322,8 @@
         if (window.PRS_Audio) window.PRS_Audio.playCoin();
         this.showPawnToast(this.state.currentPlayerIndex, "Přikoupeno: " + res.animal.icon + " " + res.animal.name + "!", res.animal.icon, "#4ade80");
         this.renderGameScreen();
+        if (this.renderArmoryGrid) this.renderArmoryGrid();
+        if (this.renderArmoryModalContent) this.renderArmoryModalContent();
         this.saveSessionAuto();
     },
 
@@ -2289,8 +2299,13 @@
         }
 
         // 4. Panství a chovy zvířat
-
-        var horseCount = 0, dogCount = 0, falconCount = 0, villageCount = 0, townCount = 0, castleCount = 0, craftCount = 0;
+        var horseCount = (st && typeof st.horses === "number") ? st.horses : 0;
+        var dogCount = (st && typeof st.dogs === "number") ? st.dogs : 0;
+        var falconCount = (st && typeof st.falcons === "number") ? st.falcons : 0;
+        var villageCount = (st && typeof st.ownedVillages === "number") ? st.ownedVillages : 0;
+        var townCount = (st && typeof st.ownedTowns === "number") ? st.ownedTowns : 0;
+        var castleCount = (st && typeof st.ownedCastles === "number") ? st.ownedCastles : 0;
+        var craftCount = (st && typeof st.ownedBuildings === "number") ? (st.ownedBuildings + (st.ownedJesters || 0)) : 0;
 
         var nodesHtml = '';
 
@@ -2849,6 +2864,12 @@
                 }
 
             }
+
+        }
+
+        if (pa.canShopLivestock || (currNode && currNode.type === "BUILDING" && currNode.subtype === "staje")) {
+
+            btns.push('<button class="btn-action-buy" onclick="PRS_App.openLivestockMarket()" style="width:100%; font-weight:bold; background:linear-gradient(135deg, #15803d, #16a34a); border-color:#86efac; padding:0.6rem; margin-bottom:0.4rem;">🌾 Vstoupit do stájí (Dobytčí trh &amp; Chov)</button>');
 
         }
 

@@ -121,6 +121,27 @@
                 subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> dosáhl cílových <strong>' + tgtH + ' 💖</strong> (získal celkem ' + winner.totalHearts + ' 💖) a v ' + this.state.roundNumber + '. kole získává ruku princezny!';
             }
 
+            if (!this.victoryCreditsAwarded && this.state.roundNumber > 0) {
+                this.victoryCreditsAwarded = true;
+                var humanPlayer = null;
+                for (var hpi = 0; hpi < this.state.players.length; hpi++) {
+                    if (this.state.players[hpi].type === "Human") {
+                        humanPlayer = this.state.players[hpi];
+                        break;
+                    }
+                }
+                if (humanPlayer) {
+                    var isHumanWinner = (winner.index === humanPlayer.index);
+                    var creditsEarned = 50; // účast v turnaji
+                    if (isHumanWinner) creditsEarned += 150; // triumf
+                    if (winType === "slayer_dragons" && isHumanWinner) creditsEarned += 50; // drakobijec bonus
+                    if (this.awardCredits) {
+                        this.awardCredits(creditsEarned, isHumanWinner ? "Královský triumf" : "Účast v turnaji", isHumanWinner);
+                    }
+                    subText += '<div style="margin-top:0.45rem; padding:0.35rem 0.65rem; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); border-radius:6px; color:#7dd3fc; font-size:0.83rem;">💎 Odměna: Získal jsi <strong>+' + creditsEarned + ' kreditů</strong> do Rytířské šatny! (Zůstatek: <strong>' + (this.userCredits || 0) + ' 💎</strong>)</div>';
+                }
+            }
+
             subEl.innerHTML = subText;
         }
 
@@ -357,6 +378,11 @@
     },
 
     // --- KRÁLOVSKÁ ZBROJNICE A TRŽIŠTĚ (MODAL) ---,
+
+    openLivestockMarket: function () {
+        this.openArmoryModal();
+        this.setArmoryTab("livestock");
+    },
 
     openArmoryModal: function () {
 
@@ -672,6 +698,73 @@
 
             return;
 
+        }
+
+        // 2.5 ZÁLOŽKA DOBYTČÍ TRH & HOSPODÁŘSKÝ CHOV (Krávy, Ovce, Prasata)
+        if (tab === "livestock") {
+            var st = window.PRS_GameEngine.getEffectiveStats(this.state, player);
+            var isAtStables = currNode && currNode.type === "BUILDING" && currNode.subtype === "staje";
+            var canShopAnimals = canShop || isAtStables;
+            var canBuyMore = (st.extraLivestockCount < st.livestockCapacity);
+
+            html.push('<div style="grid-column: 1 / -1; margin-bottom: 0.5rem;">');
+            html.push('  <div style="background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.65rem 0.85rem; font-size:0.83rem;">');
+            html.push('    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem; flex-wrap:wrap; gap:6px;">');
+            html.push('      <span style="font-size:0.92rem; font-weight:700; color:var(--gold-light);">🌾 Pastviny a královské stáje</span>');
+            html.push('      <span style="color:#fde047; font-weight:700;">Daňový zisk z chovu: +' + (st.livestockTaxBonus || 0).toLocaleString("cs-CZ") + ' zl.</span>');
+            html.push('    </div>');
+            html.push('    <div style="color:#cbd5e1; font-size:0.77rem; line-height:1.4;">');
+            html.push('      Kapacita přikoupených stád: <strong style="color:#4ade80;">' + st.extraLivestockCount + ' / ' + st.livestockCapacity + ' ks</strong> &nbsp;|&nbsp; Celkový chov: 🐄 ' + (st.cattle || 0) + ' krav, 🐑 ' + (st.sheep || 0) + ' ovcí, 🐖 ' + (st.pigs || 0) + ' prasat.');
+            html.push('      <br><small style="color:#94a3b8;">Každá 🏡 Vesnice poskytuje +3 pastviny (a automaticky chová 1★ 🐑, 2★ 🐖, 3★ 🐄), 🏛️ Město +2 pastviny a 🏠 Stáje +4 pastviny. Dobytek trvale zvyšuje daň u Výběrčího daní i mýtné na tvých vesnicích!</small>');
+            html.push('    </div>');
+            html.push('  </div>');
+            html.push('</div>');
+
+            var catalog = [
+                { id: "sheep", name: "Chovná ovce", icon: "🐑", price: 500, taxBonus: 120, rentBonus: 50, desc: "Nenáročný chov pro pastviny. Trvale zvyšuje daň u Výběrčího daní o +120 zl. a mýtné tvých vesnic o +50 zl." },
+                { id: "pigs", name: "Královské prase", icon: "🐖", price: 600, taxBonus: 150, rentBonus: 75, desc: "Tučný výnos pro osady. Trvale zvyšuje daň u Výběrčího daní o +150 zl. a mýtné tvých vesnic o +75 zl." },
+                { id: "cattle", name: "Ušlechtilý skot (Kráva)", icon: "🐄", price: 800, taxBonus: 200, rentBonus: 100, desc: "Špičkový velký dobytek. Trvale zvyšuje daň u Výběrčího daní o +200 zl. a mýtné tvých vesnic o +100 zl." }
+            ];
+
+            for (var c = 0; c < catalog.length; c++) {
+                var catItem = catalog[c];
+                var canAfford = player.gold >= catItem.price;
+
+                html.push('<div class="armory-card armory-card-tier-2" style="display:flex; flex-direction:column; justify-content:space-between;">');
+                html.push('  <div>');
+                html.push('    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">');
+                html.push('      <span class="armory-badge-tier" style="background:rgba(74,222,128,0.18); color:#86efac;">Hospodářský chov</span>');
+                html.push('      <span class="armory-slot-badge">🌾 Zvíře</span>');
+                html.push('    </div>');
+                html.push('    <div style="font-weight:bold; font-size:1.05rem; color:#f8fafc; margin-bottom:0.35rem;">' + catItem.icon + ' ' + catItem.name + '</div>');
+                html.push('    <p style="font-size:0.77rem; color:#cbd5e1; margin-bottom:0.6rem; line-height:1.35;">' + catItem.desc + '</p>');
+                html.push('    <div style="display:flex; flex-wrap:wrap; gap:0.25rem; margin-bottom:0.75rem;">');
+                html.push('      <span class="armory-stat-chip armory-stat-pos">💰 +' + catItem.taxBonus + ' zl. / daň</span>');
+                html.push('      <span class="armory-stat-chip armory-stat-pos">🏡 +' + catItem.rentBonus + ' zl. / mýto</span>');
+                html.push('    </div>');
+                html.push('  </div>');
+
+                html.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:0.5rem; border-top:1px solid rgba(255,255,255,0.06);">');
+                html.push('    <span style="font-size:0.95rem; color:var(--gold-light); font-weight:bold;">' + catItem.price.toLocaleString("cs-CZ") + ' zl.</span>');
+
+                if (st.livestockCapacity <= 0) {
+                    html.push('    <button class="btn-secondary" disabled style="padding:0.3rem 0.65rem; font-size:0.78rem; opacity:0.5;" title="Kup nejprve Vesnici, Město nebo Stáje">Nemáš pastviny</button>');
+                } else if (!canBuyMore) {
+                    html.push('    <button class="btn-secondary" disabled style="padding:0.3rem 0.65rem; font-size:0.78rem; opacity:0.5;" title="Pastviny jsou plné">Pastviny plné</button>');
+                } else if (!canShopAnimals) {
+                    html.push('    <button class="btn-secondary" disabled style="padding:0.3rem 0.65rem; font-size:0.78rem; opacity:0.45;" title="K nákupu musíš stát na poli Obchodník nebo Stáje">U Obchodníka / Stájí</button>');
+                } else if (!canAfford) {
+                    html.push('    <button class="btn-action-buy" disabled style="padding:0.3rem 0.65rem; font-size:0.78rem; opacity:0.4;">Málo zlata</button>');
+                } else {
+                    html.push('    <button class="btn-action-buy" style="padding:0.32rem 0.75rem; font-size:0.84rem; cursor:pointer;" onclick="PRS_App.handleBuyLivestock(\x27' + catItem.id + '\x27)">🛒 Koupit ' + catItem.icon + '</button>');
+                }
+
+                html.push('  </div>');
+                html.push('</div>');
+            }
+
+            grid.innerHTML = html.join("\n");
+            return;
         }
 
         // 3. KATALOG JEDNOTLIVÝCH PŘEDMĚTŮ (Zbraně, Zbroje, Šaty, Klenoty)

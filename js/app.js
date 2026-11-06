@@ -2392,6 +2392,43 @@ window.PRS_App = {
         if (this.renderOnlineRolePawnPicker) this.renderOnlineRolePawnPicker();
     },
 
+    awardCredits: function (amount, reason, isWin) {
+        if (typeof amount !== "number" || amount <= 0) return;
+        this.userCredits = (this.userCredits || 0) + amount;
+        try {
+            localStorage.setItem("prs_guest_credits", String(this.userCredits));
+        } catch (e) { }
+
+        if (this.currentUser) {
+            this.currentUser.credits = this.userCredits;
+            try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
+
+            if (this.currentUser.role !== "Guest" && this.currentUser.username) {
+                var self = this;
+                fetch("api.ashx?action=award-credits", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: this.currentUser.username,
+                        amount: amount,
+                        isWin: !!isWin
+                    })
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok && typeof res.credits === "number") {
+                        self.userCredits = res.credits;
+                        self.currentUser.credits = res.credits;
+                        try { localStorage.setItem("prs_user", JSON.stringify(self.currentUser)); } catch (e2) { }
+                        self.updateUserUI();
+                    }
+                })
+                .catch(function () { });
+            }
+        }
+        this.updateUserUI();
+    },
+
     unlockPremiumPawn: function (pawnId) {
         var self = this;
         var pw = window.PRS_getPawnById ? window.PRS_getPawnById(pawnId) : null;
@@ -2563,6 +2600,10 @@ window.PRS_App = {
         else if (scenario === "tycoon") targetHearts = 30;
 
         else if (scenario === "epic") targetHearts = 45;
+
+        if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+            this.lobbyPlayers[0].pawnId = this.selectedPawnId || this.lobbyPlayers[0].pawnId || "knight_valiant";
+        }
 
         this.state = window.PRS_GameEngine.createGame({
 
