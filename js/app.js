@@ -3109,6 +3109,337 @@ window.PRS_App = {
         this.selectPawnForSlot(pawnId);
     },
 
+    // --- RYTÍŘSKÉ STATISTIKY & SÍŇ SLÁVY (ETAPA 4) ---
+    recordGameStats: function (statsPayload) {
+        if (!statsPayload) return;
+        var self = this;
+        var u = (this.currentUser && this.currentUser.username) || statsPayload.username;
+        if (!u) return;
+
+        fetch("api.ashx?action=record-game-stats", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username: u,
+                isWin: !!statsPayload.isWin,
+                hearts: statsPayload.hearts || 0,
+                dragons: statsPayload.dragons || 0,
+                castles: statsPayload.castles || 0,
+                herds: statsPayload.herds || 0,
+                festivalHearts: statsPayload.festivalHearts || 0
+            })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            if (res && res.ok && res.stats) {
+                if (self.currentUser) {
+                    self.currentUser.gamesPlayed = res.stats.gamesPlayed;
+                    self.currentUser.gamesWon = res.stats.gamesWon;
+                    self.currentUser.dragonsSlain = res.stats.dragonsSlain;
+                    self.currentUser.totalHeartsEarned = res.stats.totalHeartsEarned;
+                    self.currentUser.highestScore = res.stats.highestScore;
+                    self.currentUser.achievementsJson = JSON.stringify(res.stats.achievements);
+                    try { localStorage.setItem("prs_user", JSON.stringify(self.currentUser)); } catch (e) { }
+                }
+                if (res.stats.newlyUnlocked && res.stats.newlyUnlocked.length > 0) {
+                    var names = {
+                        first_game: "🥉 První krok",
+                        slayer: "🐉 Drakobijce",
+                        castle_lord: "🏰 Pán hradů",
+                        breeder: "🐎 Velkochovatel",
+                        ball_master: "💃 Mistr bálů",
+                        champion: "👑 Královský vítěz",
+                        grandmaster: "🌟 Dračí legenda"
+                    };
+                    var unlNames = res.stats.newlyUnlocked.map(function (k) { return names[k] || k; }).join(", ");
+                    if (window.PRS_Audio) window.PRS_Audio.playFanfare();
+                    setTimeout(function () {
+                        KiDeskyDialog.alert("Gratulujeme! Získal jsi nový královský odznak:<br><br><strong style='color:#fde68a; font-size:1.15rem;'>" + unlNames + "</strong><br><br>Najdeš ho ve své Rytířské síni slávy.", {
+                            title: "Nový královský odznak",
+                            icon: "🏆"
+                        });
+                    }, 1200);
+                }
+            }
+        })
+        .catch(function () { });
+    },
+
+    openAchievementsModal: function () {
+        var m = document.getElementById("achievements-modal");
+        if (!m) return;
+        m.style.display = "flex";
+        this.renderAchievementsModalContent();
+    },
+
+    closeAchievementsModal: function () {
+        var m = document.getElementById("achievements-modal");
+        if (m) m.style.display = "none";
+    },
+
+    renderAchievementsModalContent: function () {
+        var body = document.getElementById("achievements-modal-body");
+        if (!body) return;
+        var u = this.currentUser || { displayName: "Host", role: "Guest", credits: 0 };
+        var played = u.gamesPlayed || 0;
+        var won = u.gamesWon || 0;
+        var dragons = u.dragonsSlain || 0;
+        var hearts = u.totalHeartsEarned || 0;
+        var highest = u.highestScore || 0;
+        var achList = [];
+        try {
+            if (u.achievementsJson) achList = JSON.parse(u.achievementsJson);
+        } catch (e) { }
+
+        var badges = [
+            { id: "first_game", icon: "🥉", title: "První krok", desc: "Zahraj svou první partii v království Princeznina srdce." },
+            { id: "slayer", icon: "🐉", title: "Drakobijce", desc: "Skol obávaného draka v jeho nebezpečné sluji." },
+            { id: "castle_lord", icon: "🏰", title: "Pán hradů", desc: "Postav alespoň 2 majestátní hrady na svých panstvích." },
+            { id: "breeder", icon: "🐎", title: "Velkochovatel", desc: "Vlastni kompletní sadu koní a alespoň 3 stáda užitkového dobytka." },
+            { id: "ball_master", icon: "💃", title: "Mistr bálů", desc: "Získej na jedněch Slavnostech přes 15 Princezniných srdcí." },
+            { id: "champion", icon: "👑", title: "Královský vítěz", desc: "Zvítěz v partii a získej ruku princezny i královskou korunu." },
+            { id: "grandmaster", icon: "🌟", title: "Dračí legenda", desc: "Dosáhni alespoň 3 slavných vítězství nebo skol 3 draky." }
+        ];
+
+        var html = '<div class="achievements-profile-header">' +
+            '  <div class="achievements-avatar-badge">' + (u.role === "Admin" ? '👑' : '🛡️') + '</div>' +
+            '  <div>' +
+            '    <div style="font-family:\'Cinzel\',serif; font-size:1.25rem; font-weight:700; color:var(--gold-light);">' + this.escapeHtml(u.displayName || u.username || "Host") + '</div>' +
+            '    <div style="font-size:0.8rem; color:#94a3b8; display:flex; gap:0.5rem; align-items:center; margin-top:0.15rem;">' +
+            '      <span>Titul: <strong style="color:#fde68a;">' + (won >= 3 ? "Dračí velmistr" : (won >= 1 ? "Rytíř šampion" : "Čestný panoš")) + '</strong></span> • ' +
+            '      <span>Pokladnice: <strong style="color:#38bdf8;">' + (u.credits || 0) + ' 💎</strong></span>' +
+            '    </div>' +
+            '  </div>' +
+            '</div>';
+
+        html += '<div class="achievements-stats-grid">' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val">' + played + '</div><div class="ach-stat-lbl">Partií</div></div>' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#22c55e;">' + won + '</div><div class="ach-stat-lbl">Vítězství</div></div>' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#f97316;">' + dragons + '</div><div class="ach-stat-lbl">Draků</div></div>' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#ec4899;">' + (Math.round(hearts * 10) / 10) + '</div><div class="ach-stat-lbl">Srdcí celkem</div></div>' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#38bdf8;">' + (Math.round(highest * 10) / 10) + '</div><div class="ach-stat-lbl">Rekord partie</div></div>' +
+            '</div>';
+
+        html += '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.05rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.45rem;">🏆 Královská vitrína odznaků (' + achList.length + ' / ' + badges.length + ')</h4>';
+
+        html += '<div class="achievements-badges-grid">';
+        for (var bi = 0; bi < badges.length; bi++) {
+            var b = badges[bi];
+            var isUnl = achList.indexOf(b.id) !== -1;
+            html += '<div class="ach-badge-card ' + (isUnl ? 'unlocked' : 'locked') + '">' +
+                '  <div class="ach-badge-icon">' + b.icon + '</div>' +
+                '  <div style="flex:1;">' +
+                '    <div class="ach-badge-title">' + b.title + '</div>' +
+                '    <div class="ach-badge-desc">' + b.desc + '</div>' +
+                '    <div class="ach-badge-status ' + (isUnl ? 'unlocked-tag' : 'locked-tag') + '">' + (isUnl ? '✨ Odemčeno' : '🔒 Zamčeno') + '</div>' +
+                '  </div>' +
+                '</div>';
+        }
+        html += '</div>';
+
+        body.innerHTML = html;
+    },
+
+    // --- KATALOG AUTORSKÝCH HER (ETAPA 5) ---
+    openGameCatalogPreview: function (gameKey) {
+        var m = document.getElementById("catalog-game-modal");
+        if (!m) return;
+        m.style.display = "flex";
+        var body = document.getElementById("catalog-game-modal-body");
+        if (!body) return;
+
+        if (gameKey === "dragon_dungeon") {
+            body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/landmarks/dragon.jpg\');">' +
+                '  <div class="catalog-modal-banner-overlay"></div>' +
+                '  <div style="position:relative; z-index:2;">' +
+                '    <span class="lp-kicker-badge" style="background:rgba(249,115,22,0.25); border-color:#fb923c; color:#fed7aa;">🔨 V přípravě • Edice KiDesky</span>' +
+                '    <h2 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.6rem; margin:0.35rem 0 0.15rem;">🐉 Dobytí Dračí Hory</h2>' +
+                '    <div style="font-size:0.85rem; color:#fde68a;">Kooperativní dungeon crawler pro 1–4 hráče</div>' +
+                '  </div>' +
+                '</div>' +
+                '<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.1rem;">' +
+                '  <span class="catalog-feature-pill">👥 1–4 Hrdinové (Kooperace)</span>' +
+                '  <span class="catalog-feature-pill">⏱️ 60–90 minut</span>' +
+                '  <span class="catalog-feature-pill">🗺️ Modulární podzemní deska</span>' +
+                '  <span class="catalog-feature-pill">🎲 Kostkové taktické souboje</span>' +
+                '</div>' +
+                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">Příběhové pozadí &amp; Pravidla</h4>' +
+                '<p style="font-size:0.88rem; line-height:1.5; color:#cbd5e1; margin-bottom:0.9rem;">Hluboko v nitru Černé skály procitl prastarý drak Vermithrax a jeho služebníci zamořili okolní kraje. Hráči netvoří soupeře, nýbrž společnou družinu odvážných hrdinů. Každý hráč si volí unikátní třídu: <strong>Válečníka</strong> (tank a drtivé údery), <strong>Kouzelníka</strong> (plošná magie ohně a blesků), <strong>Zlodějku</strong> (odemykání truhel a kritické zásahy) nebo <strong>Klerika</strong> (léčení a posvátná ochrana).</p>' +
+                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">Herní mechaniky</h4>' +
+                '<ul style="font-size:0.86rem; line-height:1.5; color:#cbd5e1; margin-left:1.2rem; margin-bottom:1.2rem;">' +
+                '  <li><strong>Modulární podzemí:</strong> Každé sestoupení do sluje náhodně generuje nové sály, pasti a truhly s relikviemi.</li>' +
+                '  <li><strong>Boss fight s drakem:</strong> Vícefázový závěrečný souboj vyžadující sehranou týmovou strategii.</li>' +
+                '  <li><strong>Sdílená zásoba životů:</strong> Padne-li jeden hrdina a není včas oživen, celá výprava prohrává!</li>' +
+                '</ul>' +
+                '<div style="display:flex; gap:0.6rem; flex-wrap:wrap;">' +
+                '  <button class="btn-gold-lg" style="flex:1; padding:0.65rem;" onclick="PRS_App.subscribeGameNewsletter(\'dragon_dungeon\')">🔔 Sledovat vývoj &amp; Získat přístup do Beta testu</button>' +
+                '  <button class="btn-secondary" style="padding:0.65rem 1rem;" onclick="PRS_App.closeGameCatalogPreview()">Zavřít náhled</button>' +
+                '</div>';
+        } else {
+            body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/tiles/merchant.jpg\');">' +
+                '  <div class="catalog-modal-banner-overlay"></div>' +
+                '  <div style="position:relative; z-index:2;">' +
+                '    <span class="lp-kicker-badge" style="background:rgba(56,189,248,0.25); border-color:#38bdf8; color:#bae6fd;">📐 Koncept v návrhu • Edice KiDesky</span>' +
+                '    <h2 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.6rem; margin:0.35rem 0 0.15rem;">⚖️ Obchodníci Království</h2>' +
+                '    <div style="font-size:0.85rem; color:#bae6fd;">Strategická ekonomická desková hra pro 2–5 kupců</div>' +
+                '  </div>' +
+                '</div>' +
+                '<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.1rem;">' +
+                '  <span class="catalog-feature-pill">👥 2–5 Kupců</span>' +
+                '  <span class="catalog-feature-pill">⏱️ 45–75 minut</span>' +
+                '  <span class="catalog-feature-pill">⛵ Obchodní stezky &amp; Cechy</span>' +
+                '  <span class="catalog-feature-pill">🪙 Fluktuace tržních cen</span>' +
+                '</div>' +
+                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">Příběhové pozadí &amp; Pravidla</h4>' +
+                '<p style="font-size:0.88rem; line-height:1.5; color:#cbd5e1; margin-bottom:0.9rem;">Rozlehlé říše propojují karavanní stezky a námořní konvoje. Jako představený kupeckého cechu nakupuješ levně hedvábí, jantar, vzácné koření a královská vína v přístavech a prodáváš je za násobky ve vnitrozemských metropolích s vysokou poptávkou.</p>' +
+                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">Herní mechaniky</h4>' +
+                '<ul style="font-size:0.86rem; line-height:1.5; color:#cbd5e1; margin-left:1.2rem; margin-bottom:1.2rem;">' +
+                '  <li><strong>Živý trh s nabídkou a poptávkou:</strong> Jakmile kupec zaplaví město kořením, jeho cena klesá pro všechny!</li>' +
+                '  <li><strong>Výstavba cechovních skladů:</strong> Možnost stavět faktorie podél obchodních tras a vybírat celní poplatky od soupeřů.</li>' +
+                '  <li><strong>Piráti a loupeživí rytíři:</strong> Riziko na cestách snižované najímáním žoldnéřských eskort.</li>' +
+                '</ul>' +
+                '<div style="display:flex; gap:0.6rem; flex-wrap:wrap;">' +
+                '  <button class="btn-gold-lg" style="flex:1; padding:0.65rem;" onclick="PRS_App.subscribeGameNewsletter(\'merchants\')">🔔 Sledovat vývoj &amp; Získat přístup do Beta testu</button>' +
+                '  <button class="btn-secondary" style="padding:0.65rem 1rem;" onclick="PRS_App.closeGameCatalogPreview()">Zavřít náhled</button>' +
+                '</div>';
+        }
+    },
+
+    closeGameCatalogPreview: function () {
+        var m = document.getElementById("catalog-game-modal");
+        if (m) m.style.display = "none";
+    },
+
+    subscribeGameNewsletter: function (gameKey) {
+        var gName = (gameKey === "dragon_dungeon") ? "Dobytí Dračí Hory" : "Obchodníci Království";
+        if (window.PRS_Audio) window.PRS_Audio.playCoin();
+        KiDeskyDialog.alert("Děkujeme za tvůj zájem o hru <strong>" + gName + "</strong>!<br><br>Tvůj rytířský profil byl zaznamenán mezi přednostní zájemce pro nadcházející uzavřené Beta testování.", {
+            title: "Přihláška k testování přijata",
+            icon: "📜"
+        });
+    },
+
+    // --- TAHOVÝ ČASOVAČ (TURN TIMER) ---
+    startTurnTimer: function () {
+        this.stopTurnTimer();
+        if (!this.state || !this.state.config || !this.state.config.turnTimerSeconds || this.state.config.turnTimerSeconds <= 0) return;
+        if (this.state.phase === "GAME_OVER") return;
+
+        var total = this.state.config.turnTimerSeconds;
+        this.turnTimerRemaining = total;
+        this.turnTimerTotal = total;
+        this.updateTurnTimerUI();
+
+        var self = this;
+        this.turnTimerInterval = setInterval(function () {
+            if (!self.state || self.state.phase === "GAME_OVER") {
+                self.stopTurnTimer();
+                return;
+            }
+            self.turnTimerRemaining--;
+            self.updateTurnTimerUI();
+
+            var isMyTurn = (self.myOnlinePlayerIndex < 0 || self.state.currentPlayerIndex === self.myOnlinePlayerIndex);
+            if (self.turnTimerRemaining === 10 && isMyTurn && window.PRS_Audio) {
+                window.PRS_Audio.playNotice();
+            }
+
+            if (self.turnTimerRemaining <= 0) {
+                self.stopTurnTimer();
+                self.handleTurnTimeout();
+            }
+        }, 1000);
+    },
+
+    stopTurnTimer: function () {
+        if (this.turnTimerInterval) {
+            clearInterval(this.turnTimerInterval);
+            this.turnTimerInterval = null;
+        }
+    },
+
+    updateTurnTimerUI: function () {
+        var el = document.getElementById("turn-timer-hud");
+        if (!el) return;
+        if (!this.state || !this.state.config || !this.state.config.turnTimerSeconds || this.state.config.turnTimerSeconds <= 0 || this.state.phase === "GAME_OVER") {
+            el.innerHTML = "";
+            return;
+        }
+        var total = this.state.config.turnTimerSeconds;
+        var rem = Math.max(0, this.turnTimerRemaining !== undefined ? this.turnTimerRemaining : total);
+        var pct = Math.max(0, Math.min(100, Math.round((rem / total) * 100)));
+        var color = (rem <= 10) ? '#ef4444' : (rem <= 25 ? '#f59e0b' : '#10b981');
+        var isUrgent = (rem <= 10);
+
+        el.innerHTML = '<div class="turn-timer-bar-wrap">' +
+            '  <div class="turn-timer-header">' +
+            '    <span>⏱️ Limit tahu: <strong style="color:' + color + ';">' + rem + 's</strong> / ' + total + 's</span>' +
+            (isUrgent ? '    <span class="timer-pulse-warning">⚠️ Vyprší za chvíli!</span>' : '') +
+            '  </div>' +
+            '  <div class="turn-timer-track">' +
+            '    <div class="turn-timer-fill" style="width:' + pct + '%; background:' + color + ';"></div>' +
+            '  </div>' +
+            '</div>';
+    },
+
+    handleTurnTimeout: function () {
+        if (!this.state || this.state.phase === "GAME_OVER") return;
+        var curIdx = this.state.currentPlayerIndex;
+        var curP = this.state.players[curIdx];
+        var isMyTurn = (this.myOnlinePlayerIndex < 0 || curIdx === this.myOnlinePlayerIndex);
+
+        if (isMyTurn && curP && curP.type === "Human") {
+            this.addLog("⏱️ Časový limit pro tvůj tah vypršel – akce byla provedena automaticky.", "danger");
+            if (this.state.phase === "ROLL") {
+                this.handleRollDice();
+            } else {
+                this.handleEndTurn();
+            }
+        } else if (this.state.roomCode && !isMyTurn && curP && curP.type === "Human") {
+            this.addLog("⏱️ Hráč " + curP.name + " nestihl svůj tah v časovém limitu.", "danger");
+            var actEl = document.getElementById("turn-action-panel");
+            if (actEl) {
+                var btn = document.getElementById("afk-takeover-btn");
+                if (!btn) {
+                    var notice = document.createElement("div");
+                    notice.style.marginTop = "0.6rem";
+                    notice.innerHTML = '<button id="afk-takeover-btn" class="btn-primary" style="width:100%; background:#dc2626; border-color:#f87171; font-weight:700; padding:0.6rem;" onclick="PRS_App.takeOverAfkTurnAsBot()">⚡ Hráč neodpovídá - Předat tah královskému botovi</button>';
+                    actEl.appendChild(notice);
+                }
+            }
+        }
+    },
+
+    renderKnightEmotesHud: function () {
+        var el = document.getElementById("knight-emotes-hud");
+        if (!el) return;
+        if (!this.state || this.state.phase === "GAME_OVER") {
+            el.innerHTML = "";
+            return;
+        }
+        el.innerHTML = '<div class="knight-emotes-bar">' +
+            '  <span class="emotes-label">💬 Reakce:</span>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'⚔️\', \'Do zbraně!\')" title="Do zbraně!">⚔️</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'👑\', \'Sláva králi!\')" title="Sláva králi!">👑</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'🛡️\', \'Držím stráž!\')" title="Držím stráž!">🛡️</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'🍷\', \'Na zdraví!\')" title="Na zdraví!">🍷</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'🐉\', \'Pozor na draka!\')" title="Pozor na draka!">🐉</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'👏\', \'Skvělý tah!\')" title="Skvělý tah!">👏</button>' +
+            '</div>';
+    },
+
+    toggleEmotePicker: function (e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        var hudEl = document.getElementById("knight-emotes-hud");
+        if (hudEl) {
+            if (hudEl.style.display === "none") {
+                hudEl.style.display = "block";
+            } else {
+                hudEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+        }
+    },
+
     removeLobbyPlayer: function (idx) {
 
         if (this.lobbyPlayers.length <= 2) return;
@@ -3215,6 +3546,10 @@ window.PRS_App = {
 
         var diffSel = document.getElementById("lobby-difficulty-mode");
 
+        var timerSel = document.getElementById("lobby-turn-timer");
+
+        var turnTimerSec = timerSel ? parseInt(timerSel.value, 10) : 0;
+
         var boardCode = boardSel ? boardSel.value : "classic_96";
 
         var scenario = scenSel ? scenSel.value : (this.selectedGameScenario || "classic");
@@ -3259,6 +3594,17 @@ window.PRS_App = {
 
         });
 
+        if (this.state && this.state.config) {
+            this.state.config.turnTimerSeconds = turnTimerSec;
+        }
+
+        try {
+            localStorage.removeItem("prs_active_online_room");
+            if (window.history && window.history.replaceState && !window.location.search.includes("room=")) {
+                window.history.replaceState(null, "", window.location.pathname);
+            }
+        } catch (e) { }
+
         this.selectedNodeId = 0;
 
         this.lastKnownTurnNumber = 1;
@@ -3299,6 +3645,8 @@ window.PRS_App = {
             this.switchTab("board");
 
             this.scheduleBotTurnIfNeeded();
+
+            this.startTurnTimer();
 
         }
 
@@ -3353,6 +3701,10 @@ window.PRS_App = {
         this.renderLowerKnightDetail();
 
         this.renderActionPanel();
+
+        this.renderKnightEmotesHud();
+
+        this.updateTurnTimerUI();
 
         this.renderLogs();
 

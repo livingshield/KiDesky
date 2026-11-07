@@ -36,13 +36,13 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611072245">
+    <link rel="stylesheet" href="css/main.css?v=202611072315">
 
-    <link rel="stylesheet" href="css/board.css?v=202611072245">
+    <link rel="stylesheet" href="css/board.css?v=202611072315">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611072245">
+    <link rel="stylesheet" href="css/modals.css?v=202611072315">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611072245">
+    <link rel="stylesheet" href="css/mobile.css?v=202611072315">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -106,6 +106,9 @@
 
             <!-- Tlačítko figurek/kreditů (pouze pro přihlášené) -->
             <button id="topbar-credits-btn" type="button" class="btn-secondary" onclick="PRS_App.openPawnShopModal(0)" title="Královská šatna a sbírka figurek" style="display:none; padding:0.3rem 0.65rem; font-weight:700; border-color:var(--gold); color:var(--gold-light); align-items:center; gap:0.35rem;">💎 <span id="top-user-credits" style="color:#38bdf8;">250</span></button>
+
+            <!-- Tlačítko Síň slávy & Úspěchy -->
+            <button id="topbar-achievements-btn" type="button" class="btn-secondary" onclick="PRS_App.openAchievementsModal()" title="Rytířská síň slávy a královské odznaky" style="padding:0.3rem 0.65rem; font-weight:700; border-color:var(--gold); color:var(--gold-light); display:inline-flex; align-items:center; gap:0.35rem;">🏆 <span class="hide-on-mobile">Síň slávy</span></button>
 
             <!-- Profil rytíře -->
             <div id="user-status-badge" class="user-pill" onclick="PRS_App.openAuthModal()" title="Kliknutím zobrazíš účet a rytířský profil">👤 Host</div>
@@ -203,6 +206,9 @@
                             <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
                                 <button type="button" class="btn-gold-lg" style="flex:1; min-width:220px; font-size:1.02rem; padding:0.7rem 1.2rem;" onclick="PRS_App.enterGameHall()">
                                     ⚔️ Vstoupit do Rytířské herny →
+                                </button>
+                                <button type="button" class="btn-secondary" style="padding:0.7rem 1rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.openAchievementsModal()" title="Otevřít Rytířskou síň slávy a odznaky">
+                                    🏆 Síň slávy
                                 </button>
                                 <button type="button" class="btn-secondary" style="padding:0.7rem 1rem;" onclick="PRS_App.openAuthModal()">
                                     👤 Změnit účet / Odhlásit
@@ -435,9 +441,9 @@
 
                         </div>
 
-                        <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; padding:0.5rem;">
+                        <button class="btn-secondary" style="width:100%; font-size:0.84rem; padding:0.5rem; border-color:#fb923c; color:#fed7aa;" onclick="PRS_App.openGameCatalogPreview('dragon_dungeon')">
 
-                            ⏳ Připravujeme do katalogu KiDesky
+                            📜 Prozkoumat koncept &amp; Návrh
 
                         </button>
 
@@ -483,9 +489,9 @@
 
                         </div>
 
-                        <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; padding:0.5rem;">
+                        <button class="btn-secondary" style="width:100%; font-size:0.84rem; padding:0.5rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.openGameCatalogPreview('merchants')">
 
-                            ⏳ Připravujeme do katalogu KiDesky
+                            📜 Prozkoumat koncept &amp; Pravidla
 
                         </button>
 
@@ -636,7 +642,7 @@
 
                         </div>
 
-                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.55rem; margin-bottom:0.95rem;">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:0.55rem; margin-bottom:0.95rem;">
 
                             <div>
 
@@ -692,6 +698,24 @@
                                     <option value="hard">⚔️ Rytířská výzva (Hard)</option>
 
                                     <option value="ultimate">💀 Na život a smrt (Ultimate)</option>
+
+                                </select>
+
+                            </div>
+
+                            <div>
+
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">⏱️ Tahový časovač:</label>
+
+                                <select id="lobby-turn-timer" class="prs-select" style="font-size:0.82rem; padding:0.4rem;">
+
+                                    <option value="0" selected>♾️ Bez limitu (volné tempo)</option>
+
+                                    <option value="60">⏱️ Rychlý tah (60 vteřin)</option>
+
+                                    <option value="90">⏳ Standardní (90 vteřin)</option>
+
+                                    <option value="45">⚡ Bleskový (45 vteřin)</option>
 
                                 </select>
 
@@ -871,6 +895,8 @@
 
                             <button class="btn-zoom" onclick="PRS_App.centerOnActivePlayer()" title="Vycentrovat na hráče na tahu">🎯 Na hráče</button>
 
+                            <button class="btn-zoom" onclick="PRS_App.toggleEmotePicker(event)" title="Odeslat reakci rytíře u stolu" style="border-color:rgba(212,175,55,0.4); color:#fde68a;">💬 Reakce</button>
+
                         </div>
 
                         <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
@@ -947,6 +973,8 @@
 
                     <!-- 1. TAH & KOSTKA (nejdůležitější akce nahoře) -->
 
+                    <div id="turn-timer-hud"></div>
+                    <div id="knight-emotes-hud"></div>
                     <div id="turn-action-panel"></div>
 
                     <!-- 2. ZÁLOŽKOVÝ INSPEKTOR HRÁČE (FÁZE 3) -->
@@ -2657,21 +2685,21 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611072245" defer></script>
-    <script src="js/game-boards.js?v=202611072245" defer></script>
-    <script src="js/game-engine.js?v=202611072245" defer></script>
-    <script src="js/game-combat-ai.js?v=202611072245" defer></script>
-    <script src="js/app-audio.js?v=202611072245" defer></script>
-    <script src="js/app-dialog.js?v=202611072245" defer></script>
-    <script src="js/app.js?v=202611072245" defer></script>
-    <script src="js/app-board.js?v=202611072245" defer></script>
-    <script src="js/app-hud.js?v=202611072245" defer></script>
-    <script src="js/app-modals.js?v=202611072245" defer></script>
-    <script src="js/app-online.js?v=202611072245" defer></script>
-    <script src="js/app-saves.js?v=202611072245" defer></script>
-    <script src="js/app-catalog.js?v=202611072245" defer></script>
-    <script src="js/app-admin.js?v=202611072245" defer></script>
-    <script src="js/app-musicwidget.js?v=202611072245" defer></script>
+    <script src="js/game-data.js?v=202611072315" defer></script>
+    <script src="js/game-boards.js?v=202611072315" defer></script>
+    <script src="js/game-engine.js?v=202611072315" defer></script>
+    <script src="js/game-combat-ai.js?v=202611072315" defer></script>
+    <script src="js/app-audio.js?v=202611072315" defer></script>
+    <script src="js/app-dialog.js?v=202611072315" defer></script>
+    <script src="js/app.js?v=202611072315" defer></script>
+    <script src="js/app-board.js?v=202611072315" defer></script>
+    <script src="js/app-hud.js?v=202611072315" defer></script>
+    <script src="js/app-modals.js?v=202611072315" defer></script>
+    <script src="js/app-online.js?v=202611072315" defer></script>
+    <script src="js/app-saves.js?v=202611072315" defer></script>
+    <script src="js/app-catalog.js?v=202611072315" defer></script>
+    <script src="js/app-admin.js?v=202611072315" defer></script>
+    <script src="js/app-musicwidget.js?v=202611072315" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3346,6 +3374,39 @@
                 <button class="btn-gold-lg" style="padding:0.55rem 1.25rem; font-size:0.92rem;" onclick="PRS_App.resumeOnlineGameFromSeats()">
                     ⚔️ Vstoupit ke stolu a pokračovat ve hře →
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏆 SÍŇ SLÁVY & ODZNAKY (ETAPA 4) -->
+    <div id="achievements-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeAchievementsModal()">
+        <div class="achievements-modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
+                <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.35rem; display:flex; align-items:center; gap:0.5rem;">
+                    🏆 Rytířská síň slávy &amp; Úspěchy
+                </h3>
+                <button class="btn-icon-danger" onclick="PRS_App.closeAchievementsModal()">✕</button>
+            </div>
+            <div id="achievements-modal-body">
+                <!-- Dynamicky generováno JS -->
+            </div>
+            <div style="margin-top:1.2rem; text-align:right; border-top:1px solid rgba(212,175,55,0.2); padding-top:0.8rem;">
+                <button class="btn-secondary" onclick="PRS_App.closeAchievementsModal()">Zavřít síň slávy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📜 NÁHLED KONCEPTU HER KATALOGU KIDESKY (ETAPA 5) -->
+    <div id="catalog-game-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeGameCatalogPreview()">
+        <div class="catalog-game-modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.9rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.4rem;">
+                <span class="lp-kicker-badge" style="margin:0; background:rgba(212,175,55,0.18); border-color:var(--gold); color:var(--gold-light);">
+                    🎲 Katalog autorských deskových her KiDesky
+                </span>
+                <button class="btn-icon-danger" onclick="PRS_App.closeGameCatalogPreview()">✕</button>
+            </div>
+            <div id="catalog-game-modal-body">
+                <!-- Dynamicky generováno JS -->
             </div>
         </div>
     </div>

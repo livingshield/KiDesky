@@ -138,6 +138,28 @@
                     if (this.awardCredits) {
                         this.awardCredits(creditsEarned, isHumanWinner ? "Královský triumf" : "Účast v turnaji", isHumanWinner);
                     }
+                    if (this.recordGameStats) {
+                        var castlesCount = 0;
+                        var herdsCount = 0;
+                        if (this.state.board && this.state.board.nodes) {
+                            for (var nid in this.state.board.nodes) {
+                                var nd = this.state.board.nodes[nid];
+                                if (nd && nd.owner === humanPlayer.index) {
+                                    if (nd.castle) castlesCount++;
+                                    if (nd.hasHerds) herdsCount++;
+                                }
+                            }
+                        }
+                        this.recordGameStats({
+                            username: (this.currentUser && this.currentUser.username) || humanPlayer.name,
+                            isWin: isHumanWinner,
+                            hearts: humanPlayer.totalHearts || 0,
+                            dragons: (humanPlayer.questsDone && humanPlayer.questsDone.slayer) ? 1 : 0,
+                            castles: castlesCount,
+                            herds: herdsCount,
+                            festivalHearts: humanPlayer.stats ? (humanPlayer.stats.festivalHearts || 0) : 0
+                        });
+                    }
                     subText += '<div style="margin-top:0.45rem; padding:0.35rem 0.65rem; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); border-radius:6px; color:#7dd3fc; font-size:0.83rem;">💎 Odměna: Získal jsi <strong>+' + creditsEarned + ' kreditů</strong> do Rytířské šatny! (Zůstatek: <strong>' + (this.userCredits || 0) + ' 💎</strong>)</div>';
                 }
             }

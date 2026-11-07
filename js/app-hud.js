@@ -4732,6 +4732,8 @@
 
             self.scheduleBotTurnIfNeeded();
 
+            if (self.startTurnTimer) self.startTurnTimer();
+
         };
 
         if (p && p.finally) {

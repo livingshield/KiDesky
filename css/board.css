@@ -2926,3 +2926,133 @@
 
 }
 
+
+
+/* ==========================================================================
+   TAHOVÝ ČASOVAČ & RYTÍŘSKÉ EMOTIKONY (ONLINE MULTIPLAYER)
+   ========================================================================== */
+.turn-timer-bar-wrap {
+    background: rgba(15, 11, 7, 0.85);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    margin-bottom: 0.55rem;
+}
+.turn-timer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    margin-bottom: 0.25rem;
+}
+.turn-timer-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.turn-timer-fill {
+    height: 100%;
+    transition: width 1s linear, background-color 0.4s ease;
+    border-radius: 4px;
+}
+.timer-pulse-warning {
+    color: #ef4444;
+    font-weight: 700;
+    font-size: 0.74rem;
+    animation: timerPulse 0.9s infinite alternate;
+}
+@keyframes timerPulse {
+    0% { opacity: 0.6; transform: scale(0.96); }
+    100% { opacity: 1; transform: scale(1.04); }
+}
+
+/* Rytířské emotikony */
+.knight-emotes-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.5rem;
+    background: rgba(20, 15, 10, 0.75);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    margin-bottom: 0.55rem;
+    flex-wrap: wrap;
+}
+.knight-emotes-bar .emotes-label {
+    font-size: 0.76rem;
+    color: var(--gold-light, #fde68a);
+    font-weight: 600;
+    margin-right: 0.2rem;
+}
+.emote-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 6px;
+    padding: 0.22rem 0.45rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    line-height: 1;
+}
+.emote-btn:hover {
+    transform: translateY(-2px) scale(1.18);
+    background: rgba(212, 175, 55, 0.25);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    border-color: var(--gold, #d4af37);
+}
+.emote-btn:active {
+    transform: scale(0.95);
+}
+
+/* Plovoucí reakční bublina nad figurkou rytíře */
+.knight-emote-bubble {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    background: rgba(18, 12, 8, 0.94);
+    border: 1.5px solid var(--gold, #d4af37);
+    border-radius: 12px;
+    padding: 0.3rem 0.65rem;
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.8), 0 0 12px rgba(212, 175, 55, 0.45);
+    pointer-events: none;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    animation: knightEmoteAnim 3.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.knight-emote-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--gold, #d4af37);
+}
+.knight-emote-bubble .emote-author {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.knight-emote-bubble .emote-text {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #fef08a;
+    white-space: nowrap;
+}
+@keyframes knightEmoteAnim {
+    0% { opacity: 0; transform: translate(-50%, -60%) scale(0.5); }
+    12% { opacity: 1; transform: translate(-50%, -100%) scale(1.08); }
+    18% { transform: translate(-50%, -100%) scale(1); }
+    75% { opacity: 1; transform: translate(-50%, -120%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -150%) scale(0.85); }
+}

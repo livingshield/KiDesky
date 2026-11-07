@@ -50,7 +50,17 @@ public class KiDeskyApiHandler : IHttpHandler
 
     // Dynamické načtení connection stringu z web.config / appsettings.json / produkčního MSSQL db4937
 
-
+    public class RoomEmoteItem
+    {
+        public string id;
+        public string code;
+        public int playerIndex;
+        public string author;
+        public string emote;
+        public long timestamp;
+    }
+    private static readonly Dictionary<string, List<RoomEmoteItem>> _roomEmotes = new Dictionary<string, List<RoomEmoteItem>>(StringComparer.OrdinalIgnoreCase);
+    private static readonly object _emoteLock = new object();
 
     private static string _resolvedConnStr = null;
 
@@ -889,6 +899,12 @@ public class KiDeskyApiHandler : IHttpHandler
                 case "admin-system-info":
                     HandleAdminSystemInfo(context);
                     break;
+                case "send-emote":
+                    HandleSendEmote(context);
+                    break;
+                case "record-game-stats":
+                    HandleRecordGameStats(context);
+                    break;
 
 
 
@@ -1334,6 +1350,16 @@ END
 IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'IX_prs_Users_GoogleId')
 BEGIN
     CREATE NONCLUSTERED INDEX IX_prs_Users_GoogleId ON [prs].[prs_Users]([GoogleId]) WHERE [GoogleId] IS NOT NULL;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'GamesPlayed')
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [GamesPlayed] INT NOT NULL DEFAULT 0;
+    ALTER TABLE [prs].[prs_Users] ADD [GamesWon] INT NOT NULL DEFAULT 0;
+    ALTER TABLE [prs].[prs_Users] ADD [DragonsSlain] INT NOT NULL DEFAULT 0;
+    ALTER TABLE [prs].[prs_Users] ADD [TotalHeartsEarned] FLOAT NOT NULL DEFAULT 0;
+    ALTER TABLE [prs].[prs_Users] ADD [HighestScore] FLOAT NOT NULL DEFAULT 0;
+    ALTER TABLE [prs].[prs_Users] ADD [AchievementsJson] NVARCHAR(MAX) NULL;
 END
 
 IF OBJECT_ID(N'[prs].[prs_Videos]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Videos]') AND name = 'LikesCount')
@@ -2774,6 +2800,12 @@ END";
             int credits = 250;
             string selectedPawn = "knight_valiant";
             string unlockedPawns = null;
+            int gPlayed = 0;
+            int gWon = 0;
+            int gDragons = 0;
+            double gTotalHearts = 0;
+            double gHighestScore = 0;
+            string gAchJson = "[]";
 
             using (var cmd = new SqlCommand(@"
                 SELECT [Id], [Username], [Email], [Role], [DisplayName], [Credits], [SelectedPawnId], [UnlockedPawnsJson]
@@ -2793,6 +2825,22 @@ END";
                         credits = r["Credits"] == DBNull.Value ? 250 : Convert.ToInt32(r["Credits"]);
                         selectedPawn = r["SelectedPawnId"] == DBNull.Value ? "knight_valiant" : r["SelectedPawnId"].ToString();
                         unlockedPawns = r["UnlockedPawnsJson"] == DBNull.Value ? "" : r["UnlockedPawnsJson"].ToString();
+                        try
+                        {
+                            int gpIdx = r.GetOrdinal("GamesPlayed");
+                            if (!r.IsDBNull(gpIdx)) gPlayed = Convert.ToInt32(r[gpIdx]);
+                            int gwIdx = r.GetOrdinal("GamesWon");
+                            if (!r.IsDBNull(gwIdx)) gWon = Convert.ToInt32(r[gwIdx]);
+                            int dsIdx = r.GetOrdinal("DragonsSlain");
+                            if (!r.IsDBNull(dsIdx)) gDragons = Convert.ToInt32(r[dsIdx]);
+                            int thIdx = r.GetOrdinal("TotalHeartsEarned");
+                            if (!r.IsDBNull(thIdx)) gTotalHearts = Convert.ToDouble(r[thIdx]);
+                            int hsIdx = r.GetOrdinal("HighestScore");
+                            if (!r.IsDBNull(hsIdx)) gHighestScore = Convert.ToDouble(r[hsIdx]);
+                            int ajIdx = r.GetOrdinal("AchievementsJson");
+                            if (!r.IsDBNull(ajIdx) && !string.IsNullOrEmpty(r[ajIdx].ToString())) gAchJson = r[ajIdx].ToString();
+                        }
+                        catch { }
                     }
                 }
             }
@@ -2848,6 +2896,12 @@ END";
                         emailConfirmed = true,
                         avatarUrl = picture,
                         authProvider = "google",
+                        gamesPlayed = gPlayed,
+                        gamesWon = gWon,
+                        dragonsSlain = gDragons,
+                        totalHeartsEarned = Math.Round(gTotalHearts, 1),
+                        highestScore = Math.Round(gHighestScore, 1),
+                        achievementsJson = gAchJson,
                         credits = targetCredits,
                         selectedPawnId = selectedPawn,
                         unlockedPawnsJson = unlockedPawns
@@ -3152,6 +3206,162 @@ END";
         }
     }
 
+    private void HandleSendEmote(HttpContext context)
+    {
+        string code = (context.Request.QueryString["code"] ?? "").Trim().ToUpperInvariant();
+        string playerIdxStr = context.Request.QueryString["playerIdx"] ?? "0";
+        int playerIdx = 0;
+        int.TryParse(playerIdxStr, out playerIdx);
+        string emote = context.Request.QueryString["emote"] ?? "";
+        string author = context.Request.QueryString["author"] ?? "";
+        if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(emote))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Missing code or emote" }));
+            return;
+        }
+        long nowMs = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+        var item = new RoomEmoteItem
+        {
+            id = Guid.NewGuid().ToString("N").Substring(0, 8),
+            code = code,
+            playerIndex = playerIdx,
+            author = author,
+            emote = emote,
+            timestamp = nowMs
+        };
+        lock (_emoteLock)
+        {
+            if (!_roomEmotes.ContainsKey(code)) _roomEmotes[code] = new List<RoomEmoteItem>();
+            var list = _roomEmotes[code];
+            list.Add(item);
+            if (list.Count > 15) list.RemoveRange(0, list.Count - 15);
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, emote = item }));
+    }
+
+    private void HandleRecordGameStats(HttpContext context)
+    {
+        var body = ReadJsonBody(context);
+        string username = GetStr(body, "username").Trim();
+        bool isWin = GetBool(body, "isWin", false);
+        double hearts = 0;
+        double.TryParse(GetStr(body, "hearts"), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out hearts);
+        int dragons = GetInt(body, "dragons", 0);
+        int castles = GetInt(body, "castles", 0);
+        int herds = GetInt(body, "herds", 0);
+        double festHearts = 0;
+        double.TryParse(GetStr(body, "festivalHearts"), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out festHearts);
+
+        if (string.IsNullOrEmpty(username))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Missing username" }));
+            return;
+        }
+
+        int played = 0, won = 0, totalDragons = 0;
+        double totalHearts = 0, highestScore = 0;
+        string achJson = "";
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                SELECT ISNULL([GamesPlayed], 0) as GamesPlayed,
+                       ISNULL([GamesWon], 0) as GamesWon,
+                       ISNULL([DragonsSlain], 0) as DragonsSlain,
+                       ISNULL([TotalHeartsEarned], 0) as TotalHeartsEarned,
+                       ISNULL([HighestScore], 0) as HighestScore,
+                       ISNULL([AchievementsJson], '') as AchievementsJson
+                FROM [prs].[prs_Users]
+                WHERE [Username] = @u OR [Email] = @u", conn))
+            {
+                cmd.Parameters.AddWithValue("@u", username);
+                using (var r = cmd.ExecuteReader())
+                {
+                    if (r.Read())
+                    {
+                        played = Convert.ToInt32(r["GamesPlayed"]);
+                        won = Convert.ToInt32(r["GamesWon"]);
+                        totalDragons = Convert.ToInt32(r["DragonsSlain"]);
+                        totalHearts = Convert.ToDouble(r["TotalHeartsEarned"]);
+                        highestScore = Convert.ToDouble(r["HighestScore"]);
+                        achJson = r["AchievementsJson"].ToString();
+                    }
+                }
+            }
+
+            played += 1;
+            if (isWin) won += 1;
+            totalDragons += dragons;
+            totalHearts += hearts;
+            if (hearts > highestScore) highestScore = hearts;
+
+            var achList = new List<string>();
+            if (!string.IsNullOrEmpty(achJson) && achJson.StartsWith("["))
+            {
+                try
+                {
+                    var parsed = _json.Deserialize<List<string>>(achJson);
+                    if (parsed != null) achList.AddRange(parsed);
+                } catch { }
+            }
+
+            List<string> newlyUnlocked = new List<string>();
+            Action<string> tryUnlock = delegate(string c) {
+                if (!achList.Contains(c)) {
+                    achList.Add(c);
+                    newlyUnlocked.Add(c);
+                }
+            };
+
+            if (played >= 1) tryUnlock("first_game");
+            if (totalDragons >= 1) tryUnlock("slayer");
+            if (castles >= 2) tryUnlock("castle_lord");
+            if (herds >= 3) tryUnlock("breeder");
+            if (festHearts >= 15.0) tryUnlock("ball_master");
+            if (won >= 1) tryUnlock("champion");
+            if (totalDragons >= 3 || won >= 3) tryUnlock("grandmaster");
+
+            string newAchJson = _json.Serialize(achList);
+
+            using (var upd = new SqlCommand(@"
+                UPDATE [prs].[prs_Users]
+                SET [GamesPlayed] = @gp,
+                    [GamesWon] = @gw,
+                    [DragonsSlain] = @ds,
+                    [TotalHeartsEarned] = @th,
+                    [HighestScore] = @hs,
+                    [AchievementsJson] = @aj
+                WHERE [Username] = @u OR [Email] = @u", conn))
+            {
+                upd.Parameters.AddWithValue("@gp", played);
+                upd.Parameters.AddWithValue("@gw", won);
+                upd.Parameters.AddWithValue("@ds", totalDragons);
+                upd.Parameters.AddWithValue("@th", totalHearts);
+                upd.Parameters.AddWithValue("@hs", highestScore);
+                upd.Parameters.AddWithValue("@aj", newAchJson);
+                upd.Parameters.AddWithValue("@u", username);
+                upd.ExecuteNonQuery();
+            }
+
+            context.Response.Write(_json.Serialize(new
+            {
+                ok = true,
+                stats = new
+                {
+                    gamesPlayed = played,
+                    gamesWon = won,
+                    dragonsSlain = totalDragons,
+                    totalHeartsEarned = Math.Round(totalHearts, 1),
+                    highestScore = Math.Round(highestScore, 1),
+                    achievements = achList,
+                    newlyUnlocked = newlyUnlocked
+                }
+            }));
+        }
+    }
+
 
 
     private void HandleLogin(HttpContext context)
@@ -3348,6 +3558,22 @@ END";
                         bool emailConfirmed = false;
                         string avatarUrl = "";
                         string authProvider = "local";
+                        int ds = 0;
+                        double th = 0;
+                        double hs = 0;
+                        string ach = "[]";
+                        try
+                        {
+                            int dsIdx = r.GetOrdinal("DragonsSlain");
+                            if (!r.IsDBNull(dsIdx)) ds = Convert.ToInt32(r[dsIdx]);
+                            int thIdx = r.GetOrdinal("TotalHeartsEarned");
+                            if (!r.IsDBNull(thIdx)) th = Convert.ToDouble(r[thIdx]);
+                            int hsIdx = r.GetOrdinal("HighestScore");
+                            if (!r.IsDBNull(hsIdx)) hs = Convert.ToDouble(r[hsIdx]);
+                            int achIdx = r.GetOrdinal("AchievementsJson");
+                            if (!r.IsDBNull(achIdx) && !string.IsNullOrEmpty(r[achIdx].ToString())) ach = r[achIdx].ToString();
+                        }
+                        catch { }
                         try
                         {
                             int ecIdx = r.GetOrdinal("EmailConfirmed");
@@ -3460,7 +3686,7 @@ END";
                         {
                             ok = true,
                             status = "success",
-                            user = new { id = id, username = u, displayName = dn, role = role, email = userEmail, emailConfirmed = emailConfirmed, avatarUrl = avatarUrl, authProvider = authProvider, gamesPlayed = gp, gamesWon = gw, credits = credits, selectedPawnId = selectedPawnId, unlockedPawnsJson = unlockedPawnsJson }
+                            user = new { id = id, username = u, displayName = dn, role = role, email = userEmail, emailConfirmed = emailConfirmed, avatarUrl = avatarUrl, authProvider = authProvider, gamesPlayed = gp, gamesWon = gw, dragonsSlain = ds, totalHeartsEarned = Math.Round(th, 1), highestScore = Math.Round(hs, 1), achievementsJson = ach, credits = credits, selectedPawnId = selectedPawnId, unlockedPawnsJson = unlockedPawnsJson }
                         }));
 
 
@@ -4361,50 +4587,29 @@ END";
 
 
 
-                        var checkObj = new
-
-
-
+                        List<RoomEmoteItem> recentEmotes = new List<RoomEmoteItem>();
+                        lock (_emoteLock)
                         {
+                            string lookupCode = !string.IsNullOrEmpty(room) ? room : guid;
+                            if (!string.IsNullOrEmpty(lookupCode) && _roomEmotes.ContainsKey(lookupCode))
+                            {
+                                long nowMs = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+                                recentEmotes = _roomEmotes[lookupCode].FindAll(e => (nowMs - e.timestamp) < 25000);
+                            }
+                        }
 
-
-
+                        var checkObj = new
+                        {
                             ok = true,
-
-
-
                             status = "success",
-
-
-
                             sessionGuid = r["SessionGuid"].ToString(),
-
-
-
                             roomCode = r["RoomCode"].ToString(),
-
-
-
                             turnNumber = Convert.ToInt32(r["TurnNumber"]),
-
-
-
                             currentPlayerIndex = Convert.ToInt32(r["CurrentTurnPlayerIdx"]),
-
-
-
                             gameStatus = r["Status"].ToString(),
-
-
-
                             winnerName = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString(),
-
-
-
-                            updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o")
-
-
-
+                            updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o"),
+                            emotes = recentEmotes
                         };
 
 
