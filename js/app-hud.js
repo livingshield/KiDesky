@@ -2512,13 +2512,13 @@
 
             '  <div class="compact-virtues-row">' +
 
-            '    <span class="cv-item" title="Boj: ' + st.boj + ' (výcvik ' + p.skills.boj + '/5)">⚔️ <strong>' + st.boj + '</strong></span>' +
+            '    <span class="cv-item" title="Boj: ' + st.boj + ' (výcvik ' + p.skills.boj + '/5) – síla v arénách, lov draků a Turnaje">⚔️ <strong>' + st.boj + '</strong></span>' +
 
-            '    <span class="cv-item" title="Jízda: ' + st.jizda + ' (výcvik ' + p.skills.jizda + '/5)">🏇 <strong>' + st.jizda + '</strong></span>' +
+            '    <span class="cv-item" title="Jízda: ' + st.jizda + ' (výcvik ' + p.skills.jizda + '/5) – rychlost pohybu, slevy nájmů a Závody">🏇 <strong>' + st.jizda + '</strong></span>' +
 
-            '    <span class="cv-item" title="Tanec: ' + st.tanec + ' (výcvik ' + p.skills.tanec + '/5)">💃 <strong>' + st.tanec + '</strong></span>' +
+            '    <span class="cv-item" title="Tanec: ' + st.tanec + ' (výcvik ' + p.skills.tanec + '/5) – audience u krále (+💖), Zámecké plesy a dary">💃 <strong>' + st.tanec + '</strong></span>' +
 
-            '    <span class="cv-item" title="Charisma: ' + st.charisma + ' (výcvik ' + p.skills.charisma + '/5)">✨ <strong>' + st.charisma + '</strong></span>' +
+            '    <span class="cv-item" title="Charisma: ' + st.charisma + ' (výcvik ' + p.skills.charisma + '/5) – násobí zisk srdcí ze slavností a audiencí">✨ <strong>' + st.charisma + '</strong></span>' +
 
             '  </div>' +
 
