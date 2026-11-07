@@ -1905,7 +1905,7 @@ window.PRS_App = {
         requestAnimationFrame(renderLoop);
     },
 
-    ensurePlayerNameForGame: function () {
+    ensurePlayerNameForGame: async function () {
         // Pokud je uživatel přihlášený (Admin / Hráč s profilem), použijeme jeho přihlášené jméno
         if (this.currentUser && this.currentUser.role !== "Guest") {
             return this.getDefaultPlayerName();
@@ -1918,7 +1918,13 @@ window.PRS_App = {
             prevNick = "Lord Filip";
         }
 
-        var entered = prompt("⚔️ Zadej své rytířské jméno u stolu pro tuto partii:", prevNick);
+        var entered = await KiDeskyDialog.prompt("Zadej své rytířské jméno u stolu pro tuto výpravu královstvím:", prevNick, {
+            title: "Rytířská registrace k výpravě",
+            icon: "⚔️",
+            placeholder: "Zadej rytířské jméno",
+            confirmText: "⚔️ Vstoupit ke stolu",
+            cancelText: "Zrušit"
+        });
         if (entered === null) {
             // Uživatel kliknul na Zrušit / Storno -> nestartujeme hru
             return null;
@@ -1937,9 +1943,9 @@ window.PRS_App = {
         return formatted;
     },
 
-    quickStartSoloGame: function (preset) {
+    quickStartSoloGame: async function (preset) {
 
-        var myName = this.ensurePlayerNameForGame();
+        var myName = await this.ensurePlayerNameForGame();
         if (!myName) return;
 
         this.lobbyPlayers = [
@@ -2001,7 +2007,7 @@ window.PRS_App = {
 
     },
 
-    createOnlineMultiplayerRoom: function () {
+    createOnlineMultiplayerRoom: async function () {
 
         var self = this;
 
@@ -2012,7 +2018,7 @@ window.PRS_App = {
             return;
         }
 
-        var myName = this.ensurePlayerNameForGame();
+        var myName = await this.ensurePlayerNameForGame();
         if (!myName) return;
         if (this.lobbyPlayers && this.lobbyPlayers[0]) {
             this.lobbyPlayers[0].name = myName;
@@ -2482,13 +2488,19 @@ window.PRS_App = {
         }
     },
 
-    promptEditNickname: function () {
+    promptEditNickname: async function () {
         var cur = (this.currentUser && this.currentUser.displayName) || "";
         if (!cur) {
             try { cur = localStorage.getItem("prs_player_nickname") || ""; } catch (e) { }
         }
         if (!cur || cur.toLowerCase() === "host" || cur.toLowerCase() === "admin") cur = "Lord Filip";
-        var newNick = prompt("Zadej své nové rytířské jméno u stolu:", cur);
+        var newNick = await KiDeskyDialog.prompt("Zadej své nové rytířské jméno u stolu:", cur, {
+            title: "Úprava rytířského jména",
+            icon: "⚔️",
+            placeholder: "např. Lord Filip",
+            confirmText: "⚔️ Uložit jméno",
+            cancelText: "Zrušit"
+        });
         if (newNick === null) return;
         newNick = newNick.trim();
         if (!newNick) return;
@@ -3019,7 +3031,7 @@ window.PRS_App = {
         this.updateUserUI();
     },
 
-    unlockPremiumPawn: function (pawnId) {
+    unlockPremiumPawn: async function (pawnId) {
         var self = this;
         var pw = window.PRS_getPawnById ? window.PRS_getPawnById(pawnId) : null;
         if (!pw) return;
@@ -3045,9 +3057,13 @@ window.PRS_App = {
             alert("Nemáš dostatek kreditů (💎) k odemčení této prémiové figurky!\n\nPotřebuješ: " + price + " 💎\nTvůj zůstatek: " + this.userCredits + " 💎\n\nTip: Kredity získáš za vítězství v partiích nebo od správce v administraci.");
             return;
         }
-        if (!confirm("Přeješ si trvale odemknout sběratelskou prémiovou figurku:\n\n✨ " + pw.name + " (" + pw.title + ")\nCena: " + price + " 💎 kreditů?")) {
-            return;
-        }
+        var conf = await KiDeskyDialog.confirm("Přeješ si trvale odemknout sběratelskou prémiovou figurku:\n\n✨ " + pw.name + " (" + pw.title + ")\nCena: " + price + " 💎 kreditů?", {
+            title: "Odemknutí šampiona",
+            icon: "💎",
+            confirmText: "💎 Odemknout figurku",
+            cancelText: "Zpět"
+        });
+        if (!conf) return;
 
         this.userCredits -= price;
         if (!Array.isArray(this.unlockedPawns)) this.unlockedPawns = [];
@@ -3103,7 +3119,7 @@ window.PRS_App = {
 
     },
 
-    rerollProceduralMap: function () {
+    rerollProceduralMap: async function () {
         var newSeed = Math.floor(Math.random() * 899999 + 100000);
         this.currentBoardSeed = newSeed;
 
@@ -3114,7 +3130,12 @@ window.PRS_App = {
         if (bSel) bSel.value = "procedural";
 
         if (this.state && this.state.turnNumber > 0) {
-            var conf = confirm("Generování nového světa vyžaduje novou partii.\nPřeješ si vygenerovat nové království (Seed #" + newSeed + ") a začít novou hru?");
+            var conf = await KiDeskyDialog.confirm("Generování nového světa vyžaduje novou partii.\nPřeješ si vygenerovat nové království (Seed #" + newSeed + ") a začít novou hru?", {
+                title: "Nové království",
+                icon: "🎲",
+                confirmText: "🎲 Vygenerovat a začít",
+                cancelText: "Zpět k partii"
+            });
             if (!conf) return;
         }
 
@@ -3127,11 +3148,16 @@ window.PRS_App = {
         }
     },
 
-    changeBoardTemplateLive: function (boardCode) {
+    changeBoardTemplateLive: async function (boardCode) {
 
         if (this.state && this.state.turnNumber > 0) {
 
-            var conf = confirm("V rozehrané partii nelze měnit mapu bez restartu hry.\nPřeješ si opravdu ukončit aktuální partii a začít novou hru na zvoleném plánu?");
+            var conf = await KiDeskyDialog.confirm("V rozehrané partii nelze měnit mapu bez restartu hry.\nPřeješ si opravdu ukončit aktuální partii a začít novou hru na zvoleném plánu?", {
+                title: "Změna mapy království",
+                icon: "🗺️",
+                confirmText: "🗺️ Změnit mapu",
+                cancelText: "Ponechat stávající"
+            });
 
             if (!conf) {
 
@@ -3157,11 +3183,11 @@ window.PRS_App = {
 
     },
 
-    startNewGame: function (switchToBoard) {
+    startNewGame: async function (switchToBoard) {
 
         if (switchToBoard) {
             if (!this._skipNamePromptOnce) {
-                var myName = this.ensurePlayerNameForGame();
+                var myName = await this.ensurePlayerNameForGame();
                 if (!myName) return;
                 if (this.lobbyPlayers && this.lobbyPlayers[0]) {
                     this.lobbyPlayers[0].name = myName;

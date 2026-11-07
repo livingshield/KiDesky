@@ -698,15 +698,20 @@ openAuthModal: function () {
                 }
 
             }).catch(function () {
-
-                window.prompt("Zkopíruj tento odkaz a pošli ho spoluhráčům:", inviteUrl);
-
+                KiDeskyDialog.prompt("Zkopíruj tento odkaz a pošli ho spoluhráčům:", inviteUrl, {
+                    title: "Odkaz ke stolu",
+                    icon: "📋",
+                    confirmText: "Hotovo",
+                    cancelText: "Zavřít"
+                });
             });
-
         } else {
-
-            window.prompt("Zkopíruj tento odkaz a pošli ho spoluhráčům:", inviteUrl);
-
+            KiDeskyDialog.prompt("Zkopíruj tento odkaz a pošli ho spoluhráčům:", inviteUrl, {
+                title: "Odkaz ke stolu",
+                icon: "📋",
+                confirmText: "Hotovo",
+                cancelText: "Zavřít"
+            });
         }
 
     },

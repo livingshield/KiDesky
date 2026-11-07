@@ -172,8 +172,15 @@
         },
 
         // Smaže uloženou hru
-        deleteSavedGame: function (saveId) {
-            if (!confirm("Opravdu si přeješ smazat tuto uloženou výpravu z paměti?")) return;
+        deleteSavedGame: async function (saveId) {
+            var conf = await KiDeskyDialog.confirm("Opravdu si přeješ smazat tuto uloženou výpravu z paměti?", {
+                title: "Smazat uloženou výpravu",
+                icon: "🗑️",
+                isDanger: true,
+                confirmText: "🗑️ Ano, smazat",
+                cancelText: "Ponechat"
+            });
+            if (!conf) return;
 
             var saves = this.getSavedGames().filter(function (s) { return s.id !== saveId; });
             this.persistSavedGames(saves);

@@ -332,8 +332,15 @@
                 });
         },
 
-        deleteAdminAudio: function (id) {
-            if (!confirm("Opravdu si přejete smazat tuto skladbu ze seznamu? (Soubor na serveru zůstane zachován.)")) return;
+        deleteAdminAudio: async function (id) {
+            var conf = await KiDeskyDialog.confirm("Opravdu si přejete smazat tuto skladbu ze seznamu? (Soubor na serveru zůstane zachován.)", {
+                title: "Smazat hudební skladbu",
+                icon: "🎵",
+                isDanger: true,
+                confirmText: "🗑️ Smazat",
+                cancelText: "Zrušit"
+            });
+            if (!conf) return;
             var self = this;
             fetch("api.ashx?action=admin-delete-audio", {
                 method: "POST",
@@ -721,8 +728,15 @@
                 });
         },
 
-        deleteAdminVideo: function (id) {
-            if (!confirm("Opravdu si přejete smazat toto video?")) return;
+        deleteAdminVideo: async function (id) {
+            var conf = await KiDeskyDialog.confirm("Opravdu si přejete smazat toto video?", {
+                title: "Smazat video",
+                icon: "🎬",
+                isDanger: true,
+                confirmText: "🗑️ Smazat",
+                cancelText: "Zrušit"
+            });
+            if (!conf) return;
             var self = this;
             fetch("api.ashx?action=admin-delete-video", {
                 method: "POST",
@@ -896,8 +910,14 @@
                 });
         },
 
-        promptResetPassword: function (id, username) {
-            var newPass = prompt("Zadejte nové heslo pro uživatele " + username + " (min. 4 znaky):");
+        promptResetPassword: async function (id, username) {
+            var newPass = await KiDeskyDialog.prompt("Zadejte nové heslo pro uživatele " + username + " (min. 4 znaky):", "", {
+                title: "Reset hesla uživatele",
+                icon: "🔑",
+                placeholder: "Zadejte nové heslo",
+                confirmText: "🔑 Změnit heslo",
+                cancelText: "Zrušit"
+            });
             if (!newPass || newPass.trim().length < 4) {
                 if (newPass !== null) alert("Heslo musí mít alespoň 4 znaky!");
                 return;
@@ -920,8 +940,15 @@
                 .catch(function () { alert("Chyba sítě při resetu hesla."); });
         },
 
-        deleteAdminUser: function (id, username) {
-            if (!confirm("Opravdu chcete trvale smazat uživatele " + username + "? Tato akce je nevratná!")) return;
+        deleteAdminUser: async function (id, username) {
+            var conf = await KiDeskyDialog.confirm("Opravdu chcete trvale smazat uživatele " + username + "? Tato akce je nevratná!", {
+                title: "Smazat uživatele",
+                icon: "⚠️",
+                isDanger: true,
+                confirmText: "🗑️ Trvale smazat",
+                cancelText: "Ponechat"
+            });
+            if (!conf) return;
             var self = this;
             fetch("api.ashx?action=admin-delete-user", {
                 method: "POST",
@@ -998,8 +1025,15 @@
             listEl.innerHTML = html;
         },
 
-        closeAdminSession: function (sessionGuid) {
-            if (!confirm("Opravdu chcete uzavřít tuto běžící místnost?")) return;
+        closeAdminSession: async function (sessionGuid) {
+            var conf = await KiDeskyDialog.confirm("Opravdu chcete uzavřít tuto běžící místnost?", {
+                title: "Uzavřít online místnost",
+                icon: "🚪",
+                isDanger: true,
+                confirmText: "Uzavřít místnost",
+                cancelText: "Zpět"
+            });
+            if (!conf) return;
             var self = this;
             fetch("api.ashx?action=admin-close-session", {
                 method: "POST",
@@ -1017,8 +1051,14 @@
                 .catch(function () { alert("Chyba sítě při uzavírání relace."); });
         },
 
-        purgeOldSessions: function () {
-            var days = prompt("Zadejte počet dní neaktivity, po kterých se staré relace promažou:", "7");
+        purgeOldSessions: async function () {
+            var days = await KiDeskyDialog.prompt("Zadejte počet dní neaktivity, po kterých se staré relace promažou:", "7", {
+                title: "Promazání starých relací",
+                icon: "🧹",
+                placeholder: "Počet dní (např. 7)",
+                confirmText: "🧹 Promazat relace",
+                cancelText: "Zrušit"
+            });
             if (!days || isNaN(days) || parseInt(days, 10) < 1) return;
 
             var self = this;

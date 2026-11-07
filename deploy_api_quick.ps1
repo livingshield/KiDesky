@@ -50,6 +50,7 @@ $filesToDeploy = @(
     "js/app-admin.js",
     "js/app-online.js",
     "js/app-saves.js",
+    "js/app-dialog.js",
     "js/app.js",
     "assets/backgrounds/bg_theme_light.jpg",
     "assets/backgrounds/bg_theme_fire.jpg",
