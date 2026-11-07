@@ -1191,36 +1191,41 @@ window.PRS_GameEngine = {
         }
 
         for (var m = 0; m < state.players.length; m++) {
-
             var pl = state.players[m];
+
+            if (pl.stats) {
+                if (typeof pl.stats.heartsFromFestivals === "number") pl.stats.heartsFromFestivals = Math.round(pl.stats.heartsFromFestivals * 10) / 10;
+                if (typeof pl.stats.heartsFromQuests === "number") pl.stats.heartsFromQuests = Math.round(pl.stats.heartsFromQuests * 10) / 10;
+                if (typeof pl.stats.heartsFromChance === "number") pl.stats.heartsFromChance = Math.round(pl.stats.heartsFromChance * 10) / 10;
+            }
+            if (typeof pl.permanentHearts === "number") pl.permanentHearts = Math.round(pl.permanentHearts * 10) / 10;
+            if (typeof pl.breedingHearts === "number") pl.breedingHearts = Math.round(pl.breedingHearts * 10) / 10;
+            if (typeof pl.setHeartsBonus === "number") pl.setHeartsBonus = Math.round(pl.setHeartsBonus * 10) / 10;
+            if (typeof pl.speciesHeartsBonus === "number") pl.speciesHeartsBonus = Math.round(pl.speciesHeartsBonus * 10) / 10;
+            if (typeof pl.estateHeartsBonus === "number") pl.estateHeartsBonus = Math.round(pl.estateHeartsBonus * 10) / 10;
 
             pl.totalHearts = Math.round((pl.permanentHearts + pl.breedingHearts + (pl.setHeartsBonus || 0) + (pl.speciesHeartsBonus || 0) + (pl.estateHeartsBonus || 0)) * 10) / 10;
 
             var isWin = false;
-
             var winReason = "";
-
             var scen = (state.config && state.config.scenario) ? state.config.scenario : "classic";
-
             var winTypeAchieved = null;
 
             if (scen === "slayer") {
-
                 // Lovci draků: ulovení 2 draků (z U3). Pouhý sběr srdcí nestačí!
                 var dragonsSlain = (pl.stats && pl.stats.dragonsSlain) ? pl.stats.dragonsSlain : 0;
                 var targetDragons = (state.config && state.config.targetDragons) ? state.config.targetDragons : 2;
 
-                if (dragonsSlain >= targetDragons) {
+                if (dragonsSlain >= targetDragons && !pl.isEliminated) {
                     isWin = true;
                     winTypeAchieved = "slayer_dragons";
                     winReason = "🏆 VÍTĚZSTVÍ LOVCE DRAKŮ! " + pl.badge + " " + pl.name + " skolil " + dragonsSlain + " obávané draky království a získává věčnou slávu i ruku princezny!";
-                } else if (pl.totalHearts >= 20 && !pl._slayerHeartHintGiven) {
+                } else if (pl.totalHearts >= 20 && !pl._slayerHeartHintGiven && !pl.isEliminated) {
                     pl._slayerHeartHintGiven = true;
                     this.addLog(state, "🐉 " + pl.badge + " " + pl.name + " má již " + pl.totalHearts + " 💖! Ve scénáři Lovci draků však k vítězství musí ještě skolit " + (targetDragons - dragonsSlain) + " draka v Dračí sluji (U3)!", "info");
                 }
 
             } else if (scen === "tycoon") {
-
                 // Feudální magnát: ovládnutí 3 měst a 1 hradu. Pouhý sběr srdcí nestačí!
                 var cCount = 0, kCount = 0;
                 for (var oi = 0; oi < pl.ownedNodes.length; oi++) {
@@ -1231,23 +1236,21 @@ window.PRS_GameEngine = {
                     }
                 }
 
-                if (cCount >= 3 && kCount >= 1) {
+                if (cCount >= 3 && kCount >= 1 && !pl.isEliminated) {
                     isWin = true;
                     winTypeAchieved = "tycoon_estates";
                     winReason = "🏆 VÍTĚZSTVÍ FEUDÁLNÍHO MAGNÁTA! " + pl.badge + " " + pl.name + " ovládl 3 vzkvétající města a 1 hrad (" + cCount + " měst, " + kCount + " hradů)!";
                 }
 
             } else {
-
-                if (pl.totalHearts >= state.config.targetHearts) {
+                if (pl.totalHearts >= state.config.targetHearts && !pl.isEliminated) {
                     isWin = true;
                     winTypeAchieved = "target_hearts";
                     winReason = "🏆 VÍTĚZSTVÍ! " + pl.badge + " " + pl.name + " dosáhl cílových " + state.config.targetHearts + " 💖 a získává ruku princezny!";
                 }
-
             }
 
-            if (state.winnerIndex === null && isWin) {
+            if (state.winnerIndex === null && isWin && !pl.isEliminated) {
 
                 state.winnerIndex = m;
 
@@ -3576,21 +3579,9 @@ window.PRS_GameEngine = {
             if (!hasMore) {
 
                 if (state.config.bankruptcyElimination) {
-
-                    player.isBankrupt = true;
-
-                    player.isEliminated = true;
-
-                    state.pendingAction.summary = "💀 ÚPLNÝ BANKROT! Rytíř " + player.name + " nemá žádný další majetek ke splacení dluhu a je navždy vyřazen ze hry!";
-
-                    this.addLog(state, "💀 ÚPLNÝ BANKROT! " + player.badge + " " + player.name + " nedokázal splatit dluh a končí v dlužním vězení (vyřazen ze hry)!", "danger");
-
+                    this.eliminatePlayer(state, player.index, "Úplný bankrot a nesplacený dluh");
                     delete state.pendingAction.debt;
-
-                    this.recalculateBreedingAndVictory(state);
-
                     return { ok: true, settled: true, eliminated: true };
-
                 } else {
 
                     state.pendingAction.summary = "⚠️ Rytíř odprodal veškerý majetek. Zbytek dluhu " + debt.remainingDebt + " zl. je nedobytný.";
@@ -3730,6 +3721,7 @@ window.PRS_GameEngine = {
 
         p.isEliminated = true;
         p.isBankrupt = true;
+        p.eliminatedRound = (state && (state.roundNumber || state.turnNumber)) ? state.roundNumber : 1;
         p.gold = 0;
 
         // Uvolnění všech vlastněných polí zpět do neutrálního stavu

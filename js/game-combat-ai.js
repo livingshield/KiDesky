@@ -714,12 +714,9 @@
         if (won) {
 
             player.gold += q.gold;
-
-            player.permanentHearts += q.hearts;
-
+            player.permanentHearts = Math.round((player.permanentHearts + q.hearts) * 10) / 10;
             player.stats.questsWon++;
-
-            player.stats.heartsFromQuests += q.hearts;
+            player.stats.heartsFromQuests = Math.round((player.stats.heartsFromQuests + q.hearts) * 10) / 10;
 
             if (q.questTier === "U3" || (q.id && q.id.indexOf("u3") === 0)) {
 
@@ -1068,13 +1065,9 @@
         // Pravidlo z IMG_4596: "min 2 hráči"
 
         if (participants.length < 2) {
-
             organizer.gold += 800;
-
-            organizer.permanentHearts += 0.5;
-
-            organizer.stats.heartsFromFestivals += 0.5;
-
+            organizer.permanentHearts = Math.round((organizer.permanentHearts + 0.5) * 10) / 10;
+            organizer.stats.heartsFromFestivals = Math.round((organizer.stats.heartsFromFestivals + 0.5) * 10) / 10;
             var cancelMsg = "🎺 **" + festTitle + "** se nekoná v plné parádě (podmínku účasti splňuje méně než 2 rytíři). Pořadatel " + organizer.name + " získává od krále dar **+800 zl.** a **+0,5 💖** za snahu.";
 
             pa.summary = cancelMsg;
@@ -1153,16 +1146,11 @@
             }
 
             heartsWon = Math.round(heartsWon * 10) / 10;
-
             prevRankHearts = heartsWon;
-
             var goldWon = goldPrizes[r] || 300;
-
-            pl.permanentHearts += heartsWon;
-
+            pl.permanentHearts = Math.round((pl.permanentHearts + heartsWon) * 10) / 10;
             pl.gold += goldWon;
-
-            pl.stats.heartsFromFestivals += heartsWon;
+            pl.stats.heartsFromFestivals = Math.round((pl.stats.heartsFromFestivals + heartsWon) * 10) / 10;
 
             if (r === 0) pl.stats.festivalsWon++;
 

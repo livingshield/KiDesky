@@ -145,136 +145,118 @@
             subEl.innerHTML = subText;
         }
 
+        var formatH = function (val) {
+            if (typeof val !== "number" || isNaN(val)) return "0";
+            var rounded = Math.round(val * 10) / 10;
+            return String(rounded);
+        };
+
         // Vítěz MUSÍ být vždy na 1. místě žebříčku i pódia!
-
         var others = [];
-
         for (var pi = 0; pi < this.state.players.length; pi++) {
-
             if (pi !== winIdx) others.push(this.state.players[pi]);
-
         }
 
         others.sort(function (a, b) {
+            var aDead = !!(a.isEliminated || a.isBankrupt);
+            var bDead = !!(b.isEliminated || b.isBankrupt);
 
+            // 1. Živý (přeživší) rytíř má VŽDY absolutní přednost před mrtvým / vyřazeným!
+            if (aDead !== bDead) {
+                return aDead ? 1 : -1;
+            }
+
+            // 2. Mezi žijícími (nebo mezi vyřazenými) rozhoduje celkový počet srdcí
             if (b.totalHearts !== a.totalHearts) return b.totalHearts - a.totalHearts;
 
-            return b.gold - a.gold;
+            // 3. Při shodě srdcí rozhoduje hotovost ve zlatě
+            if (b.gold !== a.gold) return b.gold - a.gold;
 
+            // 4. Pokud jsou oba vyřazení, rozhoduje, kdo přežil déle (vyšší kolo vyřazení)
+            if (aDead && bDead) {
+                var aRound = a.eliminatedRound || 0;
+                var bRound = b.eliminatedRound || 0;
+                if (bRound !== aRound) return bRound - aRound;
+            }
+
+            return 0;
         });
 
         var ranked = [winner].concat(others);
 
         var podEl = document.getElementById("victory-podium-content");
-
         if (podEl) {
-
             var podHtml = [];
-
             var ranks = [
-
                 { rank: 1, title: "🏆 VÍTĚZ", cls: "podium-rank-1", badgeCls: "#fbbf24" },
-
                 { rank: 2, title: "🥈 2. MÍSTO", cls: "podium-rank-2", badgeCls: "#94a3b8" },
-
                 { rank: 3, title: "🥉 3. MÍSTO", cls: "podium-rank-3", badgeCls: "#d97706" }
-
             ];
 
             for (var r = 0; r < Math.min(3, ranked.length); r++) {
-
                 var rp = ranked[r];
-
                 var rInfo = ranks[r];
+                var isDeadP = !!(rp.isEliminated || rp.isBankrupt);
 
-                podHtml.push('<div class="podium-card ' + rInfo.cls + '">');
-
+                podHtml.push('<div class="podium-card ' + rInfo.cls + '" style="' + (isDeadP ? 'opacity:0.8; border-color:#ef4444;' : '') + '">');
                 podHtml.push('  <span class="podium-rank-badge" style="background:rgba(212,175,55,0.2); color:' + rInfo.badgeCls + ';">' + rInfo.title + '</span>');
-
                 podHtml.push('  <div style="margin:0.15rem 0;">' + (this.getPlayerPawnAvatarHtml ? this.getPlayerPawnAvatarHtml(rp, 48) : rp.badge) + '</div>');
-
-                podHtml.push('  <div style="font-weight:bold; font-size:0.95rem; color:' + rp.color + '; margin-bottom:0.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:145px;" title="' + this.escapeHtml(rp.name) + '">' + this.escapeHtml(rp.name) + '</div>');
-
-                podHtml.push('  <div style="font-size:1.2rem; font-weight:bold; color:#f472b6;">' + rp.totalHearts + ' 💖</div>');
-
-                podHtml.push('  <small style="color:var(--text-muted); font-size:0.75rem;">' + rp.gold.toLocaleString("cs-CZ") + ' zl.</small>');
-
+                podHtml.push('  <div style="font-weight:bold; font-size:0.95rem; color:' + rp.color + '; margin-bottom:0.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:145px;' + (isDeadP ? ' text-decoration:line-through; opacity:0.75;' : '') + '" title="' + this.escapeHtml(rp.name) + '">' + this.escapeHtml(rp.name) + '</div>');
+                podHtml.push('  <div style="font-size:1.2rem; font-weight:bold; color:#f472b6;">' + formatH(rp.totalHearts) + ' 💖</div>');
+                if (isDeadP) {
+                    podHtml.push('  <small style="color:#ef4444; font-size:0.75rem; font-weight:700;">💀 Vyřazen (bankrot)</small>');
+                } else {
+                    podHtml.push('  <small style="color:var(--text-muted); font-size:0.75rem;">' + rp.gold.toLocaleString("cs-CZ") + ' zl.</small>');
+                }
                 podHtml.push('</div>');
-
             }
-
             podEl.innerHTML = podHtml.join("\n");
-
         }
 
         var tblEl = document.getElementById("victory-table-el");
-
         if (tblEl) {
-
             var tHtml = [];
-
             tHtml.push('<thead><tr>');
-
             tHtml.push('  <th>Pořadí</th>');
-
             tHtml.push('  <th>Rytíř</th>');
-
             tHtml.push('  <th style="color:#f472b6;">Srdce celkem</th>');
-
             tHtml.push('  <th>Slavnosti</th>');
-
             tHtml.push('  <th>Bojové úkoly</th>');
-
             tHtml.push('  <th>Chov zvířat</th>');
-
             tHtml.push('  <th>Měšec</th>');
-
             tHtml.push('  <th>Majetek celkem</th>');
-
             tHtml.push('</tr></thead><tbody>');
 
             for (var i = 0; i < ranked.length; i++) {
-
                 var p = ranked[i];
-
+                var isDeadRow = !!(p.isEliminated || p.isBankrupt);
                 var wealth = p.gold;
-
                 for (var it = 0; it < p.items.length; it++) wealth += (p.items[it].price || 0);
-
                 for (var nd = 0; nd < p.ownedNodes.length; nd++) {
-
                     var nObj = this.state.board.nodes[p.ownedNodes[nd]];
-
                     if (nObj) wealth += window.PRS_GameEngine.getNodeInvestedValue(this.state, nObj);
-
                 }
 
+                var deadBadge = isDeadRow ? ' <span style="background:#dc2626; color:#fff; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px; margin-left:4px;">💀 Vyřazen</span>' : '';
+                var pNameStyle = 'color:' + p.color + ';' + (isDeadRow ? ' text-decoration:line-through; opacity:0.7;' : '');
+
                 tHtml.push('<tr>');
-
                 tHtml.push('  <td><strong>#' + (i + 1) + '</strong></td>');
-
-                tHtml.push('  <td><strong style="color:' + p.color + ';">' + p.badge + ' ' + this.escapeHtml(p.name) + '</strong> <small style="color:var(--text-muted);">(' + p.type + ')</small></td>');
-
-                tHtml.push('  <td><strong style="color:#f472b6; font-size:1.05rem;">' + p.totalHearts + ' 💖</strong></td>');
-
-                tHtml.push('  <td>' + p.stats.heartsFromFestivals + ' 💖 (' + p.stats.festivalsWon + 'x výhra)</td>');
-
-                tHtml.push('  <td>' + p.stats.heartsFromQuests + ' 💖 (' + p.stats.questsWon + 'x skoleno)' + (p.stats.dragonsSlain > 0 ? ' <strong style="color:#ef4444; display:block; font-size:0.8rem;">🐉 ' + p.stats.dragonsSlain + 'x drak</strong>' : '') + '</td>');
-
-                tHtml.push('  <td>' + (p.breedingHearts || 0) + ' 💖</td>');
-
-                tHtml.push('  <td><strong style="color:var(--gold-light);">' + p.gold.toLocaleString("cs-CZ") + ' zl.</strong></td>');
-
+                tHtml.push('  <td><strong style="' + pNameStyle + '">' + p.badge + ' ' + this.escapeHtml(p.name) + '</strong> <small style="color:var(--text-muted);">(' + p.type + ')</small>' + deadBadge + '</td>');
+                tHtml.push('  <td><strong style="color:#f472b6; font-size:1.05rem;">' + formatH(p.totalHearts) + ' 💖</strong></td>');
+                tHtml.push('  <td>' + formatH(p.stats.heartsFromFestivals) + ' 💖 (' + p.stats.festivalsWon + 'x výhra)</td>');
+                tHtml.push('  <td>' + formatH(p.stats.heartsFromQuests) + ' 💖 (' + p.stats.questsWon + 'x skoleno)' + (p.stats.dragonsSlain > 0 ? ' <strong style="color:#ef4444; display:block; font-size:0.8rem;">🐉 ' + p.stats.dragonsSlain + 'x drak</strong>' : '') + '</td>');
+                tHtml.push('  <td>' + formatH(p.breedingHearts || 0) + ' 💖</td>');
+                if (isDeadRow) {
+                    tHtml.push('  <td><strong style="color:#ef4444;">💀 0 zl.</strong></td>');
+                } else {
+                    tHtml.push('  <td><strong style="color:var(--gold-light);">' + p.gold.toLocaleString("cs-CZ") + ' zl.</strong></td>');
+                }
                 tHtml.push('  <td>' + wealth.toLocaleString("cs-CZ") + ' zl.</td>');
-
                 tHtml.push('</tr>');
-
             }
-
             tHtml.push('</tbody>');
-
             tblEl.innerHTML = tHtml.join("\n");
-
         }
 
         var fb = document.getElementById("victory-cloud-feedback");
