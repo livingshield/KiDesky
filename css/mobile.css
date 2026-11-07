@@ -32,12 +32,12 @@
         body[data-device="mobile"] .user-bar {
             gap: 0.35rem;
         }
-        body[data-device="mobile"] .element-theme-switcher {
-            padding: 2px;
+        body[data-device="mobile"] .topbar-theme-wrap {
+            padding: 0.15rem 0.35rem;
+            font-size: 0.76rem;
         }
-        body[data-device="mobile"] .theme-btn {
-            padding: 0.2rem 0.35rem;
-            font-size: 0.75rem;
+        body[data-device="mobile"] .topbar-theme-select {
+            font-size: 0.76rem;
         }
 
         /* Mobilní herní stůl (#tab-board) na výšku (Portrait) */
@@ -1099,4 +1099,41 @@
 .mobile-tempo-btn.disabled {
   opacity: 0.35;
   filter: grayscale(1);
+}
+
+
+/* ==========================================================================
+   KRÁLOVSKÝ DIALOGOVÝ SYSTÉM – MOBILNÍ OPTIMALIZACE
+   ========================================================================== */
+@media (max-width: 480px) {
+    .kd-dialog-card {
+        padding: 1.25rem 1rem 1.15rem 1rem;
+        border-radius: 16px;
+        width: 95%;
+        max-width: 360px;
+    }
+    .kd-dialog-icon-badge {
+        width: 48px;
+        height: 48px;
+        font-size: 1.55rem;
+        margin-bottom: 0.65rem;
+    }
+    .kd-dialog-title {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    .kd-dialog-message {
+        font-size: 0.88rem;
+        margin-bottom: 1rem;
+        max-height: 45vh;
+    }
+    .kd-dialog-actions {
+        gap: 0.5rem;
+    }
+    .kd-dialog-btn {
+        padding: 0.65rem 0.9rem;
+        font-size: 0.88rem;
+        min-width: 90px;
+        flex: 1;
+    }
 }
