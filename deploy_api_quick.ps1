@@ -18,6 +18,22 @@ if (Test-Path $configPath) {
 $credentials = New-Object System.Net.NetworkCredential($FtpUsername, $FtpPassword)
 $remoteBases = @("/www/apps/KiDesky/", "/www/wwwroot/apps/KiDesky/")
 
+function Ensure-FtpDir {
+    param($remoteUri)
+    try {
+        $req = [System.Net.FtpWebRequest]::Create($remoteUri)
+        $req.Credentials = $credentials
+        $req.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory
+        $req.KeepAlive = $false
+        $req.EnableSsl = $false
+        $resp = $req.GetResponse()
+        $resp.Close()
+        Write-Host "Created FTP dir: $remoteUri" -ForegroundColor Cyan
+    } catch {
+        # Directory likely exists
+    }
+}
+
 $filesToDeploy = @(
     "api.ashx",
     "index.html",
@@ -34,7 +50,12 @@ $filesToDeploy = @(
     "js/app-admin.js",
     "js/app-online.js",
     "js/app-saves.js",
-    "js/app.js"
+    "js/app.js",
+    "assets/backgrounds/bg_theme_light.jpg",
+    "assets/backgrounds/bg_theme_fire.jpg",
+    "assets/backgrounds/bg_theme_water.jpg",
+    "assets/backgrounds/bg_theme_earth.jpg",
+    "assets/backgrounds/bg_theme_air.jpg"
 )
 
 foreach ($relPath in $filesToDeploy) {
@@ -44,6 +65,14 @@ foreach ($relPath in $filesToDeploy) {
         Write-Warning "$relPath not found!"
         continue
     }
+
+    $dirName = [System.IO.Path]::GetDirectoryName($relPath) -replace "\\", "/"
+    if ($dirName) {
+        foreach ($rb in $remoteBases) {
+            Ensure-FtpDir "ftp://$FtpServer$($rb)$dirName/"
+        }
+    }
+
     $fileBytes = [System.IO.File]::ReadAllBytes($localFile)
     foreach ($rb in $remoteBases) {
         $remoteUri = "ftp://$FtpServer$($rb)$relPath"

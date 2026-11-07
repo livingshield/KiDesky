@@ -731,19 +731,12 @@
            ================================================================ */
 
         .lp-hero-showcase {
-
             display: grid;
-
             grid-template-columns: 1.25fr 0.95fr;
-
             gap: 1.5rem;
-
             background:
-
-                linear-gradient(135deg, rgba(20, 14, 8, 0.94) 0%, rgba(38, 25, 14, 0.88) 55%, rgba(22, 14, 9, 0.95) 100%),
-
-                url('../assets/landmarks/royal_castle.png') center/cover no-repeat;
-
+                linear-gradient(135deg, rgba(14, 10, 7, 0.86) 0%, rgba(22, 16, 11, 0.78) 55%, rgba(14, 10, 7, 0.90) 100%),
+                var(--theme-bg-image) center/cover no-repeat;
             border: 2px solid var(--gold);
 
             border-radius: 18px;
