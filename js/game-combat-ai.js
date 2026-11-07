@@ -22,9 +22,9 @@
 
         } else if (targetNode.type === "VILLAGE" || targetNode.type === "CASTLE") {
 
-            if (targetNode.ownerIndex === null || targetNode.ownerIndex === undefined) {
+            if (targetNode.owner === null || targetNode.owner === undefined) {
 
-                var price = this.getNodePrice(targetNode);
+                var price = this.getNodePrice ? this.getNodePrice(state, targetNode) : (targetNode.buyPrice || 2000);
 
                 if (player.gold >= price) {
 
@@ -40,7 +40,7 @@
 
                 }
 
-            } else if (targetNode.ownerIndex === player.index) {
+            } else if (targetNode.owner === player.index) {
 
                 score += 10;
 
@@ -54,7 +54,7 @@
 
         } else if (targetNode.type === "ANIMAL") {
 
-            if (targetNode.ownerIndex === null || targetNode.ownerIndex === undefined) {
+            if (targetNode.owner === null || targetNode.owner === undefined) {
 
                 var aPrice = targetNode.buyPrice || 1000;
 
@@ -70,7 +70,7 @@
 
                 }
 
-            } else if (targetNode.ownerIndex === player.index) {
+            } else if (targetNode.owner === player.index) {
 
                 score += 8;
 
@@ -90,19 +90,21 @@
 
             var subtype = targetNode.subtype || "U1";
 
+            var curHearts = player.permanentHearts || 0;
+
             if (subtype === "U3") {
 
                 var isSlayerMode = (state.config && state.config.scenario === "slayer");
                 if (isSlayerMode) {
-                    if (effStats.boj >= 10 && player.hp >= 2) {
+                    if (effStats.boj >= 10 && curHearts >= 1.5) {
                         score += (pType === "Bot_Aggressive" ? 55 : 40);
-                    } else if (effStats.boj >= 7 && player.hp >= 2) {
+                    } else if (effStats.boj >= 7 && curHearts >= 1.5) {
                         score += 25;
                     } else {
                         score -= 20;
                     }
                 } else {
-                    if (effStats.boj >= 14 && player.hp >= 3) {
+                    if (effStats.boj >= 14 && curHearts >= 2.0) {
                         score += (pType === "Bot_Aggressive" ? 35 : 15);
                     } else {
                         score -= 40;
@@ -111,7 +113,7 @@
 
             } else if (subtype === "U2") {
 
-                if (effStats.boj >= 8 && player.hp >= 2) {
+                if (effStats.boj >= 8 && curHearts >= 1.0) {
 
                     score += (pType === "Bot_Aggressive" ? 25 : 12);
 
@@ -741,9 +743,9 @@
 
             }
 
-            // 🏆 Získání unikátní trofeje z nestvůry / draka
+            // 🏆 Získání unikátní trofeje z nestvůry / draka (U1: 75 %, U2: 65 %, U3: 90 %)
 
-            var trophyChance = (q.questTier === "U1") ? 0.75 : 1.0;
+            var trophyChance = (q.questTier === "U1") ? 0.75 : ((q.questTier === "U2") ? 0.65 : 0.90);
 
             if (q.trophyId && Math.random() <= trophyChance) {
 
@@ -785,7 +787,8 @@
 
             }
 
-            if (q.itemTier) {
+            // Bonusový předmět zdarma padne pouze při drtivém vítězství (překonání obtížnosti o +3 a více)
+            if (q.itemTier && (totalPower >= q.difficulty + 3)) {
 
                 var pool = window.PRS_ITEMS.filter(function (it) { return it.tier === q.itemTier && it.slot !== "trophy"; });
 
@@ -797,7 +800,7 @@
 
                     lootWon = loot;
 
-                    rewardMsg += " Kořist: **" + loot.icon + " " + loot.name + "**!";
+                    rewardMsg += " 🎁 Drtivé vítězství (+3 k obtížnosti)! Kořist: **" + loot.icon + " " + loot.name + "**!";
 
                 }
 
@@ -839,17 +842,18 @@
 
                 this.addLog(state, defLossMsg, "quest_loss");
 
-            } else if (tactics.elixir) {
+            } else if (tactics.elixir || player.hasElixirToken) {
 
-                // Pojistka lektvarem z Lazaretu - hráč neutrpí těžké zranění
+                // Pojistka elixírem z Lazaretu - hráč neutrpí těžké zranění
+                var usedToken = !!player.hasElixirToken;
+                if (usedToken) player.hasElixirToken = false;
+                var elixCost = usedToken ? 0 : Math.min(player.gold, 500);
 
-                var elixCost = Math.min(player.gold, 500);
-
-                player.gold -= elixCost;
+                if (elixCost > 0) player.gold -= elixCost;
 
                 preventedHospital = true;
 
-                var elixLossMsg = "🧪 Záchrana hojivým lektvarem! " + player.badge + " " + player.name + " podlehl bestii **" + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + "), ale díky lektvaru (" + elixCost + " zl.) neutrpěl těžká zranění a nemusí do Špitálu!";
+                var elixLossMsg = "🧪 Záchrana hojivým elixírem! " + player.badge + " " + player.name + " podlehl bestii **" + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + "), ale díky ochrannému elixíru z Lazaretu neutrpěl těžká zranění a nemusí do Špitálu!";
 
                 pa.summary = elixLossMsg;
 
@@ -1031,7 +1035,9 @@
 
                 } else if (fType === "ples") {
 
-                    score = roll + st.tanec + st.charisma + (st.hasDress ? 2 : 0);
+                    var armorPenalty = st.hasArmor ? 2 : 0;
+
+                    score = roll + st.tanec + st.charisma + (st.hasDress ? 2 : 0) - armorPenalty;
 
                 } else if (fType === "zavod") {
 
@@ -1089,49 +1095,66 @@
 
         var resultsText = [];
 
+        var prevRankHearts = null;
+
         for (var r = 0; r < Math.min(3, participants.length); r++) {
 
             var part = participants[r];
 
             var pl = part.player;
 
-            var ch = part.stats.charisma;
+            var ch = part.stats.charisma || 0;
+            var jz = part.stats.jizda || 0;
+            var tn = part.stats.tanec || 0;
+            var bj = part.stats.boj || 0;
 
             var heartsWon = 0;
 
-            // Přesné vzorce z autorova rukopisu IMG_4596 & IMG_4597!
-
+            // Vyvážené slavnostní odměny: zohledňují příslušnou dovednost i Charisma a garantují 1. > 2. > 3.
             if (fType === "turnaj") {
 
-                // Turnaj: 1) 3 + 1/2 CH, 2) 2 + 1/2 CH, 3) 1 + 1/2 CH
+                if (r === 0) heartsWon = 3.0 + (bj * 0.3) + (ch * 0.2);
 
-                var baseT = (r === 0) ? 3 : (r === 1 ? 2 : 1);
+                else if (r === 1) heartsWon = 2.0 + (bj * 0.2) + (ch * 0.1);
 
-                heartsWon = baseT + (ch * 0.5);
+                else heartsWon = 1.0 + (bj * 0.15);
 
             } else if (fType === "ples") {
 
-                // Ples: 1) 1 + CH, 2) CH (min 1), 3) CH - 1 (min 0.5)
+                if (r === 0) heartsWon = 2.5 + (tn * 0.4) + (ch * 0.3);
 
-                if (r === 0) heartsWon = 1 + ch;
+                else if (r === 1) heartsWon = 1.5 + (tn * 0.2) + (ch * 0.15);
 
-                else if (r === 1) heartsWon = Math.max(1, ch);
-
-                else heartsWon = Math.max(0.5, ch - 1);
+                else heartsWon = 0.5 + (tn * 0.15);
 
             } else if (fType === "zavod") {
 
-                // Závod: 1) 1,5 * CH (min 1.5), 2) CH (min 1), 3) 1/2 CH (min 0.5)
+                if (r === 0) heartsWon = 2.5 + (jz * 0.4) + (ch * 0.2);
 
-                if (r === 0) heartsWon = Math.max(1.5, ch * 1.5);
+                else if (r === 1) heartsWon = 1.5 + (jz * 0.2) + (ch * 0.1);
 
-                else if (r === 1) heartsWon = Math.max(1.0, ch);
+                else heartsWon = 0.5 + (jz * 0.15);
 
-                else heartsWon = Math.max(0.5, ch * 0.5);
+            }
+
+            // Striktní garance: vítěz bere vždy alespoň o 0.5 💖 více než 2. místo a 2. místo více než 3.
+            if (r === 1 && prevRankHearts !== null) {
+
+                heartsWon = Math.min(prevRankHearts - 0.5, heartsWon);
+
+                heartsWon = Math.max(1.0, heartsWon);
+
+            } else if (r === 2 && prevRankHearts !== null) {
+
+                heartsWon = Math.min(prevRankHearts - 0.5, heartsWon);
+
+                heartsWon = Math.max(0.5, heartsWon);
 
             }
 
             heartsWon = Math.round(heartsWon * 10) / 10;
+
+            prevRankHearts = heartsWon;
 
             var goldWon = goldPrizes[r] || 300;
 
@@ -1199,7 +1222,12 @@
 
         var power1 = p1Stats.boj + r1;
 
-        var power2 = p2Stats.boj + r2;
+        // Obránce může použít Jezdecký úhyb na koni (Jízda + min(2, koně)), pokud je vyšší než Boj
+        var defRidingVal = (p2Stats.jizda >= 1 && p2Stats.horses > 0) ? (p2Stats.jizda + Math.min(2, p2Stats.horses)) : p2Stats.jizda;
+        var usedEvasion = defRidingVal > p2Stats.boj;
+        var defStat = usedEvasion ? defRidingVal : p2Stats.boj;
+
+        var power2 = defStat + r2;
 
         var isUltimate = (state.config.difficultyMode === "ultimate");
 
@@ -1211,7 +1239,7 @@
 
             p1: { index: player.index, name: player.name, badge: player.badge, color: player.color, roll: r1, combat: p1Stats.boj, total: power1, type: player.type },
 
-            p2: { index: target.index, name: target.name, badge: target.badge, color: target.color, roll: r2, combat: p2Stats.boj, total: power2, type: target.type },
+            p2: { index: target.index, name: target.name, badge: target.badge, color: target.color, roll: r2, combat: defStat, total: power2, type: target.type, usedEvasion: usedEvasion },
 
             stake: stake,
 
@@ -1291,13 +1319,21 @@
 
             target.permanentHearts += heartStake;
 
+            if (usedEvasion && (power2 - power1 >= 3)) {
+
+                target.permanentHearts += 0.5;
+
+            }
+
             if (state.config.difficultyMode !== "easy" && state.config.difficultyMode !== "standard") {
 
                 player.permanentHearts = Math.max(0, player.permanentHearts - heartStake);
 
             }
 
-            var loseMsg = "⚔️ DUEL NA POLI! " + target.badge + " " + target.name + " (" + power2 + ") odrazil výzvu a porazil útočníka " + player.badge + " " + player.name + " (" + power1 + ")! Poražený odevzdává " + actualGold2 + " zl.!";
+            var loseMsg = usedEvasion
+                ? ("🐎 JEZDECKÝ ÚHYB! " + target.badge + " " + target.name + " (" + power2 + ") v sedle obratně vymanévroval útočníka " + player.badge + " " + player.name + " (" + power1 + ")!" + ((power2 - power1 >= 3) ? " Za bravurní manévr získává navíc +0,5 💖!" : "") + " Poražený útočník odevzdává " + actualGold2 + " zl.!")
+                : ("⚔️ DUEL NA POLI! " + target.badge + " " + target.name + " (" + power2 + ") odrazil výzvu a porazil útočníka " + player.badge + " " + player.name + " (" + power1 + ")! Poražený odevzdává " + actualGold2 + " zl.!");
 
             if (isUltimate) {
 
@@ -1377,11 +1413,15 @@
 
         target.gold += cost;
 
-        player.permanentHearts += 0.5;
+        var tStats = this.getEffectiveStats(state, player);
+
+        var toastHearts = (tStats.tanec >= 3) ? 1.0 : 0.5;
+
+        player.permanentHearts += toastHearts;
 
         player.lastToastRound = state.roundNumber;
 
-        var msg = "🍷 PŘÁTELSKÝ PŘÍPITEK! " + player.badge + " " + player.name + " pozval rytíře " + target.badge + " " + target.name + " na číši burgundského vína (-" + cost + " zl.). Za dvorskou štědrost a noblesu získává **+0,5 💖**!";
+        var msg = "🍷 PŘÁTELSKÝ PŘÍPITEK! " + player.badge + " " + player.name + " pozval rytíře " + target.badge + " " + target.name + " na číši burgundského vína (-" + cost + " zl.). Za dvorskou štědrost a společenský šarm získává **+" + toastHearts + " 💖**!";
 
         this.addLog(state, msg, "gold");
 
@@ -1715,7 +1755,7 @@
 
         if (state.pendingAction && state.pendingAction.debt) {
 
-            this.autoLiquidateDebt(state);
+            this.autoLiquidateDebt(state, bot);
 
             if (state.phase === "GAME_OVER") return;
 
@@ -1747,7 +1787,7 @@
 
         if (pa.debt) {
 
-            this.autoLiquidateDebt(state);
+            this.autoLiquidateDebt(state, bot);
 
             if (state.phase === "GAME_OVER") return;
 
@@ -1785,15 +1825,22 @@
 
             var effStats = this.getEffectiveStats(state, bot);
 
-            // Dvořan a Panoš jsou opatrní u Draků (U3)
+            var qTier = (pa.questCard && pa.questCard.questTier) || pa.questSubtype || "U1";
 
-            if (pa.questSubtype === "U3") {
+            // Dvořan a Panoš jsou opatrní u Draků (U3) a Netvorů (U2)
+            if (qTier === "U3") {
 
-                if (bot.type === "Bot_Noble" && effStats.boj < 14) shouldFight = false;
+                if (bot.type === "Bot_Noble" && effStats.boj < 13) shouldFight = false;
 
-                if (bot.type === "Bot_Easy" && effStats.boj < 15) shouldFight = false;
+                if (bot.type === "Bot_Easy" && effStats.boj < 14) shouldFight = false;
 
-                if (bot.type === "Bot_Breeder" && effStats.boj < 12) shouldFight = false;
+                if (bot.type === "Bot_Breeder" && effStats.boj < 11) shouldFight = false;
+
+            } else if (qTier === "U2") {
+
+                if (bot.type === "Bot_Noble" && effStats.boj < 8) shouldFight = false;
+
+                if (bot.type === "Bot_Breeder" && effStats.boj < 7) shouldFight = false;
 
             }
 
@@ -1814,6 +1861,23 @@
                 this.resolveQuest(state, null, { stance: botStance });
 
                 if (state.phase === "GAME_OVER") return;
+
+            } else {
+
+                // Taktický ústup z doupěte bez rizika Lazaretu
+                if (this.retreatFromQuest) {
+
+                    this.retreatFromQuest(state);
+
+                } else if (window.PRS_GameEngine && window.PRS_GameEngine.retreatFromQuest) {
+
+                    window.PRS_GameEngine.retreatFromQuest(state);
+
+                } else {
+
+                    pa.canResolveQuest = false;
+
+                }
 
             }
 
@@ -2015,29 +2079,54 @@
 
         }
 
-        // 7. Obchodník – nákup balíčků výbavy
-
+        // 7. Obchodník – nákup cílené výbavy podle archetypu nebo balíčků
         if (pa.canShopMerchant) {
 
             var packs = (state.config && state.config.itemPackPrices) || { tier1: 2500, tier2: 7000, tier3: 12000 };
 
+            var canSpecific = (typeof this.buySpecificItem === "function" && window.PRS_ITEMS);
+
             if (bot.type === "Bot_Aggressive") {
 
-                if (bot.gold - packs.tier3 >= 400 && bot.items.length < 5) this.buyItemPack(state, 3);
-
-                else if (bot.gold - packs.tier2 >= 400 && bot.items.length < 4) this.buyItemPack(state, 2);
+                if (canSpecific && bot.gold >= 10000 + 400 && !bot.items.some(function (it) { return it.id === "it3_1"; })) {
+                    this.buySpecificItem(state, "it3_1");
+                } else if (canSpecific && bot.gold >= 8500 + 400 && !bot.items.some(function (it) { return it.id === "it3_2"; })) {
+                    this.buySpecificItem(state, "it3_2");
+                } else if (canSpecific && bot.gold >= 7000 + 400 && !bot.items.some(function (it) { return it.id === "it2_1"; })) {
+                    this.buySpecificItem(state, "it2_1");
+                } else if (canSpecific && bot.gold >= 2500 + 400 && !bot.items.some(function (it) { return it.id === "it1_2"; })) {
+                    this.buySpecificItem(state, "it1_2");
+                } else if (bot.gold - packs.tier3 >= 400 && bot.items.length < 5) {
+                    this.buyItemPack(state, 3);
+                } else if (bot.gold - packs.tier2 >= 400 && bot.items.length < 4) {
+                    this.buyItemPack(state, 2);
+                }
 
             } else if (bot.type === "Bot_Noble") {
 
-                if (bot.gold - packs.tier3 >= 600 && bot.items.length < 5) this.buyItemPack(state, 3);
-
-                else if (bot.gold - packs.tier2 >= 600 && bot.items.length < 4) this.buyItemPack(state, 2);
+                if (canSpecific && bot.gold >= 12000 + 600 && !bot.items.some(function (it) { return it.id === "it3_3"; })) {
+                    this.buySpecificItem(state, "it3_3");
+                } else if (canSpecific && bot.gold >= 7000 + 600 && !bot.items.some(function (it) { return it.id === "it2_5"; })) {
+                    this.buySpecificItem(state, "it2_5");
+                } else if (canSpecific && bot.gold >= 3000 + 600 && !bot.items.some(function (it) { return it.id === "it1_6"; })) {
+                    this.buySpecificItem(state, "it1_6");
+                } else if (bot.gold - packs.tier3 >= 600 && bot.items.length < 5) {
+                    this.buyItemPack(state, 3);
+                } else if (bot.gold - packs.tier2 >= 600 && bot.items.length < 4) {
+                    this.buyItemPack(state, 2);
+                }
 
             } else if (bot.type === "Bot_Breeder") {
 
-                // Šetří zlato na zvířata na herním plánu
-
-                if (bot.gold - packs.tier2 >= 2000 && bot.items.length < 3) this.buyItemPack(state, 2);
+                if (canSpecific && bot.gold >= 10000 + 1500 && !bot.items.some(function (it) { return it.id === "it3_5"; })) {
+                    this.buySpecificItem(state, "it3_5");
+                } else if (canSpecific && bot.gold >= 7500 + 1500 && !bot.items.some(function (it) { return it.id === "it2_2"; })) {
+                    this.buySpecificItem(state, "it2_2");
+                } else if (canSpecific && bot.gold >= 2500 + 1500 && !bot.items.some(function (it) { return it.id === "it1_8"; })) {
+                    this.buySpecificItem(state, "it1_8");
+                } else if (bot.gold - packs.tier2 >= 2000 && bot.items.length < 3) {
+                    this.buyItemPack(state, 2);
+                }
 
             } else {
 

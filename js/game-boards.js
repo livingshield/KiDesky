@@ -725,7 +725,7 @@ window.KiDeskyMapGenerator = {
             { code: "U1_1", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
             { code: "K3", type: "ANIMAL", subtype: "kun", setId: 3, name: "Kůň 3 (Vraník)", icon: "🐎" },
             { code: "N3", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "PSOV1", type: "BUILDING", subtype: "psovod", name: "Psovod 1", icon: "🦴" },
+            { code: "MJ2", type: "MASTER", skill: "jizda", name: "Mistr Jízdy", icon: "🏇" },
             { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅" },
             { code: "S3", type: "ANIMAL", subtype: "sokol", setId: 3, name: "Sokol 3 (Ostříž)", icon: "🦅" },
             { code: "N4", type: "CHANCE", name: "Náhoda", icon: "❓" },
@@ -1639,7 +1639,7 @@ buildClassic4599Board: function () {
             { code: "U1_1", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
             { code: "K3", type: "ANIMAL", subtype: "kun", setId: 3, name: "Kůň 3 (Vraník)", icon: "🐎" },
             { code: "N3", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "PSOV1", type: "BUILDING", subtype: "psovod", name: "Psovod 1", icon: "🦴" },
+            { code: "MJ2", type: "MASTER", skill: "jizda", name: "Mistr Jízdy", icon: "🏇" },
             { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅" },
             { code: "S3", type: "ANIMAL", subtype: "sokol", setId: 3, name: "Sokol 3 (Ostříž)", icon: "🦅" },
             { code: "N4", type: "CHANCE", name: "Náhoda", icon: "❓" },
@@ -1990,11 +1990,11 @@ buildClassic4599Board: function () {
             { code: "BON_200", type: "BONUS", bonusGold: 200, name: "Lesní věž (+200 zl.)", icon: "⛲", x: 1075, y: 260, next: [14] },
             { code: "MT1", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃", x: 1030, y: 325, next: [15] },
             { code: "M1", type: "TOWN", estateId: "M1", name: "Město 1 (Královo Pole)", icon: "🏙️", x: 995, y: 395, next: [16] },
-            { code: "PSOV1", type: "BUILDING", subtype: "psovod", name: "Psovod 1", icon: "🦴", x: 975, y: 470, next: [17] },
+            { code: "KREJ1", type: "BUILDING", subtype: "krejci", name: "Krejčí 1", icon: "🧵", x: 975, y: 470, next: [17] },
             { code: "HOSP", type: "HOSPITAL", name: "Lesní lazaret", icon: "🏥", x: 965, y: 545, next: [18] },
             { code: "MB2", type: "MASTER", skill: "boj", name: "Mistr Boje", icon: "⚔️", x: 975, y: 620, next: [19] },
             { code: "U2_1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹", x: 1000, y: 690, next: [20] },
-            { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅", x: 1035, y: 745, next: [21] },
+            { code: "MJ1", type: "MASTER", skill: "jizda", name: "Mistr Jízdy", icon: "🏇", x: 1035, y: 745, next: [21] },
 
             // Spodní spojnice k odbočce na most Slavností (uzly 21..23)
             { code: "KRCMA", type: "TAVERN", name: "Zájezdní hostinec", icon: "🍺", x: 970, y: 805, next: [22] },
@@ -2094,6 +2094,7 @@ buildClassic4599Board: function () {
     // 3. ZKRÁCENÝ RYTÍŘSKÝ PLÁN (Pro rychlé testování ~40 min)
     // ========================================================================
     buildCompactBoard: function () {
+        var full = this.buildClassic4599Board();
         var outerDefs = [
             { code: "START", type: "START", name: "START (+3 000 zl.)", icon: "🏰" },
             { code: "K1", type: "ANIMAL", subtype: "kun", setId: 1, name: "Kůň 1 (Grošák)", icon: "🐎" },

@@ -35,6 +35,8 @@ using System.Web;
 
 
 using System.Web.Script.Serialization;
+using System.Net;
+using System.Net.Mail;
 
 
 
@@ -496,6 +498,79 @@ public class KiDeskyApiHandler : IHttpHandler
 
     private static readonly object _schemaLock = new object();
 
+    private static string SMTP_HOST = "smtp.forpsi.com";
+    private static int SMTP_PORT = 587;
+    private static string SMTP_USER = "scio@ekobio.org";
+    private static string SMTP_PASS = "Awp3desert";
+    private static bool SMTP_SSL = true;
+    private static string SMTP_FROM = "scio@ekobio.org";
+    private static string SMTP_FROM_NAME = "Princeznino srdce";
+    private static string GOOGLE_CLIENT_ID = "335921016939-afepn3s6mpsep890pjr08bli6ufj0jub.apps.googleusercontent.com";
+
+    private static bool SendConfirmationEmail(string recipientEmail, string recipientName, string token, out string error)
+    {
+        error = null;
+        try
+        {
+            if (string.IsNullOrEmpty(recipientEmail) || !recipientEmail.Contains("@"))
+            {
+                error = "Neplatna e-mailova adresa.";
+                return false;
+            }
+
+            try
+            {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+            }
+            catch { }
+
+            using (var client = new SmtpClient(SMTP_HOST, SMTP_PORT))
+            {
+                client.EnableSsl = SMTP_SSL;
+                client.UseDefaultCredentials = false;
+                client.Credentials = new NetworkCredential(SMTP_USER, SMTP_PASS);
+                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                client.Timeout = 12000;
+
+                string confirmUrl = "https://www.ekobio.org/apps/KiDesky/?confirmEmail=" + HttpUtility.UrlEncode(token);
+                string safeName = string.IsNullOrEmpty(recipientName) ? "Rytíři" : recipientName;
+
+                using (var msg = new MailMessage())
+                {
+                    msg.From = new MailAddress(SMTP_FROM, SMTP_FROM_NAME, Encoding.UTF8);
+                    msg.To.Add(new MailAddress(recipientEmail, safeName, Encoding.UTF8));
+                    msg.Subject = "👑 Potvrzení rytířského účtu – KiDesky: Princeznino srdce";
+                    msg.BodyEncoding = Encoding.UTF8;
+                    msg.IsBodyHtml = true;
+                    msg.Body = "<!DOCTYPE html><html><head><meta charset='utf-8'/><style>" +
+                        "body{font-family:'Segoe UI',Arial,sans-serif;background:#120d08;color:#f1ede4;margin:0;padding:20px;}" +
+                        ".box{max-width:580px;margin:0 auto;background:#1c140d;border:2px solid #d4af37;border-radius:10px;padding:28px;box-shadow:0 6px 24px rgba(0,0,0,0.7);}" +
+                        "h1{color:#ffd86b;font-size:22px;margin-top:0;border-bottom:1px solid rgba(212,175,55,0.3);padding-bottom:10px;}" +
+                        "p{font-size:15px;line-height:1.6;color:#e2d9cc;}" +
+                        ".btn-wrap{text-align:center;margin:24px 0;}" +
+                        ".btn{display:inline-block;background:#d4af37;color:#1c1917 !important;text-decoration:none;font-weight:bold;font-size:16px;padding:13px 26px;border-radius:6px;box-shadow:0 4px 12px rgba(212,175,55,0.35);}" +
+                        ".footer{font-size:12px;color:#8c8275;margin-top:22px;border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;}" +
+                        "</style></head><body><div class='box'>" +
+                        "<h1>🛡️ Královská pečeť pro rytíře " + HttpUtility.HtmlEncode(safeName) + "</h1>" +
+                        "<p>Zdravíme tě v království <strong>KiDesky: Princeznino srdce</strong>!</p>" +
+                        "<p>Tvůj rytířský účet byl úspěšně vytvořen. Aby se tvá postava probudila v plné síle, získala <strong>250 zlaťáků/kreditů</strong> a možnost ukládat herní úspěchy a prémiové figurky, stačí potvrdit tvou e-mailovou adresu:</p>" +
+                        "<div class='btn-wrap'><a class='btn' href='" + confirmUrl + "' target='_blank'>👑 Potvrdit můj rytířský účet</a></div>" +
+                        "<p style='font-size:13px;color:#b0a595;'>Pokud tlačítko nefunguje, otevři tento odkaz v prohlížeči:<br/>" +
+                        "<a style='color:#ffd86b;' href='" + confirmUrl + "'>" + confirmUrl + "</a></p>" +
+                        "<div class='footer'>Tento e-mail byl odeslán na základě registrace na www.ekobio.org/apps/KiDesky/. Platnost odkazu je 48 hodin.<br/>Pokud jsi registraci neprováděl/a, tento dopis můžeš ignorovat.</div>" +
+                        "</div></body></html>";
+                    client.Send(msg);
+                    return true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            return false;
+        }
+    }
+
 
 
     public void ProcessRequest(HttpContext context)
@@ -618,6 +693,18 @@ public class KiDeskyApiHandler : IHttpHandler
 
 
 
+                    break;
+
+                case "confirm-email":
+                    HandleConfirmEmail(context);
+                    break;
+
+                case "resend-confirmation":
+                    HandleResendConfirmation(context);
+                    break;
+
+                case "google-login":
+                    HandleGoogleLogin(context);
                     break;
 
 
@@ -1231,6 +1318,22 @@ END
 IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL
 BEGIN
     EXEC(N'UPDATE [prs].[prs_Users] SET [DisplayName] = [Username] WHERE [DisplayName] IS NULL OR [DisplayName] = ''''');
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'EmailConfirmed')
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [EmailConfirmed] BIT NOT NULL DEFAULT 0;
+    ALTER TABLE [prs].[prs_Users] ADD [EmailConfirmationToken] NVARCHAR(128) NULL;
+    ALTER TABLE [prs].[prs_Users] ADD [EmailConfirmationExpires] DATETIME2 NULL;
+    ALTER TABLE [prs].[prs_Users] ADD [GoogleId] NVARCHAR(128) NULL;
+    ALTER TABLE [prs].[prs_Users] ADD [AuthProvider] NVARCHAR(32) NOT NULL DEFAULT N'local';
+    ALTER TABLE [prs].[prs_Users] ADD [AvatarUrl] NVARCHAR(512) NULL;
+    EXEC(N'UPDATE [prs].[prs_Users] SET [EmailConfirmed] = 1 WHERE [Role] = N''Admin'' OR [Username] IN (N''admin'', N''rytir_jan'', N''jan.kytyr@seznam.cz'')');
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'IX_prs_Users_GoogleId')
+BEGIN
+    CREATE NONCLUSTERED INDEX IX_prs_Users_GoogleId ON [prs].[prs_Users]([GoogleId]) WHERE [GoogleId] IS NOT NULL;
 END
 
 IF OBJECT_ID(N'[prs].[prs_Videos]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Videos]') AND name = 'LikesCount')
@@ -2237,230 +2340,585 @@ END";
 
 
     private void HandleRegister(HttpContext context)
-
-
-
     {
-
-
-
+        EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
-
-
 
         string username = GetStr(body, "username").Trim();
         string password = GetStr(body, "password");
         string reqDisplayName = GetStr(body, "displayName").Trim();
-
-
-
         string email = GetStr(body, "email").Trim();
 
-
-
         if (string.IsNullOrEmpty(email) && username.Contains("@"))
-
-
-
         {
-
-
-
             email = username;
-
-
-
         }
-
-
 
         if (username.Length < 3 || password.Length < 3)
-
-
-
         {
-
-
-
             context.Response.StatusCode = 400;
-
-
-
-            context.Response.Write(_json.Serialize(new { status = "error", message = "Jm\u00e9no i heslo mus\u00ed m\u00edt alespo\u0148 3 znaky." }));
-
-
-
+            context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Jméno i heslo musí mít alespoň 3 znaky." }));
             return;
-
-
-
         }
 
-
+        if (string.IsNullOrEmpty(email) || !email.Contains("@"))
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Vyplňte prosím platný e-mail pro zaslání potvrzení registrace." }));
+            return;
+        }
 
         using (var conn = new SqlConnection(CONN_STR))
-
-
-
         {
-
-
-
             conn.Open();
-
-
+            EnsureExtendedAdminSchema(conn);
 
             using (var check = new SqlCommand("SELECT COUNT(*) FROM [prs].[prs_Users] WHERE [Username] = @u OR ([Email] IS NOT NULL AND [Email] != '' AND [Email] = @e)", conn))
-
-
-
             {
-
-
-
                 check.Parameters.AddWithValue("@u", username);
-
-
-
-                check.Parameters.AddWithValue("@e", string.IsNullOrEmpty(email) ? "___no_email___" : email);
-
-
-
+                check.Parameters.AddWithValue("@e", email);
                 if (Convert.ToInt32(check.ExecuteScalar()) > 0)
-
-
-
                 {
-
-
-
                     context.Response.StatusCode = 409;
-
-
-
-                    context.Response.Write(_json.Serialize(new { status = "error", message = "U\u017eivatel s t\u00edmto jm\u00e9nem nebo e-mailem ji\u017e existuje." }));
-
-
-
+                    context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Uživatel s tímto jménem nebo e-mailem již existuje." }));
                     return;
-
-
-
                 }
-
-
-
             }
 
+            string displayName = !string.IsNullOrEmpty(reqDisplayName) ? reqDisplayName : username;
+            bool isAdmin = username.ToLowerInvariant().StartsWith("admin") || email.Equals("jan.kytyr@seznam.cz", StringComparison.OrdinalIgnoreCase);
+            string role = isAdmin ? "Admin" : "Guest";
+            bool isConfirmed = isAdmin;
+            string confirmationToken = Guid.NewGuid().ToString("N");
+            DateTime tokenExpires = DateTime.UtcNow.AddHours(48);
+            string defaultPawns = @"[""knight_valiant"",""knight_tourney"",""lady_huntress"",""lord_diplomat"",""knight_warden"",""lady_sorceress""]";
+            int initialCredits = isAdmin ? 2500 : 250;
 
+            int userId = 0;
+            try
+            {
+                using (var ins = new SqlCommand(@"
+                    INSERT INTO [prs].[prs_Users] (
+                        [Username], [Email], [PasswordHash], [Role], [DisplayName],
+                        [EmailConfirmed], [EmailConfirmationToken], [EmailConfirmationExpires],
+                        [AuthProvider], [Credits], [SelectedPawnId], [UnlockedPawnsJson], [LastLoginAt]
+                    )
+                    OUTPUT INSERTED.Id
+                    VALUES (
+                        @u, @e, @p, @r, @d,
+                        @ec, @tok, @exp,
+                        'local', @cred, 'knight_valiant', @unl, SYSUTCDATETIME()
+                    )", conn))
+                {
+                    ins.Parameters.AddWithValue("@u", username);
+                    ins.Parameters.AddWithValue("@e", email);
+                    ins.Parameters.AddWithValue("@p", HashPassword(password));
+                    ins.Parameters.AddWithValue("@r", role);
+                    ins.Parameters.AddWithValue("@d", displayName);
+                    ins.Parameters.AddWithValue("@ec", isConfirmed ? 1 : 0);
+                    ins.Parameters.AddWithValue("@tok", isConfirmed ? (object)DBNull.Value : confirmationToken);
+                    ins.Parameters.AddWithValue("@exp", isConfirmed ? (object)DBNull.Value : tokenExpires);
+                    ins.Parameters.AddWithValue("@cred", initialCredits);
+                    ins.Parameters.AddWithValue("@unl", defaultPawns);
+                    userId = Convert.ToInt32(ins.ExecuteScalar());
+                }
+            }
+            catch (SqlException)
+            {
+                // Fallback for older columns
+                using (var ins = new SqlCommand(@"
+                    INSERT INTO [prs].[prs_Users] ([Username], [Email], [PasswordHash], [Role], [DisplayName], [LastLoginAt])
+                    OUTPUT INSERTED.Id
+                    VALUES (@u, @e, @p, @r, @d, SYSUTCDATETIME())", conn))
+                {
+                    ins.Parameters.AddWithValue("@u", username);
+                    ins.Parameters.AddWithValue("@e", email);
+                    ins.Parameters.AddWithValue("@p", HashPassword(password));
+                    ins.Parameters.AddWithValue("@r", role);
+                    ins.Parameters.AddWithValue("@d", displayName);
+                    userId = Convert.ToInt32(ins.ExecuteScalar());
+                }
+            }
 
-            string displayName = GetStr(body, "displayName").Trim();
+            string mailErr = null;
+            bool emailSent = false;
+            if (!isConfirmed)
+            {
+                emailSent = SendConfirmationEmail(email, displayName, confirmationToken, out mailErr);
+            }
 
+            string msg = isAdmin
+                ? "Administrátorský účet byl úspěšně vytvořen."
+                : (emailSent
+                    ? ("Registrace proběhla úspěšně! Na e-mail " + email + " byl odeslán potvrzovací odkaz. Do jeho potvrzení můžeš hrát v režimu Hosta.")
+                    : "Účet byl vytvořen, ale nepodařilo se odeslat potvrzovací e-mail. Můžeš hrát v režimu Hosta a potvrzení si poslat znovu z profilu.");
 
+            context.Response.Write(_json.Serialize(new
+            {
+                ok = true,
+                status = "success",
+                message = msg,
+                emailSent = emailSent,
+                user = new
+                {
+                    id = userId,
+                    username = username,
+                    displayName = displayName,
+                    role = role,
+                    email = email,
+                    emailConfirmed = isConfirmed,
+                    authProvider = "local",
+                    credits = initialCredits,
+                    selectedPawnId = "knight_valiant",
+                    unlockedPawnsJson = defaultPawns
+                }
+            }));
+        }
+    }
 
-            if (string.IsNullOrEmpty(displayName)) displayName = username;
+    private void HandleConfirmEmail(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        string token = context.Request.QueryString["token"];
+        if (string.IsNullOrEmpty(token))
+        {
+            var body = ReadJsonBody(context);
+            token = GetStr(body, "token");
+        }
+        token = (token ?? "").Trim();
+        if (string.IsNullOrEmpty(token))
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Chybí ověřovací token." }));
+            return;
+        }
 
-
-
-            string role = username.ToLowerInvariant().StartsWith("admin") ? "Admin" : "Player";
-
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
             EnsureExtendedAdminSchema(conn);
 
             int userId = 0;
+            string username = "";
+            string email = "";
+            string role = "";
+            string displayName = "";
+            int credits = 250;
+            string selectedPawn = "knight_valiant";
+            string unlockedPawns = "";
+            DateTime? expires = null;
 
-            try
-
+            using (var cmd = new SqlCommand(@"
+                SELECT [Id], [Username], [Email], [Role], [DisplayName], [Credits], [SelectedPawnId], [UnlockedPawnsJson], [EmailConfirmationExpires]
+                FROM [prs].[prs_Users]
+                WHERE [EmailConfirmationToken] = @t", conn))
             {
-
-                using (var ins = new SqlCommand(@"
-
-                    INSERT INTO [prs].[prs_Users] ([Username], [Email], [PasswordHash], [Role], [DisplayName], [LastLoginAt])
-
-                    OUTPUT INSERTED.Id
-
-                    VALUES (@u, @e, @p, @r, @d, SYSUTCDATETIME())", conn))
-
+                cmd.Parameters.AddWithValue("@t", token);
+                using (var r = cmd.ExecuteReader())
                 {
-
-                    ins.Parameters.AddWithValue("@u", username);
-
-                    ins.Parameters.AddWithValue("@e", email);
-
-                    ins.Parameters.AddWithValue("@p", HashPassword(password));
-
-                    ins.Parameters.AddWithValue("@r", role);
-
-                    ins.Parameters.AddWithValue("@d", displayName);
-
-                    userId = Convert.ToInt32(ins.ExecuteScalar());
-
-                }
-
-            }
-
-            catch (SqlException sqx)
-
-            {
-
-                if (sqx.Message.IndexOf("DisplayName", StringComparison.OrdinalIgnoreCase) >= 0)
-
-                {
-
-                    using (var ins = new SqlCommand(@"
-
-                        INSERT INTO [prs].[prs_Users] ([Username], [Email], [PasswordHash], [Role], [LastLoginAt])
-
-                        OUTPUT INSERTED.Id
-
-                        VALUES (@u, @e, @p, @r, SYSUTCDATETIME())", conn))
-
+                    if (r.Read())
                     {
-
-                        ins.Parameters.AddWithValue("@u", username);
-
-                        ins.Parameters.AddWithValue("@e", email);
-
-                        ins.Parameters.AddWithValue("@p", HashPassword(password));
-
-                        ins.Parameters.AddWithValue("@r", role);
-
-                        userId = Convert.ToInt32(ins.ExecuteScalar());
+                        userId = Convert.ToInt32(r["Id"]);
+                        username = r["Username"].ToString();
+                        email = r["Email"] == DBNull.Value ? "" : r["Email"].ToString();
+                        role = r["Role"].ToString();
+                        displayName = r["DisplayName"] == DBNull.Value ? username : r["DisplayName"].ToString();
+                        credits = r["Credits"] == DBNull.Value ? 250 : Convert.ToInt32(r["Credits"]);
+                        selectedPawn = r["SelectedPawnId"] == DBNull.Value ? "knight_valiant" : r["SelectedPawnId"].ToString();
+                        unlockedPawns = r["UnlockedPawnsJson"] == DBNull.Value ? "" : r["UnlockedPawnsJson"].ToString();
+                        if (r["EmailConfirmationExpires"] != DBNull.Value)
+                        {
+                            expires = Convert.ToDateTime(r["EmailConfirmationExpires"]);
+                        }
+                    }
                 }
             }
-            else
+
+            if (userId <= 0)
             {
-                throw;
+                context.Response.StatusCode = 404;
+                context.Response.Write(_json.Serialize(new { ok = false, message = "Ověřovací odkaz je neplatný nebo již byl použit." }));
+                return;
             }
-        }
 
-        context.Response.Write(_json.Serialize(new
+            if (expires.HasValue && DateTime.UtcNow > expires.Value)
+            {
+                context.Response.StatusCode = 410;
+                context.Response.Write(_json.Serialize(new { ok = false, message = "Platnost ověřovacího odkazu vypršela. Nechte si prosím zaslat nový z profilu." }));
+                return;
+            }
+
+            string newRole = (role == "Guest") ? "Player" : role;
+            using (var upd = new SqlCommand(@"
+                UPDATE [prs].[prs_Users]
+                SET [EmailConfirmed] = 1,
+                    [EmailConfirmationToken] = NULL,
+                    [Role] = @r,
+                    [LastLoginAt] = SYSUTCDATETIME()
+                WHERE [Id] = @id", conn))
+            {
+                upd.Parameters.AddWithValue("@r", newRole);
+                upd.Parameters.AddWithValue("@id", userId);
+                upd.ExecuteNonQuery();
+            }
+
+            context.Response.Write(_json.Serialize(new
+            {
+                ok = true,
+                status = "success",
+                message = "E-mail byl úspěšně potvrzen! Vítej v království jako plnohodnotný rytíř.",
+                user = new
+                {
+                    id = userId,
+                    username = username,
+                    displayName = displayName,
+                    role = newRole,
+                    email = email,
+                    emailConfirmed = true,
+                    credits = credits,
+                    selectedPawnId = selectedPawn,
+                    unlockedPawnsJson = unlockedPawns
+                }
+            }));
+        }
+    }
+
+    private void HandleResendConfirmation(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        string ident = GetStr(body, "username").Trim();
+        if (string.IsNullOrEmpty(ident)) ident = GetStr(body, "email").Trim();
+
+        if (string.IsNullOrEmpty(ident))
         {
-            ok = true,
-
-
-
-                    status = "success",
-
-
-
-                    user = new { id = userId, username = username, displayName = displayName, role = role, email = email, credits = (role == "Admin" ? 2500 : 250), selectedPawnId = "knight_valiant", unlockedPawnsJson = "[\"knight_valiant\",\"knight_tourney\",\"lady_huntress\",\"lord_diplomat\",\"knight_warden\",\"lady_sorceress\"]" }
-
-
-
-                }));
-
-
-
-            }
-
-
-
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Zadejte uživatelské jméno nebo e-mail." }));
+            return;
         }
 
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
 
+            int userId = 0;
+            string email = "";
+            string displayName = "";
+            bool confirmed = false;
 
+            using (var cmd = new SqlCommand(@"
+                SELECT [Id], [Username], [Email], [DisplayName], [EmailConfirmed]
+                FROM [prs].[prs_Users]
+                WHERE [Username] = @u OR ([Email] IS NOT NULL AND [Email] = @u)", conn))
+            {
+                cmd.Parameters.AddWithValue("@u", ident);
+                using (var r = cmd.ExecuteReader())
+                {
+                    if (r.Read())
+                    {
+                        userId = Convert.ToInt32(r["Id"]);
+                        email = r["Email"] == DBNull.Value ? "" : r["Email"].ToString();
+                        displayName = r["DisplayName"] == DBNull.Value ? r["Username"].ToString() : r["DisplayName"].ToString();
+                        confirmed = r["EmailConfirmed"] != DBNull.Value && Convert.ToBoolean(r["EmailConfirmed"]);
+                    }
+                }
+            }
 
+            if (userId <= 0 || string.IsNullOrEmpty(email))
+            {
+                context.Response.StatusCode = 404;
+                context.Response.Write(_json.Serialize(new { ok = false, message = "Uživatel s tímto jménem nebo e-mailem nebyl nalezen." }));
+                return;
+            }
 
+            if (confirmed)
+            {
+                context.Response.Write(_json.Serialize(new { ok = true, alreadyConfirmed = true, message = "Tento účet již má e-mail potvrzený." }));
+                return;
+            }
+
+            string newToken = Guid.NewGuid().ToString("N");
+            DateTime tokenExpires = DateTime.UtcNow.AddHours(48);
+
+            using (var upd = new SqlCommand(@"
+                UPDATE [prs].[prs_Users]
+                SET [EmailConfirmationToken] = @t,
+                    [EmailConfirmationExpires] = @e
+                WHERE [Id] = @id", conn))
+            {
+                upd.Parameters.AddWithValue("@t", newToken);
+                upd.Parameters.AddWithValue("@e", tokenExpires);
+                upd.Parameters.AddWithValue("@id", userId);
+                upd.ExecuteNonQuery();
+            }
+
+            string emailErr = null;
+            bool sent = SendConfirmationEmail(email, displayName, newToken, out emailErr);
+
+            context.Response.Write(_json.Serialize(new
+            {
+                ok = true,
+                status = "success",
+                emailSent = sent,
+                message = sent ? ("Nový potvrzovací e-mail byl odeslán na " + email + ".") : ("Chyba při odesílání e-mailu: " + emailErr)
+            }));
+        }
+    }
+
+    private void HandleGoogleLogin(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        string credential = GetStr(body, "credential").Trim();
+        string reqDisplayName = GetStr(body, "displayName").Trim();
+
+        context.Response.ContentType = "application/json; charset=utf-8";
+        context.Response.TrySkipIisCustomErrors = true;
+
+        if (string.IsNullOrEmpty(credential))
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Chybí Google credential token." }));
+            return;
+        }
+
+        string googleId = null;
+        string email = null;
+        string name = null;
+        string picture = null;
+
+        // 1. Přímé dekódování podepsaného JWT payloadu z tokenu (bez závislosti na odchozím síťovém volání)
+        try
+        {
+            string[] jwtParts = credential.Split('.');
+            if (jwtParts.Length >= 2)
+            {
+                string payloadBase64 = jwtParts[1].Replace('-', '+').Replace('_', '/');
+                switch (payloadBase64.Length % 4)
+                {
+                    case 2: payloadBase64 += "=="; break;
+                    case 3: payloadBase64 += "="; break;
+                }
+                byte[] payloadBytes = Convert.FromBase64String(payloadBase64);
+                string payloadJson = Encoding.UTF8.GetString(payloadBytes);
+                var tokenDict = _json.Deserialize<Dictionary<string, object>>(payloadJson);
+                if (tokenDict != null)
+                {
+                    if (tokenDict.ContainsKey("sub") && tokenDict["sub"] != null) googleId = tokenDict["sub"].ToString();
+                    if (tokenDict.ContainsKey("email") && tokenDict["email"] != null) email = tokenDict["email"].ToString();
+                    if (tokenDict.ContainsKey("name") && tokenDict["name"] != null) name = tokenDict["name"].ToString();
+                    if (tokenDict.ContainsKey("picture") && tokenDict["picture"] != null) picture = tokenDict["picture"].ToString();
+
+                    // Základní bezpečnostní kontrola issueru a audience
+                    string iss = tokenDict.ContainsKey("iss") && tokenDict["iss"] != null ? tokenDict["iss"].ToString() : "";
+                    string aud = tokenDict.ContainsKey("aud") && tokenDict["aud"] != null ? tokenDict["aud"].ToString() : "";
+                    if (!iss.Contains("accounts.google.com") && !iss.Contains("google.com"))
+                    {
+                        googleId = null; // Neplatný vydavatel
+                    }
+                    if (!string.IsNullOrEmpty(aud) && !aud.StartsWith("335921016939-", StringComparison.OrdinalIgnoreCase))
+                    {
+                        googleId = null; // Neplatná cílová aplikace
+                    }
+                }
+            }
+        }
+        catch { }
+
+        // 2. Fallback: pokud přímé dekódování selhalo, dotážeme se Google tokeninfo endpointu
+        if (string.IsNullOrEmpty(googleId) || string.IsNullOrEmpty(email))
+        {
+            try
+            {
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                using (var wc = new WebClient())
+                {
+                    wc.Headers[HttpRequestHeader.UserAgent] = "KiDesky-App/1.0";
+                    wc.Encoding = Encoding.UTF8;
+                    string tokenInfoJson = wc.DownloadString("https://oauth2.googleapis.com/tokeninfo?id_token=" + HttpUtility.UrlEncode(credential));
+                    var tokenInfo = _json.Deserialize<Dictionary<string, object>>(tokenInfoJson);
+                    if (tokenInfo != null)
+                    {
+                        if (tokenInfo.ContainsKey("sub")) googleId = tokenInfo["sub"].ToString();
+                        if (tokenInfo.ContainsKey("email")) email = tokenInfo["email"].ToString();
+                        if (tokenInfo.ContainsKey("name")) name = tokenInfo["name"].ToString();
+                        if (tokenInfo.ContainsKey("picture")) picture = tokenInfo["picture"].ToString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 200;
+                context.Response.Write(_json.Serialize(new { ok = false, message = "Ověření Google účtu selhalo: " + ex.Message }));
+                return;
+            }
+        }
+
+        if (string.IsNullOrEmpty(googleId) || string.IsNullOrEmpty(email))
+        {
+            context.Response.StatusCode = 200;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatný Google token (chybí ID nebo e-mail uživatele)." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+
+            int userId = 0;
+            string username = null;
+            string currentRole = null;
+            string currentDisplayName = null;
+            int credits = 250;
+            string selectedPawn = "knight_valiant";
+            string unlockedPawns = null;
+
+            using (var cmd = new SqlCommand(@"
+                SELECT [Id], [Username], [Email], [Role], [DisplayName], [Credits], [SelectedPawnId], [UnlockedPawnsJson]
+                FROM [prs].[prs_Users]
+                WHERE [GoogleId] = @gid OR ([Email] IS NOT NULL AND [Email] != '' AND [Email] = @e)", conn))
+            {
+                cmd.Parameters.AddWithValue("@gid", googleId);
+                cmd.Parameters.AddWithValue("@e", email);
+                using (var r = cmd.ExecuteReader())
+                {
+                    if (r.Read())
+                    {
+                        userId = Convert.ToInt32(r["Id"]);
+                        username = r["Username"].ToString();
+                        currentRole = r["Role"].ToString();
+                        currentDisplayName = r["DisplayName"] == DBNull.Value ? username : r["DisplayName"].ToString();
+                        credits = r["Credits"] == DBNull.Value ? 250 : Convert.ToInt32(r["Credits"]);
+                        selectedPawn = r["SelectedPawnId"] == DBNull.Value ? "knight_valiant" : r["SelectedPawnId"].ToString();
+                        unlockedPawns = r["UnlockedPawnsJson"] == DBNull.Value ? "" : r["UnlockedPawnsJson"].ToString();
+                    }
+                }
+            }
+
+            bool isAdminEmail = email.Equals("jan.kytyr@seznam.cz", StringComparison.OrdinalIgnoreCase) ||
+                               email.Equals("lordkikin@gmail.com", StringComparison.OrdinalIgnoreCase) ||
+                               email.StartsWith("admin@", StringComparison.OrdinalIgnoreCase) ||
+                               (username != null && username.Equals("admin", StringComparison.OrdinalIgnoreCase));
+
+            string effectiveDisplayName = !string.IsNullOrEmpty(reqDisplayName)
+                ? reqDisplayName
+                : (!string.IsNullOrEmpty(currentDisplayName) && currentDisplayName != "Host" && !currentDisplayName.Contains("@")
+                    ? currentDisplayName 
+                    : (!string.IsNullOrEmpty(name) ? name : email.Split('@')[0]));
+
+            if (userId > 0)
+            {
+                string targetRole = isAdminEmail ? "Admin" : ((currentRole == "Guest") ? "Player" : currentRole);
+                int targetCredits = isAdminEmail ? Math.Max(credits, 2500) : credits;
+
+                using (var upd = new SqlCommand(@"
+                    UPDATE [prs].[prs_Users]
+                    SET [GoogleId] = @gid,
+                        [AvatarUrl] = @pic,
+                        [EmailConfirmed] = 1,
+                        [Role] = @r,
+                        [DisplayName] = @d,
+                        [Credits] = @c,
+                        [LastLoginAt] = SYSUTCDATETIME()
+                    WHERE [Id] = @id", conn))
+                {
+                    upd.Parameters.AddWithValue("@gid", googleId);
+                    upd.Parameters.AddWithValue("@pic", (object)picture ?? DBNull.Value);
+                    upd.Parameters.AddWithValue("@r", targetRole);
+                    upd.Parameters.AddWithValue("@d", effectiveDisplayName);
+                    upd.Parameters.AddWithValue("@c", targetCredits);
+                    upd.Parameters.AddWithValue("@id", userId);
+                    upd.ExecuteNonQuery();
+                }
+
+                context.Response.Write(_json.Serialize(new
+                {
+                    ok = true,
+                    status = "success",
+                    message = "Prihlaseni pres Google probehlo uspesne.",
+                    user = new
+                    {
+                        id = userId,
+                        username = username,
+                        displayName = effectiveDisplayName,
+                        role = targetRole,
+                        email = email,
+                        emailConfirmed = true,
+                        avatarUrl = picture,
+                        authProvider = "google",
+                        credits = targetCredits,
+                        selectedPawnId = selectedPawn,
+                        unlockedPawnsJson = unlockedPawns
+                    }
+                }));
+                return;
+            }
+
+            // New user via Google
+            string targetNewRole = isAdminEmail ? "Admin" : "Player";
+            int newCredits = (targetNewRole == "Admin") ? 2500 : 250;
+            string defaultUnlocked = @"[""knight_valiant"",""knight_tourney"",""lady_huntress"",""lord_diplomat"",""knight_warden"",""lady_sorceress""]";
+            string newUsername = email.Split('@')[0].Replace(".", "_").Replace("-", "_");
+            if (newUsername.Length < 3) newUsername = "player_" + (googleId.Length > 6 ? googleId.Substring(0, 6) : googleId);
+
+            using (var unCheck = new SqlCommand("SELECT COUNT(*) FROM [prs].[prs_Users] WHERE [Username] = @u", conn))
+            {
+                unCheck.Parameters.AddWithValue("@u", newUsername);
+                if (Convert.ToInt32(unCheck.ExecuteScalar()) > 0)
+                {
+                    newUsername = newUsername + "_" + (new Random()).Next(100, 999);
+                }
+            }
+
+            using (var ins = new SqlCommand(@"
+                INSERT INTO [prs].[prs_Users] (
+                    [Username], [Email], [PasswordHash], [Role], [DisplayName],
+                    [GoogleId], [AuthProvider], [AvatarUrl], [EmailConfirmed],
+                    [Credits], [SelectedPawnId], [UnlockedPawnsJson], [LastLoginAt]
+                )
+                OUTPUT INSERTED.Id
+                VALUES (
+                    @u, @e, @p, @r, @d,
+                    @gid, 'google', @pic, 1,
+                    @c, 'knight_valiant', @unl, SYSUTCDATETIME()
+                )", conn))
+            {
+                ins.Parameters.AddWithValue("@u", newUsername);
+                ins.Parameters.AddWithValue("@e", email);
+                ins.Parameters.AddWithValue("@p", HashPassword(Guid.NewGuid().ToString("N")));
+                ins.Parameters.AddWithValue("@r", targetNewRole);
+                ins.Parameters.AddWithValue("@d", effectiveDisplayName);
+                ins.Parameters.AddWithValue("@gid", googleId);
+                ins.Parameters.AddWithValue("@pic", (object)picture ?? DBNull.Value);
+                ins.Parameters.AddWithValue("@c", newCredits);
+                ins.Parameters.AddWithValue("@unl", defaultUnlocked);
+                userId = Convert.ToInt32(ins.ExecuteScalar());
+            }
+
+            context.Response.Write(_json.Serialize(new
+            {
+                ok = true,
+                status = "success",
+                message = "Vitej! Ucet pres Google byl uspesne vytvoren.",
+                user = new
+                {
+                    id = userId,
+                    username = newUsername,
+                    displayName = effectiveDisplayName,
+                    role = targetNewRole,
+                    email = email,
+                    emailConfirmed = true,
+                    avatarUrl = picture,
+                    authProvider = "google",
+                    credits = newCredits,
+                    selectedPawnId = "knight_valiant",
+                    unlockedPawnsJson = defaultUnlocked
+                }
+            }));
+        }
+    }
 
     private void HandleUpdateNickname(HttpContext context)
 
@@ -2886,6 +3344,29 @@ END";
                         }
                         catch { }
 
+                        string userEmail = (r["Email"] == DBNull.Value) ? "" : r["Email"].ToString();
+                        bool emailConfirmed = false;
+                        string avatarUrl = "";
+                        string authProvider = "local";
+                        try
+                        {
+                            int ecIdx = r.GetOrdinal("EmailConfirmed");
+                            if (!r.IsDBNull(ecIdx)) emailConfirmed = Convert.ToBoolean(r.GetValue(ecIdx));
+                        }
+                        catch { }
+                        try
+                        {
+                            int avIdx = r.GetOrdinal("AvatarUrl");
+                            if (!r.IsDBNull(avIdx)) avatarUrl = r.GetString(avIdx);
+                        }
+                        catch { }
+                        try
+                        {
+                            int apIdx = r.GetOrdinal("AuthProvider");
+                            if (!r.IsDBNull(apIdx)) authProvider = r.GetString(apIdx);
+                        }
+                        catch { }
+
 
 
                         r.Close();
@@ -2976,25 +3457,10 @@ END";
 
 
                         context.Response.Write(_json.Serialize(new
-
-
-
                         {
-
-
-
                             ok = true,
-
-
-
                             status = "success",
-
-
-
-                            user = new { id = id, username = u, displayName = dn, role = role, gamesPlayed = gp, gamesWon = gw, credits = credits, selectedPawnId = selectedPawnId, unlockedPawnsJson = unlockedPawnsJson }
-
-
-
+                            user = new { id = id, username = u, displayName = dn, role = role, email = userEmail, emailConfirmed = emailConfirmed, avatarUrl = avatarUrl, authProvider = authProvider, gamesPlayed = gp, gamesWon = gw, credits = credits, selectedPawnId = selectedPawnId, unlockedPawnsJson = unlockedPawnsJson }
                         }));
 
 
@@ -3360,19 +3826,28 @@ END";
 
         int expectedTurn = GetInt(body, "expectedTurnNumber", -1);
 
-
-
         using (var conn = new SqlConnection(CONN_STR))
-
-
-
         {
-
-
-
             conn.Open();
 
+            bool isNewSession = false;
+            using (var chkNew = new SqlCommand("SELECT COUNT(*) FROM [prs].[prs_GameSessions] WHERE [SessionGuid] = @g", conn))
+            {
+                chkNew.Parameters.AddWithValue("@g", sessionGuid);
+                isNewSession = (Convert.ToInt32(chkNew.ExecuteScalar()) == 0);
+            }
 
+            if (isNewSession && (string.IsNullOrEmpty(hostUsername) || hostUsername.Equals("Guest", StringComparison.OrdinalIgnoreCase) || hostUsername.Equals("Host", StringComparison.OrdinalIgnoreCase)))
+            {
+                context.Response.StatusCode = 403;
+                context.Response.Write(_json.Serialize(new
+                {
+                    ok = false,
+                    status = "forbidden",
+                    message = "Zalozit novou online mistnost mohou pouze prihlaseni rytiri. Jako Host se muzes pripojit ke stolu pres kod."
+                }));
+                return;
+            }
 
             // 2.2 Optimistický zámek proti race conditions v online multiplayeru
 
@@ -4690,13 +5165,6 @@ END";
         {
             conn.Open();
             EnsureExtendedAdminSchema(conn);
-            if (isHeroActive)
-            {
-                using (var clr = new SqlCommand("UPDATE [prs].[prs_Videos] SET [IsHeroActive] = 0", conn))
-                {
-                    clr.ExecuteNonQuery();
-                }
-            }
 
             if (id > 0)
             {
@@ -4773,21 +5241,41 @@ END";
             return;
         }
 
+        bool toggle = body.ContainsKey("toggle") && Convert.ToBoolean(body["toggle"]);
+        bool hasActiveState = body.ContainsKey("isActive");
+        bool targetActiveState = hasActiveState ? Convert.ToBoolean(body["isActive"]) : true;
+
         using (var conn = new SqlConnection(CONN_STR))
         {
             conn.Open();
             EnsureExtendedAdminSchema(conn);
-            using (var clr = new SqlCommand("UPDATE [prs].[prs_Videos] SET [IsHeroActive] = 0", conn))
+            if (toggle)
             {
-                clr.ExecuteNonQuery();
+                using (var cmd = new SqlCommand("UPDATE [prs].[prs_Videos] SET [IsHeroActive] = CASE WHEN [IsHeroActive] = 1 THEN 0 ELSE 1 END WHERE [Id] = @id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
             }
-            using (var cmd = new SqlCommand("UPDATE [prs].[prs_Videos] SET [IsHeroActive] = 1 WHERE [Id] = @id", conn))
+            else if (hasActiveState)
             {
-                cmd.Parameters.AddWithValue("@id", id);
-                cmd.ExecuteNonQuery();
+                using (var cmd = new SqlCommand("UPDATE [prs].[prs_Videos] SET [IsHeroActive] = @act WHERE [Id] = @id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@act", targetActiveState);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            else
+            {
+                using (var cmd = new SqlCommand("UPDATE [prs].[prs_Videos] SET [IsHeroActive] = 1 WHERE [Id] = @id", conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
-        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Aktivní video bylo změněno." }));
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Stav zobrazení videa na Landing Page byl upraven." }));
     }
 
     // ========================================================================

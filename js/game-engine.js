@@ -1118,7 +1118,7 @@ window.PRS_GameEngine = {
 
         animalTotals.sort(function (a, b) { return b.val - a.val; });
 
-        var awards = state.config.animalBreedingHearts || [3, 2, 1];
+        var awards = state.config.animalBreedingHearts || [4, 2.5, 1.5];
 
         for (var k = 0; k < Math.min(awards.length, animalTotals.length); k++) {
 
@@ -1128,8 +1128,7 @@ window.PRS_GameEngine = {
 
         }
 
-        // 3.1 Balanc: Bonus za kompletní sady zvířat (Kůň + Pes + Sokol ze stejné sady 1..12 -> +1.0 💖 za každou sadu)
-
+        // 3.1 Balanc: Bonus za kompletní sady zvířat a chovatelské trojice
         for (var pIdx = 0; pIdx < state.players.length; pIdx++) {
 
             var plObj = state.players[pIdx];
@@ -1166,7 +1165,28 @@ window.PRS_GameEngine = {
 
             plObj.completeSetsCount = completeSets;
 
-            plObj.setHeartsBonus = completeSets * 1.0;
+            plObj.setHeartsBonus = completeSets * 1.5;
+
+            // Chovatelský titul za 3 zvířata stejného druhu (+1.0 💖 za každou trojici)
+            var effSt = this.getEffectiveStats(state, plObj);
+            var speciesBonus = (Math.floor(effSt.horses / 3) * 1.0) +
+                               (Math.floor(effSt.dogs / 3) * 1.0) +
+                               (Math.floor(effSt.falcons / 3) * 1.0);
+            plObj.speciesHeartsBonus = speciesBonus;
+
+            // Prestiž panství pro Stavitele a Dvořany (+1.0 💖 za Hrad, +0.5 💖 za Město či 3★ Vesnici)
+            var castleCount = 0;
+            var townCount = 0;
+            var maxVillageCount = 0;
+            for (var on2 = 0; on2 < plObj.ownedNodes.length; on2++) {
+                var estNode = state.board.nodes[plObj.ownedNodes[on2]];
+                if (!estNode) continue;
+                if (estNode.type === "CASTLE") castleCount++;
+                else if (estNode.type === "TOWN") townCount++;
+                else if (estNode.type === "VILLAGE" && (estNode.villageLevel || 1) >= 3) maxVillageCount++;
+            }
+            var estatePrestige = (castleCount * 1.0) + (townCount * 0.5) + (maxVillageCount * 0.5);
+            plObj.estateHeartsBonus = estatePrestige;
 
         }
 
@@ -1174,7 +1194,7 @@ window.PRS_GameEngine = {
 
             var pl = state.players[m];
 
-            pl.totalHearts = Math.round((pl.permanentHearts + pl.breedingHearts + (pl.setHeartsBonus || 0)) * 10) / 10;
+            pl.totalHearts = Math.round((pl.permanentHearts + pl.breedingHearts + (pl.setHeartsBonus || 0) + (pl.speciesHeartsBonus || 0) + (pl.estateHeartsBonus || 0)) * 10) / 10;
 
             var isWin = false;
 
@@ -1421,6 +1441,9 @@ window.PRS_GameEngine = {
 
                 }
 
+                // Dvorní tanec: Tanec >= 2 se šaty nebo Tanec >= 3 získá přízeň princezny na dvořanské hostině (+0.5 💖, při Tanec >= 5 dokonce +1.0 💖)
+                var danceHearts = (stNow.tanec >= 5) ? 1.0 : ((stNow.tanec >= 3 || (stNow.tanec >= 2 && stNow.hasDress)) ? 0.5 : 0);
+
                 var stipendDesc = isLandless ? "zvýšenou královskou podporu pro nemajetné **+" + stipend + " zl.**" : "žold +" + stipend + " zl.";
 
                 if (courtHearts > 0) {
@@ -1434,6 +1457,16 @@ window.PRS_GameEngine = {
                 } else {
 
                     this.addLog(state, "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + ".", "gold");
+
+                }
+
+                if (danceHearts > 0) {
+
+                    player.permanentHearts += danceHearts;
+
+                    player.stats.heartsFromFestivals += danceHearts;
+
+                    this.addLog(state, "💃 Dvorní tanec! " + player.badge + " " + player.name + " svým půvabem a tancem okouzlil princeznu na uvítací hostině (+" + danceHearts + " 💖)!", "festival");
 
                 }
 
@@ -1675,6 +1708,9 @@ window.PRS_GameEngine = {
 
                 }
 
+                // Dvorní tanec: Tanec >= 2 se šaty nebo Tanec >= 3 získá přízeň princezny na dvořanské hostině (+0.5 💖, při Tanec >= 5 dokonce +1.0 💖)
+                var danceHearts = (stNow.tanec >= 5) ? 1.0 : ((stNow.tanec >= 3 || (stNow.tanec >= 2 && stNow.hasDress)) ? 0.5 : 0);
+
                 var stipendDesc = isLandless ? "zvýšenou královskou podporu pro nemajetné **+" + stipend + " zl.**" : "žold +" + stipend + " zl.";
 
                 if (courtHearts > 0) {
@@ -1692,6 +1728,16 @@ window.PRS_GameEngine = {
                 } else {
 
                     this.addLog(state, "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + ".", "gold");
+
+                }
+
+                if (danceHearts > 0) {
+
+                    player.permanentHearts += danceHearts;
+
+                    player.stats.heartsFromFestivals += danceHearts;
+
+                    this.addLog(state, "💃 Dvorní tanec! " + player.badge + " " + player.name + " svým půvabem a tancem okouzlil princeznu na uvítací hostině (+" + danceHearts + " 💖)!", "festival");
 
                 }
 
@@ -1925,6 +1971,27 @@ window.PRS_GameEngine = {
 
         if (this.isPurchasableNode(node)) {
 
+            // Aktivní bonus Tance: Vystoupení na Hradě (+0.5 💖, u Tanec >= 5 až +1.0 💖)
+            if (node.type === "CASTLE") {
+                var cStats = this.getEffectiveStats(state, player);
+                if (cStats.tanec >= 2) {
+                    var cBonus = (cStats.tanec >= 5) ? 1.0 : 0.5;
+                    player.permanentHearts += cBonus;
+                    player.stats.heartsFromFestivals += cBonus;
+                    this.addLog(state, "💃 Dvorní tanec na Hradě! " + player.badge + " " + player.name + " okouzlil společnost na " + node.name + " vznešeným tancem (+" + cBonus + " 💖)!", "festival");
+                }
+            }
+
+            // Aktivní bonus Tance: Kejklířský dar od trubadúrů (+200 zl. za každý bod Tance)
+            if (node.type === "JESTER") {
+                var jStats = this.getEffectiveStats(state, player);
+                if (jStats.tanec >= 1) {
+                    var jGift = jStats.tanec * 200;
+                    player.gold += jGift;
+                    this.addLog(state, "🃏 Trubadúrský dar! Kejklíři na " + node.name + " ocenili tvé taneční umění a darovali ti +" + jGift.toLocaleString("cs-CZ") + " zl.!", "gold");
+                }
+            }
+
             var price = this.getNodePrice(state, node);
 
             if (node.owner === null || node.owner === undefined) {
@@ -2002,6 +2069,12 @@ window.PRS_GameEngine = {
                 }
 
                 var rent = this.calculateNodeRent(state, node, owner, moveRoll);
+
+                // Královský trysk: Sleva 30 % na mýtné na Vesnicích pro zkušené jezdce v plném cvalu
+                var pMoveStats = this.getEffectiveStats(state, player);
+                if (node.type === "VILLAGE" && pMoveStats.jizda >= 4 && pMoveStats.horses > 0) {
+                    rent = Math.round(rent * 0.70);
+                }
 
                 var actualPaid = this.transferGold(state, player, owner, rent);
 
@@ -2217,7 +2290,7 @@ window.PRS_GameEngine = {
 
             var hospMult = (state.config && state.config.hospitalMultiplier) || 1;
 
-            var elixCost = Math.round(800 * hospMult);
+            var elixCost = Math.round(1000 * hospMult);
 
             state.pendingAction.canBuyHospitalElixir = true;
 
@@ -2225,7 +2298,7 @@ window.PRS_GameEngine = {
 
             state.pendingAction.canRestHospital = true;
 
-            var hospMsg = "🏥 Rytíř " + player.badge + " " + player.name + " dorazil do Královského lazaretu. Může zakoupit hojivý lektvar (+1 Boj a zotavení za " + elixCost.toLocaleString("cs-CZ") + " zl.) nebo zdarma odpočívat.";
+            var hospMsg = "🏥 Rytíř " + player.badge + " " + player.name + " dorazil do Královského lazaretu. Může zakoupit hojivý elixír (+0,5 💖 a ochranu do boje za " + elixCost.toLocaleString("cs-CZ") + " zl.) nebo zdarma odpočívat.";
 
             state.pendingAction.summary = hospMsg;
 
@@ -2839,6 +2912,26 @@ window.PRS_GameEngine = {
                 player.gold = Math.max(0, player.gold - 400);
 
                 msg += " (Bez šatů a tance -> Pokuta 400 zl.)";
+
+            }
+
+        } else if (card.effect === "riding") {
+
+            if (stats.horses > 0 || stats.jizda >= 2) {
+
+                player.permanentHearts += card.value;
+
+                player.stats.heartsFromChance += card.value;
+
+                if (card.id === "ch_ride_2") player.gold += 500;
+
+                msg += " (Jezdecký triumf -> +" + card.value + " 💖!)";
+
+            } else {
+
+                player.gold = Math.max(0, player.gold - 300);
+
+                msg += " (Bez koně a jezdeckého umu -> Pokuta/zdržení 300 zl.)";
 
             }
 
@@ -3800,7 +3893,7 @@ window.PRS_GameEngine = {
 
     },
 
-    // Špitál: Nákup hojivého lektvaru (+1 Boj a +0.5 💖 za 800 zl.),
+    // Špitál: Nákup hojivého elixíru (+0.5 💖 a ochranný elixír do dalšího souboje za 1 000 zl., základní výcvik Boje jen pokud Boj < 2),
 
     buyHospitalElixir: function (state) {
 
@@ -3810,17 +3903,21 @@ window.PRS_GameEngine = {
 
         var player = state.players[state.currentPlayerIndex];
 
-        var cost = pa.elixirCost || 800;
+        var cost = pa.elixirCost || 1000;
 
         if (player.gold < cost) return false;
 
         player.gold -= cost;
 
-        if (player.skills.boj < 5) {
+        var trainedCombat = false;
+        if (player.skills.boj < 2) {
 
             player.skills.boj++;
+            trainedCombat = true;
 
         }
+
+        player.hasElixirToken = true;
 
         player.permanentHearts += 0.5;
 
@@ -3830,11 +3927,46 @@ window.PRS_GameEngine = {
 
         pa.canRestHospital = false;
 
-        var msg = "🧪 " + player.badge + " " + player.name + " zakoupil Hojivý lektvar za " + cost + " zl.! Získává posílení Boje (+1) a +0.5 💖 za rytířskou statečnost.";
+        var msg = "🧪 " + player.badge + " " + player.name + " zakoupil Hojivý elixír za " + cost + " zl.! Získává ochranný elixír do boje a +0.5 💖 za rytířskou statečnost" + (trainedCombat ? " a základní výcvik Boje (+1)" : "") + ".";
 
         pa.summary = msg;
 
         this.addLog(state, msg, "buy");
+
+        this.recalculateBreedingAndVictory(state);
+
+        return true;
+
+    },
+
+    // Taktický ústup z doupěte (U2: 400 zl. / U3: 800 zl.) pro nebojové postavy bez pádu do Lazaretu
+    retreatFromQuest: function (state) {
+
+        var pa = state.pendingAction;
+
+        if (!pa || !pa.canResolveQuest || !pa.questCard) return false;
+
+        var player = state.players[state.currentPlayerIndex];
+
+        var qTier = pa.questCard.questTier || "U1";
+
+        var cost = (qTier === "U3") ? 800 : ((qTier === "U2") ? 400 : 0);
+
+        var actualPaid = Math.min(player.gold, cost);
+
+        player.gold -= actualPaid;
+
+        pa.canResolveQuest = false;
+
+        var qName = pa.questCard.name;
+
+        pa.questCard = null;
+
+        var msg = "🛡️ TAKTICKÝ ÚSTUP! " + player.badge + " " + player.name + " obezřetně ustoupil před **" + qName + "**" + (actualPaid > 0 ? " (vyplaceno " + actualPaid.toLocaleString("cs-CZ") + " zl. stopařům za bezpečný odchod)." : ".");
+
+        pa.summary = msg;
+
+        this.addLog(state, msg, "info");
 
         this.recalculateBreedingAndVictory(state);
 
@@ -3950,13 +4082,17 @@ window.PRS_GameEngine = {
 
         player.gold -= cost;
 
-        player.permanentHearts += 0.5;
+        var stNow = this.getEffectiveStats(state, player);
 
-        player.stats.heartsFromFestivals += 0.5;
+        var gainHearts = (stNow.tanec >= 2) ? 1.0 : 0.5;
+
+        player.permanentHearts += gainHearts;
+
+        player.stats.heartsFromFestivals += gainHearts;
 
         pa.canBuyTavernRound = false;
 
-        var msg = "🍻 Runda medoviny na účet rytíře " + player.badge + " " + player.name + "! Celá krčma bouří a pěje oslavné písně (+0.5 💖 k přízni princezny za " + cost + " zl.).";
+        var msg = "🍻 Runda medoviny na účet rytíře " + player.badge + " " + player.name + "! Celá krčma bouří a pěje oslavné písně (+" + gainHearts + " 💖 k přízni princezny za " + cost + " zl." + (stNow.tanec >= 2 ? " – hosty nadchl tvůj taneční věhlas!" : "") + ").";
 
         pa.summary = msg;
 

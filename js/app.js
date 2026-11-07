@@ -44,63 +44,32 @@ window.PRS_App = {
 
     ],
     getDefaultPlayerName: function () {
-
-        // 1. Zkontrolujeme ručně uloženou rytířskou přezdívku z dřívějších her
-
-        try {
-
-            var savedNick = (localStorage.getItem("prs_player_nickname") || "").trim();
-
-            if (savedNick && savedNick.toLowerCase() !== "host" && savedNick.toLowerCase() !== "admin") {
-
-                return savedNick.replace(/\s*\(Ty\)$/i, "") + " (Ty)";
-
-            }
-
-        } catch (e) { }
-
-        // 2. Přihlášený uživatel (DisplayName / hezky upravený login)
-
-        if (this.currentUser && this.currentUser.role !== "Guest") {
-
-            var d = (this.currentUser.displayName || "").trim();
-
-            if (d && d.toLowerCase() !== "admin" && d.indexOf("@") === -1 && d.toLowerCase() !== "host") {
-
-                return d.replace(/\s*\(Ty\)$/i, "") + " (Ty)";
-
-            }
-
-            var u = (this.currentUser.username || "").trim();
-
-            if (u) {
-
-                if (u.indexOf("@") !== -1) {
-
-                    var localPart = u.split("@")[0].replace(/[._-]/g, " ");
-
-                    var prettyNick = localPart.replace(/\b\w/g, function (c) { return c.toUpperCase(); }).trim();
-
-                    if (prettyNick) return prettyNick + " (Ty)";
-
-                } else if (u.toLowerCase() === "admin") {
-
-                    return "Rytíř Admin (Ty)";
-
-                } else if (u.toLowerCase() !== "host") {
-
-                    return u + " (Ty)";
-
-                }
-
-            }
-
+        var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+        if (isGuest) {
+            return "Host (Ty)";
         }
 
-        // 3. Výchozí rytířské jméno pro nového hráče
+        // 1. Přihlášený uživatel (DisplayName / hezky upravený login)
+        if (this.currentUser && this.currentUser.role !== "Guest") {
+            var d = (this.currentUser.displayName || "").trim();
+            if (d && d.toLowerCase() !== "admin" && d.indexOf("@") === -1 && d.toLowerCase() !== "host") {
+                return d.replace(/\s*\(Ty\)$/i, "") + " (Ty)";
+            }
+            var u = (this.currentUser.username || "").trim();
+            if (u) {
+                if (u.indexOf("@") !== -1) {
+                    var localPart = u.split("@")[0].replace(/[._-]/g, " ");
+                    var prettyNick = localPart.replace(/\b\w/g, function (c) { return c.toUpperCase(); }).trim();
+                    if (prettyNick) return prettyNick + " (Ty)";
+                } else if (u.toLowerCase() === "admin") {
+                    return "Rytíř Admin (Ty)";
+                } else if (u.toLowerCase() !== "host") {
+                    return u + " (Ty)";
+                }
+            }
+        }
 
-        return "Lord Filip (Ty)";
-
+        return "Host (Ty)";
     },
 
     selectedNodeId: null,
@@ -195,6 +164,8 @@ window.PRS_App = {
 
         this.loadSavedUser();
 
+        this.checkEmailConfirmationUrl();
+
         this.isBoardStaticDirty = true;
 
         this.initTheme();
@@ -234,14 +205,31 @@ window.PRS_App = {
         // Spustíme výchozí ukázkovou partii (na pozadí pro okamžitý přechod ke stolu)
 
         this.initLandingLiveCanvas();
-
+        this.renderHeroVideosSection();
         this.loadActiveHeroVideo();
 
         this.loadAnnouncement();
 
-        this.startNewGame(false);
+        this.hasGameStarted = false;
 
         this.startOnlinePollingLoop();
+
+        // Výchozí záložka při startu: Propagační Brána (welcome), při F5 obnovení uloženého stavu
+        var initialTab = "welcome";
+        try {
+            var sTab = sessionStorage.getItem("prs_active_tab");
+            if (sTab && (sTab === "lobby" || (sTab === "board" && this.hasGameStarted) || sTab === "rules" || sTab === "admin")) {
+                initialTab = sTab;
+            }
+        } catch (eInit) { }
+        var curSearch = (window.location && window.location.search) ? window.location.search : "";
+        if (curSearch.indexOf("room=") !== -1) {
+            initialTab = "lobby";
+        }
+        this.switchTab(initialTab);
+        if (initialTab === "lobby" && curSearch.indexOf("room=") !== -1) {
+            this.switchGameHallRoom("online");
+        }
 
         // Odložené naplnění skrytých záložek, kontrola ?room= v URL a načtení síťového stavu
 
@@ -252,6 +240,7 @@ window.PRS_App = {
             self.renderBalanceStudioInputs();
 
             self.fetchServerStatusAndSessions();
+            if (self.updateSavedGamesUI) self.updateSavedGamesUI();
 
             self.checkUrlRoomParam();
 
@@ -351,23 +340,29 @@ window.PRS_App = {
             }
 
             // Aktualizace tlačítek přepínače
-
             var btns = document.querySelectorAll(".theme-btn");
-
             for (var b = 0; b < btns.length; b++) {
-
                 var btn = btns[b];
-
                 if (btn.getAttribute("data-theme-btn") === themeName) {
-
                     btn.classList.add("active");
-
                 } else {
-
                     btn.classList.remove("active");
-
                 }
+            }
 
+            // Synchronizace výběrových políček živlu (topbar a lobby)
+            var globalSelect = document.getElementById("global-element-theme-select");
+            if (globalSelect && globalSelect.value !== themeName) {
+                globalSelect.value = themeName;
+            }
+            var lobbySelect = document.getElementById("lobby-element-theme-select");
+            if (lobbySelect && lobbySelect.value !== themeName) {
+                lobbySelect.value = themeName;
+            }
+            var topbarIcon = document.getElementById("topbar-theme-icon");
+            if (topbarIcon) {
+                var themeIcons = { light: "👑", fire: "🔥", water: "💧", earth: "🌿", air: "⚡" };
+                topbarIcon.textContent = themeIcons[themeName] || "👑";
             }
 
         }
@@ -916,9 +911,17 @@ window.PRS_App = {
             return;
         }
 
-        this.activeTab = tabId;
+        if (tabId === "board" && !this.hasGameStarted) {
+            this.switchTab("lobby");
+            if (window.PRS_Audio && window.PRS_Audio.playNotice) window.PRS_Audio.playNotice();
+            alert("Hrací stůl je zatím prázdný. Zvol si v Rytířské herně rychlou výpravu nebo zahaj partii.");
+            return;
+        }
 
-        var tabs = ["lobby", "board", "rules", "admin"];
+        this.activeTab = tabId;
+        try { sessionStorage.setItem("prs_active_tab", tabId); } catch (e) { }
+
+        var tabs = ["welcome", "lobby", "board", "rules", "admin"];
 
         for (var i = 0; i < tabs.length; i++) {
 
@@ -940,19 +943,23 @@ window.PRS_App = {
 
         }
 
-        // Přepnutí levého horního tlačítka: na Landing Page ukazuje "← Zpět na KikiAI", jinde "🏰 ← Zpět na Landing Page"
+        // Přepnutí levého horního tlačítka: na Úvodu ukazuje "← Zpět na KikiAI", jinde "🏰 ← Zpět na Úvod & Videa"
 
         var backKikiEl = document.getElementById("topbar-back-kikiai");
 
         var backLandEl = document.getElementById("topbar-back-landing");
 
-        if (backKikiEl) backKikiEl.style.display = (tabId === "lobby") ? "inline-block" : "none";
+        if (backKikiEl) backKikiEl.style.display = (tabId === "welcome") ? "inline-block" : "none";
 
-        if (backLandEl) backLandEl.style.display = (tabId === "lobby") ? "none" : "inline-block";
+        if (backLandEl) {
+            backLandEl.style.display = (tabId === "welcome") ? "none" : "inline-block";
+            backLandEl.innerHTML = "🏰 ← Zpět na Úvod &amp; Videa";
+            backLandEl.onclick = function () { PRS_App.switchTab("welcome"); };
+        }
 
-        // Pokud odcházíme z Landing Page, pozastavíme případné promo video
+        // Pokud odcházíme z Úvodní stránky s videem, pozastavíme případné promo video
 
-        if (tabId !== "lobby") {
+        if (tabId !== "welcome") {
 
             var vid = document.getElementById("lp-promo-video");
 
@@ -962,9 +969,12 @@ window.PRS_App = {
 
             }
 
-        } else {
+        }
+
+        if (tabId === "lobby") {
 
             this.fetchServerStatusAndSessions();
+            this.updateGameHallUI();
 
         }
 
@@ -1076,6 +1086,7 @@ window.PRS_App = {
                     self.currentHeroVideo = activeHeroes[activeIdx] || null;
 
                     self.renderHeroVideoControls();
+                    self.renderHeroVideosSection();
                 } else {
                     self.fetchSingleHeroFallback();
                 }
@@ -1095,6 +1106,7 @@ window.PRS_App = {
                     self.currentHeroVideoIndex = 0;
                     self.currentHeroVideo = res.hero;
                     self.renderHeroVideoControls();
+                    self.renderHeroVideosSection();
                 }
             })
             .catch(function () { });
@@ -1107,9 +1119,23 @@ window.PRS_App = {
         var idx = this.currentHeroVideoIndex;
         var isVideoMode = (this.currentLandingMedia === "video");
 
-        var btnVideo = document.getElementById("lp-tab-btn-video");
-        if (btnVideo && v && v.title) {
-            btnVideo.innerHTML = "🎬 " + this.escapeHtml(v.title);
+        // Dynamická aktualizace horních záložek médií (umožňuje přepínat mezi videi přímo v záložkách)
+        var tabsContainer = document.getElementById("lp-media-tabs");
+        if (tabsContainer) {
+            if (total > 1) {
+                var html = '<button id="lp-tab-btn-anim" class="lp-media-tab-btn ' + (!isVideoMode ? 'active' : '') + '" onclick="PRS_App.switchLandingMedia(\'anim\')">✨ Živá animace</button>';
+                for (var i = 0; i < total; i++) {
+                    var isAct = isVideoMode && (i === idx);
+                    var t = (list[i] && list[i].title) ? list[i].title : ("Intro " + (i + 1));
+                    html += '<button id="lp-tab-btn-video-' + i + '" class="lp-media-tab-btn lp-media-tab-video ' + (isAct ? 'active' : '') + '" onclick="PRS_App.selectHeroVideoAndSwitch(' + i + ')" title="' + this.escapeHtml(t) + '">🎬 ' + this.escapeHtml(t) + '</button>';
+                }
+                tabsContainer.innerHTML = html;
+            } else {
+                var singleTitle = (v && v.title) ? v.title : "Video upoutávka";
+                tabsContainer.innerHTML =
+                    '<button id="lp-tab-btn-anim" class="lp-media-tab-btn ' + (!isVideoMode ? 'active' : '') + '" onclick="PRS_App.switchLandingMedia(\'anim\')">✨ Živá animace království</button>' +
+                    '<button id="lp-tab-btn-video" class="lp-media-tab-btn ' + (isVideoMode ? 'active' : '') + '" onclick="PRS_App.switchLandingMedia(\'video\')">🎬 ' + this.escapeHtml(singleTitle) + '</button>';
+            }
         }
 
         // Tlačítka cyklování zobrazujeme VÝHRADNĚ v režimu videa a pouze pokud je aktivních více videí
@@ -1222,6 +1248,13 @@ window.PRS_App = {
         }
     },
 
+    selectHeroVideoAndSwitch: function (index) {
+        this.selectHeroVideo(index);
+        if (this.currentLandingMedia !== "video") {
+            this.switchLandingMedia("video");
+        }
+    },
+
     applyHeroVideoChange: function (autoPlay) {
         var v = this.currentHeroVideo;
         if (!v) return;
@@ -1298,6 +1331,126 @@ window.PRS_App = {
             });
     },
 
+    renderHeroVideosSection: function () {
+        var container = document.getElementById("lp-two-videos-grid");
+        if (!container) return;
+
+        var list = this.heroVideosList || [];
+        var videos = [];
+        if (list.length >= 2) {
+            videos = [list[0], list[1]];
+        } else if (list.length === 1) {
+            videos = [list[0]];
+        } else {
+            // Výchozí dvojice oficiálních videí deskové hry
+            videos = [
+                {
+                    id: 4,
+                    title: "Intro první princezna - youtube",
+                    url: "https://www.youtube.com/watch?v=sO-MnlHy_O4",
+                    likesCount: 14,
+                    description: "Oficiální příběhová upoutávka: záchrana princezny, dračí sluj a královské slavnosti."
+                },
+                {
+                    id: 5,
+                    title: "Intro první princezna - youtube multi",
+                    url: "https://www.youtube.com/watch?v=fPyG8yeCHas",
+                    likesCount: 9,
+                    description: "Ukázka deskového plánu, herní mechaniky, budování panství a online výpravy."
+                }
+            ];
+        }
+
+        var html = [];
+        for (var i = 0; i < videos.length; i++) {
+            var v = videos[i];
+            var isYt = this.isYoutubeVideo(v);
+            var ytid = isYt ? this.getYoutubeId(v.url) : "";
+            var embedUrl = "";
+            if (isYt && ytid) {
+                embedUrl = "https://www.youtube-nocookie.com/embed/" + ytid + "?rel=0&enablejsapi=1&playsinline=1";
+            } else if (v.url) {
+                embedUrl = v.url;
+            }
+
+            var isLiked = !!(this._likedVideoIds && this._likedVideoIds[v.id]);
+            var badgeText = (i === 0) ? "🎬 Příběhové intro" : "⚔️ Hratelnost & Pravidla";
+
+            html.push('<div class="lp-video-cinema-card">');
+            html.push('  <div class="lp-video-card-header">');
+            html.push('    <h3 class="lp-video-card-title">' + this.escapeHtml(v.title || ("Video " + (i + 1))) + '</h3>');
+            html.push('    <span class="lp-video-card-badge">' + badgeText + '</span>');
+            html.push('  </div>');
+
+            html.push('  <div class="lp-video-player-frame">');
+            if (isYt && ytid) {
+                html.push('    <iframe src="' + embedUrl + '" title="' + this.escapeHtml(v.title || "") + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>');
+            } else if (v.url && v.url.match(/\.(mp4|webm)($|\?)/i)) {
+                html.push('    <video controls preload="metadata" style="width:100%; height:100%; object-fit:cover; border-radius:10px;"><source src="' + this.escapeHtml(v.url) + '" type="video/mp4"></video>');
+            } else {
+                html.push('    <iframe src="' + embedUrl + '" title="' + this.escapeHtml(v.title || "") + '" frameborder="0" allowfullscreen loading="lazy"></iframe>');
+            }
+            html.push('  </div>');
+
+            if (v.description) {
+                html.push('  <p class="lp-video-card-desc">' + this.escapeHtml(v.description) + '</p>');
+            }
+
+            html.push('  <div class="lp-video-card-footer">');
+            html.push('    <button type="button" class="lp-video-btn-action ' + (isLiked ? 'liked' : '') + '" onclick="PRS_App.likeVideoById(' + v.id + ', this)" title="' + (isLiked ? 'Tomuto videu jsi již dal like! 👍' : 'Dát videu to se mi líbí') + '">');
+            html.push('      <span class="like-heart">👍</span> <span class="like-num">' + (v.likesCount || 0) + '</span>');
+            html.push('    </button>');
+
+            if (isYt && ytid) {
+                html.push('    <a href="https://www.youtube.com/watch?v=' + ytid + '" target="_blank" rel="noopener noreferrer" class="lp-video-btn-action" title="Přehrát video na YouTube">');
+                html.push('      <span>📺 Přehrát na YouTube</span>');
+                html.push('    </a>');
+            }
+            html.push('  </div>');
+            html.push('</div>');
+        }
+
+        container.innerHTML = html.join("");
+    },
+
+    likeVideoById: function (id, btn) {
+        if (!id) return;
+        if (!this._likedVideoIds) this._likedVideoIds = {};
+        if (this._likedVideoIds[id]) {
+            this.showToast("Tomuto videu jsi již vyjádřil rytířskou přízeň! 👍", "info");
+            return;
+        }
+
+        var self = this;
+        this._likedVideoIds[id] = true;
+        try {
+            localStorage.setItem("kidesky_liked_videos", JSON.stringify(this._likedVideoIds));
+        } catch (e) { }
+
+        if (btn) {
+            btn.classList.add("liked");
+            btn.title = "Tomuto videu jsi již dal like! 👍";
+            var numEl = btn.querySelector(".like-num");
+            if (numEl) {
+                var cur = parseInt(numEl.textContent, 10) || 0;
+                numEl.textContent = cur + 1;
+            }
+        }
+
+        fetch("api.ashx?action=like-video&id=" + encodeURIComponent(id), { method: "POST" })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res && res.ok && typeof res.likesCount === "number" && btn) {
+                    var numEl = btn.querySelector(".like-num");
+                    if (numEl) numEl.textContent = res.likesCount;
+                    self.showToast("💖 Děkujeme za like! Video má nyní " + res.likesCount + " lajků.", "success");
+                }
+            })
+            .catch(function () {
+                self.showToast("💖 Like byl započítán!", "success");
+            });
+    },
+
     loadAnnouncement: function () {
         fetch("api.ashx?action=get-announcement")
             .then(function (r) { return r.json(); })
@@ -1360,6 +1513,7 @@ window.PRS_App = {
             var nextBtn = document.getElementById("lp-video-next-btn");
             if (prevBtn) prevBtn.style.display = "none";
             if (nextBtn) nextBtn.style.display = "none";
+            this.renderHeroVideoControls();
             this.initLandingLiveCanvas();
         }
     },
@@ -1756,9 +1910,42 @@ window.PRS_App = {
         requestAnimationFrame(renderLoop);
     },
 
+    ensurePlayerNameForGame: function () {
+        // Pokud je uživatel přihlášený (Admin / Hráč s profilem), použijeme jeho přihlášené jméno
+        if (this.currentUser && this.currentUser.role !== "Guest") {
+            return this.getDefaultPlayerName();
+        }
+
+        // Hráč hraje v režimu Host: zeptáme se na jméno pro tuto partii
+        var prevNick = "";
+        try { prevNick = (localStorage.getItem("prs_player_nickname") || "").trim(); } catch (e) { }
+        if (!prevNick || prevNick.toLowerCase() === "host" || prevNick.toLowerCase() === "admin") {
+            prevNick = "Lord Filip";
+        }
+
+        var entered = prompt("⚔️ Zadej své rytířské jméno u stolu pro tuto partii:", prevNick);
+        if (entered === null) {
+            // Uživatel kliknul na Zrušit / Storno -> nestartujeme hru
+            return null;
+        }
+
+        entered = entered.trim();
+        if (!entered) entered = prevNick || "Lord Filip";
+
+        try { localStorage.setItem("prs_player_nickname", entered); } catch (e) { }
+
+        var formatted = entered.replace(/\s*\(Ty\)$/i, "") + " (Ty)";
+        if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+            this.lobbyPlayers[0].name = formatted;
+            this.renderLobbyPlayers();
+        }
+        return formatted;
+    },
+
     quickStartSoloGame: function (preset) {
 
-        var myName = this.getDefaultPlayerName();
+        var myName = this.ensurePlayerNameForGame();
+        if (!myName) return;
 
         this.lobbyPlayers = [
 
@@ -1814,6 +2001,7 @@ window.PRS_App = {
 
         }
 
+        this._skipNamePromptOnce = true;
         this.startNewGame(true);
 
     },
@@ -1821,6 +2009,21 @@ window.PRS_App = {
     createOnlineMultiplayerRoom: function () {
 
         var self = this;
+
+        var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+        if (isGuest) {
+            alert("🔒 Založit novou online místnost mohou pouze přihlášení rytíři.\n\nJako Host se můžeš připojit k jakémukoliv stolu zadáním 6místného kódu od kamaráda.\n\nPro založení vlastního online stolu se stačí bezplatně přihlásit nebo zaregistrovat!");
+            this.openAuthModal();
+            return;
+        }
+
+        var myName = this.ensurePlayerNameForGame();
+        if (!myName) return;
+        if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+            this.lobbyPlayers[0].name = myName;
+            this.renderLobbyPlayers();
+        }
+        this._skipNamePromptOnce = true;
 
         var btn = document.getElementById("btn-create-online-room");
 
@@ -1880,6 +2083,8 @@ window.PRS_App = {
 
                 title: title,
 
+                hostUsername: (this.currentUser && this.currentUser.role !== "Guest") ? (this.currentUser.username || this.currentUser.displayName || "Admin") : "Guest",
+
                 boardCode: (this.state.board && this.state.board.code) ? this.state.board.code : "classic_96",
 
                 targetHearts: (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30,
@@ -1930,7 +2135,10 @@ window.PRS_App = {
 
                     if (codeInput) codeInput.value = res.roomCode;
 
+                    self.hasGameStarted = true;
+                    self.updateUserUI();
                     self.fetchServerStatusAndSessions();
+            if (self.updateSavedGamesUI) self.updateSavedGamesUI();
 
                     self.switchTab("board");
 
@@ -1984,38 +2192,52 @@ window.PRS_App = {
 
                     this.currentUser.displayName = "Host";
 
+                    this.currentUser.role = "Guest";
+
+                    this.currentUser.credits = 0;
+
                 }
 
-                if (this.currentUser && typeof this.currentUser.credits === "number") {
+                if (this.currentUser && typeof this.currentUser.credits === "number" && this.currentUser.role !== "Guest") {
+
                     this.userCredits = this.currentUser.credits;
+
                 }
+
                 if (this.currentUser && this.currentUser.selectedPawnId) {
+
                     this.selectedPawnId = this.currentUser.selectedPawnId;
+
                 }
-                if (this.currentUser && this.currentUser.unlockedPawnsJson) {
+
+                if (this.currentUser && this.currentUser.unlockedPawnsJson && this.currentUser.role !== "Guest") {
+
                     try {
+
                         var arr = JSON.parse(this.currentUser.unlockedPawnsJson);
+
                         if (Array.isArray(arr) && arr.length > 0) this.unlockedPawns = arr;
+
                     } catch (e2) { }
+
                 }
 
             }
 
-            var locPawn = localStorage.getItem("prs_selected_pawn");
-            if (locPawn && (!this.currentUser || this.currentUser.role === "Guest")) {
-                this.selectedPawnId = locPawn;
-            }
-            var locUnl = localStorage.getItem("prs_unlocked_pawns");
-            if (locUnl && (!this.currentUser || this.currentUser.role === "Guest")) {
-                try {
-                    var parsedUnl = JSON.parse(locUnl);
-                    if (Array.isArray(parsedUnl) && parsedUnl.length > 0) this.unlockedPawns = parsedUnl;
-                } catch (e3) { }
-            }
-            var locCred = localStorage.getItem("prs_guest_credits");
-            if (locCred && (!this.currentUser || this.currentUser.role === "Guest")) {
-                var cNum = parseInt(locCred, 10);
-                if (!isNaN(cNum)) this.userCredits = cNum;
+            var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+            if (isGuest) {
+                // Host má VŽDY 0 modrých krystalů a pouze 6 základních figurek zdarma
+                this.userCredits = 0;
+                this.unlockedPawns = ["knight_valiant", "knight_tourney", "lady_huntress", "lord_diplomat", "knight_warden", "lady_sorceress"];
+                var basicPawns = ["knight_valiant", "knight_tourney", "lady_huntress", "lord_diplomat", "knight_warden", "lady_sorceress"];
+                if (!this.selectedPawnId || basicPawns.indexOf(this.selectedPawnId) === -1) {
+                    this.selectedPawnId = "knight_valiant";
+                }
+                try { localStorage.removeItem("prs_guest_credits"); } catch (e) { }
+                try { localStorage.removeItem("prs_unlocked_pawns"); } catch (e) { }
+            } else {
+                var locPawn = localStorage.getItem("prs_selected_pawn");
+                if (locPawn) this.selectedPawnId = locPawn;
             }
 
         } catch (e) { }
@@ -2028,17 +2250,70 @@ window.PRS_App = {
 
     },
 
+    checkEmailConfirmationUrl: function () {
+        var self = this;
+        var search = window.location.search;
+        if (!search || search.indexOf("confirmEmail") === -1) return;
+
+        var token = "";
+        try {
+            var params = new URLSearchParams(search);
+            token = params.get("confirmEmail") || "";
+        } catch (e) {
+            var m = search.match(/[?&]confirmEmail=([^&]+)/);
+            if (m && m[1]) token = decodeURIComponent(m[1]);
+        }
+        if (!token) return;
+
+        fetch("api.ashx?action=confirm-email&token=" + encodeURIComponent(token))
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res && res.ok && res.user) {
+                    self.currentUser = res.user;
+                    if (typeof res.user.credits === "number") self.userCredits = res.user.credits;
+                    if (res.user.selectedPawnId) self.selectedPawnId = res.user.selectedPawnId;
+                    if (res.user.unlockedPawnsJson) {
+                        try {
+                            var unl = JSON.parse(res.user.unlockedPawnsJson);
+                            if (Array.isArray(unl) && unl.length > 0) self.unlockedPawns = unl;
+                        } catch (e2) { }
+                    }
+                    localStorage.setItem("prs_user", JSON.stringify(self.currentUser));
+                    self.updateUserUI();
+                    if (window.history && window.history.replaceState) {
+                        var cleanUrl = window.location.pathname;
+                        window.history.replaceState({}, document.title, cleanUrl);
+                    }
+                    if (window.PRS_Audio && window.PRS_Audio.playFanfare) {
+                        window.PRS_Audio.playFanfare();
+                    }
+                    alert("👑 " + (res.message || "Tvůj e-mail byl úspěšně potvrzen! Vítej v království jako plnohodnotný rytíř."));
+                } else {
+                    alert("⚠️ " + ((res && res.message) ? res.message : "Ověření e-mailu selhalo."));
+                }
+            })
+            .catch(function () {
+                alert("⚠️ Chyba sítě při ověřování e-mailu.");
+            });
+    },
+
     updateUserUI: function () {
 
         var badgeEl = document.getElementById("user-status-badge");
 
         var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+        var isUnconfirmed = (this.currentUser && this.currentUser.emailConfirmed === false && this.currentUser.role === "Guest");
 
         var savedNick = "";
 
         try { savedNick = (localStorage.getItem("prs_player_nickname") || "").trim(); } catch (e) { }
 
-        var rawName = isGuest ? "Host" : (savedNick || this.currentUser.displayName || this.currentUser.username || "Hráč");
+        var rawName = "";
+        if (isGuest) {
+            rawName = "Host";
+        } else {
+            rawName = (this.currentUser.displayName || "").trim() || (this.currentUser.username || "").trim() || "Hráč";
+        }
 
         if (rawName && rawName.indexOf("@") !== -1) {
 
@@ -2052,20 +2327,62 @@ window.PRS_App = {
 
         var nameStr = this.escapeHtml(rawName);
 
-        var roleIcon = isGuest ? "👤 Host" : (this.currentUser.role === "Admin" ? "👑 Admin" : "🛡️ Hráč");
+        var roleIcon = isGuest ? (isUnconfirmed ? "👤 Host (Čeká na e-mail ✉️)" : "👤 Host") : (this.currentUser.role === "Admin" ? "👑 Admin" : "🛡️ Hráč");
 
         if (badgeEl) {
+            if (isGuest) {
+                badgeEl.innerHTML = roleIcon;
+                badgeEl.title = isUnconfirmed ? "Účet čeká na potvrzení e-mailu. Kliknutím otevřeš podrobnosti." : "Hraješ volně jako Host. Kliknutím se můžeš přihlásit.";
+            } else {
+                badgeEl.innerHTML = roleIcon + ": <strong>" + nameStr + "</strong>";
+                badgeEl.title = "Klepnutím otevřete správu rytířského účtu";
+            }
+        }
 
-            badgeEl.innerHTML = roleIcon + ": <strong>" + nameStr + "</strong>";
-
+        var unconfBox = document.getElementById("auth-unconfirmed-box");
+        if (unconfBox) {
+            unconfBox.style.display = isUnconfirmed ? "block" : "none";
         }
 
         var adminNav = document.getElementById("nav-btn-admin");
-
         if (adminNav) {
-
             adminNav.style.display = (this.currentUser && this.currentUser.role === "Admin") ? "inline-flex" : "none";
+        }
 
+        // Tlačítka přihlášení a odhlášení v horní liště
+        var loginBtn = document.getElementById("topbar-login-btn");
+        var logoutBtn = document.getElementById("topbar-logout-btn");
+        var creditsBtn = document.getElementById("topbar-credits-btn");
+
+        if (loginBtn) loginBtn.style.display = isGuest ? "inline-flex" : "none";
+        if (logoutBtn) logoutBtn.style.display = isGuest ? "none" : "inline-flex";
+        if (creditsBtn) creditsBtn.style.display = isGuest ? "none" : "inline-flex";
+
+        var navBoardBtn = document.getElementById("nav-btn-board");
+        if (navBoardBtn) navBoardBtn.style.display = this.hasGameStarted ? "inline-flex" : "none";
+
+        // Aktualizace dvoustavového Auth modálu
+        var loggedView = document.getElementById("auth-logged-view");
+        var guestView = document.getElementById("auth-guest-view");
+        if (loggedView && guestView) {
+            if (isGuest) {
+                loggedView.style.display = "none";
+                guestView.style.display = "block";
+            } else {
+                loggedView.style.display = "block";
+                guestView.style.display = "none";
+
+                var pNameInput = document.getElementById("auth-profile-displayname-input");
+                if (pNameInput) pNameInput.value = rawName;
+                var pBadge = document.getElementById("auth-profile-role-badge");
+                if (pBadge) pBadge.textContent = roleIcon;
+                var pUser = document.getElementById("auth-profile-username-val");
+                if (pUser) pUser.textContent = (this.currentUser && this.currentUser.username) || "rytir";
+                var pEmail = document.getElementById("auth-profile-email-val");
+                if (pEmail) pEmail.textContent = (this.currentUser && this.currentUser.email) || "Neuveden";
+                var pCredits = document.getElementById("auth-profile-credits-val");
+                if (pCredits) pCredits.textContent = String(this.userCredits || 0) + " 💎";
+            }
         }
 
         // Aktualizace výchozího hráče č. 0 v lobby
@@ -2122,12 +2439,222 @@ window.PRS_App = {
 
         var credEl = document.getElementById("top-user-credits");
         if (credEl) {
-            if (this.currentUser && typeof this.currentUser.credits === "number") {
+            if (isGuest) {
+                this.userCredits = 0;
+                if (this.currentUser) this.currentUser.credits = 0;
+            } else if (this.currentUser && typeof this.currentUser.credits === "number") {
                 this.userCredits = this.currentUser.credits;
             }
             credEl.textContent = String(this.userCredits || 0);
         }
 
+        this.updateGameHallUI();
+
+    },
+
+    enterGameHall: function () {
+        this.switchTab("lobby");
+        this.switchGameHallRoom("custom");
+        try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { }
+    },
+
+    setGuestModeAndEnter: function () {
+        this.setGuestMode();
+        this.enterGameHall();
+    },
+
+    activeGameHallRoom: "custom",
+
+    switchGameHallRoom: function (roomId) {
+        this.activeGameHallRoom = roomId || "custom";
+        var rooms = ["custom", "online", "saves"];
+        for (var i = 0; i < rooms.length; i++) {
+            var r = rooms[i];
+            var el = document.getElementById("room-gh-" + r);
+            var btn = document.getElementById("btn-gh-" + r);
+            if (el) el.style.display = (r === this.activeGameHallRoom) ? "block" : "none";
+            if (btn) {
+                if (r === this.activeGameHallRoom) btn.classList.add("active");
+                else btn.classList.remove("active");
+            }
+        }
+        if (roomId === "online") {
+            this.fetchServerStatusAndSessions();
+        } else if (roomId === "saves") {
+            if (typeof this.renderSavedGamesList === "function") {
+                this.renderSavedGamesList();
+            }
+        }
+    },
+
+    promptEditNickname: function () {
+        var cur = (this.currentUser && this.currentUser.displayName) || "";
+        if (!cur) {
+            try { cur = localStorage.getItem("prs_player_nickname") || ""; } catch (e) { }
+        }
+        if (!cur || cur.toLowerCase() === "host" || cur.toLowerCase() === "admin") cur = "Lord Filip";
+        var newNick = prompt("Zadej své nové rytířské jméno u stolu:", cur);
+        if (newNick === null) return;
+        newNick = newNick.trim();
+        if (!newNick) return;
+        if (this.currentUser && this.currentUser.role !== "Guest") {
+            this.currentUser.displayName = newNick;
+            try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
+            fetch("api.ashx?action=update_nickname", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: this.currentUser.id, nickname: newNick })
+            }).catch(function () { });
+        }
+        try { localStorage.setItem("prs_player_nickname", newNick); } catch (e) { }
+        this.updateUserUI();
+        if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+            this.lobbyPlayers[0].name = this.getDefaultPlayerName();
+            this.renderLobbyPlayers();
+        }
+    },
+
+    scrollToSection: function (id) {
+        var el = document.getElementById(id);
+        if (el && el.scrollIntoView) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    },
+
+    updateGameHallUI: function () {
+        var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+        var savedNick = "";
+        try { savedNick = (localStorage.getItem("prs_player_nickname") || "").trim(); } catch (e) { }
+        var rawName = isGuest ? (savedNick || "Host") : ((this.currentUser && this.currentUser.displayName) || (this.currentUser && this.currentUser.username) || savedNick || "Hráč");
+        if (rawName && rawName.indexOf("@") !== -1) {
+            rawName = rawName.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); }).trim();
+        } else if (rawName && rawName.toLowerCase() === "admin") {
+            rawName = "Rytíř Admin";
+        }
+        var roleLabel = isGuest ? "👤 Host" : (this.currentUser.role === "Admin" ? "👑 Admin" : "🛡️ Hráč");
+
+        // 1. Karta vstupu na Úvodní bráně (tab-welcome)
+        var guestView = document.getElementById("welcome-entry-guest-view");
+        var userView = document.getElementById("welcome-entry-user-view");
+        var wName = document.getElementById("welcome-user-name");
+        var wRole = document.getElementById("welcome-user-role-badge");
+        var wCredits = document.getElementById("welcome-user-credits");
+        if (guestView && userView) {
+            if (isGuest) {
+                guestView.style.display = "block";
+                userView.style.display = "none";
+            } else {
+                guestView.style.display = "none";
+                userView.style.display = "block";
+                if (wName) wName.textContent = rawName;
+                if (wRole) wRole.textContent = roleLabel;
+                if (wCredits) wCredits.textContent = String(this.userCredits || 0);
+            }
+        }
+
+        // 2. Šlechtická karta v Rytířské herně (tab-lobby)
+        var ghName = document.getElementById("gamehall-player-name");
+        if (ghName) ghName.textContent = isGuest ? "Host" : rawName;
+        var ghRole = document.getElementById("gamehall-role-badge");
+        if (ghRole) ghRole.textContent = roleLabel;
+        var ghCredits = document.getElementById("gamehall-credits");
+        if (ghCredits) ghCredits.textContent = String(this.userCredits || 0);
+        var ghCreditsWrap = ghCredits ? ghCredits.parentElement : null;
+        if (ghCreditsWrap) {
+            ghCreditsWrap.style.display = isGuest ? "none" : "inline-flex";
+        }
+
+        // 3. Avatar v herně (opravená cesta k img!)
+        var activePawnId = this.selectedPawnId || (this.currentUser && this.currentUser.selectedPawnId) || "knight_valiant";
+        var pData = (window.PRS_getPawnById ? window.PRS_getPawnById(activePawnId) : null);
+        var ghAvatar = document.getElementById("gamehall-pawn-avatar");
+        if (ghAvatar && pData) {
+            ghAvatar.src = pData.img || pData.avatarUrl || pData.image || "assets/pawns/pawn_knight_valiant.png";
+            ghAvatar.alt = pData.name || "Figurka";
+        }
+
+        // 4. Rychlý pás figurek v herně (miniatury odemčených figurek)
+        var strip = document.getElementById("gamehall-quick-pawns-strip");
+        if (strip && window.PRS_PAWNS_CATALOG) {
+            var self = this;
+            var htmlPawns = "";
+            for (var pi = 0; pi < window.PRS_PAWNS_CATALOG.length; pi++) {
+                var pw = window.PRS_PAWNS_CATALOG[pi];
+                var isUnl = self.isPawnUnlocked(pw.id);
+                if (isUnl) {
+                    var isAct = (pw.id === activePawnId);
+                    htmlPawns += '<div class="gamehall-pawn-chip ' + (isAct ? 'active' : '') + '" onclick="PRS_App.selectPawnForSlot(\'' + pw.id + '\'); PRS_App.updateUserUI();" title="' + self.escapeHtml(pw.name + ' (' + pw.title + ')') + '">';
+                    htmlPawns += '<img src="' + pw.img + '" alt="' + self.escapeHtml(pw.name) + '" />';
+                    htmlPawns += '</div>';
+                }
+            }
+            strip.innerHTML = htmlPawns;
+        }
+
+        // 5. Banner rozehrané hry (pouze pokud byla hra skutečně zahájena)
+        var activeBanner = document.getElementById("gamehall-active-game-banner");
+        var activeRound = document.getElementById("gamehall-active-round-info");
+        if (activeBanner) {
+            var hasActiveGame = (this.hasGameStarted === true && this.state !== null);
+            activeBanner.style.display = hasActiveGame ? "flex" : "none";
+            if (activeRound && this.state) {
+                activeRound.textContent = "Kolo " + (this.state.roundNumber || 1) + " • " + (this.state.players ? this.state.players.length : 4) + " Rytířů";
+            }
+        }
+
+        // 6. Tlačítko pro založení online místnosti (Host se může připojit, ale nemůže ji založit)
+        var createRoomBtn = document.getElementById("btn-create-online-room");
+        if (createRoomBtn) {
+            if (isGuest) {
+                createRoomBtn.innerHTML = "🔒 Založit novou Online místnost (vyžaduje přihlášení)";
+                createRoomBtn.style.borderColor = "rgba(212,175,55,0.45)";
+                createRoomBtn.style.color = "var(--gold-light)";
+                createRoomBtn.title = "Jako Host se můžeš připojit ke stolu kamaráda přes 6místný kód. Pro založení nového stolu se přihlas.";
+            } else {
+                createRoomBtn.innerHTML = "☁️ Založit novou Online místnost a získat kód pro přátele";
+                createRoomBtn.style.borderColor = "#38bdf8";
+                createRoomBtn.style.color = "#bae6fd";
+                createRoomBtn.title = "Založí novou online hru a vygeneruje 6místný kód pro přátele";
+            }
+        }
+    },
+
+    logoutUser: function () {
+        this.setGuestMode();
+        if (window.PRS_Audio && window.PRS_Audio.playNotice) window.PRS_Audio.playNotice();
+        this.closeAuthModal();
+        this.updateUserUI();
+        alert("Byl jsi úspěšně odhlášen. Nyní pokračuješ volně v režimu Hosta.");
+    },
+
+    showAuthLoginForm: function () {
+        var loggedView = document.getElementById("auth-logged-view");
+        var guestView = document.getElementById("auth-guest-view");
+        if (loggedView) loggedView.style.display = "none";
+        if (guestView) guestView.style.display = "block";
+    },
+
+    saveProfileNickname: function () {
+        var input = document.getElementById("auth-profile-displayname-input");
+        if (!input) return;
+        var newNick = input.value.trim();
+        if (!newNick) return;
+        if (this.currentUser && this.currentUser.role !== "Guest") {
+            this.currentUser.displayName = newNick;
+            try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
+            fetch("api.ashx?action=update_nickname", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: this.currentUser.id, nickname: newNick })
+            }).catch(function () { });
+        }
+        try { localStorage.setItem("prs_player_nickname", newNick); } catch (e) { }
+        this.updateUserUI();
+        if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+            this.lobbyPlayers[0].name = this.getDefaultPlayerName();
+            this.renderLobbyPlayers();
+        }
+        alert("Rytířské jméno bylo uloženo: " + newNick);
     },
 
     // --- LOBBY & NASTAVENÍ NOVÉ HRY ---,
@@ -2271,8 +2798,22 @@ window.PRS_App = {
     // --- KRÁLOVSKÁ ŠATNA A KLENOTNICE FIGUREK (#pawn-shop-modal) ---
     isPawnUnlocked: function (pawnId) {
         var pObj = window.PRS_getPawnById ? window.PRS_getPawnById(pawnId) : null;
-        if (!pObj) return true;
-        if (pObj.unlockedByDefault || pObj.priceCredits === 0) return true;
+        if (!pObj) return false;
+
+        var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+        if (isGuest) {
+            // Host má k dispozici VÝHRADNĚ 6 základních bezplatných rytířů
+            return pObj.category === "basic";
+        }
+
+        // Administrátor má odemčeny všechny figurky v království
+        if (this.currentUser && this.currentUser.role === "Admin") {
+            return true;
+        }
+
+        // Běžný přihlášený hráč: základní jsou zdarma, ostatní podle profilu
+        if (pObj.category === "basic") return true;
+
         return Array.isArray(this.unlockedPawns) && this.unlockedPawns.indexOf(pawnId) !== -1;
     },
 
@@ -2306,6 +2847,11 @@ window.PRS_App = {
         var slotInfoEl = document.getElementById("pawn-shop-slot-info");
         if (!grid) return;
 
+        var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+        if (isGuest) {
+            this.userCredits = 0;
+        }
+
         if (credEl) credEl.textContent = String(this.userCredits || 0);
 
         var slotIdx = this.pawnPickerTargetSlot || 0;
@@ -2313,7 +2859,9 @@ window.PRS_App = {
         var currentPawnId = targetPlayer ? (targetPlayer.pawnId || this.selectedPawnId) : this.selectedPawnId;
 
         if (slotInfoEl) {
-            if (targetPlayer) {
+            if (isGuest) {
+                slotInfoEl.innerHTML = '👤 Hraješ jako <strong>Host</strong>: máš zdarma k dispozici <strong>6 základních rytířů</strong>. Prémiové figurky a krystaly 💎 jsou pro přihlášené účty.';
+            } else if (targetPlayer) {
                 slotInfoEl.innerHTML = 'Vybíráš figurku pro slot <strong>#' + (slotIdx + 1) + ': ' + this.escapeHtml(targetPlayer.name) + '</strong>';
             } else {
                 slotInfoEl.innerHTML = 'Vybíráš svou hlavní osobní figurku';
@@ -2355,13 +2903,24 @@ window.PRS_App = {
                 actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; border-color:#86efac;">✅ Právě zvoleno</button>';
             } else if (unlocked) {
                 actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.selectPawnForSlot(&quot;' + pw.id + '&quot;)">🎭 Zvolit figurku</button>';
+            } else if (isGuest) {
+                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; opacity:0.85; border-color:rgba(212,175,55,0.4);" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">🔒 Pro přihlášené</button>';
             } else {
                 var canAfford = (this.userCredits >= pw.priceCredits);
                 actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; ' + (!canAfford ? 'opacity:0.65;' : '') + '" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">🔓 Odemknout (' + pw.priceCredits + ' 💎)</button>';
             }
 
+            var statusBadge = "";
+            if (unlocked) {
+                statusBadge = '<span style="font-size:0.72rem; color:#86efac;">✓ Odemčeno</span>';
+            } else if (isBot) {
+                statusBadge = '<span style="font-size:0.72rem; color:#9ca3af;">🔒 Pouze pro PC</span>';
+            } else {
+                statusBadge = '<span style="font-size:0.74rem; color:#fde047; font-weight:700;">🔒 ' + (pw.priceCredits || 150) + ' 💎</span>';
+            }
+
             html.push('<div class="pawn-shop-card ' + (isSelected ? 'selected' : '') + ' ' + (isPrem ? 'premium-card' : '') + '" style="border-color:' + (isSelected ? '#22c55e' : (isPrem ? pw.accentColor : 'rgba(212,175,55,0.3)')) + ';">');
-            html.push('  <div class="pawn-card-top">' + catBadge + (unlocked ? '<span style="font-size:0.72rem; color:#86efac;">✓ Odemčeno</span>' : '<span style="font-size:0.74rem; color:#fde047; font-weight:700;">🔒 ' + pw.priceCredits + ' 💎</span>') + '</div>');
+            html.push('  <div class="pawn-card-top">' + catBadge + statusBadge + '</div>');
             html.push('  <div class="pawn-card-figure-wrap" onclick="PRS_App.selectPawnOrUnlock(&quot;' + pw.id + '&quot;)">');
             html.push('    <div class="pawn-card-aura" style="background:radial-gradient(circle, ' + (pw.accentColor || '#d4af37') + ' 0%, transparent 70%);"></div>');
             html.push('    <img src="' + pw.img + '" alt="' + this.escapeHtml(pw.name) + '" class="pawn-card-img"/>');
@@ -2426,11 +2985,14 @@ window.PRS_App = {
     },
 
     awardCredits: function (amount, reason, isWin) {
+        var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+        if (isGuest) {
+            // Host nezískává krystaly (krystaly 💎 jsou vyhrazeny pro registrované rytíře)
+            this.userCredits = 0;
+            return;
+        }
         if (typeof amount !== "number" || amount <= 0) return;
         this.userCredits = (this.userCredits || 0) + amount;
-        try {
-            localStorage.setItem("prs_guest_credits", String(this.userCredits));
-        } catch (e) { }
 
         if (this.currentUser) {
             this.currentUser.credits = this.userCredits;
@@ -2470,6 +3032,19 @@ window.PRS_App = {
             this.selectPawnForSlot(pawnId);
             return;
         }
+
+        var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+        if (isGuest) {
+            alert("🔒 Tato figurka je uzamčena pro registrované rytíře.\n\nJako Host máš zdarma k dispozici 6 základních rytířů a 0 krystalů (💎).\n\nChceš-li získávat krystaly za vítězství a odemykat prémiové šampiony se speciální aurou, stačí se bezplatně přihlásit nebo zaregistrovat!");
+            this.openAuthModal();
+            return;
+        }
+
+        if (pw.category === "bot") {
+            alert("🤖 Figurky PC Botů jsou vyhrazeny pro počítačové soupeře u stolu.");
+            return;
+        }
+
         var price = pw.priceCredits || 150;
         if (this.userCredits < price) {
             alert("Nemáš dostatek kreditů (💎) k odemčení této prémiové figurky!\n\nPotřebuješ: " + price + " 💎\nTvůj zůstatek: " + this.userCredits + " 💎\n\nTip: Kredity získáš za vítězství v partiích nebo od správce v administraci.");
@@ -2482,11 +3057,6 @@ window.PRS_App = {
         this.userCredits -= price;
         if (!Array.isArray(this.unlockedPawns)) this.unlockedPawns = [];
         if (this.unlockedPawns.indexOf(pawnId) === -1) this.unlockedPawns.push(pawnId);
-
-        try {
-            localStorage.setItem("prs_unlocked_pawns", JSON.stringify(this.unlockedPawns));
-            localStorage.setItem("prs_guest_credits", String(this.userCredits));
-        } catch (e) { }
 
         if (this.currentUser) {
             this.currentUser.credits = this.userCredits;
@@ -2594,6 +3164,18 @@ window.PRS_App = {
 
     startNewGame: function (switchToBoard) {
 
+        if (switchToBoard) {
+            if (!this._skipNamePromptOnce) {
+                var myName = this.ensurePlayerNameForGame();
+                if (!myName) return;
+                if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+                    this.lobbyPlayers[0].name = myName;
+                    this.renderLobbyPlayers();
+                }
+            }
+            this._skipNamePromptOnce = false;
+        }
+
         this.victoryModalShown = false;
 
         this.closeVictoryModal();
@@ -2687,6 +3269,9 @@ window.PRS_App = {
         this.renderGameScreen();
 
         if (switchToBoard) {
+
+            this.hasGameStarted = true;
+            this.updateUserUI();
 
             if (window.PRS_Audio) window.PRS_Audio.playNotice();
 

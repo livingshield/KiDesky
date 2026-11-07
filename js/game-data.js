@@ -21,7 +21,7 @@ window.PRS_DEFAULT_CONFIG = {
         pair: 0.40,
         fullSet: 0.80
     },
-    animalBreedingHearts: [3, 2, 1],
+    animalBreedingHearts: [4, 2.5, 1.5],
     estates: {
         villagePrices: [2000, 1500, 1500], // malá, +střední, +velká
         villageTaxYield: [500, 900, 1400],
@@ -75,9 +75,9 @@ window.PRS_DEFAULT_CONFIG = {
         u3BaseDiff: 13,
         u1GoldReward: 1500,
         u1FailCost: 500,
-        u2GoldReward: 3500,
+        u2GoldReward: 2600,
         u2HeartReward: 1.0,
-        u3GoldReward: 8000,
+        u3GoldReward: 6000,
         u3HeartReward: 3.0
     },
     festivalGoldPrizes: {
@@ -310,10 +310,11 @@ window.PRS_ITEMS = [
     { id: "it2_7", name: "Rubínový pečetní prsten", tier: 2, slot: "jewel", icon: "💍", boj: 1, jizda: 1, tanec: 2, charisma: 3, pluses: 7, minuses: 0, price: 7000 },
 
     // --- 3. STUPEŇ (VĚCI 3) ---
-    { id: "it3_1", name: "Meč Dračího bijce", tier: 3, slot: "weapon", icon: "🗡️", boj: 7, jizda: 3, tanec: 0, charisma: 2, pluses: 12, minuses: 0, price: 12000 },
-    { id: "it3_2", name: "Královská zlatá zbroj", tier: 3, slot: "armor", icon: "🛡️", boj: 6, jizda: 4, tanec: -2, charisma: 3, pluses: 13, minuses: 2, price: 12000 },
+    { id: "it3_1", name: "Meč Dračího bijce", tier: 3, slot: "weapon", icon: "🗡️", boj: 8, jizda: 0, tanec: 0, charisma: 2, pluses: 10, minuses: 0, price: 10000 },
+    { id: "it3_2", name: "Královská zlatá zbroj", tier: 3, slot: "armor", icon: "🛡️", boj: 7, jizda: 0, tanec: -3, charisma: 3, pluses: 10, minuses: 3, price: 8500 },
     { id: "it3_3", name: "Velkolepý knížecí šat", tier: 3, slot: "dress", icon: "👘", boj: 0, jizda: 0, tanec: 6, charisma: 6, pluses: 12, minuses: 0, price: 12000 },
-    { id: "it3_4", name: "Korunovační klenot předků", tier: 3, slot: "jewel", icon: "💎", boj: 3, jizda: 3, tanec: 3, charisma: 4, pluses: 13, minuses: 0, price: 13000 }
+    { id: "it3_4", name: "Korunovační klenot předků", tier: 3, slot: "jewel", icon: "💎", boj: 3, jizda: 3, tanec: 3, charisma: 4, pluses: 13, minuses: 0, price: 13000 },
+    { id: "it3_5", name: "Pegasovo královské sedlo", tier: 3, slot: "jewel", icon: "🏇", boj: 1, jizda: 5, tanec: 1, charisma: 3, pluses: 10, minuses: 0, price: 10000 }
 ];
 
 // ============================================================================
@@ -1105,7 +1106,17 @@ window.PRS_CHANCE_CARDS = [
             { id: "opt_potion", title: "Zakoupit elixír charismatu", icon: "✨", costGold: 1000, gainHearts: 0.5, desc: "Zaplatíš 1 000 zl. Získáváš lekci dvorní etikety a přízeň dvora (+0,5 💖)!" },
             { id: "opt_alms", title: "Podarovat chudé v podhradí", icon: "🤲", costGold: 400, gainHearts: 1.0, desc: "Místo lektvaru rozdáš 400 zl. poddaným. Lid tě velebí a princezna ti posílá vzkaz (+1,0 💖)!" }
         ]
-    }
+    },
+    // --- KARTY PRO TANEC & SPOLEČENSKÝ ŽIVOT (4 karty) ---
+    { id: "ch_ball_1", category: "positive", title: "Dvorský bál v Růžovém sále", icon: "👗", effect: "ball", value: 1.0, text: "Královna uspořádala tajný dvorský bál! Kdo má společenské šaty nebo Tanec ≥ 2, získá +1 💖! Bez šatů a tance zaplatí 400 zl. komorníkovi za nevhodný oděv." },
+    { id: "ch_ball_2", category: "positive", title: "Zámecká slavnost světel", icon: "✨", effect: "ball", value: 1.5, text: "Oslňující slavnost pod hvězdnou oblohou. Rytíři odění v róbě či zdatní tanečníci (Tanec ≥ 2) získávají +1.5 💖 za obdiv dvora (jinak pokuta 400 zl.)." },
+    { id: "ch_ball_3", category: "positive", title: "Plesový menuet s princeznou", icon: "💃", effect: "ball", value: 1.0, text: "Princezna tě vyzvala k čestnému tanci! Máš-li šaty nebo Tanec ≥ 2, okouzlíš sál (+1 💖). Jinak šlápneš do vlečky a zaplatíš 400 zl. omluvného." },
+    { id: "ch_ball_4", category: "positive", title: "Maškarní bál vévody", icon: "🎭", effect: "ball", value: 1.0, text: "Tajemný maškarní ples aristokracie! Se šaty či Tancem ≥ 2 sklízíš ovace a +1 💖. V těžké zbroji bez tance zaplatíš 400 zl. za nevhodné vystupování." },
+
+    // --- KARTY PRO JEZDECTVÍ & RYCHLOST (3 karty) ---
+    { id: "ch_ride_1", category: "positive", title: "Královská jezdecká přehlídka", icon: "🐎", effect: "riding", value: 1.0, text: "Vladař vyhlásil čestnou jezdeckou přehlídku! Rytíř s koněm ve stáji nebo Jízdou ≥ 2 předvede bravurní drezuru (+1 💖). Pěší jezdec bez cviku ztrácí 300 zl." },
+    { id: "ch_ride_2", category: "positive", title: "Bleskový posel z hranic", icon: "🏇", effect: "riding", value: 1.5, text: "Je třeba bleskově doručit královskou zprávu! V sedle koně nebo s Jízdou ≥ 2 dorazíš včas (+1.5 💖 a 500 zl.). Bez koně tě předběhne konkurent a ztratíš 300 zl." },
+    { id: "ch_ride_3", category: "positive", title: "Štvanice na divočáka", icon: "🐗", effect: "riding", value: 1.0, text: "Trubači troubí k honu! S koněm či Jízdou ≥ 2 vedeš štvanici a získáváš trofejní poctu (+1 💖). Jinak se zdržíš v hloží a zaplatíš 300 zl. hajnému." }
 ];
 
 // ============================================================================

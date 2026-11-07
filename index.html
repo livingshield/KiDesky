@@ -36,14 +36,25 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611050091">
+    <link rel="stylesheet" href="css/main.css?v=202611071815">
 
-    <link rel="stylesheet" href="css/board.css?v=202611050091">
+    <link rel="stylesheet" href="css/board.css?v=202611071815">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611050091">
+    <link rel="stylesheet" href="css/modals.css?v=202611071815">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611050091">
+    <link rel="stylesheet" href="css/mobile.css?v=202611071815">
 
+    <!-- Google Identity Services (Sign-In with Google) -->
+    <script>
+        window.PRS_handleGoogleCredentialResponse = function (response) {
+            if (window.PRS_onGoogleLoginSuccess) {
+                window.PRS_onGoogleLoginSuccess(response);
+            } else {
+                window._pendingGoogleResponse = response;
+            }
+        };
+    </script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -69,37 +80,45 @@
     <header class="topbar">
 
         <div class="brand-wrap">
-
             <a id="topbar-back-kikiai" href="/" class="back-portal-link">← Zpět na KikiAI</a>
-
-            <button id="topbar-back-landing" type="button" class="back-portal-link" style="display:none; cursor:pointer; background:rgba(212,175,55,0.18); border-color:var(--gold); color:var(--gold-light); font-family:inherit; font-weight:600;" onclick="PRS_App.switchTab('lobby')">🏰 ← Zpět na Landing Page</button>
-
-            <div class="brand-title" style="cursor:pointer;" onclick="PRS_App.switchTab('lobby')" title="Návrat na úvodní Landing Page">🎲 KiDesky: <span>Princeznino srdce</span></div>
-
+            <div class="brand-title" style="cursor:pointer;" onclick="PRS_App.switchTab('welcome')" title="Návrat na úvodní stránku a videa">🎲 KiDesky: <span>Princeznino srdce</span></div>
         </div>
 
         <nav class="nav-tabs">
-
-            <button id="nav-btn-lobby" class="nav-tab-btn active" onclick="PRS_App.switchTab('lobby')">🏰 Portál &amp; Herna</button>
-
-            <button id="nav-btn-board" class="nav-tab-btn" onclick="PRS_App.switchTab('board')">🎲 Hrací stůl</button>
-
+            <button id="nav-btn-welcome" class="nav-tab-btn active" onclick="PRS_App.switchTab('welcome')">🏰 Úvod &amp; Videa</button>
+            <button id="nav-btn-lobby" class="nav-tab-btn" onclick="PRS_App.switchTab('lobby')">⚔️ Rytířská herna</button>
+            <button id="nav-btn-board" class="nav-tab-btn" onclick="PRS_App.switchTab('board')" style="display:none;">🎲 Hrací stůl</button>
             <button id="nav-btn-rules" class="nav-tab-btn" onclick="PRS_App.switchTab('rules')">📜 Pravidla &amp; Katalog</button>
-
             <button id="nav-btn-admin" class="nav-tab-btn" onclick="PRS_App.switchTab('admin')" style="display:none; color:var(--gold-light); border-color:var(--gold);">🛡️ Administrace</button>
-
         </nav>
 
         <div class="user-bar">
+            <!-- Barevný design & živel království (kompaktní výběr pro všechny obrazovky) -->
+            <div class="topbar-theme-wrap" title="Vyber živel & barevný design království">
+                <span id="topbar-theme-icon" style="font-size:0.92rem; pointer-events:none;">👑</span>
+                <select id="global-element-theme-select" class="topbar-theme-select" onchange="PRS_App.setElementTheme(this.value, true)" aria-label="Barevný design království">
+                    <option value="light">👑 Zlato</option>
+                    <option value="fire">🔥 Oheň</option>
+                    <option value="water">💧 Voda</option>
+                    <option value="earth">🌿 Země</option>
+                    <option value="air">⚡ Bouře</option>
+                </select>
+            </div>
 
-            <button type="button" class="btn-secondary" onclick="PRS_App.openPawnShopModal(0)" title="Královská šatna a sbírka figurek (odemkni prémiové figurky za kredity)" style="padding:0.32rem 0.68rem; font-weight:700; border-color:var(--gold); color:var(--gold-light); display:inline-flex; align-items:center; gap:0.35rem;">🎭 Figurky (<span id="top-user-credits" style="color:#38bdf8;">250</span> 💎)</button>
+            <!-- Tlačítko figurek/kreditů (pouze pro přihlášené) -->
+            <button id="topbar-credits-btn" type="button" class="btn-secondary" onclick="PRS_App.openPawnShopModal(0)" title="Královská šatna a sbírka figurek" style="display:none; padding:0.3rem 0.65rem; font-weight:700; border-color:var(--gold); color:var(--gold-light); align-items:center; gap:0.35rem;">💎 <span id="top-user-credits" style="color:#38bdf8;">250</span></button>
 
-            <div id="user-status-badge" class="user-pill" onclick="PRS_App.openAuthModal()">👤 Host: <strong>Host</strong></div>
+            <!-- Profil rytíře -->
+            <div id="user-status-badge" class="user-pill" onclick="PRS_App.openAuthModal()" title="Kliknutím zobrazíš účet a rytířský profil">👤 Host</div>
 
-            <button class="btn-secondary" onclick="PRS_App.openAuthModal()">Účet / Role</button>
+            <!-- Tlačítko Přihlásit se (pro Hosta) -->
+            <button id="topbar-login-btn" type="button" class="btn-gold-lg" onclick="PRS_App.openAuthModal()" style="padding:0.32rem 0.75rem; font-size:0.82rem; font-weight:700; white-space:nowrap;">🔑 Přihlásit se</button>
 
-            <button id="topbar-settings-btn" class="btn-secondary" onclick="PRS_App.openSettingsModal()" title="Nastavení hry, živlů, zvuku a grafiky" style="padding: 0.35rem 0.75rem; font-weight:600; border-color:var(--gold); color:var(--gold-light);">⚙️ Nastavení</button>
+            <!-- Tlačítko Odhlásit se (pro přihlášeného) -->
+            <button id="topbar-logout-btn" type="button" class="btn-secondary" onclick="PRS_App.logoutUser()" title="Odhlásit se a přejít do režimu Hosta" style="display:none; border-color:rgba(239,68,68,0.5); color:#fca5a5; padding:0.3rem 0.65rem; font-size:0.82rem; white-space:nowrap;">🚪 Odhlásit</button>
 
+            <!-- Nastavení -->
+            <button id="topbar-settings-btn" class="btn-secondary" onclick="PRS_App.openSettingsModal()" title="Nastavení hry, zvuku a grafiky" style="padding:0.32rem 0.65rem; font-weight:600; border-color:var(--gold); color:var(--gold-light);">⚙️</button>
         </div>
 
     </header>
@@ -122,545 +141,141 @@
 
              ================================================================ -->
 
-        <section id="tab-lobby" style="display:block">
+                <!-- ================================================================
+             ZÁLOŽKA 1: PROPAGAČNÍ BRÁNA KRÁLOVSTVÍ & INTRO KINO
+             ================================================================ -->
+        <section id="tab-welcome" style="display:block">
 
             <!-- 1. HERO SHOWCASE VLAJKOVÉ HRY: PRINCEZNINO SRDCE -->
-
             <div class="lp-hero-showcase">
 
-                <!-- Levá část: Popis hry, parametry, medailonky, identita a vstupní tlačítka -->
-
+                <!-- Levá část: Titul, popis, meta parametry a Karta vstupu do hry -->
                 <div>
-
                     <div class="lp-kicker-badge">✨ Vlajková desková hra portálu KiDesky • Stolní &amp; Online edice</div>
 
                     <h1 class="lp-hero-title">👑 Princeznino srdce</h1>
 
                     <p class="lp-hero-lead">
-
                         Originální autorská strategická a dobrodružná desková hra zrekonstruovaná z ručně kreslených návrhů.
-
                         Vydej se ze startovního rozcestí s <strong>10 000 zlatými</strong>, skupuj šlechtické chovy koní, psů a sokolů,
-
                         buduj vesnice, města a hrady, cvič u mistrů čtyři rytířské ctnosti, skoli obávaného draka a získej jako první
-
                         <strong>30 💖 Princezniných srdcí</strong>!
-
                     </p>
 
                     <!-- Parametry hry ("Zadní strana krabice") -->
-
-                    <div class="lp-badges-row">
-
-                        <span class="lp-meta-pill">👥 <strong>2–6 Rytířů</strong> (Solo AI / Hot-Seat / Online)</span>
-
-                        <span class="lp-meta-pill">⏱️ <strong>45–90 min</strong> (Rychlý okruh 30 min)</span>
-
+                    <div class="lp-badges-grid">
+                        <span class="lp-meta-pill">👥 <strong>2–6 Rytířů</strong> (Solo / Hot-Seat / Online)</span>
+                        <span class="lp-meta-pill">⏱️ <strong>45–90 min</strong> (Sprint 30 min)</span>
                         <span class="lp-meta-pill">🧠 <strong>Strategická &amp; RPG deskovka</strong></span>
-
-                        <span class="lp-meta-pill">🗺️ <strong>96 políček &amp; 4 mapy království</strong></span>
-
+                        <span class="lp-meta-pill">🗺️ <strong>96 polí &amp; 4 mapy království</strong></span>
                     </div>
 
-                    <!-- Interaktivní pás medailonků políček -->
-
-                    <div class="lp-medallions-box">
-
-                        <div style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.6px; color:var(--gold-light); font-weight:700;">
-
-                            🔍 Prozkoumej herní políčka království (klikni nebo najeď myší):
-
-                        </div>
-
-                        <div class="lp-medallions-strip">
-
-                            <div class="lp-medallion-item active" onmouseenter="PRS_App.inspectLandingMedallion('kun', this)" onclick="PRS_App.inspectLandingMedallion('kun', this)" title="Chov Koní">
-
-                                <img src="assets/tiles/kun.jpg" alt="Kůň" />
-
+                    <!-- KRÁLOVSKÁ KARTA VSTUPU DO HRY (Vítej / Host / Přihlášení) -->
+                    <div id="welcome-entry-card" class="welcome-entry-card">
+                        <!-- Varianta pro nepřihlášeného / Hosta -->
+                        <div id="welcome-entry-guest-view">
+                            <div style="font-size:0.92rem; color:#f5f5f4; margin-bottom:0.65rem;">
+                                🏰 <strong>Vstup do hry:</strong> Hraj ihned volně bez registrace, nebo se přihlas svým rytířským profilem:
                             </div>
-
-                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('sokol', this)" onclick="PRS_App.inspectLandingMedallion('sokol', this)" title="Chov Sokolů">
-
-                                <img src="assets/tiles/sokol.jpg" alt="Sokol" />
-
-                            </div>
-
-                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('village', this)" onclick="PRS_App.inspectLandingMedallion('village', this)" title="Vesnice">
-
-                                <img src="assets/tiles/village.jpg" alt="Vesnice" />
-
-                            </div>
-
-                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('castle', this)" onclick="PRS_App.inspectLandingMedallion('castle', this)" title="Hrad">
-
-                                <img src="assets/tiles/castle.png" alt="Hrad" />
-
-                            </div>
-
-                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('tavern', this)" onclick="PRS_App.inspectLandingMedallion('tavern', this)" title="Krčma">
-
-                                <img src="assets/tiles/tavern.jpg" alt="Hospoda" />
-
-                            </div>
-
-                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('drak', this)" onclick="PRS_App.inspectLandingMedallion('drak', this)" title="Drak (Úkol 3)">
-
-                                <img src="assets/tiles/u3_drak.jpg" alt="Drak" />
-
-                            </div>
-
-                            <div class="lp-medallion-item" onmouseenter="PRS_App.inspectLandingMedallion('festival', this)" onclick="PRS_App.inspectLandingMedallion('festival', this)" title="Královské slavnosti">
-
-                                <img src="assets/tiles/festival.jpg" alt="Slavnosti" />
-
-                            </div>
-
-                        </div>
-
-                        <div id="lp-medallion-desc-box" class="lp-medallion-desc">
-
-                            🐎 <strong>Šlechtický chov Koní (1 000 zl.):</strong> Kupuj hřebčíny po království. Čím více koní vlastníš, tím vyšší mýtné platí soupeři a tím vyšší rentu inkasuješ na Mýtě!
-
-                        </div>
-
-                    </div>
-
-                    <!-- Vstupní stav účtu: Host (Guest) vs. Přihlášení -->
-
-                    <div class="lp-auth-strip">
-
-                        <div id="lp-user-banner-text" style="font-size:0.86rem; color:#f5f5f4;">
-
-                            👤 <strong>Vstup bez bariér:</strong> Hraješ jako <strong>Host</strong>. Můžeš ihned hrát proti PC nebo se připojit ke stolu přes kód.
-
-                        </div>
-
-                        <div id="lp-user-banner-actions" style="display:flex; gap:0.45rem; flex-wrap:wrap;">
-
-                            <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem;" onclick="PRS_App.openAuthModal()">🔑 Přihlásit se / Registrovat</button>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Hlavní akční tlačítka -->
-
-                    <div class="lp-cta-row">
-
-                        <button class="btn-gold-lg" onclick="PRS_App.quickStartSoloGame('standard')">
-
-                            ⚡ Rychlá hra (Solo proti PC)
-
-                        </button>
-
-                        <button class="btn-secondary" style="padding:0.65rem 1.15rem; font-weight:600; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.switchTab('board')">
-
-                            🎲 Vstoupit přímo k Hracímu stolu
-
-                        </button>
-
-                        <button class="btn-secondary" style="padding:0.65rem 1rem;" onclick="PRS_App.switchTab('rules')">
-
-                            📜 Pravidla &amp; Katalog věcí
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-                <!-- Pravá část: Přepínatelná Živá Animace Plánu + MP4 Video (RuzeProDanielku.mp4) -->
-
-                <div class="lp-media-card">
-
-                        <div class="lp-media-tabs">
-
-                            <button id="lp-tab-btn-anim" class="lp-media-tab-btn active" onclick="PRS_App.switchLandingMedia('anim')">
-
-                                ✨ Živá animace království
-
-                            </button>
-
-                            <button id="lp-tab-btn-video" class="lp-media-tab-btn" onclick="PRS_App.switchLandingMedia('video')">
-
-                                🎬 Video upoutávka (MP4)
-
-                            </button>
-
-                        </div>
-
-                        <div class="lp-media-stage">
-
-                            <!-- 1. Živá interaktivní animace herního plánu (Canvas) -->
-
-                                                        <!-- 1. Živá interaktivní animace herního plánu (Canvas) -->
-                            <div id="lp-media-anim-wrap" style="position:absolute; inset:0; width:100%; height:100%; display:block;">
-                                <canvas id="lp-live-preview-canvas" style="position:absolute; inset:0; width:100%; height:100%; display:block;"></canvas>
-                                <div style="position:absolute; bottom:8px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:center; pointer-events:none; z-index:3;">
-                                    <span id="lp-live-quest-ticker" style="background:rgba(0,0,0,0.78); border:1px solid var(--gold); color:var(--gold-light); font-size:0.74rem; padding:3px 9px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.5);">
-                                        🏰 Živý průlet nad herním plánem (96 polí)
-                                    </span>
-                                    <span style="background:rgba(236,72,153,0.85); color:#fff; font-size:0.74rem; font-weight:700; padding:3px 9px; border-radius:6px;">
-                                        Cíl: 30 💖
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- 2. MP4 Video & YouTube přehrávač (Hero multimédia) -->
-                            <div id="lp-media-video-wrap" style="position:absolute; inset:0; width:100%; height:100%; display:none; background:#000;">
-                                <video id="lp-promo-video" controls preload="metadata" loop playsinline poster="assets/board/parchment_board_bg.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000;">
-                                    <source src="assets/video/RuzeProDanielku.mp4" type="video/mp4" />
-                                    Tvůj prohlížeč nepodporuje přehrávání MP4 videa.
-                                </video>
-                                <iframe id="lp-hero-youtube-player" style="position:absolute; inset:0; width:100%; height:100%; border:none; display:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                            </div>
-
-                            <!-- Navigační šipky pro cyklování intro videí -->
-                            <button type="button" id="lp-video-prev-btn" class="lp-video-stage-arrow lp-arrow-prev" onclick="PRS_App.prevHeroVideo(event)" title="Předchozí intro video" style="display:none;">❮</button>
-                            <button type="button" id="lp-video-next-btn" class="lp-video-stage-arrow lp-arrow-next" onclick="PRS_App.nextHeroVideo(event)" title="Další intro video" style="display:none;">❯</button>
-
-                        </div>
-
-                        <!-- Interakční lišta intro videa (Titul, Dots, Like, Odběr na YouTube) -->
-                        <div id="lp-video-interaction-bar" class="lp-video-interaction-bar" style="display:none; margin-top:0.4rem;">
-                            <div class="lp-video-meta-col">
-                                <div id="lp-video-active-title" class="lp-video-title-txt">Intro video</div>
-                                <div id="lp-video-counter-dots" class="lp-video-dots-wrap"></div>
-                            </div>
-                            <div class="lp-video-actions-col">
-                                <button type="button" id="lp-btn-like-video" class="lp-btn-action-like" onclick="PRS_App.likeCurrentHeroVideo()" title="Líbí se mi toto video">
-                                    <span id="lp-like-icon">👍</span> <span id="lp-like-count">0</span>
+                            <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:0.5rem;">
+                                <button type="button" class="btn-gold-lg" style="flex:1; min-width:200px; display:inline-flex; align-items:center; justify-content:center; gap:0.4rem; padding:0.68rem 1rem;" onclick="PRS_App.setGuestModeAndEnter()">
+                                    ⚔️ Hrát ihned jako Host →
                                 </button>
-                                <a id="lp-btn-yt-sub" href="#" target="_blank" rel="noopener noreferrer" class="lp-btn-action-sub" title="Odebírat kanál na YouTube" style="display:none;">
-                                    <span style="font-size:1.05rem;">🔔</span> <span>Odebírat</span>
-                                </a>
-                                <a id="lp-btn-yt-watch" href="#" target="_blank" rel="noopener noreferrer" class="lp-btn-action-yt" title="Přehrát přímo na YouTube s možností lajkování a komentářů" style="display:none;">
-                                    <span>📺 YouTube</span>
-                                </a>
-                            </div>
-                        </div>
-
-                    <div class="lp-media-caption">
-
-                        <span id="lp-media-status-label">✨ Plynulá ukázka herních medailonků, rytířů a slavností</span>
-
-                        <button class="btn-secondary" style="font-size:0.76rem; padding:0.25rem 0.6rem;" onclick="PRS_App.switchLandingMedia(PRS_App.currentLandingMedia === 'video' ? 'anim' : 'video')">
-
-                            🔄 Přepnout Video / Animaci
-
-                        </button>
-
-                    </div>
-                    <div class="lp-media-quick-pills" style="display:flex; flex-wrap:wrap; gap:0.35rem; padding-top:0.45rem; border-top:1px solid rgba(212,175,55,0.22); font-size:0.73rem; color:#d6d3d1;">
-                        <span style="background:rgba(255,255,255,0.06); padding:3px 7px; border-radius:6px; border:1px solid rgba(212,175,55,0.22);">🎲 4 herní režimy</span>
-                        <span style="background:rgba(255,255,255,0.06); padding:3px 7px; border-radius:6px; border:1px solid rgba(212,175,55,0.22);">🐉 34 monster v bestiáři</span>
-                        <span style="background:rgba(255,255,255,0.06); padding:3px 7px; border-radius:6px; border:1px solid rgba(212,175,55,0.22);">🏰 Vesnice &amp; hrady</span>
-                        <span style="background:rgba(255,255,255,0.06); padding:3px 7px; border-radius:6px; border:1px solid rgba(212,175,55,0.22);">⚔️ Turnaje &amp; 4 ctnosti</span>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <!-- 1b. PŘEPÍNAČ BAREVNÉHO DESIGNU & ŽIVLŮ KRÁLOVSTVÍ NA LANDING PAGE -->
-
-            <div class="lp-theme-selection-banner">
-
-                <div class="lp-theme-banner-left">
-
-                    <div style="display:flex; align-items:center; gap:0.55rem; margin-bottom:0.25rem;">
-
-                        <span style="font-size:1.35rem;">🎨</span>
-
-                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.12rem; margin:0;">
-
-                            Barevný design &amp; Živel království
-
-                        </h3>
-
-                    </div>
-
-                    <p style="font-size:0.84rem; color:var(--text-muted); margin:0;">
-
-                        Zvol si atmosféru hry a desky – mění barvy rozhraní, záři políček, lemování plánu, ambientní částice i dominantní hrady a draky.
-
-                    </p>
-
-                </div>
-
-                <div class="element-theme-switcher lp-theme-switcher" title="Vyber živel / atmosféru království">
-
-                    <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true)" title="Královské Zlato">👑 <span class="theme-label">Zlato</span></button>
-
-                    <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true)" title="Dračí Oheň">🔥 <span class="theme-label">Oheň</span></button>
-
-                    <button class="theme-btn" data-theme-btn="water" onclick="PRS_App.setElementTheme('water', true)" title="Mořská Voda">💧 <span class="theme-label">Voda</span></button>
-
-                    <button class="theme-btn" data-theme-btn="earth" onclick="PRS_App.setElementTheme('earth', true)" title="Hvozdná Země">🌿 <span class="theme-label">Země</span></button>
-
-                    <button class="theme-btn" data-theme-btn="air" onclick="PRS_App.setElementTheme('air', true)" title="Bouřná Magie">⚡ <span class="theme-label">Bouře</span></button>
-
-                </div>
-
-            </div>
-
-            <!-- 2. ROZCESTNÍK HERNÍCH REŽIMŮ & PŘIPOJENÍ K MULTIPLAYERU (3 SLOUPCE) -->
-
-            <h2 class="lp-section-heading">⚔️ Vyber si herní režim nebo se připoj k Online Multiplayeru</h2>
-
-            <div class="lp-modes-grid">
-
-                <!-- KARTA 1: RYCHLÁ HRA (SOLO PROTI PC RYTÍŘŮM) -->
-
-                <div class="lp-mode-card">
-
-                    <div>
-
-                        <span class="lp-mode-badge">Režim 1 • Okamžitý start</span>
-
-                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.18rem; margin-bottom:0.4rem;">
-
-                            🤖 Rychlá výprava proti PC
-
-                        </h3>
-
-                        <p style="color:var(--text-muted); font-size:0.86rem; margin-bottom:0.95rem;">
-
-                            Ideální pro okamžité hraní na jedno kliknutí nebo trénink taktiky. Postavíš se třem povahově odlišným PC rytířům
-
-                            (<em>Černý Baron, Zikmund z Chovu, Kněžna Eliška</em>).
-
-                        </p>
-
-                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:0.75rem; margin-bottom:1rem; font-size:0.83rem;">
-
-                            <div style="margin-bottom:0.35rem;">✅ <strong>Žádné čekání na spoluhráče</strong> – tahy botů běží automaticky</div>
-
-                            <div style="margin-bottom:0.35rem;">✅ <strong>Funguje i bez přihlášení</strong> (v režimu Host)</div>
-
-                            <div>✅ <strong>Možnost kdykoliv uložit do cloudu</strong> a pokračovat později</div>
-
-                        </div>
-
-                    </div>
-
-                    <div style="display:flex; flex-direction:column; gap:0.55rem;">
-
-                        <button class="btn-gold-lg" style="width:100%;" onclick="PRS_App.quickStartSoloGame('standard')">
-
-                            ⚡ Hrát klasickou výpravu (96 polí • 30 💖 • Standard)
-
-                        </button>
-
-                        <button class="btn-secondary" style="width:100%; padding:0.55rem;" onclick="PRS_App.quickStartSoloGame('fast')">
-
-                            🏇 Rychlá sprint partie (Zkrácený okruh 48 polí • 15 💖)
-
-                        </button>
-
-                        <button class="btn-secondary" style="width:100%; padding:0.55rem; border-color:#ef4444; color:#fca5a5;" onclick="PRS_App.quickStartSoloGame('ultimate')">
-
-                            💀 Výzva na život a smrt (96 polí • Ultimate • bankrot = konec!)
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-                <!-- KARTA 2: VLASTNÍ NASTAVENÍ PARTIE & HOT-SEAT (2–6 HRÁČŮ) -->
-
-                <div class="lp-mode-card">
-
-                    <div>
-
-                        <span class="lp-mode-badge">Režim 2 • Vlastní stůl &amp; Hot-Seat</span>
-
-                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.18rem; margin-bottom:0.4rem;">
-
-                            🛋️ Sestavení vlastní partie (2–6 Rytířů)
-
-                        </h3>
-
-                        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.75rem;">
-
-                            Nastav si kombinaci <strong>živých hráčů u jednoho počítače/tabletu</strong> a <strong>PC Rytířů</strong>, zvol mapu království a cílový počet Srdcí.
-
-                        </p>
-
-                        <div id="lobby-players-list"></div>
-
-                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin: 0.65rem 0 0.9rem;">
-
-                            <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.addLobbyPlayer()">➕ Přidat rytíře (max. 6)</button>
-
-                            <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem; border-color:var(--gold); color:var(--gold-light); font-weight:600;" onclick="PRS_App.openPawnShopModal(0)">🎭 Výběr figurky &amp; Klenotnice (💎)</button>
-
-                        </div>
-
-                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.55rem; margin-bottom:0.95rem;">
-
-                            <div>
-
-                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🗺️ Herní plán:</label>
-
-                                <div style="display:flex; gap:0.35rem; align-items:center;">
-                                    <select id="lobby-board-select" class="prs-select" style="font-size:0.82rem; padding:0.4rem; flex:1;">
-
-                                    <option value="classic_96" selected>Klasický plán (96 polí)</option>
-
-                                    <option value="dragon_4598">Plán s Drakem a Věží</option>
-
-                                    <option value="compact_48">Zkrácený okruh (48 polí)</option>
-
-                                    <option value="procedural">Procedurální mapa</option>
-
-                                </select>
-                                    <button type="button" class="btn-zoom" onclick="PRS_App.rerollProceduralMap()" title="Vygenerovat nový náhodný svět (Seed)" style="padding:0.4rem 0.65rem; font-size:0.82rem;">🎲</button>
-                                </div>
-
-                            </div>
-
-                            <div>
-
-                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🏆 Herní scénář:</label>
-
-                                <select id="lobby-game-scenario" class="prs-select" style="font-size:0.82rem; padding:0.4rem;" onchange="PRS_App.handleScenarioChange(this.value)">
-
-                                    <option value="sprint">⚡ Rychlovka (15 💖)</option>
-
-                                    <option value="classic" selected>💖 Klasika (30 💖)</option>
-
-                                    <option value="slayer">🐉 Lovci draků (2 draci)</option>
-
-                                    <option value="tycoon">🏰 Magnát (3 města+hrad)</option>
-
-                                    <option value="epic">👑 Epické (45 💖)</option>
-
-                                </select>
-
-                            </div>
-
-                            <div>
-
-                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">⚖️ Obtížnost &amp; Mód:</label>
-
-                                <select id="lobby-difficulty-mode" class="prs-select" style="font-size:0.82rem; padding:0.4rem;" onchange="PRS_App.handleDifficultyChange(this.value)">
-
-                                    <option value="easy">🌿 Pohádkový (Easy)</option>
-
-                                    <option value="standard" selected>👑 Standardní (50% sazby)</option>
-
-                                    <option value="hard">⚔️ Rytířská výzva (Hard)</option>
-
-                                    <option value="ultimate">💀 Na život a smrt (Ultimate)</option>
-
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                        <div id="lobby-difficulty-info" style="margin-bottom:0.85rem; font-size:0.79rem; line-height:1.35; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.45rem 0.7rem; color:#fde68a;">
-
-                            👑 <strong>Standardní mód:</strong> 10 000 zl. do startu • žold 3 000 / 5 000 zl. • vyvážené karty Náhody • 50% sazby duelů a intrik • královská milost při dluhu.
-
-                        </div>
-
-                    </div>
-
-                    <button id="lobby-start-game-btn" class="btn-gold-lg" style="width:100%" onclick="PRS_App.startNewGame(true)">
-
-                        🎲 Rozdat 10 000 zl. a zahájit partii!
-
-                    </button>
-
-                    <button class="btn-secondary" style="width:100%; margin-top:0.45rem; font-size:0.84rem; padding:0.35rem 0.6rem; border-color:rgba(212,175,55,0.4);" onclick="PRS_App.openTutorialModal()">
-
-                        ❓ Průvodce pravidly &amp; Tutoriál pro nováčky
-
-                    </button>
-
-                </div>
-
-                <!-- KARTA 3: ONLINE MULTIPLAYER & CLOUD STOLY -->
-
-                <div class="lp-mode-card lp-mode-card-highlight">
-
-                    <div>
-
-                        <span class="lp-mode-badge" style="background:rgba(56,189,248,0.2); color:#bae6fd; border:1px solid rgba(56,189,248,0.4);">Režim 3 • Online Multiplayer &amp; Cloud</span>
-
-                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.18rem; margin-bottom:0.4rem;">
-
-                            🌐 Připojení k Online Hře &amp; Místnosti
-
-                        </h3>
-
-                        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
-
-                            Máš od kamaráda <strong>6místný kód stolu</strong>? Zadej ho níže a okamžitě vstoupíš do rozehrané partie. Nebo založ novou online místnost!
-
-                        </p>
-
-                        <!-- Box pro zadání 6místného kódu -->
-
-                        <div style="background:rgba(212,175,55,0.09); border:1px solid var(--gold); border-radius:11px; padding:0.75rem; margin-bottom:0.85rem;">
-
-                            <label style="font-size:0.78rem; color:var(--gold-light); font-weight:700; display:block; margin-bottom:0.35rem;">
-
-                                🔑 Připojit se přes 6místný kód místnosti:
-
-                            </label>
-
-                            <div style="display:flex; gap:0.45rem;">
-
-                                <input type="text" id="join-room-code-input" name="prs_room_code_table_key" autocomplete="new-password" autocorrect="off" autocapitalize="characters" spellcheck="false" class="prs-input" style="text-transform:uppercase; font-weight:700; letter-spacing:1px;" placeholder="Např. K7M4P9" maxlength="12" value="" />
-
-                                <button class="btn-gold-lg" style="white-space:nowrap; padding:0.45rem 0.9rem; font-size:0.86rem;" onclick="PRS_App.loadSessionFromCloud()">
-
-                                    ⚔️ Připojit
-
+                                <button type="button" class="btn-secondary" style="flex:1; min-width:200px; border-color:var(--gold); color:var(--gold-light); font-weight:600; padding:0.68rem 1rem;" onclick="PRS_App.openAuthModal()">
+                                    🔑 Přihlásit se Googlem / Heslem
                                 </button>
-
                             </div>
-
+                            <div style="font-size:0.75rem; color:#d6d3d1; line-height:1.35;">
+                                ✨ <em>Tip: Přihlášení přes Google získá 250 💎 na prémiové figurky a ukládání partie do cloudu.</em>
+                            </div>
                         </div>
 
-                        <!-- Tlačítko pro založení nové online místnosti -->
+                        <!-- Varianta pro přihlášeného rytíře -->
+                        <div id="welcome-entry-user-view" style="display:none;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.55rem; flex-wrap:wrap; gap:0.4rem;">
+                                <div style="font-size:0.98rem; color:var(--gold-light);">
+                                    👑 Vítej zpět v království, <strong id="welcome-user-name">Lord Filip</strong>!
+                                </div>
+                                <span id="welcome-user-role-badge" class="user-pill" style="font-size:0.74rem; padding:2px 8px; cursor:pointer;" onclick="PRS_App.openAuthModal()">👑 Admin</span>
+                            </div>
+                            <div style="font-size:0.82rem; color:#e2e8f0; margin-bottom:0.75rem;">
+                                Máš k dispozici <strong id="welcome-user-credits" style="color:#38bdf8;">250</strong> 💎 v pokladnici a tvé figurky čekají.
+                            </div>
+                            <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                                <button type="button" class="btn-gold-lg" style="flex:1; min-width:220px; font-size:1.02rem; padding:0.7rem 1.2rem;" onclick="PRS_App.enterGameHall()">
+                                    ⚔️ Vstoupit do Rytířské herny →
+                                </button>
+                                <button type="button" class="btn-secondary" style="padding:0.7rem 1rem;" onclick="PRS_App.openAuthModal()">
+                                    👤 Změnit účet / Odhlásit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
-                        <button class="btn-secondary" style="width:100%; margin-bottom:0.9rem; border-color:#38bdf8; color:#bae6fd; font-weight:600; padding:0.5rem;" id="btn-create-online-room" onclick="PRS_App.createOnlineMultiplayerRoom()">
 
-                            ☁️ Založit novou Online místnost a získat kód pro přátele
+                </div>
 
+                <!-- Pravá část: Živý náhled herního stolu & Rychlý start na 1 klik -->
+                <div class="lp-media-card" style="padding:1rem; display:flex; flex-direction:column; gap:0.75rem;">
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.45rem;">
+                        <div style="display:flex; align-items:center; gap:0.45rem;">
+                            <span style="font-size:1.15rem;">🎲</span>
+                            <strong style="font-family:'Cinzel',serif; font-size:1.02rem; color:var(--gold-light);">Živý náhled herního stolu</strong>
+                        </div>
+                        <span class="lp-meta-pill" style="font-size:0.72rem; padding:2px 8px;">96 polí • 4 mapy</span>
+                    </div>
+
+                    <div class="lp-media-stage" style="border-radius:12px; overflow:hidden; border:1px solid rgba(212,175,55,0.35); position:relative; aspect-ratio:16/9; min-height:220px; background:#090604;">
+                        <canvas id="lp-live-preview-canvas" style="position:absolute; inset:0; width:100%; height:100%; display:block;"></canvas>
+                        <div style="position:absolute; bottom:8px; left:10px; right:10px; display:flex; justify-content:space-between; align-items:center; pointer-events:none; z-index:3;">
+                            <span id="lp-live-quest-ticker" style="background:rgba(0,0,0,0.85); border:1px solid var(--gold); color:var(--gold-light); font-size:0.75rem; padding:3px 9px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.5);">
+                                🏰 Živý průlet nad herním plánem (96 polí)
+                            </span>
+                            <span style="background:rgba(236,72,153,0.9); color:#fff; font-size:0.75rem; font-weight:700; padding:3px 9px; border-radius:6px;">
+                                Cíl: 30 💖
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Konzole rychlého startu přímo z úvodní stránky -->
+                    <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.25rem;">
+                        <button type="button" class="btn-gold-lg" style="flex:1; min-width:180px; padding:0.65rem 0.9rem; font-size:0.88rem; display:inline-flex; align-items:center; justify-content:center; gap:0.45rem;" onclick="PRS_App.quickStartSoloGame('standard')" title="Spustí okamžitou výpravu proti 3 PC botům (Standardní mód)">
+                            ⚡ Rychlá výprava (1 klik)
                         </button>
-
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-
-                            <h4 style="font-size:0.84rem; color:var(--gold-light); text-transform:uppercase; letter-spacing:0.5px;">
-
-                                📂 Otevřené a uložené stoly na serveru
-
-                            </h4>
-
-                            <button class="btn-secondary" style="font-size:0.72rem; padding:2px 7px;" onclick="PRS_App.fetchServerStatusAndSessions()">🔄 Obnovit</button>
-
-                        </div>
-
-                        <div id="saved-sessions-list" style="max-height:175px; overflow-y:auto;">
-
-                            <div class="empty-note">Načítám seznam her ze serveru...</div>
-
-                        </div>
-
+                        <button type="button" class="btn-secondary" style="flex:1; min-width:160px; padding:0.65rem 0.9rem; font-size:0.86rem; border-color:var(--gold); color:var(--gold-light); display:inline-flex; align-items:center; justify-content:center; gap:0.45rem;" onclick="PRS_App.enterGameHall()" title="Vstoupit do Rytířské herny a vybrat mapu, scénář či multiplayer">
+                            🏰 Rytířská herna →
+                        </button>
                     </div>
 
                 </div>
 
             </div>
 
-            <!-- 3. RYCHLÝ TAHÁK: PRAVIDLA V KOSTCE ZA 60 VTEŘIN -->
+            <!-- 2. KRÁLOVSKÁ FILMOVÁ SÍŇ: VIDEA A UPOUTÁVKY (Dvě videa vedle sebe) -->
+            <section id="lp-video-showcase-section" class="lp-video-showcase-section">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:0.6rem; margin-bottom:1.15rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.65rem;">
+                    <div>
+                        <h2 class="lp-section-heading" style="margin:0; display:flex; align-items:center; gap:0.5rem; font-size:1.35rem;">
+                            <span>🎬</span> Královská filmová síň &amp; Upoutávky
+                        </h2>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin:0.25rem 0 0 0;">
+                            Zhlédni oficiální příběhovou upoutávku a ukázku hratelnosti deskové hry Princeznino srdce.
+                        </p>
+                    </div>
+                    <a href="https://www.youtube.com/@kidesky?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="lp-video-btn-action" style="font-size:0.8rem; padding:0.35rem 0.75rem;" title="Odebírat YouTube kanál KiDesky">
+                        <span>🔔 Odebírat kanál</span>
+                    </a>
+                </div>
+
+                <div id="lp-two-videos-grid" class="lp-two-videos-grid">
+                    <!-- Generováno dynamicky v JS z heroVideosList / fallback na 2 videa -->
+                </div>
+            </section>
+
+            <!-- Rychlý tahák: Pravidla za 60 vteřin -->
+            <div id="welcome-rules-box">
+<!-- 3. RYCHLÝ TAHÁK: PRAVIDLA V KOSTCE ZA 60 VTEŘIN -->
 
             <h2 class="lp-section-heading">📜 Jak se hraje Princeznino srdce? (Pravidla za 60 vteřin)</h2>
 
@@ -724,7 +339,12 @@
 
             </div>
 
-            <!-- 4. KATALOG HER PORTÁLU KIDESKY (SOUČASNÉ & BUDOUCÍ HRY) -->
+            
+            </div>
+
+            <!-- Katalog her KiDesky -->
+            <div id="welcome-catalog-box">
+<!-- 4. KATALOG HER PORTÁLU KIDESKY (SOUČASNÉ & BUDOUCÍ HRY) -->
 
             <h2 class="lp-section-heading">📚 Katalog autorských her portálu KiDesky</h2>
 
@@ -876,6 +496,337 @@
 
             </div>
 
+        
+            </div>
+
+        </section>
+
+                <!-- ================================================================
+             ZÁLOŽKA 2: RYTÍŘSKÁ HERNA & HERNÍ HUB (2-SLOUFCOVÝ DASHBOARD)
+             ================================================================ -->
+        <section id="tab-lobby" style="display:none">
+
+            <div class="gamehall-dashboard-grid">
+
+                <!-- LEVÝ SLOUPEC: TVŮJ RYTÍŘ & RYCHLÁ HRA (360px) -->
+                <div class="gamehall-sidebar-col">
+
+                    <!-- 1. Karta profilu rytíře -->
+                    <div class="prs-card gamehall-knight-card">
+                        <div style="display:flex; align-items:center; gap:0.9rem; margin-bottom:0.75rem;">
+                            <div class="gamehall-avatar-wrap" onclick="PRS_App.openPawnShopModal(0)" title="Klikni pro otevření královské šatny">
+                                <img id="gamehall-pawn-avatar" src="assets/pawns/pawn_knight_valiant.png" class="gamehall-avatar-img" alt="Figurka" />
+                                <span class="gamehall-avatar-badge">Šatna 🎭</span>
+                            </div>
+                            <div style="flex:1; min-width:0;">
+                                <div style="display:flex; align-items:center; gap:0.35rem;">
+                                    <span id="gamehall-player-name" style="font-family:'Cinzel',serif; font-size:1.15rem; font-weight:700; color:var(--gold-light); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Lord Filip</span>
+                                    <button type="button" class="btn-icon-subtle" onclick="PRS_App.promptEditNickname()" title="Změnit rytířské jméno u stolu">✏️</button>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.45rem; margin-top:0.25rem; flex-wrap:wrap;">
+                                    <span id="gamehall-role-badge" class="user-pill" style="font-size:0.72rem; padding:2px 7px; cursor:pointer;" onclick="PRS_App.openAuthModal()">👑 Admin</span>
+                                    <span style="font-size:0.8rem; font-weight:700; color:#38bdf8;">💎 <span id="gamehall-credits">250</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rychlý výběr figurky -->
+                        <div style="margin-bottom:0.75rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                                <span style="font-size:0.75rem; color:var(--gold-light); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">🎭 Figurka pro partii:</span>
+                                <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:1px 6px;" onclick="PRS_App.openPawnShopModal(0)">Celá šatna ➜</button>
+                            </div>
+                            <div id="gamehall-quick-pawns-strip" class="gamehall-quick-pawns-strip">
+                                <!-- Generováno JS z odemčených figurek -->
+                            </div>
+                        </div>
+
+                        <!-- Živly království (kompaktní výběr) -->
+                        <div style="border-top:1px solid rgba(212,175,55,0.2); padding-top:0.65rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
+                            <div style="font-size:0.78rem; color:var(--text-muted); font-weight:600;">🎨 Živel království:</div>
+                            <select id="lobby-element-theme-select" class="topbar-theme-select" style="max-width:145px; padding:0.25rem 0.5rem; font-size:0.8rem; border:1px solid rgba(212,175,55,0.3); border-radius:6px;" onchange="PRS_App.setElementTheme(this.value, true)" aria-label="Živel království">
+                                <option value="light">👑 Zlato</option>
+                                <option value="fire">🔥 Oheň</option>
+                                <option value="water">💧 Voda</option>
+                                <option value="earth">🌿 Země</option>
+                                <option value="air">⚡ Bouře</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 2. Karta Rychlá solo výprava proti PC (Start na 1 klik) -->
+                    <div class="prs-card" style="margin-top:1rem;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.4rem;">
+                            <span class="lp-mode-badge" style="margin:0;">Start na 1 klik</span>
+                            <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:2px 6px;" onclick="PRS_App.openTutorialModal()">❓ Tutoriál</button>
+                        </div>
+                        <h3 style="font-size:1.05rem; margin-bottom:0.35rem;">⚡ Rychlá výprava proti PC</h3>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.85rem;">
+                            Okamžitá hra proti třem botům (Černý Baron, Zikmund, Kněžna Eliška).
+                        </p>
+                        <div style="display:flex; flex-direction:column; gap:0.45rem;">
+                            <button type="button" class="btn-gold-lg" style="font-size:0.88rem; padding:0.55rem; width:100%; text-align:left;" onclick="PRS_App.quickStartSoloGame('standard')">
+                                ⚡ Klasická výprava (96 polí • 30 💖)
+                            </button>
+                            <button type="button" class="btn-secondary" style="font-size:0.82rem; padding:0.45rem; width:100%; text-align:left;" onclick="PRS_App.quickStartSoloGame('fast')">
+                                🏇 Rychlý sprint (48 polí • 15 💖)
+                            </button>
+                            <button type="button" class="btn-secondary" style="font-size:0.82rem; padding:0.45rem; width:100%; text-align:left; border-color:#ef4444; color:#fca5a5;" onclick="PRS_App.quickStartSoloGame('ultimate')">
+                                💀 Na život a smrt (Ultimate)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Rychlé pokračování v poslední uložené hře -->
+                    <div id="gamehall-recent-save-box" style="display:none;"></div>
+
+                </div>
+
+                <!-- PRAVÝ SLOUPEC: HLAVNÍ STŮL & ONLINE MULTIPLAYER (1fr) -->
+                <div class="gamehall-main-col">
+
+                    <!-- Banner rozehrané partie -->
+                    <div id="gamehall-active-game-banner" style="display:none; background:linear-gradient(135deg, rgba(212,175,55,0.2), rgba(20,15,10,0.95)); border:1.5px solid var(--gold); border-radius:12px; padding:0.65rem 1rem; margin-bottom:1rem; align-items:center; justify-content:space-between; gap:0.75rem;">
+                        <div>
+                            <strong style="color:var(--gold-light); font-size:0.92rem;">🎲 Máš rozehranou partii na stole!</strong>
+                            <span id="gamehall-active-round-info" style="font-size:0.8rem; color:#d1d5db; margin-left:0.5rem;">Kolo 1</span>
+                        </div>
+                        <button type="button" class="btn-gold-lg" style="font-size:0.82rem; padding:0.35rem 0.85rem;" onclick="PRS_App.switchTab('board')">
+                            Přejít ke stolu →
+                        </button>
+                    </div>
+
+                    <!-- Přepínač 3 hlavních stolních režimů -->
+                    <div class="gamehall-table-tabs" style="display:flex; gap:0.6rem; margin-bottom:1rem;">
+                        <button id="btn-gh-custom" type="button" class="gamehall-tab-btn active" style="flex:1;" onclick="PRS_App.switchGameHallRoom('custom')">
+                            🛋️ Vlastní stůl &amp; Hot-Seat (2–6 Rytířů)
+                        </button>
+                        <button id="btn-gh-online" type="button" class="gamehall-tab-btn" style="flex:1;" onclick="PRS_App.switchGameHallRoom('online')">
+                            🌐 Online Multiplayer &amp; Cloud stoly
+                        </button>
+                        <button id="btn-gh-saves" type="button" class="gamehall-tab-btn" style="flex:1;" onclick="PRS_App.switchGameHallRoom('saves')">
+                            💾 Uložené výpravy (<span id="gh-saved-count">0</span>)
+                        </button>
+                    </div>
+
+                    <!-- MÍSTNOST 1: VLASTNÍ STŮL & HOT-SEAT (Prostorný panel bez dvojitého rámu) -->
+                    <div id="room-gh-custom" class="prs-card gamehall-room-view" style="display:block;">
+<div>
+
+                        <span class="lp-mode-badge">Režim 2 • Vlastní stůl &amp; Hot-Seat</span>
+
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.18rem; margin-bottom:0.4rem;">
+
+                            🛋️ Sestavení vlastní partie (2–6 Rytířů)
+
+                        </h3>
+
+                        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.75rem;">
+
+                            Nastav si kombinaci <strong>živých hráčů u jednoho počítače/tabletu</strong> a <strong>PC Rytířů</strong>, zvol mapu království a cílový počet Srdcí.
+
+                        </p>
+
+                        <div id="lobby-players-list"></div>
+
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin: 0.65rem 0 0.9rem;">
+
+                            <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.addLobbyPlayer()">➕ Přidat rytíře (max. 6)</button>
+
+                            <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem; border-color:var(--gold); color:var(--gold-light); font-weight:600;" onclick="PRS_App.openPawnShopModal(0)">🎭 Výběr figurky &amp; Klenotnice (💎)</button>
+
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.55rem; margin-bottom:0.95rem;">
+
+                            <div>
+
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🗺️ Herní plán:</label>
+
+                                <div style="display:flex; gap:0.35rem; align-items:center;">
+                                    <select id="lobby-board-select" class="prs-select" style="font-size:0.82rem; padding:0.4rem; flex:1;">
+
+                                    <option value="classic_96" selected>Klasický plán (96 polí)</option>
+
+                                    <option value="dragon_4598">Plán s Drakem a Věží</option>
+
+                                    <option value="compact_48">Zkrácený okruh (48 polí)</option>
+
+                                    <option value="procedural">Procedurální mapa</option>
+
+                                </select>
+                                    <button type="button" class="btn-zoom" onclick="PRS_App.rerollProceduralMap()" title="Vygenerovat nový náhodný svět (Seed)" style="padding:0.4rem 0.65rem; font-size:0.82rem;">🎲</button>
+                                </div>
+
+                            </div>
+
+                            <div>
+
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🏆 Herní scénář:</label>
+
+                                <select id="lobby-game-scenario" class="prs-select" style="font-size:0.82rem; padding:0.4rem;" onchange="PRS_App.handleScenarioChange(this.value)">
+
+                                    <option value="sprint">⚡ Rychlovka (15 💖)</option>
+
+                                    <option value="classic" selected>💖 Klasika (30 💖)</option>
+
+                                    <option value="slayer">🐉 Lovci draků (2 draci)</option>
+
+                                    <option value="tycoon">🏰 Magnát (3 města+hrad)</option>
+
+                                    <option value="epic">👑 Epické (45 💖)</option>
+
+                                </select>
+
+                            </div>
+
+                            <div>
+
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">⚖️ Obtížnost &amp; Mód:</label>
+
+                                <select id="lobby-difficulty-mode" class="prs-select" style="font-size:0.82rem; padding:0.4rem;" onchange="PRS_App.handleDifficultyChange(this.value)">
+
+                                    <option value="easy">🌿 Pohádkový (Easy)</option>
+
+                                    <option value="standard" selected>👑 Standardní (50% sazby)</option>
+
+                                    <option value="hard">⚔️ Rytířská výzva (Hard)</option>
+
+                                    <option value="ultimate">💀 Na život a smrt (Ultimate)</option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                        <div id="lobby-difficulty-info" style="margin-bottom:0.85rem; font-size:0.79rem; line-height:1.35; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.45rem 0.7rem; color:#fde68a;">
+
+                            👑 <strong>Standardní mód:</strong> 10 000 zl. do startu • žold 3 000 / 5 000 zl. • vyvážené karty Náhody • 50% sazby duelů a intrik • královská milost při dluhu.
+
+                        </div>
+
+                    </div>
+
+                    <button id="lobby-start-game-btn" class="btn-gold-lg" style="width:100%" onclick="PRS_App.startNewGame(true)">
+
+                        🎲 Rozdat 10 000 zl. a zahájit partii!
+
+                    </button>
+
+                    <button class="btn-secondary" style="width:100%; margin-top:0.45rem; font-size:0.84rem; padding:0.35rem 0.6rem; border-color:rgba(212,175,55,0.4);" onclick="PRS_App.openTutorialModal()">
+
+                        ❓ Průvodce pravidly &amp; Tutoriál pro nováčky
+
+                    </button>
+
+                </div>
+                    </div>
+
+                    <!-- MÍSTNOST 2: ONLINE MULTIPLAYER & CLOUD (Prostorný panel bez dvojitého rámu) -->
+                    <div id="room-gh-online" class="prs-card gamehall-room-view" style="display:none;">
+<div>
+
+                        <span class="lp-mode-badge" style="background:rgba(56,189,248,0.2); color:#bae6fd; border:1px solid rgba(56,189,248,0.4);">Režim 3 • Online Multiplayer &amp; Cloud</span>
+
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.18rem; margin-bottom:0.4rem;">
+
+                            🌐 Připojení k Online Hře &amp; Místnosti
+
+                        </h3>
+
+                        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">
+
+                            Máš od kamaráda <strong>6místný kód stolu</strong>? Zadej ho níže a okamžitě vstoupíš do rozehrané partie. Nebo založ novou online místnost!
+
+                        </p>
+
+                        <!-- Box pro zadání 6místného kódu -->
+
+                        <div style="background:rgba(212,175,55,0.09); border:1px solid var(--gold); border-radius:11px; padding:0.75rem; margin-bottom:0.85rem;">
+
+                            <label style="font-size:0.78rem; color:var(--gold-light); font-weight:700; display:block; margin-bottom:0.35rem;">
+
+                                🔑 Připojit se přes 6místný kód místnosti:
+
+                            </label>
+
+                            <div style="display:flex; gap:0.45rem;">
+
+                                <input type="text" id="join-room-code-input" name="prs_room_code_table_key" autocomplete="new-password" autocorrect="off" autocapitalize="characters" spellcheck="false" class="prs-input" style="text-transform:uppercase; font-weight:700; letter-spacing:1px;" placeholder="Např. K7M4P9" maxlength="12" value="" />
+
+                                <button class="btn-gold-lg" style="white-space:nowrap; padding:0.45rem 0.9rem; font-size:0.86rem;" onclick="PRS_App.loadSessionFromCloud()">
+
+                                    ⚔️ Připojit
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Tlačítko pro založení nové online místnosti -->
+
+                        <button class="btn-secondary" style="width:100%; margin-bottom:0.9rem; border-color:#38bdf8; color:#bae6fd; font-weight:600; padding:0.5rem;" id="btn-create-online-room" onclick="PRS_App.createOnlineMultiplayerRoom()">
+
+                            ☁️ Založit novou Online místnost a získat kód pro přátele
+
+                        </button>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+
+                            <h4 style="font-size:0.84rem; color:var(--gold-light); text-transform:uppercase; letter-spacing:0.5px;">
+
+                                📂 Otevřené a uložené stoly na serveru
+
+                            </h4>
+
+                            <button class="btn-secondary" style="font-size:0.72rem; padding:2px 7px;" onclick="PRS_App.fetchServerStatusAndSessions()">🔄 Obnovit</button>
+
+                        </div>
+
+                        <div id="saved-sessions-list" style="max-height:175px; overflow-y:auto;">
+
+                            <div class="empty-note">Načítám seznam her ze serveru...</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- MÍSTNOST 3: ULOŽENÉ VÝPRAVY (SOLO, HOT-SEAT & CLOUD) -->
+                <div id="room-gh-saves" class="prs-card gamehall-room-view" style="display:none;">
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; flex-wrap:wrap; gap:0.5rem;">
+                            <div>
+                                <span class="lp-mode-badge" style="background:rgba(212,175,55,0.2); color:var(--gold-light); border:1px solid var(--gold); margin:0;">Paměť království</span>
+                                <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.18rem; margin:0.35rem 0 0;">
+                                    💾 Moje uložené hry a rozehrané výpravy
+                                </h3>
+                            </div>
+                            <div style="display:flex; gap:0.35rem;">
+                                <button id="save-tab-all" class="btn-secondary active" style="font-size:0.75rem; padding:3px 9px;" onclick="PRS_App.setSavedGamesFilter('all')">Všechny</button>
+                                <button id="save-tab-solo" class="btn-secondary" style="font-size:0.75rem; padding:3px 9px;" onclick="PRS_App.setSavedGamesFilter('solo')">Solo &amp; Hot-Seat</button>
+                                <button id="save-tab-online" class="btn-secondary" style="font-size:0.75rem; padding:3px 9px;" onclick="PRS_App.setSavedGamesFilter('online')">Online stoly</button>
+                            </div>
+                        </div>
+                        <p style="color:var(--text-muted); font-size:0.84rem; margin-bottom:0.95rem;">
+                            Zde najdeš své uložené partie ze stolu. U multiplayerových her můžeš po načtení pozvat přátele zpět nebo nepřipojené hráče nahradit PC boty.
+                        </p>
+                        <div id="saved-games-container">
+                            <!-- Generováno JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+                    </div>
+
+                </div>
+
+            </div>
+
         </section>
 
         <!-- ================================================================
@@ -935,6 +886,7 @@
                             </select>
 
                             <button id="btn-reroll-map" class="btn-zoom" onclick="PRS_App.rerollProceduralMap()" title="Vygenerovat nové unikátní království, biomy, řeku a hrady (Seed)">🎲 Nová mapa</button>
+                            <button id="btn-save-game" class="btn-zoom" style="border-color:var(--gold); color:var(--gold-light); font-weight:700;" onclick="PRS_App.openSaveGameModal()" title="Uložit rozehranou partii do paměti nebo cloudu">💾 Uložit hru</button>
                             <button class="btn-zoom" onclick="PRS_App.openSettingsModal()" title="Nastavení živlů, zvuku, tempa hry a grafiky">⚙️ Nastavení</button>
 
                         </div>
@@ -1179,21 +1131,34 @@
 
                                 <li><strong>Startovní jmění:</strong> Každý rytíř začíná na poli <code>START</code> s <strong>10 000 zl.</strong></li>
 
-                                <li><strong>Průchod STARTem:</strong> Běžný žold činí <strong>+3 000 zl.</strong> Pro nemajetné rytíře bez panství a zvířat (bezzemky) poskytuje král podporu <strong>+5 000 zl.</strong> Rytíři se šlechtickým statusem (vlastní Město či Hrad) a vysokým Charismatem získávají navíc audienci u dvora (<strong>+0,5 až +1,0 💖</strong>).</li>
+                                <li><strong>Průchod STARTem &amp; Dvorní audience:</strong> Běžný žold činí <strong>+3 000 zl.</strong> Pro nemajetné rytíře bez panství a zvířat (bezzemky) poskytuje král podporu <strong>+5 000 zl.</strong> Rytíři se šlechtickým statusem (vlastní Město či Hrad), vysokým Charismatem nebo zkušení tanečníci (<strong>Tanec ≥ 2 a šaty</strong>, popř. <strong>Tanec ≥ 3</strong>) získávají navíc audienci u dvora (<strong>+0,5 až +1,0 💖</strong>).</li>
 
                                 <li><strong>🔀 Volba trasy na rozcestích:</strong> Konec pasivního pochodu! Kdykoliv tvůj rytíř dorazí na rozcestí (křižovatku tras na plánu), figurka se zastaví a <strong>hráč si sám zvolí směr</strong>: zda pokračovat vnějším okruhem (pastviny, vesnice, kovárny), nebo vnitřní královskou stezkou (slavnosti u hradu, arény monster, mistři vlastností). V dialogu navíc vidíš přesný název cílového pole pro obě větve!</li>
 
-                                <li><strong>🚶 Taktické tempo pohybu a zvířecí navigace:</strong>
+                                <li><strong>🚶 Taktické tempo pohybu, Jízda a zvířecí navigace:</strong>
 
                                     <ul style="margin-top:4px; padding-left:1rem; font-size:0.86rem; color:#cbd5e1;">
 
                                         <li><strong>🚶 Opatrný krok (1–4):</strong> Pomalý, opatrný postup (hod 1d4) pro bezpečné manévrování na políčka v těsné blízkosti.</li>
 
-                                        <li><strong>🎲 Standardní pochod (1–6):</strong> Běžný rytířský krok (1d6).</li>
+                                        <li><strong>🎲 Standardní pochod &amp; Pěší sprint:</strong> Běžný rytířský krok (1d6). Pěší rytíř s dovedností <strong>Jízda ≥ 2</strong> může využít atletický sprint a zvolit si <strong>+1 pole navíc</strong>, při <strong>Jízda ≥ 4</strong> dokonce <strong>+2 pole navíc</strong>!</li>
 
-                                        <li><strong>🏇 Koňský cval (2d6 – vyžaduje koně):</strong> Vlastníš-li alespoň 1 koně ve stáji, házíš 2 kostkami (2d6) a volíš: <em>⚡ Bleskový trysk (součet obou kostek)</em> pro rychlý sprint přes mapu, nebo <em>🎯 Taktický manévr (výběr 1 příznivější kostky)</em> pro přesné dosednutí na konkrétní statky!</li>
+                                        <li><strong>🏇 Koňský pohyb (vyžaduje koně) – stupně Jízdy:</strong>
+                                            <ul style="margin-top:2px; padding-left:1rem; font-size:0.83rem; color:#94a3b8;">
+                                                <li><em>Jízda &lt; 2 (Koňský klus):</em> Hod 2d6 – volba 1 příznivější kostky pro přesné dosednutí na vytoužené pole.</li>
+                                                <li><em>Jízda 2–3 (Koňský cval):</em> Plný součet obou kostek (d1 + d2) pro bleskový trysk přes mapu.</li>
+                                                <li><em>Jízda ≥ 4 (Královský trysk):</em> Bleskový cval (d1 + d2) + <strong>bonusová +2 pole zdarma</strong>!</li>
+                                            </ul>
+                                        </li>
 
-                                        <li><strong>🦅 Sokolí navigace (vyžaduje sokola):</strong> Vlastníš-li alespoň 1 sokola, kroužící dravec prozkoumá terén z výšky a umožní ti upravit výsledný pohyb o <strong>±1 pole</strong> (např. při hodu 4 si zvolit pole 3, 4 nebo 5 pro vyhnutí se pasti či zisk klenotu)!</li>
+                                        <li><strong>🦅 Sokolí navigace (vyžaduje sokola):</strong> Kroužící dravec prozkoumá terén z výšky a umožní ti upravit výsledný pohyb o <strong>±1 pole</strong> (např. při hodu 4 si zvolit pole 3, 4 nebo 5 pro vyhnutí se pasti či zisk klenotu)!</li>
+
+                                        <li><strong>🐎 Speciální výhody jezdce v království:</strong>
+                                            <ul style="margin-top:2px; padding-left:1rem; font-size:0.83rem; color:#94a3b8;">
+                                                <li><em>Sleva na nájem 30 %:</em> Rytíř s Jízdou ≥ 4 a koněm platí v cizích vesnicích o 30 % nižší nájem.</li>
+                                                <li><em>Jezdecký únik v PvP duelech:</em> Napadený jezdec se může bránit obratností koně (<code>Obrana = max(Boj, Jízda + min(2, Koně))</code>). Zvítězí-li o 3+ body, získá <strong>+0,5 💖</strong> za mistrný manévr!</li>
+                                            </ul>
+                                        </li>
 
                                     </ul>
 
@@ -1207,9 +1172,16 @@
 
                             <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4; margin-bottom:1rem;">
 
-                                <li>Každý rytíř rozvíjí <strong>Boj (MB)</strong>, <strong>Jízdu (MJ)</strong>, <strong>Tanec (MT)</strong> a <strong>Charisma (MCH)</strong> na stupních <strong>1 až 5</strong>. <strong>Velmistr (VM)</strong> dokáže naučit libovolnou vlastnost.</li>
+                                <li>Každý rytíř rozvíjí 4 klíčové ctnosti na stupních <strong>1 až 5</strong>:
+                                    <ul style="margin-top:3px; padding-left:1rem; font-size:0.85rem; color:#cbd5e1;">
+                                        <li><strong>⚔️ Boj (MB):</strong> Zvyšuje sílu v soubojové aréně draků, v PvP duelech a na rytířském Turnaji.</li>
+                                        <li><strong>🏇 Jízda (MJ):</strong> Zrychluje pohyb (klus, cval, trysk), zlevňuje nájmy o 30 %, brání v duelech a dominuje Velkému závodu.</li>
+                                        <li><strong>💃 Tanec (MT):</strong> Dominuje Královskému plesu, otevírá audience u dvora na STARTu a Hradě (+0,5 až +1,0 💖), násobí přípitek v Krčmě (+1,0 💖) a dary u Šaška (+200 zl. × Tanec).</li>
+                                        <li><strong>👑 Charisma (MCH):</strong> Zvyšuje zisk srdcí ze všech slavností, zlevňuje kauce a násobí dvorní odměny.</li>
+                                    </ul>
+                                </li>
 
-                                <li>Při stoupnutí na Mistra nejprve hodíš kostkou: <strong>1, 2, 3 = Mistr tě nepřijme</strong>; <strong>4, 5, 6 = Můžeš zaplatit výcvik</strong> dalšího stupně: <strong>1 000 / 2 000 / 3 000 / 4 000 / 5 000 zl.</strong></li>
+                                <li>Při stoupnutí na Mistra nejprve hodíš kostkou: <strong>1, 2, 3 = Mistr tě nepřijme</strong>; <strong>4, 5, 6 = Můžeš zaplatit výcvik</strong> dalšího stupně: <strong>1 000 / 2 000 / 3 000 / 4 000 / 5 000 zl.</strong> <strong>Velmistr (VM)</strong> učí libovolnou vlastnost.</li>
 
                             </ul>
 
@@ -1219,11 +1191,13 @@
 
                                 <li><strong>12 sad zvířat:</strong> Sokol 400 × n, Pes 500 × n a Kůň 600 × n. Nájem cizího hráče činí <strong>20 %</strong> (1 zvíře), <strong>40 %</strong> (pár ze sady) nebo <strong>80 %</strong> (všechna 3 zvířata sady).</li>
 
-                                <li><strong>Chovný bonus za ucelenou sadu:</strong> Za každou zkompletovanou trojici (Kůň + Pes + Sokol ze stejné sady) získává majitel okamžitý a trvalý bonus <strong>+1,0 💖</strong>.</li>
+                                <li><strong>Chovný bonus za ucelenou sadu:</strong> Za každou zkompletovanou trojici (Kůň + Pes + Sokol ze stejné sady) získává majitel okamžitý a trvalý bonus <strong>+1,5 💖</strong>.</li>
 
-                                <li><strong>Chovatelská prémie:</strong> 3 hráči s nejvyšším součtem cen zvířat drží průběžně <strong>+3 💖</strong> (1. místo), <strong>+2 💖</strong> (2. místo) a <strong>+1 💖</strong> (3. místo).</li>
+                                <li><strong>Bonus za jednodruhové stádo:</strong> Vlastnictví 3 zvířat stejného druhu (3 koně, 3 psi nebo 3 sokoli) přináší chovateli trvalý bonus <strong>+1,0 💖</strong>.</li>
 
-                                <li><strong>Vesnice, Města, Hrady:</strong> U <strong>Výběrčího daní (VD)</strong> nesou Vesnice 500/900/1 400 zl., Města 1 200 zl., Hrady 2 500 zl. a Hrad dává trvale <strong>+1 Charisma</strong>.</li>
+                                <li><strong>Chovatelská prémie:</strong> 3 hráči s nejvyšším součtem cen zvířat drží průběžně <strong>+4,0 💖</strong> (1. místo), <strong>+2,5 💖</strong> (2. místo) a <strong>+1,5 💖</strong> (3. místo).</li>
+
+                                <li><strong>Prestiž feudálních panství:</strong> Každý Hrad přináší držiteli trvale <strong>+1,0 💖</strong> a +1 Charisma. Každé Město nebo plně vylepšená 3★ Vesnice dává <strong>+0,5 💖</strong>. U <strong>Výběrčího daní (VD)</strong> nesou Vesnice 500/900/1 400 zl., Města 1 200 zl. a Hrady 2 500 zl.</li>
 
                             </ul>
 
@@ -1231,7 +1205,16 @@
 
                             <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4;">
 
-                                <li><strong>Dračí doupata (U3) &amp; Soubojová aréna:</strong> Nejnebezpečnější souboje s 20 unikátními draky. Odměny od 6 000 do 16 000 zl., +2.5 až +6.0 💖 a 100% garantovaný drop mocné dračí trofeje do 5. slotu zbrojnice!</li>
+                                <li><strong>Výpravy &amp; Dračí doupata (U1–U3):</strong> Souboje s monstry a 20 unikátními draky:
+                                    <ul style="margin-top:2px; padding-left:1rem; font-size:0.85rem; color:#cbd5e1;">
+                                        <li><em>U1 (Běžné stvůry):</em> 1 000–2 500 zl. a +0,5 až +1,5 💖.</li>
+                                        <li><em>U2 (Mocná monstra):</em> 2 600 zl., +1,5 až +2,5 💖, 65% šance na trofej.</li>
+                                        <li><em>U3 (Dračí doupata):</em> 6 000 zl., +2,5 až +5,0 💖 a 100% garantovaný drop dračí trofeje!</li>
+                                        <li><em>Bonusová výstroj ze zbrojnice:</em> Padá pouze při <strong>drtivém vítězství o 3+ body</strong>.</li>
+                                    </ul>
+                                </li>
+
+                                <li><strong>🏃 Taktický ústup z arény:</strong> Pokud máš z monstra obavy, můžeš před zahájením boje zaplatit výkupné (<strong>400 zl. u U2, 800 zl. u U3</strong>) a bezpečně vycouvat bez ztráty srdcí a převozu do Špitálu!</li>
 
                                 <li><strong>🎯 Využití slabin z Bestiáře (+2 k síle):</strong> Znalost dračích slabin ti dává rozhodující převahu v boji. Pokud do arény vstoupíš s výbavou, ctností, živlem či zvířaty odpovídajícími slabině dané bestie (např. <em>Kopí</em> na Vodního draka, <em>Tanec</em> na Pohádkového draka, <em>Oheň</em> na Ledového draka, <em>Světlo/Klenoty</em> na Stínového draka, <em>Lovečtí psi</em> na Zeleného draka apod.), získáš v aréně automatický bonus <strong>+2 k bojové síle (🎯 Využitá slabina)</strong>!</li>
 
@@ -1249,13 +1232,13 @@
 
                                 </li>
 
-                                <li><strong>❓ Karty Náhody &amp; Dilemata (50 karet):</strong> Balíček osudu obsahuje 50 vyvážených karet: <strong>50 % Pozitivních</strong> (dary, úroda, dotace), <strong>25 % Negativních</strong> (přepadení, válečné daně, kletby, zkažené zásoby) a <strong>25 % Dilemat a voleb A/B</strong>, kde hráč sám volí mezi ziskem zlata, ctí, srdci nebo riskem!</li>
+                                <li><strong>❓ Karty Náhody &amp; Dilemata:</strong> Balíček obsahuje vyvážené události: dary, dotace, plesová pozvání pro tanečníky, jezdecké zkoušky pro jezdce i přepadení lapky a válečné daně.</li>
 
-                                <li><strong>🛡️ Taktické doplňky před bojem:</strong> Přímo v aréně můžeš dále aktivovat: <em>🏇 Útok z plné jízdy (+1 k síle)</em>, <em>🐕 Loveckou smečku (+1 k síle)</em> nebo <em>🧪 Hojivý lektvar z Lazaretu (pojistka proti Špitálu)</em>.</li>
+                                <li><strong>Špitál sv. Lazara &amp; Hojivý lektvar:</strong> Lektvar za 1 000 zl. trvale zvýší Boj o +1 (pouze pokud Boj &lt; 2) a navíc poskytuje <strong>jednorázový ochranný amulet</strong>, který rytíře zachrání před Špitálem při příští porážce v boji.</li>
+
+                                <li><strong>Krčma U Zlatého korbelu &amp; Šašek:</strong> Runda medoviny v krčmě dává tanečníkům (Tanec ≥ 2) prestižní odměnu <strong>+1,0 💖</strong>. Pole Šašek odměňuje zkušené tanečníky královským darem <strong>+200 zl. × Tanec</strong>.</li>
 
                                 <li><strong>Šatlava:</strong> Uvržení do vězení; vykoupení kaucí 1 000 zl., pokusem o útěk (hod 6), nebo čekáním 1 kolo.</li>
-
-                                <li><strong>Špitál sv. Lazara &amp; Krčma:</strong> Špitál nabízí zotavení z ran a lektvary, Krčma U Zlatého korbelu hazardní kostky a rundu medoviny pro zisk Charismatu.</li>
 
                             </ul>
 
@@ -1267,7 +1250,7 @@
 
                             <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:0.5rem;">
 
-                                Slavnost proběhne, pokud podmínku účasti splňují <strong>alespoň 2 hráči</strong>:
+                                Slavnost proběhne, pokud podmínku účasti splňují <strong>alespoň 2 hráči</strong>. Vítězství závisí na příslušné rytířské ctnosti (Boj, Tanec, Jízda) a Charismatu. Platí přísná hierarchie – 1. místo vždy obdrží minimálně o 0,5 💖 více než 2. místo:
 
                             </p>
 
@@ -1279,7 +1262,7 @@
 
                                         <th>Slavnost</th>
 
-                                        <th>Podmínka účasti</th>
+                                        <th>Podmínka účasti &amp; Klíčová ctnost</th>
 
                                         <th>1. místo</th>
 
@@ -1297,13 +1280,13 @@
 
                                         <td><strong>⚔️ Turnaj</strong></td>
 
-                                        <td>Kůň + Pes + Sokol</td>
+                                        <td>Kůň + Pes + Sokol<br/><small style="color:#f87171;">Rozhoduje: <strong>Boj + ½ Charisma</strong></small></td>
 
-                                        <td><code>3 + ½ CH</code> 💖</td>
+                                        <td><code>3,0 + ½ Boj</code> 💖</td>
 
-                                        <td><code>2 + ½ CH</code> 💖</td>
+                                        <td><code>2,0 + ½ Boj</code> 💖</td>
 
-                                        <td><code>1 + ½ CH</code> 💖</td>
+                                        <td><code>1,0 + ½ Boj</code> 💖</td>
 
                                     </tr>
 
@@ -1311,13 +1294,13 @@
 
                                         <td><strong>💃 Ples</strong></td>
 
-                                        <td>Šaty</td>
+                                        <td>Šaty (těžká zbroj: postih -2)<br/><small style="color:#c084fc;">Rozhoduje: <strong>Tanec + Charisma</strong></small></td>
 
-                                        <td><code>1 + CH</code> 💖</td>
+                                        <td><code>1,5 + ½ (T+CH)</code> 💖</td>
 
-                                        <td><code>CH</code> 💖</td>
+                                        <td><code>0,5 + ½ (T+CH)</code> 💖</td>
 
-                                        <td><code>CH - 1</code> 💖</td>
+                                        <td><code>½ (T+CH)</code> 💖</td>
 
                                     </tr>
 
@@ -1325,13 +1308,13 @@
 
                                         <td><strong>🏇 Závod</strong></td>
 
-                                        <td>Kůň</td>
+                                        <td>Kůň ve stáji<br/><small style="color:#38bdf8;">Rozhoduje: <strong>Jízda + Charisma + Koně</strong></small></td>
 
-                                        <td><code>1,5 × CH</code> 💖</td>
+                                        <td><code>1,5 + ½ (J+CH)</code> 💖</td>
 
-                                        <td><code>CH</code> 💖</td>
+                                        <td><code>0,5 + ½ (J+CH)</code> 💖</td>
 
-                                        <td><code>½ CH</code> 💖</td>
+                                        <td><code>½ (J+CH)</code> 💖</td>
 
                                     </tr>
 
@@ -2395,50 +2378,127 @@
 
     <!-- MODAL: PŘIHLÁŠENÍ / REGISTRACE / HOST (Guest, Player, Admin) -->
 
-    <div id="auth-modal" class="modal-backdrop">
+        <div id="auth-modal" class="modal-backdrop">
 
-        <div class="modal-box">
+        <div class="modal-box" style="max-width:440px;">
 
-            <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin-bottom:0.5rem;">🛡️ Rytířský účet & Administrace</h2>
-
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
-
-                V první fázi lze hrát přímo jako <strong>Nepřihlášený Host</strong> nebo se přihlásit jako <strong>Hráč / Admin</strong> pro správu uložených her a balancování.
-
-            </p>
-
-            <div style="display:flex; flex-direction:column; gap:0.65rem; margin-bottom:1rem;">
-
-                <input type="text" id="auth-username" class="prs-input" placeholder="Uživatelské jméno nebo e-mail (např. admin, rytir_jan)" />
-
-                <input type="text" id="auth-displayname" class="prs-input" placeholder="Rytířská přezdívka u stolu (např. Jan, Sir Gawain)" />
-
-                <div style="position:relative; display:flex; align-items:center;">
-
-                    <input type="password" id="auth-password" class="prs-input" placeholder="Heslo" style="width:100%; padding-right:2.4rem;" />
-
-                    <button type="button" id="btn-toggle-password" onclick="PRS_App.togglePasswordVisibility()" title="Zobrazit / skrýt heslo" style="position:absolute; right:0.5rem; background:none; border:none; color:var(--gold-light); font-size:1.15rem; cursor:pointer; padding:0.2rem; display:flex; align-items:center; justify-content:center; opacity:0.85; transition:opacity 0.2s;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.85">
-
-                        👁️
-
-                    </button>
-
+            <!-- POHLED 1: PŘIHLÁŠENÝ RYTÍŘ (Zobrazí se přihlášenému) -->
+            <div id="auth-logged-view" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
+                    <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.25rem; margin:0;">🛡️ Tvůj rytířský profil</h2>
+                    <span id="auth-profile-role-badge" class="user-pill" style="font-size:0.74rem; padding:2px 8px;">👑 Admin</span>
                 </div>
 
+                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(212,175,55,0.3); border-radius:10px; padding:0.85rem; margin-bottom:0.9rem;">
+                    <div style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.25rem;">Jméno u hracího stolu:</div>
+                    <div style="display:flex; gap:0.4rem; margin-bottom:0.65rem;">
+                        <input type="text" id="auth-profile-displayname-input" class="prs-input" style="font-weight:700; font-size:1rem;" />
+                        <button type="button" class="btn-gold-lg" style="padding:0.4rem 0.8rem; font-size:0.82rem; white-space:nowrap;" onclick="PRS_App.saveProfileNickname()">Uložit</button>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:#d1d5db; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.5rem;">
+                        <span>Účet:</span>
+                        <strong id="auth-profile-username-val" style="color:#fff;">lordkikin</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:#d1d5db; margin-top:0.25rem;">
+                        <span>E-mail:</span>
+                        <strong id="auth-profile-email-val" style="color:#fff;">lordkikin@gmail.com</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:#d1d5db; margin-top:0.25rem;">
+                        <span>Zůstatek pokladnice:</span>
+                        <strong id="auth-profile-credits-val" style="color:#38bdf8;">1 750 💎</strong>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem;">
+                    <button type="button" class="btn-secondary" style="flex:1; border-color:rgba(239,68,68,0.5); color:#fca5a5;" onclick="PRS_App.logoutUser()">
+                        🚪 Odhlásit se
+                    </button>
+                    <button type="button" class="btn-secondary" style="flex:1;" onclick="PRS_App.showAuthLoginForm()">
+                        🔄 Přihlásit jiný účet
+                    </button>
+                </div>
+
+                <div style="text-align:right; border-top:1px solid rgba(212,175,55,0.2); padding-top:0.65rem;">
+                    <button type="button" class="btn-gold-lg" style="padding:0.4rem 1rem; font-size:0.85rem;" onclick="PRS_App.closeAuthModal()">✕ Zavřít</button>
+                </div>
             </div>
 
-            <div id="auth-feedback" style="color:#f87171; font-size:0.84rem; margin-bottom:0.75rem;"></div>
+            <!-- POHLED 2: NEPŘIHLÁŠENÝ / HOST (Google sign-in & klasické přihlášení) -->
+            <div id="auth-guest-view">
+                <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin-bottom:0.4rem; font-size:1.3rem; text-align:center;">🛡️ Rytířský účet &amp; Vstup</h2>
 
-            <div style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:space-between;">
+                <p style="font-size:0.83rem; color:var(--text-muted); margin-bottom:0.85rem; text-align:center;">
+                    Přihlas se svým Google účtem, klasickým profilem nebo hraj volně jako <strong>Host</strong>.
+                </p>
 
-                <button class="btn-gold-lg" onclick="PRS_App.submitAuth('login')">🔑 Přihlásit se</button>
+                <!-- Google Sign-In sekce -->
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.35); border-radius: 8px; padding: 0.85rem; margin-bottom: 0.75rem;">
+                    <label for="auth-google-nickname" style="display:block; font-size:0.82rem; color:var(--gold-light); margin-bottom:0.35rem; font-weight:600;">
+                        🛡️ Tvoje rytířské jméno u stolu:
+                    </label>
+                    <input type="text" id="auth-google-nickname" class="prs-input" placeholder="Zadej jméno (např. Lord Kikin)" style="width:100%; margin-bottom:0.65rem;" />
+                    
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:0.35rem; width:100%;">
+                        <div id="g_id_onload"
+                             data-client_id="335921016939-afepn3s6mpsep890pjr08bli6ufj0jub.apps.googleusercontent.com"
+                             data-callback="PRS_handleGoogleCredentialResponse"
+                             data-auto_prompt="false"
+                             data-ux_mode="popup">
+                        </div>
+                        <div id="g_id_signin_box" class="g_id_signin"
+                             data-type="standard"
+                             data-shape="rectangular"
+                             data-theme="outline"
+                             data-text="signin_with"
+                             data-size="large"
+                             data-logo_alignment="left">
+                        </div>
+                    </div>
+                    <div id="auth-google-feedback" style="margin-top:0.45rem; font-size:0.83rem; text-align:center; min-height:1.1rem;"></div>
+                </div>
 
-                <button class="btn-secondary" onclick="PRS_App.submitAuth('register')">✨ Registrovat</button>
+                <!-- Rozbalovací tlačítko pro klasické přihlášení -->
+                <div style="text-align:center; margin-bottom:0.65rem;">
+                    <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.35rem 0.75rem; width:100%; cursor:pointer;" onclick="PRS_App.toggleClassicAuthForm()">
+                        🔒 Přihlásit se heslem / Registrace nového e-mailu ▼
+                    </button>
+                </div>
 
-                <button class="btn-secondary" onclick="PRS_App.setGuestMode()">👤 Hrát jako Host</button>
+                <!-- Klasický formulář -->
+                <div id="auth-classic-form" style="display:none; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.75rem; margin-bottom:0.75rem;">
+                    <div id="auth-unconfirmed-box" style="display:none; background:rgba(245,158,11,0.12); border:1px solid #f59e0b; border-radius:6px; padding:0.55rem 0.75rem; font-size:0.82rem; color:#fef08a; margin-bottom:0.75rem;">
+                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:0.5rem;">
+                            <div>
+                                <span>✉️</span> <strong>Účet čeká na potvrzení e-mailu!</strong><br/>
+                                <span style="color:#d1d5db; font-size:0.75rem;">Do potvrzení hraješ v režimu Hosta. Zkontroluj schránku nebo:</span>
+                            </div>
+                            <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.22rem 0.5rem; white-space:nowrap;" onclick="PRS_App.resendConfirmationEmail()">🔁 Znovu poslat</button>
+                        </div>
+                    </div>
 
-                <button class="btn-icon-danger" onclick="PRS_App.closeAuthModal()">✕</button>
+                    <div style="display:flex; flex-direction:column; gap:0.55rem; margin-bottom:0.75rem;">
+                        <input type="text" id="auth-username" class="prs-input" placeholder="Uživatelské jméno nebo e-mail" autocomplete="username" />
+                        <input type="email" id="auth-email" class="prs-input" placeholder="E-mail (pro zaslání potvrzení registrace)" autocomplete="email" />
+                        <input type="text" id="auth-displayname" class="prs-input" placeholder="Rytířská přezdívka u stolu (volitelná)" />
+                        <div style="position:relative; display:flex; align-items:center;">
+                            <input type="password" id="auth-password" class="prs-input" placeholder="Heslo" style="width:100%; padding-right:2.4rem;" autocomplete="current-password" />
+                            <button type="button" id="btn-toggle-password" onclick="PRS_App.togglePasswordVisibility()" title="Zobrazit / skrýt heslo" style="position:absolute; right:0.5rem; background:none; border:none; color:var(--gold-light); font-size:1.15rem; cursor:pointer; padding:0.2rem; display:flex; align-items:center; justify-content:center; opacity:0.85; transition:opacity 0.2s;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.85">👁️</button>
+                        </div>
+                    </div>
 
+                    <div style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:space-between;">
+                        <button class="btn-gold-lg" onclick="PRS_App.submitAuth('login')" style="flex:1;">🔑 Přihlásit se</button>
+                        <button class="btn-secondary" onclick="PRS_App.submitAuth('register')" style="flex:1;">✨ Registrovat</button>
+                    </div>
+                </div>
+
+                <div id="auth-feedback" style="color:#f87171; font-size:0.84rem; margin-bottom:0.65rem; text-align:center;"></div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(212,175,55,0.2); padding-top:0.75rem;">
+                    <button class="btn-secondary" onclick="PRS_App.setGuestMode()">👤 Hrát volně jako Host</button>
+                    <button class="btn-icon-danger" onclick="PRS_App.closeAuthModal()">✕ Zavřít</button>
+                </div>
             </div>
 
         </div>
@@ -2553,19 +2613,20 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611050091" defer></script>
-    <script src="js/game-boards.js?v=202611050091" defer></script>
-    <script src="js/game-engine.js?v=202611050091" defer></script>
-    <script src="js/game-combat-ai.js?v=202611050091" defer></script>
-    <script src="js/app-audio.js?v=202611050091" defer></script>
-    <script src="js/app.js?v=202611050091" defer></script>
-    <script src="js/app-board.js?v=202611050091" defer></script>
-    <script src="js/app-hud.js?v=202611050091" defer></script>
-    <script src="js/app-modals.js?v=202611050091" defer></script>
-    <script src="js/app-online.js?v=202611050091" defer></script>
-    <script src="js/app-catalog.js?v=202611050091" defer></script>
-    <script src="js/app-admin.js?v=202611050091" defer></script>
-    <script src="js/app-musicwidget.js?v=202611050091" defer></script>
+    <script src="js/game-data.js?v=202611071815" defer></script>
+    <script src="js/game-boards.js?v=202611071815" defer></script>
+    <script src="js/game-engine.js?v=202611071815" defer></script>
+    <script src="js/game-combat-ai.js?v=202611071815" defer></script>
+    <script src="js/app-audio.js?v=202611071815" defer></script>
+    <script src="js/app.js?v=202611071815" defer></script>
+    <script src="js/app-board.js?v=202611071815" defer></script>
+    <script src="js/app-hud.js?v=202611071815" defer></script>
+    <script src="js/app-modals.js?v=202611071815" defer></script>
+    <script src="js/app-online.js?v=202611071815" defer></script>
+    <script src="js/app-saves.js?v=202611071815" defer></script>
+    <script src="js/app-catalog.js?v=202611071815" defer></script>
+    <script src="js/app-admin.js?v=202611071815" defer></script>
+    <script src="js/app-musicwidget.js?v=202611071815" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3183,6 +3244,63 @@
                     💡 <strong>Multiplayer Tip:</strong> Když se připojíš k online stolu na místo PC bota, botova figurka na herním plánu se automaticky vymění za tvou zvolenou figurku!
                 </div>
                 <button type="button" class="btn-primary" onclick="PRS_App.closePawnShopModal()" style="padding:0.42rem 1.2rem;">Hotovo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ULOŽENÍ ROZEHRANÉ PARTIE -->
+    <div id="save-game-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeSaveGameModal()">
+        <div class="modal-box" style="max-width:540px; text-align:left; padding:1.4rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
+                <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.25rem;">💾 Uložit rozehranou výpravu</h3>
+                <button class="btn-icon-danger" onclick="PRS_App.closeSaveGameModal()">✕</button>
+            </div>
+            <div id="save-game-state-summary" style="background:rgba(0,0,0,0.5); border:1px solid rgba(212,175,55,0.2); border-radius:10px; padding:0.75rem; margin-bottom:1rem;">
+                <!-- Dynamický přehled ze stavu -->
+            </div>
+            <div style="margin-bottom:1.15rem;">
+                <label style="font-size:0.8rem; color:var(--gold-light); font-weight:700; display:block; margin-bottom:0.35rem;">
+                    🏷️ Název pro tuto uloženou hru:
+                </label>
+                <input type="text" id="save-game-title-input" class="prs-input" style="width:100%; font-size:0.92rem; padding:0.5rem 0.75rem;" placeholder="Např. Páteční bitva s draky" maxlength="60" onkeydown="if(event.key==='Enter')PRS_App.confirmSaveGame()" />
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+                <button class="btn-secondary" onclick="PRS_App.closeSaveGameModal()">Zrušit</button>
+                <button class="btn-gold-lg" style="padding:0.45rem 1.1rem; font-size:0.88rem;" onclick="PRS_App.confirmSaveGame()">💾 Potvrdit uložení</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SPRÁVA KŘESEL U MULTIPLAYER STOLU (RE-INVITE & BOTI) -->
+    <div id="online-seats-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeOnlineSeatsModal()">
+        <div class="modal-box" style="max-width:680px; text-align:left; padding:1.4rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
+                <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.25rem;">
+                    🏰 Obnovená výprava – Křesla u stolu
+                </h3>
+                <button class="btn-icon-danger" onclick="PRS_App.closeOnlineSeatsModal()">✕</button>
+            </div>
+            <div style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.35); border-radius:10px; padding:0.75rem 0.95rem; margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem; flex-wrap:wrap; gap:0.4rem;">
+                    <span style="font-size:0.8rem; color:#bae6fd; font-weight:700;">🔑 Kód stolu: <span id="online-seats-room-code" style="font-size:1.05rem; letter-spacing:1px; color:#fff;">ONLINE</span></span>
+                    <button class="btn-secondary" style="font-size:0.74rem; padding:2px 8px; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.copyOnlineSeatsInviteLink()">📋 Kopírovat odkaz se zvacím kódem</button>
+                </div>
+                <input type="text" id="online-seats-share-link" class="prs-input" readonly style="font-size:0.76rem; padding:0.35rem; color:#94a3b8; width:100%;" onclick="this.select()" />
+                <div style="font-size:0.72rem; color:#94a3b8; margin-top:0.3rem;">
+                    💡 Pošli tento odkaz spoluhráčům. Pokud někdo nemůže pokračovat, níže ho jedním kliknutím <strong>nahraď PC botem</strong> s vybranou taktikou.
+                </div>
+            </div>
+            <div style="font-size:0.82rem; color:var(--gold-light); font-weight:700; margin-bottom:0.45rem;">
+                ⚔️ Rozdělení křesel u herního stolu:
+            </div>
+            <div id="online-seats-list" style="max-height:260px; overflow-y:auto; margin-bottom:1.15rem;">
+                <!-- Generováno JS -->
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-top:1px solid rgba(212,175,55,0.2); padding-top:0.75rem;">
+                <button class="btn-secondary" onclick="PRS_App.closeOnlineSeatsModal()">Zavřít</button>
+                <button class="btn-gold-lg" style="padding:0.55rem 1.25rem; font-size:0.92rem;" onclick="PRS_App.resumeOnlineGameFromSeats()">
+                    ⚔️ Vstoupit ke stolu a pokračovat ve hře →
+                </button>
             </div>
         </div>
     </div>

@@ -872,102 +872,158 @@
 
 
 
-        /* Pás interaktivních medailonků políček */
-
-        .lp-medallions-box {
-
-            background: rgba(12, 9, 6, 0.68);
-
-            border: 1px solid rgba(212, 175, 55, 0.28);
-
-            border-radius: 13px;
-
-            padding: 0.8rem 0.95rem;
-
-            margin-bottom: 1.1rem;
-
-        }
-
-        .lp-medallions-strip {
-
-            display: flex;
-
+        /* Horní lišta - kompaktní volba živlu & barevného designu */
+        .topbar-theme-wrap {
+            display: inline-flex;
             align-items: center;
-
-            gap: 0.65rem;
-
-            flex-wrap: wrap;
-
-            margin: 0.5rem 0 0.6rem;
-
-        }
-
-        .lp-medallion-item {
-
-            width: 54px;
-
-            height: 54px;
-
-            border-radius: 50%;
-
-            border: 2.5px solid var(--gold);
-
-            overflow: hidden;
-
+            gap: 0.35rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(212, 175, 55, 0.45);
+            border-radius: 999px;
+            padding: 0.22rem 0.55rem;
+            color: var(--gold-light);
+            font-size: 0.8rem;
+            font-weight: 600;
             cursor: pointer;
-
-            position: relative;
-
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-
-            background: #1c140d;
-
+            transition: all 0.2s ease;
+        }
+        .topbar-theme-wrap:hover {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.15);
+        }
+        .topbar-theme-select {
+            background: transparent;
+            border: none;
+            color: var(--gold-light);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            padding: 0;
+            margin: 0;
+        }
+        .topbar-theme-select option {
+            background: #18110a;
+            color: #f5f5f4;
+            padding: 6px 10px;
         }
 
-        .lp-medallion-item:hover, .lp-medallion-item.active {
-
-            transform: translateY(-4px) scale(1.1);
-
-            border-color: #fef08a;
-
-            box-shadow: 0 0 16px var(--theme-glow);
-
+        /* 2-sloupcová královská filmová síň (videa pod Hero sekcí) */
+        .lp-video-showcase-section {
+            margin-top: 1.75rem;
+            margin-bottom: 2.25rem;
         }
-
-        .lp-medallion-item img {
-
-            width: 100%;
-
-            height: 100%;
-
-            object-fit: cover;
-
-            display: block;
-
+        .lp-two-videos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.35rem;
         }
-
-        .lp-medallion-desc {
-
-            font-size: 0.83rem;
-
-            color: #fde68a;
-
-            background: rgba(212, 175, 55, 0.1);
-
-            border-left: 3px solid var(--gold);
-
-            padding: 0.42rem 0.65rem;
-
-            border-radius: 6px;
-
-            min-height: 2.3rem;
-
+        @media (max-width: 900px) {
+            .lp-two-videos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .lp-video-cinema-card {
+            background: linear-gradient(145deg, rgba(22, 16, 11, 0.94) 0%, rgba(14, 10, 7, 0.98) 100%);
+            border: 1.5px solid var(--border-gold);
+            border-radius: 16px;
+            padding: 1rem;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.65);
             display: flex;
-
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+        }
+        .lp-video-cinema-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 14px 40px rgba(212, 175, 55, 0.15);
+        }
+        .lp-video-card-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-
+            gap: 0.5rem;
+        }
+        .lp-video-card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.02rem;
+            color: var(--gold-light);
+            font-weight: 700;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .lp-video-card-badge {
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid var(--gold);
+            color: var(--gold-light);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+        .lp-video-player-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 11px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .lp-video-player-frame iframe,
+        .lp-video-player-frame video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            object-fit: cover;
+        }
+        .lp-video-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(212, 175, 55, 0.18);
+            padding-top: 0.6rem;
+        }
+        .lp-video-actions-strip {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .lp-video-btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 0.3rem 0.65rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .lp-video-btn-action:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--gold);
+            color: var(--gold-light);
+        }
+        .lp-video-btn-action.liked {
+            background: rgba(236, 72, 153, 0.22);
+            border-color: #ec4899;
+            color: #fbcfe8;
         }
 
 
@@ -4046,8 +4102,8 @@
     border-top: 1px solid rgba(212, 175, 55, 0.25);
     flex-shrink: 0;
 }
-
-@keyframes botDuelProgress {
-    from { width: 100%; }
-    to { width: 0%; }
-}
+
+@keyframes botDuelProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}

@@ -1,4 +1,4 @@
-﻿param()
+param()
 
 $localBase = $PSScriptRoot
 if (-not $localBase) { $localBase = (Get-Location).Path }
@@ -18,7 +18,24 @@ if (Test-Path $configPath) {
 $credentials = New-Object System.Net.NetworkCredential($FtpUsername, $FtpPassword)
 $remoteBases = @("/www/apps/KiDesky/", "/www/wwwroot/apps/KiDesky/")
 
-$filesToDeploy = @("index.html", "js/game-data.js", "js/game-engine.js", "js/game-combat-ai.js", "js/app.js", "js/app-hud.js", "js/app-modals.js", "js/app-catalog.js")
+$filesToDeploy = @(
+    "api.ashx",
+    "index.html",
+    "css/main.css",
+    "css/board.css",
+    "css/modals.css",
+    "css/mobile.css",
+    "js/game-data.js",
+    "js/game-boards.js",
+    "js/game-engine.js",
+    "js/game-combat-ai.js",
+    "js/app-hud.js",
+    "js/app-modals.js",
+    "js/app-admin.js",
+    "js/app-online.js",
+    "js/app-saves.js",
+    "js/app.js"
+)
 
 foreach ($relPath in $filesToDeploy) {
     if ($relPath -like "*.exe*") { continue }

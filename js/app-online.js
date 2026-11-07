@@ -20,6 +20,27 @@ openAuthModal: function () {
 
             m.style.display = "flex";
 
+            var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+            var loggedView = document.getElementById("auth-logged-view");
+            var guestView = document.getElementById("auth-guest-view");
+            if (loggedView && guestView) {
+                loggedView.style.display = isGuest ? "none" : "block";
+                guestView.style.display = isGuest ? "block" : "none";
+            }
+
+            var gNick = document.getElementById("auth-google-nickname");
+            if (gNick) {
+                var curNick = (this.currentUser && this.currentUser.displayName) || "";
+                if (!curNick) {
+                    try { curNick = (localStorage.getItem("prs_player_nickname") || "").trim(); } catch (e) { }
+                }
+                if (curNick && curNick.toLowerCase() !== "host" && curNick.toLowerCase() !== "admin" && curNick.indexOf("@") === -1) {
+                    gNick.value = curNick;
+                } else if (!gNick.value) {
+                    gNick.value = "Lord Kikin";
+                }
+            }
+
             var pwd = document.getElementById("auth-password");
 
             if (pwd) pwd.type = "password";
@@ -28,10 +49,43 @@ openAuthModal: function () {
 
             if (btn) btn.innerHTML = "👁️";
 
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                try {
+                    google.accounts.id.initialize({
+                        client_id: "335921016939-afepn3s6mpsep890pjr08bli6ufj0jub.apps.googleusercontent.com",
+                        callback: window.PRS_handleGoogleCredentialResponse,
+                        auto_select: false,
+                        cancel_on_tap_outside: true,
+                        ux_mode: "popup"
+                    });
+                    var gBox = document.getElementById("g_id_signin_box");
+                    if (gBox) {
+                        gBox.innerHTML = "";
+                        google.accounts.id.renderButton(gBox, {
+                            type: "standard",
+                            shape: "rectangular",
+                            theme: "outline",
+                            text: "signin_with",
+                            size: "large",
+                            logo_alignment: "left"
+                        });
+                    }
+                } catch (eGsi) {
+                    console.warn("GSI modal init:", eGsi);
+                }
+            }
+
             this.updateBodyModalClass();
 
         }
 
+    },
+
+    toggleClassicAuthForm: function () {
+        var form = document.getElementById("auth-classic-form");
+        if (!form) return;
+        var isHidden = (form.style.display === "none" || !form.style.display);
+        form.style.display = isHidden ? "block" : "none";
     },
 
     togglePasswordVisibility: function () {
@@ -90,15 +144,28 @@ openAuthModal: function () {
 
             role: "Guest",
 
+            credits: 0,
+
+            selectedPawnId: "knight_valiant",
+
             token: null
 
         };
 
+        this.userCredits = 0;
+        this.selectedPawnId = "knight_valiant";
+        this.unlockedPawns = ["knight_valiant", "knight_tourney", "lady_huntress", "lord_diplomat", "knight_warden", "lady_sorceress"];
+
         localStorage.setItem("prs_user", JSON.stringify(this.currentUser));
+        try { localStorage.removeItem("prs_player_nickname"); } catch (e) { }
+        try { localStorage.removeItem("prs_guest_credits"); } catch (e) { }
+        try { localStorage.removeItem("prs_unlocked_pawns"); } catch (e) { }
+        try { localStorage.setItem("prs_selected_pawn", "knight_valiant"); } catch (e) { }
 
         if (this.lobbyPlayers && this.lobbyPlayers[0]) {
 
             this.lobbyPlayers[0].name = "Host (Ty)";
+            this.lobbyPlayers[0].pawnId = "knight_valiant";
 
             this.renderLobbyPlayers();
 
@@ -153,47 +220,40 @@ openAuthModal: function () {
     },
 
     submitAuth: function (mode) {
-
         var self = this;
-
         var uInput = document.getElementById("auth-username");
-
         var pInput = document.getElementById("auth-password");
-
         var dInput = document.getElementById("auth-displayname");
-
+        var eInput = document.getElementById("auth-email");
         var msgEl = document.getElementById("auth-feedback");
 
         var username = uInput ? uInput.value.trim() : "";
-
         var password = pInput ? pInput.value : "";
-
         var displayName = dInput ? dInput.value.trim() : username;
+        var email = eInput ? eInput.value.trim() : "";
+
+        if (!email && username.indexOf("@") !== -1) {
+            email = username;
+        }
 
         if (!username || !password) {
-
             if (msgEl) msgEl.textContent = "Vyplňte prosím přihlašovací jméno a heslo.";
-
             return;
+        }
 
+        if (mode === "register" && (!email || email.indexOf("@") === -1)) {
+            if (msgEl) msgEl.textContent = "Vyplňte prosím platný e-mail pro zaslání potvrzení registrace.";
+            return;
         }
 
         fetch("api.ashx?action=" + mode, {
-
             method: "POST",
-
             headers: { "Content-Type": "application/json" },
-
-            body: JSON.stringify({ username: username, password: password, displayName: displayName })
-
+            body: JSON.stringify({ username: username, password: password, displayName: displayName, email: email })
         })
-
             .then(function (r) { return r.json(); })
-
             .then(function (data) {
-
                 if (data && data.ok && data.user) {
-
                     self.currentUser = data.user;
                     if (typeof data.user.credits === "number") self.userCredits = data.user.credits;
                     if (data.user.selectedPawnId) self.selectedPawnId = data.user.selectedPawnId;
@@ -208,49 +268,61 @@ openAuthModal: function () {
                     }
 
                     if (data.user.displayName && data.user.displayName.toLowerCase() !== "admin" && data.user.displayName.indexOf("@") === -1) {
-
                         localStorage.setItem("prs_player_nickname", data.user.displayName);
-
                     }
 
                     localStorage.setItem("prs_user", JSON.stringify(self.currentUser));
-
                     self.updateUserUI();
-
                     self.closeAuthModal();
-
+                    self.enterGameHall();
                     self.fetchServerStatusAndSessions();
 
-                } else {
-
-                    var rawErr = (data && (data.error || data.message)) ? (data.error || data.message) : "Přihlášení se nezdařilo.";
-
-                    if (rawErr.indexOf("Neplatn") !== -1 && rawErr.indexOf("heslo") !== -1) {
-
-                        rawErr = "Neplatné jméno nebo heslo.";
-
+                    if (mode === "register") {
+                        alert(data.message || "Registrace proběhla úspěšně! Na tvůj e-mail byl odeslán potvrzovací odkaz. Do jeho potvrzení můžeš hrát v režimu Hosta.");
                     }
-
+                } else {
+                    var rawErr = (data && (data.error || data.message)) ? (data.error || data.message) : "Přihlášení se nezdařilo.";
+                    if (rawErr.indexOf("Neplatn") !== -1 && rawErr.indexOf("heslo") !== -1) {
+                        rawErr = "Neplatné jméno nebo heslo.";
+                    }
                     if (msgEl) msgEl.textContent = rawErr;
-
                 }
-
             })
-
             .catch(function () {
-
                 var role = (username.toLowerCase() === "admin") ? "Admin" : "Player";
-
                 self.currentUser = { id: 1, username: username, displayName: displayName || username, role: role, token: "local" };
-
                 localStorage.setItem("prs_user", JSON.stringify(self.currentUser));
-
                 self.updateUserUI();
-
                 self.closeAuthModal();
-
             });
+    },
 
+    resendConfirmationEmail: function () {
+        var self = this;
+        var u = "";
+        if (this.currentUser && (this.currentUser.email || this.currentUser.username)) {
+            u = this.currentUser.email || this.currentUser.username;
+        } else {
+            var uInput = document.getElementById("auth-username");
+            var eInput = document.getElementById("auth-email");
+            u = (eInput && eInput.value.trim()) || (uInput && uInput.value.trim()) || "";
+        }
+        if (!u) {
+            alert("Zadej prosím své uživatelské jméno nebo e-mail.");
+            return;
+        }
+        fetch("api.ashx?action=resend-confirmation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: u, email: u })
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                alert(res.message || "Požadavek na znovuzaslání byl zpracován.");
+            })
+            .catch(function () {
+                alert("Chyba sítě při odesílání potvrzení.");
+            });
     },
 
 // --- ONLINE MÍSTNOSTI, SDÍLENÍ POZVÁNKY (?room=), ZÁMEK SLOTU & AUTO-POLLING ---
@@ -342,6 +414,8 @@ openAuthModal: function () {
             '  <span style="font-size:0.82rem; background:rgba(0,0,0,0.3); border:1px solid rgba(56,189,248,0.3); border-radius:6px; padding:0.22rem 0.55rem;">' + myRoleText + '</span>' +
 
             '  <button class="btn-gold-lg" style="font-size:0.76rem; padding:0.24rem 0.6rem;" onclick="PRS_App.openOnlineRoleModal()" title="Zvolit si rytíře pro tuto online partii">👤 Zvolit / změnit rytíře</button>' +
+
+            '  <button class="btn-secondary" style="font-size:0.76rem; padding:0.24rem 0.6rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.openOnlineSeatsModal()" title="Spravovat křesla u stolu a nahradit nepřítomné hráče boty">🏰 Křesla &amp; Boti</button>' +
 
             '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.22rem 0.5rem;" onclick="PRS_App.pollOnlineSessionNow(true)" title="Okamžitě zkontrolovat tah ze serveru">🔄 Sync (Tah #' + (this.state.turnNumber || 1) + ')</button>' +
 
@@ -1227,6 +1301,9 @@ openAuthModal: function () {
 
                     self.isBoardStaticDirty = true;
 
+                    self.hasGameStarted = true;
+                    self.updateUserUI();
+
                     self.switchTab("board");
 
                     // Zjistíme, zda už má tento hráč v prohlížeči pro tuto místnost vybranou postavu
@@ -1270,6 +1347,96 @@ openAuthModal: function () {
     }
 
     });
+
+    window.PRS_onGoogleLoginSuccess = function (response) {
+        console.log("[Google Auth] Přijata odpověď z Google Identity Services:", response);
+        var fb = document.getElementById("auth-feedback");
+        var gfb = document.getElementById("auth-google-feedback");
+        var setMsg = function (col, text) {
+            if (fb) { fb.style.color = col; fb.textContent = text; }
+            if (gfb) { gfb.style.color = col; gfb.textContent = text; }
+        };
+
+        setMsg("#38bdf8", "⏳ Ověřuji rytířský Google účet v královské matrice...");
+
+        if (!response || !response.credential) {
+            var msgNoCred = "Google přihlášení neposkytlo ověřovací token.";
+            setMsg("#f87171", "⚠️ " + msgNoCred);
+            return;
+        }
+
+        var nickInput = document.getElementById("auth-google-nickname");
+        var desiredNick = (nickInput ? nickInput.value : "").trim();
+        if (!desiredNick) {
+            try { desiredNick = (localStorage.getItem("prs_player_nickname") || "").trim(); } catch (e) { }
+        }
+
+        fetch("api.ashx?action=google-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                credential: response.credential,
+                displayName: desiredNick
+            })
+        })
+            .then(function (r) {
+                return r.text().then(function (txt) {
+                    try {
+                        return JSON.parse(txt);
+                    } catch (pe) {
+                        throw new Error("Neplatná odpověď serveru (HTTP " + r.status + "): " + txt.substring(0, 100));
+                    }
+                });
+            })
+            .then(function (res) {
+                if (res && res.ok && res.user) {
+                    setMsg("#4ade80", "✅ Přihlášení úspěšné! Vítej, " + (res.user.displayName || res.user.username) + "!");
+                    if (window.PRS_App) {
+                        PRS_App.currentUser = res.user;
+                        if (typeof res.user.credits === "number") PRS_App.userCredits = res.user.credits;
+                        if (res.user.selectedPawnId) PRS_App.selectedPawnId = res.user.selectedPawnId;
+                        if (res.user.unlockedPawnsJson) {
+                            try {
+                                var unl = JSON.parse(res.user.unlockedPawnsJson);
+                                if (Array.isArray(unl) && unl.length > 0) PRS_App.unlockedPawns = unl;
+                            } catch (e2) { }
+                        }
+                        if (PRS_App.lobbyPlayers && PRS_App.lobbyPlayers[0]) {
+                            PRS_App.lobbyPlayers[0].pawnId = PRS_App.selectedPawnId || "knight_valiant";
+                        }
+                        var effNick = res.user.displayName || desiredNick || res.user.username;
+                        if (effNick && effNick.indexOf("@") === -1 && effNick.toLowerCase() !== "host") {
+                            try { localStorage.setItem("prs_player_nickname", effNick); } catch (e3) { }
+                        }
+                        try { localStorage.setItem("prs_user", JSON.stringify(PRS_App.currentUser)); } catch (e4) { }
+                        PRS_App.updateUserUI();
+                        PRS_App.updateGameHallUI();
+
+                        setTimeout(function () {
+                            PRS_App.closeAuthModal();
+                            PRS_App.enterGameHall();
+                            PRS_App.fetchServerStatusAndSessions();
+                            if (window.PRS_Audio && window.PRS_Audio.playFanfare) {
+                                window.PRS_Audio.playFanfare();
+                            }
+                        }, 500);
+                    }
+                } else {
+                    var errMsg = (res && res.message) ? res.message : "Přihlášení přes Google selhalo.";
+                    setMsg("#f87171", "⚠️ " + errMsg);
+                }
+            })
+            .catch(function (err) {
+                var netErr = "Chyba při ověřování Google účtu: " + (err.message || err);
+                setMsg("#f87171", "⚠️ " + netErr);
+            });
+    };
+
+    window.PRS_handleGoogleCredentialResponse = window.PRS_onGoogleLoginSuccess;
+    if (window._pendingGoogleResponse) {
+        window.PRS_onGoogleLoginSuccess(window._pendingGoogleResponse);
+        window._pendingGoogleResponse = null;
+    }
 
 })();
 

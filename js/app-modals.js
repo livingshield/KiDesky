@@ -1871,6 +1871,22 @@
 
     },
 
+    handleRetreatFromQuest: function () {
+
+        if (!this.state) return;
+
+        window.PRS_GameEngine.retreatFromQuest(this.state);
+
+        var qModal = document.getElementById("quest-duel-modal");
+
+        if (qModal) qModal.style.display = "none";
+
+        this.renderGameScreen();
+
+        this.saveSessionAuto();
+
+    },
+
     handleResolveFestival: function () {
 
         var pa = this.state ? this.state.pendingAction : null;

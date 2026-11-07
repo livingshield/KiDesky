@@ -118,14 +118,23 @@
             top: 0;
             z-index: 100;
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             align-items: center;
             justify-content: space-between;
-            gap: 0.8rem;
-            padding: 0.75rem 1.5rem;
-            background: rgba(15, 13, 10, 0.94);
+            gap: 0.75rem;
+            padding: 0.6rem 1.25rem;
+            background: rgba(15, 13, 10, 0.95);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-gold);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .topbar::-webkit-scrollbar {
+            height: 3px;
+        }
+        .topbar::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 3px;
         }
 
         .brand-wrap {
@@ -850,4 +859,291 @@
 .btn-branch-choice:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   PROPAGACNI BRANA (TAB-WELCOME) & RYTIRSKA HERNA (TAB-LOBBY)
+   ========================================================================== */
+
+/* Karta vstupu do hry v Hero sekci na Brane */
+.welcome-entry-card {
+    background: linear-gradient(135deg, rgba(38, 26, 14, 0.95), rgba(20, 14, 9, 0.98));
+    border: 1.5px solid var(--gold);
+    border-radius: 14px;
+    padding: 1.05rem 1.25rem;
+    margin-top: 1.1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 0 16px rgba(212, 175, 55, 0.1);
+}
+
+/* Horni profilova karta v Rytirske herne */
+.gamehall-profile-card {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1.2fr;
+    gap: 1.25rem;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(34, 24, 15, 0.96) 0%, rgba(18, 12, 8, 0.96) 100%);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 1.4rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), inset 0 0 20px rgba(212, 175, 55, 0.15);
+}
+@media (max-width: 1024px) {
+    .gamehall-profile-card {
+        grid-template-columns: 1fr;
+        gap: 0.9rem;
+    }
+}
+
+.gamehall-knight-col {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+.gamehall-avatar-wrap {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 0 14px rgba(212, 175, 55, 0.45);
+    flex-shrink: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.gamehall-avatar-wrap:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 22px rgba(212, 175, 55, 0.7);
+}
+.gamehall-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.gamehall-avatar-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.75);
+    font-size: 0.6rem;
+    text-align: center;
+    color: var(--gold-light);
+    font-weight: 700;
+}
+
+.gamehall-treasury-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 12px;
+    padding: 0.65rem 0.95rem;
+    gap: 0.35rem;
+}
+
+.gamehall-actions-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+@media (max-width: 1024px) {
+    .gamehall-actions-col {
+        align-items: stretch;
+    }
+}
+
+/* Navigacni lista mistnosti v herne */
+.gamehall-tabs-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.65rem;
+    margin-bottom: 1.35rem;
+}
+@media (max-width: 900px) {
+    .gamehall-tabs-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 520px) {
+    .gamehall-tabs-bar {
+        grid-template-columns: 1fr;
+    }
+}
+
+.gamehall-tab-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid rgba(212, 175, 55, 0.28);
+    border-radius: 12px;
+    padding: 0.75rem 0.85rem;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+.gamehall-tab-btn:hover {
+    background: rgba(212, 175, 55, 0.14);
+    border-color: var(--gold);
+    color: var(--gold-light);
+    transform: translateY(-1px);
+}
+.gamehall-tab-btn.active {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.35), rgba(180, 125, 28, 0.45));
+    border-color: var(--gold);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35);
+}
+
+.gamehall-room-view {
+    animation: fadeInRoom 0.25s ease-out;
+}
+@keyframes fadeInRoom {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-icon-subtle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0.75;
+    transition: opacity 0.2s, background 0.2s;
+}
+.btn-icon-subtle:hover {
+    opacity: 1;
+    background: rgba(212, 175, 55, 0.2);
+}
+
+/* 2x2 Mrizka parametru v Hero sekci */
+.lp-badges-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+    margin-bottom: 1.15rem;
+}
+@media (max-width: 600px) {
+    .lp-badges-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 2-sloupcovy Dashboard Rytirske herny */
+.gamehall-dashboard-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 1.35rem;
+    align-items: start;
+    margin-bottom: 1.5rem;
+}
+@media (max-width: 1080px) {
+    .gamehall-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.gamehall-knight-card {
+    background: linear-gradient(135deg, rgba(34, 24, 15, 0.96) 0%, rgba(18, 12, 8, 0.96) 100%);
+    border: 1.5px solid var(--gold);
+    border-radius: 16px;
+    padding: 1.15rem;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), inset 0 0 16px rgba(212, 175, 55, 0.12);
+}
+
+.gamehall-quick-pawns-strip {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding: 3px 0 5px 0;
+}
+.gamehall-quick-pawns-strip::-webkit-scrollbar {
+    height: 4px;
+}
+.gamehall-quick-pawns-strip::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.4);
+    border-radius: 4px;
+}
+
+.gamehall-pawn-chip {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(212, 175, 55, 0.35);
+    background: rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+    position: relative;
+}
+.gamehall-pawn-chip img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.gamehall-pawn-chip:hover {
+    transform: scale(1.12);
+    border-color: var(--gold);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+}
+.gamehall-pawn-chip.active {
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 14px rgba(212, 175, 55, 0.85);
+    transform: scale(1.1);
+}
+
+/* --- ULOŽENÉ HRY (SAVE / LOAD) & SPRÁVA KŘESEL --- */
+.save-game-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(212, 175, 55, 0.06));
+    border: 1.5px solid rgba(212, 175, 55, 0.28);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+}
+.save-game-card:hover {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(20, 15, 10, 0.95));
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+.save-game-player-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 6px;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.73rem;
+    color: #e5e7eb;
+}
+.seat-item-card {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.55rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    transition: border-color 0.18s ease;
+}
+.seat-item-card:hover {
+    border-color: rgba(212, 175, 55, 0.6);
 }

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * KiDesky - Princeznino srdce
  * Modul: app-admin.js
  * Kompletní administrátorská sekce portálu:
@@ -392,8 +392,8 @@
                     : '<span class="badge-pill" style="background:#2563eb; color:#fff;">MP4 Soubor</span>';
 
                 var heroBadge = v.isHeroActive
-                    ? '<span class="badge-pill" style="background:var(--gold); color:#1c1917; font-weight:700;">★ Hlavní Hero</span>'
-                    : '<button class="btn-secondary" style="font-size:0.72rem; padding:0.2rem 0.5rem;" onclick="PRS_App.setHeroVideo(' + v.id + ')">Aktivovat na Landing</button>';
+                    ? '<button class="btn-secondary" style="font-size:0.74rem; padding:0.25rem 0.6rem; background:#16a34a; border-color:#22c55e; color:#fff; font-weight:700;" onclick="PRS_App.toggleHeroVideo(' + v.id + ')" title="Video je aktivní na Landing Page. Kliknutím ho odeberete z rotace.">★ Aktivní na Landing</button>'
+                    : '<button class="btn-secondary" style="font-size:0.74rem; padding:0.25rem 0.6rem; color:#94a3b8; border-color:rgba(255,255,255,0.2);" onclick="PRS_App.toggleHeroVideo(' + v.id + ')" title="Kliknutím přidáte video do rotace na Landing Page">+ Přidat na Landing</button>';
 
                 html += '<tr>' +
                     '<td style="font-weight:700; color:var(--gold-light);">' + v.id + '</td>' +
@@ -741,12 +741,12 @@
                 .catch(function () { alert("Chyba sítě při mazání."); });
         },
 
-        setHeroVideo: function (id) {
+        toggleHeroVideo: function (id) {
             var self = this;
             fetch("api.ashx?action=admin-set-hero-video", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: id })
+                body: JSON.stringify({ id: id, toggle: true })
             })
                 .then(function (r) { return r.json(); })
                 .then(function (res) {
@@ -754,10 +754,14 @@
                         self.loadAdminVideos();
                         self.loadActiveHeroVideo();
                     } else {
-                        alert(res.message || "Nastavení hero videa selhalo.");
+                        alert(res.message || "Úprava stavu videa selhala.");
                     }
                 })
                 .catch(function () { alert("Chyba sítě při nastavování hero videa."); });
+        },
+
+        setHeroVideo: function (id) {
+            this.toggleHeroVideo(id);
         },
 
         // ==========================================

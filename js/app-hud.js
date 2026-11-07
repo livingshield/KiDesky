@@ -234,6 +234,10 @@
 
             htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #ef4444, #b91c1c); color:#fff; border-color:#fca5a5;" onclick="PRS_App.handleResolveQuest()">⚔️ ZAÚTOČIT NA BESTII (' + this.escapeHtml(pa.questCard.name) + ')</button>');
 
+            if (pa.questCard.questTier === "U2" || pa.questCard.questTier === "U3") {
+                htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #475569, #334155); color:#fff; border-color:#94a3b8; margin-top:4px;" onclick="PRS_App.handleRetreatFromQuest()">🛡️ Taktický ústup (' + (pa.questCard.questTier === "U3" ? '800' : '400') + ' zl.)</button>');
+            }
+
         } else if (pa.canResolveFestival) {
 
             htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #ec4899, #be185d); color:#fff; border-color:#fbcfe8;" onclick="PRS_App.handleResolveFestival()">🏆 VYHODNOTIT SLAVNOST (💖)</button>');
@@ -3091,6 +3095,11 @@
 
                 '</button>' +
 
+                ((q.questTier === "U2" || q.questTier === "U3") ?
+                ('<button id="btn-duel-retreat" class="btn-action-buy" style="margin-top:0.45rem; background:linear-gradient(135deg, #475569, #334155); border-color:#94a3b8; width:100%; font-weight:600; padding:0.6rem; cursor:pointer;" onclick="PRS_App.handleRetreatFromQuest()">' +
+                '  🛡️ Taktický ústup z doupěte (' + (q.questTier === "U3" ? '800' : '400') + ' zl.)' +
+                '</button>') : '') +
+
                 '</div>';
 
         }
@@ -4079,7 +4088,6 @@
             : (Math.floor(Math.random() * 6) + 1);
 
         // Sokolí navigace pro člověka
-
         if (hasFalcon) {
 
             self.showFalconNavigationDialog(player, baseRoll);
@@ -4088,9 +4096,73 @@
 
         }
 
-        // Běžný pochod
+        // Pěší bonus za výcvik Jízdy (Jízda >= 2 dává +1 pole, Jízda >= 4 dává +2 pole)
+        if (!hasHorse && effStats.jizda >= 2) {
 
+            var jzBonus = (effStats.jizda >= 4) ? 2 : 1;
+
+            self.showPedestrianSprintDialog(player, baseRoll, jzBonus);
+
+            return;
+
+        }
+
+        // Běžný pochod
         self.executeRollAndAnimateMove(player, null, baseRoll);
+
+    },
+
+    showPedestrianSprintDialog: function (player, baseRoll, jzBonus) {
+
+        var self = this;
+
+        var sprintRoll = baseRoll + jzBonus;
+
+        var targetBase = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, baseRoll);
+
+        var targetSprint = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, sprintRoll);
+
+        var modal = document.getElementById("generic-modal");
+
+        if (!modal) {
+
+            self.executeRollAndAnimateMove(player, null, baseRoll);
+
+            return;
+
+        }
+
+        var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
+
+            '<div style="font-size:2rem; margin-bottom:0.3rem;">🏃‍♂️ 🏇</div>' +
+
+            '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.5rem 0;">Výcvik Jízdy: Hod ' + baseRoll + '!</h3>' +
+
+            '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">Díky své rytířské mrštnosti a výcviku Jízdy můžeš vyrazit svižným přesunem (+' + jzBonus + ' ' + (jzBonus === 1 ? 'pole' : 'pole') + ')!</div>' +
+
+            '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
+
+            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border-color:#38bdf8;" onclick="PRS_App.confirmFalconRoll(' + sprintRoll + ')">' +
+
+            '    <div style="font-weight:700; color:#e0f2fe;">⚡ Rychlý přesun: ' + sprintRoll + ' polí (+' + jzBonus + ')</div>' +
+
+            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + (targetSprint ? self.escapeHtml(targetSprint.name) : '') + '</div>' +
+
+            '  </button>' +
+
+            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmFalconRoll(' + baseRoll + ')">' +
+
+            '    <div style="font-weight:700; color:#fef08a;">🚶 Běžný krok: ' + baseRoll + ' polí</div>' +
+
+            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + (targetBase ? self.escapeHtml(targetBase.name) : '') + '</div>' +
+
+            '  </button>' +
+
+            '</div></div>';
+
+        modal.innerHTML = html;
+
+        modal.style.display = "flex";
 
     },
 
@@ -4098,9 +4170,21 @@
 
         var self = this;
 
+        var effStats = window.PRS_GameEngine.getEffectiveStats(self.state, player);
+
+        var jz = effStats.jizda || 0;
+
+        var canGallop = jz >= 2;
+
+        var canSprint = jz >= 4;
+
         var sum = d1 + d2;
 
-        var targetSum = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, sum);
+        var sprintSum = sum + 2;
+
+        var targetSum = canGallop ? window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, sum) : null;
+
+        var targetSprint = canSprint ? window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, sprintSum) : null;
 
         var targetD1 = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, d1);
 
@@ -4110,49 +4194,75 @@
 
         if (!modal) {
 
-            self.executeRollAndAnimateMove(player, null, sum);
+            self.executeRollAndAnimateMove(player, null, canGallop ? sum : d1);
 
             return;
 
         }
 
+        var headerTitle = canSprint ? "Královský trysk" : (canGallop ? "Koňský cval" : "Koňský klus");
+
+        var headerSub = canGallop
+
+            ? ("Díky mistrovství Jízdy (" + jz + "/5) a koni máš plnou volbu mezi bleskovým cvalem či přesným manévrem!")
+
+            : ("Koňský klus (Jízda " + jz + "/5): Volíš z obou kostek (plný cval d1+d2 vyžaduje Jízdu ≥ 2)!");
+
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid var(--gold); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
 
             '<div style="font-size:2rem; margin-bottom:0.3rem;">🏇 🎲 🎲</div>' +
 
-            '<h3 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin:0 0 0.5rem 0;">Koňský cval: Padlo ' + d1 + ' a ' + d2 + '!</h3>' +
+            '<h3 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + headerTitle + ': Padlo ' + d1 + ' a ' + d2 + '!</h3>' +
 
-            '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">Díky koním ve stáji máš volbu: bleskově vyrazit kupředu plným tryskem, nebo přesně manévrovat na vybranou hodnotu!</div>' +
+            '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">' + headerSub + '</div>' +
 
-            '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
+            '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
 
-            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmHorseRoll(' + sum + ', ' + hasFalcon + ')">' +
+        if (canSprint && targetSprint) {
 
-            '    <div style="font-weight:700; color:#fef08a;">⚡ Bleskový trysk (' + sum + ' polí)</div>' +
+            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #7c3aed, #4f46e5); border-color:#c084fc;" onclick="PRS_App.confirmHorseRoll(' + sprintSum + ', ' + hasFalcon + ')">' +
 
-            '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + (targetSum ? self.escapeHtml(targetSum.name) : '') + '</div>' +
+                '    <div style="font-weight:700; color:#f5d0fe;">👑 Královský trysk (' + sprintSum + ' polí: ' + sum + '+2)</div>' +
 
-            '  </button>' +
+                '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + self.escapeHtml(targetSprint.name) + '</div>' +
 
-            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d1 + ', ' + hasFalcon + ')">' +
+                '  </button>';
+
+        }
+
+        if (canGallop && targetSum) {
+
+            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmHorseRoll(' + sum + ', ' + hasFalcon + ')">' +
+
+                '    <div style="font-weight:700; color:#fef08a;">⚡ Plný cval (' + sum + ' polí)</div>' +
+
+                '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + self.escapeHtml(targetSum.name) + '</div>' +
+
+                '  </button>';
+
+        }
+
+        html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d1 + ', ' + hasFalcon + ')">' +
 
             '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d1 + ' ' + (d1 === 1 ? 'pole' : (d1 < 5 ? 'pole' : 'polí')) + ')</div>' +
 
             '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + (targetD1 ? self.escapeHtml(targetD1.name) : '') + '</div>' +
 
-            '  </button>' +
+            '  </button>';
 
-            (targetD2 ? '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d2 + ', ' + hasFalcon + ')">' +
+        if (targetD2) {
 
-            '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d2 + ' ' + (d2 < 5 ? 'pole' : 'polí') + ')</div>' +
+            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d2 + ', ' + hasFalcon + ')">' +
 
-            '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + self.escapeHtml(targetD2.name) + '</div>' +
+                '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d2 + ' ' + (d2 < 5 ? 'pole' : 'polí') + ')</div>' +
 
-            '  </button>' : '') +
+                '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + self.escapeHtml(targetD2.name) + '</div>' +
 
-            '</div>' +
+                '  </button>';
 
-            '</div>';
+        }
+
+        html += '</div></div>';
 
         modal.innerHTML = html;
 
