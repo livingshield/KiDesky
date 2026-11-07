@@ -359,11 +359,6 @@ window.PRS_App = {
             if (lobbySelect && lobbySelect.value !== themeName) {
                 lobbySelect.value = themeName;
             }
-            var topbarIcon = document.getElementById("topbar-theme-icon");
-            if (topbarIcon) {
-                var themeIcons = { light: "👑", fire: "🔥", water: "💧", earth: "🌿", air: "⚡" };
-                topbarIcon.textContent = themeIcons[themeName] || "👑";
-            }
 
         }
 
