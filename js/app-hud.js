@@ -722,21 +722,58 @@
             '</span>';
     },
 
+    renderEndlessModeBanner: function () {
+        var banner = document.getElementById("board-endless-mode-banner");
+        if (!banner) return;
+
+        if (!this.state || !this.state.isEndlessMode) {
+            banner.style.display = "none";
+            return;
+        }
+
+        banner.style.display = "flex";
+        var winIdx = (this.state.originalWinnerIndex !== null && this.state.originalWinnerIndex !== undefined) ? this.state.originalWinnerIndex : (this.state.winnerIndex || 0);
+        var winner = (this.state.players && this.state.players[winIdx]) ? this.state.players[winIdx] : null;
+        var winName = winner ? (winner.badge + " " + winner.name) : "Vítěz";
+        var winColor = winner ? winner.color : "var(--gold-light)";
+        var winRound = this.state.originalWinRound || this.state.roundNumber || 1;
+
+        banner.innerHTML =
+            '<div style="display:flex; align-items:center; gap:0.65rem;">' +
+            '  <span style="font-size:1.5rem; filter:drop-shadow(0 0 6px rgba(234,179,8,0.7));">👑</span>' +
+            '  <div>' +
+            '    <div style="color:var(--gold-light); font-size:0.95rem; font-weight:700; font-family:\'Cinzel\',serif;">' +
+            '      🏆 HRA JE DOHRÁNA • VÍTĚZ: <strong style="color:' + winColor + ';">' + this.escapeHtml(winName) + '</strong> (' + winRound + '. kolo)!' +
+            '    </div>' +
+            '    <div style="font-size:0.77rem; color:#fde68a; margin-top:2px;">' +
+            '      ♾️ <em>Režim nekonečné volné hry: pokračuješ ve stavění, chovu a plnění zbývajících cílů pro radost ze hry.</em>' +
+            '    </div>' +
+            '  </div>' +
+            '</div>' +
+            '<div style="display:flex; gap:0.45rem; align-items:center;">' +
+            '  <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.75rem; border-color:var(--gold); color:var(--gold-light); font-weight:700;" onclick="PRS_App.openVictoryModal()" title="Zobrazit slavnostní tabulku a statistiky vítězství">🏆 Výsledky &amp; Síň slávy</button>' +
+            '  <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.75rem;" onclick="PRS_App.startNewGame(true)" title="Začít novou partii od začátku">🔄 Nová partie</button>' +
+            '</div>';
+    },
+
     renderTopPlayersHud: function () {
+        this.renderEndlessModeBanner();
 
         var el = document.getElementById("board-top-players-hud");
-
         if (!el || !this.state || !this.state.players) return;
 
         var target = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30;
-
         var curIdx = this.state.currentPlayerIndex;
-
         var inspIdx = (this.inspectedPlayerIndex !== null && this.inspectedPlayerIndex !== undefined) ? this.inspectedPlayerIndex : curIdx;
+        var winIdx = (this.state.originalWinnerIndex !== null && this.state.originalWinnerIndex !== undefined) ? this.state.originalWinnerIndex : this.state.winnerIndex;
 
         var html = [];
-
         for (var i = 0; i < this.state.players.length; i++) {
+            var p = this.state.players[i];
+            var isTurn = (i === curIdx);
+            var isInspected = (i === inspIdx);
+            var isOfficialWinner = (this.state.isEndlessMode || this.state.phase === "GAME_OVER") && (i === winIdx);
+            var winnerTag = isOfficialWinner ? ' <span style="background:linear-gradient(135deg,#eab308,#ca8a04); color:#000; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px; margin-left:3px; letter-spacing:0.3px; box-shadow:0 0 6px rgba(234,179,8,0.7);" title="Oficiální vítěz partie">🏆 VÍTĚZ</span>' : '';
 
             var p = this.state.players[i];
 
@@ -793,9 +830,7 @@
                 '      <div class="top-hud-name-col">' +
 
                 '        <div class="top-hud-name" style="' + (isTurn ? 'color:#fef08a; font-weight:800;' : '') + '">' +
-
-                this.escapeHtml(p.name) +
-
+                this.escapeHtml(p.name) + winnerTag +
                 (p.isEliminated ? ' <span style="background:#dc2626; color:#fff; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px; margin-left:4px; letter-spacing:0.5px; box-shadow:0 0 6px rgba(220,38,38,0.7);">💀 MRTEV</span>' : '') +
 
                 '        </div>' +
@@ -2007,16 +2042,16 @@
 
         var inspIdx = (this.inspectedPlayerIndex !== null && this.inspectedPlayerIndex !== undefined) ? this.inspectedPlayerIndex : curIdx;
 
+        var isEndless = !!(this.state && this.state.isEndlessMode);
+        var winIdx = (this.state.originalWinnerIndex !== null && this.state.originalWinnerIndex !== undefined) ? this.state.originalWinnerIndex : this.state.winnerIndex;
+        var winnerP = (isEndless && this.state.players && this.state.players[winIdx]) ? this.state.players[winIdx] : null;
+        var headerStatus = isEndless ? ('<span style="color:#fde047; font-weight:800;" title="Oficiální vítěz partie">🏆 Vítěz: ' + this.escapeHtml(winnerP ? winnerP.name : 'Rytíř') + '</span>') : ('<span style="color:#f472b6;">Cíl: ' + target + ' 💖</span>');
+
         var html = '<div class="standings-card">' +
-
             '  <div class="standings-header">' +
-
             '    <span>🏆 STAV RYTÍŘŮ &amp; ZÁVOD</span>' +
-
-            '    <span style="color:#f472b6;">Cíl: ' + target + ' 💖</span>' +
-
+            '    ' + headerStatus +
             '  </div>' +
-
             '  <div class="standings-list">';
 
         for (var i = 0; i < this.state.players.length; i++) {
@@ -2046,9 +2081,7 @@
                 '    ' + this.getPlayerPawnAvatarHtml(p, 22) + 
 
                 '    <span class="sp-name" style="' + (isTurn ? 'color:#fef08a; font-weight:700;' : '') + '">' +
-
-                (isTurn ? '👑 ' : '') + this.escapeHtml(p.name) +
-
+                (isTurn ? '👑 ' : '') + this.escapeHtml(p.name) + ((isEndless && i === winIdx) ? ' <small style="background:#eab308; color:#000; font-size:0.62rem; font-weight:800; padding:1px 4px; border-radius:3px;">👑 VÍTĚZ</small>' : '') +
                 '</span>' +
 
                 '  </div>' +
@@ -2540,11 +2573,9 @@
                 '<p>' + (this.state.winType === "slayer_dragons" ? "Skolil 2 obávané draky království" : (this.state.winType === "tycoon_estates" ? "Ovládl 3 města a královský hrad" : ("Získal celkem <strong>" + winP.totalHearts + " 💖</strong>"))) + ' za ' + this.state.roundNumber + ' kol a získává ruku princezny.</p>' +
 
                 '<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.6rem;">' +
-
-                '  <button class="btn-gold-lg" onclick="PRS_App.openVictoryModal()">👑 Otevřít ceremoniál &amp; Síň slávy</button>' +
-
+                '  <button class="btn-gold-lg" onclick="PRS_App.continueInEndlessMode()" title="Pokračovat ve volné hře na stávajícím herním plánu">♾️ Pokračovat v nekonečné hře</button>' +
+                '  <button class="btn-secondary" onclick="PRS_App.openVictoryModal()">👑 Otevřít ceremoniál &amp; Síň slávy</button>' +
                 '  <button class="btn-secondary" onclick="PRS_App.startNewGame(true)">🔄 Nová partie</button>' +
-
                 '</div>' +
 
                 '</div>';

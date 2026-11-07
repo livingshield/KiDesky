@@ -270,13 +270,58 @@
     },
 
     closeVictoryModal: function () {
-
         var modal = document.getElementById("victory-modal");
-
         if (modal) modal.style.display = "none";
-
         this.updateBodyModalClass();
+    },
 
+    continueInEndlessMode: function () {
+        if (!this.state) return;
+
+        this.state.isEndlessMode = true;
+        if (this.state.originalWinnerIndex === null || this.state.originalWinnerIndex === undefined) {
+            this.state.originalWinnerIndex = (this.state.winnerIndex !== null) ? this.state.winnerIndex : 0;
+            this.state.originalWinRound = this.state.roundNumber || 1;
+            this.state.originalWinType = this.state.winType || "standard";
+        }
+
+        // Pokud byla hra zastavena ve stavu GAME_OVER, vrátíme ji do běhu (fáze ROLL / ACTION)
+        if (this.state.phase === "GAME_OVER") {
+            if (this.state.pendingAction && this.state.pendingAction.type) {
+                this.state.phase = "ACTION";
+            } else {
+                this.state.phase = "ROLL";
+            }
+        }
+
+        this.closeVictoryModal();
+
+        if (window.PRS_Audio && window.PRS_Audio.playNotice) {
+            window.PRS_Audio.playNotice();
+        }
+
+        var winIdx = this.state.originalWinnerIndex;
+        var winP = (this.state.players && this.state.players[winIdx]) ? this.state.players[winIdx] : null;
+        var winName = winP ? winP.name : "Vítěz";
+
+        if (this.showToast) {
+            this.showToast("♾️ Nekonečná hra zahájena! Oficiální vítěz: " + winName + ". Můžeš dál volně hrát a rozvíjet panství.", "success");
+        }
+
+        if (this.renderGameScreen) {
+            this.renderGameScreen();
+        }
+
+        // Pokud je aktuálně na tahu PC bot, naplánujeme jeho tah
+        var curPl = this.state.players[this.state.currentPlayerIndex];
+        if (curPl && curPl.type !== "Human" && this.scheduleBotTurnIfNeeded) {
+            this.scheduleBotTurnIfNeeded();
+        }
+
+        // Pokud jde o online hru, uložíme aktualizovaný stav
+        if (this.state.roomCode && this.saveSessionAuto) {
+            this.saveSessionAuto();
+        }
     },
 
     saveVictoryToCloud: function () {

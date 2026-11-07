@@ -293,8 +293,11 @@ window.PRS_GameEngine = {
             pendingAction: null,
 
             winnerIndex: null,
-
             winType: null,
+            isEndlessMode: false,
+            originalWinnerIndex: null,
+            originalWinRound: null,
+            originalWinType: null,
 
             activePacts: [],
 
@@ -1250,23 +1253,20 @@ window.PRS_GameEngine = {
                 }
             }
 
-            if (state.winnerIndex === null && isWin && !pl.isEliminated) {
-
+            if (!state.isEndlessMode && state.winnerIndex === null && isWin && !pl.isEliminated) {
                 state.winnerIndex = m;
-
+                state.originalWinnerIndex = m;
+                state.originalWinRound = state.roundNumber || 1;
+                state.originalWinType = winTypeAchieved;
                 state.winType = winTypeAchieved;
-
                 state.phase = "GAME_OVER";
-
                 this.addLog(state, winReason, "win");
-
             }
 
         }
 
         // Kontrola jediného přeživšího rytíře v Ultimate módu
-
-        if (state.config.bankruptcyElimination && state.winnerIndex === null) {
+        if (!state.isEndlessMode && state.config.bankruptcyElimination && state.winnerIndex === null) {
 
             var activePlayers = [];
 
@@ -3748,13 +3748,16 @@ window.PRS_GameEngine = {
         this.recalculateBreedingAndVictory(state);
 
         // Kontrola vítězství posledního přeživšího rytíře
-        if (state.config && state.config.bankruptcyElimination && state.winnerIndex === null) {
+        if (!state.isEndlessMode && state.config && state.config.bankruptcyElimination && state.winnerIndex === null) {
             var active = [];
             for (var a = 0; a < state.players.length; a++) {
                 if (!state.players[a].isEliminated) active.push(state.players[a]);
             }
             if (active.length === 1) {
                 state.winnerIndex = active[0].index;
+                state.originalWinnerIndex = active[0].index;
+                state.originalWinRound = state.roundNumber || 1;
+                state.originalWinType = "sole_survivor";
                 state.phase = "GAME_OVER";
                 this.addLog(state, "👑 POSLEDNÍ PŘEŽIVŠÍ RYTÍŘ! Všichni ostatní soupeři padli v módu Ultimate. " + active[0].badge + " " + active[0].name + " slaví triumfální vítězství!", "victory");
             }

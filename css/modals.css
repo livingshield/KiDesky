@@ -909,6 +909,21 @@
             padding: 6px 10px;
         }
 
+        /* Banner nekonečné volné hry po dohrání */
+        .board-endless-mode-banner {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 0.65rem;
+            padding: 0.5rem 0.95rem;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(30, 20, 10, 0.92) 100%);
+            border: 1.5px solid var(--gold);
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+        }
+
         /* 2-sloupcová královská filmová síň (videa pod Hero sekcí) */
         .lp-video-showcase-section {
             margin-top: 1.75rem;

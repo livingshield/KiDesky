@@ -36,13 +36,13 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611072125">
+    <link rel="stylesheet" href="css/main.css?v=202611072135">
 
-    <link rel="stylesheet" href="css/board.css?v=202611072125">
+    <link rel="stylesheet" href="css/board.css?v=202611072135">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611072125">
+    <link rel="stylesheet" href="css/modals.css?v=202611072135">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611072125">
+    <link rel="stylesheet" href="css/mobile.css?v=202611072135">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -839,6 +839,9 @@
             <!-- Lišta Online Místnosti, Sdílení odkazu a Zámku postavy -->
 
             <div id="online-room-bar"></div>
+
+            <!-- BANNER NEKONEČNÉ HRY PO VÍTĚZSTVÍ -->
+            <div id="board-endless-mode-banner" class="board-endless-mode-banner"></div>
 
             <!-- KRÁLOVSKÁ POKLADNICE & PŘEHLED ZLATA RYTÍŘŮ U STOLU -->
 
@@ -2138,13 +2141,9 @@
             <!-- Akční tlačítka -->
 
             <div class="victory-actions-bar">
-
-                <button class="btn-gold-lg" onclick="PRS_App.startNewGame(true)">🔄 Spustit novou partii</button>
-
+                <button class="btn-gold-lg" onclick="PRS_App.continueInEndlessMode()" title="Pokračovat ve volné nekonečné hře na herním plánu se vším vybudovaným panstvím">♾️ Pokračovat v nekonečné hře</button>
                 <button class="btn-secondary" id="btn-save-hall-of-fame" onclick="PRS_App.saveVictoryToCloud()">📜 Zapsat do Síně slávy</button>
-
-                <button class="btn-secondary" onclick="PRS_App.closeVictoryModal()">👀 Prohlédnout stůl</button>
-
+                <button class="btn-secondary" onclick="PRS_App.startNewGame(true)">🔄 Spustit novou partii</button>
             </div>
 
             <div id="victory-cloud-feedback" style="text-align:center; margin-top:0.5rem; font-size:0.83rem; color:var(--gold-light);"></div>
@@ -2612,20 +2611,20 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611072125" defer></script>
-    <script src="js/game-boards.js?v=202611072125" defer></script>
-    <script src="js/game-engine.js?v=202611072125" defer></script>
-    <script src="js/game-combat-ai.js?v=202611072125" defer></script>
-    <script src="js/app-audio.js?v=202611072125" defer></script>
-    <script src="js/app.js?v=202611072125" defer></script>
-    <script src="js/app-board.js?v=202611072125" defer></script>
-    <script src="js/app-hud.js?v=202611072125" defer></script>
-    <script src="js/app-modals.js?v=202611072125" defer></script>
-    <script src="js/app-online.js?v=202611072125" defer></script>
-    <script src="js/app-saves.js?v=202611072125" defer></script>
-    <script src="js/app-catalog.js?v=202611072125" defer></script>
-    <script src="js/app-admin.js?v=202611072125" defer></script>
-    <script src="js/app-musicwidget.js?v=202611072125" defer></script>
+    <script src="js/game-data.js?v=202611072135" defer></script>
+    <script src="js/game-boards.js?v=202611072135" defer></script>
+    <script src="js/game-engine.js?v=202611072135" defer></script>
+    <script src="js/game-combat-ai.js?v=202611072135" defer></script>
+    <script src="js/app-audio.js?v=202611072135" defer></script>
+    <script src="js/app.js?v=202611072135" defer></script>
+    <script src="js/app-board.js?v=202611072135" defer></script>
+    <script src="js/app-hud.js?v=202611072135" defer></script>
+    <script src="js/app-modals.js?v=202611072135" defer></script>
+    <script src="js/app-online.js?v=202611072135" defer></script>
+    <script src="js/app-saves.js?v=202611072135" defer></script>
+    <script src="js/app-catalog.js?v=202611072135" defer></script>
+    <script src="js/app-admin.js?v=202611072135" defer></script>
+    <script src="js/app-musicwidget.js?v=202611072135" defer></script>
     <script>
         (function () {
             function bootApp() {
