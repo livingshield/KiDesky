@@ -4203,8 +4203,165 @@ window.PRS_App = {
     },
 
     // ========================================================================
-
-    // INTERAKCE MEZI HRÁČI (Duel, Přípitek, Výkup sad, Intriky, Pakt, Výzva)
-
+    // KRÁLOVSKÉ MAP STUDIO (GENERÁTOR MAP 2.0)
     // ========================================================================
+    mapStudioSeed: 4598,
+    _currentMapStudioBoard: null,
+
+    openMapStudioModal: function (initialSeed) {
+        this.mapStudioSeed = initialSeed || this.currentBoardSeed || Math.floor(Math.random() * 899999 + 100000);
+        var modal = document.getElementById("map-studio-modal");
+        if (modal) {
+            modal.style.display = "flex";
+            this.updateMapStudioPreview();
+        }
+    },
+
+    closeMapStudioModal: function () {
+        var modal = document.getElementById("map-studio-modal");
+        if (modal) modal.style.display = "none";
+    },
+
+    applyMapStudioPreset: function (presetKey) {
+        if (!window.KiDeskyMapGenerator || !window.KiDeskyMapGenerator.PRESETS) return;
+        var p = window.KiDeskyMapGenerator.PRESETS[presetKey];
+        if (!p) return;
+
+        var elNodes = document.getElementById("ms-node-count");
+        var elBranches = document.getElementById("ms-branches");
+        var elTier = document.getElementById("ms-master-tier");
+        var elAnimals = document.getElementById("ms-animal-sets");
+        var elRiver = document.getElementById("ms-river-mode");
+
+        if (elNodes) elNodes.value = String(p.nodeCount);
+        if (elBranches) elBranches.value = String(p.branches);
+        if (elTier) elTier.value = String(p.masterTier);
+        if (elAnimals) elAnimals.value = String(p.animalSetCount);
+        if (elRiver) elRiver.value = p.riverMode;
+
+        this.updateMapStudioPreview();
+    },
+
+    rerollMapStudioSeed: function () {
+        this.mapStudioSeed = Math.floor(Math.random() * 899999 + 100000);
+        this.updateMapStudioPreview();
+    },
+
+    copyMapStudioSeed: function () {
+        var inp = document.getElementById("ms-seed-input");
+        if (!inp || !inp.value) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(inp.value).then(function () {
+                KiDeskyToast.show("📋 Kód mapy zkopírován do schránky!", "info");
+            });
+        } else {
+            inp.select();
+            document.execCommand("copy");
+            KiDeskyToast.show("📋 Kód mapy zkopírován do schránky!", "info");
+        }
+    },
+
+    loadMapStudioFromInputSeed: function () {
+        var inp = document.getElementById("ms-seed-input");
+        if (!inp || !inp.value) return;
+        if (!window.KiDeskyMapGenerator || !window.KiDeskyMapGenerator.parseSeedCode) return;
+
+        var parsed = window.KiDeskyMapGenerator.parseSeedCode(inp.value);
+        if (parsed) {
+            if (parsed.seed) this.mapStudioSeed = parsed.seed;
+            var elNodes = document.getElementById("ms-node-count");
+            var elBranches = document.getElementById("ms-branches");
+            var elTier = document.getElementById("ms-master-tier");
+
+            if (elNodes && parsed.nodeCount) elNodes.value = String(parsed.nodeCount);
+            if (elBranches && parsed.branches) elBranches.value = String(parsed.branches);
+            if (elTier && parsed.masterTier) elTier.value = String(parsed.masterTier);
+
+            this.updateMapStudioPreview();
+            KiDeskyToast.show("🗺️ Kód mapy načten a aplikován!", "good");
+        } else {
+            KiDeskyToast.show("⚠️ Neplatný formát kódu mapy.", "warning");
+        }
+    },
+
+    updateMapStudioPreview: function () {
+        if (!window.KiDeskyMapGenerator) return;
+
+        var elNodes = document.getElementById("ms-node-count");
+        var elBranches = document.getElementById("ms-branches");
+        var elTier = document.getElementById("ms-master-tier");
+        var elAnimals = document.getElementById("ms-animal-sets");
+        var elRiver = document.getElementById("ms-river-mode");
+
+        var options = {
+            nodeCount: elNodes ? parseInt(elNodes.value, 10) : 78,
+            branches: elBranches ? parseInt(elBranches.value, 10) : 3,
+            masterTier: elTier ? parseInt(elTier.value, 10) : 2,
+            animalSetCount: elAnimals ? parseInt(elAnimals.value, 10) : 6,
+            riverMode: elRiver ? elRiver.value : "single",
+            seed: this.mapStudioSeed
+        };
+
+        var board = window.KiDeskyMapGenerator.generate(this.mapStudioSeed, options);
+        this._currentMapStudioBoard = board;
+
+        // Vykreslení minináhledu
+        var container = document.getElementById("ms-preview-container");
+        if (container && window.KiDeskyMapGenerator.renderMiniPreviewSVG) {
+            container.innerHTML = window.KiDeskyMapGenerator.renderMiniPreviewSVG(board, 560, 344);
+        }
+
+        // Titulek a odznaky
+        var elTitle = document.getElementById("ms-preview-title");
+        var elBadge = document.getElementById("ms-preview-badge");
+        var elStats = document.getElementById("ms-preview-stats");
+        var elInput = document.getElementById("ms-seed-input");
+
+        if (elTitle) elTitle.textContent = board.name || ("Království osudu #" + this.mapStudioSeed);
+        if (elBadge) elBadge.textContent = board.nodes.length + " polí • " + options.branches + " větve";
+        if (elInput) elInput.value = board.seedCode || window.KiDeskyMapGenerator.formatSeedCode(this.mapStudioSeed, options);
+
+        if (elStats) {
+            var brCnt = (board.bridges && board.bridges.length) ? board.bridges.length : 0;
+            var tTierRoman = ["I", "II", "III", "IV"][options.masterTier - 1] || "II";
+            elStats.textContent = "🏰 2 Tematické hrady • 🏙️ 4 Města • 🐎 " + options.animalSetCount + " chovných sad • 🌊 " + brCnt + " mostů přes řeku • ⚔️ Mistři Stupeň " + tTierRoman;
+        }
+    },
+
+    applyMapStudioBoardAndStart: async function () {
+        if (!this._currentMapStudioBoard) return;
+        this.closeMapStudioModal();
+
+        var newSeed = this.mapStudioSeed;
+        this.currentBoardSeed = newSeed;
+
+        if (this.state && this.state.turnNumber > 0) {
+            var conf = await KiDeskyDialog.confirm("Spuštění nové výpravy v Map Studiu vyžaduje restart partii.\nPřeješ si začít hrát na mapě " + (this._currentMapStudioBoard.seedCode || newSeed) + "?", {
+                title: "Zahájení výpravy v Map Studiu",
+                icon: "🗺️",
+                confirmText: "⚔️ Zahájit hru na mapě",
+                cancelText: "Zpět k partii"
+            });
+            if (!conf) return;
+        }
+
+        // Nastavíme vygenerovaný plán jako aktivní desku
+        this._customProceduralBoard = this._currentMapStudioBoard;
+        var bSel = document.getElementById("board-template-select");
+        if (bSel) bSel.value = "procedural";
+        var lobbySel = document.getElementById("lobby-board-select");
+        if (lobbySel) lobbySel.value = "procedural";
+
+        this.startNewGame(true);
+        if (this.showPawnToast) {
+            this.showPawnToast(this.state.currentPlayerIndex, "Vítej v království " + (this._currentMapStudioBoard.seedCode || newSeed), "🗺️", "#a855f7", "rgba(15, 23, 42, 0.96)");
+        }
+    },
+
+    handleMasterDuel: function () {
+        if (!this.state || !window.PRS_GameEngine || !window.PRS_GameEngine.resolveMasterDuel) return;
+        window.PRS_GameEngine.resolveMasterDuel(this.state, this.state.currentPlayerIndex);
+        if (this.renderAll) this.renderAll();
+        if (this.renderTurnActionPanel) this.renderTurnActionPanel();
+    }
 };

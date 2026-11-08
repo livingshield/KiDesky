@@ -2186,32 +2186,36 @@ window.PRS_GameEngine = {
 
         // 2. Mistr vlastnosti (MB, MJ, MT, MCH, VM)
 
-        if (node.type === "MASTER") {
-
+                if (node.type === "MASTER") {
+            var tier = (state.config && state.config.masterTier) || (state.board && state.board.masterTier) || 1;
             var mRoll = Math.floor(Math.random() * 6) + 1;
-
             state.pendingAction.masterRoll = mRoll;
+            state.pendingAction.masterTier = tier;
+            state.pendingAction.skill = node.skill;
 
-            if (mRoll >= state.config.masterMinRoll) {
+            var threshold = (tier === 3) ? 3 : (state.config.masterMinRoll || 4);
 
+            if (mRoll >= threshold) {
                 state.pendingAction.canTrainMaster = true;
-
-                state.pendingAction.skill = node.skill;
-
-                state.pendingAction.summary = "Mistr je v dobrém rozmaru (hod " + mRoll + " ≥ 4)! Můžeš si zaplatit výcvik.";
-
-                this.addLog(state, "🎓 " + player.name + " uspěl u " + node.name + " (hod " + mRoll + ") a může trénovat!");
-
+                if (tier === 4 && player.skills[node.skill || "charisma"] >= 3) {
+                    state.pendingAction.isMasterDuel = true;
+                    state.pendingAction.summary = "Mistr " + node.name + " tě vyzývá k rytířskému turnaji o Srdce princezny! (Hod " + mRoll + " ≥ " + threshold + ")";
+                    this.addLog(state, "⚔️ " + player.name + " vstoupil do výzvy mistra u " + node.name + "!");
+                } else if (tier === 2) {
+                    state.pendingAction.summary = "Mistr tě vřele vítá (Stupeň II - hod " + mRoll + ")! Můžeš získat pokročilý výcvik (+2 k vlastnosti)!";
+                    this.addLog(state, "🎓 " + player.name + " může u " + node.name + " trénovat na Stupni II!");
+                } else if (tier === 3) {
+                    state.pendingAction.summary = "Mistr ti nabízí výcvik a posvátnou Pečeť ctnosti (Stupeň III - hod " + mRoll + ")!";
+                    this.addLog(state, "🎓 " + player.name + " získal přízeň mistra a pečeť u " + node.name + "!");
+                } else {
+                    state.pendingAction.summary = "Mistr je v dobrém rozmaru (hod " + mRoll + " ≥ 4)! Můžeš si zaplatit výcvik.";
+                    this.addLog(state, "🎓 " + player.name + " uspěl u " + node.name + " (hod " + mRoll + ") a může trénovat!");
+                }
             } else {
-
-                state.pendingAction.summary = "Mistr dnes nepřijímá žáky (hodil jsi " + mRoll + ", potřeba 4–6).";
-
-                this.addLog(state, "🎓 " + player.name + " neuspěl u " + node.name + " (hod " + mRoll + ", potřeba 4–6).");
-
+                state.pendingAction.summary = "Mistr dnes nepřijímá žáky (hodil jsi " + mRoll + ", potřeba " + threshold + "–6).";
+                this.addLog(state, "🎓 " + player.name + " neuspěl u " + node.name + " (hod " + mRoll + ", potřeba " + threshold + "–6).");
             }
-
             return;
-
         }
 
         // 3. Obchodník (Nákup Věcí 1–3, prodej věcí za 1/2 a budov za 100%)
@@ -3390,7 +3394,19 @@ window.PRS_GameEngine = {
 
         player.gold -= cost;
 
-        player.skills[skill] = currentLevel + 1;
+        var tier = (state.config && state.config.masterTier) || (state.board && state.board.masterTier) || 1;
+        var gain = (tier === 2) ? 2 : 1;
+        player.skills[skill] = Math.min(5, currentLevel + gain);
+
+        if (tier === 3) {
+            player.masterSeals = player.masterSeals || {};
+            player.masterSeals[skill] = true;
+            var sealCount = Object.keys(player.masterSeals).length;
+            if (sealCount >= 3 && !player.hasMasterAegis) {
+                player.hasMasterAegis = true;
+                this.addLog(state, "🛡️ " + player.name + " shromáždil 3 různé pečetě mistrů! Získává Rytířskou záštitu (ochranu před daněmi a bezplatný lazaret)!", "good");
+            }
+        }
 
         pa.canTrainMaster = false;
 

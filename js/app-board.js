@@ -552,9 +552,9 @@
 
                     }
 
-                    if (!this.graphicsConfig.tileBitmapsByType.START || this.graphicsConfig.tileBitmapsByType.START.indexOf(".jpg") !== -1) {
+                    if (!this.graphicsConfig.tileBitmapsByType.START || this.graphicsConfig.tileBitmapsByType.START.indexOf(".jpg") !== -1 || this.graphicsConfig.tileBitmapsByType.START.indexOf("castle.png") !== -1) {
 
-                        this.graphicsConfig.tileBitmapsByType.START = "assets/tiles/castle.png";
+                        this.graphicsConfig.tileBitmapsByType.START = "assets/tiles/start.png";
 
                     }
 
@@ -670,7 +670,7 @@
 
         if (!url && (node.type === "START" || node.type === "CASTLE" || node.code === "START")) {
 
-            url = "assets/tiles/castle.png";
+            url = (node.type === "START" || node.code === "START") ? "assets/tiles/start.png" : "assets/tiles/castle.png";
 
         }
 
@@ -805,6 +805,17 @@
             '  <circle cx="0.5" cy="0.5" r="0.5" />' +
 
             '</clipPath>' +
+            '<clipPath id="clipShieldTile" clipPathUnits="objectBoundingBox"><path d="M 0.05 0.05 L 0.95 0.05 L 0.95 0.52 C 0.95 0.82 0.65 0.97 0.5 1 C 0.35 0.97 0.05 0.82 0.05 0.52 Z" /></clipPath>' +
+            '<clipPath id="clipHeartTile" clipPathUnits="objectBoundingBox"><path d="M 0.5 0.96 C 0.08 0.65 0 0.44 0 0.28 C 0 0.08 0.16 0 0.34 0 C 0.44 0 0.48 0.05 0.5 0.16 C 0.52 0.05 0.56 0 0.66 0 C 0.84 0 1 0.08 1 0.28 C 1 0.44 0.92 0.65 0.5 0.96 Z" /></clipPath>' +
+            '<clipPath id="clipOctagonTile" clipPathUnits="objectBoundingBox"><polygon points="0.29,0.02 0.71,0.02 0.98,0.29 0.98,0.71 0.71,0.98 0.29,0.98 0.02,0.71 0.02,0.29" /></clipPath>' +
+            '<clipPath id="clipStarTile" clipPathUnits="objectBoundingBox"><polygon points="0.5,0.02 0.64,0.36 0.98,0.5 0.64,0.64 0.5,0.98 0.36,0.64 0.02,0.5 0.36,0.36" /></clipPath>' +
+            '<clipPath id="clipHexTile" clipPathUnits="objectBoundingBox"><polygon points="0.25,0.05 0.75,0.05 0.98,0.5 0.75,0.95 0.25,0.95 0.02,0.5" /></clipPath>' +
+            '<clipPath id="clipSquareTile" clipPathUnits="objectBoundingBox"><rect x="0.04" y="0.04" width="0.92" height="0.92" rx="0.16" /></clipPath>' +
+            '<clipPath id="clipHospitalTile" clipPathUnits="objectBoundingBox"><path d="M 0.08 0.08 L 0.92 0.08 L 0.92 0.52 C 0.92 0.80 0.64 0.96 0.5 1 C 0.36 0.96 0.08 0.80 0.08 0.52 Z" /></clipPath>' +
+            '<linearGradient id="tileGlassGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/><stop offset="50%" stop-color="#ffffff" stop-opacity="0.08"/><stop offset="100%" stop-color="#000000" stop-opacity="0.28"/></linearGradient>' +
+            '<radialGradient id="tileInnerShadow" cx="50%" cy="50%" r="50%"><stop offset="70%" stop-color="#000000" stop-opacity="0"/><stop offset="100%" stop-color="#000000" stop-opacity="0.55"/></radialGradient>' +
+            '<filter id="dragonFireGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+            '<filter id="goldAuraGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
 
             '</defs>';
 
@@ -1037,7 +1048,7 @@
 
         // 1d. Architektonické mosty přes řeku na křížení cest
         if (this.state.board && this.state.board.bridges && this.state.board.bridges.length > 0) {
-            out.push(this.renderBoardBridgesHTML(this.state.board));
+            // mosty presunuty za cesty aby je neprekryval asfalt
         }
 
         // 1e. Plovoucí ranní mlha nad horami a hvozdem (Atmosférický opar)
@@ -1205,7 +1216,20 @@
 
                 out.push('    <text x="' + (lmk.w / 2) + '" y="102" text-anchor="middle" fill="#f3e5ab" font-family="Cinzel, serif" font-size="14" font-weight="bold">KRÁLOVSKÝ HRAD</text>');
 
-                out.push('    <text x="' + (lmk.w / 2) + '" y="121" text-anchor="middle" fill="#f472b6" font-size="11.5" font-weight="bold">♡ PRINCEZNINO SRDCE (' + this.state.config.targetHearts + ' 💖) ♡</text>');
+                var scn = (this.state.config && this.state.config.scenario) || "CLASSIC";
+                var scnTitle = "♡ PRINCEZNINO SRDCE (" + this.state.config.targetHearts + " 💖) ♡";
+                var scnColor = "#f472b6";
+                if (scn === "DRAGON") {
+                    scnTitle = "🐉 LOVCI DRAKŮ — Získejte Dračí korunu! 👑";
+                    scnColor = "#f97316";
+                } else if (scn === "TYCOON") {
+                    scnTitle = "🏰 FEUDÁLNÍ MAGNÁT — Ovládněte města a cechy! 🪙";
+                    scnColor = "#eab308";
+                } else if (scn === "SPRINT") {
+                    scnTitle = "⚡ KRÁLOVSKÝ SPRINT (15 💖)";
+                    scnColor = "#38bdf8";
+                }
+                out.push('    <text x="' + (lmk.w / 2) + '" y="121" text-anchor="middle" fill="' + scnColor + '" font-size="10.5" font-weight="bold">' + scnTitle + '</text>');
 
             } else {
 
@@ -1281,23 +1305,58 @@
 
                 var pthD = 'M ' + n.x + ' ' + n.y + ' Q ' + qx + ' ' + qy + ' ' + targetNode.x + ' ' + targetNode.y;
 
-                // 0. Vyšlapaný štěrkový/hliněný násep cesty (zemní podklad)
-                out.push('  <path d="' + pthD + '" stroke="rgba(48,32,18,0.68)" stroke-width="19" stroke-linecap="round" fill="none"/>');
+                // 4 tematické styly cest podle oblasti a větve
+                var nCode = (n.code || "");
+                var tCode = (targetNode.code || "");
+                var isDragonPath = (nCode.indexOf("_R") !== -1 || tCode.indexOf("_R") !== -1 || n.subtype === "U3" || targetNode.subtype === "U3" || nCode.indexOf("U3") !== -1 || tCode.indexOf("U3") !== -1 || nCode.indexOf("H2") !== -1 || tCode.indexOf("H2") !== -1);
+                var isFestivalPath = (nCode.indexOf("SLAV") !== -1 || tCode.indexOf("SLAV") !== -1 || nCode.indexOf("_BR") !== -1 || tCode.indexOf("_BR") !== -1 || n.type === "FESTIVAL" || targetNode.type === "FESTIVAL");
+                var isForestPath = (nCode.indexOf("_L") !== -1 || tCode.indexOf("_L") !== -1 || ((n.type === "VILLAGE" || targetNode.type === "VILLAGE") && (n.x < 500 && targetNode.x < 500)));
+
+                var rBase = "rgba(48,32,18,0.72)";
+                var rShadow = "rgba(10,7,5,0.92)";
+                var rCobble = "rgba(195,148,82,0.72)";
+                var rCurbs = "rgba(255,235,175,0.45)";
+                var rTrack = targets[t].isBranch ? targets[t].color : "rgba(253,224,71,0.65)";
+                var rTrackDash = targets[t].isBranch ? "4,4" : "6,5";
+
+                if (isDragonPath) {
+                    rBase = "rgba(28,14,10,0.88)";
+                    rShadow = "rgba(15,8,8,0.96)";
+                    rCobble = "rgba(68,58,58,0.88)";
+                    rCurbs = "rgba(234,88,12,0.45)";
+                    rTrack = targets[t].isBranch ? targets[t].color : "rgba(249,115,22,0.88)";
+                    rTrackDash = "5,4";
+                } else if (isFestivalPath) {
+                    rBase = "rgba(52,22,38,0.80)";
+                    rShadow = "rgba(22,6,16,0.94)";
+                    rCobble = "rgba(162,75,115,0.75)";
+                    rCurbs = "rgba(244,114,182,0.52)";
+                    rTrack = targets[t].isBranch ? targets[t].color : "rgba(251,191,36,0.88)";
+                    rTrackDash = "6,4";
+                } else if (isForestPath) {
+                    rBase = "rgba(22,42,22,0.80)";
+                    rShadow = "rgba(10,22,10,0.92)";
+                    rCobble = "rgba(105,125,70,0.75)";
+                    rCurbs = "rgba(134,239,172,0.40)";
+                    rTrack = targets[t].isBranch ? targets[t].color : "rgba(190,150,80,0.80)";
+                    rTrackDash = "5,5";
+                }
+
+                // 0. Vyšlapaný štěrkový násep
+                out.push('  <path d="' + pthD + '" stroke="' + rBase + '" stroke-width="19" stroke-linecap="round" fill="none"/>');
 
                 // 1. Spodní stín/příkop cesty
-                out.push('  <path d="' + pthD + '" stroke="rgba(10,7,5,0.92)" stroke-width="14" stroke-linecap="round" fill="none"/>');
+                out.push('  <path d="' + pthD + '" stroke="' + rShadow + '" stroke-width="14" stroke-linecap="round" fill="none"/>');
 
-                // 2. Kamenný dlážděný pruh s patinou
-                out.push('  <path d="' + pthD + '" stroke="rgba(195,148,82,0.68)" stroke-width="9.5" stroke-linecap="round" fill="none"/>');
+                // 2. Dlážděný pruh
+                out.push('  <path d="' + pthD + '" stroke="' + rCobble + '" stroke-width="9.5" stroke-linecap="round" fill="none"/>');
 
-                // 2b. Kamenné reliéfní obrubníky (kostky podél trasy)
-                out.push('  <path d="' + pthD + '" stroke="rgba(255,235,175,0.42)" stroke-width="8.2" stroke-dasharray="2.5,3" stroke-linecap="round" fill="none"/>');
+                // 2b. Reliéfní obrubníky
+                out.push('  <path d="' + pthD + '" stroke="' + rCurbs + '" stroke-width="8.2" stroke-dasharray="2.5,3" stroke-linecap="round" fill="none"/>');
 
-                // 3. Vnitřní vyježděná stopa se zlatým odleskem
-                var trackColor = targets[t].isBranch ? targets[t].color : 'rgba(253,224,71,0.58)';
+                // 3. Vnitřní stopa cesty
                 var trackWidth = targets[t].isBranch ? '3.5' : '4.2';
-                var trackDash = targets[t].isBranch ? '4,4' : '6,5';
-                out.push('  <path d="' + pthD + '" stroke="' + trackColor + '" stroke-width="' + trackWidth + '" stroke-dasharray="' + trackDash + '" stroke-linecap="round" fill="none"/>');
+                out.push('  <path d="' + pthD + '" stroke="' + rTrack + '" stroke-width="' + trackWidth + '" stroke-dasharray="' + rTrackDash + '" stroke-linecap="round" fill="none"/>');
 
                 // Bod uprostřed křivky (t = 0.5)
 
@@ -1335,6 +1394,11 @@
 
             }
 
+        }
+
+        // 4b. Architektonické mosty přes řeku na křížení cest (vykresleny NAD cestou)
+        if (this.state.board && this.state.board.bridges && this.state.board.bridges.length > 0) {
+            out.push(this.renderBoardBridgesHTML(this.state.board));
         }
 
         // Zvýraznění poslední ušlé cesty aktivního hráče s organickým Bézierovým průhybem
@@ -1613,6 +1677,34 @@
 
         }
 
+        // 2b. Taktický náhled dosahu kostky při fázi ROLL (Reachable Nodes)
+        if (this.state.phase === "ROLL" && activePlayer && activePlayer.nodeId !== null && activePlayer.nodeId !== undefined) {
+            var maxDice = (activePlayer.movementMode === "cautious") ? 4 : 6;
+            var reachableMap = {};
+            for (var dr = 1; dr <= maxDice; dr++) {
+                var tNode = (window.PRS_GameEngine && window.PRS_GameEngine.getTargetNodeForRoll)
+                    ? window.PRS_GameEngine.getTargetNodeForRoll(this.state, activePlayer, dr)
+                    : null;
+                if (tNode) {
+                    if (!reachableMap[tNode.id]) reachableMap[tNode.id] = [];
+                    reachableMap[tNode.id].push(dr);
+                }
+            }
+            for (var rNid in reachableMap) {
+                var targetN = nodes[Number(rNid)];
+                if (!targetN) continue;
+                var rollsStr = reachableMap[rNid].join(", ");
+                var tR = (targetN.type === "START" || targetN.type === "FESTIVAL" || targetN.type === "CASTLE" || (targetN.type === "QUEST" && targetN.subtype === "U3")) ? 21 : 16.5;
+                out.push('  <g class="dice-reach-preview" style="pointer-events:none;">');
+                out.push('    <circle cx="' + targetN.x + '" cy="' + targetN.y + '" r="' + (tR + 5) + '" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3,3" opacity="0.85"><animate attributeName="opacity" values="0.45;0.95;0.45" dur="1.6s" repeatCount="indefinite"/></circle>');
+                out.push('    <g transform="translate(' + (targetN.x) + ',' + (targetN.y - tR - 9) + ')">');
+                out.push('      <rect x="-14" y="-7.5" width="28" height="15" rx="4" fill="rgba(15,23,42,0.92)" stroke="#38bdf8" stroke-width="1"/>');
+                out.push('      <text x="0" y="3.2" text-anchor="middle" fill="#7dd3fc" font-size="8" font-weight="bold">🎲 ' + rollsStr + '</text>');
+                out.push('    </g>');
+                out.push('  </g>');
+            }
+        }
+
         var playersByNode = {};
 
         for (var k = 0; k < this.state.players.length; k++) {
@@ -1867,139 +1959,165 @@
     },
 
     renderNodeSilhouette: function (nd, r, fill, stroke, strokeWidth, isMajor, shortCode, bmpUrl) {
-
         var out = [];
 
+        // Volba přesného tvarového clip-pathu podle siluety uzlu
+        var clipId = "clipNormalTile";
         if (nd.type === "START") {
+            clipId = "clipShieldTile";
+        } else if (nd.type === "FESTIVAL") {
+            clipId = "clipHeartTile";
+        } else if (nd.type === "CASTLE" || nd.type === "TOWN") {
+            clipId = "clipOctagonTile";
+        } else if (nd.type === "QUEST") {
+            clipId = "clipStarTile";
+        } else if (nd.type === "CHANCE" || nd.type === "JESTER" || nd.type === "TAX") {
+            clipId = "clipHexTile";
+        } else if (nd.type === "PRISON") {
+            clipId = "clipSquareTile";
+        } else if (nd.type === "HOSPITAL") {
+            clipId = "clipHospitalTile";
+        }
 
+        // Taktická aura cílových uzlů podle aktivního scénáře
+        if (this.state && this.state.config) {
+            var curScn = this.state.config.scenario || "CLASSIC";
+            if (curScn === "DRAGON" && nd.type === "QUEST" && nd.subtype === "U3") {
+                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 7) + '" fill="none" stroke="#ea580c" stroke-width="3" stroke-dasharray="4,3" filter="url(#dragonFireGlow)"><animate attributeName="stroke-width" values="2;4.5;2" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></circle>');
+            } else if (curScn === "TYCOON" && (nd.type === "TOWN" || nd.type === "CASTLE")) {
+                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 5.5) + '" fill="none" stroke="#facc15" stroke-width="2.5" stroke-dasharray="3,2" filter="url(#goldAuraGlow)"><animate attributeName="opacity" values="0.4;1;0.4" dur="2.2s" repeatCount="indefinite"/></circle>');
+            }
+        }
+
+        if (nd.type === "START") {
             // Královský erbovní štít
-
             var startPth = 'M ' + (nd.x - 22) + ' ' + (nd.y - 20) + ' L ' + (nd.x + 22) + ' ' + (nd.y - 20) + ' L ' + (nd.x + 22) + ' ' + (nd.y + 4) + ' Q ' + (nd.x + 22) + ' ' + (nd.y + 24) + ' ' + nd.x + ' ' + (nd.y + 28) + ' Q ' + (nd.x - 22) + ' ' + (nd.y + 24) + ' ' + (nd.x - 22) + ' ' + (nd.y + 4) + ' Z';
-
             out.push('    <path d="' + startPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
 
         } else if (nd.type === "FESTIVAL") {
-
             // Zamilované srdcové turnajové pole
-
             var festPth = 'M ' + nd.x + ' ' + (nd.y + 20) + ' C ' + (nd.x - 25) + ' ' + (nd.y + 4) + ' ' + (nd.x - 24) + ' ' + (nd.y - 18) + ' ' + (nd.x - 10) + ' ' + (nd.y - 18) + ' C ' + (nd.x - 2) + ' ' + (nd.y - 18) + ' ' + nd.x + ' ' + (nd.y - 9) + ' ' + nd.x + ' ' + (nd.y - 8) + ' C ' + nd.x + ' ' + (nd.y - 9) + ' ' + (nd.x + 2) + ' ' + (nd.y - 18) + ' ' + (nd.x + 10) + ' ' + (nd.y - 18) + ' C ' + (nd.x + 24) + ' ' + (nd.y - 18) + ' ' + (nd.x + 25) + ' ' + (nd.y + 4) + ' ' + nd.x + ' ' + (nd.y + 20) + ' Z';
-
             out.push('    <path d="' + festPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
 
         } else if (nd.type === "CASTLE" || nd.type === "TOWN") {
-
             // Opevněný 8-úhelníkový hradní a městský polygon
-
             var octPts = [];
-
             var rad = (nd.type === "CASTLE") ? 22 : 18.5;
-
             for (var a = 0; a < 8; a++) {
-
                 var ang = a * Math.PI / 4 + Math.PI / 8;
-
                 octPts.push(Math.round(nd.x + Math.cos(ang) * rad) + ',' + Math.round(nd.y + Math.sin(ang) * rad));
-
             }
-
             out.push('    <polygon points="' + octPts.join(' ') + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
 
         } else if (nd.type === "QUEST") {
-
             // Kosočtvercová 4-cípá rytířská hvězda
-
             var qRad = isMajor ? 24 : 19;
-
             var qPth = 'M ' + nd.x + ' ' + (nd.y - qRad - 3) + ' L ' + Math.round(nd.x + qRad * 0.6) + ' ' + Math.round(nd.y - qRad * 0.6) +
-
                        ' L ' + (nd.x + qRad + 3) + ' ' + nd.y + ' L ' + Math.round(nd.x + qRad * 0.6) + ' ' + Math.round(nd.y + qRad * 0.6) +
-
                        ' L ' + nd.x + ' ' + (nd.y + qRad + 3) + ' L ' + Math.round(nd.x - qRad * 0.6) + ' ' + Math.round(nd.y + qRad * 0.6) +
-
                        ' L ' + (nd.x - qRad - 3) + ' ' + nd.y + ' L ' + Math.round(nd.x - qRad * 0.6) + ' ' + Math.round(nd.y - qRad * 0.6) + ' Z';
-
             out.push('    <path d="' + qPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
 
         } else if (nd.type === "ANIMAL") {
-
-            // Medailon s barevnou závěsnou stuhou chovné sady
-
-            var ribbonColors = { 1: "#2563eb", 2: "#059669", 3: "#d97706", 4: "#7c3aed" };
-
+            // Medailon s barevnou závěsnou stuhou chovné sady (všech 14 heraldických barev)
+            var ribbonColors = {
+                1: "#2563eb", 2: "#059669", 3: "#d97706", 4: "#7c3aed",
+                5: "#dc2626", 6: "#0891b2", 7: "#ea580c", 8: "#4f46e5",
+                9: "#16a34a", 10: "#db2777", 11: "#ca8a04", 12: "#0d9488",
+                13: "#9333ea", 14: "#475569"
+            };
             var setNum = nd.setId || (nd.code.match(/\d+/) || [1])[0];
-
             var rColor = ribbonColors[setNum] || "#2563eb";
 
             out.push('    <polygon points="' + (nd.x - 8) + ',' + (nd.y + r - 1) + ' ' + (nd.x + 8) + ',' + (nd.y + r - 1) + ' ' + (nd.x + 8) + ',' + (nd.y + r + 11) + ' ' + nd.x + ',' + (nd.y + r + 7) + ' ' + (nd.x - 8) + ',' + (nd.y + r + 11) + '" fill="' + rColor + '" stroke="#000" stroke-width="0.8"/>');
-
             out.push('    <text x="' + nd.x + '" y="' + (nd.y + r + 7) + '" text-anchor="middle" fill="#ffffff" font-size="6.5" font-weight="bold">' + setNum + '</text>');
+
+            // Indikátor zkompletované sady 3/3 (zlatá koruna) nebo pulz pro aktivního hráče (má 2/3)
+            var activePlayer = (this.state.players && this.state.players[this.state.currentPlayerIndex]) ? this.state.players[this.state.currentPlayerIndex] : null;
+            var animalSetOwners = {};
+            if (this.state.board && this.state.board.nodes) {
+                for (var an = 0; an < this.state.board.nodes.length; an++) {
+                    var aNode = this.state.board.nodes[an];
+                    if (aNode.type === "ANIMAL" && (aNode.setId == setNum || (aNode.code.match(/\d+/) || [1])[0] == setNum)) {
+                        if (aNode.owner !== null && aNode.owner !== undefined) {
+                            animalSetOwners[aNode.owner] = (animalSetOwners[aNode.owner] || 0) + 1;
+                        }
+                    }
+                }
+            }
+            var completedOwner = null;
+            for (var pKey in animalSetOwners) {
+                if (animalSetOwners[pKey] >= 3) { completedOwner = pKey; break; }
+            }
+            if (completedOwner !== null) {
+                out.push('    <g transform="translate(' + nd.x + ',' + (nd.y - r - 8) + ')"><text x="0" y="0" text-anchor="middle" font-size="9.5" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.8))">👑</text></g>');
+            } else if (activePlayer && animalSetOwners[activePlayer.index] === 2 && nd.owner !== activePlayer.index) {
+                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 4) + '" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-dasharray="3,2"><animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite"/></circle>');
+            }
 
             out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
 
+        } else if (nd.type === "MASTER") {
+            // Speciální ctnostní medailon Mistra s barevným prstencem a emblémem ctnosti
+            var skill = nd.skill || "any";
+            var mColor = "#8b5cf6";
+            var mBadge = "🧙‍♂️";
+            if (skill === "boj") { mColor = "#ef4444"; mBadge = "⚔️"; }
+            else if (skill === "jizda") { mColor = "#f59e0b"; mBadge = "🏇"; }
+            else if (skill === "tanec") { mColor = "#d946ef"; mBadge = "💃"; }
+            else if (skill === "charisma") { mColor = "#06b6d4"; mBadge = "✨"; }
+
+            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 3.2) + '" fill="none" stroke="' + mColor + '" stroke-width="2.2" stroke-dasharray="4,2"/>');
+            out.push('    <g transform="translate(' + (nd.x + r - 3) + ',' + (nd.y - r + 3) + ')">');
+            out.push('      <circle cx="0" cy="0" r="7" fill="#140f0c" stroke="' + mColor + '" stroke-width="1.1"/>');
+            out.push('      <text x="0" y="3" text-anchor="middle" font-size="8">' + mBadge + '</text>');
+            out.push('    </g>');
+
         } else if (nd.type === "CHANCE" || nd.type === "JESTER" || nd.type === "TAX") {
-
             // Šestiúhelníková vosková pečeť
-
             var hexPts = [];
-
             var hexRad = 17.5;
-
             for (var ha = 0; ha < 6; ha++) {
-
                 var hang = ha * Math.PI / 3;
-
                 hexPts.push(Math.round(nd.x + Math.cos(hang) * hexRad) + ',' + Math.round(nd.y + Math.sin(hang) * hexRad));
-
             }
-
             out.push('    <polygon points="' + hexPts.join(' ') + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
 
         } else if (nd.type === "PRISON") {
-
             // Okovaný čtverec šatlavy
-
             out.push('    <rect x="' + (nd.x - 16) + '" y="' + (nd.y - 16) + '" width="32" height="32" rx="4" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
 
         } else if (nd.type === "HOSPITAL") {
-
             // Křižácký erb špitálu
-
             var hospPth = 'M ' + (nd.x - 16) + ' ' + (nd.y - 16) + ' L ' + (nd.x + 16) + ' ' + (nd.y - 16) + ' L ' + (nd.x + 16) + ' ' + (nd.y + 2) + ' Q ' + (nd.x + 16) + ' ' + (nd.y + 18) + ' ' + nd.x + ' ' + (nd.y + 22) + ' Q ' + (nd.x - 16) + ' ' + (nd.y + 18) + ' ' + (nd.x - 16) + ' ' + (nd.y + 2) + ' Z';
-
             out.push('    <path d="' + hospPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
 
         } else {
-
             // Standardní kruhový medailon
-
             out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
-
         }
 
         // Vložení bitmapy nebo procedurální heraldické kresby
-
         if (bmpUrl) {
-
             var dSize = r * 2 - 2;
+            out.push('    <image href="' + this.escapeHtml(bmpUrl) + '" x="' + (nd.x - dSize / 2) + '" y="' + (nd.y - dSize / 2) + '" width="' + dSize + '" height="' + dSize + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + clipId + ')" />');
 
-            out.push('    <image href="' + this.escapeHtml(bmpUrl) + '" x="' + (nd.x - dSize / 2) + '" y="' + (nd.y - dSize / 2) + '" width="' + dSize + '" height="' + dSize + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#clipNormalTile)" />');
+            // 3D Medailonový reliéf přes bitmapu (korálkový lem, vnitřní stín a konvexní skleněný odlesk)
+            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r - 1.2) + '" fill="url(#tileInnerShadow)" pointer-events="none"/>');
+            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r - 2) + '" fill="none" stroke="rgba(255,223,128,0.50)" stroke-width="0.9" stroke-dasharray="1.5,2" pointer-events="none"/>');
+            out.push('    <path d="M ' + (nd.x - r + 4) + ' ' + (nd.y - 1) + ' A ' + (r - 4) + ' ' + (r - 4) + ' 0 0 1 ' + (nd.x + r - 4) + ' ' + (nd.y - 1) + ' A ' + (r - 4) + ' ' + (r * 0.42) + ' 0 0 0 ' + (nd.x - r + 4) + ' ' + (nd.y - 1) + ' Z" fill="url(#tileGlassGrad)" pointer-events="none"/>');
 
             out.push('    <g transform="translate(' + nd.x + ',' + (nd.y + r - 3) + ')">');
-
             out.push('      <rect x="-13" y="-5.5" width="26" height="11" rx="3.5" fill="#0f0d0a" stroke="rgba(212,175,55,0.7)" stroke-width="0.8"/>');
-
             out.push('      <text x="0" y="2.5" text-anchor="middle" fill="#f8fafc" font-size="7" font-weight="bold">' + this.escapeHtml(shortCode) + '</text>');
-
             out.push('    </g>');
 
         } else {
-
             out.push(this.renderProceduralTileGraphic(nd, r, fill, stroke, strokeWidth, isMajor, shortCode));
-
         }
 
         return out.join("\n");
-
     },
 
     getNodeFillColor: function (node) {

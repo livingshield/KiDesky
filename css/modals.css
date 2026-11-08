@@ -4442,3 +4442,17 @@
     font-size: 0.78rem;
     color: #fde68a;
 }
+
+/* ==========================================================================
+   KRÁLOVSKÉ MAP STUDIO (GENERÁTOR MAP 2.0)
+   ========================================================================== */
+@media (max-width: 860px) {
+    .map-studio-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.85rem !important;
+    }
+    #ms-preview-container {
+        min-height: 220px !important;
+        max-height: 280px !important;
+    }
+}

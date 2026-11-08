@@ -102,7 +102,7 @@ window.PRS_GRAPHICS_CONFIG = {
     majorTileRadius: 24,
     // Cesty k bitmapám podle typu/podtypu políčka (pokud je prázdné, použije se generovaný erbovní medailon)
     tileBitmapsByType: {
-        START: "assets/tiles/castle.png",
+        START: "assets/tiles/start.png",
         kun: "assets/tiles/kun.png",
         pes: "assets/tiles/pes.png",
         sokol: "assets/tiles/sokol.png",

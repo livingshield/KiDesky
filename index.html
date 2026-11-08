@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611081620">
+    <link rel="stylesheet" href="css/main.css?v=202611081705">
 
-    <link rel="stylesheet" href="css/board.css?v=202611081620">
+    <link rel="stylesheet" href="css/board.css?v=202611081705">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611081620">
+    <link rel="stylesheet" href="css/modals.css?v=202611081705">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611081620">
+    <link rel="stylesheet" href="css/mobile.css?v=202611081705">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -925,6 +925,7 @@
 
                             </select>
 
+                            <button id="btn-map-studio" class="btn-zoom" style="border-color:#a855f7; color:#e9d5ff; font-weight:700;" onclick="PRS_App.openMapStudioModal()" title="Královské Map Studio — parametrický generátor map 2.0 a sdílení seedů">🗺️ Map Studio</button>
                             <button id="btn-reroll-map" class="btn-zoom" onclick="PRS_App.rerollProceduralMap()" title="Vygenerovat nové unikátní království, biomy, řeku a hrady (Seed)">🎲 Nová mapa</button>
                             <button id="btn-save-game" class="btn-zoom" style="border-color:var(--gold); color:var(--gold-light); font-weight:700;" onclick="PRS_App.openSaveGameModal()" title="Uložit rozehranou partii do paměti nebo cloudu">💾 Uložit hru</button>
                             <button id="btn-to-online" class="btn-zoom" style="border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.saveCurrentSessionToCloud()" title="Proměnit partii v online místnost a sdílet kód s přáteli">🌐 Do online</button>
@@ -2725,21 +2726,21 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611081620" defer></script>
-    <script src="js/game-boards.js?v=202611081620" defer></script>
-    <script src="js/game-engine.js?v=202611081620" defer></script>
-    <script src="js/game-combat-ai.js?v=202611081620" defer></script>
-    <script src="js/app-audio.js?v=202611081620" defer></script>
-    <script src="js/app-dialog.js?v=202611081620" defer></script>
-    <script src="js/app.js?v=202611081620" defer></script>
-    <script src="js/app-board.js?v=202611081620" defer></script>
-    <script src="js/app-hud.js?v=202611081620" defer></script>
-    <script src="js/app-modals.js?v=202611081620" defer></script>
-    <script src="js/app-online.js?v=202611081620" defer></script>
-    <script src="js/app-saves.js?v=202611081620" defer></script>
-    <script src="js/app-catalog.js?v=202611081620" defer></script>
-    <script src="js/app-admin.js?v=202611081620" defer></script>
-    <script src="js/app-musicwidget.js?v=202611081620" defer></script>
+    <script src="js/game-data.js?v=202611081705" defer></script>
+    <script src="js/game-boards.js?v=202611081705" defer></script>
+    <script src="js/game-engine.js?v=202611081705" defer></script>
+    <script src="js/game-combat-ai.js?v=202611081705" defer></script>
+    <script src="js/app-audio.js?v=202611081705" defer></script>
+    <script src="js/app-dialog.js?v=202611081705" defer></script>
+    <script src="js/app.js?v=202611081705" defer></script>
+    <script src="js/app-board.js?v=202611081705" defer></script>
+    <script src="js/app-hud.js?v=202611081705" defer></script>
+    <script src="js/app-modals.js?v=202611081705" defer></script>
+    <script src="js/app-online.js?v=202611081705" defer></script>
+    <script src="js/app-saves.js?v=202611081705" defer></script>
+    <script src="js/app-catalog.js?v=202611081705" defer></script>
+    <script src="js/app-admin.js?v=202611081705" defer></script>
+    <script src="js/app-musicwidget.js?v=202611081705" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3462,6 +3463,125 @@
             </div>
         </div>
     </div>
+
+    <!-- 🗺️ KRÁLOVSKÉ MAP STUDIO (PARAMETRICKÝ GENERÁTOR MAP 2.0) -->
+    <div id="map-studio-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeMapStudioModal()">
+        <div class="modal-box" style="max-width:980px; width:95vw; max-height:92vh; display:flex; flex-direction:column; padding:1.25rem; text-align:left;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
+                <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.35rem; display:flex; align-items:center; gap:0.5rem;">
+                    🗺️ Královské Map Studio <span style="font-size:0.72rem; background:rgba(168,85,247,0.25); border:1px solid #c084fc; color:#e9d5ff; padding:2px 8px; border-radius:12px;">Generátor 2.0</span>
+                </h3>
+                <button class="btn-icon-danger" onclick="PRS_App.closeMapStudioModal()">✕</button>
+            </div>
+
+            <div style="display:grid; grid-template-columns:360px 1fr; gap:1.2rem; flex:1; overflow-y:auto; min-height:0; padding-right:0.35rem;" class="map-studio-grid">
+                <!-- LEVÝ SLOUPEC: PARAMETRY A OVLÁDÁNÍ -->
+                <div style="display:flex; flex-direction:column; gap:0.85rem;">
+                    <!-- Šablony / Presety -->
+                    <div>
+                        <label style="font-size:0.8rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.35rem;">👑 Rychlé přednastavené světy:</label>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
+                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('royal_balance')">👑 Rovnováha (78)</button>
+                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('dragon_chasm')">🐉 Drak (96)</button>
+                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('lightning_sprint')">⚡ Sprint (48)</button>
+                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('four_masters')">🧙‍♂️ 4 Mistři (112)</button>
+                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('pasture_kingdom')">🌲 Zvířata (96)</button>
+                        </div>
+                    </div>
+
+                    <!-- Rozsah mapy -->
+                    <div>
+                        <label for="ms-node-count" style="font-size:0.8rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">📍 Rozsah mapy (počet políček):</label>
+                        <select id="ms-node-count" class="prs-select" style="width:100%; font-size:0.82rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
+                            <option value="48">Malá mapa (48 políček • svižná hra ~40 min)</option>
+                            <option value="78" selected>Klasická mapa (78 políček • vyvážený plán)</option>
+                            <option value="96">Velká mapa (96 políček • bohatá výprava)</option>
+                            <option value="112">Epické království (112 políček • velkolepá kampaň)</option>
+                        </select>
+                    </div>
+
+                    <!-- Větve a odbočky -->
+                    <div>
+                        <label for="ms-branches" style="font-size:0.8rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">🌿 Větve a vnitřní zkratky:</label>
+                        <select id="ms-branches" class="prs-select" style="width:100%; font-size:0.82rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
+                            <option value="1">1 větev (Most Slavností)</option>
+                            <option value="2">2 větve (Most Slavností + Dračí stezka)</option>
+                            <option value="3" selected>3 větve (Slavnosti, Drak + Levá lesní smyčka)</option>
+                            <option value="4">4 větve (Komplexní křižovatková síť s Hřebenovkou)</option>
+                        </select>
+                    </div>
+
+                    <!-- Stupeň Mistrů -->
+                    <div>
+                        <label for="ms-master-tier" style="font-size:0.8rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">🎓 Stupeň Mistrů ctností (I.–IV.):</label>
+                        <select id="ms-master-tier" class="prs-select" style="width:100%; font-size:0.82rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
+                            <option value="1">Stupeň I: Základní zkouška ctnosti (+1 skill)</option>
+                            <option value="2" selected>Stupeň II: Pokročilý trénink (+2) &amp; Šťastná podkova</option>
+                            <option value="3">Stupeň III: Mistrovské pečetě &amp; Rytířská záštita</option>
+                            <option value="4">Stupeň IV: Rytířské duely čtyř mistrů o 1.5 💖</option>
+                        </select>
+                    </div>
+
+                    <!-- Chovná zvířata a řeka -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                        <div>
+                            <label for="ms-animal-sets" style="font-size:0.78rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">🐎 Chovné sady:</label>
+                            <select id="ms-animal-sets" class="prs-select" style="width:100%; font-size:0.8rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
+                                <option value="4">4 sady (12 zv.)</option>
+                                <option value="6" selected>6 sad (18 zv.)</option>
+                                <option value="8">8 sad (24 zv.)</option>
+                                <option value="12">12 sad (36 zv.)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="ms-river-mode" style="font-size:0.78rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">🌊 Vodní toky:</label>
+                            <select id="ms-river-mode" class="prs-select" style="width:100%; font-size:0.8rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
+                                <option value="none">Bez řeky (Louky)</option>
+                                <option value="single" selected>Královská řeka (1)</option>
+                                <option value="dual">Dvojí soutok (2 toky)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Sdílený Seed -->
+                    <div style="background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.65rem;">
+                        <label for="ms-seed-input" style="font-size:0.76rem; color:#94a3b8; display:block; margin-bottom:0.25rem;">🔑 Kód mapy (Sdílitelný Seed):</label>
+                        <div style="display:flex; gap:0.35rem;">
+                            <input type="text" id="ms-seed-input" class="prs-input" style="flex:1; font-family:monospace; font-size:0.82rem; padding:0.32rem 0.5rem; text-transform:uppercase;" placeholder="KID-78-3B-M2-S12345" onchange="PRS_App.loadMapStudioFromInputSeed()" />
+                            <button type="button" class="btn-zoom" onclick="PRS_App.rerollMapStudioSeed()" title="Vygenerovat náhodný seed">🎲</button>
+                            <button type="button" class="btn-zoom" onclick="PRS_App.copyMapStudioSeed()" title="Zkopírovat kód mapy do schránky">📋</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRAVÝ SLOUPEC: ŽIVÝ NÁHLED MAPY -->
+                <div style="display:flex; flex-direction:column; gap:0.5rem; min-height:0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span id="ms-preview-title" style="font-family:'Cinzel',serif; color:#fef08a; font-weight:bold; font-size:0.95rem;">Království osudu</span>
+                        <span id="ms-preview-badge" style="font-size:0.75rem; color:#38bdf8; font-family:monospace;">78 polí • 3 větve</span>
+                    </div>
+
+                    <div id="ms-preview-container" style="flex:1; min-height:280px; max-height:420px; background:#120c08; border:1px solid rgba(212,175,55,0.35); border-radius:10px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                        <!-- Sem se vykresluje SVG minináhled -->
+                    </div>
+
+                    <div id="ms-preview-stats" style="font-size:0.76rem; color:#cbd5e1; background:rgba(0,0,0,0.4); padding:0.45rem 0.65rem; border-radius:6px; line-height:1.4;">
+                        🏰 2 Tematické hrady • 🏙️ 4 Města • 🏘️ 6 Vesnic • 🌊 2 Mosty • ⚔️ Mistři Stupeň II
+                    </div>
+                </div>
+            </div>
+
+            <!-- PATIČKA MODALU -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem; border-top:1px solid rgba(212,175,55,0.25); padding-top:0.75rem;">
+                <button type="button" class="btn-secondary" onclick="PRS_App.closeMapStudioModal()">Zrušit</button>
+                <div style="display:flex; gap:0.5rem;">
+                    <button type="button" class="btn-secondary" onclick="PRS_App.copyMapStudioSeed()" style="border-color:#38bdf8; color:#bae6fd;">📋 Kopírovat kód (Seed)</button>
+                    <button type="button" class="btn-gold-lg" style="padding:0.45rem 1.25rem; font-size:0.92rem;" onclick="PRS_App.applyMapStudioBoardAndStart()">⚔️ Hrát na této mapě →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

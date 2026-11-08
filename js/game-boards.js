@@ -592,6 +592,160 @@ window.PRS_DECOR_CATALOG = {
 // ============================================================================
 
 window.KiDeskyMapGenerator = {
+    // 5 Přednastavených královských šablon map
+    PRESETS: {
+        royal_balance: {
+            id: "royal_balance",
+            name: "👑 Královská rovnováha",
+            desc: "Plnohodnotný trojdílný plán s 3 větvemi, 6 chovnými sadami a vyváženou ekonomií.",
+            nodeCount: 78,
+            branches: 3,
+            masterTier: 2,
+            animalSetCount: 6,
+            riverMode: "single"
+        },
+        dragon_chasm: {
+            id: "dragon_chasm",
+            name: "🐉 Dračí soutěska",
+            desc: "Drsné lávové podhůří, 2 větve s hlubokou dračí slují a dvojitým říčním proudem.",
+            nodeCount: 96,
+            branches: 2,
+            masterTier: 3,
+            animalSetCount: 4,
+            riverMode: "dual"
+        },
+        lightning_sprint: {
+            id: "lightning_sprint",
+            name: "⚡ Bleskový turnaj",
+            desc: "Kompaktní 48-políčkový okruh navržený pro rychlou a dynamickou partii (30–45 min).",
+            nodeCount: 48,
+            branches: 1,
+            masterTier: 1,
+            animalSetCount: 4,
+            riverMode: "single"
+        },
+        four_masters: {
+            id: "four_masters",
+            name: "🧙‍♂️ Turnaj čtyř mistrů",
+            desc: "Velkolepý epický svět (112 uzlů) s maximem 4 větví a duely s mistry o Srdce princezny.",
+            nodeCount: 112,
+            branches: 4,
+            masterTier: 4,
+            animalSetCount: 8,
+            riverMode: "dual"
+        },
+        pasture_kingdom: {
+            id: "pasture_kingdom",
+            name: "🌲 Lesní panství chovatelů",
+            desc: "Království zasvěcené chovu ušlechtilých zvířat (12 sad) a cechovním dílnám.",
+            nodeCount: 96,
+            branches: 3,
+            masterTier: 2,
+            animalSetCount: 12,
+            riverMode: "single"
+        }
+    },
+
+    // Převod textového seed kódu např. KID-78-3B-M2-S4598 zpět na parametry
+    parseSeedCode: function (code) {
+        if (!code || typeof code !== "string") return null;
+        var clean = code.trim().toUpperCase();
+        var match = clean.match(/^KID-(\d+)-(\d+)B-M(\d+)-S(\d+)$/);
+        if (match) {
+            return {
+                nodeCount: parseInt(match[1], 10),
+                branches: parseInt(match[2], 10),
+                masterTier: parseInt(match[3], 10),
+                seed: parseInt(match[4], 10),
+                valid: true
+            };
+        }
+        var num = parseInt(clean.replace(/\D/g, ""), 10);
+        if (!isNaN(num) && num > 0) {
+            return { seed: num, valid: true };
+        }
+        return null;
+    },
+
+    // Formátování sdílitelného seed kódu
+    formatSeedCode: function (seed, options) {
+        options = options || {};
+        var n = options.nodeCount || 78;
+        var b = (options.branches !== undefined) ? options.branches : 3;
+        var m = options.masterTier || 2;
+        var s = Math.abs(Number(seed) || 12345) % 1000000;
+        return "KID-" + n + "-" + b + "B-M" + m + "-S" + s;
+    },
+
+    // Rychlý SVG minináhled pro Map Studio
+    renderMiniPreviewSVG: function (board, width, height) {
+        width = width || 560;
+        height = height || 344;
+        if (!board || !board.nodes) return '<svg width="' + width + '" height="' + height + '"><rect width="100%" height="100%" fill="#140f0c"/></svg>';
+
+        var out = [];
+        out.push('<svg viewBox="0 0 1400 860" width="' + width + '" height="' + height + '" xmlns="http://www.w3.org/2000/svg" style="background:#18110b; border-radius:10px; box-shadow:inset 0 0 25px rgba(0,0,0,0.85); display:block;">');
+
+        // Pergamenový okraj
+        out.push('  <rect x="10" y="10" width="1380" height="840" rx="16" fill="rgba(34,25,18,0.88)" stroke="#d4af37" stroke-width="2"/>');
+
+        // Řeky
+        if (board.rivers) {
+            for (var r = 0; r < board.rivers.length; r++) {
+                out.push('  <path d="' + board.rivers[r].path + '" stroke="#0ea5e9" stroke-width="18" fill="none" opacity="0.65" stroke-linecap="round"/>');
+                out.push('  <path d="' + board.rivers[r].path + '" stroke="#7dd3fc" stroke-width="6" fill="none" opacity="0.85" stroke-linecap="round"/>');
+            }
+        }
+
+        // Cesty
+        var nodes = board.nodes;
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            var tgts = n.next || [];
+            if (n.branchLow !== null && n.branchLow !== undefined) {
+                tgts = [n.branchLow, n.branchHigh];
+            }
+            for (var t = 0; t < tgts.length; t++) {
+                var nB = nodes[tgts[t]];
+                if (!nB) continue;
+                out.push('  <line x1="' + n.x + '" y1="' + n.y + '" x2="' + nB.x + '" y2="' + nB.y + '" stroke="rgba(212,175,55,0.45)" stroke-width="4.5" stroke-linecap="round"/>');
+            }
+        }
+
+        // Mosty
+        if (board.bridges) {
+            for (var b = 0; b < board.bridges.length; b++) {
+                var br = board.bridges[b];
+                out.push('  <circle cx="' + br.x + '" cy="' + br.y + '" r="8" fill="#71717a" stroke="#fbbf24" stroke-width="1.8"/>');
+            }
+        }
+
+        // Uzly jako zářící barevné tečky
+        for (var j = 0; j < nodes.length; j++) {
+            var nd = nodes[j];
+            var col = "#d4af37";
+            var rad = 7.5;
+            if (nd.type === "START") { col = "#ef4444"; rad = 13; }
+            else if (nd.type === "CASTLE") { col = "#a855f7"; rad = 11; }
+            else if (nd.type === "TOWN") { col = "#3b82f6"; rad = 10; }
+            else if (nd.type === "FESTIVAL") { col = "#ec4899"; rad = 10; }
+            else if (nd.type === "QUEST") { col = (nd.subtype === "U3") ? "#dc2626" : "#f97316"; rad = (nd.subtype === "U3") ? 12 : 9; }
+            else if (nd.type === "MASTER") { col = "#8b5cf6"; rad = 9; }
+            else if (nd.type === "ANIMAL") { col = "#10b981"; rad = 7; }
+            else if (nd.type === "VILLAGE") { col = "#84cc16"; rad = 7.5; }
+            else if (nd.type === "JESTER") { col = "#f59e0b"; rad = 8.5; }
+
+            out.push('  <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + rad + '" fill="' + col + '" stroke="#000" stroke-width="1.4"/>');
+        }
+
+        // Název mapy v levém horním rohu
+        out.push('  <text x="36" y="52" fill="#fef08a" font-family="Cinzel, serif" font-size="20" font-weight="bold">' + (board.name || "Království") + '</text>');
+        out.push('  <text x="36" y="74" fill="#cbd5e1" font-size="13">Seed: ' + (board.seedCode || board.seed) + ' • ' + nodes.length + ' políček</text>');
+
+        out.push('</svg>');
+        return out.join("\n");
+    },
+
     // Deterministický generátor pseudonáhodných čísel (LCG)
     createRNG: function (seed) {
         var s = (Number(seed) || 12345) % 2147483647;
@@ -1063,8 +1217,14 @@ window.KiDeskyMapGenerator = {
             { id: "castleH2", name: castleH2.name, icon: castleH2.icon, image: castleH2.img, x: 1140, y: 700, w: 130, h: 115 }
         ];
 
+        var boardSeedCode = this.formatSeedCode(seed, options);
+        var chosenMasterTier = (options && options.masterTier) ? Number(options.masterTier) : 2;
+
         return {
             code: "procedural_" + seed,
+            seedCode: boardSeedCode,
+            masterTier: chosenMasterTier,
+            options: options,
             name: "Království osudu #" + seed + " (" + castleH1.name + " & " + castleH2.name + ")",
             seed: seed,
             nodes: nodes,
@@ -2217,6 +2377,9 @@ buildClassic4599Board: function () {
     
 
     buildProceduralBoard: function (seed, options) {
+        if (window.PRS_App && window.PRS_App._customProceduralBoard && window.PRS_App._customProceduralBoard.seed === seed) {
+            return window.PRS_App._customProceduralBoard;
+        }
         return window.KiDeskyMapGenerator.generate(seed, options);
     }
 };

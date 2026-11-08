@@ -465,6 +465,9 @@
         }
 
         if (pa.canTrainMaster) {
+            if (pa.isMasterDuel) {
+                btns.push('<button class="btn-action-fight" style="width:100%; margin-bottom:0.45rem; background:linear-gradient(135deg, #b91c1c, #dc2626); border-color:#fca5a5; font-weight:bold; padding:0.55rem;" onclick="PRS_App.handleMasterDuel()">⚔️ Vyzvat mistra na duel o 1.5 💖 Srdce princezny!</button>');
+            }
 
             this.toggleMobileSheet("action");
 
@@ -3006,6 +3009,9 @@
         }
 
         if (pa.canTrainMaster) {
+            if (pa.isMasterDuel) {
+                btns.push('<button class="btn-action-fight" style="width:100%; margin-bottom:0.45rem; background:linear-gradient(135deg, #b91c1c, #dc2626); border-color:#fca5a5; font-weight:bold; padding:0.55rem;" onclick="PRS_App.handleMasterDuel()">⚔️ Vyzvat mistra na duel o 1.5 💖 Srdce princezny!</button>');
+            }
 
             if (pa.skill === "any") {
 
