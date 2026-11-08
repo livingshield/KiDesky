@@ -96,7 +96,7 @@ window.PRS_App = {
 
         scale: 1.0,
 
-        minScale: 0.65,
+        minScale: 1.0,
 
         maxScale: 3.5,
 

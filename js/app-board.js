@@ -309,16 +309,38 @@
         var w = (svgEl && svgEl.clientWidth > 0) ? svgEl.clientWidth : (wrap.clientWidth || 1000);
 
         var h = (svgEl && svgEl.clientHeight > 0) ? svgEl.clientHeight : (wrap.clientHeight || 620);
+        var svgRatioX = 1400 / Math.max(1, w);
+        var svgRatioY = 860 / Math.max(1, h);
 
-        // Povolíme přirozené a velkorysé posouvání mapy myší do všech stran i při měřítku 100%
+        // Pojistka minimálního měřítka (minScale = 1.0) - zamezí zmenšení desky pod velikost herní plochy
+        var minS = (this.viewport && this.viewport.minScale) ? this.viewport.minScale : 1.0;
+        var maxS = (this.viewport && this.viewport.maxScale) ? this.viewport.maxScale : 3.5;
+        this.viewport.scale = Math.min(maxS, Math.max(minS, this.viewport.scale));
 
-        var maxOffsetX = Math.max(500, w * Math.max(0.6, this.viewport.scale));
+        var s = this.viewport.scale;
 
-        var maxOffsetY = Math.max(350, h * Math.max(0.6, this.viewport.scale));
+        // V SVG souřadnicích (viewBox 0 0 1400 860):
+        // Deska má rozměry 1400 x 860.
+        // Hranice posunu jsou přesně zarovnány s okrajem desky, aby okolo nikdy nevzniklo černé místo:
+        // - Levý okraj nesmí jít vpravo od 0 (maxTx = 0)
+        // - Pravý okraj nesmí jít vlevo od 1400 (minTx = 1400 * (1 - s))
+        // - Horní okraj nesmí jít pod 0 (maxTy = 0)
+        // - Dolní okraj nesmí jít nad 860 (minTy = 860 * (1 - s))
+        var minTx = 1400 * (1 - s);
+        var maxTx = 0;
+        var minTy = 860 * (1 - s);
+        var maxTy = 0;
 
-        this.viewport.panX = Math.min(maxOffsetX, Math.max(-maxOffsetX, this.viewport.panX));
+        if (minTx > maxTx) minTx = maxTx;
+        if (minTy > maxTy) minTy = maxTy;
 
-        this.viewport.panY = Math.min(maxOffsetY, Math.max(-maxOffsetY, this.viewport.panY));
+        var minPanX = minTx / svgRatioX;
+        var maxPanX = maxTx / svgRatioX;
+        var minPanY = minTy / svgRatioY;
+        var maxPanY = maxTy / svgRatioY;
+
+        this.viewport.panX = Math.min(maxPanX, Math.max(minPanX, this.viewport.panX));
+        this.viewport.panY = Math.min(maxPanY, Math.max(minPanY, this.viewport.panY));
 
     },
 
@@ -778,6 +800,7 @@
         var tokensLayer = document.getElementById("prs-tokens-layer");
 
         if (!stage || !staticLayer || !tokensLayer) {
+            this.clampViewportPan();
 
             var wrap = document.getElementById("board-viewport-wrap");
 
