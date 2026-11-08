@@ -1837,6 +1837,61 @@
 
     // --- DETAILNÍ KARTA STATISTIK ZVOLENÉHO RYTÍŘE V DOLNÍM SÁLU ---,
 
+    
+    renderCardDecksRow: function () {
+        var el = document.getElementById("board-card-decks-container");
+        if (!el || !this.state) return;
+
+        var decks = [
+            { code: "VECI_1", title: "VĚCI 1", subtitle: "2 500 zl.", icon: "🗡️", color: "#60a5fa", count: 9 },
+            { code: "VECI_2", title: "VĚCI 2", subtitle: "7 000 zl.", icon: "⚔️", color: "#a855f7", count: 7 },
+            { code: "VECI_3", title: "VĚCI 3", subtitle: "12 000 zl.", icon: "👑", color: "#f59e0b", count: 4 },
+            { code: "ZVER_U1", title: "ZVĚŘ (U1)", subtitle: "Obtížnost 4–6", icon: "🐗", color: "#4ade80", count: 4 },
+            { code: "MONSTRA_U2", title: "MONSTRA (U2)", subtitle: "Obtížnost 8–10", icon: "👹", color: "#fb923c", count: 4 },
+            { code: "DRACI_U3", title: "DRACI (U3)", subtitle: "Obtížnost 11–17", icon: "🐉", color: "#f43f5e", count: 20 },
+            { code: "NAHODA_N", title: "NÁHODA", subtitle: "Karty osudu", icon: "❓", color: "#eab308", count: 24 },
+            { code: "SLAVNOST_S", title: "SLAVNOSTI", subtitle: "Turnaj & ples", icon: "🎪", color: "#ec4899", count: 3 }
+        ];
+
+        if (this.state.board && this.state.board.cardZones) {
+            var bz = this.state.board.cardZones;
+            for (var i = 0; i < decks.length; i++) {
+                for (var j = 0; j < bz.length; j++) {
+                    if (bz[j].code === decks[i].code && bz[j].count !== undefined) {
+                        decks[i].count = bz[j].count;
+                        break;
+                    }
+                }
+            }
+        }
+
+        var html = [];
+        html.push('<div class="decks-strip-header">');
+        html.push('  <div style="display:flex; align-items:center; gap:0.6rem;">');
+        html.push('    <span style="font-size:1.3rem;">🃏</span>');
+        html.push('    <div>');
+        html.push('      <h3 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.05rem; margin:0;">Královské balíčky karet &amp; Pokladnice</h3>');
+        html.push('      <div style="font-size:0.78rem; color:var(--text-muted);">Kliknutím na balíček zobrazíš jeho kompletní pravidla, obsah karet a ceny</div>');
+        html.push('    </div>');
+        html.push('  </div>');
+        html.push('  <span style="font-size:0.75rem; color:#fde68a; background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.3); padding:2px 8px; border-radius:12px;">8 balíčků království</span>');
+        html.push('</div>');
+
+        html.push('<div class="decks-strip-grid">');
+        for (var d = 0; d < decks.length; d++) {
+            var dk = decks[d];
+            html.push('<div class="deck-physical-card" style="--deck-color:' + dk.color + ';" onclick="PRS_App.inspectCardZone(\'' + dk.code + '\')" title="Klikni pro náhled a pravidla balíčku ' + this.escapeHtml(dk.title) + '">');
+            html.push('  <div class="deck-count-badge" style="border-color:' + dk.color + '; color:#f8fafc;">' + dk.count + ' ks</div>');
+            html.push('  <div class="deck-icon-circle" style="border-color:' + dk.color + '; box-shadow:0 0 10px ' + dk.color + '40;">' + dk.icon + '</div>');
+            html.push('  <div class="deck-card-title">' + this.escapeHtml(dk.title) + '</div>');
+            html.push('  <div class="deck-card-sub" style="border-color:' + dk.color + '55;">' + this.escapeHtml(dk.subtitle) + '</div>');
+            html.push('</div>');
+        }
+        html.push('</div>');
+
+        el.innerHTML = html.join("\n");
+    },
+
     renderLowerKnightDetail: function () {
 
         var el = document.getElementById("lower-inspected-knight-detail");

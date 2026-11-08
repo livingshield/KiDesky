@@ -1061,76 +1061,7 @@
         out.push('    </g>');
         out.push('  </g>');
 
-        // 2. Plastické 3D balíčky karet na plánu (Interactive Card Decks)
-
-        for (var cz = 0; cz < cardZones.length; cz++) {
-
-            var z = cardZones[cz];
-
-            var col = z.color || "#d4af37";
-
-            var icon = z.icon || "🃏";
-
-            var cnt = z.count || (z.actionTier ? (z.actionTier === 1 ? 9 : (z.actionTier === 2 ? 7 : 4)) : 10);
-
-            out.push('  <g class="board-card-deck-3d" data-zone-code="' + z.code + '" transform="translate(' + z.x + ',' + z.y + ')" onclick="PRS_App.inspectCardZone(\'' + z.code + '\')" style="cursor:pointer;">');
-
-            out.push('    <title>Klikni pro náhled a pravidla balíčku ' + this.escapeHtml(z.title) + '</title>');
-
-            // 3D spodní stín a vrstvy karet pod balíčkem
-
-            out.push('    <rect x="4" y="6" width="' + z.w + '" height="' + z.h + '" rx="9" fill="rgba(0,0,0,0.52)"/>');
-
-            out.push('    <rect x="-3" y="3" width="' + z.w + '" height="' + z.h + '" rx="8" fill="#1c1612" stroke="#4a3728" stroke-width="1.2"/>');
-
-            out.push('    <rect x="-1.5" y="1.5" width="' + z.w + '" height="' + z.h + '" rx="8" fill="#2d221a" stroke="#6b5038" stroke-width="1.2"/>');
-
-            // Vrchní lícová karta balíčku
-
-            out.push('    <rect class="deck-top-card" x="0" y="0" width="' + z.w + '" height="' + z.h + '" rx="8" fill="url(#cardParchmentGrad)" stroke="' + col + '" stroke-width="1.6" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.65))"/>');
-            // Zlaté filigránové rohové kování balíčku
-            out.push('    <path d="M 4 10 L 4 4 L 10 4" fill="none" stroke="' + col + '" stroke-width="1.2" opacity="0.8"/>');
-            out.push('    <path d="M ' + (z.w - 10) + ' 4 L ' + (z.w - 4) + ' 4 L ' + (z.w - 4) + ' 10" fill="none" stroke="' + col + '" stroke-width="1.2" opacity="0.8"/>');
-            out.push('    <path d="M 4 ' + (z.h - 10) + ' L 4 ' + (z.h - 4) + ' L 10 ' + (z.h - 4) + '" fill="none" stroke="' + col + '" stroke-width="1.2" opacity="0.8"/>');
-            out.push('    <path d="M ' + (z.w - 10) + ' ' + (z.h - 4) + ' L ' + (z.w - 4) + ' ' + (z.h - 4) + ' L ' + (z.w - 4) + ' ' + (z.h - 10) + '" fill="none" stroke="' + col + '" stroke-width="1.2" opacity="0.8"/>');
-
-            out.push('    <rect x="3.5" y="3.5" width="' + (z.w - 7) + '" height="' + (z.h - 7) + '" rx="5.5" fill="none" stroke="rgba(212,175,55,0.35)" stroke-width="0.9" stroke-dasharray="6,3"/>');
-
-            // Středový erb / ikona balíčku
-
-            var cyIcon = Math.round(z.h * 0.38);
-
-            out.push('    <circle cx="' + (z.w / 2) + '" cy="' + cyIcon + '" r="19" fill="rgba(0,0,0,0.6)" stroke="' + col + '" stroke-width="1.3"/>');
-
-            out.push('    <text x="' + (z.w / 2) + '" y="' + (cyIcon + 6) + '" text-anchor="middle" font-size="17" style="user-select:none;">' + icon + '</text>');
-
-            // Název balíčku
-
-            var cyTitle = Math.round(z.h * 0.68);
-
-            out.push('    <text x="' + (z.w / 2) + '" y="' + cyTitle + '" text-anchor="middle" fill="#fef08a" font-family="Cinzel, serif" font-size="11.5" font-weight="bold">' + this.escapeHtml(z.title) + '</text>');
-
-            // Podtitul / cena nebo obtížnost
-
-            var cySub = Math.round(z.h - 10);
-
-            out.push('    <rect x="' + Math.round(z.w / 2 - 40) + '" y="' + (cySub - 10) + '" width="80" height="14" rx="4" fill="rgba(0,0,0,0.65)" stroke="rgba(212,175,55,0.25)" stroke-width="0.8"/>');
-
-            out.push('    <text x="' + (z.w / 2) + '" y="' + cySub + '" text-anchor="middle" fill="#cbd5e1" font-size="8.5" font-weight="600">' + this.escapeHtml(z.subtitle) + '</text>');
-
-            // Odznak s počtem karet v balíčku (pravý horní roh)
-
-            out.push('    <g transform="translate(' + (z.w - 12) + ', 7)">');
-
-            out.push('      <rect x="-14" y="-5" width="22" height="12" rx="3.5" fill="#0f172a" stroke="' + col + '" stroke-width="0.9"/>');
-
-            out.push('      <text x="-3" y="4" text-anchor="middle" fill="#f8fafc" font-size="7.5" font-weight="bold">' + cnt + '</text>');
-
-            out.push('    </g>');
-
-            out.push('  </g>');
-
-        }
+        // 2. Balíčky karet přesunuty z plánu do přehledné řady pod herním plánem (mezi detail rytíře a kroniku)
 
         // 3. Dominanty království (Královský Hrad, Drak, Hrady a Citadely)
 

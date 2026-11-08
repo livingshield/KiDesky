@@ -3047,3 +3047,116 @@ body[data-active-tab="board"] #topbar-announcement-banner {
     75% { opacity: 1; transform: translate(-50%, -120%) scale(1); }
     100% { opacity: 0; transform: translate(-50%, -150%) scale(0.85); }
 }
+
+/* ==========================================================================
+   KRÁLOVSKÉ BALÍČKY KARET (ŘADA MEZI DETAIL HRÁČE A KRONIKU)
+   ========================================================================== */
+.board-card-decks-section {
+    background: radial-gradient(circle at 50% 15%, rgba(36, 26, 17, 0.96) 0%, rgba(14, 10, 6, 0.98) 100%);
+    border: 1.5px solid var(--gold, #d4af37);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), inset 0 0 25px rgba(212, 175, 55, 0.12);
+}
+
+.decks-strip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.9rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+    padding-bottom: 0.55rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.decks-strip-grid {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+@media (max-width: 1200px) {
+    .decks-strip-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .decks-strip-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.deck-physical-card {
+    position: relative;
+    background: linear-gradient(155deg, #2c2017 0%, #17110c 100%);
+    border: 1.6px solid var(--deck-color, #d4af37);
+    border-radius: 12px;
+    padding: 0.85rem 0.55rem;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.75), 0 2px 0 1px #140d08, 0 4px 0 2px #26190f;
+}
+
+.deck-physical-card:hover {
+    transform: translateY(-6px) scale(1.04);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.9), 0 0 20px var(--deck-color, rgba(212, 175, 55, 0.6));
+    border-color: #fef08a;
+}
+
+.deck-physical-card:active {
+    transform: translateY(-2px) scale(1.01);
+}
+
+.deck-count-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 0.68rem;
+    font-weight: bold;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid var(--deck-color, #d4af37);
+    border-radius: 6px;
+    padding: 1px 5px;
+    line-height: 1.2;
+}
+
+.deck-icon-circle {
+    width: 38px;
+    height: 38px;
+    margin: 0.25rem auto 0.45rem auto;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1.4px solid var(--deck-color, #d4af37);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.deck-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #fef08a;
+    margin-bottom: 0.35rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deck-card-sub {
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    background: rgba(0, 0, 0, 0.65);
+    border: 0.8px solid rgba(212, 175, 55, 0.25);
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

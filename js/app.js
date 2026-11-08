@@ -3822,6 +3822,7 @@ window.PRS_App = {
         this.renderActivePlayerPanel();
 
         this.renderLowerKnightDetail();
+        this.renderCardDecksRow();
 
         this.renderActionPanel();
 
