@@ -296,6 +296,11 @@
 
         });
 
+        window.addEventListener("resize", function () {
+            self.clampViewportPan();
+            self.applyViewportTransform();
+        });
+
     },
 
     clampViewportPan: function () {
@@ -354,10 +359,14 @@
 
         var svgEl = document.getElementById("prs-board-svg");
 
+        var minS = 1.0;
+        var maxS = (this.viewport && this.viewport.maxScale) ? this.viewport.maxScale : 3.5;
+        this.viewport.minScale = minS;
+        this.viewport.scale = Math.min(maxS, Math.max(minS, this.viewport.scale || 1.0));
+        var s = this.viewport.scale;
+
         if (lbl) {
-
-            lbl.textContent = Math.round(this.viewport.scale * 100) + " %";
-
+            lbl.textContent = Math.round(s * 100) + " %";
         }
 
         if (!g || !wrap) return;
@@ -372,20 +381,34 @@
         }
 
         // Převod pixelového posunu na souřadnice SVG (1400 x 860) měřený z reálné velikosti SVG
-
         var svgW = (svgEl && svgEl.clientWidth > 0) ? svgEl.clientWidth : (wrap.clientWidth || 1000);
-
         var svgH = (svgEl && svgEl.clientHeight > 0) ? svgEl.clientHeight : (wrap.clientHeight || 620);
 
         var svgRatioX = 1400 / Math.max(1, svgW);
-
         var svgRatioY = 860 / Math.max(1, svgH);
 
-        var tx = Math.round(this.viewport.panX * svgRatioX * 10) / 10;
+        // Striktní hranice v souřadnicích SVG (1400 x 860):
+        // Deska nikdy nesmí odkrýt černé okraje:
+        // tx nesmí být > 0 ani < 1400 * (1 - s)
+        // ty nesmí být > 0 ani < 860 * (1 - s)
+        var minTx = 1400 * (1 - s);
+        var maxTx = 0;
+        var minTy = 860 * (1 - s);
+        var maxTy = 0;
 
-        var ty = Math.round(this.viewport.panY * svgRatioY * 10) / 10;
+        var tx = (this.viewport.panX || 0) * svgRatioX;
+        var ty = (this.viewport.panY || 0) * svgRatioY;
 
-        g.setAttribute("transform", "translate(" + tx + "," + ty + ") scale(" + this.viewport.scale.toFixed(3) + ")");
+        tx = Math.min(maxTx, Math.max(minTx, tx));
+        ty = Math.min(maxTy, Math.max(minTy, ty));
+
+        this.viewport.panX = tx / svgRatioX;
+        this.viewport.panY = ty / svgRatioY;
+
+        var finalTx = Math.round(tx * 10) / 10;
+        var finalTy = Math.round(ty * 10) / 10;
+
+        g.setAttribute("transform", "translate(" + finalTx + "," + finalTy + ") scale(" + s.toFixed(3) + ")");
 
     },
 

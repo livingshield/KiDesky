@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kidesky-cache-v1.0.1';
+const CACHE_NAME = 'kidesky-cache-v1.0.6';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -56,8 +56,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Pro HTML, skripty a styly preferujeme vždy síť bez mezilehlé HTTP cache, mezipaměť slouží jako offline záloha
+  const fetchPromise = (req.mode === 'navigate' || req.url.includes('.js') || req.url.includes('.css'))
+    ? fetch(req, { cache: 'no-cache' })
+    : fetch(req);
+
   event.respondWith(
-    fetch(req)
+    fetchPromise
       .then((networkResponse) => {
         // Cache successful responses for local resources
         if (networkResponse && networkResponse.status === 200) {
