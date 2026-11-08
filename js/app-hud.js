@@ -3754,11 +3754,9 @@
 
             landedLocHtml = '<div class="dice-landed-loc">' +
 
-                '<span class="loc-label">Vstup na pole:</span> ' +
+                '<span class="loc-name">' + (landedNode.icon ? '<span style="font-size:1.15rem; margin-right:3px;">' + landedNode.icon + '</span> ' : '📍 ') + '<strong>' + this.escapeHtml(landedNode.name) + '</strong></span>' +
 
-                '<span class="loc-name">' + (landedNode.icon || "📍") + ' <strong>' + this.escapeHtml(landedNode.name) + '</strong></span>' +
-
-                (landedNode.code ? ' <span class="loc-code">(' + this.escapeHtml(landedNode.code) + ')</span>' : '') +
+                (landedNode.code ? ' <span class="loc-code">' + this.escapeHtml(landedNode.code) + '</span>' : '') +
 
                 '</div>';
 
@@ -3804,8 +3802,6 @@
 
             actTreasuryHtml +
 
-            (btns.length > 0 ? ('<div class="action-buttons-wrap" style="margin:0.65rem 0 0.75rem 0; display:flex; flex-direction:column; gap:0.45rem;">' + btns.join(" ") + '</div>') : '') +
-
             '<div class="dice-badge-row">' +
 
             '  <div class="dice-cube-mini" title="Hod: ' + rollVal + '">' + rollGlyph + '</div>' +
@@ -3819,6 +3815,8 @@
             '  </div>' +
 
             '</div>' +
+
+            (btns.length > 0 ? ('<div class="action-buttons-wrap" style="margin:0.75rem 0 0.85rem 0; display:flex; flex-direction:column; gap:0.45rem;">' + btns.join(" ") + '</div>') : '') +
 
             encounterHtml +
 
