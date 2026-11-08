@@ -2751,6 +2751,36 @@
 
         }
 
+        // Trvalé stabilní zobrazení tahu bota - tlačítko je nahoře na pevné pozici, text pod ním
+        if (isBot && this.autoBotEnabled) {
+            var botRoll = this.state.lastRoll;
+            var botLandedNode = (this.state.board && this.state.board.nodes) ? this.state.board.nodes[player.nodeId] : null;
+            var botStatusText = "";
+            if (this.state.phase === "ROLL") {
+                botStatusText = "Připravuje se k hodu kostkou...";
+            } else if (botRoll) {
+                botStatusText = "Hodil <strong>" + botRoll + "</strong>" + (botLandedNode ? (" a dorazil na pole <strong>" + this.escapeHtml(botLandedNode.name) + "</strong>.") : ".");
+            } else {
+                botStatusText = "Provádí tah královstvím...";
+            }
+
+            el.innerHTML = '<div class="action-card" style="border-color:rgba(212,175,55,0.4);">' +
+                '<div class="turn-indicator" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">' +
+                '  <span>Na tahu: <span style="color:' + player.color + ';">' + player.badge + ' <strong>' + this.escapeHtml(player.name) + '</strong></span></span>' +
+                '  <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(0,0,0,0.3); padding:2px 8px; border-radius:10px;">🤖 PC</span>' +
+                '</div>' +
+                '<div style="margin-bottom:0.75rem;">' +
+                '  <button class="btn-gold-lg" style="width:100%; font-size:0.92rem; padding:0.58rem 0.85rem; font-weight:700; box-shadow:0 4px 14px rgba(212,175,55,0.3);" onclick="PRS_App.skipToNextHumanTurn()">⚡ Přeskočit přímo na můj tah</button>' +
+                '</div>' +
+                '<div class="bot-auto-status" style="text-align:center; padding:0.75rem 0.6rem; background:rgba(0,0,0,0.35); border-radius:10px; border:1px solid rgba(212,175,55,0.18);">' +
+                '  <div style="font-size:0.98rem; font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.3rem;">🤖 ' + this.escapeHtml(player.name) + '</div>' +
+                '  <div style="font-size:0.82rem; color:#cbd5e1; margin-bottom:0.4rem;">' + botStatusText + '</div>' +
+                '  <div style="font-size:0.75rem; color:var(--text-muted);">Tah počítače běží automaticky. Klepnutím na tlačítko výše ihned skočíš na svůj tah.</div>' +
+                '</div>' +
+                '</div>';
+            return;
+        }
+
         if (this.state.phase === "ROLL") {
 
             var lastRollVal = this.state.lastRoll;
@@ -2758,28 +2788,6 @@
             var diceGlyph = this.getDiceGlyph(lastRollVal || 1);
 
             var diceStatus = lastRollVal ? ("Minulý hod: <strong>" + lastRollVal + "</strong>") : "Připrav kostku k hodu";
-
-            if (isBot && this.autoBotEnabled) {
-
-                el.innerHTML = '<div class="action-card" style="border-color:rgba(212,175,55,0.4);">' +
-
-                    '<div class="turn-indicator">Na tahu je: <span style="color:' + player.color + ';">' + player.badge + ' <strong>' + this.escapeHtml(player.name) + '</strong></span></div>' +
-
-                    '<div class="bot-auto-status" style="text-align:center; padding:0.9rem 0.6rem; background:rgba(0,0,0,0.35); border-radius:10px; margin:0.6rem 0; border:1px solid rgba(212,175,55,0.22);">' +
-
-                    '  <div style="font-size:1.02rem; font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.35rem;">🤖 ' + this.escapeHtml(player.name) + ' provádí tah...</div>' +
-
-                    '  <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">Tah počítače běží automaticky. Můžeš jej nechat proběhnout nebo přeskočit rovnou na svůj hod.</div>' +
-
-                    '  <button class="btn-gold-lg" style="width:100%; font-size:0.86rem; padding:0.48rem 0.85rem;" onclick="PRS_App.skipToNextHumanTurn()">⚡ Přeskočit přímo na můj tah</button>' +
-
-                    '</div>' +
-
-                    '</div>';
-
-                return;
-
-            }
 
             var effStats = window.PRS_GameEngine.getEffectiveStats(this.state, player);
 
@@ -3730,7 +3738,7 @@
 
         if (!mustCompleteFirst) {
 
-            btns.push('<button class="btn-end-turn" onclick="PRS_App.handleEndTurn()">➡️ Ukončit tah</button>');
+            btns.push('<button class="btn-end-turn" style="width:100%; font-size:0.95rem; padding:0.58rem 1rem; font-weight:700; background:linear-gradient(135deg, #1e293b, #0f172a); border:1.5px solid #64748b; border-radius:9px; cursor:pointer;" onclick="PRS_App.handleEndTurn()">➡️ Ukončit tah</button>');
 
         }
 
@@ -3792,11 +3800,11 @@
 
         var pouchHudHtml = this.getKnightPouchHudHtml(player, true);
 
-        el.innerHTML = specialCardHtml +
-
-            '<div class="action-card">' +
+        el.innerHTML = '<div class="action-card">' +
 
             actTreasuryHtml +
+
+            (btns.length > 0 ? ('<div class="action-buttons-wrap" style="margin:0.65rem 0 0.75rem 0; display:flex; flex-direction:column; gap:0.45rem;">' + btns.join(" ") + '</div>') : '') +
 
             '<div class="dice-badge-row">' +
 
@@ -3814,7 +3822,7 @@
 
             encounterHtml +
 
-            '<div class="action-buttons-wrap">' + btns.join(" ") + '</div>' +
+            specialCardHtml +
 
             pouchHudHtml +
 
