@@ -937,15 +937,15 @@ window.KiDeskyMapGenerator = {
 
         var totalBranchLen = b1Len + b2Len + b3Len + b4Len;
         var outerLen = targetNodes - totalBranchLen;
-        if (outerLen < 32) {
-            var deficit = 32 - outerLen;
-            outerLen = 32;
-            while (deficit > 0 && (b1Len > 5 || b2Len > 5 || b3Len > 4 || b4Len > 4)) {
-                if (b2Len > 5 && deficit > 0) { b2Len--; deficit--; }
-                if (b1Len > 5 && deficit > 0) { b1Len--; deficit--; }
-                if (b4Len > 4 && deficit > 0) { b4Len--; deficit--; }
-                if (b3Len > 4 && deficit > 0) { b3Len--; deficit--; }
+        if (outerLen < 30) {
+            var deficit = 30 - outerLen;
+            while (deficit > 0 && (b1Len > 4 || b2Len > 4 || b3Len > 3 || b4Len > 3)) {
+                if (b2Len > 4 && deficit > 0) { b2Len--; deficit--; }
+                if (b1Len > 4 && deficit > 0) { b1Len--; deficit--; }
+                if (b4Len > 3 && deficit > 0) { b4Len--; deficit--; }
+                if (b3Len > 3 && deficit > 0) { b3Len--; deficit--; }
             }
+            outerLen = targetNodes - (b1Len + b2Len + b3Len + b4Len);
         }
 
         // Rozdělení outerLen do 5 segmentů po obvodu
