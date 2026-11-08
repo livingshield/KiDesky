@@ -2895,13 +2895,7 @@ body[data-active-tab="board"] #topbar-announcement-banner {
 
     .board-top-players-hud {
 
-        display: flex;
-
-        overflow-x: auto;
-
-        padding-bottom: 0.4rem;
-
-        scrollbar-width: thin;
+        display: none !important;
 
     }
 
@@ -3159,4 +3153,41 @@ body[data-active-tab="board"] #topbar-announcement-banner {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   KRÁLOVSKÝ RÁDCE A TAKTICKÝ NAŠEPTÁVAČ (BOD 7)
+   ========================================================================== */
+.royal-advisor-hud-box {
+    transition: all 0.22s ease;
+}
+.royal-advisor-hud-box:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
+}
+.royal-advisor-badge {
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 9999px;
+    letter-spacing: 0.2px;
+    display: inline-flex;
+    align-items: center;
+}
+.royal-advisor-badge.advisor-tip {
+    background: rgba(56, 189, 248, 0.18);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    color: #bae6fd;
+}
+.royal-advisor-badge.advisor-good {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.5);
+    color: #86efac;
+}
+.royal-advisor-badge.advisor-warn {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+}
+.btn-advisor-toggle:hover {
+    color: var(--gold-light) !important;
 }

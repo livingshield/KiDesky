@@ -1614,11 +1614,12 @@
 
         }
 
-        // 2b. Taktický náhled dosahu kostky při fázi ROLL (Reachable Nodes)
+        // 2b. Taktický náhled dosahu kostky při fázi ROLL (Reachable Nodes & Našeptávač)
         if (this.state.phase === "ROLL" && activePlayer && activePlayer.nodeId !== null && activePlayer.nodeId !== undefined) {
-            var maxDice = (activePlayer.movementMode === "cautious") ? 4 : 6;
+            var curMode = this.selectedMovementMode || (activePlayer && activePlayer.movementMode) || "standard";
+            var diceLimit = (curMode === "cautious") ? 4 : 6;
             var reachableMap = {};
-            for (var dr = 1; dr <= maxDice; dr++) {
+            for (var dr = 1; dr <= diceLimit; dr++) {
                 var tNode = (window.PRS_GameEngine && window.PRS_GameEngine.getTargetNodeForRoll)
                     ? window.PRS_GameEngine.getTargetNodeForRoll(this.state, activePlayer, dr)
                     : null;
@@ -1632,11 +1633,41 @@
                 if (!targetN) continue;
                 var rollsStr = reachableMap[rNid].join(", ");
                 var tR = (targetN.type === "START" || targetN.type === "FESTIVAL" || targetN.type === "CASTLE" || (targetN.type === "QUEST" && targetN.subtype === "U3")) ? 21 : 16.5;
+
+                // Taktické hodnocení pole pro barevné odlišení:
+                var haloColor = "#38bdf8"; // modrá neutrální
+                var haloFill = "none";
+                var haloBadgeIcon = "🎲";
+
+                if (targetN.owner !== null && targetN.owner !== undefined && targetN.owner !== activePlayer.index) {
+                    haloColor = "#ef4444"; // červená hrozba (cizí nájem)
+                    haloFill = "rgba(239, 68, 68, 0.16)";
+                    haloBadgeIcon = "💸";
+                } else if (targetN.type === "PRISON") {
+                    haloColor = "#f97316"; // oranžová
+                    haloFill = "rgba(249, 115, 22, 0.16)";
+                    haloBadgeIcon = "⛓️";
+                } else if (targetN.owner === null || targetN.owner === undefined) {
+                    if (targetN.type === "ANIMAL") {
+                        haloColor = "#10b981"; // zelená příležitost
+                        haloFill = "rgba(16, 185, 129, 0.18)";
+                        haloBadgeIcon = "🐎";
+                    } else if (targetN.type === "TOWN" || targetN.type === "CASTLE" || targetN.type === "VILLAGE") {
+                        haloColor = "#fbbf24"; // zlatá příležitost
+                        haloFill = "rgba(251, 191, 36, 0.20)";
+                        haloBadgeIcon = "🏰";
+                    } else if (targetN.type === "FESTIVAL") {
+                        haloColor = "#ec4899"; // růžová slavnost
+                        haloFill = "rgba(236, 72, 153, 0.18)";
+                        haloBadgeIcon = "💖";
+                    }
+                }
+
                 out.push('  <g class="dice-reach-preview" style="pointer-events:none;">');
-                out.push('    <circle cx="' + targetN.x + '" cy="' + targetN.y + '" r="' + (tR + 5) + '" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3,3" opacity="0.85"><animate attributeName="opacity" values="0.45;0.95;0.45" dur="1.6s" repeatCount="indefinite"/></circle>');
+                out.push('    <circle cx="' + targetN.x + '" cy="' + targetN.y + '" r="' + (tR + 5.5) + '" fill="' + haloFill + '" stroke="' + haloColor + '" stroke-width="2.4" stroke-dasharray="3,3" opacity="0.9"><animate attributeName="opacity" values="0.45;0.95;0.45" dur="1.6s" repeatCount="indefinite"/></circle>');
                 out.push('    <g transform="translate(' + (targetN.x) + ',' + (targetN.y - tR - 9) + ')">');
-                out.push('      <rect x="-14" y="-7.5" width="28" height="15" rx="4" fill="rgba(15,23,42,0.92)" stroke="#38bdf8" stroke-width="1"/>');
-                out.push('      <text x="0" y="3.2" text-anchor="middle" fill="#7dd3fc" font-size="8" font-weight="bold">🎲 ' + rollsStr + '</text>');
+                out.push('      <rect x="-18" y="-7.5" width="36" height="15" rx="4" fill="rgba(15,23,42,0.92)" stroke="' + haloColor + '" stroke-width="1.2"/>');
+                out.push('      <text x="0" y="3.2" text-anchor="middle" fill="#fff" font-size="8" font-weight="bold">' + haloBadgeIcon + ' ' + rollsStr + '</text>');
                 out.push('    </g>');
                 out.push('  </g>');
             }

@@ -1575,6 +1575,8 @@
 
         var statusPill = "";
 
+        var advisorEval = (!isMyCurrentStandingTile && this.getAdvisorTileEvaluation) ? this.getAdvisorTileEvaluation(node, p) : "";
+
         if (node.type === "START") {
 
             description = "Královský hradní Start. Při průchodu nebo vstupu získáváš královský žold <strong>+3 000 zl.</strong> a zotavuješ se z úmrtí.";
@@ -1765,7 +1767,7 @@
 
             '  <div class="standing-tile-body">' +
 
-            '    <div style="margin-bottom:0.35rem;">' + description + '</div>' +
+            '    <div style="margin-bottom:0.35rem;">' + description + (advisorEval ? ('<div class="inspected-tile-advisor-tip" style="margin-top:0.45rem; padding:0.3rem 0.55rem; background:rgba(212,175,55,0.12); border-left:3px solid var(--gold); border-radius:4px; font-size:0.75rem; color:#fef08a; line-height:1.35;">💡 <strong>Rádce k tomuto poli:</strong> ' + this.escapeHtml(advisorEval) + '</div>') : '') + '</div>' +
 
             '    <div class="standing-tile-status-row">' +
 
@@ -2657,6 +2659,442 @@
 
     },
 
+    // ========================================================================
+    // KRÁLOVSKÝ RÁDCE & TAKTICKÝ NAŠEPTÁVAČ (BOD 7)
+    // ========================================================================
+    isAdvisorCollapsed: function () {
+        try {
+            return localStorage.getItem("prs_advisor_collapsed") === "true";
+        } catch (e) {
+            return false;
+        }
+    },
+
+    toggleRoyalAdvisorCollapse: function () {
+        var cur = this.isAdvisorCollapsed();
+        try {
+            localStorage.setItem("prs_advisor_collapsed", cur ? "false" : "true");
+        } catch (e) { }
+        this.renderActionPanel();
+    },
+
+    getAdvisorTileEvaluation: function (node, player) {
+        if (!node || !player || !this.state) return "";
+        var cfg = this.state.config || {};
+        var scen = cfg.scenario || "classic";
+        var price = (window.PRS_GameEngine && window.PRS_GameEngine.getNodePrice) ? window.PRS_GameEngine.getNodePrice(this.state, node) : (node.price || 600);
+        if (node.type === "ANIMAL") {
+            var owned = 0;
+            for (var i = 0; i < player.ownedNodes.length; i++) {
+                var oN = this.state.board.nodes[player.ownedNodes[i]];
+                if (oN && oN.type === "ANIMAL" && oN.setId === node.setId) owned++;
+            }
+            if (node.owner === player.index) return "Tvé vlastní zvíře (sada č. " + node.setId + ").";
+            if (node.owner !== null && node.owner !== undefined) return "Patří soupeři. Stoupnutí tě bude stát nájemné.";
+            if (owned === 2) return "Klíčové pole! Koupí završíš sadu č. " + node.setId + " na 3/3 (korunka 👑 + 1.5 💖).";
+            if (owned === 1) return "Koupí získáš pár (2/3 v sadě č. " + node.setId + ").";
+            return "Volné zvíře do chovu (cena " + price.toLocaleString("cs-CZ") + " zl.).";
+        }
+        if (node.type === "TOWN") {
+            if (node.owner === player.index) return "Tvé město s daňovým výnosem 1 200 zl.";
+            if (node.owner !== null) return "Město soupeře. Přináší mu daně z každého výběru.";
+            return (scen === "tycoon" ? "Cíl scénáře Magnát! " : "") + "Výnosné královské sídlo (+1 200 zl. daň).";
+        }
+        if (node.type === "CASTLE") {
+            if (node.owner === player.index) return "Tvůj hrad (+2 500 zl. daň a +1 Charisma).";
+            if (node.owner !== null) return "Hrad soupeře. Pozor na vysoký nájem.";
+            return (scen === "tycoon" ? "Cíl scénáře Magnát! " : "") + "Majestátní hrad (+2 500 zl. daň a +1 Charisma).";
+        }
+        if (node.type === "VILLAGE") {
+            if (node.owner === player.index) return "Tvá vesnice úrovně " + (node.villageLevel || 1) + "★. Lze ji povýšit.";
+            if (node.owner !== null) return "Vesnice soupeře.";
+            return "Volná vesnice za " + node.price + " zl. Stabilní zdroj daní.";
+        }
+        if (node.type === "QUEST") {
+            if (node.subtype === "U3") return (scen === "slayer" ? "Cíl scénáře Lovci draků! " : "") + "Nebezpečná Dračí sluj s královským pokladem.";
+            if (node.subtype === "U2") return "Doupě monstra. Vyžaduje solidní bojovou výbavu.";
+            return "Lesní zvěř. Vhodný cíl pro lehký lov se psy či sokoly.";
+        }
+        if (node.type === "MASTER") {
+            return "Mistr ctnosti (" + (node.skill ? node.skill.toUpperCase() : "CTNOST") + "). Zvyšuje úroveň vlastnosti.";
+        }
+        if (node.type === "FESTIVAL") {
+            return "Královské slavnosti. Skvělé místo pro zisk Princezniných srdcí 💖.";
+        }
+        return "";
+    },
+
+    getRoyalAdvisorAdvice: function (player, phase, pa, currNode) {
+        if (!this.state || !player) return null;
+        var cfg = this.state.config || {};
+        var scen = cfg.scenario || "classic";
+        var effStats = window.PRS_GameEngine.getEffectiveStats ? window.PRS_GameEngine.getEffectiveStats(this.state, player) : player.skills;
+
+        // 1. ZVLÁŠTNÍ PŘÍPAD: DLUH A LIKVIDACE
+        if (pa && pa.debt && pa.debt > 0) {
+            return {
+                icon: "⚠️",
+                title: "Královský rádce",
+                badge: "Hrozba dluhu",
+                badgeClass: "advisor-warn",
+                text: "Dlužíš věřitelům **" + pa.debt.toLocaleString("cs-CZ") + " zl.**! Královská rada ti doporučuje nejprve prodat **samostatná zvířata bez sady**, a chránit svá **města, hrady a kompletní 3/3 chovy**, které ti zajišťují stálý zlaťákový i prestižní příjem.",
+                actionPrompt: "Vyber majetek k prodeji za 50–75 % ceny níže."
+            };
+        }
+
+        // 2. ŠATLAVA A ŠPITÁL
+        if (pa && pa.isImprisoned) {
+            var canBail = player.gold >= (cfg.prisonBail || 1000);
+            return {
+                icon: "⛓️",
+                title: "Královský rádce",
+                badge: "Šatlava",
+                badgeClass: "advisor-warn",
+                text: canBail
+                    ? "Jsi ve vězení! Máš dostatek zlaťáků na složení kauce (**" + (cfg.prisonBail || 1000) + " zl.**). Doporučuji kauci zaplatit hned, ať neztrácíš cenné tahy!"
+                    : "Jsi uvězněn a chybí ti zlato na kauci. Zkus štěstí hodem na útěk (hod 5–6 ti vrátí svobodu), nebo vyčkej 2 kola.",
+                actionPrompt: canBail ? "Zvol 'Složit kauci a odejít'." : "Zvol 'Pokusit se o útěk'."
+            };
+        }
+
+        // 3. FÁZE ROLL (Před hodem kostkou)
+        if (phase === "ROLL") {
+            var curMode = this.selectedMovementMode || "standard";
+            var diceRange = (curMode === "cautious") ? [1, 2, 3, 4] : [1, 2, 3, 4, 5, 6];
+
+            var threats = [];
+            var opportunities = [];
+            var hasMissingAnimalInReach = false;
+
+            for (var d = 0; d < diceRange.length; d++) {
+                var rollVal = diceRange[d];
+                var tNode = (window.PRS_GameEngine && window.PRS_GameEngine.getTargetNodeForRoll)
+                    ? window.PRS_GameEngine.getTargetNodeForRoll(this.state, player, rollVal)
+                    : null;
+                if (!tNode) continue;
+
+                // Nebezpečí: cizí majetek s vysokým nájmem
+                if (tNode.owner !== null && tNode.owner !== undefined && tNode.owner !== player.index) {
+                    var rentCost = 0;
+                    if (tNode.type === "ANIMAL") {
+                        rentCost = window.PRS_GameEngine.calculateAnimalRent ? window.PRS_GameEngine.calculateAnimalRent(this.state, tNode, this.state.players[tNode.owner]) : Math.round(tNode.price * 0.2);
+                    } else if (tNode.type === "VILLAGE") {
+                        var vRentRates = (cfg.estates && cfg.estates.villageRent) || [300, 600, 1000];
+                        rentCost = vRentRates[(tNode.villageLevel || 1) - 1] || 300;
+                    } else if (tNode.type === "TOWN") {
+                        rentCost = (cfg.estates && cfg.estates.townRent) || 800;
+                    } else if (tNode.type === "CASTLE") {
+                        rentCost = (cfg.estates && cfg.estates.castleRent) || 1500;
+                    }
+                    if (rentCost >= 600 || rentCost >= player.gold * 0.3) {
+                        threats.push({ node: tNode, roll: rollVal, rent: rentCost });
+                    }
+                } else if (tNode.type === "PRISON") {
+                    threats.push({ node: tNode, roll: rollVal, isPrison: true });
+                }
+
+                // Příležitosti: volné zvíře do stávající sady
+                if (tNode.type === "ANIMAL" && (tNode.owner === null || tNode.owner === undefined)) {
+                    var sCount = 0;
+                    for (var on = 0; on < player.ownedNodes.length; on++) {
+                        var oN = this.state.board.nodes[player.ownedNodes[on]];
+                        if (oN && oN.type === "ANIMAL" && oN.setId === tNode.setId) sCount++;
+                    }
+                    if (sCount === 2) {
+                        opportunities.push({ node: tNode, roll: rollVal, isTrioCompleter: true });
+                        hasMissingAnimalInReach = true;
+                    } else if (sCount === 1) {
+                        opportunities.push({ node: tNode, roll: rollVal, isPair: true });
+                    } else if (player.gold >= tNode.price) {
+                        opportunities.push({ node: tNode, roll: rollVal, isBuyable: true });
+                    }
+                } else if ((tNode.type === "TOWN" || tNode.type === "CASTLE") && (tNode.owner === null || tNode.owner === undefined)) {
+                    opportunities.push({ node: tNode, roll: rollVal, isEstate: true });
+                } else if (tNode.type === "FESTIVAL") {
+                    opportunities.push({ node: tNode, roll: rollVal, isFestival: true });
+                } else if (tNode.type === "QUEST" && tNode.subtype === "U3" && scen === "slayer") {
+                    opportunities.push({ node: tNode, roll: rollVal, isDragonSlayer: true });
+                }
+            }
+
+            if (hasMissingAnimalInReach) {
+                var opp = opportunities.find(function (o) { return o.isTrioCompleter; });
+                return {
+                    icon: "👑",
+                    title: "Královský rádce",
+                    badge: "Šlechtický chov",
+                    badgeClass: "advisor-good",
+                    text: "Při hodu **" + opp.roll + "** máš na dosah volné zvíře **" + this.escapeHtml(opp.node.name) + "**, které zkompletuje tvou chovnou sadu na **3/3** a zajistí ti korunu 👑 a **+1.5 💖**!" + (curMode !== "cautious" && opp.roll <= 4 ? " Zvaž přepnutí na **Opatrný krok 🚶 (1–4)** pro vyšší šanci na přesný hod." : ""),
+                    actionPrompt: "Hoď kostkou a usiluj o číslo " + opp.roll + "!"
+                };
+            }
+
+            if (threats.length > 0 && curMode === "standard") {
+                var th = threats[0];
+                var dangerDesc = th.isPrison ? "šatlava" : ("cizí panství s nájmem **" + th.rent.toLocaleString("cs-CZ") + " zl.**");
+                return {
+                    icon: "🛡️",
+                    title: "Královský rádce",
+                    badge: "Pozor na trasu",
+                    badgeClass: "advisor-warn",
+                    text: "Na hodu **" + th.roll + "** číhá " + dangerDesc + ". Pokud se chceš tomuto poli vyhnout, můžeš zvolit **Opatrný krok 🚶 (1–4)** nebo použít svitek z brašny.",
+                    actionPrompt: "Zvaž režim pohybu a hoď kostkou."
+                };
+            }
+
+            if (opportunities.length > 0) {
+                var op = opportunities[0];
+                var opDesc = op.isEstate ? ("volné sídlo **" + this.escapeHtml(op.node.name) + "**") : (op.isFestival ? "královské Slavnosti 💖" : ("pole **" + this.escapeHtml(op.node.name) + "**"));
+                return {
+                    icon: "💡",
+                    title: "Královský rádce",
+                    badge: "Taktický dosah",
+                    badgeClass: "advisor-tip",
+                    text: "Před tebou na hodu **" + op.roll + "** leží " + opDesc + ". Cesta je volná a příznivá pro tvůj další postup.",
+                    actionPrompt: "Hoď kostkou a vykroč na cestu."
+                };
+            }
+
+            if (scen === "slayer") {
+                return {
+                    icon: "🐉",
+                    title: "Královský rádce",
+                    badge: "Scénář Lovci draků",
+                    badgeClass: "advisor-tip",
+                    text: "Ve scénáři Lovci draků je tvým cílem skolit 2 draky království v Dračích slujích (U3). Sleduj rozcestí a směřuj na Dračí stezku!",
+                    actionPrompt: "Klepni na kostku pro hod."
+                };
+            }
+            if (scen === "tycoon") {
+                return {
+                    icon: "🏰",
+                    title: "Královský rádce",
+                    badge: "Scénář Feudální magnát",
+                    badgeClass: "advisor-tip",
+                    text: "K vítězství potřebuješ ovládnout 3 města a 1 hrad. Šetři si zlaťáky na jejich nákup a nenech si je vyfouknout soupeři!",
+                    actionPrompt: "Klepni na kostku pro hod."
+                };
+            }
+
+            return {
+                icon: "🧙‍♂️",
+                title: "Královský rádce",
+                badge: "Královský pochod",
+                badgeClass: "advisor-tip",
+                text: "Máš k dispozici **" + player.gold.toLocaleString("cs-CZ") + " zl.** a **" + player.totalHearts + " 💖**. Cesta před tebou je přehledná, zvol tempo pochodu a vyraz vstříc dobrodružství.",
+                actionPrompt: "Klepni na kostku pro hod."
+            };
+        }
+
+        // 4. FÁZE BRANCH_CHOICE
+        if (phase === "BRANCH_CHOICE") {
+            return {
+                icon: "🔀",
+                title: "Královský rádce",
+                badge: "Volba rozcestí",
+                badgeClass: "advisor-tip",
+                text: "Stojíš před klíčovým rozcestím. **Vnitřní královská stezka** nabízí slavnosti, turnaje a vysoké odměny, zatímco **Vnější okruh** poskytuje stabilní hospodářství a chov zvířat.",
+                actionPrompt: "Zvol si jednu ze dvou tras výše."
+            };
+        }
+
+        // 5. FÁZE ACTION (Po hodu na poli)
+        if (currNode) {
+            if (pa && pa.canBuyNode) {
+                var canAfford = player.gold >= pa.buyPrice;
+                var rem = player.gold - pa.buyPrice;
+
+                if (!canAfford) {
+                    return {
+                        icon: "🪙",
+                        title: "Královský rádce",
+                        badge: "Nedostatek zlata",
+                        badgeClass: "advisor-warn",
+                        text: "Pole **" + this.escapeHtml(currNode.name) + "** stojí **" + pa.buyPrice.toLocaleString("cs-CZ") + " zl.**, ale v měšci máš jen " + player.gold.toLocaleString("cs-CZ") + " zl. Nyní pole koupit nemůžeš, pokračuj ukončením tahu.",
+                        actionPrompt: "Klepni na 'Ukončit tah'."
+                    };
+                }
+
+                if (currNode.type === "ANIMAL") {
+                    var sId = currNode.setId;
+                    var ownedInSet = 0;
+                    for (var oi = 0; oi < player.ownedNodes.length; oi++) {
+                        var aN = this.state.board.nodes[player.ownedNodes[oi]];
+                        if (aN && aN.type === "ANIMAL" && aN.setId === sId) ownedInSet++;
+                    }
+
+                    if (ownedInSet === 2) {
+                        return {
+                            icon: "👑",
+                            title: "Královský rádce",
+                            badge: "Kompletace 3/3!",
+                            badgeClass: "advisor-good",
+                            text: "⭐ **Jednoznačně doporučuji koupit!** Tímto zvířetem zkompletuješ celou chovnou sadu č. " + sId + " na **3/3**. Získáš zlatou korunu 👑, prémii **+1.5 💖** a soupeři ti budou platit **trojnásobné nájemné (80 %)**!",
+                            actionPrompt: "Klepni na zelené tlačítko 'Koupit toto pole'."
+                        };
+                    } else if (ownedInSet === 1) {
+                        return {
+                            icon: "🐎",
+                            title: "Královský rádce",
+                            badge: "Zisk páru do sady",
+                            badgeClass: "advisor-good",
+                            text: "Koupí získáš již **2. zvíře ze sady č. " + sId + "**. Nájemné stoupne na 40 % a zbývá ti už jen 1 kus do královského titulu. Skvělá investice!",
+                            actionPrompt: "Klepni na 'Koupit toto pole'."
+                        };
+                    } else {
+                        return {
+                            icon: "🐎",
+                            title: "Královský rádce",
+                            badge: "Nákup zvířete",
+                            badgeClass: "advisor-tip",
+                            text: "Volné chovné zvíře (" + (currNode.subtype === "kun" ? "Kůň – nutný pro cval a závody" : (currNode.subtype === "pes" ? "Pes – bonus k lovu monster" : "Sokol – bonus k turnajům")) + "). Po nákupu ti zbyde bezpečných **" + rem.toLocaleString("cs-CZ") + " zl.**",
+                            actionPrompt: "Klepni na 'Koupit toto pole'."
+                        };
+                    }
+                }
+
+                if (currNode.type === "TOWN" || currNode.type === "CASTLE") {
+                    return {
+                        icon: "🏰",
+                        title: "Královský rádce",
+                        badge: "Strategické panství",
+                        badgeClass: "advisor-good",
+                        text: "Sídla přinášejí **pasivní daňový výnos** při každé návštěvě Výběrčího daní (VD) pro všechny hráče. Navíc hrad ti dává trvalé **+1 Charisma**. Doporučuji koupit!",
+                        actionPrompt: "Klepni na 'Koupit toto pole'."
+                    };
+                }
+
+                if (currNode.type === "VILLAGE") {
+                    return {
+                        icon: "🏘️",
+                        title: "Královský rádce",
+                        badge: "Rozvoj vesnice",
+                        badgeClass: "advisor-tip",
+                        text: "Vesnice je levný základ panství (výnos 500 zl.). Později ji můžeš povýšit až na 3★ (výnos 1 400 zl.). Po koupi ti zbyde **" + rem.toLocaleString("cs-CZ") + " zl.**",
+                        actionPrompt: "Klepni na 'Koupit toto pole'."
+                    };
+                }
+            }
+
+            if (pa && pa.canUpgradeVillage) {
+                return {
+                    icon: "🏘️",
+                    title: "Královský rádce",
+                    badge: "Povýšení panství",
+                    badgeClass: "advisor-good",
+                    text: "Stojíš na své vesnici. Povýšení na vyšší úroveň zvýší daňový výnos i nájemné od soupeřů. Investice se ti vrátí již při příštím výběru daní.",
+                    actionPrompt: "Zvol 'Povýšit vesnici' nebo ukonči tah."
+                };
+            }
+
+            if (pa && pa.canTrainMaster) {
+                if (pa.isMasterDuel) {
+                    return {
+                        icon: "⚔️",
+                        title: "Královský rádce",
+                        badge: "Rytířský duel!",
+                        badgeClass: "advisor-good",
+                        text: "Mistr ctnosti tě vyzývá k slavnostnímu rytířskému turnaji o **1.5 💖 Srdce princezny**! Hod kostkou + tvoje ctnost rozhodne. I při prohře získáš čestné srdce za odvahu.",
+                        actionPrompt: "Klepni na 'Vyzvat mistra na duel'!"
+                    };
+                }
+                return {
+                    icon: "🎓",
+                    title: "Královský rádce",
+                    badge: "Výcvik ctnosti",
+                    badgeClass: "advisor-tip",
+                    text: "Mistr tě přijal do učení! Zvýšení vlastnosti ti dá trvalou výhodu při Slavnostech a bojových výpravách. Pokud máš dostatek zlaťáků, zaplať si lekci.",
+                    actionPrompt: "Klepni na tlačítko výcviku ctnosti."
+                };
+            }
+
+            if (pa && pa.canResolveQuest && pa.questCard) {
+                var q = pa.questCard;
+                var animalBonus = (q.questTier === "U1" && (effStats.dogs > 0 || effStats.falcons > 0)) ? 1 : ((q.questTier === "U3" && effStats.dogs > 0 && effStats.falcons > 0) ? 2 : (effStats.dogs > 0 || effStats.falcons > 0 ? 1 : 0));
+                var horseBonus = (q.questTier !== "U1" && effStats.horses > 0) ? (1 + Math.floor(effStats.jizda / 2)) : 0;
+                var basePower = effStats.boj + animalBonus + horseBonus;
+                var needed = Math.max(1, q.difficulty - basePower);
+                var winRate = (needed > 6) ? 0 : Math.round(((7 - Math.max(1, needed)) / 6) * 100);
+
+                if (winRate >= 65) {
+                    return {
+                        icon: "⚔️",
+                        title: "Královský rádce",
+                        badge: "Příznivý boj (" + winRate + " %)",
+                        badgeClass: "advisor-good",
+                        text: "Tvoje bojová síla je vysoká (**+" + basePower + "**). K vítězství ti stačí hod **" + needed + "+** (šance **" + winRate + " %**). Výhra ti přinese štědré zlaťáky i srdce!",
+                        actionPrompt: "Klepni na 'Bojovat s nepřítelem'."
+                    };
+                } else if (winRate >= 35) {
+                    return {
+                        icon: "⚖️",
+                        title: "Královský rádce",
+                        badge: "Vyrovnaný souboj (" + winRate + " %)",
+                        badgeClass: "advisor-tip",
+                        text: "Šance je vyrovnaná (**" + winRate + " %**, potřebuješ hod **" + needed + "+**). Pokud máš v brašně bojový pergamen, aktivuj jej pro vyšší jistotu.",
+                        actionPrompt: "Bojuj s odvahou nebo zvaž riziko."
+                    };
+                } else {
+                    return {
+                        icon: "⚠️",
+                        title: "Královský rádce",
+                        badge: "Vysoké riziko (" + winRate + " %)",
+                        badgeClass: "advisor-warn",
+                        text: "Tento protivník je nad tvé současné síly (potřebuješ hod **" + needed + "**, šance jen **" + winRate + " %**). Porážka tě zraní a pošle do Špitálu. Doporučuji raději ustoupit.",
+                        actionPrompt: "Zvaž, zda riskovat porážku."
+                    };
+                }
+            }
+
+            return {
+                icon: "➡️",
+                title: "Královský rádce",
+                badge: "Tah dokončen",
+                badgeClass: "advisor-tip",
+                text: "Všechny záležitosti na tomto poli jsou vyřízeny. Předej hrací kostku dalšímu rytíři.",
+                actionPrompt: "Klepni na tlačítko 'Ukončit tah'."
+            };
+        }
+
+        return null;
+    },
+
+    getRoyalAdvisorHtml: function (player, phase, pa, currNode) {
+        if (!player || player.type !== "Human") return "";
+        var advice = this.getRoyalAdvisorAdvice(player, phase, pa, currNode);
+        if (!advice) return "";
+
+        var isCollapsed = this.isAdvisorCollapsed();
+
+        var bClass = advice.badgeClass || "advisor-tip";
+        var borderColor = (bClass === "advisor-warn") ? "rgba(239,68,68,0.5)" : (bClass === "advisor-good" ? "rgba(34,197,94,0.5)" : "rgba(212,175,55,0.45)");
+        var bgGrad = (bClass === "advisor-warn")
+            ? "linear-gradient(135deg, rgba(38,12,12,0.95), rgba(24,8,8,0.96))"
+            : (bClass === "advisor-good"
+                ? "linear-gradient(135deg, rgba(14,34,20,0.95), rgba(10,24,14,0.96))"
+                : "linear-gradient(135deg, rgba(32,24,16,0.95), rgba(18,14,10,0.96))");
+
+        var html = '<div class="royal-advisor-hud-box" style="margin-top:0.65rem; border:1.2px solid ' + borderColor + '; background:' + bgGrad + '; border-radius:9px; padding:0.45rem 0.65rem; box-shadow:0 3px 10px rgba(0,0,0,0.45);">' +
+            '  <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="PRS_App.toggleRoyalAdvisorCollapse()">' +
+            '    <div style="display:flex; align-items:center; gap:0.4rem;">' +
+            '      <span style="font-size:1.1rem;">' + advice.icon + '</span>' +
+            '      <strong style="color:var(--gold-light); font-family:\'Cinzel\',serif; font-size:0.8rem; letter-spacing:0.3px;">' + this.escapeHtml(advice.title) + '</strong>' +
+            '      <span class="royal-advisor-badge ' + bClass + '">' + this.escapeHtml(advice.badge) + '</span>' +
+            '    </div>' +
+            '    <button type="button" class="btn-advisor-toggle" style="background:none; border:none; color:var(--text-muted); font-size:0.7rem; cursor:pointer; padding:0 3px;" title="' + (isCollapsed ? 'Rozbalit radu' : 'Sbalit radu') + '">' + (isCollapsed ? '▼ Zobrazit radu' : '▲ Skrýt') + '</button>' +
+            '  </div>';
+
+        if (!isCollapsed) {
+            html += '  <div class="royal-advisor-body" style="margin-top:0.35rem; font-size:0.77rem; line-height:1.4; color:#e2e8f0; border-top:1px dashed rgba(212,175,55,0.22); padding-top:0.35rem;">' +
+                '    ' + this.formatGameText(advice.text) +
+                (advice.actionPrompt ? ('    <div style="margin-top:0.35rem; font-weight:700; color:#fde047; font-size:0.75rem; display:flex; align-items:center; gap:0.3rem;">👉 ' + this.escapeHtml(advice.actionPrompt) + '</div>') : '') +
+                '  </div>';
+        }
+
+        html += '</div>';
+        return html;
+    },
+
     // Rytířská brašna na pergameny a svitky (viditelná přímo v ovládání tahu)
     getKnightPouchHudHtml: function (player, isCurTurn, isFullInspector) {
         if (!player) return "";
@@ -2969,6 +3407,8 @@
 
                     : '<button class="btn-gold-lg" style="width:100%;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.handleRollDice()">' + (modeLabels[curMode] || modeLabels.standard) + '</button>') +
 
+                this.getRoyalAdvisorHtml(player, "ROLL", null, currNode) +
+
                 pouchHudHtml +
 
                 '</div>';
@@ -3026,6 +3466,8 @@
                     '  </button>' +
 
                     '</div>' +
+
+                    this.getRoyalAdvisorHtml(player, "BRANCH_CHOICE", pbc, junctionNode) +
 
                     '</div>';
 
@@ -3882,6 +4324,8 @@
             encounterHtml +
 
             specialCardHtml +
+
+            this.getRoyalAdvisorHtml(player, "ACTION", pa, currNode) +
 
             pouchHudHtml +
 
