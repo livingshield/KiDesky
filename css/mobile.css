@@ -40,22 +40,56 @@
             font-size: 0.76rem;
         }
 
-        /* Mobilní herní stůl (#tab-board) na výšku (Portrait) */
-        body[data-device="mobile"] .main-container {
-            padding: 0.4rem 0.4rem 95px 0.4rem;
+        /* Mobilní přizpůsobení lobby a formulářových polí (na výšku) */
+        @media (max-width: 640px) {
+            .lobby-player-row {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                align-items: center !important;
+                gap: 0.4rem !important;
+                padding: 0.5rem 0.6rem !important;
+            }
+            .lobby-player-row .lobby-pawn-btn {
+                flex-shrink: 0 !important;
+                width: 36px !important;
+                height: 36px !important;
+            }
+            .lobby-player-row .prs-input {
+                flex: 1 1 120px !important;
+                min-width: 0 !important;
+                font-size: 0.85rem !important;
+                padding: 0.4rem 0.55rem !important;
+            }
+            .lobby-player-row .btn-icon-danger {
+                flex-shrink: 0 !important;
+                width: 32px !important;
+                height: 32px !important;
+                padding: 0 !important;
+            }
+            .lobby-player-row .prs-select {
+                flex: 1 1 100% !important;
+                width: 100% !important;
+                margin-top: 2px !important;
+                font-size: 0.82rem !important;
+                padding: 0.42rem 0.55rem !important;
+            }
+            .gamehall-table-tabs {
+                flex-direction: column !important;
+                gap: 0.4rem !important;
+            }
+            .gamehall-tab-btn {
+                width: 100% !important;
+                text-align: left !important;
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.84rem !important;
+            }
         }
-        body[data-device="mobile"][data-orientation="portrait"] .board-workspace {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        body[data-device="mobile"][data-orientation="portrait"] .board-right-sidebar {
-            display: none; /* Skryto na výšku, plně nahrazeno Sticky Thumb Dockem a Bottom Sheetem */
-        }
+
+        /* Společné vlastnosti mobilní herní desky */
         body[data-device="mobile"] .svg-board-container {
             width: 100%;
             height: auto;
-            aspect-ratio: 1400 / 860;
+            aspect-ratio: 1400 / 860 !important;
             min-height: auto;
             border-radius: 12px;
             padding: 2px;
@@ -66,26 +100,42 @@
         body[data-device="mobile"] #prs-board-svg {
             width: 100%;
             height: auto;
-            aspect-ratio: 1400 / 860;
+            aspect-ratio: 1400 / 860 !important;
             display: block;
         }
-        body[data-device="mobile"][data-orientation="landscape"] .svg-board-container {
-            height: calc(100vh - 44px);
-            aspect-ratio: unset;
+        body[data-device="mobile"] .board-top-players-hud {
+            display: flex;
+            overflow-x: auto;
+            gap: 0.35rem;
+            padding-bottom: 3px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
         }
-        body[data-device="mobile"][data-orientation="landscape"] #prs-board-svg {
-            width: 100%;
-            height: 100%;
-            aspect-ratio: unset;
+        body[data-device="mobile"] .board-top-players-hud::-webkit-scrollbar {
+            display: none;
+        }
+        body[data-device="mobile"] .top-hud-card {
+            min-width: 130px;
+            max-width: 160px;
+            flex-shrink: 0;
+            padding: 0.35rem 0.55rem;
         }
         body[data-device="mobile"] .map-floating-toolbar {
-            padding: 0.35rem 0.5rem;
-            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 0.35rem;
+            padding: 0.3rem 0.45rem;
+            margin-bottom: 0.35rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
         }
         body[data-device="mobile"] .map-floating-toolbar .btn-zoom {
             padding: 0.28rem 0.45rem;
             font-size: 0.75rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         body[data-device="mobile"] .board-bottom-bar {
             display: none;
@@ -101,35 +151,91 @@
             padding-bottom: 3px;
         }
 
+        /* Mobilní herní stůl (#tab-board) na výšku (Portrait) */
+        body[data-device="mobile"][data-orientation="portrait"] .main-container {
+            padding: 0.35rem 0.4rem 95px 0.4rem;
+        }
+        body[data-device="mobile"][data-orientation="portrait"] .board-workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+        body[data-device="mobile"][data-orientation="portrait"] .board-right-sidebar {
+            display: none; /* Na výšku je vše ve Sticky Thumb Docku */
+        }
+
         /* Mobilní herní stůl na šířku (Landscape) - "Konzolový režim" */
+        body[data-device="mobile"][data-orientation="landscape"] {
+            overflow-y: auto !important;
+        }
         body[data-device="mobile"][data-orientation="landscape"] .main-container {
-            padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+            padding: 0.2rem 0.45rem 0.25rem 0.45rem;
             max-width: 100%;
         }
         body[data-device="mobile"][data-orientation="landscape"] .topbar {
             display: flex;
-            padding: 0.35rem 0.6rem;
+            padding: 0.2rem 0.5rem;
+            min-height: 34px;
+            gap: 0.35rem;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .board-top-players-hud {
+            display: flex;
+            gap: 0.3rem;
+            margin-bottom: 0.25rem;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .top-hud-card {
+            min-width: 110px;
+            padding: 0.25rem 0.45rem;
+            font-size: 0.72rem;
+            flex-shrink: 0;
         }
         body[data-device="mobile"][data-orientation="landscape"] .board-workspace {
             display: grid;
-            grid-template-columns: 1fr 310px;
-            gap: 0.5rem;
+            grid-template-columns: 1fr minmax(240px, 280px);
+            gap: 0.45rem;
             min-height: auto;
-            overflow: visible;
-            padding-top: 2px;
+            align-items: start;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .map-floating-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.2rem 0.4rem;
+            margin-bottom: 0.25rem;
+            overflow-x: auto;
+            gap: 0.25rem;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .map-floating-toolbar .btn-zoom {
+            padding: 0.22rem 0.4rem;
+            font-size: 0.72rem;
         }
         body[data-device="mobile"][data-orientation="landscape"] .svg-board-container {
-            height: calc(100vh - 44px);
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 1400 / 860 !important;
             touch-action: none;
+            margin: 0 auto;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] #prs-board-svg {
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 1400 / 860 !important;
+            display: block;
         }
         body[data-device="mobile"][data-orientation="landscape"] .board-right-sidebar {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 8px);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            padding-right: 4px;
-            gap: 0.45rem;
+            padding-right: 2px;
+            gap: 0.35rem;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .action-card {
+            padding: 0.65rem 0.75rem;
+            margin-bottom: 0.45rem;
+            font-size: 0.85rem;
         }
         body[data-device="mobile"][data-orientation="landscape"] #mobile-action-dock {
             display: none !important;
