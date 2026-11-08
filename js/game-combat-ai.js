@@ -1471,13 +1471,45 @@
 
             state.pendingAction.canBuyoutAnimalSet = false;
 
+            state.pendingAction.buyoutCandidates = [];
+
+            state.pendingAction.buyoutSuccess = {
+
+                nodeId: targetNode.id,
+
+                nodeName: targetNode.name,
+
+                nodeIcon: targetNode.icon || "🦅",
+
+                sellerName: targetOwner.name,
+
+                price: buyoutPrice,
+
+                setId: targetNode.setId
+
+            };
+
             state.pendingAction.summary = msg;
 
         }
 
         this.recalculateBreedingAndVictory(state);
 
-        return true;
+        return {
+
+            success: true,
+
+            nodeId: targetNode.id,
+
+            nodeName: targetNode.name,
+
+            targetOwnerName: targetOwner.name,
+
+            buyoutPrice: buyoutPrice,
+
+            setId: targetNode.setId
+
+        };
 
     },
 

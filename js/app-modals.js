@@ -2997,7 +2997,27 @@
 
             if (window.PRS_Audio) window.PRS_Audio.playBuy();
 
+            this.inspectedPlayerIndex = this.state.currentPlayerIndex;
+
+            var price = (typeof res === "object" && res.buyoutPrice) ? res.buyoutPrice : 1600;
+
+            var nodeName = (typeof res === "object" && res.nodeName) ? res.nodeName : "Zvíře";
+
+            if (this.showToast) {
+
+                this.showToast("🦅 " + nodeName + " úspěšně vykoupen ze sady (-" + price.toLocaleString("cs-CZ") + " zl., +1.0 💖)!", "success");
+
+            }
+
             this.renderGameScreen();
+
+            this.renderLowerKnightDetail();
+
+            if (this.activeSidebarTab === "property") {
+
+                this.renderSidebarPropertyPanel();
+
+            }
 
             this.saveSessionAuto();
 

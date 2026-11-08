@@ -1071,6 +1071,8 @@
 
         if (tabName === "log") this.renderSidebarQuickLogPanel();
 
+        this.renderLowerKnightDetail();
+
         if (window.PRS_Audio) window.PRS_Audio.playStep();
 
     },
@@ -3517,6 +3519,24 @@
             }
 
             specialCardHtml += '</div></div>';
+
+        } else if (pa.buyoutSuccess) {
+
+            var bs = pa.buyoutSuccess;
+
+            specialCardHtml += '<div class="buyout-interaction-card" style="border:1.5px solid #10b981; background:linear-gradient(180deg, rgba(6,78,59,0.55), rgba(15,23,42,0.92)); border-radius:10px; padding:0.85rem; margin-top:0.6rem; display:flex; align-items:flex-start; gap:0.75rem;">' +
+
+                '<div style="font-size:1.8rem; line-height:1;">' + (bs.nodeIcon || '🦅') + '</div>' +
+
+                '<div>' +
+
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; font-weight:700;">✅ Královský výkup úspěšně dokončen!</div>' +
+
+                '<div style="font-size:0.82rem; color:#a7f3d0; margin-top:0.25rem;">Kus <strong>' + this.escapeHtml(bs.nodeName) + '</strong> byl vykoupen od soupeře <strong>' + this.escapeHtml(bs.sellerName) + '</strong> za <strong>' + bs.price.toLocaleString("cs-CZ") + ' zl.</strong> Tvoje chovná sada #' + bs.setId + ' je nyní kompletní (+1,0 💖)!</div>' +
+
+                '</div>' +
+
+                '</div>';
 
         }
 
