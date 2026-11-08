@@ -851,7 +851,10 @@
 
                 '    <div class="top-hud-stats">' +
 
-                (p.isEliminated ? '      <div class="top-hud-gold" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">🪙 0 zl.</div><div class="top-hud-hearts" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">💀 ELIMINOVÁN</div>' : '      <div class="top-hud-gold">🪙 <strong>' + p.gold.toLocaleString("cs-CZ") + '</strong> zl.</div>' + statsHeartsHtml) +
+                (p.isEliminated ? '      <div class="top-hud-gold" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">🪙 0 zl.</div><div class="top-hud-hearts" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">💀 ELIMINOVÁN</div>' : '      <div class="top-hud-gold">🪙 <strong>' + p.gold.toLocaleString("cs-CZ") + '</strong> zl.</div>' + statsHeartsHtml +
+                '      <div style="font-size:0.71rem; font-weight:700; color:' + ((p.inventory && p.inventory.length) ? '#fde047' : '#94a3b8') + '; display:flex; align-items:center; gap:2px; margin-top:1px;" title="Rytířská brašna pergamenů: ' + ((p.inventory && p.inventory.length) || 0) + '/3">' +
+                '        <span>🎒</span> <span>' + ((p.inventory && p.inventory.length) || 0) + '/3</span>' +
+                '      </div>') +
 
                 '    </div>' +
 
@@ -2588,6 +2591,62 @@
 
     },
 
+    // Rytířská brašna na pergameny a svitky (viditelná přímo v ovládání tahu)
+    getKnightPouchHudHtml: function (player, isCurTurn) {
+        if (!player) return "";
+        var invList = player.inventory || [];
+        var actBuffs = [];
+        if (player.activeScrolls) {
+            if (player.activeScrolls.bonusRoll) actBuffs.push('⚡ +' + player.activeScrolls.bonusRoll + ' k hodu');
+            if (player.activeScrolls.forcedRoll) actBuffs.push('⭐ Zaručená ' + player.activeScrolls.forcedRoll);
+            if (player.activeScrolls.combatBonus) actBuffs.push('🧪 +' + player.activeScrolls.combatBonus + ' Boj');
+            if (player.activeScrolls.rentImmunity) actBuffs.push('👑 Ochrana nájmu');
+            if (player.activeScrolls.doubleBreeding) actBuffs.push('🐑 2x Chov stád');
+        }
+
+        var html = '<div class="knight-pouch-hud-card" style="margin:0.5rem 0 0.6rem; padding:0.55rem 0.75rem; background:linear-gradient(135deg, rgba(32,22,12,0.95), rgba(18,12,6,0.98)); border:1.5px solid var(--gold); border-radius:8px; box-shadow:0 3px 12px rgba(0,0,0,0.5);">' +
+            '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.3rem;">' +
+            '    <div style="display:flex; align-items:center; gap:0.4rem;">' +
+            '      <span style="font-size:1.15rem;">🎒</span>' +
+            '      <strong style="color:var(--gold-light); font-size:0.86rem; font-family:\'Cinzel\',serif;">Rytířská brašna pergamenů</strong>' +
+            '    </div>' +
+            '    <span style="font-size:0.75rem; color:' + (invList.length > 0 ? '#fde047' : '#94a3b8') + '; font-weight:800; background:rgba(0,0,0,0.4); padding:1px 6px; border-radius:4px; border:1px solid rgba(212,175,55,0.2);">' + invList.length + ' / 3 slotů</span>' +
+            '  </div>';
+
+        if (invList.length === 0) {
+            html += '<div style="font-size:0.75rem; color:#a1a1aa; font-style:italic; padding:0.2rem 0.1rem; line-height:1.35;">Brašna je prázdná. Když stoupneš na pole Náhody a otočíš pergamen, můžeš si jej sem uložit k pozdějšímu taktickému zahrání.</div>';
+        } else {
+            html += '<div style="display:flex; flex-direction:column; gap:0.4rem;">';
+            for (var si = 0; si < invList.length; si++) {
+                var sc = invList[si];
+                var canUse = isCurTurn && (player.type === "Human") && (this.state && this.state.phase !== "GAME_OVER");
+                html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:0.4rem; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.35); border-radius:6px; padding:0.35rem 0.55rem;">' +
+                    '  <div style="flex:1; min-width:0; overflow:hidden;">' +
+                    '    <div style="font-size:0.82rem; font-weight:700; color:#fde68a; display:flex; align-items:center; gap:0.3rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">' +
+                    '      <span>' + sc.icon + '</span>' +
+                    '      <span style="color:#fff;">' + this.escapeHtml(sc.title) + '</span>' +
+                    '    </div>' +
+                    '    <div style="font-size:0.72rem; color:#cbd5e1; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;" title="' + this.escapeHtml(sc.text) + '">' + this.escapeHtml(sc.text) + '</div>' +
+                    '  </div>' +
+                    (canUse
+                        ? '  <button type="button" class="btn-primary" style="padding:0.25rem 0.65rem; font-size:0.76rem; background:linear-gradient(135deg, #10b981, #059669); border-color:#34d399; font-weight:bold; white-space:nowrap; cursor:pointer;" onclick="PRS_App.handleUseInventoryScroll(' + si + ')" title="Zahrát tento pergamen hned">⚡ Použít</button>'
+                        : '  <span style="font-size:0.72rem; color:#94a3b8; font-style:italic;">Uloženo</span>'
+                    ) +
+                    '</div>';
+            }
+            html += '</div>';
+        }
+
+        if (actBuffs.length > 0) {
+            html += '<div style="margin-top:0.4rem; font-size:0.74rem; color:#86efac; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.35); border-radius:5px; padding:0.25rem 0.5rem;">' +
+                '✨ Aktivní požehnání: <strong>' + actBuffs.join(', ') + '</strong>' +
+                '</div>';
+        }
+
+        html += '</div>';
+        return html;
+    },
+
     renderActionPanel: function () {
 
         var el = document.getElementById("turn-action-panel");
@@ -2794,9 +2853,13 @@
 
                 '</div>';
 
+            var pouchHudHtml = this.getKnightPouchHudHtml(player, true);
+
             el.innerHTML = '<div class="action-card">' +
 
                 treasuryBannerHtml +
+
+                pouchHudHtml +
 
                 '<div class="dice-showcase-box">' +
 
@@ -3247,7 +3310,23 @@
 
                 '      <p style="font-size:0.86rem; color:#f8fafc; line-height:1.35; margin-bottom:0.45rem;">' + this.escapeHtml(c.text) + '</p>' +
 
-                (pa.canChooseDilemma && c.options && c.options.length >= 2 ? (
+                ((c.isScroll || c.category === "scroll" || c.scrollType || pa.canStoreScroll || pa.scrollCard) ? (
+                    '      <div style="margin-top:0.6rem; display:flex; flex-direction:column; gap:0.45rem;" onclick="event.stopPropagation();">' +
+                    '        <div style="font-size:0.78rem; color:#86efac; font-weight:700; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); border-radius:5px; padding:0.3rem 0.55rem; text-align:center;">' +
+                    '          🎒 Nalezený pergamen lze uložit do brašny na později, nebo zahrát ihned:' +
+                    '        </div>' +
+                    ((!player.inventory || player.inventory.length < 3) ? (
+                        '        <button type="button" class="btn-primary" style="background:linear-gradient(135deg, #059669, #047857); border:1.5px solid #34d399; color:#fff; font-size:0.92rem; padding:0.6rem 0.8rem; font-weight:bold; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.4rem; box-shadow:0 3px 10px rgba(5,150,105,0.4);" onclick="PRS_App.handleStoreScroll()">' +
+                        '          🎒 ULOŽIT DO BRAŠNY RYTÍŘE (' + ((player.inventory && player.inventory.length) || 0) + '/3)' +
+                        '        </button>'
+                    ) : (
+                        '        <div style="color:#f87171; font-size:0.8rem; text-align:center; font-weight:700; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); padding:0.3rem; border-radius:5px;">⚠️ Tvá brašna je plná (3/3) – použij svitek ihned níže:</div>'
+                    )) +
+                    '        <button type="button" class="btn-primary" style="background:linear-gradient(135deg, #d97706, #b45309); border:1.5px solid #fde047; color:#fff; font-size:0.92rem; padding:0.6rem 0.8rem; font-weight:bold; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.4rem; box-shadow:0 3px 10px rgba(217,119,6,0.4);" onclick="PRS_App.handleUseScrollNow()">' +
+                    '          ⚡ POUŽÍT SVITEK IHNED' +
+                    '        </button>' +
+                    '      </div>'
+                ) : pa.canChooseDilemma && c.options && c.options.length >= 2 ? (
 
                     '      <div class="chance-dilemma-container" onclick="event.stopPropagation();">' +
 
@@ -3597,7 +3676,15 @@
 
         }
 
-        var mustCompleteFirst = pa.canResolveQuest || pa.canResolveFestival || pa.isImprisoned || pa.debt;
+        var isScrollPending = !!(pa.canStoreScroll || pa.scrollCard || (pa.chanceCard && (pa.chanceCard.isScroll || pa.chanceCard.category === "scroll" || pa.chanceCard.scrollType)));
+        var mustCompleteFirst = pa.canResolveQuest || pa.canResolveFestival || pa.isImprisoned || pa.debt || isScrollPending;
+
+        if (isScrollPending) {
+            if (!player.inventory || player.inventory.length < 3) {
+                btns.push('<button class="btn-primary" style="background:linear-gradient(135deg, #059669, #047857); border:1.5px solid #34d399; font-weight:700; padding:0.55rem 0.9rem;" onclick="PRS_App.handleStoreScroll()">🎒 Uložit do brašny (' + ((player.inventory && player.inventory.length) || 0) + '/3)</button>');
+            }
+            btns.push('<button class="btn-primary" style="background:linear-gradient(135deg, #d97706, #b45309); border:1.5px solid #fde047; font-weight:700; padding:0.55rem 0.9rem;" onclick="PRS_App.handleUseScrollNow()">⚡ Použít svitek ihned</button>');
+        }
 
         if (!mustCompleteFirst) {
 
@@ -3661,11 +3748,15 @@
 
             '</div>';
 
+        var pouchHudHtml = this.getKnightPouchHudHtml(player, true);
+
         el.innerHTML = specialCardHtml +
 
             '<div class="action-card">' +
 
             actTreasuryHtml +
+
+            pouchHudHtml +
 
             '<div class="dice-badge-row">' +
 

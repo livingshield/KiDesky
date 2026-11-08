@@ -3225,7 +3225,7 @@ window.PRS_GameEngine = {
         if (player.inventory.length >= 3) {
             return { ok: false, message: "Brašna je již plná (max 3 svitky)!" };
         }
-        var scCopy = this.deepClone(card || (state.pendingAction && state.pendingAction.scrollCard));
+        var scCopy = this.deepClone(card || (state.pendingAction && (state.pendingAction.scrollCard || state.pendingAction.chanceCard)));
         if (!scCopy) return { ok: false, message: "Svitek nenalezen." };
         player.inventory.push(scCopy);
 
@@ -3244,7 +3244,7 @@ window.PRS_GameEngine = {
 
     // Aplikace okamžitého efektu pergamenu
     useScrollEffect: function (state, player, card) {
-        var sc = card || (state.pendingAction && state.pendingAction.scrollCard);
+        var sc = card || (state.pendingAction && (state.pendingAction.scrollCard || state.pendingAction.chanceCard));
         if (!sc) return { ok: false, message: "Svitek nenalezen." };
         if (!player.activeScrolls) player.activeScrolls = {};
         var msg = "";

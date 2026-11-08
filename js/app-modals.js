@@ -1997,13 +1997,18 @@
 
     // Uložení nalezeného pergamenu do brašny rytíře (max 3)
     handleStoreScroll: function () {
-        if (!this.state || !this.state.pendingAction || !this.state.pendingAction.canStoreScroll) return;
+        if (!this.state || !this.state.pendingAction) return;
         var player = this.state.players[this.state.currentPlayerIndex];
-        var res = window.PRS_GameEngine.storeScrollInInventory(this.state, player);
+        var card = (this.state.pendingAction.scrollCard || this.state.pendingAction.chanceCard);
+        var res = window.PRS_GameEngine.storeScrollInInventory(this.state, player, card);
         if (window.PRS_Audio) window.PRS_Audio.playItem();
         this.closeChanceModal();
-        if (this.showToast && res && res.scroll) {
-            this.showToast("🎒 Svitek " + res.scroll.title + " byl bezpečně uložen do tvé brašny!", "success");
+        if (res && res.scroll) {
+            if (this.showToast) {
+                this.showToast("🎒 Svitek " + res.scroll.title + " byl bezpečně uložen do tvé brašny!", "success");
+            }
+        } else if (res && res.message && this.showToast) {
+            this.showToast(res.message, "warning");
         }
         this.renderGameScreen();
         this.saveSessionAuto();
@@ -2013,7 +2018,8 @@
     handleUseScrollNow: function () {
         if (!this.state || !this.state.pendingAction) return;
         var player = this.state.players[this.state.currentPlayerIndex];
-        var res = window.PRS_GameEngine.useScrollEffect(this.state, player);
+        var card = (this.state.pendingAction.scrollCard || this.state.pendingAction.chanceCard);
+        var res = window.PRS_GameEngine.useScrollEffect(this.state, player, card);
         if (window.PRS_Audio) window.PRS_Audio.playNotice();
         this.closeChanceModal();
         if (this.showToast && res && res.message) {
