@@ -328,33 +328,30 @@ openAuthModal: function () {
 // --- ONLINE MÍSTNOSTI, SDÍLENÍ POZVÁNKY (?room=), ZÁMEK SLOTU & AUTO-POLLING ---
 
     renderOnlineRoomBar: function () {
-
         var barEl = document.getElementById("online-room-bar");
-
-        if (!barEl || !this.state) return;
+        if (!barEl) return;
+        if (!this.state) {
+            barEl.innerHTML = "";
+            barEl.style.display = "none";
+            return;
+        }
 
         var code = this.state.roomCode || "";
+        var toOnlineBtn = document.getElementById("btn-to-online");
 
         if (!code) {
-
-            barEl.innerHTML = '<div class="online-room-banner" style="background:rgba(24,20,14,0.75); border-color:rgba(212,175,55,0.28);">' +
-
-                '<div style="display:flex; align-items:center; gap:0.55rem; font-size:0.84rem; color:var(--text-muted);">' +
-
-                '  <span>🛋️ <strong>Lokální partie</strong> (Hot-Seat u jednoho PC / Solo proti PC)</span>' +
-
-                '</div>' +
-
-                '<div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">' +
-
-                '  <button class="btn-secondary" style="font-size:0.78rem; padding:0.28rem 0.65rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.saveCurrentSessionToCloud()">🌐 Proměnit v Online místnost &amp; získat kód pro přátele</button>' +
-
-                '</div>' +
-
-                '</div>';
-
+            // Lokální partie nemá zbytečný samostatný řádek přes celou obrazovku
+            barEl.innerHTML = "";
+            barEl.style.display = "none";
+            if (toOnlineBtn) {
+                toOnlineBtn.style.display = "inline-flex";
+            }
             return;
+        }
 
+        barEl.style.display = "block";
+        if (toOnlineBtn) {
+            toOnlineBtn.style.display = "none";
         }
 
         // Načtení uloženého slotu pro tuto místnost z localStorage

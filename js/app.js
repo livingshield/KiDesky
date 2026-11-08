@@ -975,6 +975,17 @@ window.PRS_App = {
 
         this.activeTab = tabId;
         try { sessionStorage.setItem("prs_active_tab", tabId); } catch (e) { }
+        try { document.body.setAttribute("data-active-tab", tabId); } catch (e) { }
+
+        // Královský posel nesmí být ve hře vůbec
+        var annBanner = document.getElementById("topbar-announcement-banner");
+        if (annBanner) {
+            if (tabId === "board") {
+                annBanner.style.display = "none";
+            } else if (annBanner.dataset.hasMessage === "true") {
+                annBanner.style.display = "flex";
+            }
+        }
 
         var tabs = ["welcome", "lobby", "board", "rules", "admin"];
 
@@ -1522,7 +1533,13 @@ window.PRS_App = {
                         } else {
                             lnk.style.display = "none";
                         }
-                        banner.style.display = "flex";
+                        banner.dataset.hasMessage = "true";
+                        // Královský posel nesmí být ve hře vůbec
+                        if (self.activeTab !== "board") {
+                            banner.style.display = "flex";
+                        } else {
+                            banner.style.display = "none";
+                        }
                     }
                 }
             })

@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611081230">
+    <link rel="stylesheet" href="css/main.css?v=202611081620">
 
-    <link rel="stylesheet" href="css/board.css?v=202611081405">
+    <link rel="stylesheet" href="css/board.css?v=202611081620">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611081230">
+    <link rel="stylesheet" href="css/modals.css?v=202611081620">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611081230">
+    <link rel="stylesheet" href="css/mobile.css?v=202611081620">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -927,6 +927,7 @@
 
                             <button id="btn-reroll-map" class="btn-zoom" onclick="PRS_App.rerollProceduralMap()" title="Vygenerovat nové unikátní království, biomy, řeku a hrady (Seed)">🎲 Nová mapa</button>
                             <button id="btn-save-game" class="btn-zoom" style="border-color:var(--gold); color:var(--gold-light); font-weight:700;" onclick="PRS_App.openSaveGameModal()" title="Uložit rozehranou partii do paměti nebo cloudu">💾 Uložit hru</button>
+                            <button id="btn-to-online" class="btn-zoom" style="border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.saveCurrentSessionToCloud()" title="Proměnit partii v online místnost a sdílet kód s přáteli">🌐 Do online</button>
                             <button class="btn-zoom" onclick="PRS_App.openSettingsModal()" title="Nastavení živlů, zvuku, tempa hry a grafiky">⚙️ Nastavení</button>
 
                         </div>
@@ -2724,21 +2725,21 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611081315" defer></script>
-    <script src="js/game-boards.js?v=202611081315" defer></script>
-    <script src="js/game-engine.js?v=202611081315" defer></script>
-    <script src="js/game-combat-ai.js?v=202611081600" defer></script>
-    <script src="js/app-audio.js?v=202611081600" defer></script>
-    <script src="js/app-dialog.js?v=202611081600" defer></script>
-    <script src="js/app.js?v=202611081600" defer></script>
-    <script src="js/app-board.js?v=202611081600" defer></script>
-    <script src="js/app-hud.js?v=202611081600" defer></script>
-    <script src="js/app-modals.js?v=202611081600" defer></script>
-    <script src="js/app-online.js?v=202611081315" defer></script>
-    <script src="js/app-saves.js?v=202611081315" defer></script>
-    <script src="js/app-catalog.js?v=202611081315" defer></script>
-    <script src="js/app-admin.js?v=202611081315" defer></script>
-    <script src="js/app-musicwidget.js?v=202611081315" defer></script>
+    <script src="js/game-data.js?v=202611081620" defer></script>
+    <script src="js/game-boards.js?v=202611081620" defer></script>
+    <script src="js/game-engine.js?v=202611081620" defer></script>
+    <script src="js/game-combat-ai.js?v=202611081620" defer></script>
+    <script src="js/app-audio.js?v=202611081620" defer></script>
+    <script src="js/app-dialog.js?v=202611081620" defer></script>
+    <script src="js/app.js?v=202611081620" defer></script>
+    <script src="js/app-board.js?v=202611081620" defer></script>
+    <script src="js/app-hud.js?v=202611081620" defer></script>
+    <script src="js/app-modals.js?v=202611081620" defer></script>
+    <script src="js/app-online.js?v=202611081620" defer></script>
+    <script src="js/app-saves.js?v=202611081620" defer></script>
+    <script src="js/app-catalog.js?v=202611081620" defer></script>
+    <script src="js/app-admin.js?v=202611081620" defer></script>
+    <script src="js/app-musicwidget.js?v=202611081620" defer></script>
     <script>
         (function () {
             function bootApp() {

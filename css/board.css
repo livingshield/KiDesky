@@ -2603,18 +2603,18 @@
 
 /* --- KRÁLOVSKÁ POKLADNICE & PŘEHLED ZLATA U STOLU (TOP PLAYERS HUD) --- */
 
+/* Zrušena duplicita: seznam hráčů je plně k dispozici v Sálu rytířů pod deskou */
 .board-top-players-hud {
+    display: none !important;
+}
 
-    display: grid;
+/* Královský posel nesmí být ve hře vůbec */
+body[data-active-tab="board"] #topbar-announcement-banner {
+    display: none !important;
+}
 
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-
-    gap: 0.6rem;
-
-    margin-bottom: 0.75rem;
-
-    user-select: none;
-
+#online-room-bar:empty {
+    display: none !important;
 }
 
 .top-hud-card {
