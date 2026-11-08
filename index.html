@@ -672,7 +672,8 @@
                                     <option value="procedural">Procedurální mapa</option>
 
                                 </select>
-                                    <button type="button" class="btn-zoom" onclick="PRS_App.rerollProceduralMap()" title="Vygenerovat nový náhodný svět (Seed)" style="padding:0.4rem 0.65rem; font-size:0.82rem;">🎲</button>
+                                    <button type="button" class="btn-zoom" onclick="PRS_App.openMapStudioModal()" title="Královské Map Studio — parametrický generátor map 2.0 a sdílení seedů" style="padding:0.4rem 0.6rem; font-size:0.82rem; border-color:#a855f7; color:#e9d5ff; font-weight:700;">🗺️</button>
+                                    <button type="button" class="btn-zoom" onclick="PRS_App.rerollProceduralMap()" title="Vygenerovat nový náhodný svět (Seed)" style="padding:0.4rem 0.6rem; font-size:0.82rem;">🎲</button>
                                 </div>
 
                             </div>
@@ -3492,89 +3493,121 @@
                 <button class="btn-icon-danger" onclick="PRS_App.closeMapStudioModal()">✕</button>
             </div>
 
-            <div style="display:grid; grid-template-columns:360px 1fr; gap:1.2rem; flex:1; overflow-y:auto; min-height:0; padding-right:0.35rem;" class="map-studio-grid">
+            <div style="display:grid; grid-template-columns:380px 1fr; gap:1.2rem; flex:1; overflow-y:auto; min-height:0; padding-right:0.35rem;" class="map-studio-grid">
                 <!-- LEVÝ SLOUPEC: PARAMETRY A OVLÁDÁNÍ -->
-                <div style="display:flex; flex-direction:column; gap:0.85rem;">
+                <div style="display:flex; flex-direction:column; gap:0.72rem;">
                     <!-- Šablony / Presety -->
                     <div>
-                        <label style="font-size:0.8rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.35rem;">👑 Rychlé přednastavené světy:</label>
-                        <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
-                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('royal_balance')">👑 Rovnováha (78)</button>
-                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('dragon_chasm')">🐉 Drak (96)</button>
-                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('lightning_sprint')">⚡ Sprint (48)</button>
-                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('four_masters')">🧙‍♂️ 4 Mistři (112)</button>
-                            <button type="button" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.5rem;" onclick="PRS_App.applyMapStudioPreset('pasture_kingdom')">🌲 Zvířata (96)</button>
+                        <label style="font-size:0.78rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.3rem;">👑 Rychlé přednastavené světy:</label>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.32rem;">
+                            <button type="button" class="btn-zoom" style="font-size:0.74rem; padding:0.22rem 0.48rem;" onclick="PRS_App.applyMapStudioPreset('royal_balance')">👑 Rovnováha (78)</button>
+                            <button type="button" class="btn-zoom" style="font-size:0.74rem; padding:0.22rem 0.48rem;" onclick="PRS_App.applyMapStudioPreset('dragon_chasm')">🐉 Drak (96)</button>
+                            <button type="button" class="btn-zoom" style="font-size:0.74rem; padding:0.22rem 0.48rem;" onclick="PRS_App.applyMapStudioPreset('lightning_sprint')">⚡ Sprint (48)</button>
+                            <button type="button" class="btn-zoom" style="font-size:0.74rem; padding:0.22rem 0.48rem;" onclick="PRS_App.applyMapStudioPreset('four_masters')">🧙‍♂️ 4 Mistři (112)</button>
+                            <button type="button" class="btn-zoom" style="font-size:0.74rem; padding:0.22rem 0.48rem;" onclick="PRS_App.applyMapStudioPreset('pasture_kingdom')">🌲 Zvířata (96)</button>
                         </div>
                     </div>
 
-                    <!-- Rozsah mapy -->
-                    <div>
-                        <label for="ms-node-count" style="font-size:0.8rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">📍 Rozsah mapy (počet políček):</label>
-                        <select id="ms-node-count" class="prs-select" style="width:100%; font-size:0.82rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
-                            <option value="48">Malá mapa (48 políček • svižná hra ~40 min)</option>
-                            <option value="78" selected>Klasická mapa (78 políček • vyvážený plán)</option>
-                            <option value="96">Velká mapa (96 políček • bohatá výprava)</option>
-                            <option value="112">Epické království (112 políček • velkolepá kampaň)</option>
-                        </select>
-                    </div>
-
-                    <!-- Větve a odbočky -->
-                    <div>
-                        <label for="ms-branches" style="font-size:0.8rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">🌿 Větve a vnitřní zkratky:</label>
-                        <select id="ms-branches" class="prs-select" style="width:100%; font-size:0.82rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
-                            <option value="1">1 větev (Most Slavností)</option>
-                            <option value="2">2 větve (Most Slavností + Dračí stezka)</option>
-                            <option value="3" selected>3 větve (Slavnosti, Drak + Levá lesní smyčka)</option>
-                            <option value="4">4 větve (Komplexní křižovatková síť s Hřebenovkou)</option>
-                        </select>
+                    <!-- Rozsah mapy & Větve -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                        <div>
+                            <label for="ms-node-count" style="font-size:0.76rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.22rem;">📍 Rozsah mapy:</label>
+                            <select id="ms-node-count" class="prs-select" style="width:100%; font-size:0.79rem; padding:0.32rem;" onchange="PRS_App.updateMapStudioPreview()">
+                                <option value="48">48 polí (Sprint)</option>
+                                <option value="68">68 polí (Kompakt)</option>
+                                <option value="78" selected>78 polí (Klasika)</option>
+                                <option value="96">96 polí (Velká)</option>
+                                <option value="112">112 polí (Epická)</option>
+                                <option value="128">128 polí (Královská)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="ms-branches" style="font-size:0.76rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.22rem;">🌿 Větve a zkratky:</label>
+                            <select id="ms-branches" class="prs-select" style="width:100%; font-size:0.79rem; padding:0.32rem;" onchange="PRS_App.updateMapStudioPreview()">
+                                <option value="1">1 větev (Slavnosti)</option>
+                                <option value="2">2 větve (+ Dračí stezka)</option>
+                                <option value="3" selected>3 větve (+ Lesní smyčka)</option>
+                                <option value="4">4 větve (+ Hřebenovka)</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Stupeň Mistrů -->
                     <div>
-                        <label for="ms-master-tier" style="font-size:0.8rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">🎓 Stupeň Mistrů ctností (I.–IV.):</label>
-                        <select id="ms-master-tier" class="prs-select" style="width:100%; font-size:0.82rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
+                        <label for="ms-master-tier" style="font-size:0.76rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.22rem;">🎓 Stupeň Mistrů ctností (I.–IV.):</label>
+                        <select id="ms-master-tier" class="prs-select" style="width:100%; font-size:0.79rem; padding:0.32rem;" onchange="PRS_App.updateMapStudioPreview()">
                             <option value="1">Stupeň I: Základní zkouška ctnosti (+1 skill)</option>
                             <option value="2" selected>Stupeň II: Pokročilý trénink (+2) &amp; Šťastná podkova</option>
                             <option value="3">Stupeň III: Mistrovské pečetě &amp; Rytířská záštita</option>
                             <option value="4">Stupeň IV: Rytířské duely čtyř mistrů o 1.5 💖</option>
+                            <option value="5">🌟 Stupňovaný RPG režim (Mistři I → II → III → IV)</option>
                         </select>
                     </div>
 
                     <!-- Chovná zvířata a řeka -->
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
                         <div>
-                            <label for="ms-animal-sets" style="font-size:0.78rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">🐎 Chovné sady:</label>
-                            <select id="ms-animal-sets" class="prs-select" style="width:100%; font-size:0.8rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
-                                <option value="4">4 sady (12 zv.)</option>
-                                <option value="6" selected>6 sad (18 zv.)</option>
-                                <option value="8">8 sad (24 zv.)</option>
-                                <option value="12">12 sad (36 zv.)</option>
+                            <label for="ms-animal-sets" style="font-size:0.76rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.22rem;">🐎 Chovné sady (trojice):</label>
+                            <select id="ms-animal-sets" class="prs-select" style="width:100%; font-size:0.79rem; padding:0.32rem;" onchange="PRS_App.updateMapStudioPreview()">
+                                <option value="4">4 sady (12 zvířat)</option>
+                                <option value="6" selected>6 sad (18 zvířat)</option>
+                                <option value="8">8 sad (24 zvířat)</option>
+                                <option value="10">10 sad (30 zvířat)</option>
+                                <option value="12">12 sad (36 zvířat)</option>
+                                <option value="14">14 sad (42 zvířat)</option>
                             </select>
                         </div>
                         <div>
-                            <label for="ms-river-mode" style="font-size:0.78rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.25rem;">🌊 Vodní toky:</label>
-                            <select id="ms-river-mode" class="prs-select" style="width:100%; font-size:0.8rem; padding:0.35rem;" onchange="PRS_App.updateMapStudioPreview()">
-                                <option value="none">Bez řeky (Louky)</option>
-                                <option value="single" selected>Královská řeka (1)</option>
-                                <option value="dual">Dvojí soutok (2 toky)</option>
+                            <label for="ms-river-mode" style="font-size:0.76rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.22rem;">🌊 Vodní síť &amp; mosty:</label>
+                            <select id="ms-river-mode" class="prs-select" style="width:100%; font-size:0.79rem; padding:0.32rem;" onchange="PRS_App.updateMapStudioPreview()">
+                                <option value="none">Bez řeky (Suché lány)</option>
+                                <option value="single" selected>Královská řeka (1 tok)</option>
+                                <option value="dual">Dvojí soutok (2 řeky)</option>
+                                <option value="island">Říční ostrov (Meandr)</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Sdílený Seed -->
-                    <div style="background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.65rem;">
-                        <label for="ms-seed-input" style="font-size:0.76rem; color:#94a3b8; display:block; margin-bottom:0.25rem;">🔑 Kód mapy (Sdílitelný Seed):</label>
+                    <!-- Nebezpečnost & Dominantní biom -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                        <div>
+                            <label for="ms-danger-level" style="font-size:0.76rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.22rem;">🐉 Nebezpečnost:</label>
+                            <select id="ms-danger-level" class="prs-select" style="width:100%; font-size:0.79rem; padding:0.32rem;" onchange="PRS_App.updateMapStudioPreview()">
+                                <option value="low">🌿 Klidné panství</option>
+                                <option value="standard" selected>⚔️ Vyvážené království</option>
+                                <option value="high">🔥 Dračí výheň (více U2/U3)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="ms-biome-theme" style="font-size:0.76rem; color:var(--gold-light); font-weight:bold; display:block; margin-bottom:0.22rem;">🏔️ Ráz krajiny (Biom):</label>
+                            <select id="ms-biome-theme" class="prs-select" style="width:100%; font-size:0.79rem; padding:0.32rem;" onchange="PRS_App.updateMapStudioPreview()">
+                                <option value="balanced" selected>👑 Vyvážená říše</option>
+                                <option value="dragon_peaks">🌋 Dračí velehorstvo</option>
+                                <option value="forest_realm">🌲 Hluboký hvozd</option>
+                                <option value="river_delta">🌊 Říční delta</option>
+                                <option value="golden_plains">🌾 Zlaté lány</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Sdílený Seed & Oblíbené mapy -->
+                    <div style="background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.55rem 0.65rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                            <label for="ms-seed-input" style="font-size:0.74rem; color:#94a3b8;">🔑 Sdílitelný kód mapy (Seed):</label>
+                            <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:0.12rem 0.45rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_App.saveCurrentMapToFavorites()" title="Uložit tuto mapu mezi oblíbené">⭐ Uložit mapu</button>
+                        </div>
                         <div style="display:flex; gap:0.35rem;">
-                            <input type="text" id="ms-seed-input" class="prs-input" style="flex:1; font-family:monospace; font-size:0.82rem; padding:0.32rem 0.5rem; text-transform:uppercase;" placeholder="KID-78-3B-M2-S12345" onchange="PRS_App.loadMapStudioFromInputSeed()" />
+                            <input type="text" id="ms-seed-input" class="prs-input" style="flex:1; font-family:monospace; font-size:0.78rem; padding:0.3rem 0.45rem; text-transform:uppercase;" placeholder="KID-78-3B-M2-A6-R1-D2-TB-S12345" onchange="PRS_App.loadMapStudioFromInputSeed()" />
                             <button type="button" class="btn-zoom" onclick="PRS_App.rerollMapStudioSeed()" title="Vygenerovat náhodný seed">🎲</button>
                             <button type="button" class="btn-zoom" onclick="PRS_App.copyMapStudioSeed()" title="Zkopírovat kód mapy do schránky">📋</button>
                         </div>
+                        <div id="ms-saved-maps-list" style="margin-top:0.4rem; display:flex; flex-wrap:wrap; gap:0.28rem;"></div>
                     </div>
                 </div>
 
                 <!-- PRAVÝ SLOUPEC: ŽIVÝ NÁHLED MAPY -->
                 <div style="display:flex; flex-direction:column; gap:0.5rem; min-height:0;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem;">
                         <span id="ms-preview-title" style="font-family:'Cinzel',serif; color:#fef08a; font-weight:bold; font-size:0.95rem;">Království osudu</span>
                         <span id="ms-preview-badge" style="font-size:0.75rem; color:#38bdf8; font-family:monospace;">78 polí • 3 větve</span>
                     </div>
@@ -3583,8 +3616,8 @@
                         <!-- Sem se vykresluje SVG minináhled -->
                     </div>
 
-                    <div id="ms-preview-stats" style="font-size:0.76rem; color:#cbd5e1; background:rgba(0,0,0,0.4); padding:0.45rem 0.65rem; border-radius:6px; line-height:1.4;">
-                        🏰 2 Tematické hrady • 🏙️ 4 Města • 🏘️ 6 Vesnic • 🌊 2 Mosty • ⚔️ Mistři Stupeň II
+                    <div id="ms-preview-stats" style="font-size:0.75rem; color:#cbd5e1; background:rgba(0,0,0,0.4); padding:0.45rem 0.65rem; border-radius:6px; line-height:1.45;">
+                        🏰 2 Hrady • 🏙️ 4 Města • 🏘️ 6 Vesnic • 🌊 2 Mosty • ⚔️ Mistři Stupeň II
                     </div>
                 </div>
             </div>

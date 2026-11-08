@@ -1966,9 +1966,6 @@
             var setNum = nd.setId || (nd.code.match(/\d+/) || [1])[0];
             var rColor = ribbonColors[setNum] || "#2563eb";
 
-            out.push('    <polygon points="' + (nd.x - 8) + ',' + (nd.y + r - 1) + ' ' + (nd.x + 8) + ',' + (nd.y + r - 1) + ' ' + (nd.x + 8) + ',' + (nd.y + r + 11) + ' ' + nd.x + ',' + (nd.y + r + 7) + ' ' + (nd.x - 8) + ',' + (nd.y + r + 11) + '" fill="' + rColor + '" stroke="#000" stroke-width="0.8"/>');
-            out.push('    <text x="' + nd.x + '" y="' + (nd.y + r + 7) + '" text-anchor="middle" fill="#ffffff" font-size="6.5" font-weight="bold">' + setNum + '</text>');
-
             // Indikátor zkompletované sady 3/3 (zlatá koruna) nebo pulz pro aktivního hráče (má 2/3)
             var activePlayer = (this.state.players && this.state.players[this.state.currentPlayerIndex]) ? this.state.players[this.state.currentPlayerIndex] : null;
             var animalSetOwners = {};
@@ -1986,30 +1983,23 @@
             for (var pKey in animalSetOwners) {
                 if (animalSetOwners[pKey] >= 3) { completedOwner = pKey; break; }
             }
-            if (completedOwner !== null) {
-                out.push('    <g transform="translate(' + nd.x + ',' + (nd.y - r - 8) + ')"><text x="0" y="0" text-anchor="middle" font-size="9.5" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.8))">👑</text></g>');
-            } else if (activePlayer && animalSetOwners[activePlayer.index] === 2 && nd.owner !== activePlayer.index) {
+            if (completedOwner === null && activePlayer && animalSetOwners[activePlayer.index] === 2 && nd.owner !== activePlayer.index) {
                 out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 4) + '" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-dasharray="3,2"><animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite"/></circle>');
             }
 
             out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
 
         } else if (nd.type === "MASTER") {
-            // Speciální ctnostní medailon Mistra s barevným prstencem a emblémem ctnosti
+            // Speciální ctnostní medailon Mistra s barevným prstencem
             var skill = nd.skill || "any";
             var mColor = "#8b5cf6";
-            var mBadge = "🧙‍♂️";
-            if (skill === "boj") { mColor = "#ef4444"; mBadge = "⚔️"; }
-            else if (skill === "jizda") { mColor = "#f59e0b"; mBadge = "🏇"; }
-            else if (skill === "tanec") { mColor = "#d946ef"; mBadge = "💃"; }
-            else if (skill === "charisma") { mColor = "#06b6d4"; mBadge = "✨"; }
+            if (skill === "boj") { mColor = "#ef4444"; }
+            else if (skill === "jizda") { mColor = "#f59e0b"; }
+            else if (skill === "tanec") { mColor = "#d946ef"; }
+            else if (skill === "charisma") { mColor = "#06b6d4"; }
 
             out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
             out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 3.2) + '" fill="none" stroke="' + mColor + '" stroke-width="2.2" stroke-dasharray="4,2"/>');
-            out.push('    <g transform="translate(' + (nd.x + r - 3) + ',' + (nd.y - r + 3) + ')">');
-            out.push('      <circle cx="0" cy="0" r="7" fill="#140f0c" stroke="' + mColor + '" stroke-width="1.1"/>');
-            out.push('      <text x="0" y="3" text-anchor="middle" font-size="8">' + mBadge + '</text>');
-            out.push('    </g>');
 
         } else if (nd.type === "CHANCE" || nd.type === "JESTER" || nd.type === "TAX") {
             // Šestiúhelníková vosková pečeť
@@ -2052,6 +2042,37 @@
 
         } else {
             out.push(this.renderProceduralTileGraphic(nd, r, fill, stroke, strokeWidth, isMajor, shortCode));
+        }
+
+        // Vrchní heraldické odznaky (nad bitmapou medailonku) pro Zvířata a Mistry
+        if (nd.type === "ANIMAL") {
+            out.push('    <g transform="translate(' + (nd.x + r - 3) + ',' + (nd.y - r + 3) + ')" pointer-events="none">');
+            out.push('      <circle cx="0" cy="0" r="6.5" fill="' + rColor + '" stroke="#fef08a" stroke-width="0.9"/>');
+            out.push('      <text x="0" y="2.3" text-anchor="middle" fill="#ffffff" font-size="6.5" font-weight="bold">' + setNum + '</text>');
+            out.push('    </g>');
+            if (completedOwner !== null) {
+                out.push('    <g transform="translate(' + nd.x + ',' + (nd.y - r - 6) + ')" pointer-events="none"><text x="0" y="0" text-anchor="middle" font-size="9.5" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.85))">👑</text></g>');
+            }
+        } else if (nd.type === "MASTER") {
+            var mSkill = nd.skill || "any";
+            var mCol = "#8b5cf6";
+            var mIcon = "🧙‍♂️";
+            if (mSkill === "boj") { mCol = "#ef4444"; mIcon = "⚔️"; }
+            else if (mSkill === "jizda") { mCol = "#f59e0b"; mIcon = "🏇"; }
+            else if (mSkill === "tanec") { mCol = "#d946ef"; mIcon = "💃"; }
+            else if (mSkill === "charisma") { mCol = "#06b6d4"; mIcon = "✨"; }
+
+            var mTierVal = nd.masterTier || (this.state && this.state.board && this.state.board.masterTier) || 1;
+            var mRoman = ["I", "II", "III", "IV"][Math.max(0, Math.min(3, mTierVal - 1))] || "I";
+
+            out.push('    <g transform="translate(' + (nd.x + r - 3) + ',' + (nd.y - r + 3) + ')" pointer-events="none">');
+            out.push('      <circle cx="0" cy="0" r="7" fill="#140f0c" stroke="' + mCol + '" stroke-width="1.2"/>');
+            out.push('      <text x="0" y="3" text-anchor="middle" font-size="8">' + mIcon + '</text>');
+            out.push('    </g>');
+            out.push('    <g transform="translate(' + (nd.x - r + 3) + ',' + (nd.y - r + 3) + ')" pointer-events="none">');
+            out.push('      <circle cx="0" cy="0" r="6.2" fill="#140f0c" stroke="#d4af37" stroke-width="0.9"/>');
+            out.push('      <text x="0" y="2.2" text-anchor="middle" fill="#fef08a" font-size="6.2" font-weight="bold">' + mRoman + '</text>');
+            out.push('    </g>');
         }
 
         return out.join("\n");

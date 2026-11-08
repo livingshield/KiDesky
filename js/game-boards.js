@@ -592,7 +592,7 @@ window.PRS_DECOR_CATALOG = {
 // ============================================================================
 
 window.KiDeskyMapGenerator = {
-    // 5 Přednastavených královských šablon map
+    // 5 Přednastavených královských šablon map (Presety Map Studia)
     PRESETS: {
         royal_balance: {
             id: "royal_balance",
@@ -602,54 +602,116 @@ window.KiDeskyMapGenerator = {
             branches: 3,
             masterTier: 2,
             animalSetCount: 6,
-            riverMode: "single"
+            riverMode: "single",
+            dangerLevel: "standard",
+            biomeTheme: "balanced"
         },
         dragon_chasm: {
             id: "dragon_chasm",
             name: "🐉 Dračí soutěska",
-            desc: "Drsné lávové podhůří, 2 větve s hlubokou dračí slují a dvojitým říčním proudem.",
+            desc: "Drsné sopečné podhůří, 2 větve s hlubokou dračí slují a dvojitým říčním soutokem.",
             nodeCount: 96,
             branches: 2,
             masterTier: 3,
-            animalSetCount: 4,
-            riverMode: "dual"
+            animalSetCount: 6,
+            riverMode: "dual",
+            dangerLevel: "high",
+            biomeTheme: "dragon_peaks"
         },
         lightning_sprint: {
             id: "lightning_sprint",
             name: "⚡ Bleskový turnaj",
-            desc: "Kompaktní 48-políčkový okruh navržený pro rychlou a dynamickou partii (30–45 min).",
+            desc: "Kompaktní 48-políčkový okruh navržený pro rychlou a dynamickou partii (30–40 min).",
             nodeCount: 48,
             branches: 1,
             masterTier: 1,
             animalSetCount: 4,
-            riverMode: "single"
+            riverMode: "single",
+            dangerLevel: "low",
+            biomeTheme: "golden_plains"
         },
         four_masters: {
             id: "four_masters",
             name: "🧙‍♂️ Turnaj čtyř mistrů",
-            desc: "Velkolepý epický svět (112 uzlů) s maximem 4 větví a duely s mistry o Srdce princezny.",
+            desc: "Velkolepý epický svět (112 uzlů) se 4 větvemi, říčním ostrovem a duely s mistry.",
             nodeCount: 112,
             branches: 4,
             masterTier: 4,
-            animalSetCount: 8,
-            riverMode: "dual"
+            animalSetCount: 10,
+            riverMode: "island",
+            dangerLevel: "high",
+            biomeTheme: "balanced"
         },
         pasture_kingdom: {
             id: "pasture_kingdom",
-            name: "🌲 Lesní panství chovatelů",
-            desc: "Království zasvěcené chovu ušlechtilých zvířat (12 sad) a cechovním dílnám.",
+            name: "🌲 Ráj chovatelů",
+            desc: "Rozlehlé lesní království zasvěcené chovu ušlechtilých zvířat (12 sad) a cechům.",
             nodeCount: 96,
             branches: 3,
-            masterTier: 2,
+            masterTier: 5,
             animalSetCount: 12,
-            riverMode: "single"
+            riverMode: "dual",
+            dangerLevel: "standard",
+            biomeTheme: "forest_realm"
         }
     },
 
-    // Převod textového seed kódu např. KID-78-3B-M2-S4598 zpět na parametry
+    // Katalog 14 ušlechtilých chovných sad (Kůň, Sokol, Pes)
+    ANIMAL_SETS_CATALOG: [
+        { setId: 1, kun: "Kůň 1 (Grošák)", sokol: "Sokol 1 (Poštolka)", pes: "Pes 1 (Ohař)" },
+        { setId: 2, kun: "Kůň 2 (Hnědák)", sokol: "Sokol 2 (Krahujec)", pes: "Pes 2 (Bígl)" },
+        { setId: 3, kun: "Kůň 3 (Vraník)", sokol: "Sokol 3 (Ostříž)", pes: "Pes 3 (Chrt)" },
+        { setId: 4, kun: "Kůň 4 (Ryzák)", sokol: "Sokol 4 (Raroh)", pes: "Pes 4 (Barvář)" },
+        { setId: 5, kun: "Kůň 5 (Bělouš)", sokol: "Sokol 5 (Královský ostříž)", pes: "Pes 5 (Slídič)" },
+        { setId: 6, kun: "Kůň 6 (Plavák)", sokol: "Sokol 6 (Sokol stěhovavý)", pes: "Pes 6 (Vlkodav)" },
+        { setId: 7, kun: "Kůň 7 (Šiml)", sokol: "Sokol 7 (Luňák)", pes: "Pes 7 (Doga)" },
+        { setId: 8, kun: "Kůň 8 (Fríský oř)", sokol: "Sokol 8 (Orlovec)", pes: "Pes 8 (Chrtí král)" },
+        { setId: 9, kun: "Kůň 9 (Andaluský hřebec)", sokol: "Sokol 9 (Jestřáb)", pes: "Pes 9 (Lovecký chrt)" },
+        { setId: 10, kun: "Kůň 10 (Válečný oř)", sokol: "Sokol 10 (Sokol královský)", pes: "Pes 10 (Královský chrt)" },
+        { setId: 11, kun: "Kůň 11 (Hvězdný hřebec)", sokol: "Sokol 11 (Bílý raroh)", pes: "Pes 11 (Stříbrný ohař)" },
+        { setId: 12, kun: "Kůň 12 (Královský oř)", sokol: "Sokol 12 (Fénixův sokol)", pes: "Pes 12 (Zlatý chrt)" },
+        { setId: 13, kun: "Kůň 13 (Zlatý palomino)", sokol: "Sokol 13 (Skalní orel)", pes: "Pes 13 (Severní vlkodav)" },
+        { setId: 14, kun: "Kůň 14 (Stínový oř)", sokol: "Sokol 14 (Noční raroh)", pes: "Pes 14 (Hradní chrlič)" }
+    ],
+
+    // Převod textového seed kódu např. KID-78-3B-M2-A6-R1-D2-T0-S4598 nebo KID-78-3B-M2-S4598 zpět na parametry
     parseSeedCode: function (code) {
         if (!code || typeof code !== "string") return null;
         var clean = code.trim().toUpperCase();
+
+        // Rozšířený formát: KID-78-3B-M2-A6-R1-D2-T0-S4598
+        var mExt = clean.match(/^KID-(\d+)-(\d+)B-M(\d+)-A(\d+)-R([0123])-D([123])-T([01234])-S(\d+)$/);
+        if (mExt) {
+            var rMap = { "0": "none", "1": "single", "2": "dual", "3": "island" };
+            var dMap = { "1": "low", "2": "standard", "3": "high" };
+            var tMap = { "0": "balanced", "1": "dragon_peaks", "2": "forest_realm", "3": "river_delta", "4": "golden_plains" };
+            return {
+                nodeCount: parseInt(mExt[1], 10),
+                branches: parseInt(mExt[2], 10),
+                masterTier: parseInt(mExt[3], 10),
+                animalSetCount: parseInt(mExt[4], 10),
+                riverMode: rMap[mExt[5]] || "single",
+                dangerLevel: dMap[mExt[6]] || "standard",
+                biomeTheme: tMap[mExt[7]] || "balanced",
+                seed: parseInt(mExt[8], 10),
+                valid: true
+            };
+        }
+
+        // Střední formát: KID-78-3B-M2-A6-S4598
+        var mMid = clean.match(/^KID-(\d+)-(\d+)B-M(\d+)-A(\d+)-S(\d+)$/);
+        if (mMid) {
+            return {
+                nodeCount: parseInt(mMid[1], 10),
+                branches: parseInt(mMid[2], 10),
+                masterTier: parseInt(mMid[3], 10),
+                animalSetCount: parseInt(mMid[4], 10),
+                seed: parseInt(mMid[5], 10),
+                valid: true
+            };
+        }
+
+        // Krátký zpětně kompatibilní formát: KID-78-3B-M2-S4598
         var match = clean.match(/^KID-(\d+)-(\d+)B-M(\d+)-S(\d+)$/);
         if (match) {
             return {
@@ -660,6 +722,7 @@ window.KiDeskyMapGenerator = {
                 valid: true
             };
         }
+
         var num = parseInt(clean.replace(/\D/g, ""), 10);
         if (!isNaN(num) && num > 0) {
             return { seed: num, valid: true };
@@ -673,8 +736,13 @@ window.KiDeskyMapGenerator = {
         var n = options.nodeCount || 78;
         var b = (options.branches !== undefined) ? options.branches : 3;
         var m = options.masterTier || 2;
+        var a = options.animalSetCount || 6;
+        var rCode = options.riverMode === "none" ? "0" : (options.riverMode === "dual" ? "2" : (options.riverMode === "island" ? "3" : "1"));
+        var dCode = options.dangerLevel === "low" ? "1" : (options.dangerLevel === "high" ? "3" : "2");
+        var tMap = { balanced: "0", dragon_peaks: "1", forest_realm: "2", river_delta: "3", golden_plains: "4" };
+        var tCode = tMap[options.biomeTheme || "balanced"] || "0";
         var s = Math.abs(Number(seed) || 12345) % 1000000;
-        return "KID-" + n + "-" + b + "B-M" + m + "-S" + s;
+        return "KID-" + n + "-" + b + "B-M" + m + "-A" + a + "-R" + rCode + "-D" + dCode + "-T" + tCode + "-S" + s;
     },
 
     // Rychlý SVG minináhled pro Map Studio
@@ -684,20 +752,28 @@ window.KiDeskyMapGenerator = {
         if (!board || !board.nodes) return '<svg width="' + width + '" height="' + height + '"><rect width="100%" height="100%" fill="#140f0c"/></svg>';
 
         var out = [];
-        out.push('<svg viewBox="0 0 1400 860" width="' + width + '" height="' + height + '" xmlns="http://www.w3.org/2000/svg" style="background:#18110b; border-radius:10px; box-shadow:inset 0 0 25px rgba(0,0,0,0.85); display:block;">');
+        out.push('<svg viewBox="0 0 1400 860" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="background:#140e09; border-radius:10px; box-shadow:inset 0 0 28px rgba(0,0,0,0.9); display:block;">');
 
-        // Pergamenový okraj
-        out.push('  <rect x="10" y="10" width="1380" height="840" rx="16" fill="rgba(34,25,18,0.88)" stroke="#d4af37" stroke-width="2"/>');
+        // Pergamenový podklad
+        out.push('  <rect x="10" y="10" width="1380" height="840" rx="16" fill="#1d150e" stroke="#d4af37" stroke-width="2"/>');
+
+        // Biomy
+        if (board.biomes) {
+            for (var bm = 0; bm < board.biomes.length; bm++) {
+                var bio = board.biomes[bm];
+                out.push('  <path d="' + bio.path + '" fill="' + (bio.fill || "rgba(255,255,255,0.06)") + '" opacity="0.55"/>');
+            }
+        }
 
         // Řeky
         if (board.rivers) {
             for (var r = 0; r < board.rivers.length; r++) {
-                out.push('  <path d="' + board.rivers[r].path + '" stroke="#0ea5e9" stroke-width="18" fill="none" opacity="0.65" stroke-linecap="round"/>');
-                out.push('  <path d="' + board.rivers[r].path + '" stroke="#7dd3fc" stroke-width="6" fill="none" opacity="0.85" stroke-linecap="round"/>');
+                out.push('  <path d="' + board.rivers[r].path + '" stroke="#0369a1" stroke-width="22" fill="none" opacity="0.7" stroke-linecap="round"/>');
+                out.push('  <path d="' + board.rivers[r].path + '" stroke="#38bdf8" stroke-width="9" fill="none" opacity="0.9" stroke-linecap="round"/>');
             }
         }
 
-        // Cesty
+        // Cesty (rozlišené podle větví)
         var nodes = board.nodes;
         for (var i = 0; i < nodes.length; i++) {
             var n = nodes[i];
@@ -708,39 +784,60 @@ window.KiDeskyMapGenerator = {
             for (var t = 0; t < tgts.length; t++) {
                 var nB = nodes[tgts[t]];
                 if (!nB) continue;
-                out.push('  <line x1="' + n.x + '" y1="' + n.y + '" x2="' + nB.x + '" y2="' + nB.y + '" stroke="rgba(212,175,55,0.45)" stroke-width="4.5" stroke-linecap="round"/>');
+                var strokeCol = "rgba(212,175,55,0.55)";
+                var strokeW = 5.5;
+                if (n.branchTag === "dragon" || nB.branchTag === "dragon") { strokeCol = "rgba(248,113,113,0.75)"; strokeW = 5; }
+                else if (n.branchTag === "festival" || nB.branchTag === "festival") { strokeCol = "rgba(244,114,182,0.75)"; strokeW = 5; }
+                else if (n.branchTag === "forest" || nB.branchTag === "forest") { strokeCol = "rgba(74,222,128,0.75)"; strokeW = 5; }
+                else if (n.branchTag === "ridge" || nB.branchTag === "ridge") { strokeCol = "rgba(192,132,252,0.75)"; strokeW = 5; }
+                out.push('  <line x1="' + n.x + '" y1="' + n.y + '" x2="' + nB.x + '" y2="' + nB.y + '" stroke="' + strokeCol + '" stroke-width="' + strokeW + '" stroke-linecap="round"/>');
             }
         }
 
-        // Mosty
+        // Mosty (nad cestami!)
         if (board.bridges) {
             for (var b = 0; b < board.bridges.length; b++) {
                 var br = board.bridges[b];
-                out.push('  <circle cx="' + br.x + '" cy="' + br.y + '" r="8" fill="#71717a" stroke="#fbbf24" stroke-width="1.8"/>');
+                out.push('  <g transform="translate(' + br.x + ',' + br.y + ') rotate(' + (br.angle || 0) + ')">');
+                out.push('    <rect x="-12" y="-8" width="24" height="16" rx="4" fill="#78716c" stroke="#fbbf24" stroke-width="2"/>');
+                out.push('  </g>');
             }
         }
 
-        // Uzly jako zářící barevné tečky
+        // Uzly jako barevné medailonky
         for (var j = 0; j < nodes.length; j++) {
             var nd = nodes[j];
             var col = "#d4af37";
-            var rad = 7.5;
-            if (nd.type === "START") { col = "#ef4444"; rad = 13; }
-            else if (nd.type === "CASTLE") { col = "#a855f7"; rad = 11; }
-            else if (nd.type === "TOWN") { col = "#3b82f6"; rad = 10; }
-            else if (nd.type === "FESTIVAL") { col = "#ec4899"; rad = 10; }
-            else if (nd.type === "QUEST") { col = (nd.subtype === "U3") ? "#dc2626" : "#f97316"; rad = (nd.subtype === "U3") ? 12 : 9; }
-            else if (nd.type === "MASTER") { col = "#8b5cf6"; rad = 9; }
-            else if (nd.type === "ANIMAL") { col = "#10b981"; rad = 7; }
-            else if (nd.type === "VILLAGE") { col = "#84cc16"; rad = 7.5; }
+            var rad = 8;
+            if (nd.type === "START") { col = "#ef4444"; rad = 14; }
+            else if (nd.type === "CASTLE") { col = "#a855f7"; rad = 12.5; }
+            else if (nd.type === "TOWN") { col = "#3b82f6"; rad = 10.5; }
+            else if (nd.type === "FESTIVAL") { col = "#ec4899"; rad = 10.5; }
+            else if (nd.type === "QUEST") { col = (nd.subtype === "U3") ? "#dc2626" : (nd.subtype === "U2" ? "#f97316" : "#84cc16"); rad = (nd.subtype === "U3") ? 12.5 : 9.5; }
+            else if (nd.type === "MASTER") { col = "#8b5cf6"; rad = 9.5; }
+            else if (nd.type === "ANIMAL") { col = "#10b981"; rad = 7.5; }
+            else if (nd.type === "VILLAGE") { col = "#a3e635"; rad = 8; }
             else if (nd.type === "JESTER") { col = "#f59e0b"; rad = 8.5; }
+            else if (nd.type === "PRISON" || nd.type === "TAX") { col = "#64748b"; rad = 8.5; }
 
-            out.push('  <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + rad + '" fill="' + col + '" stroke="#000" stroke-width="1.4"/>');
+            out.push('  <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + rad + '" fill="' + col + '" stroke="#090604" stroke-width="1.6"/>');
+            if (nd.isJunction) {
+                out.push('  <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (rad + 3.5) + '" fill="none" stroke="#fef08a" stroke-width="1.5" stroke-dasharray="3,2"/>');
+            }
         }
 
+        // Královský hrad uprostřed
+        out.push('  <circle cx="700" cy="365" r="34" fill="rgba(212,175,55,0.14)" stroke="rgba(212,175,55,0.5)" stroke-width="1.5"/>');
+        out.push('  <text x="700" y="374" text-anchor="middle" font-size="28">🏰</text>');
+
+        // Legenda v pravém horním rohu
+        out.push('  <rect x="975" y="20" width="400" height="44" rx="8" fill="rgba(0,0,0,0.68)" stroke="rgba(212,175,55,0.35)" stroke-width="1"/>');
+        out.push('  <text x="990" y="47" fill="#e2e8f0" font-size="13.5" font-family="sans-serif">🔴Start  🟣Hrad/Mistr  🔵Město  🟢Zvíře  🟠Úkol/Drak  🩷Slavnost</text>');
+
         // Název mapy v levém horním rohu
-        out.push('  <text x="36" y="52" fill="#fef08a" font-family="Cinzel, serif" font-size="20" font-weight="bold">' + (board.name || "Království") + '</text>');
-        out.push('  <text x="36" y="74" fill="#cbd5e1" font-size="13">Seed: ' + (board.seedCode || board.seed) + ' • ' + nodes.length + ' políček</text>');
+        out.push('  <rect x="24" y="20" width="540" height="58" rx="8" fill="rgba(0,0,0,0.68)" stroke="rgba(212,175,55,0.35)" stroke-width="1"/>');
+        out.push('  <text x="38" y="46" fill="#fef08a" font-family="Cinzel, serif" font-size="19" font-weight="bold">' + (board.name || "Království") + '</text>');
+        out.push('  <text x="38" y="67" fill="#93c5fd" font-size="13" font-family="monospace">' + (board.seedCode || board.seed) + ' • ' + nodes.length + ' polí</text>');
 
         out.push('</svg>');
         return out.join("\n");
@@ -777,6 +874,8 @@ window.KiDeskyMapGenerator = {
     // Vzorkování hladké kubické Bézierovy křivky
     sampleBezier: function (p0, p1, p2, p3, count, includeEnd) {
         var pts = [];
+        if (count <= 0) return pts;
+        if (count === 1) return [{ x: Math.round((p0.x + p3.x) / 2), y: Math.round((p0.y + p3.y) / 2) }];
         var denom = includeEnd ? Math.max(1, count - 1) : count;
         for (var i = 0; i < count; i++) {
             var t = i / denom;
@@ -801,35 +900,84 @@ window.KiDeskyMapGenerator = {
         { id: "castle_dark", name: "Temný hrad Erebus", icon: "🌑", img: "assets/castles/castle_dark.png", biome: "magic" }
     ],
 
-    // Hlavní metoda procedurálního generátoru mapy
+    // ========================================================================
+    // HLAVNÍ METODA PARAMETRICKÉHO GENERÁTORU MAP 2.0
+    // ========================================================================
     generate: function (customSeed, options) {
         options = options || {};
-        var seed = customSeed || Math.floor(Math.random() * 1000000);
+        if (options.generatorOptions && typeof options.generatorOptions === "object") {
+            for (var k in options.generatorOptions) {
+                if (options[k] === undefined) options[k] = options.generatorOptions[k];
+            }
+        }
+
+        var seed = Math.abs(Number(customSeed || options.seed || Math.floor(Math.random() * 899999 + 100000))) % 1000000 || 4598;
         var rnd = this.createRNG(seed);
 
-        // A) Procedurální zvlnění geometrie hlavního okruhu
-        var topWarp = (rnd() - 0.5) * 60;
-        var rightWarp = (rnd() - 0.5) * 50;
-        var bottomWarp = (rnd() - 0.5) * 60;
-        var leftWarp = (rnd() - 0.5) * 50;
+        var targetNodes = Math.max(40, Math.min(136, Number(options.nodeCount) || 78));
+        var branchCount = (options.branches !== undefined) ? Math.max(1, Math.min(4, Number(options.branches))) : 3;
+        var chosenMasterTier = Number(options.masterTier) || 2; // 1..4, nebo 5 = Stupňovaný RPG I-IV
+        var animalSetCount = Math.max(4, Math.min(14, Number(options.animalSetCount) || 6));
+        var riverMode = options.riverMode || "single"; // "none" | "single" | "dual" | "island"
+        var dangerLevel = options.dangerLevel || "standard"; // "low" | "standard" | "high"
+        var biomeTheme = options.biomeTheme || "balanced"; // "balanced" | "dragon_peaks" | "forest_realm" | "river_delta" | "golden_plains"
 
-        var pStart = { x: 500, y: Math.round(72 + topWarp * 0.2) };
+        // Max počet sad zvířat omezený velikostí mapy, aby zbylo místo na hrady, města, mistry a úkoly
+        var maxPossibleSets = Math.max(4, Math.floor((targetNodes - 24) / 3));
+        if (animalSetCount > maxPossibleSets) {
+            animalSetCount = maxPossibleSets;
+        }
+
+        // 1. VÝPOČET DÉLEK VĚTVÍ A HLAVNÍHO OKRUHU (Přesný součet = targetNodes)
+        var scaleF = targetNodes / 96;
+        var b1Len = (branchCount >= 1) ? Math.max(6, Math.round(11 * scaleF)) : 0; // Střední Most Slavností
+        var b2Len = (branchCount >= 2) ? Math.max(6, Math.round(11 * scaleF)) : 0; // Pravá Dračí stezka
+        var b3Len = (branchCount >= 3) ? Math.max(5, Math.round(7 * scaleF)) : 0;  // Levá Lesní smyčka
+        var b4Len = (branchCount >= 4) ? Math.max(5, Math.round(8 * scaleF)) : 0;  // Severní Královská hřebenovka
+
+        var totalBranchLen = b1Len + b2Len + b3Len + b4Len;
+        var outerLen = targetNodes - totalBranchLen;
+        if (outerLen < 32) {
+            var deficit = 32 - outerLen;
+            outerLen = 32;
+            while (deficit > 0 && (b1Len > 5 || b2Len > 5 || b3Len > 4 || b4Len > 4)) {
+                if (b2Len > 5 && deficit > 0) { b2Len--; deficit--; }
+                if (b1Len > 5 && deficit > 0) { b1Len--; deficit--; }
+                if (b4Len > 4 && deficit > 0) { b4Len--; deficit--; }
+                if (b3Len > 4 && deficit > 0) { b3Len--; deficit--; }
+            }
+        }
+
+        // Rozdělení outerLen do 5 segmentů po obvodu
+        var sTop = Math.max(6, Math.round(outerLen * 0.18));
+        var sRight = Math.max(7, Math.round(outerLen * 0.23));
+        var sBottom = Math.max(8, Math.round(outerLen * 0.26));
+        var sLeft1 = Math.max(6, Math.round(outerLen * 0.19));
+        var sLeft2 = Math.max(4, outerLen - (sTop + sRight + sBottom + sLeft1));
+
+        // 2. GEOMETRIE HLAVNÍHO OKRUHU (Se zvlněním podle seedu)
+        var topWarp = (rnd() - 0.5) * 56;
+        var rightWarp = (rnd() - 0.5) * 46;
+        var bottomWarp = (rnd() - 0.5) * 54;
+        var leftWarp = (rnd() - 0.5) * 46;
+
+        var pStart = { x: 500, y: Math.round(74 + topWarp * 0.2) };
         var pTopRight = { x: Math.round(1150 + rightWarp * 0.3), y: Math.round(108 + topWarp * 0.3) };
-        var pBottomRight = { x: Math.round(1145 + rightWarp * 0.4), y: Math.round(775 + bottomWarp * 0.3) };
-        var pBottomLeft = { x: Math.round(250 - leftWarp * 0.3), y: Math.round(785 + bottomWarp * 0.2) };
-        var pTopLeft = { x: Math.round(95 - leftWarp * 0.4), y: 340 };
-        var pBackToStart = { x: 450, y: 72 };
+        var pBottomRight = { x: Math.round(1145 + rightWarp * 0.4), y: Math.round(772 + bottomWarp * 0.3) };
+        var pBottomLeft = { x: Math.round(250 - leftWarp * 0.3), y: Math.round(782 + bottomWarp * 0.2) };
+        var pTopLeft = { x: Math.round(98 - leftWarp * 0.4), y: 340 };
+        var pBackToStart = { x: 445, y: Math.round(74 + topWarp * 0.2) };
 
-        var segTop = this.sampleBezier(pStart, { x: 740, y: Math.round(68 + topWarp) }, { x: 970, y: Math.round(70 + topWarp) }, pTopRight, 14, false);
-        var segRight = this.sampleBezier(pTopRight, { x: Math.round(1360 + rightWarp), y: 310 }, { x: Math.round(1355 + rightWarp), y: 620 }, pBottomRight, 18, false);
-        var segBottom = this.sampleBezier(pBottomRight, { x: 840, y: Math.round(805 + bottomWarp) }, { x: 540, y: Math.round(805 + bottomWarp) }, pBottomLeft, 20, false);
-        var segLeft1 = this.sampleBezier(pBottomLeft, { x: Math.round(60 - leftWarp), y: 740 }, { x: Math.round(60 - leftWarp), y: 500 }, pTopLeft, 15, false);
-        var segLeft2 = this.sampleBezier(pTopLeft, { x: 120, y: 100 }, { x: 280, y: 70 }, pBackToStart, 11, true);
+        var segTopPts = this.sampleBezier(pStart, { x: 740, y: Math.round(68 + topWarp) }, { x: 970, y: Math.round(72 + topWarp) }, pTopRight, sTop, false);
+        var segRightPts = this.sampleBezier(pTopRight, { x: Math.round(1345 + rightWarp), y: 310 }, { x: Math.round(1340 + rightWarp), y: 615 }, pBottomRight, sRight, false);
+        var segBottomPts = this.sampleBezier(pBottomRight, { x: 840, y: Math.round(802 + bottomWarp) }, { x: 540, y: Math.round(802 + bottomWarp) }, pBottomLeft, sBottom, false);
+        var segLeft1Pts = this.sampleBezier(pBottomLeft, { x: Math.round(68 - leftWarp), y: 730 }, { x: Math.round(68 - leftWarp), y: 500 }, pTopLeft, sLeft1, false);
+        var segLeft2Pts = this.sampleBezier(pTopLeft, { x: 120, y: 105 }, { x: 285, y: 72 }, pBackToStart, sLeft2, true);
 
-        var mainPts = segTop.concat(segRight).concat(segBottom).concat(segLeft1).concat(segLeft2);
-        var mainCount = mainPts.length;
+        var mainPts = segTopPts.concat(segRightPts).concat(segBottomPts).concat(segLeft1Pts).concat(segLeft2Pts);
+        outerLen = mainPts.length;
 
-        // B) Dynamický výběr 2 tematických hradů ze seznamu
+        // 3. VÝBĚR 2 TEMATICKÝCH HRADŮ ZE SEZNAMU
         var pool = this.THEMATIC_CASTLES.slice();
         for (var cIdx = pool.length - 1; cIdx > 0; cIdx--) {
             var swapIdx = Math.floor(rnd() * (cIdx + 1));
@@ -840,118 +988,191 @@ window.KiDeskyMapGenerator = {
         var castleH1 = pool[0];
         var castleH2 = pool[1];
 
-        // C) 3 Taktické vnitřní větve plánu
-        // 1. Pravá Dračí stezka (uzly 13 -> 31)
-        var rbP0 = { x: mainPts[13].x - 45, y: mainPts[13].y + 55 };
-        var rbP3 = { x: mainPts[31].x + 30, y: mainPts[31].y - 55 };
-        var rightBranchPts = this.sampleBezier(rbP0, { x: Math.round(1070 + (rnd() - 0.5) * 40), y: 340 }, { x: Math.round(1220 + (rnd() - 0.5) * 40), y: 520 }, rbP3, 13, true);
+        // 4. INDEXY KŘIŽOVATEK PRO 1..4 VĚTVE NA HLAVNÍM OKRUHU
+        // Větev 1 (Most Slavností): z pravého dolního kvadrantu do levého dolního kvadrantu
+        var j1Start = Math.max(4, Math.min(outerLen - 6, Math.round(outerLen * 0.47)));
+        var j1End = Math.max(j1Start + 3, Math.min(outerLen - 3, Math.round(outerLen * 0.66)));
 
-        // 2. Střední most Slavností pod hradem (uzly 37 -> 51)
-        var brP0 = { x: mainPts[37].x - 40, y: mainPts[37].y - 50 };
-        var brP3 = { x: mainPts[51].x + 30, y: mainPts[51].y - 50 };
-        var bridgePts = this.sampleBezier(brP0, { x: Math.round(690 + (rnd() - 0.5) * 50), y: 540 }, { x: Math.round(440 + (rnd() - 0.5) * 50), y: 540 }, brP3, 14, true);
+        // Větev 2 (Dračí stezka): z pravého horního rohu do pravého dolního rohu
+        var j2Start = Math.max(2, Math.min(j1Start - 2, Math.round(outerLen * 0.17)));
+        var j2End = Math.max(j2Start + 3, Math.min(j1Start - 1, Math.round(outerLen * 0.40)));
 
-        // 3. Levá smyčka kolem Hradu 1 a chovu zvěře (uzly 76 -> 67)
-        var lbP0 = { x: mainPts[76].x - 30, y: mainPts[76].y + 50 };
-        var lbP3 = { x: mainPts[67].x + 40, y: mainPts[67].y + 10 };
-        var leftBranchPts = this.sampleBezier(lbP0, { x: 350, y: 240 }, { x: 240, y: 290 }, lbP3, 7, true);
+        // Větev 3 (Levá Lesní smyčka): z levého horního oblouku zpět do levého středu
+        var j3Start = Math.max(j1End + 3, Math.min(outerLen - 2, Math.round(outerLen * 0.93)));
+        var j3End = Math.max(j1End + 2, Math.min(j3Start - 2, Math.round(outerLen * 0.81)));
 
-        // D) Pravidlové naplnění políček (Constraint Solver)
-        var topDefs = [
-            { code: "START", type: "START", name: "START (+3 000 zl.)", icon: "🏰" },
-            { code: "K1", type: "ANIMAL", subtype: "kun", setId: 1, name: "Kůň 1 (Grošák)", icon: "🐎" },
-            { code: "S1", type: "ANIMAL", subtype: "sokol", setId: 1, name: "Sokol 1 (Poštolka)", icon: "🦅" },
-            { code: "N1", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "STAJE1", type: "BUILDING", subtype: "staje", name: "Stáje 1", icon: "🏠" },
-            { code: "P1", type: "ANIMAL", subtype: "pes", setId: 1, name: "Pes 1 (Ohař)", icon: "🐕" },
-            { code: "OBCHOD1", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
-            { code: "VD1", type: "TAX", name: "Výběrčí daní", icon: "👑" },
+        // Větev 4 (Severní Královská hřebenovka): kousek za STARTem do pravého horního středu
+        var j4Start = Math.max(2, Math.min(j2Start - 2, Math.round(outerLen * 0.06)));
+        var j4End = Math.max(j2Start + 2, Math.min(j2End - 2, Math.round(outerLen * 0.27)));
+
+        // Pomocná funkce pro přiřazení stupně Mistra podle zvoleného režimu (1..4 nebo 5 = Stupňovaný RPG)
+        function resolveMasterNodeTier(progressRatio, isGrandmaster) {
+            if (isGrandmaster) return 4;
+            if (chosenMasterTier === 5) {
+                if (progressRatio < 0.28) return 1;
+                if (progressRatio < 0.58) return 2;
+                if (progressRatio < 0.85) return 3;
+                return 4;
+            }
+            return Math.max(1, Math.min(4, chosenMasterTier));
+        }
+
+        // 5. SESTAVENÍ OBSAHU POLÍČEK (CONSTRAINT SOLVER)
+        // Rozdělíme chovné sady mezi hlavní okruh a aktivní větve tak, aby každá trojice (K, S, P) držela pohromadě!
+        var branchSets = [];
+        var outerSetsCount = animalSetCount;
+        if (branchCount >= 2 && animalSetCount >= 5) {
+            branchSets.push({ branch: 2, setId: animalSetCount });
+            outerSetsCount--;
+        }
+        if (branchCount >= 3 && animalSetCount >= 6) {
+            branchSets.push({ branch: 3, setId: outerSetsCount });
+            outerSetsCount--;
+        }
+        if (branchCount >= 4 && animalSetCount >= 8) {
+            branchSets.push({ branch: 4, setId: outerSetsCount });
+            outerSetsCount--;
+        }
+
+        // Sestavení fronty speciálních polí pro hlavní okruh (mimo START a chovné sady)
+        var outerSlotCount = outerLen - 1; // uzel 0 je vždy START
+        var outerAnimalNodesCount = outerSetsCount * 3;
+
+        // Garantované jádro infrastruktury, měst, vesnic, mistrů a úkolů na hlavním okruhu
+        var corePool = [
             { code: "HOSP", type: "HOSPITAL", name: "Královský lazaret", icon: "🏥" },
-            { code: "KE1", type: "JESTER", jesterId: 1, name: "Kejklíř 1", icon: "🃏" },
-            { code: "K2", type: "ANIMAL", subtype: "kun", setId: 2, name: "Kůň 2 (Hnědák)", icon: "🐎" },
-            { code: "V2", type: "VILLAGE", estateId: "V2", name: "Vesnice 2 (Lhotka)", icon: "🏘️", hasRoof: true },
-            { code: "S2", type: "ANIMAL", subtype: "sokol", setId: 2, name: "Sokol 2 (Krahujec)", icon: "🦅" },
-            { code: "P2", type: "ANIMAL", subtype: "pes", setId: 2, name: "Pes 2 (Bígl) – Odbočka", icon: "🐕", isJunction: true }
-        ];
-
-        var rightDefs = [
-            { code: "KOV1", type: "BUILDING", subtype: "kovarna", name: "Kovárna 1", icon: "⚒️" },
-            { code: "U1_1", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
-            { code: "K3", type: "ANIMAL", subtype: "kun", setId: 3, name: "Kůň 3 (Vraník)", icon: "🐎" },
-            { code: "N3", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "MJ2", type: "MASTER", skill: "jizda", name: "Mistr Jízdy", icon: "🏇" },
-            { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 1", icon: "🦅" },
-            { code: "S3", type: "ANIMAL", subtype: "sokol", setId: 3, name: "Sokol 3 (Ostříž)", icon: "🦅" },
-            { code: "N4", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "P3", type: "ANIMAL", subtype: "pes", setId: 3, name: "Pes 3 (Chrt)", icon: "🐕" },
-            { code: "V3", type: "VILLAGE", estateId: "V3", name: "Vesnice 3 (Březová)", icon: "🏘️", hasRoof: true },
-            { code: "OBCHOD2", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
-            { code: "M3_R", type: "TOWN", estateId: "M3", name: "Město 3 (Zlatov)", icon: "🏙️" },
-            { code: "K4", type: "ANIMAL", subtype: "kun", setId: 4, name: "Kůň 4 (Ryzák)", icon: "🐎" },
-            { code: "KE2", type: "JESTER", jesterId: 2, name: "Kejklíř 2", icon: "🃏" },
-            { code: "S4", type: "ANIMAL", subtype: "sokol", setId: 4, name: "Sokol 4 (Raroh)", icon: "🦅" },
-            { code: "MCH1", type: "MASTER", skill: "charisma", name: "Mistr Charismatu", icon: "✨" },
-            { code: "P4", type: "ANIMAL", subtype: "pes", setId: 4, name: "Pes 4 (Barvář)", icon: "🐕" },
-            { code: "N5", type: "CHANCE", name: "Náhoda (Soutok u Hradu 2)", icon: "❓" }
-        ];
-
-        var bottomDefs = [
-            { code: "KOV2", type: "BUILDING", subtype: "kovarna", name: "Kovárna 2", icon: "⚒️" },
-            { code: "K5", type: "ANIMAL", subtype: "kun", setId: 5, name: "Kůň 5 (Bělouš)", icon: "🐎" },
-            { code: "S5", type: "ANIMAL", subtype: "sokol", setId: 5, name: "Sokol 5 (Královský ostříž)", icon: "🦅" },
-            { code: "V4", type: "VILLAGE", estateId: "V4", name: "Vesnice 4 (Dubina)", icon: "🏘️" },
-            { code: "P5", type: "ANIMAL", subtype: "pes", setId: 5, name: "Pes 5 (Slídič)", icon: "🐕" },
-            { code: "U1_2", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
-            { code: "S6", type: "ANIMAL", subtype: "sokol", setId: 6, name: "Sokol 6 – Odbočka ke Slavnosti", icon: "🦅", isJunction: true },
-            { code: "U1_3", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
-            { code: "K6", type: "ANIMAL", subtype: "kun", setId: 6, name: "Kůň 6 (Plavák)", icon: "🐎" },
-            { code: "VD2", type: "TAX", name: "Výběrčí daní", icon: "👑" },
-            { code: "KE3", type: "JESTER", jesterId: 3, name: "Kejklíř 3", icon: "🃏" },
             { code: "SATL", type: "PRISON", name: "Královská šatlava", icon: "⛓️" },
+            { code: "KRCMA", type: "TAVERN", name: "Krčma U Zlatého korbelu", icon: "🍺" },
+            { code: "VD1", type: "TAX", name: "Výběrčí daní", icon: "👑" },
+            { code: "VD2", type: "TAX", name: "Výběrčí daní", icon: "👑" },
+            { code: "M2", type: "TOWN", estateId: "M2", name: "Město 2 (Stříbratec)", icon: "🏙️" },
+            { code: "M3", type: "TOWN", estateId: "M3", name: "Město 3 (Zlatov)", icon: "🏙️" },
+            { code: "V1", type: "VILLAGE", estateId: "V1", name: "Vesnice 1 (Králova Lhota)", icon: "🏘️", hasRoof: true },
+            { code: "V2", type: "VILLAGE", estateId: "V2", name: "Vesnice 2 (Lhotka)", icon: "🏘️", hasRoof: true },
+            { code: "V3", type: "VILLAGE", estateId: "V3", name: "Vesnice 3 (Březová)", icon: "🏘️", hasRoof: true },
+            { code: "V4", type: "VILLAGE", estateId: "V4", name: "Vesnice 4 (Dubina)", icon: "🏘️", hasRoof: false },
+            { code: "V5", type: "VILLAGE", estateId: "V5", name: "Vesnice 5 (Skalice)", icon: "🏘️", hasRoof: true },
+            { code: "V6", type: "VILLAGE", estateId: "V6", name: "Vesnice 6 (Meziříčí)", icon: "🏘️", hasRoof: false },
+            { code: "MB1", type: "MASTER", skill: "boj", name: "Mistr Boje", icon: "⚔️" },
+            { code: "MJ1", type: "MASTER", skill: "jizda", name: "Mistr Jízdy", icon: "🏇" },
+            { code: "MT1", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃" },
+            { code: "MCH1", type: "MASTER", skill: "charisma", name: "Mistr Charismatu", icon: "✨" },
+            { code: "VM1", type: "MASTER", skill: "any", name: "Velmistr", icon: "🧙‍♂️" },
+            { code: "STAJE1", type: "BUILDING", subtype: "staje", name: "Královské stáje", icon: "🏠" },
+            { code: "KOV1", type: "BUILDING", subtype: "kovarna", name: "Cechovní kovárna", icon: "⚒️" },
+            { code: "SOK1", type: "BUILDING", subtype: "sokolnik", name: "Královský sokolník", icon: "🦅" },
+            { code: "PSOV1", type: "BUILDING", subtype: "psovod", name: "Psovod a smečka", icon: "🦴" },
+            { code: "KREJ1", type: "BUILDING", subtype: "krejci", name: "Dvorní krejčí", icon: "🧵" },
+            { code: "OBCHOD1", type: "MERCHANT", name: "Královský obchodník", icon: "⚖️" },
+            { code: "OBCHOD2", type: "MERCHANT", name: "Kupecký trh", icon: "⚖️" },
+            { code: "KE1", type: "JESTER", jesterId: 1, name: "Kejklíř 1", icon: "🃏" },
+            { code: "KE2", type: "JESTER", jesterId: 2, name: "Kejklíř 2", icon: "🃏" },
+            { code: "KE3", type: "JESTER", jesterId: 3, name: "Kejklíř 3", icon: "🃏" },
+            { code: "U1_1", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
+            { code: "U1_2", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
+            { code: "U2_1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" }
+        ];
+
+        // Pokud není aktivní Větev 2 (Dračí), garantujeme Hrad 2, Město 4 a 2 Dračí sluje přímo na hlavním okruhu!
+        if (branchCount < 2) {
+            corePool.unshift(
+                { code: "H2", type: "CASTLE", estateId: "H2", name: castleH2.name, icon: castleH2.icon },
+                { code: "M4", type: "TOWN", estateId: "M4", name: "Město 4 (Mečov)", icon: "🏙️" },
+                { code: "U3_1", type: "QUEST", subtype: "U3", name: "Dračí sluj I (U3)", icon: "🐉" },
+                { code: "U3_2", type: "QUEST", subtype: "U3", name: "Tříhlavý drak II (U3)", icon: "🐲" }
+            );
+        }
+        // Pokud není aktivní Větev 3 (Levá), garantujeme Hrad 1 na hlavním okruhu!
+        if (branchCount < 3) {
+            corePool.unshift(
+                { code: "H1", type: "CASTLE", estateId: "H1", name: castleH1.name, icon: castleH1.icon }
+            );
+        }
+
+        // Škálování nebezpečí (dangerLevel)
+        if (dangerLevel === "high") {
+            corePool.push(
+                { code: "U2_H1", type: "QUEST", subtype: "U2", name: "Bájné monstrum (U2)", icon: "👹" },
+                { code: "U2_H2", type: "QUEST", subtype: "U2", name: "Titán divočiny (U2)", icon: "👹" },
+                { code: "U3_H1", type: "QUEST", subtype: "U3", name: "Prastará dračí sluj (U3)", icon: "🐉" }
+            );
+        } else if (dangerLevel === "standard") {
+            corePool.push(
+                { code: "U1_S1", type: "QUEST", subtype: "U1", name: "Lesní revír (U1)", icon: "🐗" },
+                { code: "U2_S1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" }
+            );
+        }
+
+        // Doplňková pole pro větší mapy (96, 112, 128)
+        var extraFillerPool = [
+            { code: "V8", type: "VILLAGE", estateId: "V8", name: "Vesnice 8 (Podhradí)", icon: "🏘️", hasRoof: false },
             { code: "OBCHOD3", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
             { code: "STAJE2", type: "BUILDING", subtype: "staje", name: "Stáje 2", icon: "🏠" },
-            { code: "P6", type: "ANIMAL", subtype: "pes", setId: 6, name: "Pes 6 (Vlkodav)", icon: "🐕" },
-            { code: "MB1", type: "MASTER", skill: "boj", name: "Mistr Boje", icon: "⚔️" },
-            { code: "V5", type: "VILLAGE", estateId: "V5", name: "Vesnice 5 (Skalice)", icon: "🏘️", hasRoof: true },
-            { code: "M2", type: "TOWN", estateId: "M2", name: "Město 2 (Stříbratec)", icon: "🏙️" },
-            { code: "K7", type: "ANIMAL", subtype: "kun", setId: 7, name: "Kůň 7 (Šiml)", icon: "🐎" },
-            { code: "S7", type: "ANIMAL", subtype: "sokol", setId: 7, name: "Sokol 7 (Luňák)", icon: "🦅" }
-        ];
-
-        var leftDefs = [
-            { code: "PSOV2", type: "BUILDING", subtype: "psovod", name: "Psovod 2", icon: "🦴" },
-            { code: "N7", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "P7", type: "ANIMAL", subtype: "pes", setId: 7, name: "Pes 7 (Doga)", icon: "🐕" },
-            { code: "V6", type: "VILLAGE", estateId: "V6", name: "Vesnice 6 (Meziříčí)", icon: "🏘️" },
-            { code: "N8", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "S8", type: "ANIMAL", subtype: "sokol", setId: 8, name: "Sokol 8 (Orlovec)", icon: "🦅" },
+            { code: "KOV2", type: "BUILDING", subtype: "kovarna", name: "Kovárna 2", icon: "⚒️" },
             { code: "KE4", type: "JESTER", jesterId: 4, name: "Kejklíř 4", icon: "🃏" },
-            { code: "VM1", type: "MASTER", skill: "any", name: "Velmistr", icon: "🧙‍♂️" },
-            { code: "K8", type: "ANIMAL", subtype: "kun", setId: 8, name: "Kůň 8 (Fríský oř)", icon: "🐎" },
-            { code: "N9", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "P8", type: "ANIMAL", subtype: "pes", setId: 8, name: "Pes 8 (Chrtí král)", icon: "🐕" },
-            { code: "S9", type: "ANIMAL", subtype: "sokol", setId: 9, name: "Sokol 9 (Jestřáb)", icon: "🦅" },
+            { code: "MJ2", type: "MASTER", skill: "jizda", name: "Mistr Jízdy", icon: "🏇" },
+            { code: "MCH2", type: "MASTER", skill: "charisma", name: "Mistr Charismatu", icon: "✨" },
             { code: "OBCHOD4", type: "MERCHANT", name: "Obchodník", icon: "⚖️" },
-            { code: "P9", type: "ANIMAL", subtype: "pes", setId: 9, name: "Pes 9 (Lovecký chrt)", icon: "🐕" },
-            { code: "V8", type: "VILLAGE", estateId: "V8", name: "Vesnice 8 (Podhradí)", icon: "🏘️" },
-            { code: "K9", type: "ANIMAL", subtype: "kun", setId: 9, name: "Kůň 9 (Andaluský hřebec)", icon: "🐎" },
-            { code: "M3", type: "TOWN", estateId: "M3", name: "Město 3 (Zlatov)", icon: "🏙️" },
-            { code: "KRCMA", type: "TAVERN", name: "Krčma U Zlatého korbelu", icon: "🍺" },
+            { code: "SOK2", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 2", icon: "🦅" },
             { code: "KE5", type: "JESTER", jesterId: 5, name: "Kejklíř 5", icon: "🃏" },
-            { code: "S10", type: "ANIMAL", subtype: "sokol", setId: 10, name: "Sokol 10 (Sokol královský)", icon: "🦅" },
-            { code: "KREJ2", type: "BUILDING", subtype: "krejci", name: "Krejčí 2", icon: "🧵" },
-            { code: "K10", type: "ANIMAL", subtype: "kun", setId: 10, name: "Kůň 10 (Válečný oř)", icon: "🐎" },
-            { code: "V1", type: "VILLAGE", estateId: "V1", name: "Vesnice 1 (Králova Lhota)", icon: "🏘️", hasRoof: true },
-            { code: "N11", type: "CHANCE", name: "Náhoda", icon: "❓" },
-            { code: "OBCHOD5", type: "MERCHANT", name: "Obchodník – Odbočka k Hradu 1", icon: "⚖️", isJunction: true },
-            { code: "P10", type: "ANIMAL", subtype: "pes", setId: 10, name: "Pes 10 (Královský chrt)", icon: "🐕" }
+            { code: "U1_3", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" }
         ];
 
-        var allOuterDefs = topDefs.concat(rightDefs).concat(bottomDefs).concat(leftDefs);
+        var nonAnimalNeeded = Math.max(8, outerSlotCount - outerAnimalNodesCount);
+        var selectedNonAnimals = corePool.slice(0, nonAnimalNeeded);
+        var fIdx = 0;
+        var chanceCounter = 1;
+        while (selectedNonAnimals.length < nonAnimalNeeded) {
+            if (fIdx < extraFillerPool.length && rnd() > 0.35) {
+                selectedNonAnimals.push(extraFillerPool[fIdx++]);
+            } else {
+                selectedNonAnimals.push({ code: "N" + (chanceCounter++), type: "CHANCE", name: "Náhoda", icon: "❓" });
+            }
+        }
+
+        // Proložíme ucelené trojice zvířat (setId 1..outerSetsCount) mezi selectedNonAnimals
+        // Každá sada K-S-P je vložena blízko sebe (s 1 vloženým polem uprostřed), takže tvoří kompaktní chovný revír!
+        var outerDefs = [{ code: "START", type: "START", name: "START (+3 000 zl.)", icon: "🏰" }];
+        var naCursor = 0;
+        for (var sId = 1; sId <= outerSetsCount; sId++) {
+            var cat = this.ANIMAL_SETS_CATALOG[sId - 1];
+            var remainingSets = outerSetsCount - sId + 1;
+            var remainingNA = selectedNonAnimals.length - naCursor;
+            var chunkNA = Math.max(1, Math.floor(remainingNA / remainingSets));
+
+            // 1. Zvíře sady (Kůň)
+            outerDefs.push({ code: "K" + sId, type: "ANIMAL", subtype: "kun", setId: sId, name: cat.kun, icon: "🐎" });
+            // Vložíme 1 ne-zvířecí pole mezi Koně a Sokola
+            if (naCursor < selectedNonAnimals.length) {
+                outerDefs.push(selectedNonAnimals[naCursor++]);
+                chunkNA--;
+            }
+            // 2. Zvíře sady (Sokol)
+            outerDefs.push({ code: "S" + sId, type: "ANIMAL", subtype: "sokol", setId: sId, name: cat.sokol, icon: "🦅" });
+            // 3. Zvíře sady (Pes)
+            outerDefs.push({ code: "P" + sId, type: "ANIMAL", subtype: "pes", setId: sId, name: cat.pes, icon: "🐕" });
+
+            // Zbytek přídělu ne-zvířecích polí za sadou
+            while (chunkNA > 0 && naCursor < selectedNonAnimals.length) {
+                outerDefs.push(selectedNonAnimals[naCursor++]);
+                chunkNA--;
+            }
+        }
+        while (naCursor < selectedNonAnimals.length && outerDefs.length < outerLen) {
+            outerDefs.push(selectedNonAnimals[naCursor++]);
+        }
+        while (outerDefs.length < outerLen) {
+            outerDefs.push({ code: "N" + (chanceCounter++), type: "CHANCE", name: "Náhoda", icon: "❓" });
+        }
+        outerDefs = outerDefs.slice(0, outerLen);
+
+        // Vytvoření uzlů hlavního okruhu
         var nodes = [];
-        for (var i = 0; i < allOuterDefs.length; i++) {
-            var d = allOuterDefs[i];
+        for (var i = 0; i < outerLen; i++) {
+            var d = outerDefs[i];
             var pt = mainPts[i];
+            var prog = i / outerLen;
+            var mTierVal = (d.type === "MASTER") ? resolveMasterNodeTier(prog, d.skill === "any") : null;
             nodes.push({
                 id: i,
                 code: d.code,
@@ -961,189 +1182,323 @@ window.KiDeskyMapGenerator = {
                 estateId: d.estateId || null,
                 jesterId: d.jesterId || null,
                 skill: d.skill || null,
+                masterTier: mTierVal,
                 hasRoof: !!d.hasRoof,
-                isJunction: !!d.isJunction,
+                isJunction: false,
+                branchTag: "main",
                 name: d.name,
                 icon: d.icon,
                 x: pt.x,
                 y: pt.y,
-                next: [(i + 1) % allOuterDefs.length],
+                next: [(i + 1) % outerLen],
                 branchLow: null,
                 branchHigh: null
             });
         }
 
-        // Větev 1 (Pravá / Dračí & Hrad 2)
-        var rightBranchDefs = [
-            { code: "P11", type: "ANIMAL", subtype: "pes", setId: 11, name: "Pes 11 (Stříbrný ohař)", icon: "🐕" },
-            { code: "MJ1", type: "MASTER", skill: "jizda", name: "Mistr Jízdy", icon: "🏇" },
-            { code: "MCH2", type: "MASTER", skill: "charisma", name: "Mistr Charismatu", icon: "✨" },
-            { code: "S11", type: "ANIMAL", subtype: "sokol", setId: 11, name: "Sokol 11 (Bílý raroh)", icon: "🦅" },
-            { code: "KOV_R", type: "BUILDING", subtype: "kovarna", name: "Hradní zbrojíř", icon: "⚒️" },
-            { code: "U2_R1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
-            { code: "M4", type: "TOWN", estateId: "M4", name: "Město 4 (Mečov)", icon: "🏙️" },
-            { code: "K11", type: "ANIMAL", subtype: "kun", setId: 11, name: "Kůň 11 (Hvězdný hřebec)", icon: "🐎" },
-            { code: "VM2", type: "MASTER", skill: "any", name: "Velmistr", icon: "🧙‍♂️" },
-            { code: "U2_R2", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
-            { code: "U3_1", type: "QUEST", subtype: "U3", name: "Dračí sluj I (U3)", icon: "🐉" },
-            { code: "U3_2", type: "QUEST", subtype: "U3", name: "Tříhlavý drak II (U3)", icon: "🐲" },
-            { code: "H2", type: "CASTLE", estateId: "H2", name: castleH2.name, icon: castleH2.icon }
-        ];
-        var rbStart = nodes.length;
-        for (var r = 0; r < rightBranchDefs.length; r++) {
-            var rbd = rightBranchDefs[r];
-            var rpt = rightBranchPts[r];
-            var rid = nodes.length;
-            nodes.push({
-                id: rid,
-                code: rbd.code,
-                type: rbd.type,
-                subtype: rbd.subtype || null,
-                setId: rbd.setId || null,
-                estateId: rbd.estateId || null,
-                skill: rbd.skill || null,
-                name: rbd.name,
-                icon: rbd.icon,
-                x: rpt.x,
-                y: rpt.y,
-                next: [r < rightBranchDefs.length - 1 ? rid + 1 : 31],
-                branchLow: null,
-                branchHigh: null
+        // Pomocná funkce pro stavbu vnitřní větve mezi uzly jStart -> jEnd
+        var self = this;
+        function attachBranch(jStartIdx, jEndIdx, cp1, cp2, bDefs, tag) {
+            if (!bDefs || bDefs.length === 0) return;
+            var nStart = nodes[jStartIdx];
+            var nEnd = nodes[jEndIdx];
+            var p0 = { x: Math.round(nStart.x * 0.85 + cp1.x * 0.15), y: Math.round(nStart.y * 0.85 + cp1.y * 0.15) };
+            var p3 = { x: Math.round(nEnd.x * 0.85 + cp2.x * 0.15), y: Math.round(nEnd.y * 0.85 + cp2.y * 0.15) };
+            var pts = self.sampleBezier(p0, cp1, cp2, p3, bDefs.length, true);
+
+            var firstId = nodes.length;
+            for (var k = 0; k < bDefs.length; k++) {
+                var bd = bDefs[k];
+                var bpt = pts[k];
+                var nid = nodes.length;
+                var mTierVal = (bd.type === "MASTER") ? resolveMasterNodeTier(0.75, bd.skill === "any") : null;
+                nodes.push({
+                    id: nid,
+                    code: bd.code,
+                    type: bd.type,
+                    subtype: bd.subtype || null,
+                    setId: bd.setId || null,
+                    estateId: bd.estateId || null,
+                    jesterId: bd.jesterId || null,
+                    skill: bd.skill || null,
+                    masterTier: mTierVal,
+                    hasRoof: !!bd.hasRoof,
+                    isJunction: false,
+                    branchTag: tag,
+                    name: bd.name,
+                    icon: bd.icon,
+                    x: bpt.x,
+                    y: bpt.y,
+                    next: [k < bDefs.length - 1 ? nid + 1 : jEndIdx],
+                    branchLow: null,
+                    branchHigh: null
+                });
+            }
+            nStart.isJunction = true;
+            nStart.branchLow = (jStartIdx + 1) % outerLen;
+            nStart.branchHigh = firstId;
+        }
+
+        // VĚTEV 1: Střední Most Slavností (vždy přítomná při branches >= 1)
+        if (branchCount >= 1 && b1Len > 0) {
+            var b1Template = [
+                { code: "SLAV_BRANA", type: "CHANCE", name: "Slavnostní brána", icon: "🎪" },
+                { code: "M1", type: "TOWN", estateId: "M1", name: "Město 1 (Královo Pole)", icon: "🏙️" },
+                { code: "SLAV_TURNAJ", type: "FESTIVAL", subtype: "turnaj", name: "SLAVNOST: Královský Turnaj ♡", icon: "💖" },
+                { code: "SLAV_PLES", type: "FESTIVAL", subtype: "ples", name: "SLAVNOST: Zámecký Ples ♡", icon: "💖" },
+                { code: "SLAV_ZAVOD", type: "FESTIVAL", subtype: "zavod", name: "SLAVNOST: Velký Závod ♡", icon: "💖" },
+                { code: "V7", type: "VILLAGE", estateId: "V7", name: "Vesnice 7 (Slunečná)", icon: "🏘️", hasRoof: true },
+                { code: "MT_BR", type: "MASTER", skill: "tanec", name: "Mistr Dvorního Tance", icon: "💃" },
+                { code: "KREJ_BR", type: "BUILDING", subtype: "krejci", name: "Slavnostní krejčí", icon: "🧵" },
+                { code: "U1_BR", type: "QUEST", subtype: "U1", name: "Lov zvěře v oboře (U1)", icon: "🐗" },
+                { code: "U2_BR", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
+                { code: "KRCMA_BR", type: "TAVERN", name: "Hradní šenk", icon: "🍺" },
+                { code: "MCH_BR", type: "MASTER", skill: "charisma", name: "Mistr Dvornosti", icon: "✨" },
+                { code: "N_BR1", type: "CHANCE", name: "Náhoda u mostu", icon: "❓" },
+                { code: "N_BR2", type: "CHANCE", name: "Náhoda pod hradem", icon: "❓" }
+            ];
+            while (b1Template.length < b1Len) {
+                b1Template.push({ code: "N_BR" + b1Template.length, type: "CHANCE", name: "Náhoda", icon: "❓" });
+            }
+            attachBranch(
+                j1Start,
+                j1End,
+                { x: Math.round(740 + (rnd() - 0.5) * 45), y: 545 },
+                { x: Math.round(450 + (rnd() - 0.5) * 45), y: 545 },
+                b1Template.slice(0, b1Len),
+                "festival"
+            );
+        }
+
+        // VĚTEV 2: Pravá Dračí stezka & Hrad 2 (při branches >= 2)
+        if (branchCount >= 2 && b2Len > 0) {
+            var b2Set = null;
+            for (var bs2 = 0; bs2 < branchSets.length; bs2++) {
+                if (branchSets[bs2].branch === 2) b2Set = this.ANIMAL_SETS_CATALOG[branchSets[bs2].setId - 1];
+            }
+            var b2Template = [
+                { code: "U3_1", type: "QUEST", subtype: "U3", name: "Dračí sluj I (U3)", icon: "🐉" },
+                { code: "U3_2", type: "QUEST", subtype: "U3", name: "Tříhlavý drak II (U3)", icon: "🐲" },
+                { code: "H2", type: "CASTLE", estateId: "H2", name: castleH2.name, icon: castleH2.icon },
+                { code: "M4", type: "TOWN", estateId: "M4", name: "Město 4 (Mečov)", icon: "🏙️" },
+                { code: "VM2", type: "MASTER", skill: "any", name: "Velmistr Dračího řádu", icon: "🧙‍♂️" },
+                { code: "U2_R1", type: "QUEST", subtype: "U2", name: "Horské monstrum (U2)", icon: "👹" }
+            ];
+            if (b2Set) {
+                b2Template.splice(1, 0,
+                    { code: "P" + b2Set.setId, type: "ANIMAL", subtype: "pes", setId: b2Set.setId, name: b2Set.pes, icon: "🐕" },
+                    { code: "S" + b2Set.setId, type: "ANIMAL", subtype: "sokol", setId: b2Set.setId, name: b2Set.sokol, icon: "🦅" },
+                    { code: "K" + b2Set.setId, type: "ANIMAL", subtype: "kun", setId: b2Set.setId, name: b2Set.kun, icon: "🐎" }
+                );
+            }
+            b2Template.push(
+                { code: "KOV_R", type: "BUILDING", subtype: "kovarna", name: "Hradní zbrojíř", icon: "⚒️" },
+                { code: "U2_R2", type: "QUEST", subtype: "U2", name: "Strážce průsmyku (U2)", icon: "👹" },
+                { code: "MB_R", type: "MASTER", skill: "boj", name: "Mistr Boje", icon: "⚔️" },
+                { code: "N_R1", type: "CHANCE", name: "Horská náhoda", icon: "❓" }
+            );
+            while (b2Template.length < b2Len) {
+                b2Template.push({ code: "N_R" + b2Template.length, type: "CHANCE", name: "Náhoda", icon: "❓" });
+            }
+            attachBranch(
+                j2Start,
+                j2End,
+                { x: Math.round(1045 + (rnd() - 0.5) * 40), y: 315 },
+                { x: Math.round(1155 + (rnd() - 0.5) * 40), y: 525 },
+                b2Template.slice(0, b2Len),
+                "dragon"
+            );
+        }
+
+        // VĚTEV 3: Levá Lesní smyčka & Hrad 1 (při branches >= 3)
+        if (branchCount >= 3 && b3Len > 0) {
+            var b3Set = null;
+            for (var bs3 = 0; bs3 < branchSets.length; bs3++) {
+                if (branchSets[bs3].branch === 3) b3Set = this.ANIMAL_SETS_CATALOG[branchSets[bs3].setId - 1];
+            }
+            var b3Template = [
+                { code: "H1", type: "CASTLE", estateId: "H1", name: castleH1.name, icon: castleH1.icon },
+                { code: "U2_L1", type: "QUEST", subtype: "U2", name: "Lesní monstrum (U2)", icon: "👹" },
+                { code: "SOK_L", type: "BUILDING", subtype: "sokolnik", name: "Lesní sokolník", icon: "🦅" },
+                { code: "MT_L", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃" }
+            ];
+            if (b3Set) {
+                b3Template.splice(1, 0,
+                    { code: "S" + b3Set.setId, type: "ANIMAL", subtype: "sokol", setId: b3Set.setId, name: b3Set.sokol, icon: "🦅" },
+                    { code: "K" + b3Set.setId, type: "ANIMAL", subtype: "kun", setId: b3Set.setId, name: b3Set.kun, icon: "🐎" },
+                    { code: "P" + b3Set.setId, type: "ANIMAL", subtype: "pes", setId: b3Set.setId, name: b3Set.pes, icon: "🐕" }
+                );
+            }
+            while (b3Template.length < b3Len) {
+                b3Template.push({ code: "U1_L" + b3Template.length, type: "QUEST", subtype: "U1", name: "Hluboký hvozd (U1)", icon: "🐗" });
+            }
+            attachBranch(
+                j3Start,
+                j3End,
+                { x: Math.round(350 + (rnd() - 0.5) * 35), y: 225 },
+                { x: Math.round(235 + (rnd() - 0.5) * 35), y: 310 },
+                b3Template.slice(0, b3Len),
+                "forest"
+            );
+        }
+
+        // VĚTEV 4: Severní Královská Hřebenovka (při branches >= 4)
+        if (branchCount >= 4 && b4Len > 0) {
+            var b4Set = null;
+            for (var bs4 = 0; bs4 < branchSets.length; bs4++) {
+                if (branchSets[bs4].branch === 4) b4Set = this.ANIMAL_SETS_CATALOG[branchSets[bs4].setId - 1];
+            }
+            var b4Template = [
+                { code: "VM_N", type: "MASTER", skill: "any", name: "Severní Velmistr", icon: "🧙‍♂️" },
+                { code: "U2_N1", type: "QUEST", subtype: "U2", name: "Strážce hřebene (U2)", icon: "👹" },
+                { code: "OBCHOD_N", type: "MERCHANT", name: "Horský kupec", icon: "⚖️" },
+                { code: "V9", type: "VILLAGE", estateId: "V8", name: "Vesnice 9 (Větrná)", icon: "🏘️", hasRoof: true }
+            ];
+            if (b4Set) {
+                b4Template.splice(1, 0,
+                    { code: "K" + b4Set.setId, type: "ANIMAL", subtype: "kun", setId: b4Set.setId, name: b4Set.kun, icon: "🐎" },
+                    { code: "S" + b4Set.setId, type: "ANIMAL", subtype: "sokol", setId: b4Set.setId, name: b4Set.sokol, icon: "🦅" },
+                    { code: "P" + b4Set.setId, type: "ANIMAL", subtype: "pes", setId: b4Set.setId, name: b4Set.pes, icon: "🐕" }
+                );
+            }
+            while (b4Template.length < b4Len) {
+                b4Template.push({ code: "N_N" + b4Template.length, type: "CHANCE", name: "Náhoda na hřebeni", icon: "❓" });
+            }
+            attachBranch(
+                j4Start,
+                j4End,
+                { x: Math.round(620 + (rnd() - 0.5) * 40), y: 185 },
+                { x: Math.round(920 + (rnd() - 0.5) * 40), y: 215 },
+                b4Template.slice(0, b4Len),
+                "ridge"
+            );
+        }
+
+        // 6. PROCEDURÁLNÍ VODNÍ SÍŤ A AUTOMATICKÉ KAMENNÉ MOSTY (none | single | dual | island)
+        var rivers = [];
+        var riverPolylines = [];
+
+        if (riverMode !== "none") {
+            // Hlavní královská řeka Doubravka
+            var r1Pts = [
+                { x: Math.round(1215 + (rnd() - 0.5) * 45), y: 30 },
+                { x: Math.round(1130 + (rnd() - 0.5) * 35), y: 220 },
+                { x: Math.round(1010 + (rnd() - 0.5) * 35), y: 410 },
+                { x: Math.round(850 + (rnd() - 0.5) * 35), y: 585 },
+                { x: Math.round(735 + (rnd() - 0.5) * 35), y: 730 },
+                { x: Math.round(695 + (rnd() - 0.5) * 40), y: 855 }
+            ];
+            var r1Path = "M " + r1Pts[0].x + " " + r1Pts[0].y + " " +
+                "C " + r1Pts[1].x + " " + r1Pts[1].y + ", " + r1Pts[2].x + " " + r1Pts[2].y + ", " + r1Pts[3].x + " " + r1Pts[3].y + " " +
+                "S " + r1Pts[4].x + " " + r1Pts[4].y + ", " + r1Pts[5].x + " " + r1Pts[5].y;
+
+            rivers.push({
+                id: "main_river",
+                name: "Královská řeka Doubravka",
+                width: 10,
+                color: "#0284c7",
+                path: r1Path
             });
-        }
-        nodes[13].branchLow = 14;
-        nodes[13].branchHigh = rbStart;
 
-        // Větev 2 (Střední / Most Slavností)
-        var bridgeDefs = [
-            { code: "SLAV_BRANA", type: "CHANCE", name: "Slavnostní brána", icon: "🎪" },
-            { code: "N_BR1", type: "CHANCE", name: "Náhoda u mostu", icon: "❓" },
-            { code: "M1", type: "TOWN", estateId: "M1", name: "Město 1 (Královo Pole)", icon: "🏙️" },
-            { code: "KREJ1", type: "BUILDING", subtype: "krejci", name: "Krejčí 1", icon: "🧵" },
-            { code: "SLAV_TURNAJ", type: "FESTIVAL", subtype: "turnaj", name: "SLAVNOST: Královský Turnaj ♡", icon: "💖" },
-            { code: "SLAV_PLES", type: "FESTIVAL", subtype: "ples", name: "SLAVNOST: Zámecký Ples ♡", icon: "💖" },
-            { code: "SLAV_ZAVOD", type: "FESTIVAL", subtype: "zavod", name: "SLAVNOST: Velký Závod ♡", icon: "💖" },
-            { code: "N_BR2", type: "CHANCE", name: "Náhoda pod hradem", icon: "❓" },
-            { code: "MT1", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃" },
-            { code: "U1_BR", type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" },
-            { code: "U2_BR", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
-            { code: "V7", type: "VILLAGE", estateId: "V7", name: "Vesnice 7 (Slunečná)", icon: "🏘️", hasRoof: true },
-            { code: "KRCMA_BR", type: "TAVERN", name: "Hradní šenk", icon: "🍺" },
-            { code: "MCH_BR", type: "MASTER", skill: "charisma", name: "Mistr Dvornosti", icon: "✨" }
-        ];
-        var brStart = nodes.length;
-        for (var b = 0; b < bridgeDefs.length; b++) {
-            var bdf = bridgeDefs[b];
-            var bpt = bridgePts[b];
-            var bid = nodes.length;
-            nodes.push({
-                id: bid,
-                code: bdf.code,
-                type: bdf.type,
-                subtype: bdf.subtype || null,
-                setId: bdf.setId || null,
-                estateId: bdf.estateId || null,
-                skill: bdf.skill || null,
-                hasRoof: !!bdf.hasRoof,
-                name: bdf.name,
-                icon: bdf.icon,
-                x: bpt.x,
-                y: bpt.y,
-                next: [b < bridgeDefs.length - 1 ? bid + 1 : 51],
-                branchLow: null,
-                branchHigh: null
-            });
-        }
-        nodes[37].branchLow = 38;
-        nodes[37].branchHigh = brStart;
+            var poly1 = this.sampleBezier(r1Pts[0], r1Pts[1], r1Pts[2], r1Pts[3], 18, false)
+                .concat(this.sampleBezier(r1Pts[3], r1Pts[4], r1Pts[4], r1Pts[5], 14, true));
+            riverPolylines.push(poly1);
 
-        // Větev 3 (Levá / Hrad 1)
-        var leftBranchDefs = [
-            { code: "S12", type: "ANIMAL", subtype: "sokol", setId: 12, name: "Sokol 12 (Fénixův sokol)", icon: "🦅" },
-            { code: "SOK2", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 2", icon: "🦅" },
-            { code: "U2_L1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
-            { code: "K12", type: "ANIMAL", subtype: "kun", setId: 12, name: "Kůň 12 (Královský oř)", icon: "🐎" },
-            { code: "H1", type: "CASTLE", estateId: "H1", name: castleH1.name, icon: castleH1.icon },
-            { code: "P12", type: "ANIMAL", subtype: "pes", setId: 12, name: "Pes 12 (Zlatý chrt)", icon: "🐕" },
-            { code: "MT2", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃" }
-        ];
-        var lbStart = nodes.length;
-        for (var l = 0; l < leftBranchDefs.length; l++) {
-            var lbd = leftBranchDefs[l];
-            var lpt = leftBranchPts[l];
-            var lid = nodes.length;
-            nodes.push({
-                id: lid,
-                code: lbd.code,
-                type: lbd.type,
-                subtype: lbd.subtype || null,
-                setId: lbd.setId || null,
-                estateId: lbd.estateId || null,
-                skill: lbd.skill || null,
-                name: lbd.name,
-                icon: lbd.icon,
-                x: lpt.x,
-                y: lpt.y,
-                next: [l < leftBranchDefs.length - 1 ? lid + 1 : 67],
-                branchLow: null,
-                branchHigh: null
-            });
-        }
-        nodes[76].branchLow = 77;
-        nodes[76].branchHigh = lbStart;
+            if (riverMode === "dual") {
+                // Druhá řeka: Horská bystřina Bystřice vlévající se do Doubravky
+                var r2Pts = [
+                    { x: Math.round(255 + (rnd() - 0.5) * 45), y: 30 },
+                    { x: Math.round(370 + (rnd() - 0.5) * 35), y: 230 },
+                    { x: Math.round(520 + (rnd() - 0.5) * 35), y: 440 },
+                    { x: r1Pts[3].x, y: r1Pts[3].y }
+                ];
+                var r2Path = "M " + r2Pts[0].x + " " + r2Pts[0].y + " " +
+                    "C " + r2Pts[1].x + " " + r2Pts[1].y + ", " + r2Pts[2].x + " " + r2Pts[2].y + ", " + r2Pts[3].x + " " + r2Pts[3].y;
 
-        // E) Meandrující řeka
-        var riverControlPts = [
-            { x: Math.round(1220 + (rnd() - 0.5) * 40), y: 35 },
-            { x: Math.round(1140 + (rnd() - 0.5) * 30), y: 220 },
-            { x: Math.round(1040 + (rnd() - 0.5) * 30), y: 400 },
-            { x: Math.round(860 + (rnd() - 0.5) * 30), y: 580 },
-            { x: Math.round(740 + (rnd() - 0.5) * 30), y: 730 },
-            { x: Math.round(705 + (rnd() - 0.5) * 30), y: 855 }
-        ];
-        var riverSvgPath = "M " + riverControlPts[0].x + " " + riverControlPts[0].y + " " +
-            "C " + riverControlPts[1].x + " " + riverControlPts[1].y + ", " + riverControlPts[2].x + " " + riverControlPts[2].y + ", " + riverControlPts[3].x + " " + riverControlPts[3].y + " " +
-            "S " + riverControlPts[4].x + " " + riverControlPts[4].y + ", " + riverControlPts[5].x + " " + riverControlPts[5].y;
+                rivers.push({
+                    id: "tributary_river",
+                    name: "Horská bystřina Bystřice",
+                    width: 8,
+                    color: "#0369a1",
+                    path: r2Path
+                });
+                riverPolylines.push(this.sampleBezier(r2Pts[0], r2Pts[1], r2Pts[2], r2Pts[3], 22, true));
+            } else if (riverMode === "island") {
+                // Říční ostrov obepínající střed království
+                var rIslPts = [
+                    { x: r1Pts[1].x, y: r1Pts[1].y },
+                    { x: 520, y: 210 },
+                    { x: 460, y: 510 },
+                    { x: r1Pts[4].x, y: r1Pts[4].y }
+                ];
+                var rIslPath = "M " + rIslPts[0].x + " " + rIslPts[0].y + " " +
+                    "C " + rIslPts[1].x + " " + rIslPts[1].y + ", " + rIslPts[2].x + " " + rIslPts[2].y + ", " + rIslPts[3].x + " " + rIslPts[3].y;
 
-        // Výpočet mostů křížením cest s řekou
-        var riverPoly = [];
-        for (var tStep = 0; tStep <= 1.0; tStep += 0.035) {
-            var u = 1 - tStep;
-            var rx = Math.round(u * u * u * riverControlPts[0].x + 3 * u * u * tStep * riverControlPts[1].x + 3 * u * tStep * tStep * riverControlPts[3].x + tStep * tStep * tStep * riverControlPts[5].x);
-            var ry = Math.round(u * u * u * riverControlPts[0].y + 3 * u * u * tStep * 250 + 3 * u * tStep * tStep * 650 + tStep * tStep * tStep * riverControlPts[5].y);
-            riverPoly.push({ x: rx, y: ry });
+                rivers.push({
+                    id: "island_branch",
+                    name: "Zámecké říční rameno",
+                    width: 8,
+                    color: "#0284c7",
+                    path: rIslPath
+                });
+                riverPolylines.push(this.sampleBezier(rIslPts[0], rIslPts[1], rIslPts[2], rIslPts[3], 24, true));
+            }
         }
 
+        // Výpočet kamenných mostů na všech průsečících cest s aktivními řekami
         var bridges = [];
         for (var ndIdx = 0; ndIdx < nodes.length; ndIdx++) {
             var nA = nodes[ndIdx];
-            var tgts = nA.next || [];
+            var tgts = nA.next ? nA.next.slice() : [];
+            if (nA.branchHigh !== null && nA.branchHigh !== undefined && tgts.indexOf(nA.branchHigh) === -1) {
+                tgts.push(nA.branchHigh);
+            }
             for (var tg = 0; tg < tgts.length; tg++) {
                 var nB = nodes[tgts[tg]];
                 if (!nB) continue;
-                for (var rp = 0; rp < riverPoly.length - 1; rp++) {
-                    var hit = this.lineIntersection(nA, nB, riverPoly[rp], riverPoly[rp + 1]);
-                    if (hit) {
-                        bridges.push({
-                            x: hit.x,
-                            y: hit.y,
-                            angle: hit.angle,
-                            nodeAId: nA.id,
-                            nodeBId: nB.id
-                        });
-                        break;
+                for (var pIdx = 0; pIdx < riverPolylines.length; pIdx++) {
+                    var rPoly = riverPolylines[pIdx];
+                    var foundHit = false;
+                    for (var rp = 0; rp < rPoly.length - 1; rp++) {
+                        var hit = this.lineIntersection(nA, nB, rPoly[rp], rPoly[rp + 1]);
+                        if (hit) {
+                            // Zamezíme duplicitním mostům příliš blízko u sebe
+                            var tooClose = false;
+                            for (var eb = 0; eb < bridges.length; eb++) {
+                                var dx = bridges[eb].x - hit.x;
+                                var dy = bridges[eb].y - hit.y;
+                                if (dx * dx + dy * dy < 625) { tooClose = true; break; }
+                            }
+                            if (!tooClose) {
+                                bridges.push({
+                                    x: hit.x,
+                                    y: hit.y,
+                                    angle: hit.angle,
+                                    nodeAId: nA.id,
+                                    nodeBId: nB.id
+                                });
+                            }
+                            foundHit = true;
+                            break;
+                        }
                     }
+                    if (foundHit) break;
                 }
             }
         }
 
-        // F) 4 Organické akvarelové biomy
+        // 7. DYNAMICKÉ AKVARELOVÉ BIOMY PODLE ZVOLENÉHO TÉMATU KRAJINY
+        var mtnFill = (biomeTheme === "dragon_peaks") ? "rgba(127, 29, 29, 0.58)" : "rgba(68, 64, 60, 0.55)";
+        var fstFill = (biomeTheme === "forest_realm") ? "rgba(20, 83, 45, 0.62)" : "rgba(22, 101, 52, 0.50)";
+        var mdwFill = (biomeTheme === "golden_plains") ? "rgba(217, 119, 6, 0.54)" : "rgba(202, 138, 4, 0.42)";
+        var wtrFill = (biomeTheme === "river_delta") ? "rgba(3, 105, 161, 0.58)" : "rgba(14, 116, 144, 0.48)";
+
         var biomes = [
             {
                 id: "mountain_ridge",
                 name: "Dračí pohoří & Skalní srázy",
                 fillGrad: "mountainBiomeGrad",
-                fill: "rgba(68, 64, 60, 0.55)",
+                fill: mtnFill,
                 opacity: 0.82,
                 path: "M 960 60 C 1150 40 1350 180 1370 420 C 1380 620 1250 780 1080 770 C 1040 550 1020 320 960 60 Z",
                 contours: [
@@ -1157,7 +1512,7 @@ window.KiDeskyMapGenerator = {
                 id: "forest_deep",
                 name: "Královský hvozd Doubrava",
                 fillGrad: "forestBiomeGrad",
-                fill: "rgba(22, 101, 52, 0.50)",
+                fill: fstFill,
                 opacity: 0.78,
                 path: "M 280 60 C 460 50 680 70 660 220 C 520 280 320 320 150 280 C 100 160 180 70 280 60 Z",
                 contours: [
@@ -1171,7 +1526,7 @@ window.KiDeskyMapGenerator = {
                 id: "meadows_valley",
                 name: "Královské louky a lánová pole",
                 fillGrad: "meadowsBiomeGrad",
-                fill: "rgba(202, 138, 4, 0.42)",
+                fill: mdwFill,
                 opacity: 0.75,
                 path: "M 180 620 C 350 560 600 580 620 780 C 500 830 280 840 150 790 C 120 720 130 650 180 620 Z",
                 contours: [
@@ -1180,12 +1535,15 @@ window.KiDeskyMapGenerator = {
                 ],
                 contourStroke: "rgba(253,224,71,0.32)",
                 contourDash: "5,5"
-            },
-            {
+            }
+        ];
+
+        if (riverMode !== "none") {
+            biomes.push({
                 id: "water_wetlands",
                 name: "Meandry řeky a jezerní tůně",
                 fillGrad: "waterBiomeGrad",
-                fill: "rgba(14, 116, 144, 0.48)",
+                fill: wtrFill,
                 opacity: 0.72,
                 path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z",
                 contours: [
@@ -1194,22 +1552,21 @@ window.KiDeskyMapGenerator = {
                 ],
                 contourStroke: "rgba(56,189,248,0.35)",
                 contourDash: "7,5"
-            }
-        ];
+            });
+        }
 
-        // G) Zušlechtěné kompaktní zóny balíčků karet
+        // 8. ZÓNY BALÍČKŮ KARET & DOMINANTY KRAJINY
         var cardZones = [
             { code: "VECI_1", title: "VĚCI 1", subtitle: "2 500 zl.", icon: "🗡️", color: "#60a5fa", x: 440, y: 155, w: 90, h: 96, actionTier: 1, count: 9 },
             { code: "VECI_2", title: "VĚCI 2", subtitle: "7 000 zl.", icon: "⚔️", color: "#a855f7", x: 550, y: 155, w: 90, h: 96, actionTier: 2, count: 7 },
             { code: "VECI_3", title: "VĚCI 3", subtitle: "12 000 zl.", icon: "👑", color: "#f59e0b", x: 660, y: 155, w: 90, h: 96, actionTier: 3, count: 4 },
-            { code: "ZVER_U1", title: "ZVĚŘ", subtitle: "Obtížnost 4–6", icon: "🐗", color: "#4ade80", x: 920, y: 165, w: 100, h: 78, count: 4 },
-            { code: "MONSTRA_U2", title: "MONSTRA", subtitle: "Obtížnost 8–10", icon: "👹", color: "#fb923c", x: 950, y: 265, w: 100, h: 78, count: 4 },
+            { code: "ZVER_U1", title: "ZVĚŘ", subtitle: "Obtížnost 4–6", icon: "🐗", color: "#4ade80", x: 920, y: 165, w: 100, h: 78, count: 14 },
+            { code: "MONSTRA_U2", title: "MONSTRA", subtitle: "Obtížnost 8–15", icon: "👹", color: "#fb923c", x: 950, y: 265, w: 100, h: 78, count: 22 },
             { code: "DRACI_U3", title: "DRACI", subtitle: "Obtížnost 11–17", icon: "🐉", color: "#f43f5e", x: 980, y: 365, w: 100, h: 78, count: 20 },
             { code: "NAHODA_N", title: "NÁHODA", subtitle: "Karty osudu", icon: "❓", color: "#eab308", x: 250, y: 395, w: 76, h: 96, count: 24 },
             { code: "SLAVNOST_S", title: "SLAVNOSTI", subtitle: "Turnaj & ples", icon: "🎪", color: "#ec4899", x: 505, y: 415, w: 76, h: 86, count: 3 }
         ];
 
-        // H) Dominanty: Královský Hrad, Dračí sluj a 2 vybrané tematické hrady
         var landmarks = [
             { id: "royalCastle", name: "Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 700, y: 380, w: 220, h: 180 },
             { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 },
@@ -1217,35 +1574,60 @@ window.KiDeskyMapGenerator = {
             { id: "castleH2", name: castleH2.name, icon: castleH2.icon, image: castleH2.img, x: 1140, y: 700, w: 130, h: 115 }
         ];
 
-        var boardSeedCode = this.formatSeedCode(seed, options);
-        var chosenMasterTier = (options && options.masterTier) ? Number(options.masterTier) : 2;
+        // 9. STATISTIKY A VALIDACE MAPY PRO KONTROLNÍ PANEL
+        var statCastles = 0, statTowns = 0, statVillages = 0, statMasters = 0, statDragons = 0;
+        for (var st = 0; st < nodes.length; st++) {
+            var nt = nodes[st].type;
+            if (nt === "CASTLE") statCastles++;
+            else if (nt === "TOWN") statTowns++;
+            else if (nt === "VILLAGE") statVillages++;
+            else if (nt === "MASTER") statMasters++;
+            else if (nt === "QUEST" && nodes[st].subtype === "U3") statDragons++;
+        }
+
+        var normalizedOpts = {
+            nodeCount: nodes.length,
+            branches: branchCount,
+            masterTier: chosenMasterTier,
+            animalSetCount: animalSetCount,
+            riverMode: riverMode,
+            dangerLevel: dangerLevel,
+            biomeTheme: biomeTheme,
+            seed: seed
+        };
+        var boardSeedCode = this.formatSeedCode(seed, normalizedOpts);
 
         return {
             code: "procedural_" + seed,
             seedCode: boardSeedCode,
-            masterTier: chosenMasterTier,
-            options: options,
-            name: "Království osudu #" + seed + " (" + castleH1.name + " & " + castleH2.name + ")",
+            masterTier: (chosenMasterTier === 5 ? 2 : chosenMasterTier),
+            graduatedMasters: (chosenMasterTier === 5),
+            options: normalizedOpts,
+            stats: {
+                totalNodes: nodes.length,
+                outerNodes: outerLen,
+                branches: branchCount,
+                animalSets: animalSetCount,
+                castles: statCastles,
+                towns: statTowns,
+                villages: statVillages,
+                masters: statMasters,
+                dragons: statDragons,
+                bridges: bridges.length,
+                estMinutes: Math.round(nodes.length * 0.65),
+                scenariosValid: (statCastles >= 2 && statTowns >= 3 && statDragons >= 2)
+            },
+            name: "Království #" + seed + " (" + castleH1.name + " & " + castleH2.name + ")",
             seed: seed,
             nodes: nodes,
             cardZones: cardZones,
             landmarks: landmarks,
             biomes: biomes,
-            rivers: [
-                {
-                    id: "main_river",
-                    name: "Královská řeka Doubravka",
-                    width: 10,
-                    color: "#0284c7",
-                    path: riverSvgPath
-                }
-            ],
+            rivers: rivers,
             bridges: bridges
         };
     }
 };
-
-
 
 window.PRS_BoardBuilder = {
     createBoard: function (templateCode, options) {
@@ -2377,8 +2759,11 @@ buildClassic4599Board: function () {
     
 
     buildProceduralBoard: function (seed, options) {
-        if (window.PRS_App && window.PRS_App._customProceduralBoard && window.PRS_App._customProceduralBoard.seed === seed) {
-            return window.PRS_App._customProceduralBoard;
+        options = options || {};
+        if (window.PRS_App && window.PRS_App.mapStudioOptions) {
+            for (var k in window.PRS_App.mapStudioOptions) {
+                if (options[k] === undefined) options[k] = window.PRS_App.mapStudioOptions[k];
+            }
         }
         return window.KiDeskyMapGenerator.generate(seed, options);
     }

@@ -2187,20 +2187,26 @@ window.PRS_GameEngine = {
         // 2. Mistr vlastnosti (MB, MJ, MT, MCH, VM)
 
                 if (node.type === "MASTER") {
-            var tier = (state.config && state.config.masterTier) || (state.board && state.board.masterTier) || 1;
+            var tier = node.masterTier || (state.config && state.config.masterTier) || (state.board && state.board.masterTier) || 1;
             var mRoll = Math.floor(Math.random() * 6) + 1;
             state.pendingAction.masterRoll = mRoll;
             state.pendingAction.masterTier = tier;
             state.pendingAction.skill = node.skill;
 
             var threshold = (tier === 3) ? 3 : (state.config.masterMinRoll || 4);
+            var curSkillVal = (player.skills && node.skill && player.skills[node.skill] !== undefined) ? player.skills[node.skill] : 0;
+            var maxTrainLevel = (state.board && state.board.graduatedMasters) ? ((tier === 1) ? 2 : (tier === 2 ? 3 : (tier === 3 ? 4 : 5))) : 5;
 
             if (mRoll >= threshold) {
-                state.pendingAction.canTrainMaster = true;
+                state.pendingAction.canTrainMaster = (curSkillVal < maxTrainLevel);
+                state.pendingAction.maxTrainLevel = maxTrainLevel;
                 if (tier === 4 && player.skills[node.skill || "charisma"] >= 3) {
                     state.pendingAction.isMasterDuel = true;
                     state.pendingAction.summary = "Mistr " + node.name + " tě vyzývá k rytířskému turnaji o Srdce princezny! (Hod " + mRoll + " ≥ " + threshold + ")";
                     this.addLog(state, "⚔️ " + player.name + " vstoupil do výzvy mistra u " + node.name + "!");
+                } else if (!state.pendingAction.canTrainMaster && state.board && state.board.graduatedMasters) {
+                    state.pendingAction.summary = "U tohoto Mistra (Stupeň " + ["I", "II", "III", "IV"][tier - 1] + ") jsi již dosáhl stropu výcviku (" + maxTrainLevel + "/5). Vyhledej vyššího Mistra dále v království!";
+                    this.addLog(state, "🎓 " + player.name + " již zvládl učení u " + node.name + " (strop " + maxTrainLevel + "/5).");
                 } else if (tier === 2) {
                     state.pendingAction.summary = "Mistr tě vřele vítá (Stupeň II - hod " + mRoll + ")! Můžeš získat pokročilý výcvik (+2 k vlastnosti)!";
                     this.addLog(state, "🎓 " + player.name + " může u " + node.name + " trénovat na Stupni II!");
@@ -3394,9 +3400,11 @@ window.PRS_GameEngine = {
 
         player.gold -= cost;
 
-        var tier = (state.config && state.config.masterTier) || (state.board && state.board.masterTier) || 1;
+        var node = state.board && state.board.nodes ? state.board.nodes[player.nodeId] : null;
+        var tier = (node && node.masterTier) || (pa && pa.masterTier) || (state.config && state.config.masterTier) || (state.board && state.board.masterTier) || 1;
         var gain = (tier === 2) ? 2 : 1;
-        player.skills[skill] = Math.min(5, currentLevel + gain);
+        var maxCap = (pa && pa.maxTrainLevel) ? pa.maxTrainLevel : 5;
+        player.skills[skill] = Math.min(maxCap, Math.min(5, currentLevel + gain));
 
         if (tier === 3) {
             player.masterSeals = player.masterSeals || {};
@@ -3418,6 +3426,51 @@ window.PRS_GameEngine = {
 
         return true;
 
+    },
+
+    // Rytířský duel se Čtvrtým Mistrem ctnosti (Stupeň IV) o 1.5 💖 Srdce princezny
+    resolveMasterDuel: function (state, playerIndex) {
+        if (!state || !state.pendingAction) return false;
+        var pa = state.pendingAction;
+        if (!pa.isMasterDuel) return false;
+
+        var idx = (playerIndex !== undefined && playerIndex !== null) ? playerIndex : state.currentPlayerIndex;
+        var player = state.players[idx];
+        if (!player) return false;
+
+        var node = state.board && state.board.nodes ? state.board.nodes[player.nodeId] : null;
+        var skill = (pa.skill && pa.skill !== "any") ? pa.skill : ((node && node.skill && node.skill !== "any") ? node.skill : "charisma");
+        var eff = this.getEffectiveStats ? this.getEffectiveStats(state, player) : player.skills;
+        var skillBonus = (eff && eff[skill] !== undefined) ? eff[skill] : ((player.skills && player.skills[skill]) || 3);
+
+        var roll = Math.floor(Math.random() * 6) + 1;
+        var total = roll + skillBonus;
+        var target = 8;
+
+        pa.isMasterDuel = false;
+        pa.canTrainMaster = false;
+
+        if (total >= target) {
+            player.permanentHearts = Math.round(((player.permanentHearts || 0) + 1.5) * 10) / 10;
+            player.gold += 1500;
+            if (player.stats) {
+                player.stats.questsWon = (player.stats.questsWon || 0) + 1;
+                player.stats.heartsFromQuests = Math.round(((player.stats.heartsFromQuests || 0) + 1.5) * 10) / 10;
+            }
+            var winMsg = "⚔️ VÍTĚZSTVÍ V DUELU MISTRA! " + player.badge + " " + player.name + " hodil " + roll + " + " + skillBonus + " (" + skill.toUpperCase() + ") = " + total + " (cíl " + target + ") a získává **+1,5 💖** a **+1 500 zl.**!";
+            pa.summary = winMsg;
+            this.addLog(state, winMsg, "good");
+        } else {
+            var loseMsg = "🛡️ Čestný střet s Mistrem! " + player.badge + " " + player.name + " hodil " + roll + " + " + skillBonus + " = " + total + " (potřeba " + target + "). Mistr ocenil tvou odvahu darováním **+0,5 💖**!";
+            player.permanentHearts = Math.round(((player.permanentHearts || 0) + 0.5) * 10) / 10;
+            pa.summary = loseMsg;
+            this.addLog(state, loseMsg, "info");
+        }
+
+        if (this.recalculateBreedingAndVictory) {
+            this.recalculateBreedingAndVictory(state);
+        }
+        return true;
     },
 
     // Nákup balíčku předmětů u Obchodníka (Věci 1, Věci 2, Věci 3),
