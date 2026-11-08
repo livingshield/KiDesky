@@ -809,10 +809,14 @@
                     }
                 }
                 pct = Math.min(100, Math.round(((cCount + kCount) / 4) * 100));
-                statsHeartsHtml = '<div class="top-hud-hearts" style="color:#f59e0b; font-weight:bold;" title="Ovládnutá panství: ' + cCount + '/3 měst, ' + kCount + '/1 hrad">🏰 ' + cCount + 'm/' + kCount + 'h <span style="font-size:0.75rem; color:#f472b6; font-weight:600;">(' + p.totalHearts + '💖)</span></div>';
+                statsHeartsHtml = '<div class="top-hud-hearts" style="color:#f59e0b; font-weight:bold; display:flex; align-items:center; justify-content:flex-end; gap:5px;" title="Ovládnutá panství: ' + cCount + '/3 měst, ' + kCount + '/1 hrad"><span>🏰 ' + cCount + 'm/' + kCount + 'h</span> <span style="font-size:0.75rem; color:#f472b6; font-weight:600;">(' + p.totalHearts + '💖)</span>' +
+                    '<span style="font-size:0.69rem; font-weight:700; color:' + ((p.inventory && p.inventory.length) ? '#fde047' : '#94a3b8') + '; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.22); border-radius:3px; padding:0 3px;" title="Rytířská brašna pergamenů: ' + ((p.inventory && p.inventory.length) || 0) + '/3">🎒' + ((p.inventory && p.inventory.length) || 0) + '/3</span>' +
+                    '</div>';
             } else {
                 pct = Math.min(100, Math.round((p.totalHearts / target) * 100));
-                statsHeartsHtml = '<div class="top-hud-hearts">💖 ' + p.totalHearts + ' / ' + target + '</div>';
+                statsHeartsHtml = '<div class="top-hud-hearts" style="display:flex; align-items:center; justify-content:flex-end; gap:5px;"><span>💖 ' + p.totalHearts + ' / ' + target + '</span>' +
+                    '<span style="font-size:0.69rem; font-weight:700; color:' + ((p.inventory && p.inventory.length) ? '#fde047' : '#94a3b8') + '; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.22); border-radius:3px; padding:0 3px;" title="Rytířská brašna pergamenů: ' + ((p.inventory && p.inventory.length) || 0) + '/3">🎒' + ((p.inventory && p.inventory.length) || 0) + '/3</span>' +
+                    '</div>';
             }
 
             html.push('<div class="top-hud-card ' + (isTurn ? 'is-turn' : '') + ' ' + (isInspected ? 'is-inspected' : '') + ' ' + (p.isEliminated ? 'is-eliminated' : '') + '" ' +
@@ -851,10 +855,7 @@
 
                 '    <div class="top-hud-stats">' +
 
-                (p.isEliminated ? '      <div class="top-hud-gold" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">🪙 0 zl.</div><div class="top-hud-hearts" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">💀 ELIMINOVÁN</div>' : '      <div class="top-hud-gold">🪙 <strong>' + p.gold.toLocaleString("cs-CZ") + '</strong> zl.</div>' + statsHeartsHtml +
-                '      <div style="font-size:0.71rem; font-weight:700; color:' + ((p.inventory && p.inventory.length) ? '#fde047' : '#94a3b8') + '; display:flex; align-items:center; gap:2px; margin-top:1px;" title="Rytířská brašna pergamenů: ' + ((p.inventory && p.inventory.length) || 0) + '/3">' +
-                '        <span>🎒</span> <span>' + ((p.inventory && p.inventory.length) || 0) + '/3</span>' +
-                '      </div>') +
+                (p.isEliminated ? '      <div class="top-hud-gold" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">🪙 0 zl.</div><div class="top-hud-hearts" style="color:#ef4444; font-weight:bold; font-size:0.75rem;">💀 ELIMINOVÁN</div>' : '      <div class="top-hud-gold">🪙 <strong>' + p.gold.toLocaleString("cs-CZ") + '</strong> zl.</div>' + statsHeartsHtml) +
 
                 '    </div>' +
 
@@ -2510,6 +2511,11 @@
                     '</button>';
             }
             invHtml += '</div>';
+        } else {
+            invHtml = '<div style="margin-top:0.4rem; padding:0.3rem 0.5rem; background:rgba(212,175,55,0.05); border:1px dashed rgba(212,175,55,0.22); border-radius:6px; display:flex; align-items:center; justify-content:space-between;">' +
+                '  <span style="font-size:0.75rem; color:var(--gold-light);">🎒 <strong>Brašna pergamenů:</strong> 0 / 3 (volno)</span>' +
+                '  <span style="font-size:0.68rem; color:#94a3b8; font-style:italic;">získej na poli Náhody</span>' +
+                '</div>';
         }
 
         // Aktivní svitky v platnosti
@@ -2592,7 +2598,7 @@
     },
 
     // Rytířská brašna na pergameny a svitky (viditelná přímo v ovládání tahu)
-    getKnightPouchHudHtml: function (player, isCurTurn) {
+    getKnightPouchHudHtml: function (player, isCurTurn, isFullInspector) {
         if (!player) return "";
         var invList = player.inventory || [];
         var actBuffs = [];
@@ -2601,36 +2607,50 @@
             if (player.activeScrolls.forcedRoll) actBuffs.push('⭐ Zaručená ' + player.activeScrolls.forcedRoll);
             if (player.activeScrolls.combatBonus) actBuffs.push('🧪 +' + player.activeScrolls.combatBonus + ' Boj');
             if (player.activeScrolls.rentImmunity) actBuffs.push('👑 Ochrana nájmu');
-            if (player.activeScrolls.doubleBreeding) actBuffs.push('🐑 2x Chov stád');
+            if (player.activeScrolls.doubleBreeding) actBuffs.push('🐑 2x Chov');
         }
 
-        var html = '<div class="knight-pouch-hud-card" style="margin:0.5rem 0 0.6rem; padding:0.55rem 0.75rem; background:linear-gradient(135deg, rgba(32,22,12,0.95), rgba(18,12,6,0.98)); border:1.5px solid var(--gold); border-radius:8px; box-shadow:0 3px 12px rgba(0,0,0,0.5);">' +
-            '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.3rem;">' +
-            '    <div style="display:flex; align-items:center; gap:0.4rem;">' +
-            '      <span style="font-size:1.15rem;">🎒</span>' +
-            '      <strong style="color:var(--gold-light); font-size:0.86rem; font-family:\'Cinzel\',serif;">Rytířská brašna pergamenů</strong>' +
+        // Pokud jsme v rychlém panelu akcí tahu a brašna je prázdná:
+        // Vykreslíme elegantní jednořádkový status proužek (nezabírá zbytečně výšku)
+        if (!isFullInspector && invList.length === 0 && actBuffs.length === 0) {
+            return '<div class="knight-pouch-strip empty" style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.32); border:1px dashed rgba(212,175,55,0.3); border-radius:6px; padding:0.25rem 0.55rem; margin:0.35rem 0 0.45rem;">' +
+                '  <div style="display:flex; align-items:center; gap:0.35rem;">' +
+                '    <span style="font-size:0.95rem;">🎒</span>' +
+                '    <strong style="color:var(--gold-light); font-size:0.76rem; font-family:\'Cinzel\',serif;">Brašna rytíře:</strong>' +
+                '    <span style="font-size:0.72rem; color:#94a3b8;">0 / 3 svitků (volno)</span>' +
+                '  </div>' +
+                '  <span style="font-size:0.68rem; color:#64748b; font-style:italic;">sloty na pole Náhody</span>' +
+                '</div>';
+        }
+
+        // Pokud brašna obsahuje svitky nebo aktivní účinky:
+        var html = '<div class="knight-pouch-hud-card" style="margin:0.35rem 0 0.45rem; padding:0.4rem 0.6rem; background:linear-gradient(135deg, rgba(32,22,12,0.95), rgba(18,12,6,0.98)); border:1.5px solid var(--gold); border-radius:8px; box-shadow:0 3px 10px rgba(0,0,0,0.5);">' +
+            '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.2rem;">' +
+            '    <div style="display:flex; align-items:center; gap:0.35rem;">' +
+            '      <span style="font-size:0.95rem;">🎒</span>' +
+            '      <strong style="color:var(--gold-light); font-size:0.78rem; font-family:\'Cinzel\',serif;">Brašna pergamenů</strong>' +
             '    </div>' +
-            '    <span style="font-size:0.75rem; color:' + (invList.length > 0 ? '#fde047' : '#94a3b8') + '; font-weight:800; background:rgba(0,0,0,0.4); padding:1px 6px; border-radius:4px; border:1px solid rgba(212,175,55,0.2);">' + invList.length + ' / 3 slotů</span>' +
+            '    <span style="font-size:0.72rem; color:' + (invList.length > 0 ? '#fde047' : '#94a3b8') + '; font-weight:800; background:rgba(0,0,0,0.4); padding:1px 6px; border-radius:4px; border:1px solid rgba(212,175,55,0.2);">' + invList.length + ' / 3 slotů</span>' +
             '  </div>';
 
         if (invList.length === 0) {
-            html += '<div style="font-size:0.75rem; color:#a1a1aa; font-style:italic; padding:0.2rem 0.1rem; line-height:1.35;">Brašna je prázdná. Když stoupneš na pole Náhody a otočíš pergamen, můžeš si jej sem uložit k pozdějšímu taktickému zahrání.</div>';
+            html += '<div style="font-size:0.72rem; color:#a1a1aa; font-style:italic; padding:0.15rem 0.1rem; line-height:1.3;">Brašna je prázdná. Když stoupneš na pole Náhody a otočíš pergamen, můžeš si jej sem uložit k pozdějšímu taktickému zahrání.</div>';
         } else {
-            html += '<div style="display:flex; flex-direction:column; gap:0.4rem;">';
+            html += '<div style="display:flex; flex-direction:column; gap:0.3rem;">';
             for (var si = 0; si < invList.length; si++) {
                 var sc = invList[si];
                 var canUse = isCurTurn && (player.type === "Human") && (this.state && this.state.phase !== "GAME_OVER");
-                html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:0.4rem; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.35); border-radius:6px; padding:0.35rem 0.55rem;">' +
+                html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:0.35rem; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.3); border-radius:6px; padding:0.25rem 0.45rem;">' +
                     '  <div style="flex:1; min-width:0; overflow:hidden;">' +
-                    '    <div style="font-size:0.82rem; font-weight:700; color:#fde68a; display:flex; align-items:center; gap:0.3rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">' +
+                    '    <div style="font-size:0.76rem; font-weight:700; color:#fde68a; display:flex; align-items:center; gap:0.25rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">' +
                     '      <span>' + sc.icon + '</span>' +
                     '      <span style="color:#fff;">' + this.escapeHtml(sc.title) + '</span>' +
                     '    </div>' +
-                    '    <div style="font-size:0.72rem; color:#cbd5e1; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;" title="' + this.escapeHtml(sc.text) + '">' + this.escapeHtml(sc.text) + '</div>' +
+                    '    <div style="font-size:0.68rem; color:#cbd5e1; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;" title="' + this.escapeHtml(sc.text) + '">' + this.escapeHtml(sc.text) + '</div>' +
                     '  </div>' +
                     (canUse
-                        ? '  <button type="button" class="btn-primary" style="padding:0.25rem 0.65rem; font-size:0.76rem; background:linear-gradient(135deg, #10b981, #059669); border-color:#34d399; font-weight:bold; white-space:nowrap; cursor:pointer;" onclick="PRS_App.handleUseInventoryScroll(' + si + ')" title="Zahrát tento pergamen hned">⚡ Použít</button>'
-                        : '  <span style="font-size:0.72rem; color:#94a3b8; font-style:italic;">Uloženo</span>'
+                        ? '  <button type="button" class="btn-primary" style="padding:0.2rem 0.55rem; font-size:0.72rem; background:linear-gradient(135deg, #10b981, #059669); border-color:#34d399; font-weight:bold; white-space:nowrap; cursor:pointer;" onclick="PRS_App.handleUseInventoryScroll(' + si + ')" title="Zahrát tento pergamen hned">⚡ Použít</button>'
+                        : '  <span style="font-size:0.68rem; color:#94a3b8; font-style:italic;">Uloženo</span>'
                     ) +
                     '</div>';
             }
@@ -2638,8 +2658,8 @@
         }
 
         if (actBuffs.length > 0) {
-            html += '<div style="margin-top:0.4rem; font-size:0.74rem; color:#86efac; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.35); border-radius:5px; padding:0.25rem 0.5rem;">' +
-                '✨ Aktivní požehnání: <strong>' + actBuffs.join(', ') + '</strong>' +
+            html += '<div style="margin-top:0.3rem; font-size:0.7rem; color:#86efac; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.35); border-radius:5px; padding:0.2rem 0.45rem;">' +
+                '✨ Aktivní: <strong>' + actBuffs.join(', ') + '</strong>' +
                 '</div>';
         }
 
@@ -3311,20 +3331,22 @@
                 '      <p style="font-size:0.86rem; color:#f8fafc; line-height:1.35; margin-bottom:0.45rem;">' + this.escapeHtml(c.text) + '</p>' +
 
                 ((c.isScroll || c.category === "scroll" || c.scrollType || pa.canStoreScroll || pa.scrollCard) ? (
-                    '      <div style="margin-top:0.6rem; display:flex; flex-direction:column; gap:0.45rem;" onclick="event.stopPropagation();">' +
-                    '        <div style="font-size:0.78rem; color:#86efac; font-weight:700; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); border-radius:5px; padding:0.3rem 0.55rem; text-align:center;">' +
-                    '          🎒 Nalezený pergamen lze uložit do brašny na později, nebo zahrát ihned:' +
+                    '      <div style="margin-top:0.45rem; display:flex; flex-direction:column; gap:0.35rem;" onclick="event.stopPropagation();">' +
+                    '        <div style="font-size:0.75rem; color:#86efac; font-weight:700; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:5px; padding:0.22rem 0.45rem; text-align:center;">' +
+                    '          🎒 Taktický pergamen: ulož do brašny na později, nebo zahraj ihned:' +
                     '        </div>' +
+                    '        <div style="display:flex; gap:0.4rem;">' +
                     ((!player.inventory || player.inventory.length < 3) ? (
-                        '        <button type="button" class="btn-primary" style="background:linear-gradient(135deg, #059669, #047857); border:1.5px solid #34d399; color:#fff; font-size:0.92rem; padding:0.6rem 0.8rem; font-weight:bold; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.4rem; box-shadow:0 3px 10px rgba(5,150,105,0.4);" onclick="PRS_App.handleStoreScroll()">' +
-                        '          🎒 ULOŽIT DO BRAŠNY RYTÍŘE (' + ((player.inventory && player.inventory.length) || 0) + '/3)' +
-                        '        </button>'
+                        '          <button type="button" class="btn-primary" style="flex:1; background:linear-gradient(135deg, #059669, #047857); border:1.5px solid #34d399; color:#fff; font-size:0.84rem; padding:0.45rem 0.55rem; font-weight:bold; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem; box-shadow:0 3px 8px rgba(5,150,105,0.4);" onclick="PRS_App.handleStoreScroll()" title="Uložit pergamen do brašny rytíře">' +
+                        '            🎒 Do brašny (' + ((player.inventory && player.inventory.length) || 0) + '/3)' +
+                        '          </button>'
                     ) : (
-                        '        <div style="color:#f87171; font-size:0.8rem; text-align:center; font-weight:700; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); padding:0.3rem; border-radius:5px;">⚠️ Tvá brašna je plná (3/3) – použij svitek ihned níže:</div>'
+                        '          <div style="flex:1; color:#f87171; font-size:0.75rem; text-align:center; font-weight:700; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); padding:0.4rem; border-radius:5px;">⚠️ Brašna plná (3/3)</div>'
                     )) +
-                    '        <button type="button" class="btn-primary" style="background:linear-gradient(135deg, #d97706, #b45309); border:1.5px solid #fde047; color:#fff; font-size:0.92rem; padding:0.6rem 0.8rem; font-weight:bold; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.4rem; box-shadow:0 3px 10px rgba(217,119,6,0.4);" onclick="PRS_App.handleUseScrollNow()">' +
-                    '          ⚡ POUŽÍT SVITEK IHNED' +
-                    '        </button>' +
+                    '          <button type="button" class="btn-primary" style="flex:1; background:linear-gradient(135deg, #d97706, #b45309); border:1.5px solid #fde047; color:#fff; font-size:0.84rem; padding:0.45rem 0.55rem; font-weight:bold; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.3rem; box-shadow:0 3px 8px rgba(217,119,6,0.4);" onclick="PRS_App.handleUseScrollNow()" title="Zahrát tento pergamen okamžitě v tomto tahu">' +
+                    '            ⚡ Použít ihned' +
+                    '          </button>' +
+                    '        </div>' +
                     '      </div>'
                 ) : pa.canChooseDilemma && c.options && c.options.length >= 2 ? (
 

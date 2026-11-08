@@ -969,89 +969,58 @@
         /* 3D Interaktivní karta Náhody */
 
         .chance-card-box {
-
             perspective: 1200px;
-
-            margin-bottom: 0.95rem;
-
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 2;
+            width: 100%;
         }
 
         .chance-card-inner {
-
             position: relative;
-
             width: 100%;
-
-            min-height: 180px;
-
-            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-
+            min-height: 200px;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             transform-style: preserve-3d;
-
-            border-radius: 14px;
-
+            border-radius: 12px;
             cursor: pointer;
-
         }
 
         .chance-card-inner.flipped {
-
             transform: rotateY(180deg);
-
         }
 
         .chance-card-face {
-
-            position: absolute;
-
-            inset: 0;
-
             width: 100%;
-
-            min-height: 100%;
-
             -webkit-backface-visibility: hidden;
-
             backface-visibility: hidden;
-
-            border-radius: 14px;
-
-            padding: 1rem;
-
+            border-radius: 12px;
+            padding: 0.85rem 0.95rem;
             display: flex;
-
             flex-direction: column;
-
-            justify-content: center;
-
+            justify-content: flex-start;
             box-sizing: border-box;
-
         }
 
         .chance-card-back {
-
+            position: absolute;
+            inset: 0;
+            height: 100%;
             background: linear-gradient(135deg, #2b1704 0%, #452408 50%, #170d03 100%);
-
             border: 2.2px solid var(--gold);
-
             box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
-
             align-items: center;
-
+            justify-content: center;
             text-align: center;
-
         }
 
         .chance-card-front {
-
+            position: relative;
+            min-height: 200px;
             background: linear-gradient(135deg, #3d240d 0%, #201306 100%);
-
             border: 2.2px solid #facc15;
-
             box-shadow: 0 10px 30px rgba(250, 204, 21, 0.45);
-
             transform: rotateY(180deg);
-
         }
 
         .chance-seal {
@@ -2975,11 +2944,13 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.3rem 0.5rem;
-    background: rgba(20, 15, 10, 0.75);
-    border: 1px solid rgba(212, 175, 55, 0.3);
+    background: rgba(20, 15, 10, 0.85);
+    border: 1px solid rgba(212, 175, 55, 0.35);
     border-radius: 8px;
     margin-bottom: 0.55rem;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 5;
 }
 .knight-emotes-bar .emotes-label {
     font-size: 0.76rem;
