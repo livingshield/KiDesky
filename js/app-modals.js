@@ -3506,6 +3506,202 @@
 
     },
 
+    openCardPreview: function (type, id) {
+        var modal = document.getElementById("card-detail-preview-modal");
+        var titleEl = document.getElementById("card-detail-preview-title");
+        var bodyEl = document.getElementById("card-detail-preview-body");
+        if (!modal || !bodyEl) return;
+
+        var html = [];
+        var modalTitle = "Náhled karty";
+
+        if (type === "quest") {
+            var q = null;
+            if (window.PRS_QUESTS) {
+                var allQuests = (window.PRS_QUESTS.U1 || []).concat(window.PRS_QUESTS.U2 || []).concat(window.PRS_QUESTS.U3 || []);
+                for (var i = 0; i < allQuests.length; i++) {
+                    if (allQuests[i].id === id) { q = allQuests[i]; break; }
+                }
+            }
+            if (!q) return;
+
+            modalTitle = (q.icon || "⚔️") + " " + q.name;
+
+            var isU1 = (q.id && q.id.indexOf("u1_") === 0);
+            var isU2 = (q.id && q.id.indexOf("u2_") === 0);
+
+            var tierTitle = isU1 ? "Tier U1 • Lesní zvěř" :
+                            (isU2 && q.difficulty >= 12 ? "Tier U2+ • Mýtický titán" :
+                            (isU2 ? "Tier U2 • Bájné monstrum" :
+                            (q.tierGroup === "young" ? "Tier U3 • Mladý drak" :
+                            (q.tierGroup === "elemental" ? "Tier U3 • Živlový drak" : "Tier U3 • Legendární Boss"))));
+
+            var tierColor = isU1 ? "#10b981" :
+                            (isU2 && q.difficulty >= 12 ? "#ec4899" :
+                            (isU2 ? "#f59e0b" :
+                            (q.tierGroup === "young" ? "#60a5fa" :
+                            (q.tierGroup === "elemental" ? "#a855f7" : "#e11d48"))));
+
+            var wMap = {
+                dogs: "Lovečtí psi odlákají pozornost (+2 k síle se psy v chovu)",
+                falcon: "Sokol útočí na zranitelná místa (+2 k síle se sokolem v chovu)",
+                falcons: "Lovecký sokol vystopuje úkryt / odrazí vzdušný útok (+2 k síle)",
+                animals: "Pes i sokol matou protivníka v boji (+2 k síle při vlastnictví psa i sokola)",
+                horse: "Útok z plné jízdy na koni (+2 k síle s koněm v chovu)",
+                dance: "Lze okouzlit ladným tancem (+2 k síle s Tancem ≥ 2)",
+                elixir: "Hojivý lektvar neutralizuje dech či jed (+2 k síle s lektvarem)",
+                water_armor: "Vodní perla či pevná zbroj tlumí žár (+2 k síle se zbrojí / vodní perlou)",
+                ice: "Mrazivé zbraně oslabují protivníka (+2 k síle s mrazivou zbraní / relikvií)",
+                fire: "Oheň taví led, krystaly a sítě (+2 k síle s ohnivou zbraní / relikvií)",
+                armor: "Pevná rytířská zbroj svádí blesky a odráží drtivé údery (+2 k síle)",
+                light: "Posvěcené relikvie rozhánějí temnotu a přízraky (+2 k síle)",
+                charisma: "Vznešené charisma soka uchlácholí (+2 k síle s Charismatem ≥ 3)",
+                holy: "Svaté relikvie zaženou nemrtvého a zlomí kletbu (+2 k síle)",
+                courage: "Pevná vůle a odvaha pronikne mlhou (+2 k síle s Bojem ≥ 3 či Jízdou ≥ 3)",
+                mastery: "Zkouška všech 4 ctností (+2 k síle při všech ctnostech ≥ 2)",
+                spear: "Dlouhé rytířské kopí udrží soka v bezpečné vzdálenosti (+2 k síle)"
+            };
+
+            var trophyDef = (q.trophyId && window.PRS_TROPHIES) ? window.PRS_TROPHIES[q.trophyId] : null;
+
+            html.push('<div class="bestiary-card" style="margin:0; background:rgba(0,0,0,0.5); border:1px solid rgba(212,175,55,0.4); border-radius:12px; overflow:hidden;">');
+
+            if (q.img) {
+                html.push('  <div class="card-media-header" style="cursor:pointer;" onclick="PRS_App.openImageModal(\'' + q.img + '\', \'' + this.escapeHtml(q.name) + '\', \'' + this.escapeHtml(q.desc) + '\')" title="Klikni pro celoobrazovkové zvětšení">');
+                html.push('    <img src="' + q.img + '" alt="' + this.escapeHtml(q.name) + '" class="card-media-img" loading="lazy" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.png\';" />');
+                html.push('    <span class="card-media-badge-left" style="border-color:' + tierColor + '; color:' + tierColor + ';">' + tierTitle + '</span>');
+                html.push('    <span class="card-media-badge-right" style="border-color:rgba(239,68,68,0.6); color:#fca5a5;">⚔️ Obtížnost ' + q.difficulty + '</span>');
+                html.push('  </div>');
+            }
+
+            html.push('  <div class="card-media-body" style="padding:0.9rem;">');
+            html.push('    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.4rem;">');
+            html.push('      <span style="font-weight:bold; font-size:1.1rem; color:#f8fafc;">' + (q.icon || "⚔️") + ' ' + this.escapeHtml(q.name) + '</span>');
+            html.push('      <span style="background:rgba(212,175,55,0.2); border:1px solid var(--gold); border-radius:6px; padding:0.2rem 0.55rem; font-size:0.82rem; color:var(--gold-light); font-weight:bold;">💰 +' + q.gold.toLocaleString("cs-CZ") + ' zl. &nbsp;|&nbsp; 💖 +' + q.hearts + '</span>');
+            html.push('    </div>');
+
+            html.push('    <div style="font-size:0.86rem; color:#cbd5e1; line-height:1.45; margin-bottom:0.75rem;">' + this.escapeHtml(q.desc) + '</div>');
+
+            if (q.weakness && wMap[q.weakness]) {
+                html.push('    <div class="card-callout-box" style="border-color:rgba(253,224,71,0.4); color:#fef08a; background:rgba(212,175,55,0.12); font-size:0.83rem; margin-bottom:0.6rem; padding:0.5rem 0.75rem; border-radius:6px;">');
+                html.push('      🎯 <strong>Využitelná slabina (+2 k síle):</strong> ' + wMap[q.weakness]);
+                html.push('    </div>');
+            }
+
+            if (trophyDef) {
+                var statsBonus = [];
+                if (trophyDef.boj) statsBonus.push("⚔️+" + trophyDef.boj);
+                if (trophyDef.jizda) statsBonus.push("🏇+" + trophyDef.jizda);
+                if (trophyDef.tanec) statsBonus.push("💃+" + trophyDef.tanec);
+                if (trophyDef.charisma) statsBonus.push("✨+" + trophyDef.charisma);
+                html.push('    <div class="card-callout-box" style="border-color:rgba(212,175,55,0.4); color:var(--gold-light); background:rgba(255,255,255,0.04); font-size:0.83rem; padding:0.5rem 0.75rem; border-radius:6px;">');
+                html.push('      🏆 <strong>Trofej po porážce:</strong> ' + trophyDef.icon + ' ' + this.escapeHtml(trophyDef.name) + (statsBonus.length ? ' (' + statsBonus.join(" ") + ')' : ''));
+                html.push('    </div>');
+            }
+
+            if (q.imgFlip) {
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + q.img + '\', \'' + q.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.6rem; width:100%; cursor:pointer;">🔄 Otočit směr pohledu</button>');
+            }
+
+            html.push('  </div>');
+            html.push('</div>');
+
+        } else if (type === "item") {
+            var it = null;
+            if (window.PRS_ITEMS) {
+                for (var j = 0; j < window.PRS_ITEMS.length; j++) {
+                    if (window.PRS_ITEMS[j].id === id) { it = window.PRS_ITEMS[j]; break; }
+                }
+            }
+            if (!it) return;
+
+            modalTitle = (it.icon || "🛡️") + " " + it.name;
+
+            var statChips = [];
+            if (it.boj) statChips.push('<span class="armory-stat-chip ' + (it.boj > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (it.boj > 0 ? '+' : '') + it.boj + ' Boj</span>');
+            if (it.jizda) statChips.push('<span class="armory-stat-chip ' + (it.jizda > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (it.jizda > 0 ? '+' : '') + it.jizda + ' Jízda</span>');
+            if (it.tanec) statChips.push('<span class="armory-stat-chip ' + (it.tanec > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (it.tanec > 0 ? '+' : '') + it.tanec + ' Tanec</span>');
+            if (it.charisma) statChips.push('<span class="armory-stat-chip ' + (it.charisma > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">✨ ' + (it.charisma > 0 ? '+' : '') + it.charisma + ' Charisma</span>');
+
+            var slotLabels = {
+                weapon: "⚔️ Zbraň",
+                armor: "🛡️ Brnění",
+                steed: "🏇 Oř / Zvíře",
+                cloak: "🧥 Plášť / Oděv",
+                jewel: "💎 Klenot / Šperk",
+                trophy: "🏆 Trofej"
+            };
+
+            html.push('<div style="background:rgba(0,0,0,0.5); border:1px solid rgba(212,175,55,0.4); border-radius:12px; padding:1.1rem;">');
+            html.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">');
+            html.push('    <span style="font-size:0.8rem; background:rgba(212,175,55,0.18); color:var(--gold-light); padding:0.2rem 0.55rem; border-radius:4px; font-weight:bold;">' + (it.tier || 1) + '. stupeň výbavy</span>');
+            html.push('    <span style="font-size:1.05rem; color:var(--gold-light); font-weight:bold;">' + (it.price ? it.price.toLocaleString("cs-CZ") + ' zl.' : 'Vzácné') + '</span>');
+            html.push('  </div>');
+
+            html.push('  <div style="font-size:1.3rem; font-weight:bold; color:#f8fafc; margin-bottom:0.5rem;">' + (it.icon || '🛡️') + ' ' + this.escapeHtml(it.name) + '</div>');
+            html.push('  <div style="font-size:0.86rem; color:#cbd5e1; line-height:1.45; margin-bottom:0.85rem;">' + this.escapeHtml(it.desc || 'Ušlechtilý předmět pro rytíře turnajového dvora.') + '</div>');
+
+            if (statChips.length > 0) {
+                html.push('  <div style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-bottom:0.85rem;">' + statChips.join("") + '</div>');
+            }
+
+            html.push('  <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.55rem 0.75rem; font-size:0.82rem; color:#94a3b8; display:flex; justify-content:space-between;">');
+            html.push('    <span>Slot rytíře: <strong style="color:#e2e8f0;">' + (slotLabels[it.slot] || it.slot || 'Univerzální') + '</strong></span>');
+            if (it.source) html.push('    <span>Původ: <strong style="color:var(--gold-light);">' + this.escapeHtml(it.source) + '</strong></span>');
+            html.push('  </div>');
+
+            html.push('</div>');
+
+        } else if (type === "chance") {
+            var ch = null;
+            if (window.PRS_CHANCE_CARDS) {
+                for (var k = 0; k < window.PRS_CHANCE_CARDS.length; k++) {
+                    if (window.PRS_CHANCE_CARDS[k].id === id) { ch = window.PRS_CHANCE_CARDS[k]; break; }
+                }
+            }
+            if (!ch) return;
+
+            modalTitle = (ch.icon || "❓") + " " + ch.title;
+            var catLabel = ch.category === "positive" ? "Pozitivní osud (+)" : (ch.category === "negative" ? "Neštěstí (-)" : "Výzva (!)");
+            var catCol = ch.category === "positive" ? "#4ade80" : (ch.category === "negative" ? "#f87171" : "#facc15");
+
+            html.push('<div style="background:rgba(0,0,0,0.5); border:1px solid rgba(212,175,55,0.4); border-radius:12px; padding:1.1rem; text-align:center;">');
+            html.push('  <div style="font-size:2.4rem; margin-bottom:0.4rem;">' + (ch.icon || '❓') + '</div>');
+            html.push('  <div style="font-size:0.8rem; color:' + catCol + '; font-weight:bold; text-transform:uppercase; margin-bottom:0.5rem;">' + catLabel + '</div>');
+            html.push('  <div style="font-size:1.15rem; font-weight:bold; color:var(--gold-light); margin-bottom:0.75rem;">' + this.escapeHtml(ch.title) + '</div>');
+            html.push('  <div style="font-size:0.92rem; color:#e2e8f0; line-height:1.5; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.75rem;">' + this.escapeHtml(ch.text) + '</div>');
+            html.push('</div>');
+
+        } else if (type === "festival") {
+            var festMap = {
+                fest_tournament: { title: "Královský rytířský turnaj", icon: "⚔️", desc: "Turnajové klání v plné zbroji na počest královny. Měří se dovednost Boje a Jízdy na koni.", virtues: "⚔️ Boj + 🏇 Jízda", prizes: "1. místo: 1 500 zl. &nbsp;|&nbsp; 2. místo: 800 zl. &nbsp;|&nbsp; 3. místo: 400 zl." },
+                fest_ball: { title: "Dvorský ples u princezny", icon: "💃", desc: "Slavnostní ples v audienční síni. Dvorské dámy hodnotí ladnost Tance a vznešené Charisma rytířů.", virtues: "💃 Tanec + ✨ Charisma", prizes: "1. místo: 1 500 zl. &nbsp;|&nbsp; 2. místo: 800 zl. &nbsp;|&nbsp; 3. místo: 400 zl." },
+                fest_race: { title: "Velký královský dostih", icon: "🏇", desc: "Rychlostní a vytrvalostní závod koní přes louky i příkopy království. Rozhoduje Jízda a Boj.", virtues: "🏇 Jízda + ⚔️ Boj", prizes: "1. místo: 1 500 zl. &nbsp;|&nbsp; 2. místo: 800 zl. &nbsp;|&nbsp; 3. místo: 400 zl." }
+            };
+            var f = festMap[id] || { title: "Královská slavnost", icon: "🎪", desc: "Slavnostní událost království.", virtues: "Turnajové ctnosti", prizes: "Peněžité odměny" };
+            modalTitle = f.icon + " " + f.title;
+
+            html.push('<div style="background:rgba(0,0,0,0.5); border:1px solid rgba(212,175,55,0.4); border-radius:12px; padding:1.1rem;">');
+            html.push('  <div style="text-align:center; font-size:2.4rem; margin-bottom:0.4rem;">' + f.icon + '</div>');
+            html.push('  <div style="font-size:1.15rem; font-weight:bold; color:var(--gold-light); text-align:center; margin-bottom:0.6rem;">' + this.escapeHtml(f.title) + '</div>');
+            html.push('  <div style="font-size:0.88rem; color:#cbd5e1; line-height:1.45; margin-bottom:0.85rem;">' + this.escapeHtml(f.desc) + '</div>');
+            html.push('  <div style="background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.6rem 0.75rem; margin-bottom:0.6rem; font-size:0.84rem;"><strong>Hodnocené ctnosti:</strong> ' + f.virtues + '</div>');
+            html.push('  <div style="background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); border-radius:8px; padding:0.6rem 0.75rem; font-size:0.84rem; color:#86efac;"><strong>Ceny pro vítěze:</strong> ' + f.prizes + '</div>');
+            html.push('</div>');
+        }
+
+        if (titleEl) titleEl.innerHTML = modalTitle;
+        if (bodyEl) bodyEl.innerHTML = html.join("");
+        modal.style.display = "flex";
+        if (this.updateBodyModalClass) this.updateBodyModalClass();
+    },
+
+    closeCardPreviewModal: function () {
+        var modal = document.getElementById("card-detail-preview-modal");
+        if (modal) modal.style.display = "none";
+        if (this.updateBodyModalClass) this.updateBodyModalClass();
+    },
+
     closeKnightDuelModal: function () {
 
         if (this.botDuelAutoCloseTimer) {

@@ -834,26 +834,32 @@
         var tokensLayer = document.getElementById("prs-tokens-layer");
 
         if (!stage || !staticLayer || !tokensLayer) {
+            var s = Math.max(1.0, this.viewport.scale || 1.0);
+            this.viewport.scale = s;
             this.clampViewportPan();
 
             var wrap = document.getElementById("board-viewport-wrap");
+            var svgW = (svg && svg.clientWidth > 0) ? svg.clientWidth : (wrap ? wrap.clientWidth : 1000);
+            var svgH = (svg && svg.clientHeight > 0) ? svg.clientHeight : (wrap ? wrap.clientHeight : 620);
+            var svgRatioX = 1400 / Math.max(1, svgW);
+            var svgRatioY = 860 / Math.max(1, svgH);
 
-            var svgRatioX = 1400 / Math.max(1, wrap ? wrap.clientWidth : 1000);
+            var minTx = 1400 * (1 - s);
+            var minTy = 860 * (1 - s);
+            var tx = (this.viewport.panX || 0) * svgRatioX;
+            var ty = (this.viewport.panY || 0) * svgRatioY;
+            tx = Math.min(0, Math.max(minTx, tx));
+            ty = Math.min(0, Math.max(minTy, ty));
+            this.viewport.panX = tx / svgRatioX;
+            this.viewport.panY = ty / svgRatioY;
 
-            var svgRatioY = 860 / Math.max(1, wrap ? wrap.clientHeight : 620);
-
-            var tx = Math.round(this.viewport.panX * svgRatioX * 10) / 10;
-
-            var ty = Math.round(this.viewport.panY * svgRatioY * 10) / 10;
+            var finalTx = Math.round(tx * 10) / 10;
+            var finalTy = Math.round(ty * 10) / 10;
 
             svg.innerHTML = this.getBoardDefsSVG() +
-
-                '<g id="prs-board-stage" transform="translate(' + tx + ',' + ty + ') scale(' + this.viewport.scale.toFixed(3) + ')">' +
-
+                '<g id="prs-board-stage" transform="translate(' + finalTx + ',' + finalTy + ') scale(' + s.toFixed(3) + ')">' +
                 '  <g id="prs-static-layer"></g>' +
-
                 '  <g id="prs-tokens-layer"></g>' +
-
                 '</g>';
 
             staticLayer = document.getElementById("prs-static-layer");
@@ -3055,17 +3061,17 @@
 
     getCardZoneInfo: function (code) {
 
-        var title = "🃏 Balíček karet";
+        var title = "Balíček karet";
 
         var html = [];
 
         if (code === "VECI_1") {
 
-            title = "🗡️ Balíček VĚCI 1 (Základní výbava)";
+            title = "🛡️ Balíček VĚCI 1 (Základní výzbroj)";
 
             var items1 = (window.PRS_ITEMS || []).filter(function (it) { return it.tier === 1; });
 
-            html.push('<div style="margin-bottom:0.8rem; background:rgba(96,165,250,0.1); border:1px solid rgba(96,165,250,0.3); border-radius:8px; padding:0.75rem;">');
+            html.push('<div style="margin-bottom:0.8rem; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.75rem;">');
 
             html.push('  <strong>Cena balíčku: 2 500 zl.</strong> | Obsahuje 9 základních zbraní, zbrojí a dvorských šperků.');
 
@@ -3073,15 +3079,21 @@
 
             html.push('</div>');
 
-            html.push('<div style="font-weight:bold; margin-bottom:0.4rem; color:var(--gold-light);">Přehled předmětů v balíčku:</div>');
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:var(--gold-light); font-size:0.88rem;">Přehled předmětů v balíčku (klikni pro detail karty):</div>');
 
-            html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem;">');
+            html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
 
             for (var i = 0; i < items1.length; i++) {
 
                 var it = items1[i];
 
-                html.push('<div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:0.4rem 0.6rem; font-size:0.8rem;">' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong><br/><span style="color:#a8a29e; font-size:0.75rem;">' + (it.boj ? "Boj +" + it.boj + " " : "") + (it.jizda ? "Jízda +" + it.jizda + " " : "") + (it.tanec ? "Tanec +" + it.tanec + " " : "") + (it.charisma ? "Char. +" + it.charisma : "") + '</span></div>');
+                html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'item\', \'' + it.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.3); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'var(--gold)\'; this.style.background=\'rgba(212,175,55,0.15)\'" onmouseout="this.style.borderColor=\'rgba(212,175,55,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
+                html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
+                html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong></span>');
+                html.push('    <span style="font-size:0.72rem; color:var(--gold-light);">🔍 Náhled</span>');
+                html.push('  </div>');
+                html.push('  <div style="font-size:0.75rem; color:#fef08a; margin-top:2px;">' + (it.boj ? "⚔️+" + it.boj + " " : "") + (it.jizda ? "🏇+" + it.jizda + " " : "") + (it.tanec ? "💃+" + it.tanec + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
+                html.push('</div>');
 
             }
 
@@ -3101,15 +3113,21 @@
 
             html.push('</div>');
 
-            html.push('<div style="font-weight:bold; margin-bottom:0.4rem; color:var(--gold-light);">Přehled předmětů v balíčku:</div>');
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#c084fc; font-size:0.88rem;">Přehled předmětů v balíčku (klikni pro detail karty):</div>');
 
-            html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem;">');
+            html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
 
             for (var i = 0; i < items2.length; i++) {
 
                 var it = items2[i];
 
-                html.push('<div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:0.4rem 0.6rem; font-size:0.8rem;">' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong><br/><span style="color:#a8a29e; font-size:0.75rem;">' + (it.boj ? "Boj +" + it.boj + " " : "") + (it.jizda ? "Jízda +" + it.jizda + " " : "") + (it.tanec ? "Tanec +" + it.tanec + " " : "") + (it.charisma ? "Char. +" + it.charisma : "") + '</span></div>');
+                html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'item\', \'' + it.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(168,85,247,0.3); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'#c084fc\'; this.style.background=\'rgba(168,85,247,0.15)\'" onmouseout="this.style.borderColor=\'rgba(168,85,247,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
+                html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
+                html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong></span>');
+                html.push('    <span style="font-size:0.72rem; color:#d8b4fe;">🔍 Náhled</span>');
+                html.push('  </div>');
+                html.push('  <div style="font-size:0.75rem; color:#e9d5ff; margin-top:2px;">' + (it.boj ? "⚔️+" + it.boj + " " : "") + (it.jizda ? "🏇+" + it.jizda + " " : "") + (it.tanec ? "💃+" + it.tanec + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
+                html.push('</div>');
 
             }
 
@@ -3129,7 +3147,7 @@
 
             html.push('</div>');
 
-            html.push('<div style="font-weight:bold; margin-bottom:0.4rem; color:var(--gold-light);">Přehled předmětů v balíčku:</div>');
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#facc15; font-size:0.88rem;">Přehled předmětů v balíčku (klikni pro detail karty):</div>');
 
             html.push('<div style="display:grid; grid-template-columns:1fr; gap:0.45rem;">');
 
@@ -3137,7 +3155,13 @@
 
                 var it = items3[i];
 
-                html.push('<div style="background:rgba(0,0,0,0.4); border:1px solid rgba(212,175,55,0.3); border-radius:6px; padding:0.5rem 0.75rem; font-size:0.85rem;">' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> (' + it.price.toLocaleString("cs-CZ") + ' zl.)<br/><span style="color:#fef08a; font-size:0.8rem;">' + (it.boj ? "Boj +" + it.boj + " " : "") + (it.jizda ? "Jízda +" + it.jizda + " " : "") + (it.tanec ? "Tanec +" + it.tanec + " " : "") + (it.charisma ? "Char. +" + it.charisma : "") + '</span></div>');
+                html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'item\', \'' + it.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:0.5rem 0.75rem; font-size:0.85rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'#facc15\'; this.style.background=\'rgba(245,158,11,0.15)\'" onmouseout="this.style.borderColor=\'rgba(245,158,11,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
+                html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
+                html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> (' + it.price.toLocaleString("cs-CZ") + ' zl.)</span>');
+                html.push('    <span style="font-size:0.75rem; color:#fde047;">🔍 Náhled</span>');
+                html.push('  </div>');
+                html.push('  <div style="color:#fef08a; font-size:0.8rem; margin-top:2px;">' + (it.boj ? "⚔️+" + it.boj + " " : "") + (it.jizda ? "🏇+" + it.jizda + " " : "") + (it.tanec ? "💃+" + it.tanec + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
+                html.push('</div>');
 
             }
 
@@ -3151,11 +3175,13 @@
 
             html.push('<div style="margin-bottom:0.8rem; background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); border-radius:8px; padding:0.75rem;">');
 
-            html.push('  <strong>Obtížnost: 4–6</strong> | Odměna: 1 200 – 2 200 zl. + 0.5–1 💖 Srdce.');
+            html.push('  <strong>Obtížnost: 4–6</strong> | Odměna: 1 200 – 2 600 zl. + 0.5–1.5 💖 Srdce.');
 
             html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Lovečtí psi a sokoli usnadňují ulovení zvěře. Poražením každého zvířete získáte unikátní loveckou trofej do 5. slotu výbavy.</p>');
 
             html.push('</div>');
+
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#86efac; font-size:0.88rem;">Seznam ' + q1.length + ' zvířat v revíru (klikni pro detail karty):</div>');
 
             html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
 
@@ -3163,7 +3189,16 @@
 
                 var z = q1[i];
 
-                html.push('<div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:0.4rem 0.6rem; font-size:0.8rem;">' + z.icon + ' <strong>' + this.escapeHtml(z.name) + '</strong><br/><span style="color:#4ade80;">⚔️ Obtížnost ' + z.difficulty + '</span> | +' + z.gold + ' zl.</div>');
+                html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'quest\', \'' + z.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(74,222,128,0.3); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'#4ade80\'; this.style.background=\'rgba(74,222,128,0.15)\'" onmouseout="this.style.borderColor=\'rgba(74,222,128,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
+                html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
+                html.push('    <span>' + z.icon + ' <strong>' + this.escapeHtml(z.name) + '</strong></span>');
+                html.push('    <span style="font-size:0.72rem; color:#86efac;">🔍 Náhled</span>');
+                html.push('  </div>');
+                html.push('  <div style="display:flex; justify-content:space-between; margin-top:2px; font-size:0.75rem;">');
+                html.push('    <span style="color:#4ade80;">⚔️ Obtížnost ' + z.difficulty + '</span>');
+                html.push('    <span style="color:var(--gold-light);">+' + z.gold + ' zl.</span>');
+                html.push('  </div>');
+                html.push('</div>');
 
             }
 
@@ -3177,19 +3212,31 @@
 
             html.push('<div style="margin-bottom:0.8rem; background:rgba(251,146,60,0.1); border:1px solid rgba(251,146,60,0.3); border-radius:8px; padding:0.75rem;">');
 
-            html.push('  <strong>Obtížnost: 8–10</strong> | Odměna: 3 000 – 4 500 zl. + 1–1.5 💖 + Předmět výbavy.');
+            html.push('  <strong>Obtížnost: 8–15</strong> | Odměna: 3 000 – 12 000 zl. + 1–5 💖 + Předmět výbavy.');
 
-            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Skalní obři, vlkodlaci, loupeživí rytíři a čarodějové. Poražení vám přinese trvalé srdce princezny a mocnou relikvii.</p>');
+            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Skalní obři, vlkodlaci, loupeživí rytíři, titáni a čarodějové. Poražení vám přinese trvalé srdce princezny a mocnou relikvii.</p>');
 
             html.push('</div>');
+
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#fdba74; font-size:0.88rem;">Seznam ' + q2.length + ' monster v balíčku (klikni pro detail karty):</div>');
 
             html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
 
             for (var i = 0; i < q2.length; i++) {
 
                 var m = q2[i];
+                var mCol = (m.difficulty >= 12) ? "#ec4899" : "#fb923c";
 
-                html.push('<div style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:0.4rem 0.6rem; font-size:0.8rem;">' + m.icon + ' <strong>' + this.escapeHtml(m.name) + '</strong><br/><span style="color:#fb923c;">⚔️ Obtížnost ' + m.difficulty + '</span> | +' + m.gold + ' zl.</div>');
+                html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'quest\', \'' + m.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid ' + mCol + '44; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'' + mCol + '\'; this.style.background=\'' + mCol + '22\'" onmouseout="this.style.borderColor=\'' + mCol + '44\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
+                html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
+                html.push('    <span>' + m.icon + ' <strong>' + this.escapeHtml(m.name) + '</strong></span>');
+                html.push('    <span style="font-size:0.72rem; color:' + mCol + ';">🔍 Náhled</span>');
+                html.push('  </div>');
+                html.push('  <div style="display:flex; justify-content:space-between; margin-top:2px; font-size:0.75rem;">');
+                html.push('    <span style="color:' + mCol + ';">⚔️ Obtížnost ' + m.difficulty + '</span>');
+                html.push('    <span style="color:var(--gold-light);">+' + m.gold + ' zl.</span>');
+                html.push('  </div>');
+                html.push('</div>');
 
             }
 
@@ -3199,6 +3246,8 @@
 
             title = "🐉 Balíček DRACI (Úkoly U3 - Dračí sluje)";
 
+            var q3 = (window.PRS_QUESTS && window.PRS_QUESTS.U3) ? window.PRS_QUESTS.U3 : [];
+
             html.push('<div style="margin-bottom:0.8rem; background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); border-radius:8px; padding:0.75rem;">');
 
             html.push('  <strong>Obtížnost: 11–17</strong> | Odměna: 6 000 – 16 000 zl. + 2.5–6.0 💖 Srdcí princezny.');
@@ -3207,9 +3256,33 @@
 
             html.push('</div>');
 
-            html.push('<div style="text-align:center; margin-top:0.8rem;">');
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#fda4af; font-size:0.88rem;">Seznam ' + q3.length + ' draků v balíčku (klikni pro detail karty):</div>');
 
-            html.push('  <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal(); PRS_App.switchTab(\'rules\'); PRS_App.switchRulesSubtab(\'dragons\');" style="cursor:pointer; padding:0.5rem 1rem;">🐉 Prohlédnout kompletní Dračí Bestiář (20)</button>');
+            html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem; margin-bottom:0.8rem;">');
+
+            for (var i = 0; i < q3.length; i++) {
+
+                var d = q3[i];
+                var dCol = (d.tierGroup === "young") ? "#60a5fa" : (d.tierGroup === "elemental" ? "#c084fc" : "#f43f5e");
+
+                html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'quest\', \'' + d.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid ' + dCol + '44; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'' + dCol + '\'; this.style.background=\'' + dCol + '22\'" onmouseout="this.style.borderColor=\'' + dCol + '44\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
+                html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
+                html.push('    <span>' + d.icon + ' <strong>' + this.escapeHtml(d.name) + '</strong></span>');
+                html.push('    <span style="font-size:0.72rem; color:' + dCol + ';">🔍 Náhled</span>');
+                html.push('  </div>');
+                html.push('  <div style="display:flex; justify-content:space-between; margin-top:2px; font-size:0.75rem;">');
+                html.push('    <span style="color:' + dCol + ';">⚔️ ' + d.difficulty + '</span>');
+                html.push('    <span style="color:var(--gold-light);">+' + d.gold + ' zl. | 💖+' + d.hearts + '</span>');
+                html.push('  </div>');
+                html.push('</div>');
+
+            }
+
+            html.push('</div>');
+
+            html.push('<div style="text-align:center; margin-top:0.4rem;">');
+
+            html.push('  <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal(); PRS_App.switchTab(\'rules\'); PRS_App.switchRulesSubtab(\'dragons\');" style="cursor:pointer; padding:0.45rem 1rem;">🐉 Prohlédnout kompletní Dračí Bestiář v pravidlech (20)</button>');
 
             html.push('</div>');
 
@@ -3225,7 +3298,28 @@
 
             html.push('</div>');
 
-            html.push('<p style="font-size:0.85rem; color:#94a3b8;">Karty se dobírají při vstupu na pole označené <strong>N</strong>. Efekt se vyhodnocuje okamžitě a karta se odloží na spodek balíčku.</p>');
+            var chList = (window.PRS_CHANCE_CARDS && window.PRS_CHANCE_CARDS.length) ? window.PRS_CHANCE_CARDS : [];
+
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#fef08a; font-size:0.88rem;">Výběr karet osudu (klikni pro detail karty):</div>');
+
+            html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
+
+            for (var i = 0; i < Math.min(12, chList.length); i++) {
+
+                var ch = chList[i];
+                var cCol = ch.category === "positive" ? "#4ade80" : (ch.category === "negative" ? "#f87171" : "#facc15");
+
+                html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'chance\', \'' + ch.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(234,179,8,0.25); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'#eab308\'; this.style.background=\'rgba(234,179,8,0.15)\'" onmouseout="this.style.borderColor=\'rgba(234,179,8,0.25)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
+                html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
+                html.push('    <span>' + ch.icon + ' <strong>' + this.escapeHtml(ch.title) + '</strong></span>');
+                html.push('    <span style="font-size:0.72rem; color:#fde047;">🔍 Detail</span>');
+                html.push('  </div>');
+                html.push('  <div style="font-size:0.74rem; color:' + cCol + '; margin-top:2px;">' + (ch.category === 'positive' ? 'Přízeň dvora (+)' : (ch.category === 'negative' ? 'Neštěstí (-)' : 'Zkouška (!)')) + '</div>');
+                html.push('</div>');
+
+            }
+
+            html.push('</div>');
 
         } else if (code === "SLAVNOST_S") {
 
@@ -3239,8 +3333,30 @@
 
             html.push('</div>');
 
-        }
+            var festList = [
+                { id: "fest_tournament", title: "Královský rytířský turnaj", icon: "⚔️", subtitle: "Boj & Jízda", prize: "až 1 500 zl." },
+                { id: "fest_ball", title: "Dvorský ples u princezny", icon: "💃", subtitle: "Tanec & Charisma", prize: "až 1 500 zl." },
+                { id: "fest_race", title: "Velký královský dostih", icon: "🏇", subtitle: "Jízda & Boj", prize: "až 1 500 zl." }
+            ];
 
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#f472b6; font-size:0.88rem;">Královské slavnosti (klikni pro detail):</div>');
+
+            html.push('<div style="display:grid; grid-template-columns:1fr; gap:0.5rem; margin-bottom:0.8rem;">');
+
+            for (var i = 0; i < festList.length; i++) {
+
+                var f = festList[i];
+
+                html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'festival\', \'' + f.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(236,72,153,0.3); border-radius:6px; padding:0.55rem 0.75rem; font-size:0.85rem; cursor:pointer; transition:all 0.15s ease; display:flex; justify-content:space-between; align-items:center;" onmouseover="this.style.borderColor=\'#ec4899\'; this.style.background=\'rgba(236,72,153,0.15)\'" onmouseout="this.style.borderColor=\'rgba(236,72,153,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
+                html.push('  <div>' + f.icon + ' <strong>' + this.escapeHtml(f.title) + '</strong><br/><span style="color:#f472b6; font-size:0.78rem;">' + f.subtitle + '</span></div>');
+                html.push('  <div style="text-align:right;"><span style="color:var(--gold-light); font-weight:bold; font-size:0.84rem;">' + f.prize + '</span><br/><span style="font-size:0.74rem; color:#f9a8d4;">🔍 Náhled</span></div>');
+                html.push('</div>');
+
+            }
+
+            html.push('</div>');
+
+        }
         return { title: title, bodyHTML: html.join("") };
 
     },

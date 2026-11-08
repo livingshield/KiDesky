@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611082155">
+    <link rel="stylesheet" href="css/main.css?v=202611082230">
 
-    <link rel="stylesheet" href="css/board.css?v=202611082155">
+    <link rel="stylesheet" href="css/board.css?v=202611082230">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611082155">
+    <link rel="stylesheet" href="css/modals.css?v=202611082230">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611082155">
+    <link rel="stylesheet" href="css/mobile.css?v=202611082230">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -2729,21 +2729,21 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611082155" defer></script>
-    <script src="js/game-boards.js?v=202611082155" defer></script>
-    <script src="js/game-engine.js?v=202611082155" defer></script>
-    <script src="js/game-combat-ai.js?v=202611082155" defer></script>
-    <script src="js/app-audio.js?v=202611082155" defer></script>
-    <script src="js/app-dialog.js?v=202611082155" defer></script>
-    <script src="js/app.js?v=202611082155" defer></script>
-    <script src="js/app-board.js?v=202611082155" defer></script>
-    <script src="js/app-hud.js?v=202611082155" defer></script>
-    <script src="js/app-modals.js?v=202611082155" defer></script>
-    <script src="js/app-online.js?v=202611082155" defer></script>
-    <script src="js/app-saves.js?v=202611082155" defer></script>
-    <script src="js/app-catalog.js?v=202611082155" defer></script>
-    <script src="js/app-admin.js?v=202611082155" defer></script>
-    <script src="js/app-musicwidget.js?v=202611082155" defer></script>
+    <script src="js/game-data.js?v=202611082230" defer></script>
+    <script src="js/game-boards.js?v=202611082230" defer></script>
+    <script src="js/game-engine.js?v=202611082230" defer></script>
+    <script src="js/game-combat-ai.js?v=202611082230" defer></script>
+    <script src="js/app-audio.js?v=202611082230" defer></script>
+    <script src="js/app-dialog.js?v=202611082230" defer></script>
+    <script src="js/app.js?v=202611082230" defer></script>
+    <script src="js/app-board.js?v=202611082230" defer></script>
+    <script src="js/app-hud.js?v=202611082230" defer></script>
+    <script src="js/app-modals.js?v=202611082230" defer></script>
+    <script src="js/app-online.js?v=202611082230" defer></script>
+    <script src="js/app-saves.js?v=202611082230" defer></script>
+    <script src="js/app-catalog.js?v=202611082230" defer></script>
+    <script src="js/app-admin.js?v=202611082230" defer></script>
+    <script src="js/app-musicwidget.js?v=202611082230" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -2761,7 +2761,7 @@
 
     <!-- UNIVERSAL IMAGE LIGHTBOX (Pro Draky, Zámky, Nákresy a Trofeje) -->
 
-    <div id="image-lightbox-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeImageModal()">
+    <div id="image-lightbox-modal" class="modal-backdrop" style="display:none; z-index:10100;" onclick="if(event.target===this)PRS_App.closeImageModal()">
 
         <div class="modal-box" style="max-width:700px; text-align:center; padding:1.25rem;">
 
@@ -2936,6 +2936,21 @@
 
         </div>
 
+    </div>
+
+    <!-- NÁHLED KARTY Z BALÍČKU / BESTIÁŘE (FÁZE B) -->
+    <div id="card-detail-preview-modal" class="modal-backdrop" style="display:none; z-index:10050;" onclick="if(event.target===this)PRS_App.closeCardPreviewModal()">
+        <div class="modal-box" style="max-width:540px; padding:1.25rem; border-color:var(--gold); box-shadow:0 16px 45px rgba(0,0,0,0.85); background:linear-gradient(180deg, #18130e 0%, #0d0a07 100%);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.5rem;">
+                <h3 id="card-detail-preview-title" style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; display:flex; align-items:center; gap:0.5rem; font-size:1.15rem;"></h3>
+                <button class="btn-icon-danger" onclick="PRS_App.closeCardPreviewModal()" title="Zavřít náhled">✕</button>
+            </div>
+            <div id="card-detail-preview-body" style="max-height:68vh; overflow-y:auto; line-height:1.45; font-size:0.9rem; color:#e2e8f0;"></div>
+            <div style="margin-top:0.9rem; display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(212,175,55,0.2); padding-top:0.6rem;">
+                <button class="btn-secondary" onclick="PRS_App.closeCardPreviewModal()" style="font-size:0.85rem; padding:0.35rem 0.9rem; cursor:pointer;">← Zpět na balíček</button>
+                <button class="rules-subnav-btn active" onclick="PRS_App.closeCardPreviewModal()" style="padding:0.35rem 1.1rem; cursor:pointer; font-size:0.85rem;">Zavřít</button>
+            </div>
+        </div>
     </div>
 
     <!-- MODÁL NASTAVENÍ HRY A PROSTŘEDÍ -->
