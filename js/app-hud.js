@@ -2613,7 +2613,7 @@
         // Pokud jsme v rychlém panelu akcí tahu a brašna je prázdná:
         // Vykreslíme elegantní jednořádkový status proužek (nezabírá zbytečně výšku)
         if (!isFullInspector && invList.length === 0 && actBuffs.length === 0) {
-            return '<div class="knight-pouch-strip empty" style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.32); border:1px dashed rgba(212,175,55,0.3); border-radius:6px; padding:0.25rem 0.55rem; margin:0.35rem 0 0.45rem;">' +
+            return '<div class="knight-pouch-strip empty" style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.32); border:1px dashed rgba(212,175,55,0.3); border-radius:6px; padding:0.25rem 0.55rem; margin-top:0.55rem;">' +
                 '  <div style="display:flex; align-items:center; gap:0.35rem;">' +
                 '    <span style="font-size:0.95rem;">🎒</span>' +
                 '    <strong style="color:var(--gold-light); font-size:0.76rem; font-family:\'Cinzel\',serif;">Brašna rytíře:</strong>' +
@@ -2624,7 +2624,7 @@
         }
 
         // Pokud brašna obsahuje svitky nebo aktivní účinky:
-        var html = '<div class="knight-pouch-hud-card" style="margin:0.35rem 0 0.45rem; padding:0.4rem 0.6rem; background:linear-gradient(135deg, rgba(32,22,12,0.95), rgba(18,12,6,0.98)); border:1.5px solid var(--gold); border-radius:8px; box-shadow:0 3px 10px rgba(0,0,0,0.5);">' +
+        var html = '<div class="knight-pouch-hud-card" style="margin-top:0.55rem; padding:0.4rem 0.6rem; background:linear-gradient(135deg, rgba(32,22,12,0.95), rgba(18,12,6,0.98)); border:1.5px solid var(--gold); border-radius:8px; box-shadow:0 3px 10px rgba(0,0,0,0.5);">' +
             '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.2rem;">' +
             '    <div style="display:flex; align-items:center; gap:0.35rem;">' +
             '      <span style="font-size:0.95rem;">🎒</span>' +
@@ -2879,8 +2879,6 @@
 
                 treasuryBannerHtml +
 
-                pouchHudHtml +
-
                 '<div class="dice-showcase-box">' +
 
                 '  <div>' +
@@ -2902,6 +2900,8 @@
                     ? '<button class="btn-gold-lg" style="width:100%;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.stepBotNow()">🤖 Odehrát tah PC (' + this.escapeHtml(player.name) + ')</button>'
 
                     : '<button class="btn-gold-lg" style="width:100%;" ' + (this.isMoveAnimating ? 'disabled' : '') + ' onclick="PRS_App.handleRollDice()">' + (modeLabels[curMode] || modeLabels.standard) + '</button>') +
+
+                pouchHudHtml +
 
                 '</div>';
 
@@ -3778,8 +3778,6 @@
 
             actTreasuryHtml +
 
-            pouchHudHtml +
-
             '<div class="dice-badge-row">' +
 
             '  <div class="dice-cube-mini" title="Hod: ' + rollVal + '">' + rollGlyph + '</div>' +
@@ -3797,6 +3795,8 @@
             encounterHtml +
 
             '<div class="action-buttons-wrap">' + btns.join(" ") + '</div>' +
+
+            pouchHudHtml +
 
             '</div>';
 
