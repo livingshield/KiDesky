@@ -2727,45 +2727,89 @@
         if (!body || !this.state || !this.state.pendingAction || !this.state.pendingAction.chanceCard) return;
         var pa = this.state.pendingAction;
         var c = pa.chanceCard;
+        var player = this.state.players[this.state.currentPlayerIndex];
         var isFlipped = (this.flippedChanceCardId === c.id);
         var effColor = (c.effect === "gold_loss" || c.effect === "robbers") ? "#fca5a5" : ((c.effect === "hearts" || c.effect === "ball") ? "#f472b6" : "#fde047");
+        var isScroll = !!(c.isScroll || c.category === "scroll" || c.scrollType || pa.canStoreScroll || pa.scrollCard);
+        var isDilemma = !!(pa.canChooseDilemma && c.options && c.options.length >= 2);
+        var invCount = (player && player.inventory && player.inventory.length) || 0;
+        var canStore = invCount < 3;
 
-        var html = '<div class="chance-card-box" style="margin-bottom:0.5rem; perspective:1200px;">' +
-            '  <div id="modal-chance-card-inner" class="chance-card-inner ' + (isFlipped ? 'flipped' : '') + '" style="min-height:230px;" onclick="PRS_App.toggleChanceCardFlip(\'' + c.id + '\')">' +
-            '    <div class="chance-card-face chance-card-back" style="padding:1.2rem; text-align:center;">' +
-            '      <div class="chance-seal">👑</div>' +
-            '      <div style="font-family:\'Cinzel\',serif; font-size:1.15rem; font-weight:bold; color:var(--gold-light); margin-bottom:0.35rem;">KRÁLOVSKÝ PERGAMEN OSUDU</div>' +
-            '      <p style="font-size:0.86rem; color:#fde68a; margin-bottom:1rem; line-height:1.4;">Stoupnul jsi na pole Náhody! Klepnutím prolomíš voskovou pečeť a odhalíš vůli osudu.</p>' +
-            '      <button type="button" class="btn-action-tavern" style="font-size:0.92rem; padding:0.55rem 1.4rem; cursor:pointer; font-weight:bold;" onclick="event.stopPropagation(); PRS_App.toggleChanceCardFlip(\'' + c.id + '\')">📜 OTOČIT KARTU NÁHODY</button>' +
-            '    </div>' +
-            '    <div class="chance-card-face chance-card-front" style="padding:1.1rem;">' +
-            '      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; border-bottom:1px solid rgba(250,204,21,0.3); padding-bottom:0.35rem;">' +
-            '        <span class="standing-tile-badge" style="background:rgba(234,179,8,0.25); color:#fef08a; border-color:#eab308; font-weight:700;">❓ KARTA NÁHODY</span>' +
-            '        <span style="font-size:0.8rem; color:#fde047; font-weight:bold;">' + c.id + '</span>' +
-            '      </div>' +
-            '      <div style="font-family:\'Cinzel\',serif; font-size:1.15rem; font-weight:bold; color:#fef08a; margin-bottom:0.4rem;">' + this.escapeHtml(c.title) + '</div>' +
-            '      <p style="font-size:0.9rem; color:#f8fafc; line-height:1.4; margin-bottom:0.65rem;">' + this.escapeHtml(c.text) + '</p>' +
-            (pa.canChooseDilemma && c.options && c.options.length >= 2 ? (
-                '      <div class="chance-dilemma-container" onclick="event.stopPropagation();" style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.4rem;">' +
-                '        <button type="button" class="chance-dilemma-btn opt-a" style="text-align:left; padding:0.65rem 0.85rem; background:linear-gradient(135deg, rgba(2,132,199,0.35), rgba(3,105,161,0.55)); border:1.5px solid #38bdf8; border-radius:8px; color:#fff; cursor:pointer;" onclick="PRS_App.handleChooseChanceDilemma(0)">' +
-                '          <div class="opt-title" style="font-weight:700; color:#7dd3fc; margin-bottom:2px;">' + c.options[0].icon + ' ' + this.escapeHtml(c.options[0].title) + '</div>' +
-                '          <div class="opt-desc" style="font-size:0.82rem; color:#e0f2fe; line-height:1.3;">' + this.escapeHtml(c.options[0].desc) + '</div>' +
-                '        </button>' +
-                '        <button type="button" class="chance-dilemma-btn opt-b" style="text-align:left; padding:0.65rem 0.85rem; background:linear-gradient(135deg, rgba(124,58,237,0.35), rgba(109,40,217,0.55)); border:1.5px solid #c084fc; border-radius:8px; color:#fff; cursor:pointer;" onclick="PRS_App.handleChooseChanceDilemma(1)">' +
-                '          <div class="opt-title" style="font-weight:700; color:#e9d5ff; margin-bottom:2px;">' + c.options[1].icon + ' ' + this.escapeHtml(c.options[1].title) + '</div>' +
-                '          <div class="opt-desc" style="font-size:0.82rem; color:#f5f3ff; line-height:1.3;">' + this.escapeHtml(c.options[1].desc) + '</div>' +
-                '        </button>' +
-                '      </div>'
-            ) : (
-                '      <div style="margin-top:auto; font-size:0.88rem; font-weight:bold; color:' + effColor + '; background:rgba(0,0,0,0.55); padding:0.5rem 0.75rem; border-radius:8px; border:1px solid rgba(255,255,255,0.12); margin-bottom:0.75rem;">' +
-                '        ⚡ ' + this.formatGameText(pa.summary || c.text) +
-                '      </div>' +
-                '      <button type="button" class="btn-primary" style="width:100%; padding:0.6rem; font-weight:bold; font-size:0.92rem;" onclick="PRS_App.closeChanceModal(); PRS_App.handleEndTurn();">➡️ Rozumím &amp; Ukončit tah</button>'
-            )) +
-            '    </div>' +
+        // Pokud karta ještě nebyla otočena: Zobrazíme královskou voskovou pečeť
+        if (!isFlipped) {
+            body.innerHTML = '<div style="text-align:center; padding:1.5rem 0.75rem; cursor:pointer;" onclick="PRS_App.toggleChanceCardFlip(\'' + c.id + '\')">' +
+                '  <div class="chance-seal" style="margin:0 auto 1.1rem; width:68px; height:68px; font-size:2rem; display:flex; align-items:center; justify-content:center; border-radius:50%; background:radial-gradient(circle, #dc2626 0%, #991b1b 75%, #450a0a 100%); border:2.5px solid #fbbf24; box-shadow:0 0 25px rgba(220,38,38,0.65);">👑</div>' +
+                '  <div style="font-family:\'Cinzel\',serif; font-size:1.3rem; font-weight:bold; color:var(--gold-light); margin-bottom:0.4rem; letter-spacing:0.5px;">KRÁLOVSKÝ PERGAMEN OSUDU</div>' +
+                '  <p style="font-size:0.92rem; color:#fde68a; margin-bottom:1.4rem; line-height:1.5;">Stoupnul jsi na pole Náhody! Prolom královskou voskovou pečeť a odhal vůli osudu.</p>' +
+                '  <button type="button" class="btn-primary" style="font-size:1rem; padding:0.75rem 2rem; cursor:pointer; font-weight:bold; border-radius:8px; background:linear-gradient(135deg, #d97706, #b45309); border:1.5px solid #fde047; color:#fff; box-shadow:0 4px 18px rgba(217,119,6,0.5);" onclick="event.stopPropagation(); PRS_App.toggleChanceCardFlip(\'' + c.id + '\')">📜 PROLOMIT PEČEŤ &amp; ODHALIT KARTU</button>' +
+                '</div>';
+            return;
+        }
+
+        // Karta je otočena: Zobrazíme čistý, dokonale dimenzovaný obsah bez ořezu a bez dvojitých rámů
+        var html = '<div class="chance-modal-content" style="display:flex; flex-direction:column; gap:0.75rem;">' +
+            '  <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:0.35rem; border-bottom:1px solid rgba(212,175,55,0.25);">' +
+            '    <span class="standing-tile-badge" style="background:rgba(234,179,8,0.2); color:#fef08a; border-color:#eab308; font-weight:700; font-size:0.78rem; padding:2px 8px; border-radius:4px;">❓ KARTA NÁHODY</span>' +
+            '    <span style="font-size:0.8rem; color:#fde047; font-weight:700;">' + c.id + '</span>' +
             '  </div>' +
-            '</div>';
+            '  <div style="font-family:\'Cinzel\',serif; font-size:1.3rem; font-weight:bold; color:#fef08a; text-shadow:0 0 10px rgba(250,204,21,0.3); line-height:1.3;">' +
+            this.escapeHtml(c.title) +
+            '  </div>' +
+            '  <div style="font-size:0.94rem; color:#f8fafc; line-height:1.5; background:rgba(0,0,0,0.35); border-left:3px solid #facc15; padding:0.65rem 0.85rem; border-radius:6px;">' +
+            this.escapeHtml(c.text) +
+            '  </div>';
 
+        // 1. Dilema (volba ze dvou možností)
+        if (isDilemma) {
+            html += '<div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.35rem;">' +
+                '  <div style="font-size:0.78rem; color:#fde047; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Zvol své rozhodnutí:</div>' +
+                '  <button type="button" class="chance-dilemma-btn opt-a" style="text-align:left; padding:0.8rem 1rem; background:linear-gradient(135deg, rgba(2,132,199,0.35), rgba(3,105,161,0.55)); border:1.5px solid #38bdf8; border-radius:8px; color:#fff; cursor:pointer; transition:all 0.15s ease;" onclick="PRS_App.handleChooseChanceDilemma(0)">' +
+                '    <div class="opt-title" style="font-weight:800; font-size:0.96rem; color:#7dd3fc; margin-bottom:3px; display:flex; align-items:center; gap:0.35rem;">' +
+                '      <span>' + c.options[0].icon + '</span> <span>' + this.escapeHtml(c.options[0].title) + '</span>' +
+                '    </div>' +
+                '    <div class="opt-desc" style="font-size:0.83rem; color:#e0f2fe; line-height:1.35;">' + this.escapeHtml(c.options[0].desc) + '</div>' +
+                '  </button>' +
+                '  <button type="button" class="chance-dilemma-btn opt-b" style="text-align:left; padding:0.8rem 1rem; background:linear-gradient(135deg, rgba(124,58,237,0.35), rgba(109,40,217,0.55)); border:1.5px solid #c084fc; border-radius:8px; color:#fff; cursor:pointer; transition:all 0.15s ease;" onclick="PRS_App.handleChooseChanceDilemma(1)">' +
+                '    <div class="opt-title" style="font-weight:800; font-size:0.96rem; color:#e9d5ff; margin-bottom:3px; display:flex; align-items:center; gap:0.35rem;">' +
+                '      <span>' + c.options[1].icon + '</span> <span>' + this.escapeHtml(c.options[1].title) + '</span>' +
+                '    </div>' +
+                '    <div class="opt-desc" style="font-size:0.83rem; color:#f5f3ff; line-height:1.35;">' + this.escapeHtml(c.options[1].desc) + '</div>' +
+                '  </button>' +
+                '</div>';
+        }
+        // 2. Taktický pergamen (uložit do brašny nebo použít ihned)
+        else if (isScroll) {
+            html += '<div style="margin-top:0.35rem; display:flex; flex-direction:column; gap:0.55rem;">' +
+                '  <div style="font-size:0.82rem; color:#86efac; font-weight:700; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.35); border-radius:6px; padding:0.45rem 0.65rem; text-align:center;">' +
+                '    🎒 Taktický pergamen: ulož do brašny na později, nebo zahraj ihned:' +
+                '  </div>' +
+                '  <div style="display:flex; gap:0.55rem;">' +
+                (canStore ? (
+                    '    <button type="button" class="btn-primary" style="flex:1; background:linear-gradient(135deg, #059669, #047857); border:1.5px solid #34d399; color:#fff; font-size:0.92rem; padding:0.65rem 0.8rem; font-weight:bold; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.35rem; box-shadow:0 3px 10px rgba(5,150,105,0.4);" onclick="PRS_App.handleStoreScroll(); PRS_App.closeChanceModal();">' +
+                    '      🎒 Do brašny (' + invCount + '/3)' +
+                    '    </button>'
+                ) : (
+                    '    <div style="flex:1; color:#f87171; font-size:0.82rem; text-align:center; font-weight:700; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); padding:0.55rem; border-radius:8px;">⚠️ Brašna plná (3/3)</div>'
+                )) +
+                '    <button type="button" class="btn-primary" style="flex:1; background:linear-gradient(135deg, #d97706, #b45309); border:1.5px solid #fde047; color:#fff; font-size:0.92rem; padding:0.65rem 0.8rem; font-weight:bold; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.35rem; box-shadow:0 3px 10px rgba(217,119,6,0.4);" onclick="PRS_App.handleUseScrollNow(); PRS_App.closeChanceModal();">' +
+                '      ⚡ Použít ihned' +
+                '    </button>' +
+                '  </div>' +
+                '</div>';
+        }
+        // 3. Běžná karta s efektem
+        else {
+            html += '<div style="margin-top:0.35rem; display:flex; flex-direction:column; gap:0.65rem;">' +
+                '  <div style="font-size:0.92rem; font-weight:bold; color:' + effColor + '; background:rgba(0,0,0,0.55); padding:0.65rem 0.9rem; border-radius:8px; border:1px solid rgba(255,255,255,0.15); text-align:center;">' +
+                '    ⚡ ' + this.formatGameText(pa.summary || c.text) +
+                '  </div>' +
+                '  <button type="button" class="btn-primary" style="width:100%; padding:0.7rem; font-weight:bold; font-size:0.95rem; border-radius:8px;" onclick="PRS_App.closeChanceModal(); PRS_App.handleEndTurn();">' +
+                '    ➡️ Rozumím &amp; Ukončit tah' +
+                '  </button>' +
+                '</div>';
+        }
+
+        html += '</div>';
         body.innerHTML = html;
     },
 
