@@ -204,6 +204,10 @@ window.PRS_GameEngine = {
 
                 items: [], // pole objektů z PRS_ITEMS
 
+                inventory: [], // taktické svitky / pergameny k zahrání z ruky (max 3)
+
+                activeScrolls: {}, // aktivní jednorázové efekty svitků
+
                 ownedNodes: [], // pole nodeId
 
                 livestock: {
@@ -768,6 +772,10 @@ window.PRS_GameEngine = {
         if (hasStaje) jizda += 1;
 
         if (hasKrejci) tanec += 1;
+
+        if (player.activeScrolls && player.activeScrolls.combatBonus) {
+            boj += player.activeScrolls.combatBonus;
+        }
 
         return {
 
@@ -1593,6 +1601,19 @@ window.PRS_GameEngine = {
 
         var roll = forcedRoll || (Math.floor(Math.random() * 6) + 1);
 
+        if (player.activeScrolls && player.activeScrolls.forcedRoll) {
+            roll = player.activeScrolls.forcedRoll;
+            delete player.activeScrolls.forcedRoll;
+            this.addLog(state, "⭐ Hvězdná konjunkce štěstěny: Na kostce padla zaručená 6!", "gold");
+        }
+
+        if (player.activeScrolls && player.activeScrolls.bonusRoll) {
+            var bRoll = player.activeScrolls.bonusRoll;
+            roll += bRoll;
+            delete player.activeScrolls.bonusRoll;
+            this.addLog(state, "⚡ Pergamen bleskového cvalu: Přidáno +" + bRoll + " polí k hodu! Výsledný posun: " + roll + ".", "gold");
+        }
+
         state.lastRoll = roll;
 
         var currentId = player.nodeId;
@@ -2077,6 +2098,14 @@ window.PRS_GameEngine = {
                 var pMoveStats = this.getEffectiveStats(state, player);
                 if (node.type === "VILLAGE" && pMoveStats.jizda >= 4 && pMoveStats.horses > 0) {
                     rent = Math.round(rent * 0.70);
+                }
+
+                if (player.activeScrolls && player.activeScrolls.rentImmunity) {
+                    delete player.activeScrolls.rentImmunity;
+                    var amMsg = "📜 Královský glejt amnestie! Rytíř " + player.badge + " " + player.name + " je zproštěn placení mýtného/nájmu " + rent.toLocaleString("cs-CZ") + " zl. na poli " + node.name + "!";
+                    this.addLog(state, amMsg, "gold");
+                    state.pendingAction.summary = amMsg;
+                    return;
                 }
 
                 var actualPaid = this.transferGold(state, player, owner, rent);
@@ -2711,7 +2740,9 @@ window.PRS_GameEngine = {
 
         var targetCat = "positive";
 
-        if (rollType < posWeight) {
+        if (rollType < 0.16) {
+            targetCat = "scroll";
+        } else if (rollType < posWeight) {
 
             targetCat = "positive";
 
@@ -2736,6 +2767,28 @@ window.PRS_GameEngine = {
         var card = pool[Math.floor(Math.random() * pool.length)];
 
         var stats = this.getEffectiveStats(state, player);
+
+        // KARTA PERGAMENU / SVITKU (Uložení do brašny rytíře vs. zahrání ihned)
+        if (card.category === "scroll" || card.isScroll) {
+            if (!player.inventory) player.inventory = [];
+            state.pendingAction.chanceCard = card;
+            state.pendingAction.scrollCard = card;
+            state.pendingAction.canStoreScroll = (player.inventory.length < 3);
+            state.pendingAction.canUseScrollNow = true;
+
+            var scrollMsg = "📜 Nález pergamenu – **" + card.title + "**: " + card.text;
+            state.pendingAction.summary = scrollMsg;
+            this.addLog(state, scrollMsg, "gold");
+
+            if (player.type !== "Human") {
+                if (player.inventory.length < 3) {
+                    this.storeScrollInInventory(state, player, card);
+                } else {
+                    this.useScrollEffect(state, player, card);
+                }
+            }
+            return;
+        }
 
         // KARTA DILEMATU / VOLBY (Interaktivní rozhodnutí A vs. B)
 
@@ -3166,7 +3219,78 @@ window.PRS_GameEngine = {
 
     },
 
-    // Rozhodování AI botů u dilematických karet podle jejich archetypu,
+    // Uložení nalezeného pergamenu do brašny rytíře (max 3)
+    storeScrollInInventory: function (state, player, card) {
+        if (!player.inventory) player.inventory = [];
+        if (player.inventory.length >= 3) {
+            return { ok: false, message: "Brašna je již plná (max 3 svitky)!" };
+        }
+        var scCopy = this.deepClone(card || (state.pendingAction && state.pendingAction.scrollCard));
+        if (!scCopy) return { ok: false, message: "Svitek nenalezen." };
+        player.inventory.push(scCopy);
+
+        var pa = state.pendingAction;
+        if (pa) {
+            pa.canStoreScroll = false;
+            pa.canUseScrollNow = false;
+            pa.scrollCard = null;
+            pa.chanceCard = null;
+            var msg = "🎒 " + player.badge + " " + player.name + " uložil **" + scCopy.title + "** do své rytířské brašny (kapacita: " + player.inventory.length + "/3).";
+            pa.summary = msg;
+            this.addLog(state, msg, "gold");
+        }
+        return { ok: true, scroll: scCopy };
+    },
+
+    // Aplikace okamžitého efektu pergamenu
+    useScrollEffect: function (state, player, card) {
+        var sc = card || (state.pendingAction && state.pendingAction.scrollCard);
+        if (!sc) return { ok: false, message: "Svitek nenalezen." };
+        if (!player.activeScrolls) player.activeScrolls = {};
+        var msg = "";
+
+        if (sc.scrollType === "speed_boost") {
+            player.activeScrolls.bonusRoll = (player.activeScrolls.bonusRoll || 0) + 3;
+            msg = "⚡ Rytíř " + player.badge + " " + player.name + " přečetl **" + sc.title + "**! K příštímu hodu kostkou získá **+3 pole**!";
+        } else if (sc.scrollType === "rent_amnesty") {
+            player.activeScrolls.rentImmunity = true;
+            msg = "👑 Rytíř " + player.badge + " " + player.name + " vytasil **" + sc.title + "**! Je plně osvobozen od mýtného a nájmů na 1 tah!";
+        } else if (sc.scrollType === "combat_boost") {
+            player.activeScrolls.combatBonus = (player.activeScrolls.combatBonus || 0) + 2;
+            msg = "🧪 Rytíř " + player.badge + " " + player.name + " požil **" + sc.title + "**! Jeho Boj se zvyšuje o **+2 body**!";
+        } else if (sc.scrollType === "breeding_double") {
+            player.gold += 1000;
+            player.activeScrolls.doubleBreeding = true;
+            msg = "🐑 Rytíř " + player.badge + " " + player.name + " aktivoval **" + sc.title + "**! Získává +1 000 zl. a zdvojený chov stád!";
+        } else if (sc.scrollType === "fortune_favor") {
+            player.activeScrolls.forcedRoll = 6;
+            msg = "⭐ Rytíř " + player.badge + " " + player.name + " vyvolal **" + sc.title + "**! Hvězdy přejí rytíři – při příštím hodu padne **čistá 6**!";
+        } else {
+            msg = "📜 Rytíř " + player.badge + " " + player.name + " použil pergamen **" + sc.title + "**!";
+        }
+
+        var pa = state.pendingAction;
+        if (pa) {
+            pa.canStoreScroll = false;
+            pa.canUseScrollNow = false;
+            pa.scrollCard = null;
+            pa.chanceCard = null;
+            pa.summary = msg;
+        }
+        this.addLog(state, msg, "gold");
+        this.recalculateBreedingAndVictory(state);
+        return { ok: true, message: msg };
+    },
+
+    // Zahrání pergamenu z brašny (z ruky hráče)
+    useInventoryScroll: function (state, playerIndex, scrollIndex) {
+        var player = state.players[playerIndex];
+        if (!player || !player.inventory || !player.inventory[scrollIndex]) {
+            return { ok: false, message: "Pergamen v brašně nenalezen!" };
+        }
+        var scroll = player.inventory.splice(scrollIndex, 1)[0];
+        return this.useScrollEffect(state, player, scroll);
+    },
 
     buyCurrentNode: function (state) {
 

@@ -206,6 +206,11 @@
 
         var ranked = [winner].concat(others);
 
+        if (!this.state._historySaved && this.state.roundNumber > 0) {
+            this.state._historySaved = true;
+            this.saveMatchToHistory(winner, ranked);
+        }
+
         var podEl = document.getElementById("victory-podium-content");
         if (podEl) {
             var podHtml = [];
@@ -424,6 +429,258 @@
 
             });
 
+    },
+
+    // Uložení odehrané partie do historie a profilu
+    saveMatchToHistory: function (winner, ranked) {
+        if (!this.state || !winner) return;
+        var hist = [];
+        try {
+            hist = JSON.parse(localStorage.getItem("prs_game_history") || "[]");
+        } catch (e) { }
+
+        var entry = {
+            id: "game_" + Date.now(),
+            date: new Date().toLocaleDateString("cs-CZ") + " " + new Date().toLocaleTimeString("cs-CZ", { hour: '2-digit', minute: '2-digit' }),
+            boardName: (this.state.board && this.state.board.name) || "Království KiDesky",
+            mapVariant: this.state.mapVariant || "classic",
+            roundNumber: this.state.roundNumber || 1,
+            winnerName: winner.name,
+            winnerBadge: winner.badge,
+            winnerColor: winner.color,
+            winnerHearts: winner.totalHearts,
+            winType: this.state.winType || "standard",
+            players: (ranked || []).map(function (p) {
+                return {
+                    name: p.name,
+                    badge: p.badge,
+                    color: p.color,
+                    hearts: p.totalHearts,
+                    gold: p.gold,
+                    isDead: !!(p.isEliminated || p.isBankrupt)
+                };
+            })
+        };
+
+        hist.push(entry);
+        if (hist.length > 25) hist = hist.slice(-25);
+        try {
+            localStorage.setItem("prs_game_history", JSON.stringify(hist));
+        } catch (e) { }
+    },
+
+    // Otevření slavnostního modálu s Královským diplomem
+    openWinnerDiplomaModal: function (histIndex) {
+        var modal = document.getElementById("diploma-modal");
+        if (!modal) return;
+
+        var matchData = null;
+        if (histIndex !== undefined && histIndex !== null) {
+            try {
+                var hist = JSON.parse(localStorage.getItem("prs_game_history") || "[]");
+                matchData = hist[histIndex];
+            } catch (e) { }
+        }
+
+        if (!matchData && this.state) {
+            var winIdx = (this.state.originalWinnerIndex !== null && this.state.originalWinnerIndex !== undefined)
+                ? this.state.originalWinnerIndex
+                : ((this.state.winnerIndex !== null) ? this.state.winnerIndex : 0);
+            var winner = (this.state.players && this.state.players[winIdx]) ? this.state.players[winIdx] : { name: "Rytíř", badge: "👑", color: "#fbbf24", totalHearts: 30 };
+            matchData = {
+                id: "game_" + Date.now(),
+                date: new Date().toLocaleDateString("cs-CZ") + " " + new Date().toLocaleTimeString("cs-CZ", { hour: '2-digit', minute: '2-digit' }),
+                boardName: (this.state.board && this.state.board.name) || "Království KiDesky",
+                roundNumber: this.state.roundNumber || 1,
+                winnerName: winner.name,
+                winnerBadge: winner.badge,
+                winnerColor: winner.color,
+                winnerHearts: winner.totalHearts,
+                winType: this.state.winType || "standard"
+            };
+        }
+
+        if (!matchData) return;
+        this._currentDiplomaMatch = matchData;
+        modal.style.display = "flex";
+        this.updateBodyModalClass();
+        this.renderWinnerDiploma(matchData);
+        if (window.PRS_Audio) window.PRS_Audio.playFanfare();
+    },
+
+    closeWinnerDiplomaModal: function () {
+        var modal = document.getElementById("diploma-modal");
+        if (modal) modal.style.display = "none";
+        this.updateBodyModalClass();
+    },
+
+    // Vykreslení iluminovaného dekretu na HTML5 Canvas
+    renderWinnerDiploma: function (data) {
+        var canvas = document.getElementById("diploma-canvas");
+        if (!canvas) return;
+        var ctx = canvas.getContext("2d");
+        var w = canvas.width;
+        var h = canvas.height;
+
+        // 1. Pergamenový podklad s vinětací
+        var bgGrad = ctx.createRadialGradient(w / 2, h / 2, 80, w / 2, h / 2, 450);
+        bgGrad.addColorStop(0, "#fefce8");
+        bgGrad.addColorStop(0.65, "#fbf3db");
+        bgGrad.addColorStop(1, "#ebd5a7");
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Subtílní textura stárnoucího papíru
+        ctx.save();
+        ctx.fillStyle = "rgba(180, 130, 60, 0.04)";
+        for (var i = 0; i < 40; i++) {
+            var rx = (i * 97) % w;
+            var ry = (i * 71) % h;
+            var rw = 30 + ((i * 13) % 80);
+            var rh = 15 + ((i * 7) % 50);
+            ctx.fillRect(rx, ry, rw, rh);
+        }
+        ctx.restore();
+
+        // 2. Ozdobný dvojitý zlatý lem a rohy
+        ctx.strokeStyle = "#c59b27";
+        ctx.lineWidth = 6;
+        ctx.strokeRect(18, 18, w - 36, h - 36);
+
+        ctx.strokeStyle = "#78350f";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(26, 26, w - 52, h - 52);
+
+        // Rohové ornamenty
+        var corners = [
+            [26, 26], [w - 26, 26],
+            [26, h - 26], [w - 26, h - 26]
+        ];
+        ctx.fillStyle = "#c59b27";
+        corners.forEach(function (pt) {
+            ctx.beginPath();
+            ctx.arc(pt[0], pt[1], 8, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // 3. Záhlaví a koruna
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.font = "38px serif";
+        ctx.fillText("👑", w / 2, 65);
+
+        ctx.font = "bold 15px 'Cinzel', serif";
+        ctx.fillStyle = "#854d0e";
+        ctx.fillText("KRÁLOVSTVÍ KIDESKY", w / 2, 102);
+
+        ctx.font = "bold 24px 'Cinzel', serif";
+        ctx.fillStyle = "#451a03";
+        ctx.fillText("PRINCEZNINO SRDCE", w / 2, 130);
+
+        // Dělící zlatá linka s ornamentem
+        ctx.strokeStyle = "#c59b27";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(w / 2 - 180, 148);
+        ctx.lineTo(w / 2 + 180, 148);
+        ctx.stroke();
+        ctx.fillStyle = "#c59b27";
+        ctx.font = "14px serif";
+        ctx.fillText("✦  ⚜️  ✦", w / 2, 148);
+
+        // 4. Titul diplomu
+        ctx.font = "bold 27px 'Cinzel', serif";
+        ctx.fillStyle = "#b45309";
+        ctx.fillText("KRÁLOVSKÝ DIPLOM VÍTĚZE", w / 2, 188);
+
+        // 5. Provolání
+        ctx.font = "italic 15px 'Outfit', sans-serif";
+        ctx.fillStyle = "#5c3d18";
+        ctx.fillText("Tímto slavnostním dekretem se dává na vědomí celému světu, že udatný rytíř", w / 2, 225);
+
+        // Jméno vítěze
+        ctx.font = "bold 32px 'Cinzel', serif";
+        ctx.fillStyle = data.winnerColor || "#b45309";
+        var winTitle = (data.winnerBadge ? data.winnerBadge + " " : "") + (data.winnerName || "Neznámý Rytíř");
+        ctx.fillText(winTitle, w / 2, 268);
+
+        // Dekretový text o vítězství
+        ctx.font = "16px 'Outfit', sans-serif";
+        ctx.fillStyle = "#3e2710";
+        var mapTxt = data.boardName || "Království";
+        var rTxt = data.roundNumber || 1;
+        var hTxt = data.winnerHearts || 30;
+        ctx.fillText("dokázal v nelítostném a čestném zápolení po " + rTxt + " kolech ovládnout turnaj", w / 2, 315);
+        ctx.fillText("na herním stole „" + mapTxt + "“ a získal celkem " + hTxt + " Princezniných srdcí,", w / 2, 342);
+        ctx.fillText("čímž si vydobyl nehynoucí slávu rytířského stavu i ruku spanilé princezny.", w / 2, 369);
+
+        // 6. Královské pečetě a podpis
+        // Levá pečeť (Červený vosk)
+        var sealX = 140, sealY = 465;
+        var sGrad = ctx.createRadialGradient(sealX, sealY, 5, sealX, sealY, 40);
+        sGrad.addColorStop(0, "#dc2626");
+        sGrad.addColorStop(0.85, "#991b1b");
+        sGrad.addColorStop(1, "#5f0f0f");
+        ctx.fillStyle = sGrad;
+        ctx.beginPath();
+        ctx.arc(sealX, sealY, 38, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#fef08a";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#fef08a";
+        ctx.font = "24px serif";
+        ctx.fillText("👑", sealX, sealY - 4);
+        ctx.font = "bold 8px 'Cinzel', serif";
+        ctx.fillText("KRÁLOVSKÁ PEČEŤ", sealX, sealY + 18);
+
+        // Středové údaje
+        ctx.font = "12px 'Outfit', sans-serif";
+        ctx.fillStyle = "#78350f";
+        ctx.fillText("Dáno v sídelním městě království KiDesky", w / 2, 445);
+        ctx.font = "bold 13px 'Cinzel', serif";
+        ctx.fillStyle = "#451a03";
+        ctx.fillText("Datum: " + (data.date || new Date().toLocaleDateString("cs-CZ")), w / 2, 468);
+        ctx.font = "11px 'Outfit', sans-serif";
+        ctx.fillStyle = "#854d0e";
+        ctx.fillText("Dekret koruny č. KD-" + String(data.id || "").replace("game_", "").slice(-6), w / 2, 490);
+
+        // Pravá strana: podpis kancléře
+        var signX = w - 160, signY = 455;
+        ctx.font = "italic 13px 'Outfit', sans-serif";
+        ctx.fillStyle = "#5c3d18";
+        ctx.fillText("V zastoupení koruny a dvora:", signX, signY - 18);
+        ctx.font = "italic bold 18px 'Cinzel', serif";
+        ctx.fillStyle = "#1e293b";
+        ctx.fillText("Lord Kikin", signX, signY + 6);
+        ctx.strokeStyle = "#334155";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(signX - 60, signY + 16);
+        ctx.lineTo(signX + 60, signY + 16);
+        ctx.stroke();
+        ctx.font = "10px 'Outfit', sans-serif";
+        ctx.fillStyle = "#64748b";
+        ctx.fillText("Nejvyšší královský kancléř", signX, signY + 28);
+    },
+
+    // Stažení certifikátu jako PNG
+    downloadWinnerDiploma: function () {
+        var canvas = document.getElementById("diploma-canvas");
+        if (!canvas) return;
+        var dataUrl = canvas.toDataURL("image/png");
+        var link = document.createElement("a");
+        var winName = (this._currentDiplomaMatch && this._currentDiplomaMatch.winnerName) ? this._currentDiplomaMatch.winnerName.replace(/\s+/g, "_") : "vitez";
+        link.download = "kralovsky_diplom_" + winName + ".png";
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        if (this.showToast) {
+            this.showToast("💾 Královský diplom vítěze byl úspěšně stažen do tvého zařízení!", "success");
+        }
     },
 
     // --- KRÁLOVSKÁ ZBROJNICE A TRŽIŠTĚ (MODAL) ---,
@@ -1736,6 +1993,51 @@
 
         this.saveSessionAuto();
 
+    },
+
+    // Uložení nalezeného pergamenu do brašny rytíře (max 3)
+    handleStoreScroll: function () {
+        if (!this.state || !this.state.pendingAction || !this.state.pendingAction.canStoreScroll) return;
+        var player = this.state.players[this.state.currentPlayerIndex];
+        var res = window.PRS_GameEngine.storeScrollInInventory(this.state, player);
+        if (window.PRS_Audio) window.PRS_Audio.playItem();
+        this.closeChanceModal();
+        if (this.showToast && res && res.scroll) {
+            this.showToast("🎒 Svitek " + res.scroll.title + " byl bezpečně uložen do tvé brašny!", "success");
+        }
+        this.renderGameScreen();
+        this.saveSessionAuto();
+    },
+
+    // Okamžité použití pergamenu po otočení
+    handleUseScrollNow: function () {
+        if (!this.state || !this.state.pendingAction) return;
+        var player = this.state.players[this.state.currentPlayerIndex];
+        var res = window.PRS_GameEngine.useScrollEffect(this.state, player);
+        if (window.PRS_Audio) window.PRS_Audio.playNotice();
+        this.closeChanceModal();
+        if (this.showToast && res && res.message) {
+            this.showToast(res.message, "success");
+        }
+        this.renderGameScreen();
+        this.saveSessionAuto();
+    },
+
+    // Zahrání pergamenu z brašny (z ruky hráče)
+    handleUseInventoryScroll: function (scrollIndex) {
+        if (!this.state) return;
+        var curIdx = this.state.currentPlayerIndex;
+        var player = this.state.players[curIdx];
+        if (!player || !player.inventory || !player.inventory[scrollIndex]) return;
+
+        var scrollName = player.inventory[scrollIndex].title;
+        var res = window.PRS_GameEngine.useInventoryScroll(this.state, curIdx, scrollIndex);
+        if (window.PRS_Audio) window.PRS_Audio.playNotice();
+        if (this.showToast) {
+            this.showToast("📜 Pergamen " + scrollName + " aktivován!", "success");
+        }
+        this.renderGameScreen();
+        this.saveSessionAuto();
     },
 
     // --- FÁZE 3: ZÁLOŽKOVÝ INSPEKTOR HRÁČE & ERGONOMIE ---

@@ -242,6 +242,14 @@
 
             htmlBtns.push('<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #ec4899, #be185d); color:#fff; border-color:#fbcfe8;" onclick="PRS_App.handleResolveFestival()">🏆 VYHODNOTIT SLAVNOST (💖)</button>');
 
+        } else if (pa.canStoreScroll || pa.scrollCard) {
+
+            htmlBtns.push('<div style="display:flex; flex-direction:column; gap:6px; width:100%;">' +
+                (pa.canStoreScroll ? '<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #059669, #047857); color:#fff; border-color:#34d399;" onclick="PRS_App.handleStoreScroll()">🎒 ULOŽIT DO BRAŠNY (' + (player.inventory ? player.inventory.length : 0) + '/3)</button>' : '') +
+                '<button class="mobile-btn-primary" style="background:linear-gradient(135deg, #d97706, #b45309); color:#fff; border-color:#fde047;" onclick="PRS_App.handleUseScrollNow()">⚡ POUŽÍT SVITEK IHNED</button>' +
+                '<button class="mobile-btn-primary" style="background:rgba(255,255,255,0.12); color:#fde047; border-color:var(--border-gold);" onclick="PRS_App.openChanceModal()">📜 Prohlédnout pergamen</button>' +
+                '</div>');
+
         } else if (pa.canChooseDilemma && pa.chanceCard && pa.chanceCard.options && pa.chanceCard.options.length >= 2) {
 
             var cDil = pa.chanceCard;
@@ -2484,6 +2492,38 @@
 
         }
 
+        // Taktické svitky v brašně rytíře
+        var invHtml = '';
+        var invList = p.inventory || [];
+        if (invList.length > 0) {
+            invHtml = '<div style="margin-top:0.4rem; padding:0.35rem 0.5rem; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.25); border-radius:6px; display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">' +
+                '  <span style="font-size:0.75rem; color:var(--gold-light); font-weight:700;">🎒 Brašna (' + invList.length + '/3):</span>';
+            for (var scI = 0; scI < invList.length; scI++) {
+                var sc = invList[scI];
+                var canUse = (inspIdx === this.state.currentPlayerIndex && p.type === "Human" && this.state.phase !== "GAME_OVER");
+                invHtml += '  <button type="button" class="btn-secondary" style="padding:0.2rem 0.45rem; font-size:0.75rem; border-color:var(--gold); color:#fef08a; display:inline-flex; align-items:center; gap:0.25rem;' + (canUse ? ' cursor:pointer;' : ' opacity:0.8;') + '" ' +
+                    (canUse ? 'onclick="PRS_App.handleUseInventoryScroll(' + scI + ')"' : '') + ' title="' + this.escapeHtml(sc.text) + '">' +
+                    sc.icon + ' ' + this.escapeHtml(sc.title) + (canUse ? ' <span style="color:#4ade80; font-weight:bold;">▶</span>' : '') +
+                    '</button>';
+            }
+            invHtml += '</div>';
+        }
+
+        // Aktivní svitky v platnosti
+        var actBuffs = [];
+        if (p.activeScrolls) {
+            if (p.activeScrolls.bonusRoll) actBuffs.push('⚡ +' + p.activeScrolls.bonusRoll + ' k hodu');
+            if (p.activeScrolls.forcedRoll) actBuffs.push('⭐ Zaručená ' + p.activeScrolls.forcedRoll);
+            if (p.activeScrolls.combatBonus) actBuffs.push('🧪 +' + p.activeScrolls.combatBonus + ' Boj');
+            if (p.activeScrolls.rentImmunity) actBuffs.push('👑 Ochrana nájmu');
+            if (p.activeScrolls.doubleBreeding) actBuffs.push('🐑 2x Chov');
+        }
+        if (actBuffs.length > 0) {
+            invHtml += '<div style="margin-top:0.3rem; font-size:0.73rem; color:#86efac; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:4px; padding:0.2rem 0.45rem;">' +
+                '✨ Aktivní účinek: <strong>' + actBuffs.join(', ') + '</strong>' +
+                '</div>';
+        }
+
         el.innerHTML = '<div class="compact-knight-card" style="border-left: 4px solid ' + p.color + ';">' +
 
             '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">' +
@@ -2539,6 +2579,8 @@
             '    </button>' +
 
             '  </div>' +
+
+            invHtml +
 
             tabContentHtml +
 

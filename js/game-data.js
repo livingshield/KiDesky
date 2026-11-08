@@ -1116,7 +1116,59 @@ window.PRS_CHANCE_CARDS = [
     // --- KARTY PRO JEZDECTVÍ & RYCHLOST (3 karty) ---
     { id: "ch_ride_1", category: "positive", title: "Královská jezdecká přehlídka", icon: "🐎", effect: "riding", value: 1.0, text: "Vladař vyhlásil čestnou jezdeckou přehlídku! Rytíř s koněm ve stáji nebo Jízdou ≥ 2 předvede bravurní drezuru (+1 💖). Pěší jezdec bez cviku ztrácí 300 zl." },
     { id: "ch_ride_2", category: "positive", title: "Bleskový posel z hranic", icon: "🏇", effect: "riding", value: 1.5, text: "Je třeba bleskově doručit královskou zprávu! V sedle koně nebo s Jízdou ≥ 2 dorazíš včas (+1.5 💖 a 500 zl.). Bez koně tě předběhne konkurent a ztratíš 300 zl." },
-    { id: "ch_ride_3", category: "positive", title: "Štvanice na divočáka", icon: "🐗", effect: "riding", value: 1.0, text: "Trubači troubí k honu! S koněm či Jízdou ≥ 2 vedeš štvanici a získáváš trofejní poctu (+1 💖). Jinak se zdržíš v hloží a zaplatíš 300 zl. hajnému." }
+    { id: "ch_ride_3", category: "positive", title: "Štvanice na divočáka", icon: "🐗", effect: "riding", value: 1.0, text: "Trubači troubí k honu! S koněm či Jízdou ≥ 2 vedeš štvanici a získáváš trofejní poctu (+1 💖). Jinak se zdržíš v hloží a zaplatíš 300 zl. hajnému." },
+
+    // --- 5. TAKTICKÉ PERGAMENY DO INVENTÁŘE RYTÍŘE (Lze uložit do brašny a zahrát z ruky) ---
+    {
+        id: "scroll_speed",
+        category: "scroll",
+        title: "Pergamen bleskového cvalu",
+        icon: "📜⚡",
+        isScroll: true,
+        storable: true,
+        scrollType: "speed_boost",
+        text: "Starodávný svitek větru. Ulož do brašny rytíře a zahraj před hodem kostkou: přidá +3 k hodu!"
+    },
+    {
+        id: "scroll_amnesty",
+        category: "scroll",
+        title: "Královský glejt amnestie",
+        icon: "📜👑",
+        isScroll: true,
+        storable: true,
+        scrollType: "rent_amnesty",
+        text: "Pečeť purkrabího. Ulož do brašny: odpustí placení nájmu na cizím panství nebo kauci v šatlavě."
+    },
+    {
+        id: "scroll_strength",
+        category: "scroll",
+        title: "Alchymistický lektvar síly",
+        icon: "📜🧪",
+        isScroll: true,
+        storable: true,
+        scrollType: "combat_boost",
+        text: "Elixír dračí síly. Ulož do brašny a zahraj před bojem, turnajem či lovem: přidá +2 k Boji!"
+    },
+    {
+        id: "scroll_fleece",
+        category: "scroll",
+        title: "Svitek zlatého rouna",
+        icon: "📜🐑",
+        isScroll: true,
+        storable: true,
+        scrollType: "breeding_double",
+        text: "Zemědělský svitek. Ulož do brašny: zdvojnásobí zisk z chovu stád (+100% srdcí) a daruje +1 000 zl."
+    },
+    {
+        id: "scroll_fortune",
+        category: "scroll",
+        title: "Hvězdná konjunkce štěstěny",
+        icon: "📜⭐",
+        isScroll: true,
+        storable: true,
+        scrollType: "fortune_favor",
+        text: "Astrologický svitek. Ulož do brašny: zaručí hod 6 na kostce a ochrání před lapky na celou 1 cestu."
+    }
 ];
 
 // ============================================================================

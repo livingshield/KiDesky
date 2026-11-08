@@ -36,13 +36,22 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/main.css?v=202611072315">
+    <!-- Progressive Web App (PWA) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#181008">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="KiDesky">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/board.css?v=202611072315">
+    <link rel="stylesheet" href="css/main.css?v=202611081230">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611072315">
+    <link rel="stylesheet" href="css/board.css?v=202611081230">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611072315">
+    <link rel="stylesheet" href="css/modals.css?v=202611081230">
+
+    <link rel="stylesheet" href="css/mobile.css?v=202611081230">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -106,6 +115,9 @@
 
             <!-- Tlačítko figurek/kreditů (pouze pro přihlášené) -->
             <button id="topbar-credits-btn" type="button" class="btn-secondary" onclick="PRS_App.openPawnShopModal(0)" title="Královská šatna a sbírka figurek" style="display:none; padding:0.3rem 0.65rem; font-weight:700; border-color:var(--gold); color:var(--gold-light); align-items:center; gap:0.35rem;">💎 <span id="top-user-credits" style="color:#38bdf8;">250</span></button>
+
+            <!-- Tlačítko PWA instalace na mobil / PC -->
+            <button id="topbar-pwa-install-btn" type="button" class="btn-gold-lg" onclick="PRS_App.promptPwaInstall()" title="Nainstalovat hru na plochu mobilu nebo počítače" style="display:none; padding:0.3rem 0.7rem; font-size:0.82rem; font-weight:700; white-space:nowrap; background:linear-gradient(135deg, #059669, #10b981); border-color:#34d399; align-items:center; gap:0.35rem;">📲 <span class="hide-on-mobile">Instalovat</span></button>
 
             <!-- Tlačítko Síň slávy & Úspěchy -->
             <button id="topbar-achievements-btn" type="button" class="btn-secondary" onclick="PRS_App.openAchievementsModal()" title="Rytířská síň slávy a královské odznaky" style="padding:0.3rem 0.65rem; font-weight:700; border-color:var(--gold); color:var(--gold-light); display:inline-flex; align-items:center; gap:0.35rem;">🏆 <span class="hide-on-mobile">Síň slávy</span></button>
@@ -2216,7 +2228,8 @@
 
             <div class="victory-actions-bar">
                 <button class="btn-gold-lg" onclick="PRS_App.continueInEndlessMode()" title="Pokračovat ve volné nekonečné hře na herním plánu se vším vybudovaným panstvím">♾️ Pokračovat v nekonečné hře</button>
-                <button class="btn-secondary" id="btn-save-hall-of-fame" onclick="PRS_App.saveVictoryToCloud()">📜 Zapsat do Síně slávy</button>
+                <button class="btn-secondary" id="btn-show-diploma" onclick="PRS_App.openWinnerDiplomaModal()" title="Zobrazit a stáhnout iluminovaný Královský diplom vítěze">📜 Královský diplom</button>
+                <button class="btn-secondary" id="btn-save-hall-of-fame" onclick="PRS_App.saveVictoryToCloud()">🏆 Zapsat do Síně slávy</button>
                 <button class="btn-secondary" onclick="PRS_App.startNewGame(true)">🔄 Spustit novou partii</button>
             </div>
 
@@ -2224,6 +2237,32 @@
 
         </div>
 
+    </div>
+
+    <!-- MODAL: KRÁLOVSKÝ DIPLOM VÍTĚZE (Iluminovaný dekret ke stažení) -->
+    <div id="diploma-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)PRS_App.closeWinnerDiplomaModal()">
+        <div class="modal-box diploma-modal-box" style="max-width:820px; width:95%; background:linear-gradient(135deg, rgba(26,18,12,0.98), rgba(14,10,7,0.99)); border:2px solid var(--gold); border-radius:14px; box-shadow:0 12px 40px rgba(0,0,0,0.85); overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.9rem 1.25rem; background:linear-gradient(135deg, rgba(30,22,14,0.95), rgba(16,12,8,0.98)); border-bottom:1px solid rgba(212,175,55,0.35);">
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                    <span style="font-size:1.6rem;">📜</span>
+                    <div>
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.25rem;">Královský diplom vítěze</h3>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">Oficiální listina krále s pečetí a podpisem kancléře</div>
+                    </div>
+                </div>
+                <button class="btn-icon-danger" onclick="PRS_App.closeWinnerDiplomaModal()" title="Zavřít diplom">✕</button>
+            </div>
+
+            <div style="padding:1.25rem; display:flex; flex-direction:column; align-items:center; gap:1rem;">
+                <div style="max-width:100%; overflow-x:auto; background:rgba(0,0,0,0.4); padding:0.5rem; border-radius:8px; border:1px solid rgba(212,175,55,0.25);">
+                    <canvas id="diploma-canvas" width="800" height="560" style="display:block; max-width:100%; height:auto; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.6);"></canvas>
+                </div>
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:center; width:100%;">
+                    <button class="btn-gold-lg" onclick="PRS_App.downloadWinnerDiploma()" style="padding:0.5rem 1.4rem; font-size:0.9rem; display:inline-flex; align-items:center; gap:0.4rem;">💾 Stáhnout diplom (PNG)</button>
+                    <button class="btn-secondary" onclick="PRS_App.closeWinnerDiplomaModal()" style="padding:0.5rem 1.2rem;">Zavřít listinu</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL: KRÁLOVSKÁ ZBROJNICE A TRŽIŠTĚ -->
@@ -2685,21 +2724,21 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611072315" defer></script>
-    <script src="js/game-boards.js?v=202611072315" defer></script>
-    <script src="js/game-engine.js?v=202611072315" defer></script>
-    <script src="js/game-combat-ai.js?v=202611072315" defer></script>
-    <script src="js/app-audio.js?v=202611072315" defer></script>
-    <script src="js/app-dialog.js?v=202611072315" defer></script>
-    <script src="js/app.js?v=202611072315" defer></script>
-    <script src="js/app-board.js?v=202611072315" defer></script>
-    <script src="js/app-hud.js?v=202611072315" defer></script>
-    <script src="js/app-modals.js?v=202611072315" defer></script>
-    <script src="js/app-online.js?v=202611072315" defer></script>
-    <script src="js/app-saves.js?v=202611072315" defer></script>
-    <script src="js/app-catalog.js?v=202611072315" defer></script>
-    <script src="js/app-admin.js?v=202611072315" defer></script>
-    <script src="js/app-musicwidget.js?v=202611072315" defer></script>
+    <script src="js/game-data.js?v=202611081245" defer></script>
+    <script src="js/game-boards.js?v=202611081245" defer></script>
+    <script src="js/game-engine.js?v=202611081245" defer></script>
+    <script src="js/game-combat-ai.js?v=202611081245" defer></script>
+    <script src="js/app-audio.js?v=202611081245" defer></script>
+    <script src="js/app-dialog.js?v=202611081245" defer></script>
+    <script src="js/app.js?v=202611081245" defer></script>
+    <script src="js/app-board.js?v=202611081245" defer></script>
+    <script src="js/app-hud.js?v=202611081245" defer></script>
+    <script src="js/app-modals.js?v=202611081245" defer></script>
+    <script src="js/app-online.js?v=202611081245" defer></script>
+    <script src="js/app-saves.js?v=202611081245" defer></script>
+    <script src="js/app-catalog.js?v=202611081245" defer></script>
+    <script src="js/app-admin.js?v=202611081245" defer></script>
+    <script src="js/app-musicwidget.js?v=202611081245" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3024,6 +3063,18 @@
 
                     <button class="btn-secondary" onclick="PRS_App.closeSettingsModal(); PRS_App.openGraphicsModal();" style="padding:0.45rem 0.85rem;">🎨 Otevřít správce prostředí a textur</button>
 
+                </div>
+
+                <!-- Sekce 5: Mobilní aplikace & PWA -->
+                <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.85rem 1rem;">
+                    <div style="font-weight:bold; color:var(--gold-light); margin-bottom:0.4rem; font-size:0.92rem; display:flex; align-items:center; gap:0.4rem;">
+                        📲 Mobilní aplikace (PWA instalace)
+                    </div>
+                    <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.65rem;">Nainstaluj si KiDesky přímo na plochu mobilu či PC pro hraní bez rámečku prohlížeče a offline:</div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:0.8rem; flex-wrap:wrap;">
+                        <span id="settings-pwa-status" style="font-size:0.85rem; color:#cbd5e1;">Aplikace je připravena k instalaci.</span>
+                        <button id="settings-pwa-install-btn" class="btn-gold-lg" onclick="PRS_App.promptPwaInstall()" style="padding:0.4rem 0.95rem; font-size:0.84rem; display:inline-flex; align-items:center; gap:0.4rem; background:linear-gradient(135deg, #059669, #10b981); border-color:#34d399;">📲 Nainstalovat na plochu</button>
+                    </div>
                 </div>
 
             </div>

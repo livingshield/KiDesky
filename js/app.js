@@ -210,6 +210,8 @@ window.PRS_App = {
 
         this.loadAnnouncement();
 
+        this.initPwa();
+
         this.hasGameStarted = false;
 
         this.startOnlinePollingLoop();
@@ -426,6 +428,64 @@ window.PRS_App = {
 
         }
 
+    },
+
+    // ========================================================================
+    // PWA & MOBILNÍ INSTALACE (SERVICE WORKER & BEFOREINSTALLPROMPT)
+    // ========================================================================
+    initPwa: function () {
+        var self = this;
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(function (reg) {
+                        console.log('[PWA] Service Worker registrován se scope:', reg.scope);
+                    })
+                    .catch(function (err) {
+                        console.warn('[PWA] Registrace Service Workeru selhala:', err);
+                    });
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            window._pwaDeferredPrompt = e;
+            var topBtn = document.getElementById('topbar-pwa-install-btn');
+            if (topBtn) topBtn.style.display = 'inline-flex';
+            var setStatus = document.getElementById('settings-pwa-status');
+            if (setStatus) setStatus.textContent = 'Aplikace je připravena k rychlé instalaci jedním kliknutím.';
+            var setBtn = document.getElementById('settings-pwa-install-btn');
+            if (setBtn) setBtn.style.display = 'inline-flex';
+        });
+
+        window.addEventListener('appinstalled', function () {
+            window._pwaDeferredPrompt = null;
+            var topBtn = document.getElementById('topbar-pwa-install-btn');
+            if (topBtn) topBtn.style.display = 'none';
+            var setStatus = document.getElementById('settings-pwa-status');
+            if (setStatus) setStatus.innerHTML = '✅ <strong style="color:#4ade80;">Aplikace je úspěšně nainstalována na této ploše!</strong>';
+            var setBtn = document.getElementById('settings-pwa-install-btn');
+            if (setBtn) setBtn.style.display = 'none';
+            if (self.showToast) {
+                self.showToast('📲 KiDesky bylo úspěšně nainstalováno na tvou plochu!', 'success');
+            }
+        });
+    },
+
+    promptPwaInstall: function () {
+        if (!window._pwaDeferredPrompt) {
+            if (this.showToast) {
+                this.showToast('ℹ️ Pro instalaci na mobilu použij volbu „Přidat na plochu“ v menu prohlížeče.', 'notice');
+            }
+            return;
+        }
+        window._pwaDeferredPrompt.prompt();
+        window._pwaDeferredPrompt.userChoice.then(function (choiceResult) {
+            if (choiceResult && choiceResult.outcome === 'accepted') {
+                console.log('[PWA] Uživatel potvrdil instalaci aplikace.');
+            }
+            window._pwaDeferredPrompt = null;
+        });
     },
 
     // ========================================================================
@@ -3201,6 +3261,12 @@ window.PRS_App = {
             { id: "grandmaster", icon: "🌟", title: "Dračí legenda", desc: "Dosáhni alespoň 3 slavných vítězství nebo skol 3 draky." }
         ];
 
+        var activeTab = this._achievementsSubtab || "badges";
+        var hist = [];
+        try {
+            hist = JSON.parse(localStorage.getItem("prs_game_history") || "[]");
+        } catch (e) { }
+
         var html = '<div class="achievements-profile-header">' +
             '  <div class="achievements-avatar-badge">' + (u.role === "Admin" ? '👑' : '🛡️') + '</div>' +
             '  <div>' +
@@ -3220,24 +3286,64 @@ window.PRS_App = {
             '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#38bdf8;">' + (Math.round(highest * 10) / 10) + '</div><div class="ach-stat-lbl">Rekord partie</div></div>' +
             '</div>';
 
-        html += '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.05rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.45rem;">🏆 Královská vitrína odznaků (' + achList.length + ' / ' + badges.length + ')</h4>';
+        // Přepínač podzáložek: Odznaky vs. Historie výprav
+        html += '<div style="display:flex; gap:0.5rem; margin:1rem 0 0.85rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.55rem;">' +
+            '  <button type="button" class="rules-subnav-btn ' + (activeTab === "badges" ? "active" : "") + '" onclick="PRS_App.setAchievementsSubtab(\'badges\')" style="padding:0.35rem 0.85rem; font-size:0.84rem;">🏆 Královské odznaky (' + achList.length + ' / ' + badges.length + ')</button>' +
+            '  <button type="button" class="rules-subnav-btn ' + (activeTab === "history" ? "active" : "") + '" onclick="PRS_App.setAchievementsSubtab(\'history\')" style="padding:0.35rem 0.85rem; font-size:0.84rem;">📜 Historie výprav (' + hist.length + ')</button>' +
+            '</div>';
 
-        html += '<div class="achievements-badges-grid">';
-        for (var bi = 0; bi < badges.length; bi++) {
-            var b = badges[bi];
-            var isUnl = achList.indexOf(b.id) !== -1;
-            html += '<div class="ach-badge-card ' + (isUnl ? 'unlocked' : 'locked') + '">' +
-                '  <div class="ach-badge-icon">' + b.icon + '</div>' +
-                '  <div style="flex:1;">' +
-                '    <div class="ach-badge-title">' + b.title + '</div>' +
-                '    <div class="ach-badge-desc">' + b.desc + '</div>' +
-                '    <div class="ach-badge-status ' + (isUnl ? 'unlocked-tag' : 'locked-tag') + '">' + (isUnl ? '✨ Odemčeno' : '🔒 Zamčeno') + '</div>' +
-                '  </div>' +
-                '</div>';
+        if (activeTab === "history") {
+            if (hist.length === 0) {
+                html += '<div style="text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.9rem; background:rgba(0,0,0,0.25); border-radius:8px; border:1px dashed rgba(212,175,55,0.2);">' +
+                    '  <div style="font-size:2rem; margin-bottom:0.4rem;">📜</div>' +
+                    '  <strong style="color:var(--gold-light);">Žádná zaznamenaná historie partií</strong>' +
+                    '  <div style="margin-top:0.25rem;">Odehraj partii na herním stole a tvoje výsledky i slavnostní diplomy se uloží sem do kroniky království.</div>' +
+                    '</div>';
+            } else {
+                html += '<div style="display:flex; flex-direction:column; gap:0.75rem; max-height:48vh; overflow-y:auto; padding-right:0.35rem;">';
+                for (var hi = hist.length - 1; hi >= 0; hi--) {
+                    var hItem = hist[hi];
+                    html += '<div style="background:rgba(0,0,0,0.4); border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.75rem 0.95rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">' +
+                        '  <div>' +
+                        '    <div style="display:flex; align-items:center; gap:0.45rem;">' +
+                        '      <span style="font-size:1.1rem;">👑</span>' +
+                        '      <strong style="color:' + (hItem.winnerColor || 'var(--gold-light)') + '; font-size:0.96rem;">' + (hItem.winnerBadge || '🛡️') + ' ' + this.escapeHtml(hItem.winnerName || 'Vítěz') + '</strong>' +
+                        '      <span style="font-size:0.82rem; color:#ec4899; font-weight:700;">' + hItem.winnerHearts + ' 💖</span>' +
+                        '    </div>' +
+                        '    <div style="font-size:0.78rem; color:#94a3b8; margin-top:0.2rem;">' +
+                        '      <span>📅 ' + this.escapeHtml(hItem.date) + '</span> • ' +
+                        '      <span>🗺️ ' + this.escapeHtml(hItem.boardName) + '</span> • ' +
+                        '      <span>⏳ ' + hItem.roundNumber + ' kol</span>' +
+                        '    </div>' +
+                        '  </div>' +
+                        '  <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.65rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.openWinnerDiplomaModal(' + hi + ')">📜 Královský diplom</button>' +
+                        '</div>';
+                }
+                html += '</div>';
+            }
+        } else {
+            html += '<div class="achievements-badges-grid">';
+            for (var bi = 0; bi < badges.length; bi++) {
+                var b = badges[bi];
+                var isUnl = achList.indexOf(b.id) !== -1;
+                html += '<div class="ach-badge-card ' + (isUnl ? 'unlocked' : 'locked') + '">' +
+                    '  <div class="ach-badge-icon">' + b.icon + '</div>' +
+                    '  <div style="flex:1;">' +
+                    '    <div class="ach-badge-title">' + b.title + '</div>' +
+                    '    <div class="ach-badge-desc">' + b.desc + '</div>' +
+                    '    <div class="ach-badge-status ' + (isUnl ? 'unlocked-tag' : 'locked-tag') + '">' + (isUnl ? '✨ Odemčeno' : '🔒 Zamčeno') + '</div>' +
+                    '  </div>' +
+                    '</div>';
+            }
+            html += '</div>';
         }
-        html += '</div>';
 
         body.innerHTML = html;
+    },
+
+    setAchievementsSubtab: function (tab) {
+        this._achievementsSubtab = tab;
+        this.renderAchievementsModalContent();
     },
 
     // --- KATALOG AUTORSKÝCH HER (ETAPA 5) ---
