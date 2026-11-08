@@ -1,18 +1,28 @@
-const CACHE_NAME = 'kidesky-cache-v1.0.6';
+const CACHE_NAME = 'kidesky-cache-v1.0.7';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
-  './css/styles.css',
+  './css/main.css',
+  './css/board.css',
+  './css/modals.css',
+  './css/mobile.css',
   './js/game-data.js',
-  './js/game-engine.js',
   './js/game-boards.js',
-  './js/game-bot.js',
+  './js/game-engine.js',
+  './js/game-combat-ai.js',
   './js/app-audio.js',
-  './js/app-modals.js',
+  './js/app-board.js',
   './js/app-hud.js',
+  './js/app-modals.js',
+  './js/app-admin.js',
+  './js/app-online.js',
+  './js/app-saves.js',
+  './js/app-dialog.js',
+  './js/app-catalog.js',
+  './js/app-musicwidget.js',
   './js/app.js'
 ];
 
