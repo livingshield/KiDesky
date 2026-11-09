@@ -950,6 +950,30 @@ window.KiDeskyMapGenerator = {
         return pts;
     },
 
+    sampleRiverPathSimple: function (path) {
+        if (!path) return [];
+        var nums = path.match(/[-+]?\d*\.?\d+/g);
+        if (!nums || nums.length < 8) return [];
+        var pts = [];
+        var start = { x: parseFloat(nums[0]), y: parseFloat(nums[1]) };
+        var idx = 2;
+        while (idx + 5 < nums.length) {
+            var cp1 = { x: parseFloat(nums[idx]), y: parseFloat(nums[idx + 1]) };
+            var cp2 = { x: parseFloat(nums[idx + 2]), y: parseFloat(nums[idx + 3]) };
+            var end = { x: parseFloat(nums[idx + 4]), y: parseFloat(nums[idx + 5]) };
+            for (var s = (idx === 2 ? 0 : 1); s <= 20; s++) {
+                var t = s / 20;
+                var it = 1 - t;
+                var bx = it * it * it * start.x + 3 * it * it * t * cp1.x + 3 * it * t * t * cp2.x + t * t * t * end.x;
+                var by = it * it * it * start.y + 3 * it * it * t * cp1.y + 3 * it * t * t * cp2.y + t * t * t * end.y;
+                pts.push({ x: Math.round(bx), y: Math.round(by) });
+            }
+            start = end;
+            idx += 6;
+        }
+        return pts;
+    },
+
     // Kompletní katalog 10 královských a feudálních hradů
     ALL_CASTLES: [
         { id: "castle_royal", name: "Královský hrad (Sídlo koruny)", icon: "👑", img: "assets/castles/castle_royal.png", biome: "golden_plains", element: "light" },
@@ -1516,13 +1540,13 @@ window.KiDeskyMapGenerator = {
 
             if (riverMode === "dual") {
                 var r2Pts = [
-                    { x: Math.round(255 + (rnd() - 0.5) * 45), y: 30 },
-                    { x: Math.round(370 + (rnd() - 0.5) * 35), y: 230 },
-                    { x: Math.round(520 + (rnd() - 0.5) * 35), y: 440 },
+                    { x: Math.round(270 + (rnd() - 0.5) * 40), y: 25 },
+                    { x: Math.round(410 + (rnd() - 0.5) * 35), y: 175 },
+                    { x: Math.round(r1Pts[3].x - 110 + (rnd() - 0.5) * 20), y: Math.round(r1Pts[3].y - 85) },
                     { x: r1Pts[3].x, y: r1Pts[3].y }
                 ];
                 var r2Path = "M " + r2Pts[0].x + " " + r2Pts[0].y + " C " + r2Pts[1].x + " " + r2Pts[1].y + ", " + r2Pts[2].x + " " + r2Pts[2].y + ", " + r2Pts[3].x + " " + r2Pts[3].y;
-                rivers.push({ id: "tributary_river", name: "Horská bystřina Bystřice", width: 8, color: "#0369a1", path: r2Path });
+                rivers.push({ id: "tributary_river", name: "Horská bystřina Bystřice", width: 9, isTributary: true, color: "#0369a1", path: r2Path });
                 riverPolylines.push(this.sampleBezier(r2Pts[0], r2Pts[1], r2Pts[2], r2Pts[3], 22, true));
             } else if (riverMode === "island") {
                 var rIslPts = [{ x: r1Pts[1].x, y: r1Pts[1].y }, { x: 520, y: 210 }, { x: 460, y: 510 }, { x: r1Pts[4].x, y: r1Pts[4].y }];
@@ -2170,9 +2194,9 @@ window.KiDeskyMapGenerator = {
             if (riverMode === "dual") {
                 // Druhá řeka: Horská bystřina Bystřice vlévající se do Doubravky
                 var r2Pts = [
-                    { x: Math.round(255 + (rnd() - 0.5) * 45), y: 30 },
-                    { x: Math.round(370 + (rnd() - 0.5) * 35), y: 230 },
-                    { x: Math.round(520 + (rnd() - 0.5) * 35), y: 440 },
+                    { x: Math.round(270 + (rnd() - 0.5) * 40), y: 25 },
+                    { x: Math.round(410 + (rnd() - 0.5) * 35), y: 175 },
+                    { x: Math.round(r1Pts[3].x - 110 + (rnd() - 0.5) * 20), y: Math.round(r1Pts[3].y - 85) },
                     { x: r1Pts[3].x, y: r1Pts[3].y }
                 ];
                 var r2Path = "M " + r2Pts[0].x + " " + r2Pts[0].y + " " +
@@ -2181,7 +2205,8 @@ window.KiDeskyMapGenerator = {
                 rivers.push({
                     id: "tributary_river",
                     name: "Horská bystřina Bystřice",
-                    width: 8,
+                    width: 9,
+                    isTributary: true,
                     color: "#0369a1",
                     path: r2Path
                 });
@@ -2564,8 +2589,33 @@ window.PRS_BoardBuilder = {
         var catalog = window.PRS_DECOR_CATALOG || {};
         var decorList = [];
 
+        var riverClearancePoints = [];
+        if (board.rivers && board.rivers.length > 0) {
+            var sRPS = (this.sampleRiverPathSimple || (window.PRS_BoardBuilder && window.PRS_BoardBuilder.sampleRiverPathSimple));
+            if (sRPS) {
+                for (var ri = 0; ri < board.rivers.length; ri++) {
+                    var rObj = board.rivers[ri];
+                    var rWidth = rObj.width || 14;
+                    var smpPts = sRPS(rObj.path);
+                    for (var sp = 0; sp < smpPts.length; sp++) {
+                        riverClearancePoints.push({ x: smpPts[sp].x, y: smpPts[sp].y, halfW: rWidth / 2 });
+                    }
+                }
+            }
+        }
+
         function isPositionClear(x, y, radius, allowClusterOverlap) {
             if (x - radius < 35 || x + radius > 1365 || y - radius < 35 || y + radius > 825) return false;
+
+            for (var rp = 0; rp < riverClearancePoints.length; rp++) {
+                var rpt = riverClearancePoints[rp];
+                var rdx = rpt.x - x;
+                var rdy = rpt.y - y;
+                var minRDist = radius + rpt.halfW + 18;
+                if (rdx * rdx + rdy * rdy < minRDist * minRDist) {
+                    return false;
+                }
+            }
 
             for (var i = 0; i < nodes.length; i++) {
                 var n = nodes[i];
@@ -2896,6 +2946,24 @@ window.PRS_BoardBuilder = {
                 var oy = Math.max(0, Math.min(ly2, cz.y + cz.h) - Math.max(ly1, cz.y));
                 if (ox > 0 && oy > 0) {
                     return -2;
+                }
+            }
+            if (board.rivers && board.rivers.length > 0) {
+                var sRPS2 = (this.sampleRiverPathSimple || (window.PRS_BoardBuilder && window.PRS_BoardBuilder.sampleRiverPathSimple));
+                if (sRPS2) {
+                    for (var rIndex = 0; rIndex < board.rivers.length; rIndex++) {
+                        var riverItem = board.rivers[rIndex];
+                        var rHalfW = (riverItem.width || 14) / 2;
+                        var rPts = sRPS2(riverItem.path);
+                        for (var pi = 0; pi < rPts.length; pi++) {
+                            var rdx = rPts[pi].x - cx;
+                            var rdy = rPts[pi].y - cy;
+                            var safeR = r + rHalfW + 22;
+                            if (rdx * rdx + rdy * rdy < safeR * safeR) {
+                                return -3;
+                            }
+                        }
+                    }
                 }
             }
             return minNodeDist;
@@ -3751,6 +3819,10 @@ window.PRS_BoardBuilder = {
         }
         return window.KiDeskyMapGenerator.generate(seed, options);
     }
+};
+
+window.PRS_BoardBuilder.sampleRiverPathSimple = function (p) {
+    return window.KiDeskyMapGenerator.sampleRiverPathSimple(p);
 };
 
 window.KiDeskyMapGenerator.sanitizeAndAnchorLandmarks = function (b) {
