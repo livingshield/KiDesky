@@ -213,6 +213,27 @@
             // Lokální obnova stavu pro Solo AI a Hot-Seat
             try {
                 var restoredState = JSON.parse(target.stateJson);
+
+                // Sanitizace obnoveného stavu (zpětná kompatibilita pro starší savy)
+                if (restoredState.pendingAction) {
+                    var pa = restoredState.pendingAction;
+                    if (pa.canUpgradeVillage && (typeof pa.upgradeCost !== "number" || isNaN(pa.upgradeCost))) {
+                        var prices = (restoredState.config && restoredState.config.estates && restoredState.config.estates.villagePrices) ? restoredState.config.estates.villagePrices : [0, 1500, 3000];
+                        var n = (restoredState.board && restoredState.board.nodes && pa.nodeId !== undefined) ? restoredState.board.nodes[pa.nodeId] : null;
+                        var lv = (n && n.villageLevel) ? n.villageLevel : 1;
+                        pa.upgradeCost = prices[lv] || 1500;
+                    }
+                    if (pa.canBuyNode && (typeof pa.buyPrice !== "number" || isNaN(pa.buyPrice))) {
+                        var nBuy = (restoredState.board && restoredState.board.nodes && pa.nodeId !== undefined) ? restoredState.board.nodes[pa.nodeId] : null;
+                        pa.buyPrice = (nBuy && nBuy.price) ? nBuy.price : 1000;
+                    }
+                }
+                if (restoredState.board && restoredState.board.rivers && restoredState.board.rivers.length > 0 && (!restoredState.board.bridges || restoredState.board.bridges.length === 0)) {
+                    if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
+                        window.PRS_BoardBuilder.computeRiverBridges(restoredState.board);
+                    }
+                }
+
                 this.state = restoredState;
                 this.hasGameStarted = true;
                 this.isBoardStaticDirty = true;

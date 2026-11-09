@@ -3376,11 +3376,14 @@ window.PRS_GameEngine = {
         this.addLog(state, msg, "buy");
 
         if (state.pendingAction && state.pendingAction.nodeId === node.id) {
-
             state.pendingAction.canUpgradeVillage = (node.villageLevel < 3);
-
+            if (node.villageLevel < 3) {
+                var prices = (state.config && state.config.estates && state.config.estates.villagePrices) ? state.config.estates.villagePrices : [0, 1500, 3000];
+                state.pendingAction.upgradeCost = prices[node.villageLevel] || 1500;
+            } else {
+                state.pendingAction.upgradeCost = 0;
+            }
             state.pendingAction.summary = msg;
-
         }
 
         this.recalculateBreedingAndVictory(state);

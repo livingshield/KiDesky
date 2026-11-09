@@ -299,15 +299,11 @@
                 '</div>');
 
         } else if (pa.canUpgradeVillage) {
-
-            var canAffordUpg = player.gold >= pa.upgradeCost;
-
+            var uCost = (typeof pa.upgradeCost === "number" && !isNaN(pa.upgradeCost)) ? pa.upgradeCost : 1500;
+            var canAffordUpg = (player.gold || 0) >= uCost;
             htmlBtns.push('<div style="display:flex; gap:6px; width:100%;">' +
-
-                '<button class="mobile-btn-primary" style="flex:1.4;" ' + (!canAffordUpg ? 'disabled' : '') + ' onclick="PRS_App.handleUpgradeVillage(' + pa.nodeId + ')">🏘️ POVÝŠIT (' + pa.upgradeCost + ' zl.)</button>' +
-
+                '<button class="mobile-btn-primary" style="flex:1.4;" ' + (!canAffordUpg ? 'disabled' : '') + ' onclick="PRS_App.handleUpgradeVillage(' + pa.nodeId + ')">🏘️ POVÝŠIT (' + uCost + ' zl.)</button>' +
                 '<button class="mobile-btn-primary" style="flex:1; background:rgba(255,255,255,0.12); border-color:var(--border-gold); color:var(--text-main);" onclick="PRS_App.handleEndTurn()">➡️ Konec tahu</button>' +
-
                 '</div>');
 
         } else if (pa.canShopLivestock) {
@@ -442,12 +438,10 @@
 
         }
 
-        if (pa.canUpgradeVillage && p.gold >= pa.upgradeCost) {
-
+        var uCost = (typeof pa.upgradeCost === "number" && !isNaN(pa.upgradeCost)) ? pa.upgradeCost : 1500;
+        if (pa.canUpgradeVillage && (p.gold || 0) >= uCost) {
             this.handleUpgradeVillage(pa.nodeId);
-
             return;
-
         }
 
         if (pa.isImprisoned || pa.canPayPrisonBail || pa.canAttemptPrisonEscape) {
@@ -3486,27 +3480,19 @@
         var btns = [];
 
         if (pa.canBuyNode) {
-
-            var canAfford = player.gold >= pa.buyPrice;
-
-            var remGold = player.gold - pa.buyPrice;
-
+            var bPrice = (typeof pa.buyPrice === "number" && !isNaN(pa.buyPrice)) ? pa.buyPrice : 1000;
+            var canAfford = (player.gold || 0) >= bPrice;
+            var remGold = (player.gold || 0) - bPrice;
             var isProc = this.isActionProcessing || this.isSavingSession;
-
-            var buyLabel = isProc ? "⏳ Kupuji pole..." : ("📜 Koupit toto pole (" + pa.buyPrice.toLocaleString("cs-CZ") + " zl.)" + (canAfford ? (" • Zbyde: " + remGold.toLocaleString("cs-CZ") + " zl.") : " • ❌ Chybí zlato!"));
-
+            var buyLabel = isProc ? "⏳ Kupuji pole..." : ("📜 Koupit toto pole (" + bPrice.toLocaleString("cs-CZ") + " zl.)" + (canAfford ? (" • Zbyde: " + remGold.toLocaleString("cs-CZ") + " zl.") : " • ❌ Chybí zlato!"));
             btns.push('<button class="btn-action-buy" id="btn-buy-current-node" style="' + (isProc ? 'opacity:0.5; pointer-events:none;' : '') + '" ' + (!canAfford || isProc ? 'disabled' : '') + ' onclick="PRS_App.handleBuyNode()">' + buyLabel + '</button>');
-
         }
 
         if (pa.canUpgradeVillage) {
-
-            var canAffordUpg = player.gold >= pa.upgradeCost;
-
-            var remUpg = player.gold - pa.upgradeCost;
-
-            btns.push('<button class="btn-action-buy" ' + (!canAffordUpg ? 'disabled' : '') + ' onclick="PRS_App.handleUpgradeVillage(' + pa.nodeId + ')">🏘️ Povýšit vesnici (' + pa.upgradeCost.toLocaleString("cs-CZ") + ' zl.)' + (canAffordUpg ? (' • Zbyde: ' + remUpg.toLocaleString("cs-CZ") + ' zl.') : '') + '</button>');
-
+            var uCost = (typeof pa.upgradeCost === "number" && !isNaN(pa.upgradeCost)) ? pa.upgradeCost : 1500;
+            var canAffordUpg = (player.gold || 0) >= uCost;
+            var remUpg = (player.gold || 0) - uCost;
+            btns.push('<button class="btn-action-buy" ' + (!canAffordUpg ? 'disabled' : '') + ' onclick="PRS_App.handleUpgradeVillage(' + pa.nodeId + ')">🏘️ Povýšit vesnici (' + uCost.toLocaleString("cs-CZ") + ' zl.)' + (canAffordUpg ? (' • Zbyde: ' + remUpg.toLocaleString("cs-CZ") + ' zl.') : '') + '</button>');
         }
 
         if (pa.canTrainMaster) {
