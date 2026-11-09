@@ -87,8 +87,10 @@ $codeFiles = @(
     "js/app-hud.js",
     "js/app-modals.js",
     "js/app-online.js",
+    "js/app-saves.js",
     "js/app-catalog.js",
-    "js/app-admin.js"
+    "js/app-admin.js",
+    "js/app-musicwidget.js"
 )
 
 foreach ($rb in $remoteBases) {
