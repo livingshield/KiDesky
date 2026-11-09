@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611090610">
+    <link rel="stylesheet" href="css/main.css?v=202611090820">
 
-    <link rel="stylesheet" href="css/board.css?v=202611090610">
+    <link rel="stylesheet" href="css/board.css?v=202611090820">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611090610">
+    <link rel="stylesheet" href="css/modals.css?v=202611090820">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611090610">
+    <link rel="stylesheet" href="css/mobile.css?v=202611090820">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -77,6 +77,16 @@
                 var t = document.documentElement.getAttribute("data-theme") || "light";
 
                 document.body.setAttribute("data-theme", t);
+
+                var w = window.innerWidth || screen.width || 1200;
+                var h = window.innerHeight || screen.height || 800;
+                var isTouch = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) || ('ontouchstart' in window);
+                var orient = (h >= w) ? "portrait" : "landscape";
+                var isMobileLandscape = isTouch && (h <= 540) && (w < 1050);
+                var dev = (w < 768 || isMobileLandscape) ? "mobile" : ((w < 1024) ? "tablet" : "desktop");
+                document.body.setAttribute("data-device", dev);
+                document.body.setAttribute("data-orientation", orient);
+                document.body.setAttribute("data-touch", isTouch ? "true" : "false");
 
             } catch (e) {}
 
@@ -2730,21 +2740,21 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611090610" defer></script>
-    <script src="js/game-boards.js?v=202611090610" defer></script>
-    <script src="js/game-engine.js?v=202611090610" defer></script>
-    <script src="js/game-combat-ai.js?v=202611090610" defer></script>
-    <script src="js/app-audio.js?v=202611090610" defer></script>
-    <script src="js/app-dialog.js?v=202611090610" defer></script>
-    <script src="js/app.js?v=202611090610" defer></script>
-    <script src="js/app-board.js?v=202611090610" defer></script>
-    <script src="js/app-hud.js?v=202611090610" defer></script>
-    <script src="js/app-modals.js?v=202611090610" defer></script>
-    <script src="js/app-online.js?v=202611090610" defer></script>
-    <script src="js/app-saves.js?v=202611090610" defer></script>
-    <script src="js/app-catalog.js?v=202611090610" defer></script>
-    <script src="js/app-admin.js?v=202611090610" defer></script>
-    <script src="js/app-musicwidget.js?v=202611090610" defer></script>
+    <script src="js/game-data.js?v=202611090820" defer></script>
+    <script src="js/game-boards.js?v=202611090820" defer></script>
+    <script src="js/game-engine.js?v=202611090820" defer></script>
+    <script src="js/game-combat-ai.js?v=202611090820" defer></script>
+    <script src="js/app-audio.js?v=202611090820" defer></script>
+    <script src="js/app-dialog.js?v=202611090820" defer></script>
+    <script src="js/app.js?v=202611090820" defer></script>
+    <script src="js/app-board.js?v=202611090820" defer></script>
+    <script src="js/app-hud.js?v=202611090820" defer></script>
+    <script src="js/app-modals.js?v=202611090820" defer></script>
+    <script src="js/app-online.js?v=202611090820" defer></script>
+    <script src="js/app-saves.js?v=202611090820" defer></script>
+    <script src="js/app-catalog.js?v=202611090820" defer></script>
+    <script src="js/app-admin.js?v=202611090820" defer></script>
+    <script src="js/app-musicwidget.js?v=202611090820" defer></script>
     <script>
         (function () {
             function bootApp() {

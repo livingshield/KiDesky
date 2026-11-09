@@ -4,10 +4,20 @@
 
         body[data-device="mobile"] {
             -webkit-tap-highlight-color: transparent;
+            max-width: 100vw !important;
+            width: 100% !important;
+            overflow-x: hidden !important;
+            position: relative;
+            box-sizing: border-box;
         }
 
         /* Zamezení scrollování stránky v mobilním režimu herního plánu */
-        body[data-device="mobile"].on-board-tab { overflow-x: hidden; overflow-y: auto; }
+        body[data-device="mobile"].on-board-tab {
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            max-width: 100vw !important;
+            width: 100% !important;
+        }
 
         /* Kompaktní horní lišta na mobilu */
         body[data-device="mobile"] .topbar {
@@ -131,18 +141,26 @@
             padding: 0.35rem 0.55rem;
         }
         body[data-device="mobile"] .map-floating-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.35rem;
-            padding: 0.3rem 0.45rem;
-            margin-bottom: 0.35rem;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            white-space: nowrap;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 0.25rem !important;
+            padding: 0.25rem 0.4rem !important;
+            margin-bottom: 0.3rem !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            white-space: nowrap !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            min-width: 0 !important;
+        }
+        body[data-device="mobile"] .map-floating-toolbar > * {
+            flex-shrink: 0 !important;
+            min-width: 0 !important;
         }
         body[data-device="mobile"] .map-floating-toolbar .btn-zoom {
-            padding: 0.28rem 0.45rem;
+            padding: 0.22rem 0.4rem;
             font-size: 0.75rem;
             white-space: nowrap;
             flex-shrink: 0;
@@ -164,29 +182,53 @@
         /* Mobilní herní stůl (#tab-board) na výšku (Portrait) */
         body[data-device="mobile"][data-orientation="portrait"] .main-container {
             padding: 0.35rem 0.4rem 95px 0.4rem;
+            max-width: 100vw;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
         body[data-device="mobile"][data-orientation="portrait"] .board-workspace {
             display: flex;
             flex-direction: column;
             gap: 0.45rem;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        body[data-device="mobile"][data-orientation="portrait"] .board-workspace > * {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
         body[data-device="mobile"][data-orientation="portrait"] .board-right-sidebar {
-            display: none; /* Na výšku je vše ve Sticky Thumb Docku */
+            display: none !important; /* Na výšku je vše ve Sticky Thumb Docku */
         }
 
         /* Mobilní herní stůl na šířku (Landscape) - "Konzolový režim" */
         body[data-device="mobile"][data-orientation="landscape"] {
             overflow-y: auto !important;
+            overflow-x: hidden !important;
+            max-width: 100vw !important;
+            width: 100% !important;
         }
         body[data-device="mobile"][data-orientation="landscape"] .main-container {
             padding: 0.2rem 0.45rem 0.25rem 0.45rem;
-            max-width: 100%;
+            max-width: 100vw;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
         body[data-device="mobile"][data-orientation="landscape"] .topbar {
             display: flex;
             padding: 0.2rem 0.5rem;
             min-height: 34px;
             gap: 0.35rem;
+            max-width: 100vw;
+            width: 100%;
+            box-sizing: border-box;
         }
         body[data-device="mobile"][data-orientation="landscape"] .board-top-players-hud {
             display: none !important;
@@ -198,11 +240,20 @@
             flex-shrink: 0;
         }
         body[data-device="mobile"][data-orientation="landscape"] .board-workspace {
-            display: grid;
-            grid-template-columns: 1fr minmax(215px, 255px);
-            gap: 0.35rem;
-            min-height: auto;
-            align-items: start;
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) minmax(225px, 265px) !important;
+            gap: 0.35rem !important;
+            min-height: auto !important;
+            align-items: stretch !important;
+            max-height: calc(100vh - 42px) !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .board-workspace > * {
+            min-width: 0 !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
         body[data-device="mobile"][data-orientation="landscape"] .map-floating-toolbar {
             display: flex !important;
@@ -215,37 +266,51 @@
             overflow-x: auto !important;
             -webkit-overflow-scrolling: touch;
             gap: 0.25rem;
+            max-width: 100% !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
         body[data-device="mobile"][data-orientation="landscape"] .map-floating-toolbar > * {
             flex-shrink: 0 !important;
         }
         body[data-device="mobile"][data-orientation="landscape"] .map-floating-toolbar .btn-zoom {
-            padding: 0.2rem 0.35rem;
+            padding: 0.18rem 0.35rem;
             font-size: 0.72rem;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] .board-bottom-bar {
+            display: none !important;
         }
         body[data-device="mobile"][data-orientation="landscape"] .svg-board-container {
             width: 100% !important;
             height: auto !important;
-            max-height: calc(100vh - 80px) !important;
+            max-height: calc(100vh - 70px) !important;
             aspect-ratio: 1400 / 860 !important;
             touch-action: none;
             margin: 0 auto;
+            box-sizing: border-box;
         }
         body[data-device="mobile"][data-orientation="landscape"] #prs-board-svg {
             width: 100% !important;
             height: auto !important;
-            max-height: calc(100vh - 80px) !important;
+            max-height: calc(100vh - 70px) !important;
             aspect-ratio: 1400 / 860 !important;
             display: block;
         }
         body[data-device="mobile"][data-orientation="landscape"] .board-right-sidebar {
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow-y: auto !important;
             -webkit-overflow-scrolling: touch;
-            max-height: calc(100vh - 46px) !important;
-            padding-right: 3px;
+            max-height: calc(100vh - 42px) !important;
+            padding-right: 2px;
             gap: 0.3rem;
+            min-width: 220px;
+        }
+        body[data-device="mobile"][data-orientation="landscape"] #turn-action-panel {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            margin-bottom: 0.25rem;
         }
         body[data-device="mobile"][data-orientation="landscape"] .action-card {
             padding: 0.45rem 0.55rem;

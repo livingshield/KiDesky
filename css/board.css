@@ -176,17 +176,33 @@
 
             display: grid;
 
-            grid-template-columns: 1fr 405px;
+            grid-template-columns: minmax(0, 1fr) 405px;
 
             gap: 1.05rem;
 
             align-items: start;
 
+            max-width: 100%;
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+        }
+
+        .board-workspace > * {
+
+            min-width: 0;
+
+            max-width: 100%;
+
+            box-sizing: border-box;
+
         }
 
         @media (max-width: 1240px) {
 
-            .board-workspace { grid-template-columns: 1fr; }
+            .board-workspace { grid-template-columns: minmax(0, 1fr); }
 
         }
 
@@ -215,6 +231,10 @@
             -webkit-user-select: none;
 
             touch-action: none;
+
+            max-width: 100%;
+
+            box-sizing: border-box;
 
         }
 
@@ -279,6 +299,14 @@
             border-radius: 12px;
 
             font-size: 0.82rem;
+
+            max-width: 100%;
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            min-width: 0;
 
         }
 
@@ -3190,4 +3218,106 @@ body[data-active-tab="board"] #topbar-announcement-banner {
 }
 .btn-advisor-toggle:hover {
     color: var(--gold-light) !important;
+}
+
+/* ==========================================================================
+   ČISTÁ CSS MEDIA QUERY: KONZOLOVÝ LANDSCAPE REŽIM PRO SMARTPHONY
+   ========================================================================== */
+@media (orientation: landscape) and (max-height: 540px) {
+    .board-workspace {
+        grid-template-columns: minmax(0, 1fr) minmax(225px, 265px) !important;
+        gap: 0.35rem !important;
+        align-items: stretch !important;
+        max-height: calc(100vh - 42px) !important;
+    }
+    .svg-board-container {
+        height: auto !important;
+        max-height: calc(100vh - 70px) !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+    }
+    #prs-board-svg {
+        height: auto !important;
+        max-height: calc(100vh - 70px) !important;
+    }
+    .board-right-sidebar {
+        display: flex !important;
+        flex-direction: column !important;
+        max-height: calc(100vh - 42px) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        min-width: 220px;
+        padding-right: 2px;
+    }
+    .board-bottom-bar {
+        display: none !important;
+    }
+    .map-floating-toolbar {
+        padding: 0.15rem 0.35rem !important;
+        margin-bottom: 0.2rem !important;
+        gap: 0.25rem !important;
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+        overflow-x: auto !important;
+    }
+    .map-floating-toolbar .btn-zoom {
+        padding: 0.18rem 0.35rem !important;
+        font-size: 0.72rem !important;
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVITA SÁLU RYTÍŘŮ A KARET PRO MOBILNÍ ZAŘÍZENÍ (PORTRAIT & LANDSCAPE)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .board-lower-dashboard {
+        margin-top: 1.2rem;
+        padding-top: 1rem;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    .lower-dashboard-header {
+        padding: 0.5rem 0.65rem;
+        font-size: 0.85rem;
+    }
+    .board-card-decks-section {
+        padding: 0.65rem 0.55rem;
+        border-radius: 12px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    .decks-strip-header {
+        margin-bottom: 0.55rem;
+        padding-bottom: 0.4rem;
+    }
+    .decks-strip-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.45rem !important;
+    }
+    .deck-physical-card {
+        padding: 0.55rem 0.35rem;
+    }
+    .deck-icon-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 1.05rem;
+        margin: 0.2rem auto 0.35rem auto;
+    }
+    .deck-card-title {
+        font-size: 0.78rem;
+    }
+    .deck-card-sub {
+        font-size: 0.68rem;
+    }
+    .princess-race-container {
+        padding: 0.45rem 0.55rem;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
+    }
+    .heart-track-grid {
+        gap: 0.4rem;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
 }

@@ -514,13 +514,15 @@ window.PRS_App = {
 
         var savedOverride = (typeof localStorage !== "undefined") ? localStorage.getItem("kidesky_device_override") : null;
 
-        if (w >= 900 && savedOverride === "mobile") {
+        if (w >= 1050 && h > 540 && savedOverride === "mobile") {
 
             try { localStorage.removeItem("kidesky_device_override"); } catch (e) { }
 
             savedOverride = null;
 
         }
+
+        var isMobileLandscape = isTouch && (h <= 540) && (w < 1050);
 
         var device = "desktop";
 
@@ -530,7 +532,7 @@ window.PRS_App = {
 
         } else {
 
-            if (w < 768) {
+            if (w < 768 || isMobileLandscape) {
 
                 device = "mobile";
 
@@ -585,6 +587,12 @@ window.PRS_App = {
         this.updateDeviceSwitcherUI();
 
         this.updateMobileDock();
+
+        if (this.activeTab === "board" && typeof this.renderActionPanel === "function") {
+
+            this.renderActionPanel();
+
+        }
 
         return this.deviceProfile;
 
