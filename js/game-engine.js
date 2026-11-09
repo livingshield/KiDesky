@@ -142,9 +142,16 @@ window.PRS_GameEngine = {
 
         }
 
-        var boardCode = options.boardCode || "classic_96";
-
+        var boardCode = options.boardCode || cfg.boardCode || "classic_96";
+        if (cfg.customBoardRecipe && !options.customRecipe) {
+            options.customRecipe = cfg.customBoardRecipe;
+        }
         var board = window.PRS_BoardBuilder.createBoard(boardCode, options);
+        cfg.boardCode = boardCode;
+        cfg.boardTemplate = boardCode;
+        if (board && board.recipe) {
+            cfg.customBoardRecipe = board.recipe;
+        }
 
         var playerDefs = options.players || [
 

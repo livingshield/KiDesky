@@ -905,6 +905,21 @@ public class KiDeskyApiHandler : IHttpHandler
                 case "record-game-stats":
                     HandleRecordGameStats(context);
                     break;
+                case "list-board-templates":
+                    HandleListBoardTemplates(context);
+                    break;
+                case "get-board-template":
+                    HandleGetBoardTemplate(context);
+                    break;
+                case "admin-save-board-template":
+                    HandleAdminSaveBoardTemplate(context);
+                    break;
+                case "admin-rename-board-template":
+                    HandleAdminRenameBoardTemplate(context);
+                    break;
+                case "admin-delete-board-template":
+                    HandleAdminDeleteBoardTemplate(context);
+                    break;
 
 
 
@@ -1445,14 +1460,111 @@ END
 
 UPDATE [prs].[prs_Users]
 SET [DisplayName] = [Username]
-WHERE [DisplayName] LIKE '%Ã%' OR [DisplayName] LIKE '%Å%';
-END", conn))
+WHERE [DisplayName] LIKE '%Ã%' OR [DisplayName] LIKE '%Å%';", conn))
             {
                 seedCmd.Parameters.Add("@vt", SqlDbType.NVarChar, 128).Value = "Královská upoutávka (Růže pro Danielku)";
                 seedCmd.Parameters.Add("@vd", SqlDbType.NVarChar, 500).Value = "Oficiální videopředstavení světa KiDesky a Princeznina srdce";
                 seedCmd.Parameters.Add("@am", SqlDbType.NVarChar, 500).Value = "Vítejte v království KiDesky: Princeznino srdce! Otestujte své rytířské ctnosti v turnajích.";
                 seedCmd.ExecuteNonQuery();
             }
+
+            // Schéma a výchozí záznamy pro předdefinované a dynamické herní plány [prs].[prs_BoardTemplates]
+            try
+            {
+                using (var tplMigCmd = new SqlCommand(@"
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_BoardTemplates]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [prs].[prs_BoardTemplates] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [TemplateCode] NVARCHAR(50) NOT NULL UNIQUE,
+        [Name] NVARCHAR(100) NOT NULL,
+        [Description] NVARCHAR(500) NULL,
+        [NodeCount] INT NOT NULL DEFAULT 96,
+        [GraphJson] NVARCHAR(MAX) NOT NULL DEFAULT N'{}',
+        [RecipeJson] NVARCHAR(MAX) NULL,
+        [Seed] INT NOT NULL DEFAULT 4598,
+        [IsBuiltIn] BIT NOT NULL DEFAULT 0,
+        [IsActive] BIT NOT NULL DEFAULT 1,
+        [SortOrder] INT NOT NULL DEFAULT 100,
+        [CreatedBy] NVARCHAR(64) NULL,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        [UpdatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+
+IF OBJECT_ID(N'[prs].[prs_BoardTemplates]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_BoardTemplates]') AND name = 'RecipeJson')
+BEGIN
+    ALTER TABLE [prs].[prs_BoardTemplates] ADD [RecipeJson] NVARCHAR(MAX) NULL;
+END
+
+IF OBJECT_ID(N'[prs].[prs_BoardTemplates]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_BoardTemplates]') AND name = 'Seed')
+BEGIN
+    ALTER TABLE [prs].[prs_BoardTemplates] ADD [Seed] INT NOT NULL DEFAULT 4598;
+END
+
+IF OBJECT_ID(N'[prs].[prs_BoardTemplates]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_BoardTemplates]') AND name = 'IsBuiltIn')
+BEGIN
+    ALTER TABLE [prs].[prs_BoardTemplates] ADD [IsBuiltIn] BIT NOT NULL DEFAULT 0;
+END
+
+IF OBJECT_ID(N'[prs].[prs_BoardTemplates]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_BoardTemplates]') AND name = 'IsActive')
+BEGIN
+    ALTER TABLE [prs].[prs_BoardTemplates] ADD [IsActive] BIT NOT NULL DEFAULT 1;
+END
+
+IF OBJECT_ID(N'[prs].[prs_BoardTemplates]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_BoardTemplates]') AND name = 'SortOrder')
+BEGIN
+    ALTER TABLE [prs].[prs_BoardTemplates] ADD [SortOrder] INT NOT NULL DEFAULT 100;
+END
+
+IF OBJECT_ID(N'[prs].[prs_BoardTemplates]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_BoardTemplates]') AND name = 'CreatedBy')
+BEGIN
+    ALTER TABLE [prs].[prs_BoardTemplates] ADD [CreatedBy] NVARCHAR(64) NULL;
+END
+
+IF OBJECT_ID(N'[prs].[prs_BoardTemplates]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_BoardTemplates]') AND name = 'UpdatedAt')
+BEGIN
+    ALTER TABLE [prs].[prs_BoardTemplates] ADD [UpdatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME();
+END", conn))
+                {
+                    tplMigCmd.ExecuteNonQuery();
+                }
+
+                using (var tplSeedCmd = new SqlCommand(@"
+IF NOT EXISTS (SELECT 1 FROM [prs].[prs_BoardTemplates] WHERE [TemplateCode] = N'classic_96')
+BEGIN
+    INSERT INTO [prs].[prs_BoardTemplates] ([TemplateCode], [Name], [Description], [NodeCount], [GraphJson], [RecipeJson], [Seed], [IsBuiltIn], [IsActive], [SortOrder], [CreatedBy])
+    VALUES (N'classic_96', @n1, @d1, 96, N'{}', @r1, 4598, 1, 1, 10, N'system');
+END
+
+IF NOT EXISTS (SELECT 1 FROM [prs].[prs_BoardTemplates] WHERE [TemplateCode] = N'dragon_4598')
+BEGIN
+    INSERT INTO [prs].[prs_BoardTemplates] ([TemplateCode], [Name], [Description], [NodeCount], [GraphJson], [RecipeJson], [Seed], [IsBuiltIn], [IsActive], [SortOrder], [CreatedBy])
+    VALUES (N'dragon_4598', @n2, @d2, 64, N'{}', @r2, 4598, 1, 1, 20, N'system');
+END
+
+IF NOT EXISTS (SELECT 1 FROM [prs].[prs_BoardTemplates] WHERE [TemplateCode] = N'compact_48')
+BEGIN
+    INSERT INTO [prs].[prs_BoardTemplates] ([TemplateCode], [Name], [Description], [NodeCount], [GraphJson], [RecipeJson], [Seed], [IsBuiltIn], [IsActive], [SortOrder], [CreatedBy])
+    VALUES (N'compact_48', @n3, @d3, 48, N'{}', @r3, 4598, 1, 1, 30, N'system');
+END", conn))
+                {
+                    tplSeedCmd.Parameters.Add("@n1", SqlDbType.NVarChar, 100).Value = "Královská divočina 96 (Velký plán)";
+                    tplSeedCmd.Parameters.Add("@d1", SqlDbType.NVarChar, 500).Value = "Klasická velká herní deska s 96 poli, 4 vnitřními větvemi a 12 chovnými sadami zvířat.";
+                    tplSeedCmd.Parameters.Add("@r1", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5,6,7,8,9,10,11,12],\"villages\":10,\"towns\":5,\"castles\":3,\"jesters\":4,\"buildings\":5,\"questsU1\":4,\"questsU2\":3,\"questsU3\":2,\"masters\":7,\"merchants\":3,\"festivals\":3,\"chances\":6,\"taxes\":2,\"prisons\":1,\"hospitals\":1,\"taverns\":0,\"branches\":4}";
+
+                    tplSeedCmd.Parameters.Add("@n2", SqlDbType.NVarChar, 100).Value = "Dračí stezka (Střední plán – 64 polí)";
+                    tplSeedCmd.Parameters.Add("@d2", SqlDbType.NVarChar, 500).Value = "Středně velký královský plán se 64 poli, řekou Doubravkou a 8 sadami zvířat.";
+                    tplSeedCmd.Parameters.Add("@r2", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5,6,7,8],\"villages\":7,\"towns\":4,\"castles\":2,\"jesters\":3,\"buildings\":4,\"questsU1\":3,\"questsU2\":2,\"questsU3\":2,\"masters\":5,\"merchants\":2,\"festivals\":2,\"chances\":4,\"taxes\":1,\"prisons\":1,\"hospitals\":1,\"taverns\":0,\"branches\":2}";
+
+                    tplSeedCmd.Parameters.Add("@n3", SqlDbType.NVarChar, 100).Value = "Rytířské kolbiště (Rychlá hra – 48 polí)";
+                    tplSeedCmd.Parameters.Add("@d3", SqlDbType.NVarChar, 500).Value = "Kompaktní herní plán s 48 poli pro svižnější partie plné přímých střetů.";
+                    tplSeedCmd.Parameters.Add("@r3", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5,6],\"villages\":5,\"towns\":3,\"castles\":2,\"jesters\":2,\"buildings\":3,\"questsU1\":2,\"questsU2\":2,\"questsU3\":1,\"masters\":4,\"merchants\":2,\"festivals\":2,\"chances\":3,\"taxes\":1,\"prisons\":1,\"hospitals\":1,\"taverns\":0,\"branches\":1}";
+
+                    tplSeedCmd.ExecuteNonQuery();
+                }
+            }
+            catch { }
 
             using (var roleCmd = new SqlCommand("UPDATE [prs].[prs_Users] SET [Role] = N'Admin' WHERE [Username] IN (N'admin', N'rytir_jan', N'jan.kytyr@seznam.cz')", conn))
             {
@@ -5961,7 +6073,7 @@ END";
         {
             conn.Open();
             EnsureExtendedAdminSchema(conn);
-            string[] tables = new string[] { "prs_Users", "prs_GameSessions", "prs_SessionPlayers", "prs_TelemetryLogs", "prs_GameConfigs", "prs_Videos", "prs_Announcements" };
+            string[] tables = new string[] { "prs_Users", "prs_GameSessions", "prs_SessionPlayers", "prs_TelemetryLogs", "prs_GameConfigs", "prs_BoardTemplates", "prs_Videos", "prs_Announcements" };
             foreach (var t in tables)
             {
                 try
@@ -5988,6 +6100,351 @@ END";
             os = Environment.OSVersion.ToString(),
             tableCounts = counts
         }));
+    }
+
+    // =========================================================
+    // SPRÁVA PŘEDDEFINOVANÝCH A DYNAMICKÝCH HERNÍCH PLÁNŮ
+    // =========================================================
+
+    private void HandleListBoardTemplates(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        bool showAll = (context.Request.QueryString["all"] == "1");
+        bool includeGraph = (context.Request.QueryString["includeGraph"] != "0");
+        var list = new List<object>();
+
+        if (!IsDbConfigured())
+        {
+            context.Response.Write(_json.Serialize(new { ok = true, status = "offline", templates = list }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            string sql = @"
+                SELECT [Id], [TemplateCode], [Name], [Description], [NodeCount],
+                       [RecipeJson], [GraphJson], [Seed], [IsBuiltIn], [IsActive],
+                       [SortOrder], [CreatedBy], [CreatedAt], [UpdatedAt]
+                FROM [prs].[prs_BoardTemplates]
+                " + (showAll ? "" : "WHERE [IsActive] = 1") + @"
+                ORDER BY [SortOrder] ASC, [Id] ASC";
+
+            using (var cmd = new SqlCommand(sql, conn))
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    bool isBuiltIn = r["IsBuiltIn"] != DBNull.Value && Convert.ToBoolean(r["IsBuiltIn"]);
+                    string graphStr = (r["GraphJson"] == DBNull.Value) ? "{}" : r["GraphJson"].ToString();
+                    list.Add(new
+                    {
+                        id = Convert.ToInt32(r["Id"]),
+                        templateCode = r["TemplateCode"].ToString(),
+                        name = r["Name"].ToString(),
+                        description = r["Description"] == DBNull.Value ? "" : r["Description"].ToString(),
+                        nodeCount = Convert.ToInt32(r["NodeCount"]),
+                        seed = r["Seed"] == DBNull.Value ? 4598 : Convert.ToInt32(r["Seed"]),
+                        isBuiltIn = isBuiltIn,
+                        isActive = r["IsActive"] == DBNull.Value || Convert.ToBoolean(r["IsActive"]),
+                        sortOrder = r["SortOrder"] == DBNull.Value ? 100 : Convert.ToInt32(r["SortOrder"]),
+                        createdBy = r["CreatedBy"] == DBNull.Value ? "admin" : r["CreatedBy"].ToString(),
+                        recipeJson = r["RecipeJson"] == DBNull.Value ? null : r["RecipeJson"].ToString(),
+                        graphJson = (includeGraph && !isBuiltIn) ? graphStr : null,
+                        createdAt = r["CreatedAt"] == DBNull.Value ? null : Convert.ToDateTime(r["CreatedAt"]).ToString("o"),
+                        updatedAt = r["UpdatedAt"] == DBNull.Value ? null : Convert.ToDateTime(r["UpdatedAt"]).ToString("o")
+                    });
+                }
+            }
+        }
+
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success", templates = list }));
+    }
+
+    private void HandleGetBoardTemplate(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        string code = (context.Request.QueryString["code"] ?? context.Request.QueryString["templateCode"] ?? "").Trim();
+        int id = 0;
+        int.TryParse(context.Request.QueryString["id"] ?? "0", out id);
+
+        if (string.IsNullOrEmpty(code) && id <= 0)
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Chybí identifikátor herního plánu." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            string sql = id > 0
+                ? "SELECT TOP 1 * FROM [prs].[prs_BoardTemplates] WHERE [Id] = @id"
+                : "SELECT TOP 1 * FROM [prs].[prs_BoardTemplates] WHERE [TemplateCode] = @code";
+
+            using (var cmd = new SqlCommand(sql, conn))
+            {
+                if (id > 0) cmd.Parameters.AddWithValue("@id", id);
+                else cmd.Parameters.AddWithValue("@code", code);
+
+                using (var r = cmd.ExecuteReader())
+                {
+                    if (r.Read())
+                    {
+                        var tpl = new
+                        {
+                            id = Convert.ToInt32(r["Id"]),
+                            templateCode = r["TemplateCode"].ToString(),
+                            name = r["Name"].ToString(),
+                            description = r["Description"] == DBNull.Value ? "" : r["Description"].ToString(),
+                            nodeCount = Convert.ToInt32(r["NodeCount"]),
+                            seed = r["Seed"] == DBNull.Value ? 4598 : Convert.ToInt32(r["Seed"]),
+                            isBuiltIn = r["IsBuiltIn"] != DBNull.Value && Convert.ToBoolean(r["IsBuiltIn"]),
+                            isActive = r["IsActive"] == DBNull.Value || Convert.ToBoolean(r["IsActive"]),
+                            sortOrder = r["SortOrder"] == DBNull.Value ? 100 : Convert.ToInt32(r["SortOrder"]),
+                            recipeJson = r["RecipeJson"] == DBNull.Value ? null : r["RecipeJson"].ToString(),
+                            graphJson = r["GraphJson"] == DBNull.Value ? "{}" : r["GraphJson"].ToString()
+                        };
+                        context.Response.Write(_json.Serialize(new { ok = true, status = "success", template = tpl }));
+                        return;
+                    }
+                }
+            }
+        }
+
+        context.Response.Write(_json.Serialize(new { ok = false, message = "Herní plán nebyl nalezen." }));
+    }
+
+    private void HandleAdminSaveBoardTemplate(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        string templateCode = GetStr(body, "templateCode").Trim();
+        string name = GetStr(body, "name").Trim();
+        string description = GetStr(body, "description").Trim();
+        int nodeCount = GetInt(body, "nodeCount", 96);
+        int seed = GetInt(body, "seed", 4598);
+        int sortOrder = GetInt(body, "sortOrder", 50);
+        bool isActive = !body.ContainsKey("isActive") || GetBool(body, "isActive", true);
+        string createdBy = GetStr(body, "createdBy", "admin").Trim();
+        string recipeJson = GetStr(body, "recipeJson");
+        string graphJson = GetStr(body, "graphJson", "{}");
+
+        if (string.IsNullOrEmpty(name))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Zadejte prosím název herního plánu." }));
+            return;
+        }
+
+        if (string.IsNullOrEmpty(templateCode))
+        {
+            templateCode = "custom_" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "_" + (new Random().Next(100, 999));
+        }
+
+        if (string.IsNullOrEmpty(graphJson)) graphJson = "{}";
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+
+            int existingId = id;
+            if (existingId <= 0)
+            {
+                using (var chk = new SqlCommand("SELECT [Id] FROM [prs].[prs_BoardTemplates] WHERE [TemplateCode] = @tc", conn))
+                {
+                    chk.Parameters.AddWithValue("@tc", templateCode);
+                    object found = chk.ExecuteScalar();
+                    if (found != null && found != DBNull.Value) existingId = Convert.ToInt32(found);
+                }
+            }
+
+            if (existingId > 0)
+            {
+                using (var upd = new SqlCommand(@"
+                    UPDATE [prs].[prs_BoardTemplates]
+                    SET [Name] = @n,
+                        [Description] = @d,
+                        [NodeCount] = @nc,
+                        [Seed] = @s,
+                        [SortOrder] = @so,
+                        [IsActive] = @ia,
+                        [RecipeJson] = COALESCE(@rj, [RecipeJson]),
+                        [GraphJson] = CASE WHEN @gj = N'{}' THEN [GraphJson] ELSE @gj END,
+                        [UpdatedAt] = SYSUTCDATETIME()
+                    WHERE [Id] = @id", conn))
+                {
+                    upd.Parameters.Add("@n", SqlDbType.NVarChar, 100).Value = name;
+                    upd.Parameters.Add("@d", SqlDbType.NVarChar, 500).Value = description;
+                    upd.Parameters.AddWithValue("@nc", nodeCount);
+                    upd.Parameters.AddWithValue("@s", seed);
+                    upd.Parameters.AddWithValue("@so", sortOrder);
+                    upd.Parameters.AddWithValue("@ia", isActive);
+                    upd.Parameters.Add("@rj", SqlDbType.NVarChar, -1).Value = string.IsNullOrEmpty(recipeJson) ? (object)DBNull.Value : recipeJson;
+                    upd.Parameters.Add("@gj", SqlDbType.NVarChar, -1).Value = graphJson;
+                    upd.Parameters.AddWithValue("@id", existingId);
+                    upd.ExecuteNonQuery();
+                }
+
+                context.Response.Write(_json.Serialize(new
+                {
+                    ok = true,
+                    status = "success",
+                    id = existingId,
+                    templateCode = templateCode,
+                    message = "Předdefinovaný herní plán '" + name + "' byl aktualizován."
+                }));
+                return;
+            }
+            else
+            {
+                int newId = 0;
+                using (var ins = new SqlCommand(@"
+                    INSERT INTO [prs].[prs_BoardTemplates]
+                        ([TemplateCode], [Name], [Description], [NodeCount], [GraphJson], [RecipeJson], [Seed], [IsBuiltIn], [IsActive], [SortOrder], [CreatedBy], [CreatedAt], [UpdatedAt])
+                    OUTPUT INSERTED.[Id]
+                    VALUES
+                        (@tc, @n, @d, @nc, @gj, @rj, @s, 0, @ia, @so, @cb, SYSUTCDATETIME(), SYSUTCDATETIME())", conn))
+                {
+                    ins.Parameters.Add("@tc", SqlDbType.NVarChar, 50).Value = templateCode;
+                    ins.Parameters.Add("@n", SqlDbType.NVarChar, 100).Value = name;
+                    ins.Parameters.Add("@d", SqlDbType.NVarChar, 500).Value = description;
+                    ins.Parameters.AddWithValue("@nc", nodeCount);
+                    ins.Parameters.Add("@gj", SqlDbType.NVarChar, -1).Value = graphJson;
+                    ins.Parameters.Add("@rj", SqlDbType.NVarChar, -1).Value = string.IsNullOrEmpty(recipeJson) ? (object)DBNull.Value : recipeJson;
+                    ins.Parameters.AddWithValue("@s", seed);
+                    ins.Parameters.AddWithValue("@ia", isActive);
+                    ins.Parameters.AddWithValue("@so", sortOrder);
+                    ins.Parameters.Add("@cb", SqlDbType.NVarChar, 64).Value = createdBy;
+                    newId = Convert.ToInt32(ins.ExecuteScalar());
+                }
+
+                context.Response.Write(_json.Serialize(new
+                {
+                    ok = true,
+                    status = "success",
+                    id = newId,
+                    templateCode = templateCode,
+                    message = "Nový předdefinovaný herní plán '" + name + "' byl uložen do databáze."
+                }));
+            }
+        }
+    }
+
+    private void HandleAdminRenameBoardTemplate(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        string templateCode = GetStr(body, "templateCode").Trim();
+        string name = GetStr(body, "name").Trim();
+        string description = GetStr(body, "description").Trim();
+        int sortOrder = GetInt(body, "sortOrder", -1);
+        bool hasActive = body.ContainsKey("isActive");
+        bool isActive = GetBool(body, "isActive", true);
+
+        if ((id <= 0 && string.IsNullOrEmpty(templateCode)) || string.IsNullOrEmpty(name))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Zadejte platné ID a nový název herního plánu." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            string sql = @"
+                UPDATE [prs].[prs_BoardTemplates]
+                SET [Name] = @n,
+                    [Description] = @d,
+                    [SortOrder] = CASE WHEN @so >= 0 THEN @so ELSE [SortOrder] END,
+                    [IsActive] = CASE WHEN @hasAct = 1 THEN @ia ELSE [IsActive] END,
+                    [UpdatedAt] = SYSUTCDATETIME()
+                WHERE " + (id > 0 ? "[Id] = @id" : "[TemplateCode] = @tc");
+
+            using (var cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.Add("@n", SqlDbType.NVarChar, 100).Value = name;
+                cmd.Parameters.Add("@d", SqlDbType.NVarChar, 500).Value = description;
+                cmd.Parameters.AddWithValue("@so", sortOrder);
+                cmd.Parameters.AddWithValue("@hasAct", hasActive ? 1 : 0);
+                cmd.Parameters.AddWithValue("@ia", isActive);
+                if (id > 0) cmd.Parameters.AddWithValue("@id", id);
+                else cmd.Parameters.Add("@tc", SqlDbType.NVarChar, 50).Value = templateCode;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        context.Response.Write(_json.Serialize(new
+        {
+            ok = true,
+            status = "success",
+            message = "Herní plán byl přejmenován na '" + name + "'."
+        }));
+    }
+
+    private void HandleAdminDeleteBoardTemplate(HttpContext context)
+    {
+        EnsureDatabaseSchema();
+        var body = ReadJsonBody(context);
+        int id = GetInt(body, "id", 0);
+        string templateCode = GetStr(body, "templateCode").Trim();
+
+        if (id <= 0 && string.IsNullOrEmpty(templateCode))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatný identifikátor herního plánu." }));
+            return;
+        }
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+
+            bool isBuiltIn = false;
+            string whereClause = id > 0 ? "[Id] = @id" : "[TemplateCode] = @tc";
+            using (var chk = new SqlCommand("SELECT [IsBuiltIn] FROM [prs].[prs_BoardTemplates] WHERE " + whereClause, conn))
+            {
+                if (id > 0) chk.Parameters.AddWithValue("@id", id);
+                else chk.Parameters.Add("@tc", SqlDbType.NVarChar, 50).Value = templateCode;
+                object res = chk.ExecuteScalar();
+                if (res != null && res != DBNull.Value) isBuiltIn = Convert.ToBoolean(res);
+            }
+
+            if (isBuiltIn)
+            {
+                // Vestavěné plány skryjeme z nabídky (IsActive = 0), aby je šlo v případě potřeby v administraci obnovit
+                using (var cmd = new SqlCommand("UPDATE [prs].[prs_BoardTemplates] SET [IsActive] = 0, [UpdatedAt] = SYSUTCDATETIME() WHERE " + whereClause, conn))
+                {
+                    if (id > 0) cmd.Parameters.AddWithValue("@id", id);
+                    else cmd.Parameters.Add("@tc", SqlDbType.NVarChar, 50).Value = templateCode;
+                    cmd.ExecuteNonQuery();
+                }
+                context.Response.Write(_json.Serialize(new
+                {
+                    ok = true,
+                    status = "success",
+                    message = "Výchozí herní plán byl odebrán z aktivní nabídky (v administraci jej lze kdykoliv znovu zapnout)."
+                }));
+            }
+            else
+            {
+                using (var cmd = new SqlCommand("DELETE FROM [prs].[prs_BoardTemplates] WHERE " + whereClause, conn))
+                {
+                    if (id > 0) cmd.Parameters.AddWithValue("@id", id);
+                    else cmd.Parameters.Add("@tc", SqlDbType.NVarChar, 50).Value = templateCode;
+                    cmd.ExecuteNonQuery();
+                }
+                context.Response.Write(_json.Serialize(new
+                {
+                    ok = true,
+                    status = "success",
+                    message = "Předdefinovaný herní plán byl trvale odebrán."
+                }));
+            }
+        }
     }
 
     public bool IsReusable { get { return false; } }

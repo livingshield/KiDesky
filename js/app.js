@@ -245,6 +245,7 @@ window.PRS_App = {
             if (self.updateSavedGamesUI) self.updateSavedGamesUI();
 
             self.checkUrlRoomParam();
+            if (self.loadBoardTemplatesFromServer) self.loadBoardTemplatesFromServer();
 
             fetch("api.ashx?action=get-config")
                 .then(function (r) { return r.json(); })
@@ -3612,7 +3613,67 @@ window.PRS_App = {
         }
     },
 
+    handleLobbyBoardSelectChange: function (boardCode) {
+        if (boardCode === "custom_dynamic") {
+            this.openMapStudioModal();
+        }
+    },
+
+    loadBoardTemplatesFromServer: function (cb) {
+        var self = this;
+        fetch("api.ashx?action=list-board-templates")
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res && res.ok && Array.isArray(res.templates)) {
+                    if (window.PRS_BoardBuilder && window.PRS_BoardBuilder.registerDbTemplates) {
+                        window.PRS_BoardBuilder.registerDbTemplates(res.templates);
+                    }
+                    self.refreshBoardTemplateSelects();
+                }
+                if (typeof cb === "function") cb(res);
+            })
+            .catch(function () {
+                if (typeof cb === "function") cb(null);
+            });
+    },
+
+    refreshBoardTemplateSelects: function () {
+        if (!window.PRS_BoardBuilder || !window.PRS_BoardBuilder.getActiveTemplatesList) return;
+        var list = window.PRS_BoardBuilder.getActiveTemplatesList();
+        var lobbySel = document.getElementById("lobby-board-select");
+        var boardSel = document.getElementById("board-template-select");
+        var simSel = document.getElementById("sim-board-select");
+
+        var self = this;
+        function populateSelect(sel, prefix) {
+            if (!sel) return;
+            var curVal = sel.value || "classic_96";
+            var html = "";
+            for (var i = 0; i < list.length; i++) {
+                var t = list[i];
+                var label = (prefix ? (prefix + t.name) : t.name) + (t.nodeCount ? (" (" + t.nodeCount + " polí)") : "");
+                html += '<option value="' + self.escapeHtml(t.templateCode) + '">' + self.escapeHtml(label) + '</option>';
+            }
+            html += '<option value="custom_dynamic">' + (prefix ? (prefix + "Vlastní dynamický (Map Studio)") : "🛠️ Vlastní dynamický plán (Map Studio)") + '</option>';
+            html += '<option value="procedural">' + (prefix ? (prefix + "Náhodné království") : "🎲 Náhodné království (Procedurální)") + '</option>';
+            sel.innerHTML = html;
+            var exists = false;
+            for (var j = 0; j < sel.options.length; j++) {
+                if (sel.options[j].value === curVal) { exists = true; break; }
+            }
+            sel.value = exists ? curVal : (sel.options[0] ? sel.options[0].value : "classic_96");
+        }
+
+        populateSelect(lobbySel, "");
+        populateSelect(boardSel, "Plán: ");
+        populateSelect(simSel, "🗺️ Plán: ");
+    },
+
     changeBoardTemplateLive: async function (boardCode) {
+        if (boardCode === "custom_dynamic") {
+            this.openMapStudioModal();
+            return;
+        }
 
         if (this.state && this.state.turnNumber > 0) {
 
@@ -3709,13 +3770,17 @@ window.PRS_App = {
             this.lobbyPlayers[0].pawnId = this.selectedPawnId || this.lobbyPlayers[0].pawnId || "knight_valiant";
         }
 
+        var isDynamicOrProc = (boardCode === "procedural" || boardCode === "custom_dynamic");
+        var activeSeed = isDynamicOrProc ? (this.currentBoardSeed || (this.currentBoardSeed = Math.floor(Math.random() * 899999 + 100000))) : null;
+
         this.state = window.PRS_GameEngine.createGame({
 
             config: this.activeConfig,
 
             boardCode: boardCode,
-            boardSeed: (boardCode === "procedural" ? (this.currentBoardSeed || (this.currentBoardSeed = Math.floor(Math.random() * 899999 + 100000))) : null),
-            seed: (boardCode === "procedural" ? (this.currentBoardSeed || (this.currentBoardSeed = Math.floor(Math.random() * 899999 + 100000))) : null),
+            boardSeed: activeSeed,
+            seed: activeSeed,
+            customRecipe: (boardCode === "custom_dynamic" ? this.customBoardRecipe : null),
 
             scenario: scenario,
 
@@ -3742,7 +3807,7 @@ window.PRS_App = {
 
         this.lastKnownTurnNumber = 1;
 
-        if (boardCode === "procedural" && typeof fetch === "function") {
+        if (isDynamicOrProc && typeof fetch === "function") {
             try {
                 fetch("api.ashx?action=log-telemetry", {
                     method: "POST",
@@ -4214,17 +4279,56 @@ window.PRS_App = {
     },
 
     // ========================================================================
-    // KRÁLOVSKÉ MAP STUDIO (GENERÁTOR MAP 2.0)
+    // KRÁLOVSKÉ MAP STUDIO (DYNAMICKÝ SESTAVOVAČ HERNÍHO PLÁNU 2.0)
     // ========================================================================
     mapStudioSeed: 4598,
     mapStudioOptions: null,
+    customBoardRecipe: null,
     _currentMapStudioBoard: null,
 
-    openMapStudioModal: function (initialSeed) {
+    MAP_STUDIO_COUNTERS_DEF: [
+        { key: "villages", label: "🏘️ Vesnice (V)", min: 0, max: 24 },
+        { key: "towns", label: "🏙️ Města (M)", min: 0, max: 14 },
+        { key: "castles", label: "🏯 Hrady (H)", min: 0, max: 9 },
+        { key: "jesters", label: "🃏 Kejklíři (KE)", min: 0, max: 12 },
+        { key: "buildings", label: "⚒️ Cechovní živnosti", min: 0, max: 12 },
+        { key: "questsU1", label: "🐗 Zvěř (U1)", min: 0, max: 16 },
+        { key: "questsU2", label: "👹 Monstra (U2)", min: 0, max: 14 },
+        { key: "questsU3", label: "🐲 Dračí sluje (U3)", min: 0, max: 10 },
+        { key: "masters", label: "🧙‍♂️ Mistři ctností", min: 0, max: 20 },
+        { key: "merchants", label: "⚖️ Obchodníci", min: 0, max: 10 },
+        { key: "festivals", label: "💖 Slavnosti", min: 0, max: 12 },
+        { key: "chances", label: "❓ Pole Náhody (N)", min: 0, max: 24 },
+        { key: "taxes", label: "👑 Výběrčí daní", min: 0, max: 8 },
+        { key: "prisons", label: "⛓️ Šatlava", min: 0, max: 4 },
+        { key: "hospitals", label: "🏥 Lazaret", min: 0, max: 4 },
+        { key: "taverns", label: "🍺 Krčma", min: 0, max: 6 }
+    ],
+
+    ensureMapStudioRecipe: function () {
+        if (!window.KiDeskyMapGenerator) return;
+        if (!this.customBoardRecipe) {
+            this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(window.KiDeskyMapGenerator.DEFAULT_RECIPE, this.mapStudioSeed);
+        } else {
+            this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(this.customBoardRecipe, this.mapStudioSeed);
+        }
+    },
+
+    openMapStudioModal: function (initialSeed, initialRecipe) {
         this.mapStudioSeed = initialSeed || this.currentBoardSeed || Math.floor(Math.random() * 899999 + 100000);
+        if (initialRecipe && window.KiDeskyMapGenerator) {
+            this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(initialRecipe, this.mapStudioSeed);
+        } else {
+            this.ensureMapStudioRecipe();
+        }
         var modal = document.getElementById("map-studio-modal");
         if (modal) {
             modal.style.display = "flex";
+            var adminBtn = document.getElementById("btn-ms-admin-save-template");
+            if (adminBtn) {
+                adminBtn.style.display = (this.currentUser && this.currentUser.role === "Admin") ? "inline-flex" : "none";
+            }
+            this.syncMapStudioInputsFromRecipe();
             this.renderSavedMapsInStudio();
             this.updateMapStudioPreview();
         }
@@ -4235,43 +4339,203 @@ window.PRS_App = {
         if (modal) modal.style.display = "none";
     },
 
+    syncMapStudioInputsFromRecipe: function () {
+        this.ensureMapStudioRecipe();
+        var r = this.customBoardRecipe;
+        if (!r) return;
+
+        var elBranches = document.getElementById("ms-branches");
+        var elTier = document.getElementById("ms-master-tier");
+        var elRiver = document.getElementById("ms-river-mode");
+        var elBiome = document.getElementById("ms-biome-theme");
+        var elName = document.getElementById("ms-custom-name");
+        var elSeed = document.getElementById("ms-seed-input");
+
+        if (elBranches) elBranches.value = String(r.branches !== undefined ? r.branches : 3);
+        if (elTier) elTier.value = String(r.masterTier || 2);
+        if (elRiver) elRiver.value = r.riverMode || "single";
+        if (elBiome) elBiome.value = r.biomeTheme || "balanced";
+        if (elName) elName.value = r.customName || "";
+        if (elSeed) elSeed.value = String(this.mapStudioSeed || r.seed || 4598);
+
+        this.renderMapStudioAnimalLevels();
+        this.renderMapStudioCounters();
+    },
+
+    renderMapStudioAnimalLevels: function () {
+        var grid = document.getElementById("ms-animal-levels-grid");
+        if (!grid || !this.customBoardRecipe) return;
+        var activeLevels = this.customBoardRecipe.animalLevels || [1, 2, 3, 4, 5, 6];
+        var ribbonColors = {
+            1: "#2563eb", 2: "#059669", 3: "#d97706", 4: "#7c3aed",
+            5: "#dc2626", 6: "#0891b2", 7: "#ea580c", 8: "#4f46e5",
+            9: "#16a34a", 10: "#db2777", 11: "#ca8a04", 12: "#0d9488",
+            13: "#9333ea", 14: "#475569"
+        };
+        var setsCatalog = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ANIMAL_SETS) ? window.KiDeskyMapGenerator.ANIMAL_SETS : [];
+        var html = "";
+        for (var lvl = 1; lvl <= 14; lvl++) {
+            var isSelected = activeLevels.indexOf(lvl) !== -1;
+            var sDef = setsCatalog[lvl - 1] || { kun: "Kůň " + lvl, sokol: "Sokol " + lvl, pes: "Pes " + lvl };
+            var col = ribbonColors[lvl] || "#2563eb";
+            var bg = isSelected ? "rgba(16,185,129,0.18)" : "rgba(15,23,42,0.55)";
+            var border = isSelected ? "#34d399" : "rgba(255,255,255,0.12)";
+            var textCol = isSelected ? "#f8fafc" : "#94a3b8";
+
+            html += '<div onclick="PRS_App.toggleMapStudioAnimalLevel(' + lvl + ')" style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:' + bg + '; border:1px solid ' + border + '; border-radius:6px; padding:4px 6px; cursor:pointer; user-select:none; transition:all 0.15s;" title="Level ' + lvl + ': ' + this.escapeHtml(sDef.kun + ' • ' + sDef.sokol + ' • ' + sDef.pes) + ' (Cena ' + (lvl * 400) + '/' + (lvl * 500) + '/' + (lvl * 600) + ' zl.)">' +
+                '<div style="display:flex; align-items:center; gap:5px; min-width:0;">' +
+                    '<span style="width:14px; height:14px; border-radius:50%; background:' + col + '; color:#fff; font-size:0.62rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid rgba(255,255,255,0.5);">' + lvl + '</span>' +
+                    '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.7rem; color:' + textCol + '; font-weight:' + (isSelected ? '700' : '500') + ';">' +
+                        this.escapeHtml(sDef.kun) + ' <span style="opacity:0.7; font-size:0.64rem;">(+S+P)</span>' +
+                    '</div>' +
+                '</div>' +
+                '<span style="font-size:0.74rem; color:' + (isSelected ? '#4ade80' : '#475569') + '; font-weight:bold; flex-shrink:0;">' + (isSelected ? '✓ 3' : '○') + '</span>' +
+            '</div>';
+        }
+        grid.innerHTML = html;
+
+        var sumBadge = document.getElementById("ms-animal-summary-badge");
+        if (sumBadge) {
+            sumBadge.textContent = activeLevels.length + " trojic = " + (activeLevels.length * 3) + " polí";
+        }
+    },
+
+    renderMapStudioCounters: function () {
+        var grid = document.getElementById("ms-counters-grid");
+        if (!grid || !this.customBoardRecipe) return;
+        var r = this.customBoardRecipe;
+        var defs = this.MAP_STUDIO_COUNTERS_DEF;
+        var html = "";
+        for (var i = 0; i < defs.length; i++) {
+            var d = defs[i];
+            var val = (r[d.key] !== undefined) ? r[d.key] : 0;
+            html += '<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:rgba(15,23,42,0.55); border:1px solid rgba(212,175,55,0.18); border-radius:6px; padding:3px 6px;">' +
+                '<span style="font-size:0.71rem; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + this.escapeHtml(d.label) + '">' + d.label + '</span>' +
+                '<div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">' +
+                    '<button type="button" class="btn-zoom" style="padding:1px 6px; font-size:0.72rem; line-height:1.1;" onclick="PRS_App.changeMapStudioCount(\'' + d.key + '\', -1)">−</button>' +
+                    '<input type="number" min="' + d.min + '" max="' + d.max + '" value="' + val + '" onchange="PRS_App.setMapStudioCount(\'' + d.key + '\', this.value)" style="width:36px; text-align:center; background:rgba(0,0,0,0.6); color:#fef08a; border:1px solid rgba(212,175,55,0.3); border-radius:4px; font-size:0.73rem; font-weight:700; padding:1px 2px;" />' +
+                    '<button type="button" class="btn-zoom" style="padding:1px 6px; font-size:0.72rem; line-height:1.1;" onclick="PRS_App.changeMapStudioCount(\'' + d.key + '\', 1)">+</button>' +
+                '</div>' +
+            '</div>';
+        }
+        grid.innerHTML = html;
+    },
+
+    toggleMapStudioAnimalLevel: function (lvl) {
+        this.ensureMapStudioRecipe();
+        var arr = (this.customBoardRecipe.animalLevels || []).slice();
+        var idx = arr.indexOf(lvl);
+        if (idx !== -1) {
+            if (arr.length <= 1) {
+                KiDeskyToast.show("🐾 Na mapě musí zůstat alespoň 1 trojice zvířat.", "warning");
+                return;
+            }
+            arr.splice(idx, 1);
+        } else {
+            arr.push(lvl);
+            arr.sort(function (a, b) { return a - b; });
+        }
+        this.customBoardRecipe.animalLevels = arr;
+        this.renderMapStudioAnimalLevels();
+        this.updateMapStudioPreview();
+    },
+
+    selectMapStudioAnimalRange: function (mode) {
+        this.ensureMapStudioRecipe();
+        var arr = [];
+        if (mode === "1-6") arr = [1, 2, 3, 4, 5, 6];
+        else if (mode === "1-9") arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        else if (mode === "1-12") arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        else if (mode === "all") arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+        else if (mode === "odd") arr = [1, 3, 5, 7, 9, 11, 13];
+        else if (mode === "even") arr = [2, 4, 6, 8, 10, 12, 14];
+        else arr = [1, 2, 3, 4, 5, 6];
+
+        this.customBoardRecipe.animalLevels = arr;
+        this.renderMapStudioAnimalLevels();
+        this.updateMapStudioPreview();
+    },
+
+    changeMapStudioCount: function (key, delta) {
+        this.ensureMapStudioRecipe();
+        var cur = parseInt(this.customBoardRecipe[key], 10) || 0;
+        this.setMapStudioCount(key, cur + delta);
+    },
+
+    setMapStudioCount: function (key, rawVal) {
+        this.ensureMapStudioRecipe();
+        var def = null;
+        for (var i = 0; i < this.MAP_STUDIO_COUNTERS_DEF.length; i++) {
+            if (this.MAP_STUDIO_COUNTERS_DEF[i].key === key) {
+                def = this.MAP_STUDIO_COUNTERS_DEF[i];
+                break;
+            }
+        }
+        var minV = def ? def.min : 0;
+        var maxV = def ? def.max : 24;
+        var v = parseInt(rawVal, 10);
+        if (isNaN(v)) v = minV;
+        v = Math.max(minV, Math.min(maxV, v));
+        this.customBoardRecipe[key] = v;
+        this.renderMapStudioCounters();
+        this.updateMapStudioPreview();
+    },
+
+    onMapStudioTopOptionChange: function () {
+        this.ensureMapStudioRecipe();
+        var elBranches = document.getElementById("ms-branches");
+        var elTier = document.getElementById("ms-master-tier");
+        var elRiver = document.getElementById("ms-river-mode");
+        var elBiome = document.getElementById("ms-biome-theme");
+        var elName = document.getElementById("ms-custom-name");
+
+        if (elBranches) this.customBoardRecipe.branches = parseInt(elBranches.value, 10);
+        if (elTier) this.customBoardRecipe.masterTier = parseInt(elTier.value, 10);
+        if (elRiver) this.customBoardRecipe.riverMode = elRiver.value;
+        if (elBiome) this.customBoardRecipe.biomeTheme = elBiome.value;
+        if (elName) this.customBoardRecipe.customName = elName.value.trim();
+
+        this.updateMapStudioPreview();
+    },
+
+    resetMapStudioRecipeToDefault: function () {
+        if (!window.KiDeskyMapGenerator) return;
+        this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(window.KiDeskyMapGenerator.DEFAULT_RECIPE, this.mapStudioSeed);
+        this.syncMapStudioInputsFromRecipe();
+        this.updateMapStudioPreview();
+        KiDeskyToast.show("↺ Sestava plánu byla obnovena na výchozích 96 polí.", "info");
+    },
+
     applyMapStudioPreset: function (presetKey) {
         if (!window.KiDeskyMapGenerator || !window.KiDeskyMapGenerator.PRESETS) return;
         var p = window.KiDeskyMapGenerator.PRESETS[presetKey];
         if (!p) return;
 
-        var elNodes = document.getElementById("ms-node-count");
-        var elBranches = document.getElementById("ms-branches");
-        var elTier = document.getElementById("ms-master-tier");
-        var elAnimals = document.getElementById("ms-animal-sets");
-        var elRiver = document.getElementById("ms-river-mode");
-        var elDanger = document.getElementById("ms-danger-level");
-        var elBiome = document.getElementById("ms-biome-theme");
-
-        if (elNodes && p.nodeCount) elNodes.value = String(p.nodeCount);
-        if (elBranches && p.branches) elBranches.value = String(p.branches);
-        if (elTier && p.masterTier) elTier.value = String(p.masterTier);
-        if (elAnimals && p.animalSetCount) elAnimals.value = String(p.animalSetCount);
-        if (elRiver && p.riverMode) elRiver.value = p.riverMode;
-        if (elDanger && p.dangerLevel) elDanger.value = p.dangerLevel;
-        if (elBiome && p.biomeTheme) elBiome.value = p.biomeTheme;
-
+        if (p.recipe) {
+            this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(p.recipe, this.mapStudioSeed);
+        }
+        this.syncMapStudioInputsFromRecipe();
         this.updateMapStudioPreview();
+        KiDeskyToast.show("👑 Aplikována přednastavená sestava: " + (p.name || presetKey), "good");
     },
 
     rerollMapStudioSeed: function () {
         this.mapStudioSeed = Math.floor(Math.random() * 899999 + 100000);
+        if (this.customBoardRecipe) this.customBoardRecipe.seed = this.mapStudioSeed;
+        var elSeed = document.getElementById("ms-seed-input");
+        if (elSeed) elSeed.value = String(this.mapStudioSeed);
         this.updateMapStudioPreview();
     },
 
     copyMapStudioSeed: function () {
         var inp = document.getElementById("ms-seed-input");
-        if (!inp || !inp.value) return;
+        var val = (this._currentMapStudioBoard && this._currentMapStudioBoard.seedCode) || (inp && inp.value) || String(this.mapStudioSeed);
+        if (!val) return;
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(inp.value).then(function () {
-                KiDeskyToast.show("📋 Kód mapy zkopírován do schránky!", "info");
+            navigator.clipboard.writeText(val).then(function () {
+                KiDeskyToast.show("📋 Kód mapy (" + val + ") zkopírován do schránky!", "info");
             });
-        } else {
+        } else if (inp) {
             inp.select();
             document.execCommand("copy");
             KiDeskyToast.show("📋 Kód mapy zkopírován do schránky!", "info");
@@ -4281,7 +4545,14 @@ window.PRS_App = {
     loadMapStudioFromInputSeed: function () {
         var inp = document.getElementById("ms-seed-input");
         if (!inp || !inp.value) return;
-        this.applySeedCodeToStudio(inp.value);
+        var raw = inp.value.trim();
+        if (/^\d+$/.test(raw)) {
+            this.mapStudioSeed = parseInt(raw, 10);
+            if (this.customBoardRecipe) this.customBoardRecipe.seed = this.mapStudioSeed;
+            this.updateMapStudioPreview();
+            return;
+        }
+        this.applySeedCodeToStudio(raw);
     },
 
     applySeedCodeToStudio: function (seedStr) {
@@ -4289,22 +4560,17 @@ window.PRS_App = {
         var parsed = window.KiDeskyMapGenerator.parseSeedCode(seedStr);
         if (parsed) {
             if (parsed.seed) this.mapStudioSeed = parsed.seed;
-            var elNodes = document.getElementById("ms-node-count");
-            var elBranches = document.getElementById("ms-branches");
-            var elTier = document.getElementById("ms-master-tier");
-            var elAnimals = document.getElementById("ms-animal-sets");
-            var elRiver = document.getElementById("ms-river-mode");
-            var elDanger = document.getElementById("ms-danger-level");
-            var elBiome = document.getElementById("ms-biome-theme");
-
-            if (elNodes && parsed.nodeCount) elNodes.value = String(parsed.nodeCount);
-            if (elBranches && parsed.branches) elBranches.value = String(parsed.branches);
-            if (elTier && parsed.masterTier) elTier.value = String(parsed.masterTier);
-            if (elAnimals && parsed.animalSetCount) elAnimals.value = String(parsed.animalSetCount);
-            if (elRiver && parsed.riverMode) elRiver.value = parsed.riverMode;
-            if (elDanger && parsed.dangerLevel) elDanger.value = parsed.dangerLevel;
-            if (elBiome && parsed.biomeTheme) elBiome.value = parsed.biomeTheme;
-
+            this.ensureMapStudioRecipe();
+            if (parsed.branches !== undefined) this.customBoardRecipe.branches = parsed.branches;
+            if (parsed.masterTier) this.customBoardRecipe.masterTier = parsed.masterTier;
+            if (parsed.riverMode) this.customBoardRecipe.riverMode = parsed.riverMode;
+            if (parsed.biomeTheme) this.customBoardRecipe.biomeTheme = parsed.biomeTheme;
+            if (parsed.animalSetCount) {
+                var lvls = [];
+                for (var i = 1; i <= parsed.animalSetCount; i++) lvls.push(i);
+                this.customBoardRecipe.animalLevels = lvls;
+            }
+            this.syncMapStudioInputsFromRecipe();
             this.updateMapStudioPreview();
             KiDeskyToast.show("🗺️ Kód mapy načten a aplikován!", "good");
         } else {
@@ -4313,28 +4579,43 @@ window.PRS_App = {
     },
 
     saveCurrentMapToFavorites: function () {
-        if (!this._currentMapStudioBoard) return;
-        var code = this._currentMapStudioBoard.seedCode || "";
-        var name = this._currentMapStudioBoard.name || ("Mapa #" + this.mapStudioSeed);
-        if (!code) return;
+        if (!this._currentMapStudioBoard || !this.customBoardRecipe) return;
+        var code = this._currentMapStudioBoard.seedCode || ("KID-" + this.mapStudioSeed);
+        var name = this.customBoardRecipe.customName || this._currentMapStudioBoard.name || ("Vlastní plán #" + this.mapStudioSeed);
         var list = [];
         try { list = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { list = []; }
-        for (var i = 0; i < list.length; i++) {
-            if (list[i].seedCode === code) {
-                KiDeskyToast.show("⭐ Tato mapa je již uložena v oblíbených.", "info");
-                return;
-            }
-        }
+
+        var clonedRecipe = JSON.parse(JSON.stringify(this.customBoardRecipe));
+        clonedRecipe.seed = this.mapStudioSeed;
+
         list.unshift({
             seedCode: code,
+            seed: this.mapStudioSeed,
             name: name,
-            nodeCount: this._currentMapStudioBoard.nodes ? this._currentMapStudioBoard.nodes.length : 78,
+            nodeCount: this._currentMapStudioBoard.nodes ? this._currentMapStudioBoard.nodes.length : 96,
+            recipe: clonedRecipe,
             savedAt: new Date().toLocaleDateString("cs-CZ")
         });
-        if (list.length > 8) list = list.slice(0, 8);
+        if (list.length > 10) list = list.slice(0, 10);
         try { localStorage.setItem("prs_saved_maps", JSON.stringify(list)); } catch (e) { }
         this.renderSavedMapsInStudio();
-        KiDeskyToast.show("⭐ Mapa „" + name + "“ uložena do oblíbených!", "good");
+        KiDeskyToast.show("⭐ Sestava „" + name + "“ byla uložena do tvých šablon!", "good");
+    },
+
+    applySavedFavoriteMap: function (idx) {
+        var list = [];
+        try { list = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { list = []; }
+        var item = list[idx];
+        if (!item) return;
+        if (item.seed) this.mapStudioSeed = item.seed;
+        if (item.recipe && window.KiDeskyMapGenerator) {
+            this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(item.recipe, this.mapStudioSeed);
+            this.syncMapStudioInputsFromRecipe();
+            this.updateMapStudioPreview();
+            KiDeskyToast.show("🗺️ Načtena vlastní šablona: " + (item.name || item.seedCode), "good");
+        } else if (item.seedCode) {
+            this.applySeedCodeToStudio(item.seedCode);
+        }
     },
 
     deleteSavedFavoriteMap: function (idx, ev) {
@@ -4354,14 +4635,14 @@ window.PRS_App = {
         var list = [];
         try { list = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { list = []; }
         if (!list.length) {
-            wrap.innerHTML = '<span style="font-size:0.7rem; color:#64748b;">Zatím žádné uložené oblíbené mapy.</span>';
+            wrap.innerHTML = '<span style="font-size:0.7rem; color:#64748b;">Zatím žádné uložené vlastní sestavy.</span>';
             return;
         }
         var html = "";
         for (var i = 0; i < list.length; i++) {
             var item = list[i];
             var shortName = this.escapeHtml(item.name || item.seedCode);
-            html += '<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(212,175,55,0.14); border:1px solid rgba(212,175,55,0.38); border-radius:6px; padding:2px 6px; font-size:0.7rem; color:#fef08a; cursor:pointer;" onclick="PRS_App.applySeedCodeToStudio(\'' + this.escapeHtml(item.seedCode) + '\')" title="Načíst mapu ' + this.escapeHtml(item.seedCode) + '">' +
+            html += '<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(212,175,55,0.14); border:1px solid rgba(212,175,55,0.38); border-radius:6px; padding:2px 6px; font-size:0.7rem; color:#fef08a; cursor:pointer;" onclick="PRS_App.applySavedFavoriteMap(' + i + ')" title="Načíst uloženou sestavu">' +
                 '⭐ ' + shortName + ' (' + (item.nodeCount || 78) + ')' +
                 '<span onclick="PRS_App.deleteSavedFavoriteMap(' + i + ', event)" style="color:#f87171; font-weight:bold; margin-left:3px;" title="Odebrat">×</span>' +
                 '</span>';
@@ -4371,35 +4652,17 @@ window.PRS_App = {
 
     updateMapStudioPreview: function () {
         if (!window.KiDeskyMapGenerator) return;
+        this.ensureMapStudioRecipe();
+        this.customBoardRecipe.seed = this.mapStudioSeed;
 
-        var elNodes = document.getElementById("ms-node-count");
-        var elBranches = document.getElementById("ms-branches");
-        var elTier = document.getElementById("ms-master-tier");
-        var elAnimals = document.getElementById("ms-animal-sets");
-        var elRiver = document.getElementById("ms-river-mode");
-        var elDanger = document.getElementById("ms-danger-level");
-        var elBiome = document.getElementById("ms-biome-theme");
-
-        var options = {
-            nodeCount: elNodes ? parseInt(elNodes.value, 10) : 78,
-            branches: elBranches ? parseInt(elBranches.value, 10) : 3,
-            masterTier: elTier ? parseInt(elTier.value, 10) : 2,
-            animalSetCount: elAnimals ? parseInt(elAnimals.value, 10) : 6,
-            riverMode: elRiver ? elRiver.value : "single",
-            dangerLevel: elDanger ? elDanger.value : "standard",
-            biomeTheme: elBiome ? elBiome.value : "balanced",
-            seed: this.mapStudioSeed
-        };
-
-        this.mapStudioOptions = options;
-
-        var board = window.KiDeskyMapGenerator.generate(this.mapStudioSeed, options);
+        var board = window.KiDeskyMapGenerator.compileDynamicRecipe(this.customBoardRecipe, this.mapStudioSeed);
         this._currentMapStudioBoard = board;
+        this.mapStudioOptions = board.generatorOptions || {};
 
-        // Vykreslení minináhledu
+        // Vykreslení živého SVG minináhledu
         var container = document.getElementById("ms-preview-container");
         if (container && window.KiDeskyMapGenerator.renderMiniPreviewSVG) {
-            container.innerHTML = window.KiDeskyMapGenerator.renderMiniPreviewSVG(board, 560, 344);
+            container.innerHTML = window.KiDeskyMapGenerator.renderMiniPreviewSVG(board, 580, 360);
         }
 
         // Titulek a odznaky
@@ -4408,49 +4671,71 @@ window.PRS_App = {
         var elStats = document.getElementById("ms-preview-stats");
         var elInput = document.getElementById("ms-seed-input");
 
-        if (elTitle) elTitle.textContent = board.name || ("Království osudu #" + this.mapStudioSeed);
-        if (elBadge) elBadge.textContent = board.nodes.length + " polí • " + options.branches + " větve";
-        if (elInput) elInput.value = board.seedCode || window.KiDeskyMapGenerator.formatSeedCode(this.mapStudioSeed, options);
+        if (elTitle) elTitle.textContent = board.name || ("Vlastní království #" + this.mapStudioSeed);
+        if (elBadge) {
+            var aCnt = (this.customBoardRecipe.animalLevels || []).length;
+            elBadge.textContent = board.nodes.length + " polí • " + aCnt + " trojic zvířat (" + (aCnt * 3) + ") • " + (this.customBoardRecipe.branches || 0) + " větví";
+        }
+        if (elInput && document.activeElement !== elInput) {
+            elInput.value = String(this.mapStudioSeed);
+        }
 
         if (elStats) {
-            var st = board.stats || {};
+            var r = this.customBoardRecipe;
             var brCnt = (board.bridges && board.bridges.length) ? board.bridges.length : 0;
-            var tTierLabel = (options.masterTier === 5) ? "RPG I→IV" : ("Stupeň " + (["I", "II", "III", "IV"][options.masterTier - 1] || "II"));
-            var validBadge = (st.scenariosValid !== false) ? ' • <span style="color:#4ade80; font-weight:600;">✓ Scénáře ověřeny</span>' : '';
-            elStats.innerHTML = "🏰 " + (st.castles || 2) + " Hrady • 🏙️ " + (st.towns || 4) + " Města • 🏘️ " + (st.villages || 6) + " Vesnic • 🐲 " + (st.dragons || 2) + " Dračí sluje • 🐎 " + options.animalSetCount + " sad zvířat • 🌊 " + brCnt + " mostů • 🎓 Mistři " + tTierLabel + validBadge;
+            var tTierLabel = (r.masterTier === 5) ? "RPG I→IV" : ("Stupeň " + (["I", "II", "III", "IV"][(r.masterTier || 2) - 1] || "II"));
+
+            var warnings = [];
+            if (r.questsU3 < 2) warnings.push("Pro scénář Lovci draků doporučeno alespoň 2× Drak U3");
+            if (r.towns < 3 || r.castles < 1) warnings.push("Pro scénář Magnát doporučeno 3× Město + 1× Hrad");
+
+            var validHtml = warnings.length === 0
+                ? ' • <span style="color:#4ade80; font-weight:700;">✓ Všechny scénáře splnitelné</span>'
+                : ' • <span style="color:#fbbf24; font-weight:600;" title="' + this.escapeHtml(warnings.join(" | ")) + '">⚠️ ' + this.escapeHtml(warnings[0]) + '</span>';
+
+            elStats.innerHTML =
+                "🏯 <strong>" + r.castles + "</strong> Hrady • " +
+                "🏙️ <strong>" + r.towns + "</strong> Města • " +
+                "🏘️ <strong>" + r.villages + "</strong> Vesnice • " +
+                "🃏 <strong>" + r.jesters + "</strong> Kejklíři • " +
+                "⚒️ <strong>" + r.buildings + "</strong> Živnosti • " +
+                "🐗 <strong>" + r.questsU1 + "</strong> U1 • " +
+                "👹 <strong>" + r.questsU2 + "</strong> U2 • " +
+                "🐲 <strong>" + r.questsU3 + "</strong> Draci U3 • " +
+                "🧙‍♂️ <strong>" + r.masters + "</strong> Mistři (" + tTierLabel + ") • " +
+                "💖 <strong>" + r.festivals + "</strong> Slavnosti • " +
+                "🌊 <strong>" + brCnt + "</strong> mostů" +
+                validHtml;
         }
     },
 
     applyMapStudioBoardAndStart: async function () {
-        if (!this._currentMapStudioBoard) return;
+        if (!this._currentMapStudioBoard || !this.customBoardRecipe) return;
         this.closeMapStudioModal();
 
         var newSeed = this.mapStudioSeed;
         this.currentBoardSeed = newSeed;
-        if (this.mapStudioOptions) {
-            this.mapStudioOptions.seed = newSeed;
-        }
+        this.customBoardRecipe.seed = newSeed;
 
         if (this.state && this.state.turnNumber > 0) {
-            var conf = await KiDeskyDialog.confirm("Spuštění nové výpravy v Map Studiu vyžaduje restart partie.\nPřeješ si začít hrát na mapě " + (this._currentMapStudioBoard.seedCode || newSeed) + "?", {
-                title: "Zahájení výpravy v Map Studiu",
+            var conf = await KiDeskyDialog.confirm("Spuštění nové výpravy na vlastním dynamickém plánu vyžaduje restart partie.\nPřeješ si začít hrát na plánu „" + (this._currentMapStudioBoard.name || newSeed) + "“ (" + this._currentMapStudioBoard.nodes.length + " polí)?", {
+                title: "Zahájení výpravy na vlastním plánu",
                 icon: "🗺️",
-                confirmText: "⚔️ Zahájit hru na mapě",
+                confirmText: "⚔️ Zahájit hru na tomto plánu",
                 cancelText: "Zpět k partii"
             });
             if (!conf) return;
         }
 
-        // Nastavíme vygenerovaný plán jako aktivní procedurální desku
         this._customProceduralBoard = this._currentMapStudioBoard;
         var bSel = document.getElementById("board-template-select");
-        if (bSel) bSel.value = "procedural";
+        if (bSel) bSel.value = "custom_dynamic";
         var lobbySel = document.getElementById("lobby-board-select");
-        if (lobbySel) lobbySel.value = "procedural";
+        if (lobbySel) lobbySel.value = "custom_dynamic";
 
         this.startNewGame(true);
         if (this.showPawnToast && this.state) {
-            this.showPawnToast(this.state.currentPlayerIndex, "Vítej v království " + (this._currentMapStudioBoard.seedCode || newSeed), "🗺️", "#a855f7", "rgba(15, 23, 42, 0.96)");
+            this.showPawnToast(this.state.currentPlayerIndex, "Vítej na plánu " + (this._currentMapStudioBoard.name || ("#" + newSeed)), "🗺️", "#a855f7", "rgba(15, 23, 42, 0.96)");
         }
     },
 

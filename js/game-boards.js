@@ -592,31 +592,72 @@ window.PRS_DECOR_CATALOG = {
 // ============================================================================
 
 window.KiDeskyMapGenerator = {
-    // 5 Přednastavených královských šablon map (Presety Map Studia)
+    // Výchozí recept pro Vlastní dynamický plán (Klasická vyvážená hra)
+    DEFAULT_RECIPE: {
+        animalLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        villages: 10,
+        towns: 5,
+        castles: 3,
+        jesters: 4,
+        buildings: 5,
+        questsU1: 4,
+        questsU2: 3,
+        questsU3: 2,
+        masters: 7,
+        merchants: 3,
+        festivals: 3,
+        chances: 6,
+        taxes: 2,
+        prisons: 1,
+        hospitals: 1,
+        taverns: 1,
+        branches: 3,
+        masterTier: 5,
+        riverMode: "single",
+        biomeTheme: "balanced",
+        seed: 4598,
+        customName: ""
+    },
+
+    // 5 Přednastavených královských šablon map (Presety Map Studia s přesným receptem polí)
     PRESETS: {
         royal_balance: {
             id: "royal_balance",
             name: "👑 Královská rovnováha",
-            desc: "Plnohodnotný trojdílný plán s 3 větvemi, 6 chovnými sadami a vyváženou ekonomií.",
-            nodeCount: 78,
+            desc: "Vyvážený plán s 3 větvemi, 8 chovnými sadami (levely 1–8) a bohatou ekonomií.",
+            nodeCount: 75,
             branches: 3,
-            masterTier: 2,
-            animalSetCount: 6,
+            masterTier: 5,
+            animalSetCount: 8,
             riverMode: "single",
             dangerLevel: "standard",
-            biomeTheme: "balanced"
+            biomeTheme: "balanced",
+            recipe: {
+                animalLevels: [1, 2, 3, 4, 5, 6, 7, 8],
+                villages: 8, towns: 4, castles: 2, jesters: 3, buildings: 5,
+                questsU1: 4, questsU2: 3, questsU3: 2, masters: 6, merchants: 3,
+                festivals: 3, chances: 5, taxes: 2, prisons: 1, hospitals: 1, taverns: 1,
+                branches: 3, masterTier: 5, riverMode: "single", biomeTheme: "balanced"
+            }
         },
         dragon_chasm: {
             id: "dragon_chasm",
             name: "🐉 Dračí soutěska",
-            desc: "Drsné sopečné podhůří, 2 větve s hlubokou dračí slují a dvojitým říčním soutokem.",
-            nodeCount: 96,
+            desc: "Drsné sopečné podhůří, 4 dračí sluje, 5 monster, 3 hrady a dvojitý říční soutok.",
+            nodeCount: 84,
             branches: 2,
             masterTier: 3,
-            animalSetCount: 6,
+            animalSetCount: 8,
             riverMode: "dual",
             dangerLevel: "high",
-            biomeTheme: "dragon_peaks"
+            biomeTheme: "dragon_peaks",
+            recipe: {
+                animalLevels: [1, 2, 4, 6, 8, 10, 12, 14],
+                villages: 7, towns: 4, castles: 3, jesters: 3, buildings: 5,
+                questsU1: 4, questsU2: 5, questsU3: 4, masters: 7, merchants: 3,
+                festivals: 3, chances: 6, taxes: 2, prisons: 1, hospitals: 2, taverns: 1,
+                branches: 2, masterTier: 3, riverMode: "dual", biomeTheme: "dragon_peaks"
+            }
         },
         lightning_sprint: {
             id: "lightning_sprint",
@@ -625,34 +666,55 @@ window.KiDeskyMapGenerator = {
             nodeCount: 48,
             branches: 1,
             masterTier: 1,
-            animalSetCount: 4,
+            animalSetCount: 5,
             riverMode: "single",
             dangerLevel: "low",
-            biomeTheme: "golden_plains"
+            biomeTheme: "golden_plains",
+            recipe: {
+                animalLevels: [1, 2, 3, 4, 5],
+                villages: 5, towns: 3, castles: 2, jesters: 2, buildings: 3,
+                questsU1: 2, questsU2: 2, questsU3: 2, masters: 4, merchants: 2,
+                festivals: 3, chances: 3, taxes: 1, prisons: 1, hospitals: 1, taverns: 1,
+                branches: 1, masterTier: 1, riverMode: "single", biomeTheme: "golden_plains"
+            }
         },
         four_masters: {
             id: "four_masters",
             name: "🧙‍♂️ Turnaj čtyř mistrů",
-            desc: "Velkolepý epický svět (112 uzlů) se 4 větvemi, říčním ostrovem a duely s mistry.",
-            nodeCount: 112,
+            desc: "Velkolepý epický svět se 4 větvemi, říčním ostrovem, 10 sadami zvířat a 10 mistry.",
+            nodeCount: 102,
             branches: 4,
             masterTier: 4,
             animalSetCount: 10,
             riverMode: "island",
             dangerLevel: "high",
-            biomeTheme: "balanced"
+            biomeTheme: "balanced",
+            recipe: {
+                animalLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                villages: 10, towns: 6, castles: 4, jesters: 4, buildings: 5,
+                questsU1: 5, questsU2: 4, questsU3: 3, masters: 10, merchants: 4,
+                festivals: 3, chances: 8, taxes: 2, prisons: 1, hospitals: 1, taverns: 1,
+                branches: 4, masterTier: 4, riverMode: "island", biomeTheme: "balanced"
+            }
         },
         pasture_kingdom: {
             id: "pasture_kingdom",
-            name: "🌲 Ráj chovatelů",
-            desc: "Rozlehlé lesní království zasvěcené chovu ušlechtilých zvířat (12 sad) a cechům.",
-            nodeCount: 96,
+            name: "🌲 Ráj chovatelů (Všech 14 sad)",
+            desc: "Rozlehlé lesní království zasvěcené chovu všech 14 sad zvířat (42 polí zvířat) a cechům.",
+            nodeCount: 98,
             branches: 3,
             masterTier: 5,
-            animalSetCount: 12,
+            animalSetCount: 14,
             riverMode: "dual",
             dangerLevel: "standard",
-            biomeTheme: "forest_realm"
+            biomeTheme: "forest_realm",
+            recipe: {
+                animalLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+                villages: 9, towns: 5, castles: 3, jesters: 4, buildings: 6,
+                questsU1: 3, questsU2: 2, questsU3: 2, masters: 6, merchants: 3,
+                festivals: 3, chances: 5, taxes: 1, prisons: 1, hospitals: 1, taverns: 1,
+                branches: 3, masterTier: 5, riverMode: "dual", biomeTheme: "forest_realm"
+            }
         }
     },
 
@@ -901,6 +963,627 @@ window.KiDeskyMapGenerator = {
     ],
 
     // ========================================================================
+    // KOMPILÁTOR VLASTNÍHO DYNAMICKÉHO RECEPTU POLÍČEK (CUSTOM BOARD RECIPE)
+    // ========================================================================
+    normalizeRecipe: function (raw, customSeed) {
+        var def = this.DEFAULT_RECIPE;
+        var r = (raw && typeof raw === "object") ? raw : {};
+
+        // 1. Aktivní levely trojic zvířat (1 až 14)
+        var levels = [];
+        if (Array.isArray(r.animalLevels)) {
+            for (var i = 0; i < r.animalLevels.length; i++) {
+                var lv = parseInt(r.animalLevels[i], 10);
+                if (lv >= 1 && lv <= 14 && levels.indexOf(lv) === -1) {
+                    levels.push(lv);
+                }
+            }
+            levels.sort(function (a, b) { return a - b; });
+        } else if (r.animalSetCount !== undefined) {
+            var cnt = Math.max(0, Math.min(14, parseInt(r.animalSetCount, 10) || 8));
+            for (var s = 1; s <= cnt; s++) levels.push(s);
+        } else {
+            levels = def.animalLevels.slice();
+        }
+
+        function clampInt(val, fallback, minV, maxV) {
+            var n = (val !== undefined && val !== null && val !== "") ? parseInt(val, 10) : fallback;
+            if (isNaN(n)) n = fallback;
+            return Math.max(minV, Math.min(maxV, n));
+        }
+
+        var norm = {
+            animalLevels: levels,
+            villages: clampInt(r.villages, def.villages, 0, 24),
+            towns: clampInt(r.towns, def.towns, 0, 14),
+            castles: clampInt(r.castles, def.castles, 0, 9),
+            jesters: clampInt(r.jesters, def.jesters, 0, 12),
+            buildings: clampInt(r.buildings, def.buildings, 0, 12),
+            questsU1: clampInt(r.questsU1, def.questsU1, 0, 16),
+            questsU2: clampInt(r.questsU2, def.questsU2, 0, 14),
+            questsU3: clampInt(r.questsU3, def.questsU3, 0, 10),
+            masters: clampInt(r.masters, def.masters, 0, 20),
+            merchants: clampInt(r.merchants, def.merchants, 0, 10),
+            festivals: clampInt(r.festivals, def.festivals, 0, 12),
+            chances: clampInt(r.chances, def.chances, 0, 24),
+            taxes: clampInt(r.taxes, def.taxes, 0, 8),
+            prisons: clampInt(r.prisons, def.prisons, 0, 4),
+            hospitals: clampInt(r.hospitals, def.hospitals, 0, 4),
+            taverns: clampInt(r.taverns, def.taverns, 0, 6),
+            branches: clampInt(r.branches, def.branches, 0, 4),
+            masterTier: clampInt(r.masterTier, def.masterTier, 1, 5),
+            riverMode: r.riverMode || def.riverMode || "single",
+            biomeTheme: r.biomeTheme || def.biomeTheme || "balanced",
+            seed: Math.abs(Number(customSeed || r.seed || def.seed || 4598)) % 1000000 || 4598,
+            customName: (r.customName || "").trim()
+        };
+
+        norm.totalNodes = this.calculateRecipeTotalNodes(norm);
+        return norm;
+    },
+
+    calculateRecipeTotalNodes: function (r) {
+        if (!r) return 0;
+        var animCount = Array.isArray(r.animalLevels) ? (r.animalLevels.length * 3) : 0;
+        var otherCount =
+            (Number(r.villages) || 0) +
+            (Number(r.towns) || 0) +
+            (Number(r.castles) || 0) +
+            (Number(r.jesters) || 0) +
+            (Number(r.buildings) || 0) +
+            (Number(r.questsU1) || 0) +
+            (Number(r.questsU2) || 0) +
+            (Number(r.questsU3) || 0) +
+            (Number(r.masters) || 0) +
+            (Number(r.merchants) || 0) +
+            (Number(r.festivals) || 0) +
+            (Number(r.chances) || 0) +
+            (Number(r.taxes) || 0) +
+            (Number(r.prisons) || 0) +
+            (Number(r.hospitals) || 0) +
+            (Number(r.taverns) || 0);
+        return 1 + animCount + otherCount; // 1 = START
+    },
+
+    compileDynamicRecipe: function (rawRecipe, customSeed) {
+        var r = this.normalizeRecipe(rawRecipe, customSeed);
+        var seed = r.seed;
+        var rnd = this.createRNG(seed);
+        var chosenMasterTier = r.masterTier;
+        var riverMode = r.riverMode;
+        var biomeTheme = r.biomeTheme;
+
+        function resolveMasterNodeTier(progressRatio, isGrandmaster) {
+            if (isGrandmaster) return 4;
+            if (chosenMasterTier === 5) {
+                if (progressRatio < 0.28) return 1;
+                if (progressRatio < 0.58) return 2;
+                if (progressRatio < 0.85) return 3;
+                return 4;
+            }
+            return Math.max(1, Math.min(4, chosenMasterTier));
+        }
+
+        // 1. Sestavení přesných seznamů polí podle uživatelského receptu
+        var villageNames = [
+            "Králova Lhota", "Lhotka", "Březová", "Dubina", "Skalice", "Meziříčí",
+            "Slunečná", "Podhradí", "Větrná", "Zlatá Olešnice", "Rovensko", "Chlumec",
+            "Lipnice", "Studánka", "Osek", "Hvozd", "Kamenice", "Jabloňov", "Borová", "Blatná",
+            "Dobříš", "Rožmitál", "Třeboňsko", "Bystřička"
+        ];
+        var townNames = [
+            "Královo Pole", "Stříbratec", "Zlatov", "Mečov", "Železný Brod",
+            "Korunní Město", "Sokolov", "Hvězdomír", "Lví Brod", "Sluneční Hradec",
+            "Velehrad", "Křišťálov", "Jantarové Město", "Bílý Kámen"
+        ];
+        var buildingTemplates = [
+            { subtype: "staje", name: "Královské stáje", icon: "🏠", codePrefix: "STAJE" },
+            { subtype: "kovarna", name: "Cechovní kovárna", icon: "⚒️", codePrefix: "KOV" },
+            { subtype: "sokolnik", name: "Královský sokolník", icon: "🦅", codePrefix: "SOK" },
+            { subtype: "psovod", name: "Psovod a smečka", icon: "🦴", codePrefix: "PSOV" },
+            { subtype: "krejci", name: "Dvorní krejčí", icon: "🧵", codePrefix: "KREJ" }
+        ];
+        var masterTemplates = [
+            { skill: "boj", name: "Mistr Boje", icon: "⚔️", codePrefix: "MB" },
+            { skill: "jizda", name: "Mistr Jízdy", icon: "🏇", codePrefix: "MJ" },
+            { skill: "tanec", name: "Mistr Tance", icon: "💃", codePrefix: "MT" },
+            { skill: "charisma", name: "Mistr Charismatu", icon: "✨", codePrefix: "MCH" },
+            { skill: "any", name: "Velmistr", icon: "🧙‍♂️", codePrefix: "VM" }
+        ];
+        var festivalTemplates = [
+            { subtype: "turnaj", name: "SLAVNOST: Královský Turnaj ♡", icon: "💖", baseCode: "SLAV_TURNAJ" },
+            { subtype: "ples", name: "SLAVNOST: Zámecký Ples ♡", icon: "💖", baseCode: "SLAV_PLES" },
+            { subtype: "zavod", name: "SLAVNOST: Velký Závod ♡", icon: "💖", baseCode: "SLAV_ZAVOD" }
+        ];
+
+        // Zamíchání tematických hradů podle seedu
+        var castlePool = this.THEMATIC_CASTLES.slice();
+        for (var cIdx = castlePool.length - 1; cIdx > 0; cIdx--) {
+            var swapIdx = Math.floor(rnd() * (cIdx + 1));
+            var tmpC = castlePool[cIdx];
+            castlePool[cIdx] = castlePool[swapIdx];
+            castlePool[swapIdx] = tmpC;
+        }
+        var castleH1 = castlePool[0];
+        var castleH2 = castlePool[1] || castlePool[0];
+
+        var listVillages = [], listTowns = [], listCastles = [], listJesters = [], listBuildings = [];
+        var listU1 = [], listU2 = [], listU3 = [], listMasters = [], listMerchants = [];
+        var listFestivals = [], listChances = [], listTaxes = [], listPrisons = [], listHospitals = [], listTaverns = [];
+
+        for (var iv = 0; iv < r.villages; iv++) {
+            var vName = villageNames[iv % villageNames.length];
+            listVillages.push({ code: "V" + (iv + 1), type: "VILLAGE", estateId: "V" + (iv + 1), name: "Vesnice " + (iv + 1) + " (" + vName + ")", icon: "🏘️", hasRoof: (iv % 2 === 0) });
+        }
+        for (var it = 0; it < r.towns; it++) {
+            var tName = townNames[it % townNames.length];
+            listTowns.push({ code: "M" + (it + 1), type: "TOWN", estateId: "M" + (it + 1), name: "Město " + (it + 1) + " (" + tName + ")", icon: "🏙️" });
+        }
+        for (var ic = 0; ic < r.castles; ic++) {
+            var cDef = castlePool[ic % castlePool.length];
+            listCastles.push({ code: "H" + (ic + 1), type: "CASTLE", estateId: "H" + (ic + 1), name: "Hrad " + (ic + 1) + " (" + cDef.name + ")", icon: cDef.icon || "🏯", castleImg: cDef.img });
+        }
+        for (var ij = 0; ij < r.jesters; ij++) {
+            listJesters.push({ code: "KE" + (ij + 1), type: "JESTER", jesterId: ij + 1, name: "Kejklíř " + (ij + 1), icon: "🃏" });
+        }
+        for (var ib = 0; ib < r.buildings; ib++) {
+            var bDef = buildingTemplates[ib % buildingTemplates.length];
+            listBuildings.push({ code: bDef.codePrefix + (Math.floor(ib / 5) + 1), type: "BUILDING", subtype: bDef.subtype, name: bDef.name, icon: bDef.icon });
+        }
+        for (var iu1 = 0; iu1 < r.questsU1; iu1++) {
+            listU1.push({ code: "U1_" + (iu1 + 1), type: "QUEST", subtype: "U1", name: "Lov zvěře (U1)", icon: "🐗" });
+        }
+        for (var iu2 = 0; iu2 < r.questsU2; iu2++) {
+            listU2.push({ code: "U2_" + (iu2 + 1), type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" });
+        }
+        for (var iu3 = 0; iu3 < r.questsU3; iu3++) {
+            listU3.push({ code: "U3_" + (iu3 + 1), type: "QUEST", subtype: "U3", name: (iu3 % 2 === 0 ? "Dračí sluj (U3)" : "Tříhlavá saň (U3)"), icon: (iu3 % 2 === 0 ? "🐉" : "🐲") });
+        }
+        for (var im = 0; im < r.masters; im++) {
+            var mDef = masterTemplates[im % masterTemplates.length];
+            listMasters.push({ code: mDef.codePrefix + (Math.floor(im / 5) + 1), type: "MASTER", skill: mDef.skill, name: mDef.name, icon: mDef.icon });
+        }
+        for (var imer = 0; imer < r.merchants; imer++) {
+            listMerchants.push({ code: "OBCHOD" + (imer + 1), type: "MERCHANT", name: "Královský obchodník", icon: "⚖️" });
+        }
+        for (var ifest = 0; ifest < r.festivals; ifest++) {
+            var fDef = festivalTemplates[ifest % festivalTemplates.length];
+            var fCode = (ifest < 3) ? fDef.baseCode : (fDef.baseCode + "_" + (ifest + 1));
+            listFestivals.push({ code: fCode, type: "FESTIVAL", subtype: fDef.subtype, name: fDef.name, icon: fDef.icon });
+        }
+        for (var ich = 0; ich < r.chances; ich++) {
+            listChances.push({ code: "N" + (ich + 1), type: "CHANCE", name: "Náhoda", icon: "❓" });
+        }
+        for (var itx = 0; itx < r.taxes; itx++) {
+            listTaxes.push({ code: "VD" + (itx + 1), type: "TAX", name: "Výběrčí daní", icon: "👑" });
+        }
+        for (var ipr = 0; ipr < r.prisons; ipr++) {
+            listPrisons.push({ code: "SATL" + (ipr > 0 ? (ipr + 1) : ""), type: "PRISON", name: "Královská šatlava", icon: "⛓️" });
+        }
+        for (var ihp = 0; ihp < r.hospitals; ihp++) {
+            listHospitals.push({ code: "HOSP" + (ihp > 0 ? (ihp + 1) : ""), type: "HOSPITAL", name: "Královský lazaret", icon: "🏥" });
+        }
+        for (var itav = 0; itav < r.taverns; itav++) {
+            listTaverns.push({ code: "KRCMA" + (itav > 0 ? (itav + 1) : ""), type: "TAVERN", name: "Krčma U Zlatého korbelu", icon: "🍺" });
+        }
+
+        // Pojistka pro extrémně malý počet polí (< 20), aby šel vytvořit uzavřený okruh
+        var rawTotal = r.totalNodes;
+        while (rawTotal < 20) {
+            listChances.push({ code: "N_PAD_" + rawTotal, type: "CHANCE", name: "Náhoda", icon: "❓" });
+            rawTotal++;
+        }
+
+        var remainingAnimalLevels = r.animalLevels.slice();
+        var branchCount = r.branches;
+        if (rawTotal < 32) branchCount = 0;
+        else if (rawTotal < 44 && branchCount > 1) branchCount = 1;
+        else if (rawTotal < 56 && branchCount > 2) branchCount = 2;
+
+        // 2. Rozdělení polí do větví (pouze z reálně naklikaných zásob uživatele!)
+        var b1Defs = [], b2Defs = [], b3Defs = [], b4Defs = [];
+        var maxBranchBudget = Math.max(0, rawTotal - 24); // Garantujeme min. 24 polí na hlavním okruhu
+
+        function takeFrom(arr, maxItems) {
+            var taken = [];
+            while (taken.length < maxItems && arr.length > 0 && maxBranchBudget > 0) {
+                taken.push(arr.shift());
+                maxBranchBudget--;
+            }
+            return taken;
+        }
+
+        function takeAnimalTripletForBranch() {
+            if (remainingAnimalLevels.length >= 5 && maxBranchBudget >= 3) {
+                var lvl = remainingAnimalLevels.pop();
+                var cat = this.ANIMAL_SETS_CATALOG[lvl - 1] || this.ANIMAL_SETS_CATALOG[0];
+                maxBranchBudget -= 3;
+                return [
+                    { code: "K" + lvl, type: "ANIMAL", subtype: "kun", setId: lvl, name: cat.kun, icon: "🐎" },
+                    { code: "S" + lvl, type: "ANIMAL", subtype: "sokol", setId: lvl, name: cat.sokol, icon: "🦅" },
+                    { code: "P" + lvl, type: "ANIMAL", subtype: "pes", setId: lvl, name: cat.pes, icon: "🐕" }
+                ];
+            }
+            return [];
+        }
+
+        // Větev 1: Most Slavností
+        if (branchCount >= 1 && maxBranchBudget >= 3) {
+            b1Defs = b1Defs.concat(takeFrom(listFestivals, Math.min(3, listFestivals.length)));
+            if (listTowns.length > 1) b1Defs = b1Defs.concat(takeFrom(listTowns, 1));
+            if (listVillages.length > 2) b1Defs = b1Defs.concat(takeFrom(listVillages, 1));
+            if (listMasters.length > 2) b1Defs = b1Defs.concat(takeFrom(listMasters, 1));
+            if (listChances.length > 2) b1Defs = b1Defs.concat(takeFrom(listChances, 1));
+        }
+
+        // Větev 2: Pravá Dračí stezka
+        if (branchCount >= 2 && maxBranchBudget >= 3) {
+            b2Defs = b2Defs.concat(takeFrom(listU3, Math.min(2, listU3.length)));
+            if (listCastles.length > 0) b2Defs = b2Defs.concat(takeFrom(listCastles, 1));
+            if (listU2.length > 1) b2Defs = b2Defs.concat(takeFrom(listU2, 1));
+            b2Defs = b2Defs.concat(takeAnimalTripletForBranch.call(this));
+            if (listMasters.length > 1) b2Defs = b2Defs.concat(takeFrom(listMasters, 1));
+        }
+
+        // Větev 3: Levá Lesní smyčka
+        if (branchCount >= 3 && maxBranchBudget >= 3) {
+            if (listCastles.length > 0) b3Defs = b3Defs.concat(takeFrom(listCastles, 1));
+            b3Defs = b3Defs.concat(takeAnimalTripletForBranch.call(this));
+            if (listU2.length > 0) b3Defs = b3Defs.concat(takeFrom(listU2, 1));
+            if (listU1.length > 1) b3Defs = b3Defs.concat(takeFrom(listU1, 1));
+            if (listBuildings.length > 2) b3Defs = b3Defs.concat(takeFrom(listBuildings, 1));
+        }
+
+        // Větev 4: Severní Královská hřebenovka
+        if (branchCount >= 4 && maxBranchBudget >= 3) {
+            if (listCastles.length > 0) b4Defs = b4Defs.concat(takeFrom(listCastles, 1));
+            else if (listTowns.length > 1) b4Defs = b4Defs.concat(takeFrom(listTowns, 1));
+            b4Defs = b4Defs.concat(takeAnimalTripletForBranch.call(this));
+            if (listMasters.length > 0) b4Defs = b4Defs.concat(takeFrom(listMasters, 1));
+            if (listMerchants.length > 1) b4Defs = b4Defs.concat(takeFrom(listMerchants, 1));
+        }
+
+        // 3. Rovnoměrné proložení všech zbývajících ne-zvířecích polí na hlavní okruh
+        var buckets = [
+            listVillages, listMasters, listChances, listBuildings,
+            listTowns, listU1, listJesters, listMerchants,
+            listU2, listFestivals, listTaxes, listCastles,
+            listU3, listHospitals, listPrisons, listTaverns
+        ];
+        var outerNonAnimals = [];
+        var stillHasItems = true;
+        while (stillHasItems) {
+            stillHasItems = false;
+            for (var bk = 0; bk < buckets.length; bk++) {
+                if (buckets[bk].length > 0) {
+                    outerNonAnimals.push(buckets[bk].shift());
+                    stillHasItems = true;
+                }
+            }
+        }
+
+        // 4. Složení hlavního okruhu: START + proložené trojice zvířat (každý vybraný level K+S+P drží u sebe!) + outerNonAnimals
+        var outerDefs = [{ code: "START", type: "START", name: "START (+3 000 zl.)", icon: "🏰" }];
+        var naCursor = 0;
+        var outerSetsCount = remainingAnimalLevels.length;
+
+        if (outerSetsCount > 0) {
+            for (var sIdx = 0; sIdx < outerSetsCount; sIdx++) {
+                var lvlId = remainingAnimalLevels[sIdx];
+                var cat = this.ANIMAL_SETS_CATALOG[lvlId - 1] || this.ANIMAL_SETS_CATALOG[0];
+                var remSets = outerSetsCount - sIdx;
+                var remNA = outerNonAnimals.length - naCursor;
+                var chunkNA = Math.floor(remNA / remSets);
+
+                // 1. Kůň daného levelu
+                outerDefs.push({ code: "K" + lvlId, type: "ANIMAL", subtype: "kun", setId: lvlId, name: cat.kun, icon: "🐎" });
+                // Max 1 mezilehlé pole uvnitř chovného revíru
+                if (chunkNA > 0 && naCursor < outerNonAnimals.length) {
+                    outerDefs.push(outerNonAnimals[naCursor++]);
+                    chunkNA--;
+                }
+                // 2. Sokol/Pták daného levelu
+                outerDefs.push({ code: "S" + lvlId, type: "ANIMAL", subtype: "sokol", setId: lvlId, name: cat.sokol, icon: "🦅" });
+                // 3. Pes daného levelu
+                outerDefs.push({ code: "P" + lvlId, type: "ANIMAL", subtype: "pes", setId: lvlId, name: cat.pes, icon: "🐕" });
+
+                while (chunkNA > 0 && naCursor < outerNonAnimals.length) {
+                    outerDefs.push(outerNonAnimals[naCursor++]);
+                    chunkNA--;
+                }
+            }
+        }
+        while (naCursor < outerNonAnimals.length) {
+            outerDefs.push(outerNonAnimals[naCursor++]);
+        }
+
+        var outerLen = outerDefs.length;
+
+        // 5. Geometrie hlavního okruhu (5 Bézierových segmentů přizpůsobených délce outerLen)
+        var sTop = Math.max(4, Math.round(outerLen * 0.18));
+        var sRight = Math.max(4, Math.round(outerLen * 0.23));
+        var sBottom = Math.max(5, Math.round(outerLen * 0.26));
+        var sLeft1 = Math.max(4, Math.round(outerLen * 0.19));
+        var sLeft2 = Math.max(3, outerLen - (sTop + sRight + sBottom + sLeft1));
+        while (sTop + sRight + sBottom + sLeft1 + sLeft2 > outerLen) {
+            if (sBottom > 4) sBottom--;
+            else if (sRight > 4) sRight--;
+            else if (sLeft1 > 3) sLeft1--;
+            else break;
+        }
+
+        var topWarp = (rnd() - 0.5) * 52;
+        var rightWarp = (rnd() - 0.5) * 44;
+        var bottomWarp = (rnd() - 0.5) * 50;
+        var leftWarp = (rnd() - 0.5) * 44;
+
+        var pStart = { x: 500, y: Math.round(74 + topWarp * 0.2) };
+        var pTopRight = { x: Math.round(1150 + rightWarp * 0.3), y: Math.round(108 + topWarp * 0.3) };
+        var pBottomRight = { x: Math.round(1145 + rightWarp * 0.4), y: Math.round(772 + bottomWarp * 0.3) };
+        var pBottomLeft = { x: Math.round(250 - leftWarp * 0.3), y: Math.round(782 + bottomWarp * 0.2) };
+        var pTopLeft = { x: Math.round(98 - leftWarp * 0.4), y: 340 };
+        var pBackToStart = { x: 445, y: Math.round(74 + topWarp * 0.2) };
+
+        var segTopPts = this.sampleBezier(pStart, { x: 740, y: Math.round(68 + topWarp) }, { x: 970, y: Math.round(72 + topWarp) }, pTopRight, sTop, false);
+        var segRightPts = this.sampleBezier(pTopRight, { x: Math.round(1345 + rightWarp), y: 310 }, { x: Math.round(1340 + rightWarp), y: 615 }, pBottomRight, sRight, false);
+        var segBottomPts = this.sampleBezier(pBottomRight, { x: 840, y: Math.round(802 + bottomWarp) }, { x: 540, y: Math.round(802 + bottomWarp) }, pBottomLeft, sBottom, false);
+        var segLeft1Pts = this.sampleBezier(pBottomLeft, { x: Math.round(68 - leftWarp), y: 730 }, { x: Math.round(68 - leftWarp), y: 500 }, pTopLeft, sLeft1, false);
+        var segLeft2Pts = this.sampleBezier(pTopLeft, { x: 120, y: 105 }, { x: 285, y: 72 }, pBackToStart, sLeft2, true);
+
+        var mainPts = segTopPts.concat(segRightPts).concat(segBottomPts).concat(segLeft1Pts).concat(segLeft2Pts);
+
+        var nodes = [];
+        for (var i = 0; i < outerLen; i++) {
+            var d = outerDefs[i];
+            var pt = mainPts[i] || { x: 500, y: 74 };
+            var prog = i / outerLen;
+            var mTierVal = (d.type === "MASTER") ? resolveMasterNodeTier(prog, d.skill === "any") : null;
+            nodes.push({
+                id: i,
+                code: d.code,
+                type: d.type,
+                subtype: d.subtype || null,
+                setId: d.setId || null,
+                estateId: d.estateId || null,
+                jesterId: d.jesterId || null,
+                skill: d.skill || null,
+                masterTier: mTierVal,
+                hasRoof: !!d.hasRoof,
+                isJunction: false,
+                branchTag: "main",
+                name: d.name,
+                icon: d.icon,
+                x: pt.x,
+                y: pt.y,
+                next: [(i + 1) % outerLen],
+                branchLow: null,
+                branchHigh: null
+            });
+        }
+
+        // 6. Připojení větví
+        var self = this;
+        function attachBranch(jStartIdx, jEndIdx, cp1, cp2, bDefs, tag) {
+            if (!bDefs || bDefs.length === 0) return;
+            var nStart = nodes[jStartIdx];
+            var nEnd = nodes[jEndIdx];
+            if (!nStart || !nEnd) return;
+            var p0 = { x: Math.round(nStart.x * 0.85 + cp1.x * 0.15), y: Math.round(nStart.y * 0.85 + cp1.y * 0.15) };
+            var p3 = { x: Math.round(nEnd.x * 0.85 + cp2.x * 0.15), y: Math.round(nEnd.y * 0.85 + cp2.y * 0.15) };
+            var pts = self.sampleBezier(p0, cp1, cp2, p3, bDefs.length, true);
+
+            var firstId = nodes.length;
+            for (var k = 0; k < bDefs.length; k++) {
+                var bd = bDefs[k];
+                var bpt = pts[k];
+                var nid = nodes.length;
+                var mTierVal = (bd.type === "MASTER") ? resolveMasterNodeTier(0.75, bd.skill === "any") : null;
+                nodes.push({
+                    id: nid,
+                    code: bd.code,
+                    type: bd.type,
+                    subtype: bd.subtype || null,
+                    setId: bd.setId || null,
+                    estateId: bd.estateId || null,
+                    jesterId: bd.jesterId || null,
+                    skill: bd.skill || null,
+                    masterTier: mTierVal,
+                    hasRoof: !!bd.hasRoof,
+                    isJunction: false,
+                    branchTag: tag,
+                    name: bd.name,
+                    icon: bd.icon,
+                    x: bpt.x,
+                    y: bpt.y,
+                    next: [k < bDefs.length - 1 ? nid + 1 : jEndIdx],
+                    branchLow: null,
+                    branchHigh: null
+                });
+            }
+            nStart.isJunction = true;
+            nStart.branchLow = (jStartIdx + 1) % outerLen;
+            nStart.branchHigh = firstId;
+        }
+
+        var j1Start = Math.max(4, Math.min(outerLen - 6, Math.round(outerLen * 0.47)));
+        var j1End = Math.max(j1Start + 3, Math.min(outerLen - 3, Math.round(outerLen * 0.66)));
+        var j2Start = Math.max(2, Math.min(j1Start - 2, Math.round(outerLen * 0.17)));
+        var j2End = Math.max(j2Start + 3, Math.min(j1Start - 1, Math.round(outerLen * 0.40)));
+        var j3Start = Math.max(j1End + 3, Math.min(outerLen - 2, Math.round(outerLen * 0.93)));
+        var j3End = Math.max(j1End + 2, Math.min(j3Start - 2, Math.round(outerLen * 0.81)));
+        var j4Start = Math.max(2, Math.min(j2Start - 2, Math.round(outerLen * 0.06)));
+        var j4End = Math.max(j2Start + 2, Math.min(j2End - 2, Math.round(outerLen * 0.27)));
+
+        var activeBranchCount = 0;
+        if (b1Defs.length > 0) {
+            attachBranch(j1Start, j1End, { x: Math.round(740 + (rnd() - 0.5) * 45), y: 545 }, { x: Math.round(450 + (rnd() - 0.5) * 45), y: 545 }, b1Defs, "festival");
+            activeBranchCount++;
+        }
+        if (b2Defs.length > 0) {
+            attachBranch(j2Start, j2End, { x: Math.round(1045 + (rnd() - 0.5) * 40), y: 315 }, { x: Math.round(1155 + (rnd() - 0.5) * 40), y: 525 }, b2Defs, "dragon");
+            activeBranchCount++;
+        }
+        if (b3Defs.length > 0) {
+            attachBranch(j3Start, j3End, { x: Math.round(350 + (rnd() - 0.5) * 35), y: 225 }, { x: Math.round(235 + (rnd() - 0.5) * 35), y: 310 }, b3Defs, "forest");
+            activeBranchCount++;
+        }
+        if (b4Defs.length > 0) {
+            attachBranch(j4Start, j4End, { x: Math.round(620 + (rnd() - 0.5) * 40), y: 185 }, { x: Math.round(920 + (rnd() - 0.5) * 40), y: 215 }, b4Defs, "ridge");
+            activeBranchCount++;
+        }
+
+        // 7. Řeky a mosty
+        var rivers = [];
+        var riverPolylines = [];
+        if (riverMode !== "none") {
+            var r1Pts = [
+                { x: Math.round(1215 + (rnd() - 0.5) * 45), y: 30 },
+                { x: Math.round(1130 + (rnd() - 0.5) * 35), y: 220 },
+                { x: Math.round(1010 + (rnd() - 0.5) * 35), y: 410 },
+                { x: Math.round(850 + (rnd() - 0.5) * 35), y: 585 },
+                { x: Math.round(735 + (rnd() - 0.5) * 35), y: 730 },
+                { x: Math.round(695 + (rnd() - 0.5) * 40), y: 855 }
+            ];
+            var r1Path = "M " + r1Pts[0].x + " " + r1Pts[0].y + " " +
+                "C " + r1Pts[1].x + " " + r1Pts[1].y + ", " + r1Pts[2].x + " " + r1Pts[2].y + ", " + r1Pts[3].x + " " + r1Pts[3].y + " " +
+                "S " + r1Pts[4].x + " " + r1Pts[4].y + ", " + r1Pts[5].x + " " + r1Pts[5].y;
+            rivers.push({ id: "main_river", name: "Královská řeka Doubravka", width: 10, color: "#0284c7", path: r1Path });
+            riverPolylines.push(this.sampleBezier(r1Pts[0], r1Pts[1], r1Pts[2], r1Pts[3], 18, false).concat(this.sampleBezier(r1Pts[3], r1Pts[4], r1Pts[4], r1Pts[5], 14, true)));
+
+            if (riverMode === "dual") {
+                var r2Pts = [
+                    { x: Math.round(255 + (rnd() - 0.5) * 45), y: 30 },
+                    { x: Math.round(370 + (rnd() - 0.5) * 35), y: 230 },
+                    { x: Math.round(520 + (rnd() - 0.5) * 35), y: 440 },
+                    { x: r1Pts[3].x, y: r1Pts[3].y }
+                ];
+                var r2Path = "M " + r2Pts[0].x + " " + r2Pts[0].y + " C " + r2Pts[1].x + " " + r2Pts[1].y + ", " + r2Pts[2].x + " " + r2Pts[2].y + ", " + r2Pts[3].x + " " + r2Pts[3].y;
+                rivers.push({ id: "tributary_river", name: "Horská bystřina Bystřice", width: 8, color: "#0369a1", path: r2Path });
+                riverPolylines.push(this.sampleBezier(r2Pts[0], r2Pts[1], r2Pts[2], r2Pts[3], 22, true));
+            } else if (riverMode === "island") {
+                var rIslPts = [{ x: r1Pts[1].x, y: r1Pts[1].y }, { x: 520, y: 210 }, { x: 460, y: 510 }, { x: r1Pts[4].x, y: r1Pts[4].y }];
+                var rIslPath = "M " + rIslPts[0].x + " " + rIslPts[0].y + " C " + rIslPts[1].x + " " + rIslPts[1].y + ", " + rIslPts[2].x + " " + rIslPts[2].y + ", " + rIslPts[3].x + " " + rIslPts[3].y;
+                rivers.push({ id: "island_branch", name: "Zámecké říční rameno", width: 8, color: "#0284c7", path: rIslPath });
+                riverPolylines.push(this.sampleBezier(rIslPts[0], rIslPts[1], rIslPts[2], rIslPts[3], 24, true));
+            }
+        }
+
+        var bridges = [];
+        for (var ndIdx = 0; ndIdx < nodes.length; ndIdx++) {
+            var nA = nodes[ndIdx];
+            var tgts = nA.next ? nA.next.slice() : [];
+            if (nA.branchHigh !== null && nA.branchHigh !== undefined && tgts.indexOf(nA.branchHigh) === -1) tgts.push(nA.branchHigh);
+            for (var tg = 0; tg < tgts.length; tg++) {
+                var nB = nodes[tgts[tg]];
+                if (!nB) continue;
+                for (var pIdx = 0; pIdx < riverPolylines.length; pIdx++) {
+                    var rPoly = riverPolylines[pIdx];
+                    var foundHit = false;
+                    for (var rp = 0; rp < rPoly.length - 1; rp++) {
+                        var hit = this.lineIntersection(nA, nB, rPoly[rp], rPoly[rp + 1]);
+                        if (hit) {
+                            var tooClose = false;
+                            for (var eb = 0; eb < bridges.length; eb++) {
+                                var dx = bridges[eb].x - hit.x, dy = bridges[eb].y - hit.y;
+                                if (dx * dx + dy * dy < 625) { tooClose = true; break; }
+                            }
+                            if (!tooClose) bridges.push({ x: hit.x, y: hit.y, angle: hit.angle, nodeAId: nA.id, nodeBId: nB.id });
+                            foundHit = true;
+                            break;
+                        }
+                    }
+                    if (foundHit) break;
+                }
+            }
+        }
+
+        // 8. Biomy a dominanty
+        var mtnFill = (biomeTheme === "dragon_peaks") ? "rgba(127, 29, 29, 0.58)" : "rgba(68, 64, 60, 0.55)";
+        var fstFill = (biomeTheme === "forest_realm") ? "rgba(20, 83, 45, 0.62)" : "rgba(22, 101, 52, 0.50)";
+        var mdwFill = (biomeTheme === "golden_plains") ? "rgba(217, 119, 6, 0.54)" : "rgba(202, 138, 4, 0.42)";
+        var wtrFill = (biomeTheme === "river_delta") ? "rgba(3, 105, 161, 0.58)" : "rgba(14, 116, 144, 0.48)";
+
+        var biomes = [
+            { id: "mountain_ridge", name: "Dračí pohoří & Skalní srázy", fillGrad: "mountainBiomeGrad", fill: mtnFill, opacity: 0.82, path: "M 960 60 C 1150 40 1350 180 1370 420 C 1380 620 1250 780 1080 770 C 1040 550 1020 320 960 60 Z", contours: ["M 1040 120 Q 1200 90 1280 260 Q 1320 450 1240 650", "M 1080 180 Q 1220 160 1270 340 Q 1280 520 1190 680"], contourStroke: "rgba(251,191,36,0.38)", contourDash: "8,5" },
+            { id: "forest_deep", name: "Královský hvozd Doubrava", fillGrad: "forestBiomeGrad", fill: fstFill, opacity: 0.78, path: "M 280 60 C 460 50 680 70 660 220 C 520 280 320 320 150 280 C 100 160 180 70 280 60 Z", contours: ["M 260 90 Q 420 80 560 180 Q 450 240 280 250", "M 180 150 Q 320 160 480 210"], contourStroke: "rgba(134,239,172,0.30)", contourDash: "6,6" },
+            { id: "meadows_valley", name: "Královské louky a lánová pole", fillGrad: "meadowsBiomeGrad", fill: mdwFill, opacity: 0.75, path: "M 180 620 C 350 560 600 580 620 780 C 500 830 280 840 150 790 C 120 720 130 650 180 620 Z", contours: ["M 220 660 Q 380 610 540 680", "M 260 720 Q 410 670 510 750"], contourStroke: "rgba(253,224,71,0.32)", contourDash: "5,5" }
+        ];
+        if (riverMode !== "none") {
+            biomes.push({ id: "water_wetlands", name: "Meandry řeky a jezerní tůně", fillGrad: "waterBiomeGrad", fill: wtrFill, opacity: 0.72, path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z", contours: ["M 1100 160 Q 990 350 860 520 Q 770 660 720 780", "M 1150 220 Q 1040 410 910 580"], contourStroke: "rgba(56,189,248,0.35)", contourDash: "7,5" });
+        }
+
+        var cardZones = [
+            { code: "VECI_1", title: "VĚCI 1", subtitle: "2 500 zl.", icon: "🗡️", color: "#60a5fa", x: 440, y: 155, w: 90, h: 96, actionTier: 1, count: 9 },
+            { code: "VECI_2", title: "VĚCI 2", subtitle: "7 000 zl.", icon: "⚔️", color: "#a855f7", x: 550, y: 155, w: 90, h: 96, actionTier: 2, count: 7 },
+            { code: "VECI_3", title: "VĚCI 3", subtitle: "12 000 zl.", icon: "👑", color: "#f59e0b", x: 660, y: 155, w: 90, h: 96, actionTier: 3, count: 4 },
+            { code: "ZVER_U1", title: "ZVĚŘ", subtitle: "Obtížnost 4–6", icon: "🐗", color: "#4ade80", x: 920, y: 165, w: 100, h: 78, count: 14 },
+            { code: "MONSTRA_U2", title: "MONSTRA", subtitle: "Obtížnost 8–15", icon: "👹", color: "#fb923c", x: 950, y: 265, w: 100, h: 78, count: 22 },
+            { code: "DRACI_U3", title: "DRACI", subtitle: "Obtížnost 11–17", icon: "🐉", color: "#f43f5e", x: 980, y: 365, w: 100, h: 78, count: 20 },
+            { code: "NAHODA_N", title: "NÁHODA", subtitle: "Karty osudu", icon: "❓", color: "#eab308", x: 250, y: 395, w: 76, h: 96, count: 24 },
+            { code: "SLAVNOST_S", title: "SLAVNOSTI", subtitle: "Turnaj & ples", icon: "🎪", color: "#ec4899", x: 505, y: 415, w: 76, h: 86, count: 3 }
+        ];
+
+        var landmarks = [
+            { id: "royalCastle", name: "Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 700, y: 380, w: 220, h: 180 },
+            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 },
+            { id: "castleH1", name: castleH1.name, icon: castleH1.icon, image: castleH1.img, x: 260, y: 220, w: 130, h: 115 },
+            { id: "castleH2", name: castleH2.name, icon: castleH2.icon, image: castleH2.img, x: 1140, y: 700, w: 130, h: 115 }
+        ];
+
+        var normalizedOpts = {
+            nodeCount: nodes.length,
+            branches: activeBranchCount,
+            masterTier: chosenMasterTier,
+            animalSetCount: r.animalLevels.length,
+            riverMode: riverMode,
+            dangerLevel: (r.questsU3 >= 3 ? "high" : (r.questsU3 === 0 ? "low" : "standard")),
+            biomeTheme: biomeTheme,
+            seed: seed
+        };
+        var boardSeedCode = this.formatSeedCode(seed, normalizedOpts);
+        var displayName = r.customName || ("Dynamické království #" + seed + " (" + nodes.length + " polí)");
+
+        return {
+            code: "custom_dynamic",
+            seedCode: boardSeedCode,
+            masterTier: (chosenMasterTier === 5 ? 2 : chosenMasterTier),
+            graduatedMasters: (chosenMasterTier === 5),
+            recipe: r,
+            options: normalizedOpts,
+            stats: {
+                totalNodes: nodes.length,
+                outerNodes: outerLen,
+                branches: activeBranchCount,
+                animalSets: r.animalLevels.length,
+                animalLevels: r.animalLevels.slice(),
+                castles: r.castles,
+                towns: r.towns,
+                villages: r.villages,
+                jesters: r.jesters,
+                buildings: r.buildings,
+                masters: r.masters,
+                merchants: r.merchants,
+                festivals: r.festivals,
+                chances: r.chances,
+                questsU1: r.questsU1,
+                questsU2: r.questsU2,
+                dragons: r.questsU3,
+                bridges: bridges.length,
+                estMinutes: Math.round(nodes.length * 0.65),
+                scenariosValid: (r.castles >= 1 && (r.towns + r.villages) >= 3 && r.questsU3 >= 1)
+            },
+            name: displayName,
+            seed: seed,
+            nodes: nodes,
+            cardZones: cardZones,
+            landmarks: landmarks,
+            biomes: biomes,
+            rivers: rivers,
+            bridges: bridges
+        };
+    },
+
+    // ========================================================================
     // HLAVNÍ METODA PARAMETRICKÉHO GENERÁTORU MAP 2.0
     // ========================================================================
     generate: function (customSeed, options) {
@@ -909,6 +1592,12 @@ window.KiDeskyMapGenerator = {
             for (var k in options.generatorOptions) {
                 if (options[k] === undefined) options[k] = options.generatorOptions[k];
             }
+        }
+        if (options.customRecipe && typeof options.customRecipe === "object") {
+            return this.compileDynamicRecipe(options.customRecipe, customSeed || options.seed);
+        }
+        if (Array.isArray(options.animalLevels) || options.villages !== undefined || options.jesters !== undefined) {
+            return this.compileDynamicRecipe(options, customSeed || options.seed);
         }
 
         var seed = Math.abs(Number(customSeed || options.seed || Math.floor(Math.random() * 899999 + 100000))) % 1000000 || 4598;
@@ -1630,19 +2319,93 @@ window.KiDeskyMapGenerator = {
 };
 
 window.PRS_BoardBuilder = {
+    dbTemplates: [],
+    dbTemplatesMap: {},
+
+    registerDbTemplates: function (list) {
+        if (!Array.isArray(list)) return;
+        this.dbTemplates = list.slice();
+        this.dbTemplatesMap = {};
+        for (var i = 0; i < list.length; i++) {
+            var t = list[i];
+            if (t && t.templateCode) {
+                this.dbTemplatesMap[t.templateCode] = t;
+            }
+        }
+    },
+
+    getActiveTemplatesList: function () {
+        if (this.dbTemplates && this.dbTemplates.length > 0) {
+            return this.dbTemplates.filter(function (t) { return t.isActive !== false; });
+        }
+        return [
+            { id: 1, templateCode: "classic_96", name: "Královská divočina 96 (Velký plán)", description: "Klasická velká herní deska s 96 poli, 4 vnitřními větvemi a 12 chovnými sadami zvířat.", nodeCount: 96, isBuiltIn: true, isActive: true },
+            { id: 2, templateCode: "dragon_4598", name: "Dračí stezka (Střední plán – 64 polí)", description: "Středně velký královský plán se 64 poli, řekou Doubravkou a 8 sadami zvířat.", nodeCount: 64, isBuiltIn: true, isActive: true },
+            { id: 3, templateCode: "compact_48", name: "Rytířské kolbiště (Rychlá hra – 48 polí)", description: "Kompaktní herní plán s 48 poli pro svižnější partie plné přímých střetů.", nodeCount: 48, isBuiltIn: true, isActive: true }
+        ];
+    },
+
     createBoard: function (templateCode, options) {
         options = options || {};
         var seed = options.seed || options.boardSeed || Math.floor(Math.random() * 1000000);
-        var board;
-        if (templateCode === "dragon_4598" || templateCode === "dragon_4595") {
-            board = this.buildDragon4598Board();
-        } else if (templateCode === "compact_48") {
-            board = this.buildCompactBoard();
-        } else if (templateCode === "procedural" || templateCode === "dynamic") {
-            board = this.buildProceduralBoard(seed, options);
-        } else {
-            board = this.buildClassic4599Board();
+        var board = null;
+        var dbTpl = (templateCode && this.dbTemplatesMap) ? this.dbTemplatesMap[templateCode] : null;
+
+        // 1. Pokud je předán vlastní dynamický recept (custom_dynamic nebo options.customRecipe)
+        if (templateCode === "custom_dynamic" || options.customRecipe) {
+            var recipeObj = options.customRecipe || (window.PRS_App && window.PRS_App.customBoardRecipe) || window.KiDeskyMapGenerator.DEFAULT_RECIPE;
+            if (typeof recipeObj === "string") {
+                try { recipeObj = JSON.parse(recipeObj); } catch (e) { recipeObj = window.KiDeskyMapGenerator.DEFAULT_RECIPE; }
+            }
+            seed = recipeObj.seed || seed;
+            board = window.KiDeskyMapGenerator.compileDynamicRecipe(recipeObj, seed);
+            board.code = "custom_dynamic";
         }
+        // 2. Pokud jde o administrátorem uložený předdefinovaný plán v databázi (není vestavěný)
+        else if (dbTpl && !dbTpl.isBuiltIn) {
+            seed = dbTpl.seed || seed;
+            var parsedGraph = null;
+            if (dbTpl.graphJson && typeof dbTpl.graphJson === "string" && dbTpl.graphJson.length > 20) {
+                try {
+                    var g = JSON.parse(dbTpl.graphJson);
+                    if (g && Array.isArray(g.nodes) && g.nodes.length > 0) parsedGraph = g;
+                } catch (e) { }
+            } else if (dbTpl.graphJson && typeof dbTpl.graphJson === "object" && Array.isArray(dbTpl.graphJson.nodes)) {
+                parsedGraph = JSON.parse(JSON.stringify(dbTpl.graphJson));
+            }
+
+            if (parsedGraph) {
+                board = parsedGraph;
+                board.code = dbTpl.templateCode;
+                board.name = dbTpl.name || board.name;
+            } else if (dbTpl.recipeJson) {
+                var dbRec = dbTpl.recipeJson;
+                if (typeof dbRec === "string") {
+                    try { dbRec = JSON.parse(dbRec); } catch (e) { dbRec = window.KiDeskyMapGenerator.DEFAULT_RECIPE; }
+                }
+                board = window.KiDeskyMapGenerator.compileDynamicRecipe(dbRec, seed);
+                board.code = dbTpl.templateCode;
+                board.name = dbTpl.name || board.name;
+            }
+        }
+
+        // 3. Standardní a procedurální plány
+        if (!board) {
+            if (templateCode === "dragon_4598" || templateCode === "dragon_4595") {
+                board = this.buildDragon4598Board();
+            } else if (templateCode === "compact_48") {
+                board = this.buildCompactBoard();
+            } else if (templateCode === "procedural" || templateCode === "dynamic") {
+                board = this.buildProceduralBoard(seed, options);
+            } else {
+                board = this.buildClassic4599Board();
+            }
+            // Pokud byl vestavěný plán v DB administrátorem přejmenován, propíšeme nový název
+            if (dbTpl && dbTpl.name) {
+                board.name = dbTpl.name;
+            }
+        }
+
         // Automatické generické ověření a bezpečné ukotvení dominant bez kolizí
         this.sanitizeAndAnchorLandmarks(board);
         // Automatický výpočet mostů na křížení řeky a cest, pokud ještě nejsou definovány
@@ -1650,7 +2413,9 @@ window.PRS_BoardBuilder = {
             this.computeRiverBridges(board);
         }
         // Generování procedurálních a ukotvených dekorací krajiny s ekosystémovými shluky
-        this.generateBoardDecorations(board, seed);
+        if (!board.decorations || board.decorations.length === 0) {
+            this.generateBoardDecorations(board, seed);
+        }
         return board;
     },
 

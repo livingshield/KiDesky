@@ -45,7 +45,7 @@
 
         switchAdminSubtab: function (subtab) {
             this.activeAdminSubtab = subtab;
-            var subtabs = ["videos", "audio", "users", "sessions", "announcements", "balance", "telemetry", "system"];
+            var subtabs = ["videos", "audio", "users", "sessions", "boards", "announcements", "balance", "telemetry", "system"];
             for (var i = 0; i < subtabs.length; i++) {
                 var s = subtabs[i];
                 var sec = document.getElementById("admin-subtab-" + s);
@@ -69,6 +69,9 @@
                     break;
                 case "sessions":
                     this.loadAdminSessions();
+                    break;
+                case "boards":
+                    this.loadAdminBoards();
                     break;
                 case "announcements":
                     this.loadAdminAnnouncements();
@@ -1235,6 +1238,383 @@
                 })
                 .catch(function () {
                     if (diagEl) diagEl.innerHTML = '<div style="color:#ef4444; padding:1.5rem;">Chyba sítě při komunikaci se serverem.</div>';
+                });
+        },
+
+        // ==========================================
+        // 8. SPRÁVA PŘEDDEFINOVANÝCH HERNÍCH PLÁNŮ (prs_BoardTemplates)
+        // ==========================================
+
+        adminBoardsList: [],
+        editingBoardId: 0,
+        editingBoardFromStudio: false,
+
+        loadAdminBoards: function () {
+            var self = this;
+            var listEl = document.getElementById("admin-boards-table-body");
+            if (listEl) listEl.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">⏳ Načítám předdefinované herní plány...</td></tr>';
+
+            fetch("api.ashx?action=list-board-templates&all=1&includeGraph=1")
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok && Array.isArray(res.templates)) {
+                        self.adminBoardsList = res.templates;
+                        if (window.PRS_BoardBuilder && window.PRS_BoardBuilder.registerDbTemplates) {
+                            window.PRS_BoardBuilder.registerDbTemplates(res.templates);
+                        }
+                        if (self.refreshBoardTemplateSelects) {
+                            self.refreshBoardTemplateSelects();
+                        }
+                        self.renderAdminBoardsTable();
+                    } else if (listEl) {
+                        listEl.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:1.5rem;">Chyba načítání plánů: ' + self.escapeHtml((res && res.message) || "Neznámá chyba") + '</td></tr>';
+                    }
+                })
+                .catch(function () {
+                    if (listEl) listEl.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#ef4444; padding:1.5rem;">Chyba sítě při načítání herních plánů.</td></tr>';
+                });
+        },
+
+        renderAdminBoardsTable: function () {
+            var listEl = document.getElementById("admin-boards-table-body");
+            if (!listEl) return;
+            if (!this.adminBoardsList || this.adminBoardsList.length === 0) {
+                listEl.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">Zatím nejsou uloženy žádné předdefinované herní plány.</td></tr>';
+                return;
+            }
+            var html = "";
+            for (var i = 0; i < this.adminBoardsList.length; i++) {
+                var b = this.adminBoardsList[i];
+                var typeBadge = b.isBuiltIn
+                    ? '<span class="badge-pill" style="background:rgba(212,175,55,0.22); border:1px solid var(--gold); color:var(--gold-light); font-size:0.68rem;">👑 Výchozí</span>'
+                    : '<span class="badge-pill" style="background:rgba(168,85,247,0.25); border:1px solid #c084fc; color:#e9d5ff; font-size:0.68rem;">🛠️ Dynamický</span>';
+
+                var activeBadge = b.isActive
+                    ? '<span class="badge-pill" style="background:#16a34a; color:#fff; cursor:pointer;" onclick="PRS_App.toggleAdminBoardActive(' + b.id + ', false)" title="Kliknutím skryješ plán z nabídky">Aktivní</span>'
+                    : '<span class="badge-pill" style="background:#57534e; color:#fff; cursor:pointer;" onclick="PRS_App.toggleAdminBoardActive(' + b.id + ', true)" title="Kliknutím znovu zapneš plán do nabídky">Skryto</span>';
+
+                var recipeInfo = "";
+                if (b.recipeJson) {
+                    try {
+                        var r = (typeof b.recipeJson === "string") ? JSON.parse(b.recipeJson) : b.recipeJson;
+                        if (r) {
+                            var aCnt = Array.isArray(r.animalLevels) ? r.animalLevels.length : 6;
+                            recipeInfo = '<div style="font-size:0.71rem; color:#94a3b8; margin-top:2px;">🐎 ' + aCnt + ' sad zvířat • 🏯 ' + (r.castles || 0) + 'H / ' + (r.towns || 0) + 'M / ' + (r.villages || 0) + 'V • 🐲 ' + (r.questsU3 || 0) + ' draků</div>';
+                        }
+                    } catch (e) { }
+                }
+
+                var delBtnLabel = b.isBuiltIn ? (b.isActive ? "👁️ Skrýt" : "👁️ Obnovit") : "🗑️ Odebrat";
+                var delBtnAction = b.isBuiltIn && !b.isActive
+                    ? 'PRS_App.toggleAdminBoardActive(' + b.id + ', true)'
+                    : 'PRS_App.deleteAdminBoard(' + b.id + ')';
+                var delBtnStyle = (b.isBuiltIn && !b.isActive)
+                    ? 'color:#4ade80; border-color:#4ade80;'
+                    : 'color:#ef4444; border-color:#ef4444;';
+
+                html += '<tr>' +
+                    '<td style="font-weight:700; color:var(--gold-light);">' + b.id + '</td>' +
+                    '<td><code style="font-size:0.76rem; color:#bae6fd;">' + this.escapeHtml(b.templateCode) + '</code><div style="margin-top:3px;">' + typeBadge + '</div></td>' +
+                    '<td><strong>' + this.escapeHtml(b.name) + '</strong><br><small style="color:var(--text-muted);">' + this.escapeHtml(b.description || "") + '</small>' + recipeInfo + '</td>' +
+                    '<td style="text-align:center;"><strong>' + (b.nodeCount || 96) + ' polí</strong><br><small style="color:#94a3b8; font-family:monospace;">Seed #' + (b.seed || 4598) + '</small></td>' +
+                    '<td style="text-align:center; font-weight:700;">' + (b.sortOrder !== undefined ? b.sortOrder : 50) + '</td>' +
+                    '<td style="text-align:center;">' + activeBadge + '</td>' +
+                    '<td style="text-align:right; white-space:nowrap;">' +
+                        '<button class="btn-secondary" style="font-size:0.74rem; padding:0.24rem 0.5rem; margin-right:4px;" onclick="PRS_App.openEditBoardModal(' + b.id + ')" title="Přejmenovat plán nebo upravit popis a pořadí">✏️ Přejmenovat</button>' +
+                        '<button class="btn-secondary" style="font-size:0.74rem; padding:0.24rem 0.5rem; margin-right:4px; border-color:#a855f7; color:#e9d5ff;" onclick="PRS_App.openBoardInMapStudio(' + b.id + ')" title="Otevřít složení polí v Map Studiu">🎛️ Složení</button>' +
+                        '<button class="btn-secondary" style="font-size:0.74rem; padding:0.24rem 0.5rem; ' + delBtnStyle + '" onclick="' + delBtnAction + '">' + delBtnLabel + '</button>' +
+                    '</td>' +
+                '</tr>';
+            }
+            listEl.innerHTML = html;
+        },
+
+        openSaveToPredefinedModal: function () {
+            if (!this.currentUser || this.currentUser.role !== "Admin") {
+                KiDeskyToast.show("🛡️ Ukládání do předdefinovaných plánů je vyhrazeno administrátorovi.", "warning");
+                return;
+            }
+            if (!this._currentMapStudioBoard || !this.customBoardRecipe) {
+                this.updateMapStudioPreview();
+            }
+            var brd = this._currentMapStudioBoard;
+            var r = this.customBoardRecipe || {};
+            this.editingBoardId = 0;
+            this.editingBoardFromStudio = true;
+
+            var modal = document.getElementById("admin-board-modal");
+            var titleEl = document.getElementById("admin-board-modal-title");
+            var nameInp = document.getElementById("admin-brd-name");
+            var descInp = document.getElementById("admin-brd-desc");
+            var codeInp = document.getElementById("admin-brd-code");
+            var orderInp = document.getElementById("admin-brd-order");
+            var activeChk = document.getElementById("admin-brd-active");
+            var infoEl = document.getElementById("admin-brd-info");
+            var fbEl = document.getElementById("admin-brd-feedback");
+
+            if (titleEl) titleEl.innerHTML = "🛡️ Uložit vygenerovaný plán do předdefinovaných (DB)";
+            var defaultName = r.customName || (brd && brd.name) || ("Královský plán #" + this.mapStudioSeed);
+            var aCnt = Array.isArray(r.animalLevels) ? r.animalLevels.length : 6;
+            var nodeCnt = (brd && brd.nodes) ? brd.nodes.length : 96;
+            var defaultDesc = "Dynamický plán (" + nodeCnt + " polí, " + aCnt + " sad zvířat, " + (r.castles || 0) + " hrady, " + (r.towns || 0) + " města, " + (r.questsU3 || 0) + " draci, Seed #" + this.mapStudioSeed + ").";
+
+            if (nameInp) nameInp.value = defaultName;
+            if (descInp) descInp.value = defaultDesc;
+            if (codeInp) {
+                codeInp.value = "custom_" + this.mapStudioSeed;
+                codeInp.disabled = false;
+            }
+            if (orderInp) orderInp.value = "40";
+            if (activeChk) activeChk.checked = true;
+            if (infoEl) {
+                infoEl.innerHTML = "📍 <strong>" + nodeCnt + " polí</strong> • 🎲 Seed <strong>#" + this.mapStudioSeed + "</strong> • 🐎 <strong>" + aCnt + " trojic zvířat</strong> • Tento plán bude po uložení okamžitě dostupný všem hráčům v nabídce herních plánů (Solo i Online Multiplayer).";
+            }
+            if (fbEl) fbEl.textContent = "";
+            if (modal) modal.style.display = "flex";
+        },
+
+        openEditBoardModal: function (id) {
+            var item = null;
+            for (var i = 0; i < this.adminBoardsList.length; i++) {
+                if (this.adminBoardsList[i].id === id) {
+                    item = this.adminBoardsList[i];
+                    break;
+                }
+            }
+            if (!item) return;
+
+            this.editingBoardId = item.id;
+            this.editingBoardFromStudio = false;
+
+            var modal = document.getElementById("admin-board-modal");
+            var titleEl = document.getElementById("admin-board-modal-title");
+            var nameInp = document.getElementById("admin-brd-name");
+            var descInp = document.getElementById("admin-brd-desc");
+            var codeInp = document.getElementById("admin-brd-code");
+            var orderInp = document.getElementById("admin-brd-order");
+            var activeChk = document.getElementById("admin-brd-active");
+            var infoEl = document.getElementById("admin-brd-info");
+            var fbEl = document.getElementById("admin-brd-feedback");
+
+            if (titleEl) titleEl.innerHTML = "✏️ Přejmenovat / Upravit předdefinovaný plán";
+            if (nameInp) nameInp.value = item.name || "";
+            if (descInp) descInp.value = item.description || "";
+            if (codeInp) {
+                codeInp.value = item.templateCode || "";
+                codeInp.disabled = true;
+            }
+            if (orderInp) orderInp.value = String(item.sortOrder !== undefined ? item.sortOrder : 50);
+            if (activeChk) activeChk.checked = Boolean(item.isActive);
+            if (infoEl) {
+                infoEl.innerHTML = (item.isBuiltIn ? "👑 <strong>Výchozí systémový plán</strong> (lze libovolně přejmenovat, změnit pořadí nebo skrýt)." : "🛠️ <strong>Vlastní předdefinovaný plán</strong> (" + (item.nodeCount || 96) + " polí, Seed #" + (item.seed || 4598) + ").");
+            }
+            if (fbEl) fbEl.textContent = "";
+            if (modal) modal.style.display = "flex";
+        },
+
+        closeAdminBoardModal: function () {
+            var modal = document.getElementById("admin-board-modal");
+            if (modal) modal.style.display = "none";
+        },
+
+        submitAdminBoardModal: function () {
+            var self = this;
+            var nameInp = document.getElementById("admin-brd-name");
+            var descInp = document.getElementById("admin-brd-desc");
+            var codeInp = document.getElementById("admin-brd-code");
+            var orderInp = document.getElementById("admin-brd-order");
+            var activeChk = document.getElementById("admin-brd-active");
+            var fbEl = document.getElementById("admin-brd-feedback");
+
+            var name = nameInp ? nameInp.value.trim() : "";
+            var desc = descInp ? descInp.value.trim() : "";
+            var code = codeInp ? codeInp.value.trim() : "";
+            var sortOrder = orderInp ? (parseInt(orderInp.value, 10) || 50) : 50;
+            var isActive = activeChk ? Boolean(activeChk.checked) : true;
+
+            if (!name) {
+                if (fbEl) fbEl.textContent = "Zadejte prosím název herního plánu.";
+                return;
+            }
+
+            if (this.editingBoardFromStudio) {
+                var brd = this._currentMapStudioBoard;
+                var rec = this.customBoardRecipe || {};
+                rec.customName = name;
+                rec.seed = this.mapStudioSeed;
+                if (brd) brd.name = name;
+
+                var payload = {
+                    id: this.editingBoardId || 0,
+                    templateCode: code || ("custom_" + this.mapStudioSeed),
+                    name: name,
+                    description: desc,
+                    nodeCount: (brd && brd.nodes) ? brd.nodes.length : 96,
+                    seed: this.mapStudioSeed || 4598,
+                    sortOrder: sortOrder,
+                    isActive: isActive,
+                    createdBy: (this.currentUser && this.currentUser.username) || "admin",
+                    recipeJson: JSON.stringify(rec),
+                    graphJson: brd ? JSON.stringify(brd) : "{}"
+                };
+
+                fetch("api.ashx?action=admin-save-board-template", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.ok) {
+                            self.closeAdminBoardModal();
+                            KiDeskyToast.show("🛡️ " + (res.message || "Plán byl uložen do předdefinovaných!"), "good");
+                            if (self.loadBoardTemplatesFromServer) {
+                                self.loadBoardTemplatesFromServer(function () {
+                                    if (res.templateCode) {
+                                        var lSel = document.getElementById("lobby-board-select");
+                                        if (lSel) lSel.value = res.templateCode;
+                                        var bSel = document.getElementById("board-template-select");
+                                        if (bSel) bSel.value = res.templateCode;
+                                    }
+                                });
+                            }
+                            if (self.activeAdminSubtab === "boards") self.loadAdminBoards();
+                        } else {
+                            if (fbEl) fbEl.textContent = (res && res.message) || "Chyba při ukládání plánu.";
+                        }
+                    })
+                    .catch(function () {
+                        if (fbEl) fbEl.textContent = "Chyba komunikace se serverem.";
+                    });
+            } else {
+                var renamePayload = {
+                    id: this.editingBoardId,
+                    templateCode: code,
+                    name: name,
+                    description: desc,
+                    sortOrder: sortOrder,
+                    isActive: isActive
+                };
+                fetch("api.ashx?action=admin-rename-board-template", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(renamePayload)
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.ok) {
+                            self.closeAdminBoardModal();
+                            KiDeskyToast.show("✏️ " + (res.message || "Herní plán byl upraven."), "good");
+                            self.loadAdminBoards();
+                            if (self.loadBoardTemplatesFromServer) self.loadBoardTemplatesFromServer();
+                        } else {
+                            if (fbEl) fbEl.textContent = (res && res.message) || "Chyba při úpravě plánu.";
+                        }
+                    })
+                    .catch(function () {
+                        if (fbEl) fbEl.textContent = "Chyba komunikace se serverem.";
+                    });
+            }
+        },
+
+        openBoardInMapStudio: function (id) {
+            var item = null;
+            for (var i = 0; i < this.adminBoardsList.length; i++) {
+                if (this.adminBoardsList[i].id === id) {
+                    item = this.adminBoardsList[i];
+                    break;
+                }
+            }
+            if (!item) return;
+
+            var rec = null;
+            if (item.recipeJson) {
+                try {
+                    rec = (typeof item.recipeJson === "string") ? JSON.parse(item.recipeJson) : item.recipeJson;
+                } catch (e) { rec = null; }
+            }
+            if (!rec && window.KiDeskyMapGenerator) {
+                rec = window.KiDeskyMapGenerator.DEFAULT_RECIPE;
+            }
+            if (rec && item.name) {
+                rec.customName = item.name;
+            }
+            this.openMapStudioModal(item.seed || 4598, rec);
+            this.editingBoardId = item.isBuiltIn ? 0 : item.id;
+            KiDeskyToast.show("🎛️ Plán „" + item.name + "“ načten do Map Studia.", "info");
+        },
+
+        toggleAdminBoardActive: function (id, newActive) {
+            var self = this;
+            var item = null;
+            for (var i = 0; i < this.adminBoardsList.length; i++) {
+                if (this.adminBoardsList[i].id === id) {
+                    item = this.adminBoardsList[i];
+                    break;
+                }
+            }
+            if (!item) return;
+
+            fetch("api.ashx?action=admin-rename-board-template", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: item.id,
+                    templateCode: item.templateCode,
+                    name: item.name,
+                    description: item.description || "",
+                    sortOrder: item.sortOrder || 50,
+                    isActive: Boolean(newActive)
+                })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok) {
+                        KiDeskyToast.show(newActive ? "👁️ Plán byl aktivován v nabídce." : "👁️ Plán byl skryt z nabídky.", "info");
+                        self.loadAdminBoards();
+                        if (self.loadBoardTemplatesFromServer) self.loadBoardTemplatesFromServer();
+                    }
+                });
+        },
+
+        deleteAdminBoard: async function (id) {
+            var self = this;
+            var item = null;
+            for (var i = 0; i < this.adminBoardsList.length; i++) {
+                if (this.adminBoardsList[i].id === id) {
+                    item = this.adminBoardsList[i];
+                    break;
+                }
+            }
+            if (!item) return;
+
+            var msg = item.isBuiltIn
+                ? "Toto je výchozí vestavěný plán („" + item.name + "“).\nOdebráním jej skryješ z nabídky pro hráče (v administraci jej můžeš kdykoliv znovu zapnout). Pokračovat?"
+                : "Opravdu si přeješ trvale odebrat předdefinovaný herní plán „" + item.name + "“ z databáze?";
+
+            var conf = await KiDeskyDialog.confirm(msg, {
+                title: item.isBuiltIn ? "Odebrat výchozí plán z nabídky" : "Smazat předdefinovaný plán",
+                icon: "🗑️",
+                confirmText: item.isBuiltIn ? "👁️ Skrýt z nabídky" : "🗑️ Trvale odebrat",
+                cancelText: "Zrušit",
+                danger: true
+            });
+            if (!conf) return;
+
+            fetch("api.ashx?action=admin-delete-board-template", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: item.id, templateCode: item.templateCode })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok) {
+                        KiDeskyToast.show("🗑️ " + (res.message || "Herní plán byl odebrán."), "info");
+                        self.loadAdminBoards();
+                        if (self.loadBoardTemplatesFromServer) self.loadBoardTemplatesFromServer();
+                    } else {
+                        KiDeskyToast.show("⚠️ " + ((res && res.message) || "Chyba při odebírání plánu."), "warning");
+                    }
                 });
         }
     });
