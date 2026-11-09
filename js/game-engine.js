@@ -1242,15 +1242,17 @@ window.PRS_GameEngine = {
                 for (var oi = 0; oi < pl.ownedNodes.length; oi++) {
                     var oNd = state.board.nodes[pl.ownedNodes[oi]];
                     if (oNd) {
-                        if (oNd.level === 3 || oNd.type === "CASTLE") kCount++;
-                        else if (oNd.level === 2 || oNd.type === "TOWN") cCount++;
+                        var isCst = (oNd.type === "CASTLE" || (oNd.type === "VILLAGE" && (oNd.villageLevel || 1) >= 3));
+                        var isTwn = (oNd.type === "TOWN" || (oNd.type === "VILLAGE" && (oNd.villageLevel || 1) >= 2));
+                        if (isCst) kCount++;
+                        else if (isTwn) cCount++;
                     }
                 }
 
-                if (cCount >= 3 && kCount >= 1 && !pl.isEliminated) {
+                if (kCount >= 1 && (kCount + cCount) >= 4 && !pl.isEliminated) {
                     isWin = true;
                     winTypeAchieved = "tycoon_estates";
-                    winReason = "🏆 VÍTĚZSTVÍ FEUDÁLNÍHO MAGNÁTA! " + pl.badge + " " + pl.name + " ovládl 3 vzkvétající města a 1 hrad (" + cCount + " měst, " + kCount + " hradů)!";
+                    winReason = "🏆 VÍTĚZSTVÍ FEUDÁLNÍHO MAGNÁTA! " + pl.badge + " " + pl.name + " ovládl " + (kCount + cCount) + " panství (" + cCount + " měst, " + kCount + " hradů) a vybudoval nejmocnější dominium v království!";
                 }
 
             } else {
@@ -3373,6 +3375,8 @@ window.PRS_GameEngine = {
             state.pendingAction.summary = msg;
 
         }
+
+        this.recalculateBreedingAndVictory(state);
 
         return true;
 

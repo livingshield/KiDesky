@@ -1991,16 +1991,13 @@
 
                 }
 
-                // DVOŘAN: Absolutní priorita pro Města a Hrady (šlechtický status pro START audienci)
-
-                else if (targetNode.type === "CASTLE" || targetNode.type === "TOWN") {
-
-                    if (bot.type === "Bot_Noble") neededReserve = 200;
-
+                // ŠLECHTA & MAGNÁTI: Absolutní priorita pro Města, Hrady a Vesnice
+                else if (targetNode.type === "CASTLE" || targetNode.type === "TOWN" || targetNode.type === "VILLAGE") {
+                    var scn = (state.config && state.config.scenario) ? state.config.scenario : "classic";
+                    if (scn === "tycoon") neededReserve = 100;
+                    else if (bot.type === "Bot_Noble") neededReserve = 200;
                     else if (bot.type === "Bot_Aggressive") neededReserve = 350;
-
                     else neededReserve = 500;
-
                 }
 
                 // Řemeslné budovy
@@ -2033,20 +2030,29 @@
 
         }
 
-        // 5. Vylepšování vesnic (Chovatel vylepšuje nejraději)
-
+        // 5. Vylepšování vesnic (při dopadu na pole i z celého rytířského portfolia)
         if (pa.canUpgradeVillage) {
-
-            var upgRes = reserveGold;
-
-            if (bot.type === "Bot_Breeder") upgRes = 400;
-
+            var upgRes = (scen === "tycoon") ? 300 : (bot.type === "Bot_Breeder" ? 400 : reserveGold);
             if (bot.gold - pa.upgradeCost >= upgRes) {
-
                 this.upgradeVillage(state, pa.nodeId);
-
             }
-
+        }
+        // 5b. Průběžná správa a povyšování vlastněných vesnic na Města (2★) a Hrady (3★)
+        if (bot.ownedNodes && bot.ownedNodes.length > 0) {
+            var scen = (state.config && state.config.scenario) ? state.config.scenario : "classic";
+            var minSpare = (scen === "tycoon") ? 400 : (bot.type === "Bot_Breeder" ? 600 : 2500);
+            for (var vi = 0; vi < bot.ownedNodes.length; vi++) {
+                var vId = bot.ownedNodes[vi];
+                var vNd = state.board.nodes[vId];
+                if (vNd && vNd.type === "VILLAGE" && (vNd.villageLevel || 1) < 3) {
+                    var uPrices = (state.config.estates && state.config.estates.villagePrices) || [2000, 1500, 3000];
+                    var uC = uPrices[vNd.villageLevel || 1] || 1500;
+                    if (bot.gold - uC >= minSpare) {
+                        this.upgradeVillage(state, vId);
+                        if (state.phase === "GAME_OVER") return;
+                    }
+                }
+            }
         }
 
         // 6. Trénink u Mistra podle archetypu

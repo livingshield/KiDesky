@@ -53,8 +53,10 @@
                     for (var oi = 0; oi < player.ownedNodes.length; oi++) {
                         var oNd = this.state.board.nodes[player.ownedNodes[oi]];
                         if (oNd) {
-                            if (oNd.level === 3 || oNd.type === "CASTLE") kCount++;
-                            else if (oNd.level === 2 || oNd.type === "TOWN") cCount++;
+                            var isCst = (oNd.type === "CASTLE" || (oNd.type === "VILLAGE" && (oNd.villageLevel || 1) >= 3));
+                            var isTwn = (oNd.type === "TOWN" || (oNd.type === "VILLAGE" && (oNd.villageLevel || 1) >= 2));
+                            if (isCst) kCount++;
+                            else if (isTwn) cCount++;
                         }
                     }
                 }
@@ -950,8 +952,10 @@
                         for (var oi = 0; oi < plTrack.ownedNodes.length; oi++) {
                             var oNd = this.state.board.nodes[plTrack.ownedNodes[oi]];
                             if (oNd) {
-                                if (oNd.level === 3 || oNd.type === "CASTLE") kCount++;
-                                else if (oNd.level === 2 || oNd.type === "TOWN") cCount++;
+                                var isCst = (oNd.type === "CASTLE" || (oNd.type === "VILLAGE" && (oNd.villageLevel || 1) >= 3));
+                                var isTwn = (oNd.type === "TOWN" || (oNd.type === "VILLAGE" && (oNd.villageLevel || 1) >= 2));
+                                if (isCst) kCount++;
+                                else if (isTwn) cCount++;
                             }
                         }
                     }
