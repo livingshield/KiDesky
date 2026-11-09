@@ -1572,9 +1572,6 @@ window.KiDeskyMapGenerator = {
             { id: "forest_deep", name: "Královský hvozd Doubrava", fillGrad: "forestBiomeGrad", fill: fstFill, opacity: 0.78, path: "M 280 60 C 460 50 680 70 660 220 C 520 280 320 320 150 280 C 100 160 180 70 280 60 Z", contours: ["M 260 90 Q 420 80 560 180 Q 450 240 280 250", "M 180 150 Q 320 160 480 210"], contourStroke: "rgba(134,239,172,0.30)", contourDash: "6,6" },
             { id: "meadows_valley", name: "Královské louky a lánová pole", fillGrad: "meadowsBiomeGrad", fill: mdwFill, opacity: 0.75, path: "M 180 620 C 350 560 600 580 620 780 C 500 830 280 840 150 790 C 120 720 130 650 180 620 Z", contours: ["M 220 660 Q 380 610 540 680", "M 260 720 Q 410 670 510 750"], contourStroke: "rgba(253,224,71,0.32)", contourDash: "5,5" }
         ];
-        if (riverMode !== "none") {
-            biomes.push({ id: "water_wetlands", name: "Meandry řeky a jezerní tůně", fillGrad: "waterBiomeGrad", fill: wtrFill, opacity: 0.28, path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z", contours: [] });
-        }
 
         var cardZones = [
             { code: "VECI_1", title: "VĚCI 1", subtitle: "2 500 zl.", icon: "🗡️", color: "#60a5fa", x: 440, y: 155, w: 90, h: 96, actionTier: 1, count: 9 },
@@ -2304,11 +2301,6 @@ window.KiDeskyMapGenerator = {
             }
         ];
 
-        if (riverMode !== "none") {
-            biomes.push({
-                id: "water_wetlands", name: "Meandry řeky a jezerní tůně", fillGrad: "waterBiomeGrad", fill: "rgba(14, 116, 144, 0.28)", opacity: 0.28, path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z", contours: [] });
-        }
-
         // 8. ZÓNY BALÍČKŮ KARET & DOMINANTY KRAJINY
         var cardZones = [
             { code: "VECI_1", title: "VĚCI 1", subtitle: "2 500 zl.", icon: "🗡️", color: "#60a5fa", x: 440, y: 155, w: 90, h: 96, actionTier: 1, count: 9 },
@@ -2515,11 +2507,12 @@ window.PRS_BoardBuilder = {
 
         // Přibližný polygon pro hlavní řeku
         var riverPoly = [
-            { x: 1225, y: 15 }, { x: 1205, y: 70 }, { x: 1177, y: 127 },
-            { x: 1145, y: 200 }, { x: 1107, y: 281 }, { x: 1055, y: 375 },
-            { x: 965, y: 470 }, { x: 870, y: 570 }, { x: 779, y: 676 },
-            { x: 750, y: 735 }, { x: 720, y: 802 }, { x: 700, y: 860 },
-            { x: 690, y: 910 }
+            { x: 1225, y: 15 }, { x: 1205, y: 60 }, { x: 1177, y: 127 },
+            { x: 1160, y: 170 }, { x: 1130, y: 220 }, { x: 1107, y: 281 },
+            { x: 1075, y: 355 }, { x: 1025, y: 415 }, { x: 965, y: 470 },
+            { x: 900, y: 535 }, { x: 835, y: 605 }, { x: 779, y: 676 },
+            { x: 752, y: 710 }, { x: 734, y: 756 }, { x: 720, y: 802 },
+            { x: 711, y: 832 }, { x: 703, y: 874 }, { x: 695, y: 915 }
         ];
 
         for (var n = 0; n < nodes.length; n++) {
@@ -3142,9 +3135,20 @@ window.PRS_BoardBuilder = {
 
     buildClassic4599Board: function (options) {
         options = options || {};
-        var seed = options.seed || options.boardSeed || 4598;
+        var seed = (options.seed !== undefined && options.seed !== null) ? options.seed : (options.boardSeed || Math.floor(Math.random() * 1000000));
         var royalKey = options.royalCastle || (options.recipe && options.recipe.royalCastle) || "auto";
         var royalDef = this.resolveRoyalCastle(royalKey, options.biomeTheme, seed);
+
+        // Dynamická variabilita hradů H1 a H2 bez duplicit s královským hradem
+        var allCastles = this.ALL_CASTLES || [];
+        var remainingCastles = allCastles.filter(function (c) {
+            return c.id !== royalDef.id && c.img !== royalDef.img;
+        });
+        var h1Idx = Math.abs(seed * 7 + 3) % Math.max(1, remainingCastles.length);
+        var castleDefH1 = remainingCastles[h1Idx] || allCastles[1];
+        var remainingForH2 = remainingCastles.filter(function (c) { return c.id !== castleDefH1.id; });
+        var h2Idx = Math.abs(seed * 13 + 5) % Math.max(1, remainingForH2.length);
+        var castleDefH2 = remainingForH2[h2Idx] || allCastles[5];
         // A) Hlavní obvodový okruh (74 polí, plynule zaoblený přesně podle IMG_4599)
         // Sekce 1: Horní rovinka od STARTu (x=500, y=72) doprava k P2 (x=1145, y=108) -> 14 polí (indexy 0..13)
         var topDefs = [
@@ -3293,7 +3297,7 @@ window.PRS_BoardBuilder = {
             { code: "U2_R2", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "U3_1", type: "QUEST", subtype: "U3", name: "Dračí sluj I (U3)", icon: "🐉" },
             { code: "U3_2", type: "QUEST", subtype: "U3", name: "Tříhlavý drak II (U3)", icon: "🐲" },
-            { code: "H2", type: "CASTLE", estateId: "H2", name: "Hrad 2 (Orlí Hrad)", icon: "☁️", castleImg: "assets/castles/castle_wind.png" }
+            { code: "H2", type: "CASTLE", estateId: "H2", name: "Hrad 2 (" + castleDefH2.name + ")", icon: castleDefH2.icon || "☁️", castleImg: castleDefH2.img }
         ];
         var rightBranchPts = this.sampleBezier([1095, 165], [1085, 360], [1235, 510], [1185, 725], rightBranchDefs.length, true);
         var rbStart = nodes.length;
@@ -3372,7 +3376,7 @@ window.PRS_BoardBuilder = {
             { code: "SOK2", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 2", icon: "🦅" },
             { code: "U2_L1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "K12", type: "ANIMAL", subtype: "kun", setId: 12, name: "Kůň 12 (Královský oř)", icon: "🐎" },
-            { code: "H1", type: "CASTLE", estateId: "H1", name: "Hrad 1 (Lví Hrad)", icon: "🌲", castleImg: "assets/castles/castle_forest.png" },
+            { code: "H1", type: "CASTLE", estateId: "H1", name: "Hrad 1 (" + castleDefH1.name + ")", icon: castleDefH1.icon || "🌲", castleImg: castleDefH1.img },
             { code: "P12", type: "ANIMAL", subtype: "pes", setId: 12, name: "Pes 12 (Zlatý chrt)", icon: "🐕" },
             { code: "MT2", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃" }
         ];
@@ -3457,18 +3461,16 @@ window.PRS_BoardBuilder = {
                 ],
                 contourStroke: "rgba(253,224,71,0.32)",
                 contourDash: "5,5"
-            },
-            {
-                id: "water_wetlands", name: "Meandry řeky a jezerní tůně", fillGrad: "waterBiomeGrad", fill: "rgba(14, 116, 144, 0.28)", opacity: 0.28, path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z", contours: [] }
+            }
         ];
 
         var rivers = [
             {
                 id: "river_classic",
                 name: "Královská řeka Doubravka",
-                width: 12,
+                width: 14,
                 color: "#0284c7",
-                path: "M 1225 15 C 1205 70, 1190 95, 1177 127 C 1155 175, 1125 225, 1107 281 C 1075 355, 1025 415, 965 470 C 895 535, 835 605, 779 676 C 755 710, 735 755, 720 802 C 705 845, 695 875, 690 910"
+                path: "M 1225 15 C 1205 60, 1190 95, 1177 127 C 1160 170, 1130 220, 1107 281 C 1075 355, 1025 415, 965 470 C 900 535, 835 605, 779 676 C 752 710, 734 756, 720 802 C 711 832, 703 874, 695 915"
             }
         ];
 

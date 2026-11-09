@@ -67,6 +67,13 @@ $filesToDeploy = @(
     "assets/backgrounds/bg_theme_air.jpg"
 )
 
+# Dynamicky pridat vsechny soubory hradu (PNG, JPG, _flip.png) - prisne krome .exe
+Get-ChildItem (Join-Path $localBase "assets\castles") -File | ForEach-Object {
+    if ($_.Extension -ne ".exe" -and $_.Name -notlike "*.exe*") {
+        $filesToDeploy += "assets/castles/$($_.Name)"
+    }
+}
+
 foreach ($relPath in $filesToDeploy) {
     if ($relPath -like "*.exe*") { continue }
     $localFile = Join-Path $localBase ($relPath -replace "/", "\")

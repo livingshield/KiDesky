@@ -955,16 +955,27 @@
     // ========================================================================
     sampleRiverPath: function (d, step) {
         try {
+            var svg = document.getElementById("prs-board-svg") || (document.querySelector && document.querySelector("svg"));
             var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute("d", d);
+            var attached = false;
+            if (svg && svg.appendChild) {
+                p.style.display = "none";
+                svg.appendChild(p);
+                attached = true;
+            }
             var len = p.getTotalLength();
-            if (!(len > 20)) return null;
+            if (!(len > 20)) {
+                if (attached && p.parentNode) p.parentNode.removeChild(p);
+                return null;
+            }
             var n = Math.max(14, Math.ceil(len / step));
             var pts = [], i;
             for (i = 0; i <= n; i++) {
                 var pt = p.getPointAtLength(len * i / n);
                 pts.push({ x: pt.x, y: pt.y, t: i / n, s: len * i / n });
             }
+            if (attached && p.parentNode) p.parentNode.removeChild(p);
             for (i = 0; i <= n; i++) {
                 var a = pts[Math.max(0, i - 1)], b = pts[Math.min(n, i + 1)];
                 var dx = b.x - a.x, dy = b.y - a.y;
@@ -1008,6 +1019,7 @@
             var riv = board.rivers[r];
             var rw = riv.width || 14;
             var rid = "rv" + r;
+            var isTributary = (riv.id === "tributary_river" || riv.isTributary || (r > 0 && riv.id !== "island_branch"));
             var smp = this.sampleRiverPath(riv.path, 7);
 
             // Záloha, pokud nelze cestu vzorkovat (např. mimo prohlížeč)
@@ -1038,7 +1050,8 @@
                 var L = [], R = [];
                 for (var k = 0; k < n; k++) {
                     var pt = pts[k];
-                    var hw = halfW[k] * scale + extra;
+                    var extraFade = (isTributary && extra > 0) ? Math.min(1, Math.max(0, (n - 1 - k) / 5)) : 1;
+                    var hw = halfW[k] * scale + extra * extraFade;
                     // Vnější strana zákrutu je hlubší a širší, vnitřní má náplavy
                     var shift = pt.curv * 0.16 * halfW[k];
                     var jl = bankJit * noise(pt.s * 1.3, p3, p4);

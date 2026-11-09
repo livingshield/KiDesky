@@ -99,8 +99,8 @@ $filesToUpload = @(
     "assets/tiles/u3_drak.jpg"
 )
 
-# Add all 10 castles
-Get-ChildItem "$localBase\assets\castles\*.jpg" | ForEach-Object {
+# Add all 10 castles (JPG, PNG, _flip.png) - exclude any .exe
+Get-ChildItem "$localBase\assets\castles\*" -File | Where-Object { $_.Extension -ne ".exe" -and $_.Name -notlike "*.exe*" } | ForEach-Object {
     $filesToUpload += "assets/castles/$($_.Name)"
 }
 
