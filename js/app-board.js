@@ -648,10 +648,40 @@
 
         if (!node || !this.graphicsConfig) return "";
 
+        // 1. Explicitní bitmapa hradu definovaná na uzlu plánu (z generátoru)
+        if (node.castleImg) {
+            var cImg = node.castleImg;
+            if (node.x > 700 && cImg.indexOf("_flip") === -1) {
+                return cImg.replace(".png", "_flip.png");
+            }
+            return cImg;
+        }
+
+        // 2. Přímé mapování podle kódu políčka
         if (this.graphicsConfig.tileBitmapsByCode && this.graphicsConfig.tileBitmapsByCode[node.code]) {
 
             return this.graphicsConfig.tileBitmapsByCode[node.code];
 
+        }
+
+        // 3. Specifická tematická mapa pro políčka hradů (H1..H9)
+        if (node.type === "CASTLE") {
+            var castleMap = {
+                H1: "assets/castles/castle_forest.png",
+                H2: "assets/castles/castle_wind.png",
+                H3: "assets/castles/castle_crystal.png",
+                H4: "assets/castles/castle_lava.png",
+                H5: "assets/castles/castle_water.png",
+                H6: "assets/castles/castle_dark.png",
+                H7: "assets/castles/castle_desert.png",
+                H8: "assets/castles/castle_swamp.png",
+                H9: "assets/castles/castle_ice.png"
+            };
+            var cUrl = (node.estateId && castleMap[node.estateId]) || (node.code && castleMap[node.code]);
+            if (cUrl) {
+                if (node.x > 700) return cUrl.replace(".png", "_flip.png");
+                return cUrl;
+            }
         }
 
         var byType = this.graphicsConfig.tileBitmapsByType || {};
@@ -678,9 +708,8 @@
 
             if (url.endsWith(".jpg")) url = url.replace(".jpg", ".png");
 
-            // Na pravé polovině plánu zrcadlit směrová zvířata a draky
-
-            if (node.x > 700 && (node.subtype === "kun" || node.subtype === "pes" || node.subtype === "sokol" || node.subtype === "U3")) {
+            // Na pravé polovině plánu zrcadlit směrová zvířata, hrady a draky
+            if (node.x > 700 && (node.subtype === "kun" || node.subtype === "pes" || node.subtype === "sokol" || node.subtype === "U3" || node.type === "CASTLE")) {
 
                 var flipUrl = url.replace(".png", "_flip.png");
 
@@ -923,18 +952,32 @@
         out.push('  <g id="prs-rivers-layer">');
         for (var r = 0; r < board.rivers.length; r++) {
             var riv = board.rivers[r];
-            var rw = riv.width || 12;
-            // 0. Břehy řeky s pískem a kameny
-            out.push('    <path d="' + riv.path + '" stroke="rgba(70,50,30,0.65)" stroke-width="' + (rw + 14) + '" stroke-linecap="round" fill="none" opacity="0.8"/>');
-            // 1. Spodní stín/hluboké koryto řeky
-            out.push('    <path d="' + riv.path + '" stroke="rgba(8,24,32,0.92)" stroke-width="' + (rw + 7) + '" stroke-linecap="round" fill="none"/>');
-            // 2. Tmavomodrá hlubina
-            out.push('    <path d="' + riv.path + '" stroke="' + (riv.color || '#0284c7') + '" stroke-width="' + rw + '" stroke-linecap="round" fill="none" opacity="0.9"/>');
-            // 2b. Tyrkysový zářící střední proud
-            out.push('    <path d="' + riv.path + '" stroke="#38bdf8" stroke-width="' + Math.max(3, rw * 0.55) + '" stroke-linecap="round" fill="none" opacity="0.85"/>');
-            // 3. Světelné odlesky na vlnkách s animací proudu vody
-            out.push('    <path d="' + riv.path + '" stroke="#f0f9ff" stroke-width="' + Math.max(1.8, rw * 0.26) + '" stroke-linecap="round" stroke-dasharray="12,20" fill="none" opacity="0.92">');
-            out.push('      <animate attributeName="stroke-dashoffset" values="0;-40" dur="2.0s" repeatCount="indefinite"/>');
+            var rw = riv.width || 14;
+
+            // 1. Měkký příbřežní lem vegetace & vlhké půdy (organický rozptyl do pergamenu)
+            out.push('    <path d="' + riv.path + '" stroke="rgba(38,62,28,0.32)" stroke-width="' + (rw + 18) + '" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#riverBankBlur)"/>');
+
+            // 2. Písčité a štěrkové naplaveniny na březích meandrů
+            out.push('    <path d="' + riv.path + '" stroke="rgba(118,88,48,0.40)" stroke-width="' + (rw + 8) + '" stroke-linecap="round" stroke-linejoin="round" fill="none"/>');
+
+            // 3. Stín hlubšího koryta řeky (přirozené zaoblení dna)
+            out.push('    <path d="' + riv.path + '" stroke="rgba(10,26,38,0.55)" stroke-width="' + (rw + 3.5) + '" stroke-linecap="round" stroke-linejoin="round" fill="none"/>');
+
+            // 4. Hladina řeky (hluboký akvarelový modrý proud s přirozenou propustností)
+            out.push('    <path d="' + riv.path + '" stroke="url(#riverNaturalGrad)" stroke-width="' + rw + '" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.92"/>');
+
+            // 5. Průsvitný světlejší proud vnitřní mělčiny (bez tvrdých okrajů)
+            out.push('    <path d="' + riv.path + '" stroke="url(#riverShallowGrad)" stroke-width="' + Math.max(3, rw * 0.58) + '" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.72"/>');
+
+            // 6. Jemné organické odlesky vodní hladiny (ŽÁDNÁ BÍLÁ PŘERUŠOVANÁ ČÁRA JAKO NA SILNICI!)
+            // Proudová linka A: jemný dlouhý meandrující odlesk
+            out.push('    <path d="' + riv.path + '" stroke="rgba(240,249,255,0.30)" stroke-width="' + Math.max(0.9, rw * 0.15) + '" stroke-linecap="round" stroke-dasharray="32,60,14,48" fill="none">');
+            out.push('      <animate attributeName="stroke-dashoffset" values="0;-154" dur="6.5s" repeatCount="indefinite"/>');
+            out.push('    </path>');
+
+            // Proudová linka B: sekundární jemný třpyt v odlišném rytmu
+            out.push('    <path d="' + riv.path + '" stroke="rgba(186,230,253,0.22)" stroke-width="' + Math.max(0.7, rw * 0.11) + '" stroke-linecap="round" stroke-dasharray="20,75,10,55" fill="none">');
+            out.push('      <animate attributeName="stroke-dashoffset" values="0;-160" dur="9.2s" repeatCount="indefinite"/>');
             out.push('    </path>');
         }
         out.push('  </g>');
@@ -1075,7 +1118,16 @@
 
             var lmk = landmarks[lm];
 
-            var customLmUrl = lmk.image || ((this.graphicsConfig && this.graphicsConfig.landmarkBitmaps && this.graphicsConfig.landmarkBitmaps[lmk.id]) ? this.graphicsConfig.landmarkBitmaps[lmk.id] : "");
+            var customLmUrl = "";
+            if (lmk.id === "royalCastle") {
+                if (this.currentTheme && this.currentTheme !== "light" && this.graphicsConfig && this.graphicsConfig.landmarkBitmaps && this.graphicsConfig.landmarkBitmaps.royalCastle) {
+                    customLmUrl = this.graphicsConfig.landmarkBitmaps.royalCastle;
+                } else {
+                    customLmUrl = lmk.image || (this.graphicsConfig && this.graphicsConfig.landmarkBitmaps && this.graphicsConfig.landmarkBitmaps.royalCastle) || "assets/castles/castle_royal.png";
+                }
+            } else {
+                customLmUrl = lmk.image || ((this.graphicsConfig && this.graphicsConfig.landmarkBitmaps && this.graphicsConfig.landmarkBitmaps[lmk.id]) ? this.graphicsConfig.landmarkBitmaps[lmk.id] : "");
+            }
 
             if (customLmUrl && customLmUrl.indexOf(".jpg") !== -1) {
 
@@ -1087,7 +1139,7 @@
 
             if ((lmk.x > 700 || lmk.isFlipped) && customLmUrl && customLmUrl.indexOf("_flip") === -1) {
 
-                if (customLmUrl.indexOf("dragon") !== -1 || lmk.id === "dragonLair") {
+                if (customLmUrl.indexOf("dragon") !== -1 || lmk.id === "dragonLair" || customLmUrl.indexOf("castle") !== -1) {
 
                     customLmUrl = customLmUrl.replace(".png", "_flip.png");
 
@@ -1123,7 +1175,8 @@
 
                     out.push('      <rect x="-115" y="-13" width="230" height="26" rx="13" fill="rgba(18,12,8,0.92)" stroke="' + activePalette.stroke + '" stroke-width="1.6" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.7))"/>');
 
-                    out.push('      <text x="0" y="5" text-anchor="middle" fill="#f472b6" font-size="11.5" font-weight="bold">♡ PRINCEZNINO SRDCE (' + this.state.config.targetHearts + ' 💖) ♡</text>');
+                    var rcName = lmk.name || "Královský Hrad";
+                    out.push('      <text x="0" y="5" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="bold">♡ ' + this.escapeHtml(rcName) + ' (' + this.state.config.targetHearts + ' 💖) ♡</text>');
 
                     out.push('    </g>');
 

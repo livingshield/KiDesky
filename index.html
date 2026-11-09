@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611091215">
+    <link rel="stylesheet" href="css/main.css?v=202611091330">
 
-    <link rel="stylesheet" href="css/board.css?v=202611091215">
+    <link rel="stylesheet" href="css/board.css?v=202611091330">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611091215">
+    <link rel="stylesheet" href="css/modals.css?v=202611091330">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611091215">
+    <link rel="stylesheet" href="css/mobile.css?v=202611091330">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -741,6 +741,38 @@
                                     <option value="90">⏳ Standardní (90 vteřin)</option>
 
                                     <option value="45">⚡ Bleskový (45 vteřin)</option>
+
+                                </select>
+
+                            </div>
+
+                            <div>
+
+                                <label style="font-size:0.78rem; color:var(--gold-light); display:block; margin-bottom:0.25rem;">🏰 Královské sídlo:</label>
+
+                                <select id="lobby-royal-castle" class="prs-select" style="font-size:0.82rem; padding:0.4rem;" onchange="PRS_App.handleRoyalCastleChange(this.value)">
+
+                                    <option value="auto" selected>🎲 Pestré (při každé hře jiné)</option>
+
+                                    <option value="castle_royal">👑 Královský hrad (Sídlo koruny)</option>
+
+                                    <option value="castle_forest">🌲 Lesní hrad Doubrava</option>
+
+                                    <option value="castle_ice">❄️ Ledový palác Věčného mrazu</option>
+
+                                    <option value="castle_lava">🌋 Sopečná pevnost Lávový chřtán</option>
+
+                                    <option value="castle_crystal">💎 Křišťálový zámek Ametyst</option>
+
+                                    <option value="castle_wind">☁️ Větrný vzdušný zámek Boreas</option>
+
+                                    <option value="castle_water">🌊 Vodní citadela Oceán</option>
+
+                                    <option value="castle_desert">🏜️ Pouštní pískovcový palác</option>
+
+                                    <option value="castle_swamp">🌫️ Bažinná tvrz Černá tůň</option>
+
+                                    <option value="castle_dark">🌑 Temný podzemní hrad Erebus</option>
 
                                 </select>
 
@@ -2777,21 +2809,21 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611091215" defer></script>
-    <script src="js/game-boards.js?v=202611091215" defer></script>
-    <script src="js/game-engine.js?v=202611091215" defer></script>
-    <script src="js/game-combat-ai.js?v=202611091215" defer></script>
-    <script src="js/app-audio.js?v=202611091215" defer></script>
-    <script src="js/app-dialog.js?v=202611091215" defer></script>
-    <script src="js/app.js?v=202611091215" defer></script>
-    <script src="js/app-board.js?v=202611091215" defer></script>
-    <script src="js/app-hud.js?v=202611091215" defer></script>
-    <script src="js/app-modals.js?v=202611091215" defer></script>
-    <script src="js/app-online.js?v=202611091215" defer></script>
-    <script src="js/app-saves.js?v=202611091215" defer></script>
-    <script src="js/app-catalog.js?v=202611091215" defer></script>
-    <script src="js/app-admin.js?v=202611091215" defer></script>
-    <script src="js/app-musicwidget.js?v=202611091215" defer></script>
+    <script src="js/game-data.js?v=202611091515" defer></script>
+    <script src="js/game-boards.js?v=202611091515" defer></script>
+    <script src="js/game-engine.js?v=202611091515" defer></script>
+    <script src="js/game-combat-ai.js?v=202611091515" defer></script>
+    <script src="js/app-audio.js?v=202611091515" defer></script>
+    <script src="js/app-dialog.js?v=202611091515" defer></script>
+    <script src="js/app.js?v=202611091515" defer></script>
+    <script src="js/app-board.js?v=202611091515" defer></script>
+    <script src="js/app-hud.js?v=202611091515" defer></script>
+    <script src="js/app-modals.js?v=202611091515" defer></script>
+    <script src="js/app-online.js?v=202611091515" defer></script>
+    <script src="js/app-saves.js?v=202611091515" defer></script>
+    <script src="js/app-catalog.js?v=202611091515" defer></script>
+    <script src="js/app-admin.js?v=202611091515" defer></script>
+    <script src="js/app-musicwidget.js?v=202611091515" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3642,6 +3674,22 @@
                                     <option value="golden_plains">🌾 Zlaté lány</option>
                                 </select>
                             </div>
+                        </div>
+                        <div style="margin-bottom:0.4rem;">
+                            <label for="ms-royal-castle" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;">🏰 Hlavní královské sídlo (středová dominanta):</label>
+                            <select id="ms-royal-castle" class="prs-select" style="width:100%; font-size:0.76rem; padding:0.28rem;" onchange="PRS_App.onMapStudioTopOptionChange()">
+                                <option value="auto" selected>🎲 Podle prostředí / živlu (automaticky)</option>
+                                <option value="castle_royal">👑 Královský hrad (Sídlo koruny)</option>
+                                <option value="castle_forest">🌲 Lesní hrad Doubrava</option>
+                                <option value="castle_ice">❄️ Ledový palác Věčného mrazu</option>
+                                <option value="castle_lava">🌋 Sopečná pevnost Lávový chřtán</option>
+                                <option value="castle_crystal">💎 Křišťálový zámek Ametyst</option>
+                                <option value="castle_wind">☁️ Větrný vzdušný zámek Boreas</option>
+                                <option value="castle_water">🌊 Vodní citadela Oceán</option>
+                                <option value="castle_desert">🏜️ Pouštní pískovcový palác</option>
+                                <option value="castle_swamp">🌫️ Bažinná tvrz Černá tůň</option>
+                                <option value="castle_dark">🌑 Temný podzemní hrad Erebus</option>
+                            </select>
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 140px; gap:0.45rem;">
                             <div>

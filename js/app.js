@@ -312,6 +312,15 @@ window.PRS_App = {
 
         this.setElementTheme(theme, false);
 
+        if (typeof localStorage !== "undefined") {
+            var savedCastle = localStorage.getItem("kidesky_royal_castle");
+            if (savedCastle) {
+                this.selectedRoyalCastle = savedCastle;
+                var rSel = document.getElementById("lobby-royal-castle");
+                if (rSel) rSel.value = savedCastle;
+            }
+        }
+
     },
 
     setElementTheme: function (themeName, playSound) {
@@ -3744,6 +3753,10 @@ window.PRS_App = {
 
         var turnTimerSec = timerSel ? parseInt(timerSel.value, 10) : 0;
 
+        var royalSel = document.getElementById("lobby-royal-castle");
+        var royalCastle = royalSel ? royalSel.value : (this.selectedRoyalCastle || "auto");
+        this.selectedRoyalCastle = royalCastle;
+
         var boardCode = boardSel ? boardSel.value : "classic_96";
 
         var scenario = scenSel ? scenSel.value : (this.selectedGameScenario || "classic");
@@ -3780,6 +3793,7 @@ window.PRS_App = {
             boardCode: boardCode,
             boardSeed: activeSeed,
             seed: activeSeed,
+            royalCastle: royalCastle,
             customRecipe: (boardCode === "custom_dynamic" ? this.customBoardRecipe : null),
 
             scenario: scenario,
@@ -4090,6 +4104,18 @@ window.PRS_App = {
 
     },
 
+    handleRoyalCastleChange: function (castleKey) {
+
+        this.selectedRoyalCastle = castleKey;
+
+        if (typeof localStorage !== "undefined") {
+            try { localStorage.setItem("kidesky_royal_castle", castleKey); } catch (e) { }
+        }
+
+        if (window.PRS_Audio) window.PRS_Audio.playItem();
+
+    },
+
     handleDifficultyChange: function (mode) {
 
         this.selectedDifficultyMode = mode;
@@ -4348,6 +4374,7 @@ window.PRS_App = {
         var elTier = document.getElementById("ms-master-tier");
         var elRiver = document.getElementById("ms-river-mode");
         var elBiome = document.getElementById("ms-biome-theme");
+        var elRoyal = document.getElementById("ms-royal-castle");
         var elName = document.getElementById("ms-custom-name");
         var elSeed = document.getElementById("ms-seed-input");
 
@@ -4355,6 +4382,7 @@ window.PRS_App = {
         if (elTier) elTier.value = String(r.masterTier || 2);
         if (elRiver) elRiver.value = r.riverMode || "single";
         if (elBiome) elBiome.value = r.biomeTheme || "balanced";
+        if (elRoyal) elRoyal.value = r.royalCastle || "auto";
         if (elName) elName.value = r.customName || "";
         if (elSeed) elSeed.value = String(this.mapStudioSeed || r.seed || 4598);
 
@@ -4487,12 +4515,14 @@ window.PRS_App = {
         var elTier = document.getElementById("ms-master-tier");
         var elRiver = document.getElementById("ms-river-mode");
         var elBiome = document.getElementById("ms-biome-theme");
+        var elRoyal = document.getElementById("ms-royal-castle");
         var elName = document.getElementById("ms-custom-name");
 
         if (elBranches) this.customBoardRecipe.branches = parseInt(elBranches.value, 10);
         if (elTier) this.customBoardRecipe.masterTier = parseInt(elTier.value, 10);
         if (elRiver) this.customBoardRecipe.riverMode = elRiver.value;
         if (elBiome) this.customBoardRecipe.biomeTheme = elBiome.value;
+        if (elRoyal) this.customBoardRecipe.royalCastle = elRoyal.value;
         if (elName) this.customBoardRecipe.customName = elName.value.trim();
 
         this.updateMapStudioPreview();
@@ -4565,6 +4595,7 @@ window.PRS_App = {
             if (parsed.masterTier) this.customBoardRecipe.masterTier = parsed.masterTier;
             if (parsed.riverMode) this.customBoardRecipe.riverMode = parsed.riverMode;
             if (parsed.biomeTheme) this.customBoardRecipe.biomeTheme = parsed.biomeTheme;
+            if (parsed.royalCastle) this.customBoardRecipe.royalCastle = parsed.royalCastle;
             if (parsed.animalSetCount) {
                 var lvls = [];
                 for (var i = 1; i <= parsed.animalSetCount; i++) lvls.push(i);

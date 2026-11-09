@@ -615,6 +615,7 @@ window.KiDeskyMapGenerator = {
         masterTier: 5,
         riverMode: "single",
         biomeTheme: "balanced",
+        royalCastle: "auto",
         seed: 4598,
         customName: ""
     },
@@ -949,6 +950,20 @@ window.KiDeskyMapGenerator = {
         return pts;
     },
 
+    // Kompletní katalog 10 královských a feudálních hradů
+    ALL_CASTLES: [
+        { id: "castle_royal", name: "Královský hrad (Sídlo koruny)", icon: "👑", img: "assets/castles/castle_royal.png", biome: "golden_plains", element: "light" },
+        { id: "castle_forest", name: "Lesní hrad Doubrava", icon: "🌲", img: "assets/castles/castle_forest.png", biome: "forest_realm", element: "earth" },
+        { id: "castle_ice", name: "Ledový palác Věčného mrazu", icon: "❄️", img: "assets/castles/castle_ice.png", biome: "mountain", element: "water" },
+        { id: "castle_lava", name: "Sopečná pevnost Lávový chřtán", icon: "🌋", img: "assets/castles/castle_lava.png", biome: "dragon_peaks", element: "fire" },
+        { id: "castle_crystal", name: "Křišťálový zámek Ametyst", icon: "💎", img: "assets/castles/castle_crystal.png", biome: "magic", element: "light" },
+        { id: "castle_wind", name: "Větrný vzdušný zámek Boreas", icon: "☁️", img: "assets/castles/castle_wind.png", biome: "golden_plains", element: "air" },
+        { id: "castle_water", name: "Vodní citadela Oceán", icon: "🌊", img: "assets/castles/castle_water.png", biome: "river_delta", element: "water" },
+        { id: "castle_desert", name: "Pouštní pískovcový palác", icon: "🏜️", img: "assets/castles/castle_desert.png", biome: "golden_plains", element: "earth" },
+        { id: "castle_swamp", name: "Bažinná tvrz Černá tůň", icon: "🌫️", img: "assets/castles/castle_swamp.png", biome: "swamp", element: "earth" },
+        { id: "castle_dark", name: "Temný hrad Erebus", icon: "🌑", img: "assets/castles/castle_dark.png", biome: "magic", element: "fire" }
+    ],
+
     // Seznam 9 tematických hradů z katalogu pro procedurální přiřazení
     THEMATIC_CASTLES: [
         { id: "castle_forest", name: "Lesní hrad Doubrava", icon: "🌲", img: "assets/castles/castle_forest.png", biome: "forest" },
@@ -961,6 +976,42 @@ window.KiDeskyMapGenerator = {
         { id: "castle_swamp", name: "Bažinná tvrz Černá tůň", icon: "🌫️", img: "assets/castles/castle_swamp.png", biome: "swamp" },
         { id: "castle_dark", name: "Temný hrad Erebus", icon: "🌑", img: "assets/castles/castle_dark.png", biome: "magic" }
     ],
+
+    // Vybere dominantní královský hrad podle volby, biomu nebo seedu
+    resolveRoyalCastle: function (royalCastleKey, biomeTheme, seed) {
+        var all = this.ALL_CASTLES;
+        // 1. Explicitní volba uživatele z Map Studia nebo Lobby
+        if (royalCastleKey && royalCastleKey !== "auto" && royalCastleKey !== "random") {
+            for (var i = 0; i < all.length; i++) {
+                if (all[i].id === royalCastleKey || all[i].id === "castle_" + royalCastleKey) {
+                    return all[i];
+                }
+            }
+        }
+        // 2. Podle rázovitého biomu krajiny
+        if (biomeTheme === "dragon_peaks") {
+            return this.getCastleById("castle_lava") || all[3];
+        } else if (biomeTheme === "forest_realm" || biomeTheme === "forest") {
+            return this.getCastleById("castle_forest") || all[1];
+        } else if (biomeTheme === "river_delta" || biomeTheme === "water") {
+            return this.getCastleById("castle_water") || all[6];
+        } else if (biomeTheme === "mountain" || biomeTheme === "ice") {
+            return this.getCastleById("castle_ice") || all[2];
+        }
+        // 3. Deterministický pestrý výběr ze seedu
+        var s = (typeof seed === "number" && !isNaN(seed)) ? Math.abs(seed) : Math.floor(Math.random() * 1000);
+        return all[s % all.length];
+    },
+
+    getCastleById: function (id) {
+        if (!id) return null;
+        for (var i = 0; i < this.ALL_CASTLES.length; i++) {
+            if (this.ALL_CASTLES[i].id === id || this.ALL_CASTLES[i].id === "castle_" + id) {
+                return this.ALL_CASTLES[i];
+            }
+        }
+        return null;
+    },
 
     // ========================================================================
     // KOMPILÁTOR VLASTNÍHO DYNAMICKÉHO RECEPTU POLÍČEK (CUSTOM BOARD RECIPE)
@@ -1014,6 +1065,7 @@ window.KiDeskyMapGenerator = {
             masterTier: clampInt(r.masterTier, def.masterTier, 1, 5),
             riverMode: r.riverMode || def.riverMode || "single",
             biomeTheme: r.biomeTheme || def.biomeTheme || "balanced",
+            royalCastle: r.royalCastle || def.royalCastle || "auto",
             seed: Math.abs(Number(customSeed || r.seed || def.seed || 4598)) % 1000000 || 4598,
             customName: (r.customName || "").trim()
         };
@@ -1096,8 +1148,9 @@ window.KiDeskyMapGenerator = {
             { subtype: "zavod", name: "SLAVNOST: Velký Závod ♡", icon: "💖", baseCode: "SLAV_ZAVOD" }
         ];
 
-        // Zamíchání tematických hradů podle seedu
-        var castlePool = this.THEMATIC_CASTLES.slice();
+        // Zamíchání tematických hradů podle seedu a určení královského sídla
+        var royalDef = this.resolveRoyalCastle(r.royalCastle, biomeTheme, seed);
+        var castlePool = this.ALL_CASTLES.filter(function (c) { return c.id !== royalDef.id; });
         for (var cIdx = castlePool.length - 1; cIdx > 0; cIdx--) {
             var swapIdx = Math.floor(rnd() * (cIdx + 1));
             var tmpC = castlePool[cIdx];
@@ -1345,6 +1398,8 @@ window.KiDeskyMapGenerator = {
                 subtype: d.subtype || null,
                 setId: d.setId || null,
                 estateId: d.estateId || null,
+                castleImg: d.castleImg || null,
+                castleId: d.castleId || null,
                 jesterId: d.jesterId || null,
                 skill: d.skill || null,
                 masterTier: mTierVal,
@@ -1385,6 +1440,8 @@ window.KiDeskyMapGenerator = {
                     subtype: bd.subtype || null,
                     setId: bd.setId || null,
                     estateId: bd.estateId || null,
+                    castleImg: bd.castleImg || null,
+                    castleId: bd.castleId || null,
                     jesterId: bd.jesterId || null,
                     skill: bd.skill || null,
                     masterTier: mTierVal,
@@ -1436,19 +1493,26 @@ window.KiDeskyMapGenerator = {
         var rivers = [];
         var riverPolylines = [];
         if (riverMode !== "none") {
+            var m1 = (rnd() - 0.5) * 45;
+            var m2 = (rnd() - 0.5) * 55;
+            var m3 = (rnd() - 0.5) * 40;
             var r1Pts = [
-                { x: Math.round(1215 + (rnd() - 0.5) * 45), y: 30 },
-                { x: Math.round(1130 + (rnd() - 0.5) * 35), y: 220 },
-                { x: Math.round(1010 + (rnd() - 0.5) * 35), y: 410 },
-                { x: Math.round(850 + (rnd() - 0.5) * 35), y: 585 },
-                { x: Math.round(735 + (rnd() - 0.5) * 35), y: 730 },
-                { x: Math.round(695 + (rnd() - 0.5) * 40), y: 855 }
+                { x: Math.round(1225 + (rnd() - 0.5) * 25), y: 15 },
+                { x: Math.round(1185 + m1 * 0.5), y: 125 },
+                { x: Math.round(1115 - m1 * 0.4), y: 275 },
+                { x: Math.round(1025 + m2), y: 415 },
+                { x: Math.round(915 - m2 * 0.5), y: 560 },
+                { x: Math.round(775 + m3), y: 705 },
+                { x: Math.round(695 + (rnd() - 0.5) * 20), y: 875 }
             ];
             var r1Path = "M " + r1Pts[0].x + " " + r1Pts[0].y + " " +
                 "C " + r1Pts[1].x + " " + r1Pts[1].y + ", " + r1Pts[2].x + " " + r1Pts[2].y + ", " + r1Pts[3].x + " " + r1Pts[3].y + " " +
-                "S " + r1Pts[4].x + " " + r1Pts[4].y + ", " + r1Pts[5].x + " " + r1Pts[5].y;
-            rivers.push({ id: "main_river", name: "Královská řeka Doubravka", width: 10, color: "#0284c7", path: r1Path });
-            riverPolylines.push(this.sampleBezier(r1Pts[0], r1Pts[1], r1Pts[2], r1Pts[3], 18, false).concat(this.sampleBezier(r1Pts[3], r1Pts[4], r1Pts[4], r1Pts[5], 14, true)));
+                "C " + r1Pts[4].x + " " + r1Pts[4].y + ", " + r1Pts[5].x + " " + r1Pts[5].y + ", " + r1Pts[6].x + " " + r1Pts[6].y;
+            rivers.push({ id: "main_river", name: "Královská řeka Doubravka", width: 14, color: "#0284c7", path: r1Path });
+            riverPolylines.push(
+                this.sampleBezier(r1Pts[0], r1Pts[1], r1Pts[2], r1Pts[3], 20, false)
+                    .concat(this.sampleBezier(r1Pts[3], r1Pts[4], r1Pts[5], r1Pts[6], 20, true))
+            );
 
             if (riverMode === "dual") {
                 var r2Pts = [
@@ -1509,7 +1573,7 @@ window.KiDeskyMapGenerator = {
             { id: "meadows_valley", name: "Královské louky a lánová pole", fillGrad: "meadowsBiomeGrad", fill: mdwFill, opacity: 0.75, path: "M 180 620 C 350 560 600 580 620 780 C 500 830 280 840 150 790 C 120 720 130 650 180 620 Z", contours: ["M 220 660 Q 380 610 540 680", "M 260 720 Q 410 670 510 750"], contourStroke: "rgba(253,224,71,0.32)", contourDash: "5,5" }
         ];
         if (riverMode !== "none") {
-            biomes.push({ id: "water_wetlands", name: "Meandry řeky a jezerní tůně", fillGrad: "waterBiomeGrad", fill: wtrFill, opacity: 0.72, path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z", contours: ["M 1100 160 Q 990 350 860 520 Q 770 660 720 780", "M 1150 220 Q 1040 410 910 580"], contourStroke: "rgba(56,189,248,0.35)", contourDash: "7,5" });
+            biomes.push({ id: "water_wetlands", name: "Meandry řeky a jezerní tůně", fillGrad: "waterBiomeGrad", fill: wtrFill, opacity: 0.28, path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z", contours: [] });
         }
 
         var cardZones = [
@@ -1524,10 +1588,8 @@ window.KiDeskyMapGenerator = {
         ];
 
         var landmarks = [
-            { id: "royalCastle", name: "Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 700, y: 380, w: 220, h: 180 },
-            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 },
-            { id: "castleH1", name: castleH1.name, icon: castleH1.icon, image: castleH1.img, x: 260, y: 220, w: 130, h: 115 },
-            { id: "castleH2", name: castleH2.name, icon: castleH2.icon, image: castleH2.img, x: 1140, y: 700, w: 130, h: 115 }
+            { id: "royalCastle", name: royalDef.name, icon: royalDef.icon || "👑", image: royalDef.img, x: 700, y: 380, w: 220, h: 180 },
+            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 }
         ];
 
         var normalizedOpts = {
@@ -1538,12 +1600,13 @@ window.KiDeskyMapGenerator = {
             riverMode: riverMode,
             dangerLevel: (r.questsU3 >= 3 ? "high" : (r.questsU3 === 0 ? "low" : "standard")),
             biomeTheme: biomeTheme,
+            royalCastle: r.royalCastle || "auto",
             seed: seed
         };
         var boardSeedCode = this.formatSeedCode(seed, normalizedOpts);
         var displayName = r.customName || ("Dynamické království #" + seed + " (" + nodes.length + " polí)");
 
-        return {
+        var boardObj = {
             code: "custom_dynamic",
             seedCode: boardSeedCode,
             masterTier: (chosenMasterTier === 5 ? 2 : chosenMasterTier),
@@ -1581,6 +1644,11 @@ window.KiDeskyMapGenerator = {
             rivers: rivers,
             bridges: bridges
         };
+
+        if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks === "function") {
+            window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks(boardObj);
+        }
+        return boardObj;
     },
 
     // ========================================================================
@@ -1666,8 +1734,9 @@ window.KiDeskyMapGenerator = {
         var mainPts = segTopPts.concat(segRightPts).concat(segBottomPts).concat(segLeft1Pts).concat(segLeft2Pts);
         outerLen = mainPts.length;
 
-        // 3. VÝBĚR 2 TEMATICKÝCH HRADŮ ZE SEZNAMU
-        var pool = this.THEMATIC_CASTLES.slice();
+        // 3. VÝBĚR KRÁLOVSKÉHO SÍDLA A TEMATICKÝCH HRADŮ
+        var royalDef = this.resolveRoyalCastle(options.royalCastle, biomeTheme, seed);
+        var pool = this.ALL_CASTLES.filter(function (c) { return c.id !== royalDef.id; });
         for (var cIdx = pool.length - 1; cIdx > 0; cIdx--) {
             var swapIdx = Math.floor(rnd() * (cIdx + 1));
             var temp = pool[cIdx];
@@ -1675,7 +1744,7 @@ window.KiDeskyMapGenerator = {
             pool[swapIdx] = temp;
         }
         var castleH1 = pool[0];
-        var castleH2 = pool[1];
+        var castleH2 = pool[1] || pool[0];
 
         // 4. INDEXY KŘIŽOVATEK PRO 1..4 VĚTVE NA HLAVNÍM OKRUHU
         // Větev 1 (Most Slavností): z pravého dolního kvadrantu do levého dolního kvadrantu
@@ -1765,7 +1834,7 @@ window.KiDeskyMapGenerator = {
         // Pokud není aktivní Větev 2 (Dračí), garantujeme Hrad 2, Město 4 a 2 Dračí sluje přímo na hlavním okruhu!
         if (branchCount < 2) {
             corePool.unshift(
-                { code: "H2", type: "CASTLE", estateId: "H2", name: castleH2.name, icon: castleH2.icon },
+                { code: "H2", type: "CASTLE", estateId: "H2", name: castleH2.name, icon: castleH2.icon, castleImg: castleH2.img },
                 { code: "M4", type: "TOWN", estateId: "M4", name: "Město 4 (Mečov)", icon: "🏙️" },
                 { code: "U3_1", type: "QUEST", subtype: "U3", name: "Dračí sluj I (U3)", icon: "🐉" },
                 { code: "U3_2", type: "QUEST", subtype: "U3", name: "Tříhlavý drak II (U3)", icon: "🐲" }
@@ -1774,7 +1843,7 @@ window.KiDeskyMapGenerator = {
         // Pokud není aktivní Větev 3 (Levá), garantujeme Hrad 1 na hlavním okruhu!
         if (branchCount < 3) {
             corePool.unshift(
-                { code: "H1", type: "CASTLE", estateId: "H1", name: castleH1.name, icon: castleH1.icon }
+                { code: "H1", type: "CASTLE", estateId: "H1", name: castleH1.name, icon: castleH1.icon, castleImg: castleH1.img }
             );
         }
 
@@ -1869,6 +1938,8 @@ window.KiDeskyMapGenerator = {
                 subtype: d.subtype || null,
                 setId: d.setId || null,
                 estateId: d.estateId || null,
+                castleImg: d.castleImg || null,
+                castleId: d.castleId || null,
                 jesterId: d.jesterId || null,
                 skill: d.skill || null,
                 masterTier: mTierVal,
@@ -1908,6 +1979,8 @@ window.KiDeskyMapGenerator = {
                     subtype: bd.subtype || null,
                     setId: bd.setId || null,
                     estateId: bd.estateId || null,
+                    castleImg: bd.castleImg || null,
+                    castleId: bd.castleId || null,
                     jesterId: bd.jesterId || null,
                     skill: bd.skill || null,
                     masterTier: mTierVal,
@@ -1968,7 +2041,7 @@ window.KiDeskyMapGenerator = {
             var b2Template = [
                 { code: "U3_1", type: "QUEST", subtype: "U3", name: "Dračí sluj I (U3)", icon: "🐉" },
                 { code: "U3_2", type: "QUEST", subtype: "U3", name: "Tříhlavý drak II (U3)", icon: "🐲" },
-                { code: "H2", type: "CASTLE", estateId: "H2", name: castleH2.name, icon: castleH2.icon },
+                { code: "H2", type: "CASTLE", estateId: "H2", name: castleH2.name, icon: castleH2.icon, castleImg: castleH2.img },
                 { code: "M4", type: "TOWN", estateId: "M4", name: "Město 4 (Mečov)", icon: "🏙️" },
                 { code: "VM2", type: "MASTER", skill: "any", name: "Velmistr Dračího řádu", icon: "🧙‍♂️" },
                 { code: "U2_R1", type: "QUEST", subtype: "U2", name: "Horské monstrum (U2)", icon: "👹" }
@@ -2006,7 +2079,7 @@ window.KiDeskyMapGenerator = {
                 if (branchSets[bs3].branch === 3) b3Set = this.ANIMAL_SETS_CATALOG[branchSets[bs3].setId - 1];
             }
             var b3Template = [
-                { code: "H1", type: "CASTLE", estateId: "H1", name: castleH1.name, icon: castleH1.icon },
+                { code: "H1", type: "CASTLE", estateId: "H1", name: castleH1.name, icon: castleH1.icon, castleImg: castleH1.img },
                 { code: "U2_L1", type: "QUEST", subtype: "U2", name: "Lesní monstrum (U2)", icon: "👹" },
                 { code: "SOK_L", type: "BUILDING", subtype: "sokolnik", name: "Lesní sokolník", icon: "🦅" },
                 { code: "MT_L", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃" }
@@ -2069,28 +2142,32 @@ window.KiDeskyMapGenerator = {
 
         if (riverMode !== "none") {
             // Hlavní královská řeka Doubravka
+            var m1 = (rnd() - 0.5) * 45;
+            var m2 = (rnd() - 0.5) * 55;
+            var m3 = (rnd() - 0.5) * 40;
             var r1Pts = [
-                { x: Math.round(1215 + (rnd() - 0.5) * 45), y: 30 },
-                { x: Math.round(1130 + (rnd() - 0.5) * 35), y: 220 },
-                { x: Math.round(1010 + (rnd() - 0.5) * 35), y: 410 },
-                { x: Math.round(850 + (rnd() - 0.5) * 35), y: 585 },
-                { x: Math.round(735 + (rnd() - 0.5) * 35), y: 730 },
-                { x: Math.round(695 + (rnd() - 0.5) * 40), y: 855 }
+                { x: Math.round(1225 + (rnd() - 0.5) * 25), y: 15 },
+                { x: Math.round(1185 + m1 * 0.5), y: 125 },
+                { x: Math.round(1115 - m1 * 0.4), y: 275 },
+                { x: Math.round(1025 + m2), y: 415 },
+                { x: Math.round(915 - m2 * 0.5), y: 560 },
+                { x: Math.round(775 + m3), y: 705 },
+                { x: Math.round(695 + (rnd() - 0.5) * 20), y: 875 }
             ];
             var r1Path = "M " + r1Pts[0].x + " " + r1Pts[0].y + " " +
                 "C " + r1Pts[1].x + " " + r1Pts[1].y + ", " + r1Pts[2].x + " " + r1Pts[2].y + ", " + r1Pts[3].x + " " + r1Pts[3].y + " " +
-                "S " + r1Pts[4].x + " " + r1Pts[4].y + ", " + r1Pts[5].x + " " + r1Pts[5].y;
+                "C " + r1Pts[4].x + " " + r1Pts[4].y + ", " + r1Pts[5].x + " " + r1Pts[5].y + ", " + r1Pts[6].x + " " + r1Pts[6].y;
 
             rivers.push({
                 id: "main_river",
                 name: "Královská řeka Doubravka",
-                width: 10,
+                width: 14,
                 color: "#0284c7",
                 path: r1Path
             });
 
-            var poly1 = this.sampleBezier(r1Pts[0], r1Pts[1], r1Pts[2], r1Pts[3], 18, false)
-                .concat(this.sampleBezier(r1Pts[3], r1Pts[4], r1Pts[4], r1Pts[5], 14, true));
+            var poly1 = this.sampleBezier(r1Pts[0], r1Pts[1], r1Pts[2], r1Pts[3], 20, false)
+                .concat(this.sampleBezier(r1Pts[3], r1Pts[4], r1Pts[5], r1Pts[6], 20, true));
             riverPolylines.push(poly1);
 
             if (riverMode === "dual") {
@@ -2229,19 +2306,7 @@ window.KiDeskyMapGenerator = {
 
         if (riverMode !== "none") {
             biomes.push({
-                id: "water_wetlands",
-                name: "Meandry řeky a jezerní tůně",
-                fillGrad: "waterBiomeGrad",
-                fill: wtrFill,
-                opacity: 0.72,
-                path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z",
-                contours: [
-                    "M 1100 160 Q 990 350 860 520 Q 770 660 720 780",
-                    "M 1150 220 Q 1040 410 910 580"
-                ],
-                contourStroke: "rgba(56,189,248,0.35)",
-                contourDash: "7,5"
-            });
+                id: "water_wetlands", name: "Meandry řeky a jezerní tůně", fillGrad: "waterBiomeGrad", fill: "rgba(14, 116, 144, 0.28)", opacity: 0.28, path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z", contours: [] });
         }
 
         // 8. ZÓNY BALÍČKŮ KARET & DOMINANTY KRAJINY
@@ -2257,10 +2322,8 @@ window.KiDeskyMapGenerator = {
         ];
 
         var landmarks = [
-            { id: "royalCastle", name: "Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 700, y: 380, w: 220, h: 180 },
-            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 },
-            { id: "castleH1", name: castleH1.name, icon: castleH1.icon, image: castleH1.img, x: 260, y: 220, w: 130, h: 115 },
-            { id: "castleH2", name: castleH2.name, icon: castleH2.icon, image: castleH2.img, x: 1140, y: 700, w: 130, h: 115 }
+            { id: "royalCastle", name: royalDef.name, icon: royalDef.icon || "👑", image: royalDef.img, x: 700, y: 380, w: 220, h: 180 },
+            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 }
         ];
 
         // 9. STATISTIKY A VALIDACE MAPY PRO KONTROLNÍ PANEL
@@ -2315,12 +2378,35 @@ window.KiDeskyMapGenerator = {
             rivers: rivers,
             bridges: bridges
         };
+
+        if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks === "function") {
+            window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks(boardObj);
+        }
+        return boardObj;
     }
 };
 
 window.PRS_BoardBuilder = {
     dbTemplates: [],
     dbTemplatesMap: {},
+
+    get ALL_CASTLES() {
+        return window.KiDeskyMapGenerator ? window.KiDeskyMapGenerator.ALL_CASTLES : [];
+    },
+
+    resolveRoyalCastle: function (key, theme, seed) {
+        if (window.KiDeskyMapGenerator && typeof window.KiDeskyMapGenerator.resolveRoyalCastle === "function") {
+            return window.KiDeskyMapGenerator.resolveRoyalCastle(key, theme, seed);
+        }
+        return { name: "Královský Hrad", icon: "👑", img: "assets/castles/castle_royal.png" };
+    },
+
+    getCastleById: function (id) {
+        if (window.KiDeskyMapGenerator && typeof window.KiDeskyMapGenerator.getCastleById === "function") {
+            return window.KiDeskyMapGenerator.getCastleById(id);
+        }
+        return null;
+    },
 
     registerDbTemplates: function (list) {
         if (!Array.isArray(list)) return;
@@ -2392,13 +2478,16 @@ window.PRS_BoardBuilder = {
         // 3. Standardní a procedurální plány
         if (!board) {
             if (templateCode === "dragon_4598" || templateCode === "dragon_4595") {
-                board = this.buildDragon4598Board();
+                board = this.buildDragon4598Board(options);
             } else if (templateCode === "compact_48") {
-                board = this.buildCompactBoard();
+                board = this.buildCompactBoard(options);
             } else if (templateCode === "procedural" || templateCode === "dynamic") {
                 board = this.buildProceduralBoard(seed, options);
             } else {
-                board = this.buildClassic4599Board();
+                board = this.buildClassic4599Board(options);
+            }
+            if (options && options.royalCastle) {
+                board.royalCastle = options.royalCastle;
             }
             // Pokud byl vestavěný plán v DB administrátorem přejmenován, propíšeme nový název
             if (dbTpl && dbTpl.name) {
@@ -2426,10 +2515,11 @@ window.PRS_BoardBuilder = {
 
         // Přibližný polygon pro hlavní řeku
         var riverPoly = [
-            { x: 1220, y: 35 }, { x: 1180, y: 120 }, { x: 1140, y: 220 },
-            { x: 1090, y: 310 }, { x: 1040, y: 400 }, { x: 950, y: 490 },
-            { x: 860, y: 580 }, { x: 790, y: 660 }, { x: 740, y: 730 },
-            { x: 705, y: 855 }
+            { x: 1225, y: 15 }, { x: 1205, y: 70 }, { x: 1177, y: 127 },
+            { x: 1145, y: 200 }, { x: 1107, y: 281 }, { x: 1055, y: 375 },
+            { x: 965, y: 470 }, { x: 870, y: 570 }, { x: 779, y: 676 },
+            { x: 750, y: 735 }, { x: 720, y: 802 }, { x: 700, y: 860 },
+            { x: 690, y: 910 }
         ];
 
         for (var n = 0; n < nodes.length; n++) {
@@ -2830,8 +2920,33 @@ window.PRS_BoardBuilder = {
         }
 
         var hasCastle = false;
+        var origRoyal = null;
+        if (board.landmarks && board.landmarks.length > 0) {
+            for (var ol = 0; ol < board.landmarks.length; ol++) {
+                if (board.landmarks[ol].id === "royalCastle") {
+                    origRoyal = board.landmarks[ol];
+                    break;
+                }
+            }
+        }
+        var targetRoyalKey = board.royalCastle || (board.recipe && board.recipe.royalCastle) || (origRoyal && origRoyal.selectedKey);
+        var royalDef = (targetRoyalKey && this.resolveRoyalCastle ? this.resolveRoyalCastle(targetRoyalKey, board.biomeTheme, board.seed) : null) || origRoyal || (this.resolveRoyalCastle ? this.resolveRoyalCastle("auto", board.biomeTheme, board.seed) : null) || {
+            name: "Královský Hrad",
+            icon: "👑",
+            image: "assets/castles/castle_royal.png"
+        };
+
         for (var v = 0; v < validLandmarks.length; v++) {
-            if (validLandmarks[v].id === "royalCastle") { hasCastle = true; break; }
+            if (validLandmarks[v].id === "royalCastle") {
+                hasCastle = true;
+                // Pokud bylo vybráno specifické královské sídlo nebo je nastaveno dynamicky, aktualizujeme grafiku
+                if (royalDef && (royalDef.img || royalDef.image)) {
+                    validLandmarks[v].image = royalDef.img || royalDef.image;
+                    validLandmarks[v].name = royalDef.name || validLandmarks[v].name;
+                    validLandmarks[v].icon = royalDef.icon || validLandmarks[v].icon;
+                }
+                break;
+            }
         }
         if (!hasCastle) {
             var candidates = [
@@ -2845,9 +2960,9 @@ window.PRS_BoardBuilder = {
                 if (getClearance(cand.x, cand.y, cand.w, cand.h) > 0) {
                     validLandmarks.unshift({
                         id: "royalCastle",
-                        name: "Královský Hrad",
-                        icon: "🏰",
-                        image: "assets/landmarks/royal_castle.png",
+                        name: royalDef.name || "Královský Hrad",
+                        icon: royalDef.icon || "👑",
+                        image: royalDef.image || royalDef.img || "assets/castles/castle_royal.png",
                         x: cand.x,
                         y: cand.y,
                         w: cand.w,
@@ -2903,6 +3018,112 @@ window.PRS_BoardBuilder = {
             }
         }
 
+        // 3. Dynamické kotvení tematických hradů vedle políček CASTLE (H1, H2, H3...)
+        // Vyloučíme Královský hrad, aby se na mapě žádný hrad neopakoval
+        var royalImgBase = "";
+        for (var vl = 0; vl < validLandmarks.length; vl++) {
+            if (validLandmarks[vl].id === "royalCastle") {
+                royalImgBase = (validLandmarks[vl].image || "").toLowerCase();
+                break;
+            }
+        }
+        if (!royalImgBase && royalDef) {
+            royalImgBase = (royalDef.image || royalDef.img || "assets/castles/castle_royal.png").toLowerCase();
+        }
+
+        var allCastlesCatalog = this.ALL_CASTLES || [];
+        var freeThematicCastles = allCastlesCatalog.filter(function (c) {
+            if (!royalImgBase) return true;
+            var cKey = c.id.replace("castle_", "").toLowerCase();
+            return royalImgBase.indexOf(cKey) === -1 && royalImgBase.indexOf(c.id.toLowerCase()) === -1;
+        });
+        if (freeThematicCastles.length === 0) freeThematicCastles = allCastlesCatalog.slice(0);
+
+        var defaultCastleMap = {
+            H1: "assets/castles/castle_forest.png",
+            H2: "assets/castles/castle_wind.png",
+            H3: "assets/castles/castle_crystal.png",
+            H4: "assets/castles/castle_desert.png",
+            H5: "assets/castles/castle_water.png",
+            H6: "assets/castles/castle_ice.png",
+            H7: "assets/castles/castle_lava.png",
+            H8: "assets/castles/castle_swamp.png",
+            H9: "assets/castles/castle_dark.png"
+        };
+
+        var castleNodes = [];
+        for (var cn = 0; cn < nodes.length; cn++) {
+            if (nodes[cn].type === "CASTLE") {
+                castleNodes.push(nodes[cn]);
+            }
+        }
+
+        var maxCastlesToAnchor = Math.min(4, castleNodes.length);
+        for (var ci = 0; ci < maxCastlesToAnchor; ci++) {
+            var cNode = castleNodes[ci];
+            var cKey = cNode.estateId || cNode.code || ("H" + (ci + 1));
+            var cId = "castle_" + cKey;
+
+            // Výběr unikátního hradu bez kolize s Královským hradem
+            var cImg = cNode.castleImg;
+            var isDup = !cImg || (royalImgBase && royalImgBase.indexOf(cImg.toLowerCase().replace("assets/castles/", "").replace(".png", "").replace("_flip", "")) !== -1);
+            if (isDup) {
+                var prefImg = defaultCastleMap[cKey];
+                var prefDup = prefImg && royalImgBase && royalImgBase.indexOf(prefImg.toLowerCase().replace("assets/castles/", "").replace(".png", "")) !== -1;
+                if (prefImg && !prefDup) {
+                    cImg = prefImg;
+                } else {
+                    var poolPick = freeThematicCastles[ci % freeThematicCastles.length];
+                    cImg = poolPick ? poolPick.img : "assets/castles/castle_forest.png";
+                }
+            }
+            cNode.castleImg = cImg;
+
+            var exists = false;
+            for (var vlIdx = 0; vlIdx < validLandmarks.length; vlIdx++) {
+                if (validLandmarks[vlIdx].id === cId || validLandmarks[vlIdx].id === ("castleH" + (ci + 1))) {
+                    validLandmarks[vlIdx].image = cImg;
+                    exists = true;
+                    break;
+                }
+            }
+            if (exists) continue;
+
+            var cAngles = [0, 45, 90, 135, 180, 225, 270, 315];
+            var cDists = [105, 125, 90, 140];
+            var bestCSpot = null;
+            var maxCClearance = -1;
+            var cw = 125, ch = 110;
+            for (var cd = 0; cd < cDists.length; cd++) {
+                var testDist = cDists[cd];
+                for (var ca = 0; ca < cAngles.length; ca++) {
+                    var rad = (cAngles[ca] * Math.PI) / 180;
+                    var tx = Math.round(cNode.x + Math.cos(rad) * testDist);
+                    var ty = Math.round(cNode.y + Math.sin(rad) * testDist);
+                    if (tx < 90 || tx > 1310 || ty < 70 || ty > 790) continue;
+                    var cDist = getClearance(tx, ty, cw, ch);
+                    if (cDist > maxCClearance) {
+                        maxCClearance = cDist;
+                        bestCSpot = { x: tx, y: ty };
+                    }
+                }
+                if (bestCSpot && maxCClearance > 45) break;
+            }
+            if (bestCSpot && maxCClearance > 45) {
+                validLandmarks.push({
+                    id: cId,
+                    name: cNode.name || ("Hrad " + (ci + 1)),
+                    icon: cNode.icon || "🏯",
+                    image: cImg,
+                    x: bestCSpot.x,
+                    y: bestCSpot.y,
+                    w: cw,
+                    h: ch,
+                    isFlipped: (bestCSpot.x > 700)
+                });
+            }
+        }
+
         board.landmarks = validLandmarks;
     },
 
@@ -2919,7 +3140,11 @@ window.PRS_BoardBuilder = {
         return pts;
     },
 
-buildClassic4599Board: function () {
+    buildClassic4599Board: function (options) {
+        options = options || {};
+        var seed = options.seed || options.boardSeed || 4598;
+        var royalKey = options.royalCastle || (options.recipe && options.recipe.royalCastle) || "auto";
+        var royalDef = this.resolveRoyalCastle(royalKey, options.biomeTheme, seed);
         // A) Hlavní obvodový okruh (74 polí, plynule zaoblený přesně podle IMG_4599)
         // Sekce 1: Horní rovinka od STARTu (x=500, y=72) doprava k P2 (x=1145, y=108) -> 14 polí (indexy 0..13)
         var topDefs = [
@@ -3038,6 +3263,8 @@ buildClassic4599Board: function () {
                 subtype: d.subtype || null,
                 setId: d.setId || null,
                 estateId: d.estateId || null,
+                castleImg: d.castleImg || null,
+                castleId: d.castleId || null,
                 jesterId: d.jesterId || null,
                 skill: d.skill || null,
                 hasRoof: !!d.hasRoof,
@@ -3066,7 +3293,7 @@ buildClassic4599Board: function () {
             { code: "U2_R2", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "U3_1", type: "QUEST", subtype: "U3", name: "Dračí sluj I (U3)", icon: "🐉" },
             { code: "U3_2", type: "QUEST", subtype: "U3", name: "Tříhlavý drak II (U3)", icon: "🐲" },
-            { code: "H2", type: "CASTLE", estateId: "H2", name: "Hrad 2 (Orlí Hrad)", icon: "🏯" }
+            { code: "H2", type: "CASTLE", estateId: "H2", name: "Hrad 2 (Orlí Hrad)", icon: "☁️", castleImg: "assets/castles/castle_wind.png" }
         ];
         var rightBranchPts = this.sampleBezier([1095, 165], [1085, 360], [1235, 510], [1185, 725], rightBranchDefs.length, true);
         var rbStart = nodes.length;
@@ -3081,6 +3308,7 @@ buildClassic4599Board: function () {
                 subtype: rbd.subtype || null,
                 setId: rbd.setId || null,
                 estateId: rbd.estateId || null,
+                castleImg: rbd.castleImg || null,
                 skill: rbd.skill || null,
                 name: rbd.name,
                 icon: rbd.icon,
@@ -3144,7 +3372,7 @@ buildClassic4599Board: function () {
             { code: "SOK2", type: "BUILDING", subtype: "sokolnik", name: "Sokolník 2", icon: "🦅" },
             { code: "U2_L1", type: "QUEST", subtype: "U2", name: "Souboj s monstrem (U2)", icon: "👹" },
             { code: "K12", type: "ANIMAL", subtype: "kun", setId: 12, name: "Kůň 12 (Královský oř)", icon: "🐎" },
-            { code: "H1", type: "CASTLE", estateId: "H1", name: "Hrad 1 (Lví Hrad)", icon: "🏯" },
+            { code: "H1", type: "CASTLE", estateId: "H1", name: "Hrad 1 (Lví Hrad)", icon: "🌲", castleImg: "assets/castles/castle_forest.png" },
             { code: "P12", type: "ANIMAL", subtype: "pes", setId: 12, name: "Pes 12 (Zlatý chrt)", icon: "🐕" },
             { code: "MT2", type: "MASTER", skill: "tanec", name: "Mistr Tance", icon: "💃" }
         ];
@@ -3161,6 +3389,7 @@ buildClassic4599Board: function () {
                 subtype: lbd.subtype || null,
                 setId: lbd.setId || null,
                 estateId: lbd.estateId || null,
+                castleImg: lbd.castleImg || null,
                 skill: lbd.skill || null,
                 name: lbd.name,
                 icon: lbd.icon,
@@ -3230,19 +3459,7 @@ buildClassic4599Board: function () {
                 contourDash: "5,5"
             },
             {
-                id: "water_wetlands",
-                name: "Meandry řeky Doubravky",
-                fillGrad: "waterBiomeGrad",
-                fill: "rgba(14, 116, 144, 0.48)",
-                opacity: 0.72,
-                path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z",
-                contours: [
-                    "M 1100 160 Q 990 350 860 520 Q 770 660 720 780",
-                    "M 1150 220 Q 1040 410 910 580"
-                ],
-                contourStroke: "rgba(56,189,248,0.35)",
-                contourDash: "7,5"
-            }
+                id: "water_wetlands", name: "Meandry řeky a jezerní tůně", fillGrad: "waterBiomeGrad", fill: "rgba(14, 116, 144, 0.28)", opacity: 0.28, path: "M 1120 100 C 1050 280 920 480 800 640 C 720 760 680 840 760 840 C 860 740 1000 520 1180 280 Z", contours: [] }
         ];
 
         var rivers = [
@@ -3251,12 +3468,12 @@ buildClassic4599Board: function () {
                 name: "Královská řeka Doubravka",
                 width: 12,
                 color: "#0284c7",
-                path: "M 1220 35 C 1140 220, 1040 400, 860 580 S 740 730, 705 855"
+                path: "M 1225 15 C 1205 70, 1190 95, 1177 127 C 1155 175, 1125 225, 1107 281 C 1075 355, 1025 415, 965 470 C 895 535, 835 605, 779 676 C 755 710, 735 755, 720 802 C 705 845, 695 875, 690 910"
             }
         ];
 
         var landmarks = [
-            { id: "royalCastle", name: "Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 700, y: 390, w: 220, h: 180 },
+            { id: "royalCastle", name: royalDef.name || "Královský Hrad", icon: royalDef.icon || "👑", image: royalDef.img || "assets/castles/castle_royal.png", x: 700, y: 390, w: 220, h: 180 },
             { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 }
         ];
 
@@ -3532,4 +3749,8 @@ buildClassic4599Board: function () {
         }
         return window.KiDeskyMapGenerator.generate(seed, options);
     }
+};
+
+window.KiDeskyMapGenerator.sanitizeAndAnchorLandmarks = function (b) {
+    return window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks(b);
 };
