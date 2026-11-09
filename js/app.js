@@ -229,6 +229,7 @@ window.PRS_App = {
             initialTab = "lobby";
         }
         this.switchTab(initialTab);
+        this.refreshBoardTemplateSelects();
         if (initialTab === "lobby" && curSearch.indexOf("room=") !== -1) {
             this.switchGameHallRoom("online");
         }
@@ -243,6 +244,7 @@ window.PRS_App = {
 
             self.fetchServerStatusAndSessions();
             if (self.updateSavedGamesUI) self.updateSavedGamesUI();
+            if (self.refreshBoardTemplateSelects) self.refreshBoardTemplateSelects();
 
             self.checkUrlRoomParam();
             if (self.loadBoardTemplatesFromServer) self.loadBoardTemplatesFromServer();
@@ -3625,6 +3627,9 @@ window.PRS_App = {
     handleLobbyBoardSelectChange: function (boardCode) {
         if (boardCode === "custom_dynamic") {
             this.openMapStudioModal();
+        } else if (boardCode && String(boardCode).indexOf("saved_map_") === 0) {
+            var idx = parseInt(String(boardCode).replace("saved_map_", ""), 10);
+            this.applySavedFavoriteMap(idx);
         }
     },
 
@@ -3647,24 +3652,51 @@ window.PRS_App = {
     },
 
     refreshBoardTemplateSelects: function () {
-        if (!window.PRS_BoardBuilder || !window.PRS_BoardBuilder.getActiveTemplatesList) return;
-        var list = window.PRS_BoardBuilder.getActiveTemplatesList();
+        var list = (window.PRS_BoardBuilder && window.PRS_BoardBuilder.getActiveTemplatesList) ? window.PRS_BoardBuilder.getActiveTemplatesList() : [
+            { templateCode: "classic_96", name: "Klasická výprava", nodeCount: 96 },
+            { templateCode: "dragon_4598", name: "Dračí země", nodeCount: 104 },
+            { templateCode: "compact_48", name: "Rychlý sprint", nodeCount: 48 }
+        ];
         var lobbySel = document.getElementById("lobby-board-select");
         var boardSel = document.getElementById("board-template-select");
         var simSel = document.getElementById("sim-board-select");
+
+        var savedMaps = [];
+        try { savedMaps = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { savedMaps = []; }
 
         var self = this;
         function populateSelect(sel, prefix) {
             if (!sel) return;
             var curVal = sel.value || "classic_96";
             var html = "";
+
+            // 1. Předdefinované / systémové plány
+            html += '<optgroup label="👑 Předdefinované herní plány:">';
             for (var i = 0; i < list.length; i++) {
                 var t = list[i];
                 var label = (prefix ? (prefix + t.name) : t.name) + (t.nodeCount ? (" (" + t.nodeCount + " polí)") : "");
                 html += '<option value="' + self.escapeHtml(t.templateCode) + '">' + self.escapeHtml(label) + '</option>';
             }
+            html += '</optgroup>';
+
+            // 2. Moje uložené dynamické plány z Map Studia
+            if (savedMaps.length > 0) {
+                html += '<optgroup label="⭐ Moje uložené dynamické plány:">';
+                for (var s = 0; s < savedMaps.length; s++) {
+                    var sm = savedMaps[s];
+                    var smName = sm.name || ("Vlastní plán #" + (sm.seed || s + 1));
+                    var smLabel = (prefix ? prefix : "") + "⭐ " + smName + " (" + (sm.nodeCount || 96) + " polí)";
+                    html += '<option value="saved_map_' + s + '">' + self.escapeHtml(smLabel) + '</option>';
+                }
+                html += '</optgroup>';
+            }
+
+            // 3. Tvůrce & Generátor
+            html += '<optgroup label="🛠️ Tvůrce & Generátor:">';
             html += '<option value="custom_dynamic">' + (prefix ? (prefix + "Vlastní dynamický (Map Studio)") : "🛠️ Vlastní dynamický plán (Map Studio)") + '</option>';
             html += '<option value="procedural">' + (prefix ? (prefix + "Náhodné království") : "🎲 Náhodné království (Procedurální)") + '</option>';
+            html += '</optgroup>';
+
             sel.innerHTML = html;
             var exists = false;
             for (var j = 0; j < sel.options.length; j++) {
@@ -3707,6 +3739,11 @@ window.PRS_App = {
 
             }
 
+        }
+
+        if (boardCode && String(boardCode).indexOf("saved_map_") === 0) {
+            var idx = parseInt(String(boardCode).replace("saved_map_", ""), 10);
+            this.applySavedFavoriteMap(idx);
         }
 
         var lobbySel = document.getElementById("lobby-board-select");
@@ -3783,8 +3820,9 @@ window.PRS_App = {
             this.lobbyPlayers[0].pawnId = this.selectedPawnId || this.lobbyPlayers[0].pawnId || "knight_valiant";
         }
 
-        var isDynamicOrProc = (boardCode === "procedural" || boardCode === "custom_dynamic");
+        var isDynamicOrProc = (boardCode === "procedural" || boardCode === "custom_dynamic" || (boardCode && String(boardCode).indexOf("saved_map_") === 0));
         var activeSeed = isDynamicOrProc ? (this.currentBoardSeed || (this.currentBoardSeed = Math.floor(Math.random() * 899999 + 100000))) : null;
+        var customRec = (boardCode === "custom_dynamic" || (boardCode && String(boardCode).indexOf("saved_map_") === 0)) ? this.customBoardRecipe : null;
 
         this.state = window.PRS_GameEngine.createGame({
 
@@ -3794,7 +3832,7 @@ window.PRS_App = {
             boardSeed: activeSeed,
             seed: activeSeed,
             royalCastle: royalCastle,
-            customRecipe: (boardCode === "custom_dynamic" ? this.customBoardRecipe : null),
+            customRecipe: customRec,
 
             scenario: scenario,
 
@@ -3882,12 +3920,19 @@ window.PRS_App = {
 
             bSel.disabled = inGame;
 
-            bSel.title = inGame ? "Plán nelze měnit v průběhu rozehrané partie" : "Přepnout rozložení plánu";
+            var curBoardName = (this.state.board && this.state.board.name) ? this.state.board.name : "Královský plán";
+
+            bSel.title = inGame ? ("Plán: " + curBoardName + " (nelze měnit v průběhu rozehrané partie)") : "Přepnout rozložení plánu";
 
             if (this.state.config && this.state.config.boardTemplate) {
 
                 bSel.value = this.state.config.boardTemplate;
 
+            }
+
+            var optCustom = bSel.querySelector('option[value="custom_dynamic"]');
+            if (optCustom && this.state.board && this.state.board.name) {
+                optCustom.textContent = "Plán: " + this.state.board.name + " (" + (this.state.board.nodes ? this.state.board.nodes.length : 96) + " polí)";
             }
 
         }
@@ -4612,12 +4657,13 @@ window.PRS_App = {
     saveCurrentMapToFavorites: function () {
         if (!this._currentMapStudioBoard || !this.customBoardRecipe) return;
         var code = this._currentMapStudioBoard.seedCode || ("KID-" + this.mapStudioSeed);
-        var name = this.customBoardRecipe.customName || this._currentMapStudioBoard.name || ("Vlastní plán #" + this.mapStudioSeed);
+        var name = (this.customBoardRecipe && this.customBoardRecipe.customName) || this._currentMapStudioBoard.name || ("Vlastní plán #" + this.mapStudioSeed);
         var list = [];
         try { list = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { list = []; }
 
         var clonedRecipe = JSON.parse(JSON.stringify(this.customBoardRecipe));
         clonedRecipe.seed = this.mapStudioSeed;
+        clonedRecipe.customName = name;
 
         list.unshift({
             seedCode: code,
@@ -4627,10 +4673,17 @@ window.PRS_App = {
             recipe: clonedRecipe,
             savedAt: new Date().toLocaleDateString("cs-CZ")
         });
-        if (list.length > 10) list = list.slice(0, 10);
+        if (list.length > 20) list = list.slice(0, 20);
         try { localStorage.setItem("prs_saved_maps", JSON.stringify(list)); } catch (e) { }
         this.renderSavedMapsInStudio();
-        KiDeskyToast.show("⭐ Sestava „" + name + "“ byla uložena do tvých šablon!", "good");
+        this.refreshBoardTemplateSelects();
+        var lSel = document.getElementById("lobby-board-select");
+        if (lSel) lSel.value = "saved_map_0";
+        var bSel = document.getElementById("board-template-select");
+        if (bSel) bSel.value = "saved_map_0";
+        if (this.updateSavedGamesUI) this.updateSavedGamesUI();
+        if (this.renderSavedGamesList) this.renderSavedGamesList();
+        KiDeskyToast.show("⭐ Šablona „" + name + "“ byla uložena a nastavena pro hru!", "good");
     },
 
     applySavedFavoriteMap: function (idx) {
@@ -4639,14 +4692,53 @@ window.PRS_App = {
         var item = list[idx];
         if (!item) return;
         if (item.seed) this.mapStudioSeed = item.seed;
+        this.currentBoardSeed = this.mapStudioSeed;
         if (item.recipe && window.KiDeskyMapGenerator) {
             this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(item.recipe, this.mapStudioSeed);
+            if (item.name) this.customBoardRecipe.customName = item.name;
+            this._currentMapStudioBoard = window.KiDeskyMapGenerator.compileDynamicRecipe(this.customBoardRecipe, this.mapStudioSeed);
+            this._customProceduralBoard = this._currentMapStudioBoard;
             this.syncMapStudioInputsFromRecipe();
             this.updateMapStudioPreview();
             KiDeskyToast.show("🗺️ Načtena vlastní šablona: " + (item.name || item.seedCode), "good");
         } else if (item.seedCode) {
             this.applySeedCodeToStudio(item.seedCode);
         }
+    },
+
+    playOnSavedFavoriteMap: async function (idx) {
+        var list = [];
+        try { list = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { list = []; }
+        var item = list[idx];
+        if (!item) return;
+        this.applySavedFavoriteMap(idx);
+        var lobbySel = document.getElementById("lobby-board-select");
+        if (lobbySel) lobbySel.value = "saved_map_" + idx;
+        var bSel = document.getElementById("board-template-select");
+        if (bSel) bSel.value = "saved_map_" + idx;
+
+        if (this.state && this.state.turnNumber > 0) {
+            var conf = await KiDeskyDialog.confirm("Spuštění výpravy na šabloně „" + (item.name || "Vlastní plán") + "“ vyžaduje restart partie.\nPřeješ si začít hrát?", {
+                title: "Zahájení výpravy na vybraném plánu",
+                icon: "🗺️",
+                confirmText: "⚔️ Zahájit hru",
+                cancelText: "Zpět"
+            });
+            if (!conf) return;
+        }
+
+        this.startNewGame(true);
+        if (this.showPawnToast && this.state) {
+            this.showPawnToast(this.state.currentPlayerIndex, "Vítej na plánu " + (item.name || ("#" + item.seed)), "🗺️", "#a855f7", "rgba(15, 23, 42, 0.96)");
+        }
+    },
+
+    editSavedFavoriteMapInStudio: function (idx) {
+        var list = [];
+        try { list = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { list = []; }
+        var item = list[idx];
+        if (!item) return;
+        this.openMapStudioModal(item.seed, item.recipe);
     },
 
     deleteSavedFavoriteMap: function (idx, ev) {
@@ -4657,6 +4749,10 @@ window.PRS_App = {
             list.splice(idx, 1);
             try { localStorage.setItem("prs_saved_maps", JSON.stringify(list)); } catch (e) { }
             this.renderSavedMapsInStudio();
+            this.refreshBoardTemplateSelects();
+            if (this.updateSavedGamesUI) this.updateSavedGamesUI();
+            if (this.renderSavedGamesList) this.renderSavedGamesList();
+            KiDeskyToast.show("🗑️ Šablona plánu byla odebrána.", "neutral");
         }
     },
 

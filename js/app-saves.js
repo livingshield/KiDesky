@@ -130,6 +130,9 @@
                 });
             }
 
+            var boardName = (this.state.board && this.state.board.name) ? this.state.board.name : "Královský plán";
+            var nodeCount = (this.state.board && this.state.board.nodes) ? this.state.board.nodes.length : 96;
+
             var saveEntry = {
                 id: saveId,
                 title: title,
@@ -137,6 +140,8 @@
                 roomCode: this.state.roomCode || null,
                 sessionGuid: this.state.sessionGuid || null,
                 boardCode: (this.state.board && this.state.board.code) ? this.state.board.code : "classic_96",
+                boardName: boardName,
+                nodeCount: nodeCount,
                 targetHearts: (this.state.config && this.state.config.targetHearts) || 30,
                 roundNumber: this.state.roundNumber || 1,
                 turnNumber: this.state.turnNumber || 0,
@@ -295,7 +300,7 @@
         // Přepne filtr uložených her v herně
         setSavedGamesFilter: function (filter) {
             this.savedGamesFilter = filter || "all";
-            var tabs = ["all", "solo", "online"];
+            var tabs = ["all", "solo", "online", "maps"];
             for (var i = 0; i < tabs.length; i++) {
                 var btn = document.getElementById("save-tab-" + tabs[i]);
                 if (btn) {
@@ -306,13 +311,70 @@
             this.renderSavedGamesList();
         },
 
-        // Vykreslí seznam uložených her v Rytířské herně
+        // Vykreslí seznam uložených her a šablon plánů v Rytířské herně
         renderSavedGamesList: function () {
             var container = document.getElementById("saved-games-container");
             if (!container) return;
 
             var saves = this.getSavedGames();
+            var savedMaps = [];
+            try { savedMaps = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { savedMaps = []; }
             var filter = this.savedGamesFilter || "all";
+
+            // 1. ZVLÁŠTNÍ POHLED: POUZE ŠABLONY PLÁNŮ
+            if (filter === "maps") {
+                if (savedMaps.length === 0) {
+                    container.innerHTML =
+                        '<div class="empty-note" style="padding:2rem 1rem; text-align:center;">' +
+                        '  <div style="font-size:2.4rem; margin-bottom:0.5rem;">🗺️</div>' +
+                        '  <strong style="color:var(--gold-light); font-size:1rem; display:block; margin-bottom:0.35rem;">Zatím nemáš žádné uložené šablony vlastních plánů</strong>' +
+                        '  <p style="color:var(--text-muted); font-size:0.84rem; max-width:440px; margin:0 auto 1rem;">' +
+                        '    V Královském Map Studiu si můžeš libovolně navolit zvířata, hrady, města, řeku i draky a sestavu uložit tlačítkem <strong>💾 Uložit do mých šablon</strong>.' +
+                        '  </p>' +
+                        '  <button class="btn-gold-lg" style="font-size:0.86rem; padding:0.45rem 1rem;" onclick="PRS_App.openMapStudioModal()">🛠️ Otevřít Map Studio a vytvořit plán</button>' +
+                        '</div>';
+                    return;
+                }
+
+                var mapsHtml = [];
+                for (var m = 0; m < savedMaps.length; m++) {
+                    var sm = savedMaps[m];
+                    var r = sm.recipe || {};
+                    var aCnt = Array.isArray(r.animalLevels) ? r.animalLevels.length : 12;
+                    mapsHtml.push(
+                        '<div class="save-game-card" style="border-color:rgba(168,85,247,0.45); background:rgba(88,28,135,0.14);">' +
+                        '  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; gap:0.5rem; flex-wrap:wrap;">' +
+                        '    <div>' +
+                        '      <h4 style="font-family:\'Cinzel\',serif; color:#fef08a; font-size:1.05rem; margin:0 0 0.25rem;">' +
+                        '        ⭐ ' + this.escapeHtml(sm.name || ("Vlastní plán #" + sm.seed)) +
+                        '      </h4>' +
+                        '      <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; font-size:0.76rem; color:var(--text-muted);">' +
+                        '        <span class="lp-mode-badge" style="background:rgba(168,85,247,0.25); color:#e9d5ff; border-color:#c084fc;">Dynamická šablona</span>' +
+                        '        <span style="color:#fde047; font-weight:700;">📍 ' + (sm.nodeCount || 96) + ' polí</span>' +
+                        '        <span>🎲 Seed #' + (sm.seed || "—") + '</span>' +
+                        '        <span>🕒 ' + (sm.savedAt || "Uloženo") + '</span>' +
+                        '      </div>' +
+                        '    </div>' +
+                        '    <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">' +
+                        '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.8rem;" onclick="PRS_App.playOnSavedFavoriteMap(' + m + ')">⚔️ Hrát na plánu</button>' +
+                        '      <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem; border-color:#a855f7; color:#e9d5ff;" onclick="PRS_App.editSavedFavoriteMapInStudio(' + m + ')">🛠️ Upravit</button>' +
+                        '      <button class="btn-icon-danger" style="padding:0.3rem 0.55rem; font-size:0.85rem;" onclick="PRS_App.deleteSavedFavoriteMap(' + m + ', event)" title="Smazat tuto šablonu plánu">🗑️</button>' +
+                        '    </div>' +
+                        '  </div>' +
+                        '  <div style="display:flex; gap:0.4rem; flex-wrap:wrap; font-size:0.73rem; color:#cbd5e1; margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(168,85,247,0.2);">' +
+                        '    <span>🐎 ' + aCnt + ' sad zvířat</span>' +
+                        '    <span>🏰 ' + (r.castles !== undefined ? r.castles : 3) + ' hradů</span>' +
+                        '    <span>🏙️ ' + (r.towns !== undefined ? r.towns : 6) + ' měst</span>' +
+                        '    <span>🏘️ ' + (r.villages !== undefined ? r.villages : 8) + ' vesnic</span>' +
+                        '    <span>🐲 ' + (r.questsU3 !== undefined ? r.questsU3 : 2) + ' draků</span>' +
+                        '    <span>🌊 Řeka: ' + (r.riverMode === "none" ? "Bez řeky" : (r.riverMode === "dual" ? "Soutok 2 řek" : "Královská")) + '</span>' +
+                        '  </div>' +
+                        '</div>'
+                    );
+                }
+                container.innerHTML = mapsHtml.join("\n");
+                return;
+            }
 
             if (filter === "solo") {
                 saves = saves.filter(function (s) { return s.mode !== "Online"; });
@@ -320,7 +382,45 @@
                 saves = saves.filter(function (s) { return s.mode === "Online"; });
             }
 
+            var html = [];
+
+            // 2. HLAVIČKA ŠABLON PLÁNŮ PŘI ZOBRAZENÍ VŠECH ("all")
+            if (filter === "all" && savedMaps.length > 0) {
+                var mapChips = [];
+                for (var k = 0; k < savedMaps.length; k++) {
+                    var mItem = savedMaps[k];
+                    mapChips.push(
+                        '<div style="display:inline-flex; align-items:center; gap:6px; background:rgba(168,85,247,0.18); border:1px solid rgba(168,85,247,0.45); border-radius:6px; padding:3px 8px; font-size:0.75rem; color:#fef08a;">' +
+                        '  <strong style="cursor:pointer;" onclick="PRS_App.playOnSavedFavoriteMap(' + k + ')" title="Zahájit hru na tomto plánu">⭐ ' + this.escapeHtml(mItem.name || ("Plán #" + mItem.seed)) + ' (' + (mItem.nodeCount || 96) + ' polí)</strong>' +
+                        '  <button class="btn-zoom" style="font-size:0.65rem; padding:1px 5px; border-color:#a855f7; color:#e9d5ff;" onclick="PRS_App.editSavedFavoriteMapInStudio(' + k + ')" title="Upravit v Map Studiu">🛠️</button>' +
+                        '  <span onclick="PRS_App.deleteSavedFavoriteMap(' + k + ', event)" style="color:#f87171; cursor:pointer; font-weight:bold; margin-left:2px;" title="Odebrat">×</span>' +
+                        '</div>'
+                    );
+                }
+                html.push(
+                    '<div style="background:rgba(88,28,135,0.12); border:1px solid rgba(168,85,247,0.35); border-radius:10px; padding:0.65rem 0.85rem; margin-bottom:1rem;">' +
+                    '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; flex-wrap:wrap; gap:0.4rem;">' +
+                    '    <span style="font-size:0.8rem; color:#e9d5ff; font-weight:bold;">⭐ Moje uložené šablony herních plánů (' + savedMaps.length + ')</span>' +
+                    '    <button class="btn-zoom" style="font-size:0.72rem; padding:2px 8px; border-color:#a855f7; color:#e9d5ff;" onclick="PRS_App.openMapStudioModal()">🛠️ Nový plán v Map Studiu</button>' +
+                    '  </div>' +
+                    '  <div style="display:flex; flex-wrap:wrap; gap:0.4rem;">' +
+                    mapChips.join("") +
+                    '  </div>' +
+                    '</div>'
+                );
+            }
+
             if (saves.length === 0) {
+                if (filter === "all" && savedMaps.length > 0) {
+                    html.push(
+                        '<div class="empty-note" style="padding:1.5rem 1rem; text-align:center;">' +
+                        '  <strong style="color:var(--gold-light); font-size:0.95rem; display:block; margin-bottom:0.25rem;">Žádné rozehrané herní partie</strong>' +
+                        '  <p style="color:var(--text-muted); font-size:0.82rem; margin:0 auto 0.75rem;">Můžeš zahájit novou výpravu na některé ze svých uložených šablon výše!</p>' +
+                        '</div>'
+                    );
+                    container.innerHTML = html.join("\n");
+                    return;
+                }
                 container.innerHTML =
                     '<div class="empty-note" style="padding:2rem 1rem; text-align:center;">' +
                     '  <div style="font-size:2.4rem; margin-bottom:0.5rem;">📜</div>' +
@@ -333,12 +433,12 @@
                 return;
             }
 
-            var html = [];
             for (var i = 0; i < saves.length; i++) {
                 var s = saves[i];
                 var isOnline = (s.mode === "Online");
                 var badgeLabel = isOnline ? "🌐 Online (Kód: " + (s.roomCode || "—") + ")" : (s.mode === "HotSeat" ? "🛋️ Hot-Seat" : "⚡ Solo AI");
                 var badgeClass = isOnline ? "lp-mode-badge" : "user-pill";
+                var boardBadge = s.boardName || s.boardCode || "Královský plán";
 
                 var playersPills = [];
                 for (var p = 0; p < (s.playersSummary || []).length; p++) {
@@ -358,6 +458,7 @@
                     '      <h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.05rem; margin:0 0 0.25rem;">' + this.escapeHtml(s.title) + '</h4>' +
                     '      <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; font-size:0.76rem; color:var(--text-muted);">' +
                     '        <span class="' + badgeClass + '" style="font-size:0.7rem; padding:1px 6px;">' + badgeLabel + '</span>' +
+                    '        <span style="font-size:0.7rem; background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.4); color:#e9d5ff; padding:1px 6px; border-radius:4px;">🗺️ ' + this.escapeHtml(boardBadge) + '</span>' +
                     '        <span>🕒 ' + (s.savedAtFormatted || "Neznámý čas") + '</span>' +
                     '        <span>🏆 Kolo ' + (s.roundNumber || 1) + ' (Tah #' + (s.turnNumber || 0) + ')</span>' +
                     '        <span>🎯 Cíl: ' + (s.targetHearts || 30) + ' 💖</span>' +
@@ -381,13 +482,18 @@
         // Aktualizuje počítadlo a rychlý odkaz v postranním panelu herny
         updateSavedGamesUI: function () {
             var saves = this.getSavedGames();
+            var savedMaps = [];
+            try { savedMaps = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { savedMaps = []; }
+            var totalCount = saves.length + savedMaps.length;
+
             var countEl = document.getElementById("gh-saved-count");
-            if (countEl) countEl.textContent = String(saves.length);
+            if (countEl) countEl.textContent = String(totalCount);
 
             var recentBox = document.getElementById("gamehall-recent-save-box");
             if (recentBox) {
                 if (saves.length > 0) {
                     var latest = saves[0];
+                    var bLabel = latest.boardName || latest.boardCode || "Královský plán";
                     recentBox.style.display = "block";
                     recentBox.innerHTML =
                         '<div style="background:rgba(212,175,55,0.08); border:1px solid var(--gold); border-radius:10px; padding:0.6rem 0.8rem; margin-top:0.75rem;">' +
@@ -395,11 +501,28 @@
                         '    <span style="font-size:0.74rem; color:var(--gold-light); font-weight:700; text-transform:uppercase;">💾 Poslední uložená hra</span>' +
                         '    <span style="font-size:0.72rem; color:var(--text-muted);">' + (latest.savedAtFormatted || "") + '</span>' +
                         '  </div>' +
-                        '  <div style="font-size:0.84rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:0.45rem;">' +
+                        '  <div style="font-size:0.84rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:0.2rem;">' +
                         this.escapeHtml(latest.title) +
                         '  </div>' +
+                        '  <div style="font-size:0.72rem; color:#fde68a; margin-bottom:0.45rem;">🗺️ Plán: ' + this.escapeHtml(bLabel) + '</div>' +
                         '  <button class="btn-gold-lg" style="width:100%; font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.loadSavedGame(\'' + latest.id + '\')">' +
                         '    ▶️ Pokračovat ve hře (Kolo ' + (latest.roundNumber || 1) + ')' +
+                        '  </button>' +
+                        '</div>';
+                } else if (savedMaps.length > 0) {
+                    var latestMap = savedMaps[0];
+                    recentBox.style.display = "block";
+                    recentBox.innerHTML =
+                        '<div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.4); border-radius:10px; padding:0.6rem 0.8rem; margin-top:0.75rem;">' +
+                        '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">' +
+                        '    <span style="font-size:0.74rem; color:#e9d5ff; font-weight:700; text-transform:uppercase;">⭐ Uložená šablona plánu</span>' +
+                        '    <span style="font-size:0.72rem; color:var(--text-muted);">' + (latestMap.savedAt || "") + '</span>' +
+                        '  </div>' +
+                        '  <div style="font-size:0.84rem; font-weight:600; color:#fef08a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:0.45rem;">' +
+                        this.escapeHtml(latestMap.name || "Vlastní plán") + ' (' + (latestMap.nodeCount || 96) + ' polí)' +
+                        '  </div>' +
+                        '  <button class="btn-gold-lg" style="width:100%; font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.playOnSavedFavoriteMap(0)">' +
+                        '    ⚔️ Hrát na tomto plánu' +
                         '  </button>' +
                         '</div>';
                 } else {

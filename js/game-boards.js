@@ -2463,6 +2463,22 @@ window.PRS_BoardBuilder = {
             seed = recipeObj.seed || seed;
             board = window.KiDeskyMapGenerator.compileDynamicRecipe(recipeObj, seed);
             board.code = "custom_dynamic";
+            if (recipeObj.customName) {
+                board.name = recipeObj.customName;
+            }
+        }
+        // 1b. Pokud jde o uložený dynamický plán z mých šablon (saved_map_X)
+        else if (templateCode && String(templateCode).indexOf("saved_map_") === 0) {
+            var sIdx = parseInt(String(templateCode).replace("saved_map_", ""), 10);
+            var savedList = [];
+            try { savedList = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { savedList = []; }
+            var savedItem = savedList[sIdx];
+            if (savedItem && savedItem.recipe && window.KiDeskyMapGenerator) {
+                var sSeed = savedItem.seed || seed;
+                board = window.KiDeskyMapGenerator.compileDynamicRecipe(savedItem.recipe, sSeed);
+                board.code = templateCode;
+                board.name = savedItem.name || board.name;
+            }
         }
         // 2. Pokud jde o administrátorem uložený předdefinovaný plán v databázi (není vestavěný)
         else if (dbTpl && !dbTpl.isBuiltIn) {

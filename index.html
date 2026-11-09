@@ -884,10 +884,11 @@
                                     💾 Moje uložené hry a rozehrané výpravy
                                 </h3>
                             </div>
-                            <div style="display:flex; gap:0.35rem;">
+                            <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
                                 <button id="save-tab-all" class="btn-secondary active" style="font-size:0.75rem; padding:3px 9px;" onclick="PRS_App.setSavedGamesFilter('all')">Všechny</button>
                                 <button id="save-tab-solo" class="btn-secondary" style="font-size:0.75rem; padding:3px 9px;" onclick="PRS_App.setSavedGamesFilter('solo')">Solo &amp; Hot-Seat</button>
                                 <button id="save-tab-online" class="btn-secondary" style="font-size:0.75rem; padding:3px 9px;" onclick="PRS_App.setSavedGamesFilter('online')">Online stoly</button>
+                                <button id="save-tab-maps" class="btn-secondary" style="font-size:0.75rem; padding:3px 9px; border-color:#a855f7; color:#e9d5ff;" onclick="PRS_App.setSavedGamesFilter('maps')">⭐ Šablony plánů</button>
                             </div>
                         </div>
                         <p style="color:var(--text-muted); font-size:0.84rem; margin-bottom:0.95rem;">
@@ -2805,21 +2806,21 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611091910" defer></script>
-    <script src="js/game-boards.js?v=202611091910" defer></script>
-    <script src="js/game-engine.js?v=202611091910" defer></script>
-    <script src="js/game-combat-ai.js?v=202611091910" defer></script>
-    <script src="js/app-audio.js?v=202611091910" defer></script>
-    <script src="js/app-dialog.js?v=202611091910" defer></script>
-    <script src="js/app.js?v=202611091910" defer></script>
-    <script src="js/app-board.js?v=202611091910" defer></script>
-    <script src="js/app-hud.js?v=202611091910" defer></script>
-    <script src="js/app-modals.js?v=202611091910" defer></script>
-    <script src="js/app-online.js?v=202611091910" defer></script>
-    <script src="js/app-saves.js?v=202611091910" defer></script>
-    <script src="js/app-catalog.js?v=202611091910" defer></script>
-    <script src="js/app-admin.js?v=202611091910" defer></script>
-    <script src="js/app-musicwidget.js?v=202611091910" defer></script>
+    <script src="js/game-data.js?v=202611092005" defer></script>
+    <script src="js/game-boards.js?v=202611092005" defer></script>
+    <script src="js/game-engine.js?v=202611092005" defer></script>
+    <script src="js/game-combat-ai.js?v=202611092005" defer></script>
+    <script src="js/app-audio.js?v=202611092005" defer></script>
+    <script src="js/app-dialog.js?v=202611092005" defer></script>
+    <script src="js/app.js?v=202611092005" defer></script>
+    <script src="js/app-board.js?v=202611092005" defer></script>
+    <script src="js/app-hud.js?v=202611092005" defer></script>
+    <script src="js/app-modals.js?v=202611092005" defer></script>
+    <script src="js/app-online.js?v=202611092005" defer></script>
+    <script src="js/app-saves.js?v=202611092005" defer></script>
+    <script src="js/app-catalog.js?v=202611092005" defer></script>
+    <script src="js/app-admin.js?v=202611092005" defer></script>
+    <script src="js/app-musicwidget.js?v=202611092005" defer></script>
     <script>
         (function () {
             function bootApp() {
