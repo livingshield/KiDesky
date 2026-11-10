@@ -2696,17 +2696,17 @@
         if (node.type === "TOWN") {
             if (node.owner === player.index) return "Tvé město s daňovým výnosem 1 200 zl.";
             if (node.owner !== null) return "Město soupeře. Přináší mu daně z každého výběru.";
-            return (scen === "tycoon" ? "Cíl scénáře Magnát! " : "") + "Výnosné královské sídlo (+1 200 zl. daň).";
+            return (scen === "tycoon" ? "Cíl scénáře Magnát! " : "") + "Volné město za " + price.toLocaleString("cs-CZ") + " zl. (+1 200 zl. daň).";
         }
         if (node.type === "CASTLE") {
             if (node.owner === player.index) return "Tvůj hrad (+2 500 zl. daň a +1 Charisma).";
             if (node.owner !== null) return "Hrad soupeře. Pozor na vysoký nájem.";
-            return (scen === "tycoon" ? "Cíl scénáře Magnát! " : "") + "Majestátní hrad (+2 500 zl. daň a +1 Charisma).";
+            return (scen === "tycoon" ? "Cíl scénáře Magnát! " : "") + "Volný hrad za " + price.toLocaleString("cs-CZ") + " zl. (+2 500 zl. daň a +1 Charisma).";
         }
         if (node.type === "VILLAGE") {
             if (node.owner === player.index) return "Tvá vesnice úrovně " + (node.villageLevel || 1) + "★. Lze ji povýšit.";
             if (node.owner !== null) return "Vesnice soupeře.";
-            return "Volná vesnice za " + node.price + " zl. Stabilní zdroj daní.";
+            return "Volná vesnice za " + price.toLocaleString("cs-CZ") + " zl. Stabilní zdroj daní.";
         }
         if (node.type === "QUEST") {
             if (node.subtype === "U3") return (scen === "slayer" ? "Cíl scénáře Lovci draků! " : "") + "Nebezpečná Dračí sluj s královským pokladem.";
@@ -2798,12 +2798,13 @@
                         var oN = this.state.board.nodes[player.ownedNodes[on]];
                         if (oN && oN.type === "ANIMAL" && oN.setId === tNode.setId) sCount++;
                     }
+                    var tPrice = (window.PRS_GameEngine && window.PRS_GameEngine.getNodePrice) ? window.PRS_GameEngine.getNodePrice(this.state, tNode) : (tNode.price || 500);
                     if (sCount === 2) {
                         opportunities.push({ node: tNode, roll: rollVal, isTrioCompleter: true });
                         hasMissingAnimalInReach = true;
                     } else if (sCount === 1) {
                         opportunities.push({ node: tNode, roll: rollVal, isPair: true });
-                    } else if (player.gold >= tNode.price) {
+                    } else if (player.gold >= tPrice) {
                         opportunities.push({ node: tNode, roll: rollVal, isBuyable: true });
                     }
                 } else if ((tNode.type === "TOWN" || tNode.type === "CASTLE") && (tNode.owner === null || tNode.owner === undefined)) {
