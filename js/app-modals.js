@@ -2990,101 +2990,115 @@
     },
 
     handleAnimalBuyout: function (nodeId) {
+        if (this.isActionProcessing || this.isSavingSession) return;
+        this.isActionProcessing = true;
 
-        var res = window.PRS_GameEngine.executeAnimalBuyout(this.state, nodeId);
-
-        if (res) {
-
-            if (window.PRS_Audio) window.PRS_Audio.playBuy();
-
-            this.inspectedPlayerIndex = this.state.currentPlayerIndex;
-
-            var price = (typeof res === "object" && res.buyoutPrice) ? res.buyoutPrice : 1600;
-
-            var nodeName = (typeof res === "object" && res.nodeName) ? res.nodeName : "Zvíře";
-
-            if (this.showToast) {
-
-                this.showToast("🦅 " + nodeName + " úspěšně vykoupen ze sady (-" + price.toLocaleString("cs-CZ") + " zl., +1.0 💖)!", "success");
-
+        // Okamžitě v DOMu odstranit panel s předkupním právem pro okamžitou vizuální odezvu
+        var buyoutCards = document.querySelectorAll(".buyout-interaction-card, .btn-action-buyout");
+        for (var b = 0; b < buyoutCards.length; b++) {
+            if (buyoutCards[b].classList.contains("buyout-interaction-card")) {
+                buyoutCards[b].remove();
+            } else {
+                buyoutCards[b].disabled = true;
+                buyoutCards[b].style.opacity = "0.5";
             }
-
-            this.renderGameScreen();
-
-            this.renderLowerKnightDetail();
-
-            if (this.activeSidebarTab === "property") {
-
-                this.renderSidebarPropertyPanel();
-
-            }
-
-            this.saveSessionAuto();
-
         }
 
+        var res = window.PRS_GameEngine.executeAnimalBuyout(this.state, nodeId);
+        if (res) {
+            if (window.PRS_Audio) window.PRS_Audio.playBuy();
+            this.inspectedPlayerIndex = this.state.currentPlayerIndex;
+            var price = (typeof res === "object" && res.buyoutPrice) ? res.buyoutPrice : 1600;
+            var nodeName = (typeof res === "object" && res.nodeName) ? res.nodeName : "Zvíře";
+            if (this.showToast) {
+                this.showToast("🦅 " + nodeName + " úspěšně vykoupen ze sady (-" + price.toLocaleString("cs-CZ") + " zl., +1.0 💖)!", "success");
+            }
+            if (this.showPawnToast) {
+                this.showPawnToast(this.state.currentPlayerIndex, "Vykoupen " + nodeName + "!", "🦅", "#10b981");
+            }
+
+            if (this.state && this.state.pendingAction) {
+                this.state.pendingAction.canBuyoutAnimalSet = false;
+                this.state.pendingAction.buyoutCandidates = [];
+                this.state.pendingAction.buyoutSuccess = null;
+                delete this.state.pendingAction.canBuyoutAnimalSet;
+                delete this.state.pendingAction.buyoutCandidates;
+                delete this.state.pendingAction.buyoutSuccess;
+            }
+
+            this.isBoardStaticDirty = true;
+            try { this.renderGameScreen(); } catch (e) { console.error("renderGameScreen error:", e); }
+            try { this.renderActionPanel(); } catch (e) { console.error("renderActionPanel error:", e); }
+            try { this.renderLowerKnightDetail(); } catch (e) { console.error("renderLowerKnightDetail error:", e); }
+            if (this.activeSidebarTab === "property") {
+                try { this.renderSidebarPropertyPanel(); } catch (e) { }
+            }
+
+            var self = this;
+            var p = this.saveSessionAuto();
+            if (p && p.finally) {
+                p.finally(function () {
+                    self.isActionProcessing = false;
+                });
+            } else {
+                this.isActionProcessing = false;
+            }
+        } else {
+            this.isActionProcessing = false;
+            try { this.renderActionPanel(); } catch (e) { }
+        }
+    },
+
+    getGenericModal: function () {
+        var modal = document.getElementById("generic-modal");
+        if (!modal) {
+            modal = document.createElement("div");
+            modal.id = "generic-modal";
+            modal.className = "modal-backdrop";
+            modal.style.display = "none";
+            modal.style.zIndex = "10060";
+            modal.onclick = function (e) {
+                if (e.target === this) this.style.display = "none";
+            };
+            document.body.appendChild(modal);
+        }
+        return modal;
     },
 
     openIntrigueModal: function (type) {
-
         var self = this;
-
-        var modal = document.getElementById("generic-modal");
-
+        var modal = this.getGenericModal();
         if (!modal) return;
-
         var p = self.state.players[self.state.currentPlayerIndex];
-
         var targets = [];
-
         for (var i = 0; i < self.state.players.length; i++) {
-
             var pl = self.state.players[i];
-
             if (pl.index !== p.index && !pl.isEliminated) targets.push(pl);
-
         }
-
         var isBallad = (type === "ballad");
-
-        var cost = isBallad ? (self.state.pendingAction.intrigueBalladCost || 750) : (self.state.pendingAction.intrigueCustomsCost || 600);
-
+        var cost = isBallad ? ((self.state.pendingAction && self.state.pendingAction.intrigueBalladCost) || 750) : ((self.state.pendingAction && self.state.pendingAction.intrigueCustomsCost) || 600);
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid var(--gold); border-radius:14px; text-align:center;">' +
-
             '<div style="font-size:2rem; margin-bottom:0.25rem;">' + (isBallad ? '🎭 🃏' : '📜 ⚖️') + '</div>' +
-
             '<h3 style="font-family:Cinzel,serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + (isBallad ? 'Posměšná balada pod balkónem' : 'Královská celní kontrola') + '</h3>' +
-
             '<p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:1rem;">' +
-
             (isBallad ? 'Kejklíř složí uštěpačnou píseň o vybraném soupeři (souboj Charisma + 1d6). Úspěch: soupeř ztrácí 💖 a ty získáváš dvorskou přízeň! Cena: ' + cost + ' zl.' : 'Zvol soupeře, jehož panství budou na 1 kolo zmrazena celní kontrolou (nikdo mu neplatí nájem). Cena: ' + cost + ' zl.') +
-
             '</p>' +
-
             '<div style="display:flex; flex-direction:column; gap:0.5rem;">';
-
         for (var t = 0; t < targets.length; t++) {
-
             var tgt = targets[t];
-
+            var chVal = (tgt.skills && tgt.skills.charisma !== undefined) ? tgt.skills.charisma : 1;
             html += '<button class="btn-gold-lg" style="text-align:left; padding:0.6rem 0.85rem;" onclick="PRS_App.confirmPlotIntrigue(\'' + type + '\', ' + tgt.index + ')">' +
-
-                tgt.badge + ' <strong>' + self.escapeHtml(tgt.name) + '</strong> (' + tgt.totalHearts + ' 💖, Charisma ' + tgt.skills.charisma + ')' +
-
+                tgt.badge + ' <strong>' + self.escapeHtml(tgt.name) + '</strong> (' + tgt.totalHearts + ' 💖, Charisma ' + chVal + ')' +
                 '</button>';
-
         }
-
+        if (targets.length === 0) {
+            html += '<p style="color:#fca5a5; font-size:0.85rem;">V království již nezbyl žádný aktivní soupeř.</p>';
+        }
         html += '</div>' +
-
-            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="document.getElementById(\'generic-modal\').style.display=\'none\'">Zrušit</button>' +
-
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">Zrušit</button>' +
             '</div>';
-
         modal.innerHTML = html;
-
         modal.style.display = "flex";
-
     },
 
     confirmPlotIntrigue: function (type, targetIdx) {
@@ -3108,185 +3122,107 @@
     },
 
     openTradePactModal: function () {
-
         var self = this;
-
-        var modal = document.getElementById("generic-modal");
-
+        var modal = this.getGenericModal();
         if (!modal) return;
-
         var p = self.state.players[self.state.currentPlayerIndex];
-
-        var cost = self.state.pendingAction.tradePactCost || 750;
-
-        // Najdi nejvyšší počet Srdcí pro kontrolu pravidla proti lídrovi
-
-        var maxHearts = 0;
-
-        for (var h = 0; h < self.state.players.length; h++) {
-
-            if (self.state.players[h].totalHearts > maxHearts) maxHearts = self.state.players[h].totalHearts;
-
-        }
-
+        var rate = (self.state.config && self.state.config.interactionRate !== undefined) ? self.state.config.interactionRate : 0.5;
+        var cost = Math.round(1500 * (rate > 0 ? rate : 0.5));
         var partners = [];
-
+        var maxHearts = 0;
+        for (var h = 0; h < self.state.players.length; h++) {
+            if (self.state.players[h].totalHearts > maxHearts) maxHearts = self.state.players[h].totalHearts;
+        }
         for (var i = 0; i < self.state.players.length; i++) {
-
             var pl = self.state.players[i];
-
             if (pl.index !== p.index && !pl.isEliminated && !window.PRS_GameEngine.hasActiveTradePact(self.state, p.index, pl.index)) {
-
                 var isLeaderAhead = (pl.totalHearts === maxHearts && maxHearts >= p.totalHearts + 2);
-
                 partners.push({ player: pl, isLeaderAhead: isLeaderAhead });
-
             }
-
         }
-
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; text-align:center;">' +
-
             '<div style="font-size:2rem; margin-bottom:0.25rem;">🤝 📜</div>' +
-
             '<h3 style="font-family:Cinzel,serif; color:#7dd3fc; margin:0 0 0.5rem 0;">Uzavření Obchodního paktu</h3>' +
-
             '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:1rem;">' +
-
             'Zpečeť bezcelní alianci na <strong>8 celých kol</strong> za <strong>' + cost + ' zl.</strong> (polovina jde do pokladny, polovina partnerovi jako dar). ' +
-
             'Pravidlo cti: Pakt nelze uzavřít s lídrem království, který vede o 2+ 💖!' +
-
             '</p>' +
-
             '<div style="display:flex; flex-direction:column; gap:0.5rem;">';
-
         for (var pt = 0; pt < partners.length; pt++) {
-
             var item = partners[pt];
-
             var part = item.player;
-
             var disabled = item.isLeaderAhead || (p.gold < cost);
-
             html += '<button class="btn-gold-lg" ' + (disabled ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '') + ' style="text-align:left; padding:0.6rem 0.85rem; background:linear-gradient(135deg, #0284c7, #0369a1); border-color:#38bdf8;" onclick="PRS_App.confirmTradePact(' + part.index + ')">' +
-
                 part.badge + ' <strong>' + self.escapeHtml(part.name) + '</strong> (' + (part.ownedNodes ? part.ownedNodes.length : 0) + ' panství, ' + part.totalHearts + ' 💖)' +
-
                 (item.isLeaderAhead ? ' <small style="color:#fca5a5;">(Nelze: Lídr)</small>' : '') +
-
                 '</button>';
-
         }
-
+        if (partners.length === 0) {
+            html += '<p style="color:#bae6fd; font-size:0.85rem;">V království není žádný volný spojenec pro pakt.</p>';
+        }
         html += '</div>' +
-
-            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="document.getElementById(\'generic-modal\').style.display=\'none\'">Zrušit</button>' +
-
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">Zrušit</button>' +
             '</div>';
-
         modal.innerHTML = html;
-
         modal.style.display = "flex";
-
     },
 
     confirmTradePact: function (partnerIdx) {
-
         var modal = document.getElementById("generic-modal");
-
         if (modal) modal.style.display = "none";
-
         var res = window.PRS_GameEngine.executeFormTradePact(this.state, partnerIdx);
-
         if (res) {
-
             if (window.PRS_Audio) window.PRS_Audio.playFanfare();
-
             this.renderGameScreen();
-
             this.saveSessionAuto();
-
         }
-
     },
 
     openFestivalChallengeModal: function () {
-
         var self = this;
-
-        var modal = document.getElementById("generic-modal");
-
+        var modal = this.getGenericModal();
         if (!modal) return;
-
         var p = self.state.players[self.state.currentPlayerIndex];
-
-        var stake = self.state.pendingAction.festivalChallengeStake || 750;
-
+        var stake = (self.state.pendingAction && self.state.pendingAction.festivalChallengeStake) || 750;
         var rivals = [];
-
         for (var i = 0; i < self.state.players.length; i++) {
-
             var pl = self.state.players[i];
-
             if (pl.index !== p.index && !pl.isEliminated) rivals.push(pl);
-
         }
-
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #ec4899; border-radius:14px; text-align:center;">' +
-
             '<div style="font-size:2rem; margin-bottom:0.25rem;">🏆 🤺</div>' +
-
             '<h3 style="font-family:Cinzel,serif; color:#fbcfe8; margin:0 0 0.5rem 0;">Osobní výzva na Slavnosti</h3>' +
-
             '<p style="font-size:0.84rem; color:#fce7f3; margin-bottom:1rem;">' +
-
             'Zvol rivala a disciplínu (hod 1d6 + hodnota ctnosti). Vítěz získá <strong>' + stake + ' zl.</strong> a <strong>+0,5 💖</strong> slávy!' +
-
             '</p>' +
-
             '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
-
         for (var r = 0; r < rivals.length; r++) {
-
             var riv = rivals[r];
-
+            var rBoj = (riv.skills && riv.skills.boj !== undefined) ? riv.skills.boj : 1;
+            var rJizda = (riv.skills && riv.skills.jizda !== undefined) ? riv.skills.jizda : 1;
+            var rTanec = (riv.skills && riv.skills.tanec !== undefined) ? riv.skills.tanec : 1;
             html += '<div style="background:rgba(0,0,0,0.35); border:1px solid rgba(236,72,153,0.3); border-radius:8px; padding:0.55rem; text-align:left;">' +
-
                 '<div style="font-weight:700; color:#fbcfe8; margin-bottom:4px;">' + riv.badge + ' ' + self.escapeHtml(riv.name) + ' (' + riv.totalHearts + ' 💖)</div>' +
-
                 '<div style="display:flex; gap:4px;">' +
-
-                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'boj\')">⚔️ Boj (' + riv.skills.boj + ')</button>' +
-
-                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'jizda\')">🏇 Jízda (' + riv.skills.jizda + ')</button>' +
-
-                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'tanec\')">💃 Tanec (' + riv.skills.tanec + ')</button>' +
-
+                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'boj\')">⚔️ Boj (' + rBoj + ')</button>' +
+                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'jizda\')">🏇 Jízda (' + rJizda + ')</button>' +
+                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'tanec\')">💃 Tanec (' + rTanec + ')</button>' +
                 '</div>' +
-
                 '</div>';
-
         }
-
+        if (rivals.length === 0) {
+            html += '<p style="color:#fca5a5; font-size:0.85rem;">V království již nezbyl žádný aktivní soupeř k výzvě.</p>';
+        }
         html += '</div>' +
-
-            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="document.getElementById(\'generic-modal\').style.display=\'none\'">Zrušit</button>' +
-
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">Zrušit</button>' +
             '</div>';
-
         modal.innerHTML = html;
-
         modal.style.display = "flex";
-
     },
 
     confirmFestivalChallenge: function (rivalIdx, discipline) {
-
         var modal = document.getElementById("generic-modal");
-
         if (modal) modal.style.display = "none";
-
         var res = window.PRS_GameEngine.executeFestivalChallenge(this.state, rivalIdx, discipline);
 
         if (res) {

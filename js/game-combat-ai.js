@@ -1429,88 +1429,67 @@
 
     },
 
-    // 3. Šlechtický výkup ze sady (Královské předkupní právo),
-
+    // 3. Šlechtický výkup ze sady (Královské předkupní právo)
     executeAnimalBuyout: function (state, targetNodeId) {
-
         var player = state.players[state.currentPlayerIndex];
-
-        var targetNode = state.board.nodes[targetNodeId];
-
-        if (!player || !targetNode || targetNode.type !== "ANIMAL" || targetNode.owner === null || targetNode.owner === player.index) {
-
-            return false;
-
+        var targetNode = null;
+        if (state.board && Array.isArray(state.board.nodes)) {
+            if (typeof targetNodeId === "number" && state.board.nodes[targetNodeId]) {
+                targetNode = state.board.nodes[targetNodeId];
+            } else {
+                for (var ni = 0; ni < state.board.nodes.length; ni++) {
+                    if (state.board.nodes[ni] && state.board.nodes[ni].id == targetNodeId) {
+                        targetNode = state.board.nodes[ni];
+                        break;
+                    }
+                }
+            }
         }
-
+        if (!player || !targetNode || targetNode.type !== "ANIMAL" || targetNode.owner === null || targetNode.owner === undefined || targetNode.owner === player.index) {
+            return false;
+        }
         var targetOwner = state.players[targetNode.owner];
+        if (!targetOwner) return false;
 
-        var origPrice = this.getNodePrice(state, targetNode);
-
+        var origPrice = this.getNodePrice ? this.getNodePrice(state, targetNode) : (targetNode.buyPrice || 1000);
         var buyoutPrice = origPrice * 2;
-
         if (player.gold < buyoutPrice) return false;
 
         player.gold -= buyoutPrice;
-
         targetOwner.gold += buyoutPrice;
-
-        var oIdx = targetOwner.ownedNodes.indexOf(targetNode.id);
-
-        if (oIdx !== -1) targetOwner.ownedNodes.splice(oIdx, 1);
-
-        player.ownedNodes.push(targetNode.id);
-
+        if (Array.isArray(targetOwner.ownedNodes)) {
+            var oIdx = targetOwner.ownedNodes.indexOf(targetNode.id);
+            if (oIdx !== -1) targetOwner.ownedNodes.splice(oIdx, 1);
+        }
+        if (!Array.isArray(player.ownedNodes)) player.ownedNodes = [];
+        if (player.ownedNodes.indexOf(targetNode.id) === -1) {
+            player.ownedNodes.push(targetNode.id);
+        }
         targetNode.owner = player.index;
 
-        var msg = "📜 KRÁLOVSKÉ PŘEDKUPNÍ PRÁVO! " + player.badge + " " + player.name + " vykoupil " + targetNode.icon + " **" + targetNode.name + "** od " + targetOwner.badge + " " + targetOwner.name + " za dvojnásobek (" + buyoutPrice + " zl.) a zkompletoval sadu #" + targetNode.setId + " (+1,0 💖)!";
-
+        var msg = "📜 KRÁLOVSKÉ PŘEDKUPNÍ PRÁVO! " + player.badge + " " + player.name + " vykoupil " + (targetNode.icon || "🐾") + " **" + targetNode.name + "** od " + targetOwner.badge + " " + targetOwner.name + " za dvojnásobek (" + buyoutPrice + " zl.) a zkompletoval sadu #" + targetNode.setId + " (+1,0 💖)!";
         this.addLog(state, msg, "victory");
 
         if (state.pendingAction) {
-
             state.pendingAction.canBuyoutAnimalSet = false;
-
             state.pendingAction.buyoutCandidates = [];
-
-            state.pendingAction.buyoutSuccess = {
-
-                nodeId: targetNode.id,
-
-                nodeName: targetNode.name,
-
-                nodeIcon: targetNode.icon || "🦅",
-
-                sellerName: targetOwner.name,
-
-                price: buyoutPrice,
-
-                setId: targetNode.setId
-
-            };
-
+            state.pendingAction.buyoutSuccess = null;
+            delete state.pendingAction.canBuyoutAnimalSet;
+            delete state.pendingAction.buyoutCandidates;
+            delete state.pendingAction.buyoutSuccess;
             state.pendingAction.summary = msg;
-
         }
 
         this.recalculateBreedingAndVictory(state);
 
         return {
-
             success: true,
-
             nodeId: targetNode.id,
-
             nodeName: targetNode.name,
-
             targetOwnerName: targetOwner.name,
-
             buyoutPrice: buyoutPrice,
-
             setId: targetNode.setId
-
         };
-
     },
 
     // 4. Dvorní intrika u Kejklíře nebo v Krčmě,

@@ -3994,51 +3994,42 @@
         }
 
         // 2. Šlechtický výkup ze sady (Královské předkupní právo)
+        var validBuyoutCandidates = [];
+        if (pa.canBuyoutAnimalSet && pa.buyoutCandidates && pa.buyoutCandidates.length > 0 && this.state.board && this.state.board.nodes) {
+            for (var biCheck = 0; biCheck < pa.buyoutCandidates.length; biCheck++) {
+                var bcCandidate = pa.buyoutCandidates[biCheck];
+                var candNodeObj = this.state.board.nodes[bcCandidate.nodeId];
+                if (candNodeObj && candNodeObj.owner !== null && candNodeObj.owner !== undefined && candNodeObj.owner !== player.index) {
+                    validBuyoutCandidates.push(bcCandidate);
+                }
+            }
+        }
 
-        if (pa.canBuyoutAnimalSet && pa.buyoutCandidates && pa.buyoutCandidates.length > 0) {
-
+        if (validBuyoutCandidates.length > 0) {
             specialCardHtml += '<div class="buyout-interaction-card" style="border:1.5px solid #10b981; background:linear-gradient(180deg, rgba(6,78,59,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-
                 '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; margin-bottom:4px;">📜 Královské předkupní právo na zvíře!</div>' +
-
                 '<p style="font-size:0.8rem; color:#a7f3d0; margin-bottom:0.6rem;">Vlastníš 2 ze 3 zvířat sady! Můžeš vykoupit chybějící kus od majitele za dvojnásobek ceny a ihned zkompletovat sadu (+1,0 💖):</p>' +
-
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">';
 
-            for (var bi = 0; bi < pa.buyoutCandidates.length; bi++) {
-
-                var bc = pa.buyoutCandidates[bi];
-
+            for (var bi = 0; bi < validBuyoutCandidates.length; bi++) {
+                var bc = validBuyoutCandidates[bi];
                 var canAffordBc = player.gold >= bc.buyoutPrice;
-
                 specialCardHtml += '  <button class="btn-action-buyout" ' + (!canAffordBc ? 'disabled' : '') + ' style="padding:0.55rem; background:linear-gradient(135deg, #059669, #047857); color:#fff; border:1px solid #6ee7b7; border-radius:7px; font-weight:700; text-align:left; cursor:pointer;" onclick="PRS_App.handleAnimalBuyout(' + bc.nodeId + ')">' +
-
                     bc.icon + ' Vykoupit ' + this.escapeHtml(bc.name) + ' ze sady #' + bc.setId + ' (' + bc.buyoutPrice + ' zl. pro ' + this.escapeHtml(bc.ownerName) + ') ➔ +1.0 💖' +
-
                     '</button>';
-
             }
 
             specialCardHtml += '</div></div>';
-
         } else if (pa.buyoutSuccess) {
-
             var bs = pa.buyoutSuccess;
-
-            specialCardHtml += '<div class="buyout-interaction-card" style="border:1.5px solid #10b981; background:linear-gradient(180deg, rgba(6,78,59,0.55), rgba(15,23,42,0.92)); border-radius:10px; padding:0.85rem; margin-top:0.6rem; display:flex; align-items:flex-start; gap:0.75rem;">' +
-
+            specialCardHtml += '<div class="buyout-interaction-card" style="border:1.5px solid #10b981; background:linear-gradient(180deg, rgba(6,78,59,0.55), rgba(15,23,42,0.92)); border-radius:10px; padding:0.85rem; margin-top:0.6rem; display:flex; align-items:flex-start; gap:0.75rem; position:relative;">' +
                 '<div style="font-size:1.8rem; line-height:1;">' + (bs.nodeIcon || '🦅') + '</div>' +
-
-                '<div>' +
-
+                '<div style="flex:1;">' +
                 '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; font-weight:700;">✅ Královský výkup úspěšně dokončen!</div>' +
-
                 '<div style="font-size:0.82rem; color:#a7f3d0; margin-top:0.25rem;">Kus <strong>' + this.escapeHtml(bs.nodeName) + '</strong> byl vykoupen od soupeře <strong>' + this.escapeHtml(bs.sellerName) + '</strong> za <strong>' + bs.price.toLocaleString("cs-CZ") + ' zl.</strong> Tvoje chovná sada #' + bs.setId + ' je nyní kompletní (+1,0 💖)!</div>' +
-
                 '</div>' +
-
+                '<button type="button" onclick="this.closest(\'.buyout-interaction-card\').remove(); if(PRS_App.state && PRS_App.state.pendingAction) PRS_App.state.pendingAction.buyoutSuccess=null;" style="background:transparent; border:none; color:#a7f3d0; font-size:1.15rem; cursor:pointer; padding:0 4px; line-height:1;" title="Zavřít oznámení">✕</button>' +
                 '</div>';
-
         }
 
         // 3. Dvorní intriky u Kejklíře a v Krčmě
@@ -4829,14 +4820,10 @@
 
         var targetSprint = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, sprintRoll);
 
-        var modal = document.getElementById("generic-modal");
-
+        var modal = (this.getGenericModal ? this.getGenericModal() : document.getElementById("generic-modal"));
         if (!modal) {
-
             self.executeRollAndAnimateMove(player, null, baseRoll);
-
             return;
-
         }
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
@@ -5011,14 +4998,10 @@
 
         var targetPlus = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, plusRoll);
 
-        var modal = document.getElementById("generic-modal");
-
+        var modal = (this.getGenericModal ? this.getGenericModal() : document.getElementById("generic-modal"));
         if (!modal) {
-
             self.executeRollAndAnimateMove(player, null, baseRoll);
-
             return;
-
         }
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
