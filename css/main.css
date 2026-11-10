@@ -1067,15 +1067,27 @@
 /* 2-sloupcovy Dashboard Rytirske herny */
 .gamehall-dashboard-grid {
     display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 1.35rem;
+    grid-template-columns: minmax(290px, 340px) minmax(0, 1fr);
+    gap: 1.25rem;
     align-items: start;
     margin-bottom: 1.5rem;
 }
-@media (max-width: 1080px) {
+@media (max-width: 860px) {
     .gamehall-dashboard-grid {
         grid-template-columns: 1fr;
     }
+}
+
+.gamehall-sidebar-col {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.gamehall-main-col {
+    min-width: 0;
+    width: 100%;
 }
 
 .gamehall-knight-card {
@@ -1130,18 +1142,29 @@
 }
 
 /* --- ULOŽENÉ HRY (SAVE / LOAD) & SPRÁVA KŘESEL --- */
+.saved-games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 0.85rem;
+    align-items: stretch;
+}
+
 .save-game-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(212, 175, 55, 0.06));
     border: 1.5px solid rgba(212, 175, 55, 0.28);
     border-radius: 12px;
     padding: 0.85rem 1rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0;
     transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 .save-game-card:hover {
     border-color: var(--gold);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(20, 15, 10, 0.95));
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(20, 15, 10, 0.95));
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+    transform: translateY(-2px);
 }
 .save-game-player-chip {
     display: inline-flex;

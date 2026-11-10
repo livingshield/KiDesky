@@ -2730,12 +2730,13 @@
 
         // 1. ZVLÁŠTNÍ PŘÍPAD: DLUH A LIKVIDACE
         if (pa && pa.debt && pa.debt > 0) {
+            var debtAmt = (typeof pa.debt === "number" && !isNaN(pa.debt)) ? pa.debt : 0;
             return {
                 icon: "⚠️",
                 title: "Královský rádce",
                 badge: "Hrozba dluhu",
                 badgeClass: "advisor-warn",
-                text: "Dlužíš věřitelům **" + pa.debt.toLocaleString("cs-CZ") + " zl.**! Královská rada ti doporučuje nejprve prodat **samostatná zvířata bez sady**, a chránit svá **města, hrady a kompletní 3/3 chovy**, které ti zajišťují stálý zlaťákový i prestižní příjem.",
+                text: "Dlužíš věřitelům **" + debtAmt.toLocaleString("cs-CZ") + " zl.**! Královská rada ti doporučuje nejprve prodat **samostatná zvířata bez sady**, a chránit svá **města, hrady a kompletní 3/3 chovy**, které ti zajišťují stálý zlaťákový i prestižní příjem.",
                 actionPrompt: "Vyber majetek k prodeji za 50–75 % ceny níže."
             };
         }
@@ -2900,8 +2901,10 @@
         // 5. FÁZE ACTION (Po hodu na poli)
         if (currNode) {
             if (pa && pa.canBuyNode) {
-                var canAfford = player.gold >= pa.buyPrice;
-                var rem = player.gold - pa.buyPrice;
+                var bPrice = (typeof pa.buyPrice === "number" && !isNaN(pa.buyPrice)) ? pa.buyPrice : ((currNode && typeof currNode.price === "number") ? currNode.price : 1000);
+                var pGold = (player && typeof player.gold === "number") ? player.gold : 0;
+                var canAfford = pGold >= bPrice;
+                var rem = pGold - bPrice;
 
                 if (!canAfford) {
                     return {
@@ -2909,7 +2912,7 @@
                         title: "Královský rádce",
                         badge: "Nedostatek zlata",
                         badgeClass: "advisor-warn",
-                        text: "Pole **" + this.escapeHtml(currNode.name) + "** stojí **" + pa.buyPrice.toLocaleString("cs-CZ") + " zl.**, ale v měšci máš jen " + player.gold.toLocaleString("cs-CZ") + " zl. Nyní pole koupit nemůžeš, pokračuj ukončením tahu.",
+                        text: "Pole **" + this.escapeHtml(currNode.name) + "** stojí **" + bPrice.toLocaleString("cs-CZ") + " zl.**, ale v měšci máš jen " + pGold.toLocaleString("cs-CZ") + " zl. Nyní pole koupit nemůžeš, pokračuj ukončením tahu.",
                         actionPrompt: "Klepni na 'Ukončit tah'."
                     };
                 }

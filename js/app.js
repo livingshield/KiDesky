@@ -2582,6 +2582,15 @@ window.PRS_App = {
             if (typeof this.renderSavedGamesList === "function") {
                 this.renderSavedGamesList();
             }
+            var roomEl = document.getElementById("room-gh-saves");
+            if (roomEl) {
+                try {
+                    var rect = roomEl.getBoundingClientRect();
+                    if (rect.top < 60 || rect.top > window.innerHeight * 0.7) {
+                        roomEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                } catch (e) { }
+            }
         }
     },
 

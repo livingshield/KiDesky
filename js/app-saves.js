@@ -233,6 +233,16 @@
                         pa.buyPrice = (nBuy && nBuy.price) ? nBuy.price : 1000;
                     }
                 }
+                if (Array.isArray(restoredState.players)) {
+                    for (var pi = 0; pi < restoredState.players.length; pi++) {
+                        var plObj = restoredState.players[pi];
+                        if (typeof plObj.gold !== "number" || isNaN(plObj.gold)) plObj.gold = 0;
+                        if (typeof plObj.totalHearts !== "number" || isNaN(plObj.totalHearts)) plObj.totalHearts = 0;
+                        if (!Array.isArray(plObj.ownedNodes)) plObj.ownedNodes = [];
+                        if (!Array.isArray(plObj.inventory)) plObj.inventory = [];
+                        if (!plObj.skills || typeof plObj.skills !== "object") plObj.skills = { boj: 0, jizda: 0, tanec: 0, charisma: 0 };
+                    }
+                }
                 if (restoredState.board && restoredState.board.rivers && restoredState.board.rivers.length > 0 && (!restoredState.board.bridges || restoredState.board.bridges.length === 0)) {
                     if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
                         window.PRS_BoardBuilder.computeRiverBridges(restoredState.board);
@@ -372,7 +382,7 @@
                         '</div>'
                     );
                 }
-                container.innerHTML = mapsHtml.join("\n");
+                container.innerHTML = '<div class="saved-games-grid">' + mapsHtml.join("\n") + '</div>';
                 return;
             }
 
@@ -383,6 +393,7 @@
             }
 
             var html = [];
+            var saveCards = [];
 
             // 2. HLAVIČKA ŠABLON PLÁNŮ PŘI ZOBRAZENÍ VŠECH ("all")
             if (filter === "all" && savedMaps.length > 0) {
@@ -444,14 +455,15 @@
                 for (var p = 0; p < (s.playersSummary || []).length; p++) {
                     var pl = s.playersSummary[p];
                     var isBot = (pl.type !== "Human");
+                    var plGold = (typeof pl.gold === "number" && !isNaN(pl.gold)) ? pl.gold : 0;
                     playersPills.push(
                         '<span class="save-game-player-chip" style="border-left:3px solid ' + (pl.color || '#d4af37') + ';">' +
-                        (isBot ? '🤖 ' : '👤 ') + this.escapeHtml(pl.name) + ' (' + (pl.hearts || 0) + ' 💖, ' + (pl.gold || 0).toLocaleString("cs-CZ") + ' zl.)' +
+                        (isBot ? '🤖 ' : '👤 ') + this.escapeHtml(pl.name) + ' (' + (pl.hearts || 0) + ' 💖, ' + plGold.toLocaleString("cs-CZ") + ' zl.)' +
                         '</span>'
                     );
                 }
 
-                html.push(
+                saveCards.push(
                     '<div class="save-game-card">' +
                     '  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; gap:0.5rem; flex-wrap:wrap;">' +
                     '    <div>' +
@@ -474,6 +486,10 @@
                     '  </div>' +
                     '</div>'
                 );
+            }
+
+            if (saveCards.length > 0) {
+                html.push('<div class="saved-games-grid">' + saveCards.join("\n") + '</div>');
             }
 
             container.innerHTML = html.join("\n");
@@ -508,6 +524,9 @@
                         '  <button class="btn-gold-lg" style="width:100%; font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.loadSavedGame(\'' + latest.id + '\')">' +
                         '    ▶️ Pokračovat ve hře (Kolo ' + (latest.roundNumber || 1) + ')' +
                         '  </button>' +
+                        '  <div style="text-align:right; margin-top:0.35rem;">' +
+                        '    <button type="button" style="background:none; border:none; color:var(--gold-light); font-size:0.73rem; cursor:pointer; text-decoration:underline;" onclick="PRS_App.switchGameHallRoom(\'saves\')">Zobrazit všechny výpravy (' + totalCount + ') →</button>' +
+                        '  </div>' +
                         '</div>';
                 } else if (savedMaps.length > 0) {
                     var latestMap = savedMaps[0];
@@ -524,6 +543,9 @@
                         '  <button class="btn-gold-lg" style="width:100%; font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.playOnSavedFavoriteMap(0)">' +
                         '    ⚔️ Hrát na tomto plánu' +
                         '  </button>' +
+                        '  <div style="text-align:right; margin-top:0.35rem;">' +
+                        '    <button type="button" style="background:none; border:none; color:#e9d5ff; font-size:0.73rem; cursor:pointer; text-decoration:underline;" onclick="PRS_App.switchGameHallRoom(\'saves\')">Zobrazit šablony (' + totalCount + ') →</button>' +
+                        '  </div>' +
                         '</div>';
                 } else {
                     recentBox.style.display = "none";
