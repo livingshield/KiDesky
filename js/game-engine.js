@@ -1099,90 +1099,66 @@ window.PRS_GameEngine = {
     },
 
     // Přepočet průběžných chovatelských bodů, kompletních sad zvířat a kontrola vítězství,
-
     recalculateBreedingAndVictory: function (state) {
+        if (!state || !state.players || !Array.isArray(state.players)) return;
+        var hasBoardNodes = Boolean(state.board && Array.isArray(state.board.nodes));
 
         var animalTotals = [];
-
         for (var i = 0; i < state.players.length; i++) {
-
             var p = state.players[i];
-
+            if (!p) continue;
+            if (!Array.isArray(p.ownedNodes)) p.ownedNodes = [];
             var val = 0;
-
-            for (var j = 0; j < p.ownedNodes.length; j++) {
-
-                var nd = state.board.nodes[p.ownedNodes[j]];
-
-                if (nd && nd.type === "ANIMAL") {
-
-                    val += this.getNodePrice(state, nd);
-
+            if (hasBoardNodes) {
+                for (var j = 0; j < p.ownedNodes.length; j++) {
+                    var nd = state.board.nodes[p.ownedNodes[j]];
+                    if (nd && nd.type === "ANIMAL") {
+                        val += this.getNodePrice(state, nd);
+                    }
                 }
-
             }
-
             p.animalValue = val;
-
             p.breedingHearts = 0;
-
             if (val > 0) {
-
                 animalTotals.push({ index: i, val: val });
-
             }
-
         }
 
         animalTotals.sort(function (a, b) { return b.val - a.val; });
-
-        var awards = state.config.animalBreedingHearts || [4, 2.5, 1.5];
-
+        var awards = (state.config && state.config.animalBreedingHearts) || [4, 2.5, 1.5];
         for (var k = 0; k < Math.min(awards.length, animalTotals.length); k++) {
-
             var winnerIdx = animalTotals[k].index;
-
-            state.players[winnerIdx].breedingHearts = awards[k];
-
+            if (state.players[winnerIdx]) {
+                state.players[winnerIdx].breedingHearts = awards[k];
+            }
         }
 
         // 3.1 Balanc: Bonus za kompletní sady zvířat a chovatelské trojice
         for (var pIdx = 0; pIdx < state.players.length; pIdx++) {
-
             var plObj = state.players[pIdx];
+            if (!plObj) continue;
+            if (!Array.isArray(plObj.ownedNodes)) plObj.ownedNodes = [];
 
             var setCounts = {};
-
-            for (var on = 0; on < plObj.ownedNodes.length; on++) {
-
-                var animNode = state.board.nodes[plObj.ownedNodes[on]];
-
-                if (animNode && animNode.type === "ANIMAL" && animNode.setId) {
-
-                    var sid = animNode.setId;
-
-                    if (!setCounts[sid]) setCounts[sid] = { kun: 0, pes: 0, sokol: 0 };
-
-                    if (animNode.subtype) setCounts[sid][animNode.subtype]++;
-
+            if (hasBoardNodes) {
+                for (var on = 0; on < plObj.ownedNodes.length; on++) {
+                    var animNode = state.board.nodes[plObj.ownedNodes[on]];
+                    if (animNode && animNode.type === "ANIMAL" && animNode.setId) {
+                        var sid = animNode.setId;
+                        if (!setCounts[sid]) setCounts[sid] = { kun: 0, pes: 0, sokol: 0 };
+                        if (animNode.subtype) setCounts[sid][animNode.subtype]++;
+                    }
                 }
-
             }
 
             var completeSets = 0;
-
             for (var sKey in setCounts) {
-
                 if (setCounts[sKey].kun >= 1 && setCounts[sKey].pes >= 1 && setCounts[sKey].sokol >= 1) {
-
                     completeSets++;
-
                 }
-
             }
 
             plObj.completeSetsCount = completeSets;
-
             plObj.setHeartsBonus = completeSets * 1.5;
 
             // Chovatelský titul za 3 zvířata stejného druhu (+1.0 💖 za každou trojici)
@@ -1196,16 +1172,17 @@ window.PRS_GameEngine = {
             var castleCount = 0;
             var townCount = 0;
             var maxVillageCount = 0;
-            for (var on2 = 0; on2 < plObj.ownedNodes.length; on2++) {
-                var estNode = state.board.nodes[plObj.ownedNodes[on2]];
-                if (!estNode) continue;
-                if (estNode.type === "CASTLE") castleCount++;
-                else if (estNode.type === "TOWN") townCount++;
-                else if (estNode.type === "VILLAGE" && (estNode.villageLevel || 1) >= 3) maxVillageCount++;
+            if (hasBoardNodes) {
+                for (var on2 = 0; on2 < plObj.ownedNodes.length; on2++) {
+                    var estNode = state.board.nodes[plObj.ownedNodes[on2]];
+                    if (!estNode) continue;
+                    if (estNode.type === "CASTLE") castleCount++;
+                    else if (estNode.type === "TOWN") townCount++;
+                    else if (estNode.type === "VILLAGE" && (estNode.villageLevel || 1) >= 3) maxVillageCount++;
+                }
             }
             var estatePrestige = (castleCount * 1.0) + (townCount * 0.5) + (maxVillageCount * 0.5);
             plObj.estateHeartsBonus = estatePrestige;
-
         }
 
         for (var m = 0; m < state.players.length; m++) {

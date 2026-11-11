@@ -49,7 +49,7 @@
 
     <link rel="stylesheet" href="css/board.css?v=202611091330">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611091330">
+    <link rel="stylesheet" href="css/modals.css?v=202611112245">
 
     <link rel="stylesheet" href="css/mobile.css?v=202611091330">
 
@@ -2806,21 +2806,22 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611100955" defer></script>
-    <script src="js/game-boards.js?v=202611100955" defer></script>
-    <script src="js/game-engine.js?v=202611100955" defer></script>
-    <script src="js/game-combat-ai.js?v=202611100955" defer></script>
-    <script src="js/app-audio.js?v=202611100955" defer></script>
-    <script src="js/app-dialog.js?v=202611100955" defer></script>
-    <script src="js/app.js?v=202611101045" defer></script>
-    <script src="js/app-board.js?v=202611101045" defer></script>
-    <script src="js/app-hud.js?v=202611101045" defer></script>
-    <script src="js/app-modals.js?v=202611101045" defer></script>
-    <script src="js/app-online.js?v=202611101045" defer></script>
-    <script src="js/app-saves.js?v=202611101045" defer></script>
-    <script src="js/app-catalog.js?v=202611100955" defer></script>
-    <script src="js/app-admin.js?v=202611100955" defer></script>
-    <script src="js/app-musicwidget.js?v=202611100955" defer></script>
+    <script src="js/game-data.js?v=202611112245" defer></script>
+    <script src="js/game-boards.js?v=202611112245" defer></script>
+    <script src="js/game-engine.js?v=202611112245" defer></script>
+    <script src="js/game-combat-ai.js?v=202611112245" defer></script>
+    <script src="js/app-audio.js?v=202611112245" defer></script>
+    <script src="js/app-dialog.js?v=202611112245" defer></script>
+    <script src="js/app.js?v=202611112245" defer></script>
+    <script src="js/app-board.js?v=202611112245" defer></script>
+    <script src="js/app-hud.js?v=202611112245" defer></script>
+    <script src="js/app-modals.js?v=202611112245" defer></script>
+    <script src="js/app-online.js?v=202611112245" defer></script>
+    <script src="js/app-saves.js?v=202611112245" defer></script>
+    <script src="js/app-map-editor.js?v=202611112245" defer></script>
+    <script src="js/app-catalog.js?v=202611112245" defer></script>
+    <script src="js/app-admin.js?v=202611112245" defer></script>
+    <script src="js/app-musicwidget.js?v=202611112245" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3568,16 +3569,24 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.65rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.45rem; flex-wrap:wrap; gap:0.5rem;">
                 <div>
                     <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.28rem; display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-                        🗺️ Královské Map Studio <span style="font-size:0.72rem; background:rgba(168,85,247,0.25); border:1px solid #c084fc; color:#e9d5ff; padding:2px 8px; border-radius:12px;">Dynamický sestavovač plánu</span>
+                        🗺️ Královské Map Studio <span style="font-size:0.72rem; background:rgba(168,85,247,0.25); border:1px solid #c084fc; color:#e9d5ff; padding:2px 8px; border-radius:12px;">Dynamický sestavovač plánu 2.0</span>
                     </h3>
                     <div style="font-size:0.76rem; color:var(--text-muted); margin-top:2px;">
-                        Zvol přesně, které trojice zvířat (1–14) a kolik hradů, měst, vesnic, kejklířů, monster či draků má mapa obsahovat.
+                        Zvol skladbu polí parametrickým receptem nebo přepni do WYSIWYG editoru a upravuj pole přímo na plánu.
                     </div>
                 </div>
-                <button class="btn-icon-danger" onclick="PRS_App.closeMapStudioModal()">✕</button>
+                <div style="display:flex; gap:0.45rem; align-items:center; flex-wrap:wrap;">
+                    <button type="button" id="ms-tab-btn-recipe" class="btn-zoom" style="font-size:0.78rem; padding:0.28rem 0.75rem; background:linear-gradient(135deg, #d4af37, #b45309); color:#fff; border-color:#fde047; font-weight:700;" onclick="PRS_App.switchMapStudioTab('recipe')">
+                        ⚙️ Parametrický recept
+                    </button>
+                    <button type="button" id="ms-tab-btn-editor" class="btn-zoom" style="font-size:0.78rem; padding:0.28rem 0.75rem; background:rgba(0,0,0,0.4); color:#e9d5ff; border-color:rgba(168,85,247,0.4); font-weight:700;" onclick="PRS_App.switchMapStudioTab('editor')">
+                        🎨 Interaktivní WYSIWYG editor
+                    </button>
+                    <button class="btn-icon-danger" style="margin-left:0.25rem;" onclick="PRS_App.closeMapStudioModal()">✕</button>
+                </div>
             </div>
 
-            <div style="display:grid; grid-template-columns:465px 1fr; gap:1.1rem; flex:1; overflow-y:auto; min-height:0; padding-right:0.25rem;" class="map-studio-grid">
+            <div id="ms-recipe-view" style="display:grid; grid-template-columns:465px 1fr; gap:1.1rem; flex:1; overflow-y:auto; min-height:0; padding-right:0.25rem;" class="map-studio-grid">
                 <!-- LEVÝ SLOUPEC: DYNAMICKÝ RECEPT POLÍ & GEOMETRIE -->
                 <div style="display:flex; flex-direction:column; gap:0.65rem; overflow-y:auto; max-height:74vh; padding-right:0.3rem;">
                     <!-- 1. Rychlé šablony / Presety -->
@@ -3733,8 +3742,11 @@
                 </div>
             </div>
 
-            <!-- PATIČKA MODALU -->
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-top:0.85rem; border-top:1px solid rgba(212,175,55,0.25); padding-top:0.7rem;">
+            <!-- INTERAKTIVNÍ WYSIWYG EDITOR POHLED -->
+            <div id="ms-editor-view" style="display:none; flex:1; min-height:0; flex-direction:column; overflow:hidden;"></div>
+
+            <!-- PATIČKA MODALU (pouze pro recept) -->
+            <div id="ms-modal-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-top:0.85rem; border-top:1px solid rgba(212,175,55,0.25); padding-top:0.7rem;">
                 <button type="button" class="btn-secondary" onclick="PRS_App.closeMapStudioModal()">Zrušit</button>
                 <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
                     <button type="button" id="btn-ms-admin-save-template" class="btn-secondary" style="display:none; border-color:#f59e0b; color:#fde68a; font-weight:700;" onclick="PRS_App.openSaveToPredefinedModal()">

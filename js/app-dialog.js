@@ -60,6 +60,20 @@
         }, 220);
     }
 
+    function setDialogContent(el, msgStr) {
+        if (!el) return;
+        var s = String(msgStr || "");
+        if (/<[a-z][\s\S]*>/i.test(s)) {
+            el.innerHTML = s;
+        } else {
+            el.innerHTML = s
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\n/g, "<br>");
+        }
+    }
+
     var Dialog = {
         alert: function (message, options) {
             options = options || {};
@@ -88,7 +102,7 @@
 
                 if (iconEl) iconEl.textContent = icon;
                 if (titleEl) titleEl.textContent = title;
-                if (msgEl) msgEl.textContent = msgStr;
+                if (msgEl) setDialogContent(msgEl, msgStr);
                 if (inputWrap) inputWrap.style.display = 'none';
 
                 if (actions) {
@@ -152,7 +166,7 @@
 
                 if (iconEl) iconEl.textContent = icon;
                 if (titleEl) titleEl.textContent = title;
-                if (msgEl) msgEl.textContent = msgStr;
+                if (msgEl) setDialogContent(msgEl, msgStr);
                 if (inputWrap) inputWrap.style.display = 'none';
 
                 var confirmBtnClass = isDanger ? 'kd-dialog-btn kd-dialog-btn-danger' : 'kd-dialog-btn kd-dialog-btn-primary';
@@ -231,7 +245,7 @@
 
                 if (iconEl) iconEl.textContent = icon;
                 if (titleEl) titleEl.textContent = title;
-                if (msgEl) msgEl.textContent = msgStr;
+                if (msgEl) setDialogContent(msgEl, msgStr);
 
                 if (inputWrap) inputWrap.style.display = 'block';
                 if (inp) {
@@ -287,6 +301,82 @@
                     inp.focus();
                     inp.select();
                 }
+
+                if (window.PRS_Audio && window.PRS_Audio.playNotice) {
+                    try { window.PRS_Audio.playNotice(); } catch (e) {}
+                }
+            });
+        },
+
+        choice: function (message, choices, options) {
+            options = options || {};
+            var title = options.title || "Královská volba";
+            var icon = options.icon || "👑";
+
+            return new Promise(function (resolve) {
+                var root = ensureDOM();
+                root.dataset.type = 'choice';
+                currentResolver = resolve;
+
+                var titleEl = document.getElementById('kd-dialog-title');
+                var msgEl = document.getElementById('kd-dialog-message');
+                var iconEl = document.getElementById('kd-dialog-icon');
+                var inputWrap = document.getElementById('kd-dialog-input-wrap');
+                var actions = document.getElementById('kd-dialog-actions');
+
+                if (titleEl) titleEl.textContent = title;
+                if (iconEl) iconEl.textContent = icon;
+                if (inputWrap) inputWrap.style.display = 'none';
+
+                setDialogContent(msgEl, message);
+
+                var btnsHtml = [];
+                (choices || []).forEach(function (c, idx) {
+                    var cls = c.isPrimary ? 'kd-dialog-btn kd-dialog-btn-primary' : (c.isDanger ? 'kd-dialog-btn kd-dialog-btn-danger' : 'kd-dialog-btn kd-dialog-btn-secondary');
+                    var extraStyle = c.style || 'width:100%; text-align:left; justify-content:flex-start; padding:0.6rem 0.85rem; font-size:0.86rem; box-sizing:border-box; margin-bottom:0.25rem;';
+                    btnsHtml.push('<button type="button" class="' + cls + '" id="kd-dialog-choice-' + idx + '" style="' + extraStyle + '">' + c.label + (c.description ? ('<div style="font-size:0.75rem; opacity:0.82; font-weight:normal; margin-top:3px; line-height:1.25;">' + c.description + '</div>') : '') + '</button>');
+                });
+                btnsHtml.push('<button type="button" class="kd-dialog-btn kd-dialog-btn-secondary" id="kd-dialog-choice-cancel" style="margin-top:0.35rem; width:100%; justify-content:center;">Zrušit</button>');
+
+                if (actions) {
+                    actions.style.flexDirection = 'column';
+                    actions.style.gap = '0.4rem';
+                    actions.innerHTML = btnsHtml.join('\n');
+                }
+
+                (choices || []).forEach(function (c, idx) {
+                    var b = document.getElementById('kd-dialog-choice-' + idx);
+                    if (b) {
+                        b.onclick = function () {
+                            if (window.PRS_Audio && window.PRS_Audio.playDiceRoll) {
+                                try { window.PRS_Audio.playDiceRoll(); } catch (e) {}
+                            }
+                            if (actions) { actions.style.flexDirection = ''; actions.style.gap = ''; }
+                            dismiss(c.id);
+                        };
+                    }
+                });
+
+                var cancelBtn = document.getElementById('kd-dialog-choice-cancel');
+                if (cancelBtn) {
+                    cancelBtn.onclick = function () {
+                        if (actions) { actions.style.flexDirection = ''; actions.style.gap = ''; }
+                        dismiss(null);
+                    };
+                }
+
+                keyListener = function (e) {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        if (actions) { actions.style.flexDirection = ''; actions.style.gap = ''; }
+                        dismiss(null);
+                    }
+                };
+                document.addEventListener('keydown', keyListener);
+
+                root.style.display = 'flex';
+                root.offsetHeight;
+                root.classList.add('kd-dialog-active');
 
                 if (window.PRS_Audio && window.PRS_Audio.playNotice) {
                     try { window.PRS_Audio.playNotice(); } catch (e) {}

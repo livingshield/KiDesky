@@ -4175,16 +4175,9 @@ END";
                 isNewSession = (Convert.ToInt32(chkNew.ExecuteScalar()) == 0);
             }
 
-            if (isNewSession && (string.IsNullOrEmpty(hostUsername) || hostUsername.Equals("Guest", StringComparison.OrdinalIgnoreCase) || hostUsername.Equals("Host", StringComparison.OrdinalIgnoreCase)))
+            if (isNewSession && string.IsNullOrEmpty(hostUsername))
             {
-                context.Response.StatusCode = 403;
-                context.Response.Write(_json.Serialize(new
-                {
-                    ok = false,
-                    status = "forbidden",
-                    message = "Zalozit novou online mistnost mohou pouze prihlaseni rytiri. Jako Host se muzes pripojit ke stolu pres kod."
-                }));
-                return;
+                hostUsername = "Host";
             }
 
             // 2.2 Optimistický zámek proti race conditions v online multiplayeru
@@ -4307,6 +4300,23 @@ END";
 
 
 
+            }
+
+            // 2.3 Ochrana lidských křesel před nechtěným přepsáním hostitelským bot-stavem
+            bool allowBotOverride = body.ContainsKey("allowBotOverride") && Convert.ToBoolean(body["allowBotOverride"]);
+            if (!allowBotOverride && !string.IsNullOrEmpty(stateJson) && stateJson != "{}")
+            {
+                using (var chkPlayers = new SqlCommand("SELECT TOP 1 [StateJson] FROM [prs].[prs_GameSessions] WHERE [SessionGuid] = @chkGuid OR [RoomCode] = @chkRoom ORDER BY [UpdatedAt] DESC", conn))
+                {
+                    chkPlayers.Parameters.Add("@chkGuid", SqlDbType.NVarChar, 64).Value = sessionGuid;
+                    chkPlayers.Parameters.Add("@chkRoom", SqlDbType.NVarChar, 16).Value = roomCode;
+                    object exObj = chkPlayers.ExecuteScalar();
+                    if (exObj != null && exObj != DBNull.Value)
+                    {
+                        string existingJson = exObj.ToString();
+                        stateJson = MergeHumanPlayerClaims(existingJson, stateJson);
+                    }
+                }
             }
 
 
@@ -4479,6 +4489,49 @@ END";
 
 
 
+    }
+
+    private string MergeHumanPlayerClaims(string existingJson, string incomingJson)
+    {
+        try
+        {
+            var exState = _json.Deserialize<Dictionary<string, object>>(existingJson);
+            var inState = _json.Deserialize<Dictionary<string, object>>(incomingJson);
+            if (exState == null || inState == null) return incomingJson;
+            if (!exState.ContainsKey("players") || !inState.ContainsKey("players")) return incomingJson;
+
+            var exPlayers = exState["players"] as System.Collections.ArrayList;
+            var inPlayers = inState["players"] as System.Collections.ArrayList;
+            if (exPlayers == null || inPlayers == null) return incomingJson;
+
+            bool merged = false;
+            for (int i = 0; i < Math.Min(exPlayers.Count, inPlayers.Count); i++)
+            {
+                var ep = exPlayers[i] as Dictionary<string, object>;
+                var ip = inPlayers[i] as Dictionary<string, object>;
+                if (ep == null || ip == null) continue;
+
+                string epType = ep.ContainsKey("type") && ep["type"] != null ? ep["type"].ToString() : "";
+                string epClaimed = ep.ContainsKey("claimedBy") && ep["claimedBy"] != null ? ep["claimedBy"].ToString() : "";
+                string ipType = ip.ContainsKey("type") && ip["type"] != null ? ip["type"].ToString() : "";
+
+                // Pokud je v existující DB hráč označen jako živý (Human s claimedBy) a příchozí stav ho má jako bota
+                if (epType == "Human" && !string.IsNullOrEmpty(epClaimed) && ipType.StartsWith("Bot"))
+                {
+                    ip["type"] = "Human";
+                    ip["claimedBy"] = epClaimed;
+                    if (ep.ContainsKey("name") && ep["name"] != null) ip["name"] = ep["name"];
+                    if (ep.ContainsKey("pawnId") && ep["pawnId"] != null) ip["pawnId"] = ep["pawnId"];
+                    merged = true;
+                }
+            }
+            if (merged)
+            {
+                return _json.Serialize(inState);
+            }
+        }
+        catch { }
+        return incomingJson;
     }
 
 

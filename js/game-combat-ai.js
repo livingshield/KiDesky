@@ -238,81 +238,89 @@
         var hasFalcon = (bot.stats.falcons > 0 || effStats.falcons > 0);
 
         var rollResult = Math.floor(Math.random() * 6) + 1;
-
         var chosenMode = "standard";
 
         if (hasHorse) {
-
             var d1 = Math.floor(Math.random() * 6) + 1;
-
             var d2 = Math.floor(Math.random() * 6) + 1;
+            var jz = effStats.jizda || 0;
+            var canGallop = jz >= 2;
+            var canSprint = jz >= 4;
 
-            var sprint = d1 + d2;
+            // Varianta A: Sokol naviguje jen u taktických manévrů (d1 a d2). Plný cval a trysk jsou příliš rychlé.
+            var candidates = [];
 
-            var options = [sprint, d1, d2];
-
-            var bestRoll = d1;
-
-            var bestScore = -999;
-
-            for (var i = 0; i < options.length; i++) {
-
-                var rCandidate = options[i];
-
-                var tNode = this.getTargetNodeForRoll(state, bot, rCandidate);
-
-                var sc = this.scoreNodeForPlayer(state, bot, tNode);
-
-                if (sc > bestScore) {
-
-                    bestScore = sc;
-
-                    bestRoll = rCandidate;
-
-                }
-
+            // 1. Cval a Královský trysk (rychlost, ale bez sokola)
+            if (canSprint) {
+                candidates.push({ roll: d1 + d2 + 2, type: "sprint", usesFalcon: false });
+            }
+            if (canGallop) {
+                candidates.push({ roll: d1 + d2, type: "gallop", usesFalcon: false });
             }
 
-            rollResult = bestRoll;
+            // 2. Taktické manévry d1 a d2 (přesnost se sokolí navigací ±1)
+            var maneuverBases = [d1];
+            if (d2 !== d1) maneuverBases.push(d2);
 
+            for (var m = 0; m < maneuverBases.length; m++) {
+                var mBase = maneuverBases[m];
+                candidates.push({ roll: mBase, type: "maneuver", usesFalcon: false });
+                if (hasFalcon) {
+                    if (mBase > 1) {
+                        candidates.push({ roll: mBase - 1, type: "maneuver_falcon_minus", usesFalcon: true });
+                    }
+                    candidates.push({ roll: mBase + 1, type: "maneuver_falcon_plus", usesFalcon: true });
+                }
+            }
+
+            // Ohodnocení kandidátů botem
+            var bestCand = candidates[0];
+            var bestScore = -9999;
+            for (var c = 0; c < candidates.length; c++) {
+                var cand = candidates[c];
+                var tNode = this.getTargetNodeForRoll(state, bot, cand.roll);
+                var sc = this.scoreNodeForPlayer(state, bot, tNode);
+                if (sc > bestScore) {
+                    bestScore = sc;
+                    bestCand = cand;
+                }
+            }
+
+            rollResult = bestCand.roll;
             chosenMode = "horse";
 
-            this.addLog(state, "🏇 " + bot.badge + " " + bot.name + " využívá koňského cvalu (kostky " + d1 + " a " + d2 + ") a volí skok o " + rollResult + " polí!");
+            if (bestCand.usesFalcon) {
+                var targetNodeName = this.getTargetNodeForRoll(state, bot, rollResult).name;
+                this.addLog(state, "🏇🦅 " + bot.badge + " " + bot.name + " volí taktický manévr s koněm a sokolí navigací na **" + targetNodeName + "** (" + rollResult + " polí)!");
+            } else if (bestCand.type === "sprint") {
+                this.addLog(state, "🏇👑 " + bot.badge + " " + bot.name + " vyráží do Královského trysku o " + rollResult + " polí (" + d1 + "+" + d2 + "+2)!");
+            } else if (bestCand.type === "gallop") {
+                this.addLog(state, "🏇 " + bot.badge + " " + bot.name + " využívá plného koňského cvalu o " + rollResult + " polí (" + d1 + "+" + d2 + ")!");
+            } else {
+                this.addLog(state, "🏇 " + bot.badge + " " + bot.name + " volí taktický manévr s koněm o " + rollResult + " polí!");
+            }
 
+            return { roll: rollResult, mode: chosenMode };
         }
 
+        // Pěší se sokolem (pouze pokud bot nemá koně)
         if (hasFalcon) {
-
             var baseTarget = this.getTargetNodeForRoll(state, bot, rollResult);
-
             var baseScore = this.scoreNodeForPlayer(state, bot, baseTarget);
-
             var minusRoll = Math.max(1, rollResult - 1);
-
             var plusRoll = rollResult + 1;
-
             var minusTarget = this.getTargetNodeForRoll(state, bot, minusRoll);
-
             var plusTarget = this.getTargetNodeForRoll(state, bot, plusRoll);
-
             var minusScore = this.scoreNodeForPlayer(state, bot, minusTarget);
-
             var plusScore = this.scoreNodeForPlayer(state, bot, plusTarget);
 
             if (plusScore > baseScore + 4 && plusScore >= minusScore) {
-
                 this.addLog(state, "🦅 " + bot.badge + " " + bot.name + " díky sokolí navigaci upravuje přistání o +1 pole na **" + plusTarget.name + "**!");
-
                 rollResult = plusRoll;
-
             } else if (minusScore > baseScore + 4) {
-
                 this.addLog(state, "🦅 " + bot.badge + " " + bot.name + " díky sokolí navigaci upravuje přistání o -1 pole na **" + minusTarget.name + "**!");
-
                 rollResult = minusRoll;
-
             }
-
         }
 
         return { roll: rollResult, mode: chosenMode };
@@ -1480,7 +1488,11 @@
             state.pendingAction.summary = msg;
         }
 
-        this.recalculateBreedingAndVictory(state);
+        try {
+            this.recalculateBreedingAndVictory(state);
+        } catch (e) {
+            console.error("recalculateBreedingAndVictory error in buyout:", e);
+        }
 
         return {
             success: true,

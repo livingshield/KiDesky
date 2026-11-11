@@ -1054,13 +1054,15 @@
 /* 2x2 Mrizka parametru v Hero sekci */
 .lp-badges-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 0.45rem;
     margin-bottom: 1.15rem;
+    width: 100%;
+    max-width: 100%;
 }
 @media (max-width: 600px) {
     .lp-badges-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
@@ -1071,10 +1073,12 @@
     gap: 1.25rem;
     align-items: start;
     margin-bottom: 1.5rem;
+    width: 100%;
+    max-width: 100%;
 }
 @media (max-width: 860px) {
     .gamehall-dashboard-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 

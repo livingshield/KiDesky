@@ -1575,7 +1575,17 @@ window.KiDeskyMapGenerator = {
                                 var dx = bridges[eb].x - hit.x, dy = bridges[eb].y - hit.y;
                                 if (dx * dx + dy * dy < 625) { tooClose = true; break; }
                             }
-                            if (!tooClose) bridges.push({ x: hit.x, y: hit.y, angle: hit.angle, nodeAId: nA.id, nodeBId: nB.id });
+                            if (!tooClose) {
+                                var cType = "stone_arch";
+                                var hasTownOrCastle = (nA && (nA.type === "castle" || nA.type === "town" || nA.type === "start")) ||
+                                                      (nB && (nB.type === "castle" || nB.type === "town" || nB.type === "start"));
+                                var hasVillage = (nA && (nA.type === "village" || nA.type === "tavern" || nA.type === "trade" || nA.type === "craft")) ||
+                                                 (nB && (nB.type === "village" || nB.type === "tavern" || nB.type === "trade" || nB.type === "craft"));
+                                if (hasTownOrCastle) cType = "stone_arch";
+                                else if (hasVillage) cType = "wood_plank";
+                                else cType = (bridges.length % 2 === 0) ? "stone_ford" : "wood_plank";
+                                bridges.push({ x: hit.x, y: hit.y, angle: hit.angle, nodeAId: nA.id, nodeBId: nB.id, crossingType: cType });
+                            }
                             foundHit = true;
                             break;
                         }
@@ -2258,12 +2268,21 @@ window.KiDeskyMapGenerator = {
                                 if (dx * dx + dy * dy < 625) { tooClose = true; break; }
                             }
                             if (!tooClose) {
+                                var cType = "stone_arch";
+                                var hasTownOrCastle = (nA && (nA.type === "castle" || nA.type === "town" || nA.type === "start")) ||
+                                                      (nB && (nB.type === "castle" || nB.type === "town" || nB.type === "start"));
+                                var hasVillage = (nA && (nA.type === "village" || nA.type === "tavern" || nA.type === "trade" || nA.type === "craft")) ||
+                                                 (nB && (nB.type === "village" || nB.type === "tavern" || nB.type === "trade" || nB.type === "craft"));
+                                if (hasTownOrCastle) cType = "stone_arch";
+                                else if (hasVillage) cType = "wood_plank";
+                                else cType = (bridges.length % 2 === 0) ? "stone_ford" : "wood_plank";
                                 bridges.push({
                                     x: hit.x,
                                     y: hit.y,
                                     angle: hit.angle,
                                     nodeAId: nA.id,
-                                    nodeBId: nB.id
+                                    nodeBId: nB.id,
+                                    crossingType: cType
                                 });
                             }
                             foundHit = true;
@@ -2546,34 +2565,75 @@ window.PRS_BoardBuilder = {
         var nodes = board.nodes;
         var bridges = [];
 
-        // Přibližný polygon pro hlavní řeku
-        var riverPoly = [
-            { x: 1225, y: 15 }, { x: 1205, y: 60 }, { x: 1177, y: 127 },
-            { x: 1160, y: 170 }, { x: 1130, y: 220 }, { x: 1107, y: 281 },
-            { x: 1075, y: 355 }, { x: 1025, y: 415 }, { x: 965, y: 470 },
-            { x: 900, y: 535 }, { x: 835, y: 605 }, { x: 779, y: 676 },
-            { x: 752, y: 710 }, { x: 734, y: 756 }, { x: 720, y: 802 },
-            { x: 711, y: 832 }, { x: 703, y: 874 }, { x: 695, y: 915 }
-        ];
+        var sRPS = (this.sampleRiverPathSimple || (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.sampleRiverPathSimple) || (window.PRS_BoardBuilder && window.PRS_BoardBuilder.sampleRiverPathSimple));
+        var riverPolys = [];
+
+        for (var ri = 0; ri < board.rivers.length; ri++) {
+            var rObj = board.rivers[ri];
+            if (rObj && rObj.path && sRPS) {
+                var smp = sRPS(rObj.path);
+                if (smp && smp.length > 1) {
+                    riverPolys.push(smp);
+                }
+            }
+        }
+
+        // Fallback pro klasickou desku, pokud by vzorkování selhalo
+        if (riverPolys.length === 0) {
+            riverPolys.push([
+                { x: 1225, y: 15 }, { x: 1205, y: 60 }, { x: 1177, y: 127 },
+                { x: 1160, y: 170 }, { x: 1130, y: 220 }, { x: 1107, y: 281 },
+                { x: 1075, y: 355 }, { x: 1025, y: 415 }, { x: 965, y: 470 },
+                { x: 900, y: 535 }, { x: 835, y: 605 }, { x: 779, y: 676 },
+                { x: 752, y: 710 }, { x: 734, y: 756 }, { x: 720, y: 802 },
+                { x: 711, y: 832 }, { x: 703, y: 874 }, { x: 695, y: 915 }
+            ]);
+        }
 
         for (var n = 0; n < nodes.length; n++) {
             var nA = nodes[n];
             var tgts = nA.next || [];
+            if (nA.branchHigh !== null && nA.branchHigh !== undefined && tgts.indexOf(nA.branchHigh) === -1) {
+                tgts = tgts.concat([nA.branchHigh]);
+            }
             for (var t = 0; t < tgts.length; t++) {
                 var nB = nodes[tgts[t]];
                 if (!nB) continue;
-                for (var r = 0; r < riverPoly.length - 1; r++) {
-                    var hit = window.KiDeskyMapGenerator.lineIntersection(nA, nB, riverPoly[r], riverPoly[r + 1]);
-                    if (hit) {
-                        bridges.push({
-                            x: hit.x,
-                            y: hit.y,
-                            angle: hit.angle,
-                            nodeAId: nA.id,
-                            nodeBId: nB.id
-                        });
-                        break;
+                for (var polyI = 0; polyI < riverPolys.length; polyI++) {
+                    var riverPoly = riverPolys[polyI];
+                    var hitFound = false;
+                    for (var r = 0; r < riverPoly.length - 1; r++) {
+                        var hit = window.KiDeskyMapGenerator.lineIntersection(nA, nB, riverPoly[r], riverPoly[r + 1]);
+                        if (hit) {
+                            var tooClose = false;
+                            for (var eb = 0; eb < bridges.length; eb++) {
+                                var bdx = bridges[eb].x - hit.x, bdy = bridges[eb].y - hit.y;
+                                if (bdx * bdx + bdy * bdy < 625) { tooClose = true; break; }
+                            }
+                            if (!tooClose) {
+                                var cType = "stone_arch";
+                                var hasTownOrCastle = (nA && (nA.type === "castle" || nA.type === "town" || nA.type === "start")) ||
+                                                      (nB && (nB.type === "castle" || nB.type === "town" || nB.type === "start"));
+                                var hasVillage = (nA && (nA.type === "village" || nA.type === "tavern" || nA.type === "trade" || nA.type === "craft")) ||
+                                                 (nB && (nB.type === "village" || nB.type === "tavern" || nB.type === "trade" || nB.type === "craft"));
+                                if (hasTownOrCastle) cType = "stone_arch";
+                                else if (hasVillage) cType = "wood_plank";
+                                else cType = (bridges.length % 2 === 0) ? "stone_ford" : "wood_plank";
+
+                                bridges.push({
+                                    x: hit.x,
+                                    y: hit.y,
+                                    angle: hit.angle,
+                                    nodeAId: nA.id,
+                                    nodeBId: nB.id,
+                                    crossingType: cType
+                                });
+                            }
+                            hitFound = true;
+                            break;
+                        }
                     }
+                    if (hitFound) break;
                 }
             }
         }

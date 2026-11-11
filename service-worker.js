@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kidesky-cache-v1.3.0';
+const CACHE_NAME = 'kidesky-cache-v1.5.2';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -20,6 +20,7 @@ const CORE_ASSETS = [
   './js/app-admin.js',
   './js/app-online.js',
   './js/app-saves.js',
+  './js/app-map-editor.js',
   './js/app-dialog.js',
   './js/app-catalog.js',
   './js/app-musicwidget.js',
@@ -29,10 +30,14 @@ const CORE_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Best-effort pre-cache core assets
-      return cache.addAll(CORE_ASSETS).catch((err) => {
-        console.warn('[SW] Core assets pre-caching partial warning:', err);
-      });
+      // Best-effort pre-cache all core assets resiliently
+      return Promise.allSettled(
+        CORE_ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn('[SW] Core asset pre-caching partial warning for:', url, err);
+          })
+        )
+      );
     })
   );
   self.skipWaiting();

@@ -86,6 +86,8 @@
 
         if (!modal || !this.state) return;
 
+        if (this.clearActiveGameAutosave) this.clearActiveGameAutosave();
+
         if (modal.style.display === "flex") return; // Zabraňuje problikávání a opakovanému překreslování
 
         if (window.PRS_Audio) window.PRS_Audio.playFanfare();
@@ -3004,7 +3006,22 @@
             }
         }
 
-        var res = window.PRS_GameEngine.executeAnimalBuyout(this.state, nodeId);
+        // Preventivně vyčistit stav předkupního práva v pendingAction
+        if (this.state && this.state.pendingAction) {
+            this.state.pendingAction.canBuyoutAnimalSet = false;
+            this.state.pendingAction.buyoutCandidates = [];
+            delete this.state.pendingAction.canBuyoutAnimalSet;
+            delete this.state.pendingAction.buyoutCandidates;
+            delete this.state.pendingAction.buyoutSuccess;
+        }
+
+        var res = null;
+        try {
+            res = window.PRS_GameEngine.executeAnimalBuyout(this.state, nodeId);
+        } catch (err) {
+            console.error("Chyba při výkupu zvířete executeAnimalBuyout:", err);
+        }
+
         if (res) {
             if (window.PRS_Audio) window.PRS_Audio.playBuy();
             this.inspectedPlayerIndex = this.state.currentPlayerIndex;
@@ -3041,7 +3058,7 @@
                     self.isActionProcessing = false;
                 });
             } else {
-                this.isActionProcessing = false;
+                setTimeout(function () { self.isActionProcessing = false; }, 350);
             }
         } else {
             this.isActionProcessing = false;
@@ -3181,32 +3198,36 @@
     openFestivalChallengeModal: function () {
         var self = this;
         var modal = this.getGenericModal();
-        if (!modal) return;
+        if (!modal || !self.state) return;
         var p = self.state.players[self.state.currentPlayerIndex];
+        if (!p) return;
         var stake = (self.state.pendingAction && self.state.pendingAction.festivalChallengeStake) || 750;
+        var canAfford = (p.gold >= stake);
         var rivals = [];
         for (var i = 0; i < self.state.players.length; i++) {
             var pl = self.state.players[i];
             if (pl.index !== p.index && !pl.isEliminated) rivals.push(pl);
         }
-        var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #ec4899; border-radius:14px; text-align:center;">' +
+        var html = '<div class="modal-box tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #ec4899; border-radius:14px; text-align:center; box-shadow:0 12px 35px rgba(0,0,0,0.85);">' +
             '<div style="font-size:2rem; margin-bottom:0.25rem;">🏆 🤺</div>' +
             '<h3 style="font-family:Cinzel,serif; color:#fbcfe8; margin:0 0 0.5rem 0;">Osobní výzva na Slavnosti</h3>' +
-            '<p style="font-size:0.84rem; color:#fce7f3; margin-bottom:1rem;">' +
-            'Zvol rivala a disciplínu (hod 1d6 + hodnota ctnosti). Vítěz získá <strong>' + stake + ' zl.</strong> a <strong>+0,5 💖</strong> slávy!' +
+            '<p style="font-size:0.84rem; color:#fce7f3; margin-bottom:0.85rem;">' +
+            'Zvol rivala a disciplínu (hod 1d6 + hodnota ctnosti). Vítěz získá <strong>' + stake.toLocaleString("cs-CZ") + ' zl.</strong> a <strong>+0,5 💖</strong> slávy!' +
             '</p>' +
+            (!canAfford ? '<div style="background:rgba(239,68,68,0.2); border:1px solid #f87171; border-radius:8px; padding:0.45rem; font-size:0.8rem; color:#fca5a5; margin-bottom:0.75rem;">⚠️ Nemáš dostatek zlaťáků na sázku (' + (p.gold || 0) + ' / ' + stake + ' zl.).</div>' : '') +
             '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
         for (var r = 0; r < rivals.length; r++) {
             var riv = rivals[r];
             var rBoj = (riv.skills && riv.skills.boj !== undefined) ? riv.skills.boj : 1;
             var rJizda = (riv.skills && riv.skills.jizda !== undefined) ? riv.skills.jizda : 1;
             var rTanec = (riv.skills && riv.skills.tanec !== undefined) ? riv.skills.tanec : 1;
+            var btnDis = !canAfford ? 'disabled style="flex:1; font-size:0.78rem; padding:0.35rem; opacity:0.5;"' : 'style="flex:1; font-size:0.78rem; padding:0.35rem;"';
             html += '<div style="background:rgba(0,0,0,0.35); border:1px solid rgba(236,72,153,0.3); border-radius:8px; padding:0.55rem; text-align:left;">' +
-                '<div style="font-weight:700; color:#fbcfe8; margin-bottom:4px;">' + riv.badge + ' ' + self.escapeHtml(riv.name) + ' (' + riv.totalHearts + ' 💖)</div>' +
+                '<div style="font-weight:700; color:#fbcfe8; margin-bottom:4px;">' + riv.badge + ' ' + (self.escapeHtml ? self.escapeHtml(riv.name) : riv.name) + ' (' + riv.totalHearts + ' 💖)</div>' +
                 '<div style="display:flex; gap:4px;">' +
-                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'boj\')">⚔️ Boj (' + rBoj + ')</button>' +
-                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'jizda\')">🏇 Jízda (' + rJizda + ')</button>' +
-                '  <button class="btn-secondary" style="flex:1; font-size:0.78rem; padding:0.35rem;" onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'tanec\')">💃 Tanec (' + rTanec + ')</button>' +
+                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'boj\')">⚔️ Boj (' + rBoj + ')</button>' +
+                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'jizda\')">🏇 Jízda (' + rJizda + ')</button>' +
+                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'tanec\')">💃 Tanec (' + rTanec + ')</button>' +
                 '</div>' +
                 '</div>';
         }
@@ -3214,27 +3235,24 @@
             html += '<p style="color:#fca5a5; font-size:0.85rem;">V království již nezbyl žádný aktivní soupeř k výzvě.</p>';
         }
         html += '</div>' +
-            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">Zrušit</button>' +
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m){ m.style.display=\'none\'; if(window.PRS_App && window.PRS_App.updateBodyModalClass) window.PRS_App.updateBodyModalClass(); }">Zrušit</button>' +
             '</div>';
         modal.innerHTML = html;
         modal.style.display = "flex";
+        if (this.updateBodyModalClass) this.updateBodyModalClass();
     },
 
     confirmFestivalChallenge: function (rivalIdx, discipline) {
         var modal = document.getElementById("generic-modal");
         if (modal) modal.style.display = "none";
+        if (this.updateBodyModalClass) this.updateBodyModalClass();
         var res = window.PRS_GameEngine.executeFestivalChallenge(this.state, rivalIdx, discipline);
 
         if (res) {
-
             this.renderGameScreen();
-
             this.saveSessionAuto();
-
             this.showDuelResultModal(res, "festival");
-
         }
-
     },
 
     showDuelResultModal: function (res, category) {

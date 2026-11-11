@@ -2,24 +2,31 @@
   "name": "KiDesky: Princeznino srdce",
   "short_name": "KiDesky",
   "description": "Autorská strategická a dobrodružná desková hra království KiDesky.",
-  "start_url": "./index.html",
-  "scope": "./",
+  "id": "/apps/KiDesky/",
+  "start_url": "/apps/KiDesky/",
+  "scope": "/apps/KiDesky/",
   "display": "standalone",
   "background_color": "#0f0b07",
   "theme_color": "#181008",
   "orientation": "any",
   "icons": [
     {
-      "src": "assets/icons/icon-192.png",
+      "src": "/apps/KiDesky/assets/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "assets/icons/icon-512.png",
+      "src": "/apps/KiDesky/assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/apps/KiDesky/assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "categories": ["games", "entertainment"]

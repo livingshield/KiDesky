@@ -732,83 +732,65 @@
 
         .lp-hero-showcase {
             display: grid;
-            grid-template-columns: 1.25fr 0.95fr;
+            grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
             gap: 1.5rem;
             background:
                 linear-gradient(135deg, rgba(14, 10, 7, 0.86) 0%, rgba(22, 16, 11, 0.78) 55%, rgba(14, 10, 7, 0.90) 100%),
                 var(--theme-bg-image) center/cover no-repeat;
             border: 2px solid var(--gold);
-
             border-radius: 18px;
-
             padding: 1.65rem;
-
             margin-bottom: 1.5rem;
-
             box-shadow: 0 16px 42px rgba(0, 0, 0, 0.65), inset 0 0 32px rgba(212, 175, 55, 0.12);
-
             position: relative;
-
             overflow: hidden;
-
             align-items: start;
+            box-sizing: border-box;
+            max-width: 100%;
+        }
 
+        .lp-hero-showcase > * {
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         @media (max-width: 1080px) {
-
             .lp-hero-showcase {
-
-                grid-template-columns: 1fr;
-
+                grid-template-columns: minmax(0, 1fr);
             }
-
         }
 
         .lp-kicker-badge {
-
             display: inline-flex;
-
             align-items: center;
-
             gap: 0.45rem;
-
             background: rgba(212, 175, 55, 0.16);
-
             border: 1px solid var(--gold);
-
             color: var(--gold-light);
-
             font-size: 0.76rem;
-
             font-weight: 700;
-
             text-transform: uppercase;
-
             letter-spacing: 0.9px;
-
             padding: 0.28rem 0.75rem;
-
             border-radius: 999px;
-
             margin-bottom: 0.65rem;
-
+            max-width: 100%;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.35;
+            box-sizing: border-box;
         }
 
         .lp-hero-title {
-
             font-family: 'Cinzel', serif;
-
             font-size: clamp(1.75rem, 2.8vw, 2.55rem);
-
             color: var(--gold-light);
-
             line-height: 1.18;
-
             margin-bottom: 0.55rem;
-
             text-shadow: 0 3px 12px rgba(0, 0, 0, 0.85);
-
+            word-break: break-word;
+            max-width: 100%;
         }
 
         .lp-hero-lead {
@@ -4455,4 +4437,10 @@
         min-height: 220px !important;
         max-height: 280px !important;
     }
+}
+
+/* Skrytí patičky receptu při aktivním WYSIWYG editoru */
+#ms-editor-view:not([style*="display: none"]) ~ #ms-modal-footer,
+.modal-box:has(#ms-editor-view:not([style*="display: none"])) #ms-modal-footer {
+    display: none !important;
 }

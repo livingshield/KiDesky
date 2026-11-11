@@ -1070,19 +1070,123 @@
         return false;
     },
 
+    // ========================================================================
+    // ŽIVLOVÉ PALETY ŘEKY A VODNÍ SÍTĚ (VÝRAZNÉ, KONTRASTNÍ & SYTÉ)
+    // ========================================================================
+    RIVER_THEMES: {
+        light: {
+            waterGradient: [
+                { offset: "0%", color: "#7dd3fc" },
+                { offset: "22%", color: "#38bdf8" },
+                { offset: "60%", color: "#0284c7" },
+                { offset: "100%", color: "#0369a1" }
+            ],
+            deepWaterColor: "rgba(2, 60, 115, 0.45)",
+            meadowColor: "rgba(132, 204, 22, 0.30)",
+            bankColor: "#dfbe86",
+            bankOpacity: 0.95,
+            bankInkColor: "rgba(45, 26, 14, 0.92)",
+            streamColor1: "rgba(255, 255, 255, 0.85)",
+            streamColor2: "rgba(186, 230, 253, 0.70)",
+            springColor: "#bae6fd",
+            bridgeStoneBody: "#78716c",
+            bridgeStoneRoad: "#e7e5e4",
+            bridgeArch: "#44403c"
+        },
+        fire: {
+            waterGradient: [
+                { offset: "0%", color: "#fef08a" },
+                { offset: "20%", color: "#f97316" },
+                { offset: "55%", color: "#ea580c" },
+                { offset: "100%", color: "#7f1d1d" }
+            ],
+            deepWaterColor: "rgba(254, 240, 138, 0.42)",
+            meadowColor: "rgba(180, 50, 10, 0.35)",
+            bankColor: "#292524",
+            bankOpacity: 0.95,
+            bankInkColor: "rgba(249, 115, 22, 0.95)",
+            streamColor1: "rgba(254, 240, 138, 0.90)",
+            streamColor2: "rgba(251, 146, 60, 0.75)",
+            springColor: "#fef08a",
+            bridgeStoneBody: "#1c1917",
+            bridgeStoneRoad: "#44403c",
+            bridgeArch: "#0c0a09"
+        },
+        water: {
+            waterGradient: [
+                { offset: "0%", color: "#67e8f9" },
+                { offset: "25%", color: "#06b6d4" },
+                { offset: "65%", color: "#0284c7" },
+                { offset: "100%", color: "#1e3a8a" }
+            ],
+            deepWaterColor: "rgba(6, 40, 110, 0.48)",
+            meadowColor: "rgba(20, 140, 150, 0.35)",
+            bankColor: "#93c5fd",
+            bankOpacity: 0.85,
+            bankInkColor: "rgba(12, 74, 110, 0.92)",
+            streamColor1: "rgba(255, 255, 255, 0.88)",
+            streamColor2: "rgba(186, 230, 253, 0.65)",
+            springColor: "#a5f3fc",
+            bridgeStoneBody: "#64748b",
+            bridgeStoneRoad: "#cbd5e1",
+            bridgeArch: "#334155"
+        },
+        earth: {
+            waterGradient: [
+                { offset: "0%", color: "#a7f3d0" },
+                { offset: "28%", color: "#34d399" },
+                { offset: "65%", color: "#059669" },
+                { offset: "100%", color: "#14532d" }
+            ],
+            deepWaterColor: "rgba(6, 45, 18, 0.45)",
+            meadowColor: "rgba(45, 110, 30, 0.38)",
+            bankColor: "#854d0e",
+            bankOpacity: 0.90,
+            bankInkColor: "rgba(35, 20, 10, 0.92)",
+            streamColor1: "rgba(240, 253, 244, 0.65)",
+            streamColor2: "rgba(187, 247, 208, 0.45)",
+            springColor: "#6ee7b7",
+            bridgeStoneBody: "#57534e",
+            bridgeStoneRoad: "#a8a29e",
+            bridgeArch: "#292524"
+        },
+        air: {
+            waterGradient: [
+                { offset: "0%", color: "#e0e7ff" },
+                { offset: "30%", color: "#c7d2fe" },
+                { offset: "65%", color: "#818cf8" },
+                { offset: "100%", color: "#4338ca" }
+            ],
+            deepWaterColor: "rgba(35, 25, 95, 0.40)",
+            meadowColor: "rgba(99, 102, 241, 0.28)",
+            bankColor: "#c7d2fe",
+            bankOpacity: 0.85,
+            bankInkColor: "rgba(49, 46, 129, 0.88)",
+            streamColor1: "rgba(255, 255, 255, 0.90)",
+            streamColor2: "rgba(224, 231, 255, 0.60)",
+            springColor: "#e0e7ff",
+            bridgeStoneBody: "#94a3b8",
+            bridgeStoneRoad: "#e2e8f0",
+            bridgeArch: "#64748b"
+        }
+    },
+
     renderBoardRiversHTML: function (board) {
         if (!board || !board.rivers || board.rivers.length === 0) return "";
         var out = [];
         var nodes = board.nodes || [];
         var bridges = board.bridges || [];
+        var activeTheme = (document.documentElement && document.documentElement.getAttribute("data-theme")) ||
+                          (typeof localStorage !== "undefined" && localStorage.getItem("kidesky_element_theme")) || "light";
+        var rTheme = this.RIVER_THEMES[activeTheme] || this.RIVER_THEMES.light;
         out.push('  <g id="prs-rivers-layer">');
 
         // 1. Vzorkování všech řek v království
         var sampledRivers = [];
         for (var r = 0; r < board.rivers.length; r++) {
             var riv = board.rivers[r];
-            var rw = riv.width || 14;
             var isTrib = Boolean(riv.id === "tributary_river" || riv.isTributary || (board.rivers.length > 1 && r > 0 && riv.id !== "main_river" && riv.id !== "river_classic"));
+            var rw = (riv.width && riv.width >= 28) ? riv.width : (isTrib ? 24 : 38);
             var smp = this.sampleRiverPath(riv.path, 6.5);
             if (!smp) continue;
 
@@ -1095,12 +1199,12 @@
             var halfW = [];
             for (var i = 0; i < n; i++) {
                 var t = pts[i].t;
-                var prof = 0.50 + 0.95 * Math.pow(t, 0.85) + 0.36 * Math.pow(Math.max(0, (t - 0.8) / 0.2), 2);
+                var prof = 0.56 + 0.82 * Math.pow(t, 0.85) + 0.32 * Math.pow(Math.max(0, (t - 0.75) / 0.25), 2);
                 if (isTrib && t > 0.75) {
-                    prof *= (1 + 0.45 * ((t - 0.75) / 0.25)); // plynulé trychtýřové rozšíření ústí přítoku
+                    prof *= (1 + 0.40 * ((t - 0.75) / 0.25)); // plynulé trychtýřové rozšíření ústí přítoku
                 }
-                var w = rw * prof * (1 + 0.15 * noise(pts[i].s, p1, p2));
-                halfW.push(Math.max(1.8, w / 2));
+                var w = rw * prof * (1 + 0.12 * noise(pts[i].s, p1, p2));
+                halfW.push(Math.max(3.5, w / 2));
             }
 
             sampledRivers.push({
@@ -1163,10 +1267,10 @@
         // Předpočítání břehů pro všechny řeky
         for (var sr = 0; sr < sampledRivers.length; sr++) {
             var s = sampledRivers[sr];
-            s.sides1 = getSides(s, 15, 1, 1.4);   // Vlhká louka
-            s.sides2 = getSides(s, 5.0, 1, 1.7);  // Písčitý břeh
+            s.sides1 = getSides(s, 22, 1, 1.4);   // Sytá vlhká louka podél toku
+            s.sides2 = getSides(s, 8.5, 1, 1.7);  // Písčito-štěrkový břeh
             s.sides3 = getSides(s, 0, 1, 0.6);    // Hladina vody
-            s.sides4 = getSides(s, 0, 0.44, 0);   // Hluboký střed toku
+            s.sides4 = getSides(s, 0, 0.52, 0);   // Hluboký střed toku
         }
 
         // 2. Detekce soutoku a vytvoření sjednocené sítě
@@ -1209,13 +1313,13 @@
             }
         }
 
-        // 3. Společný master gradient pro vodní hladinu
+        // 3. Společný master gradient pro vodní hladinu podle živlu
         out.push('    <defs>');
         out.push('      <linearGradient id="prsMasterRiverWater" gradientUnits="userSpaceOnUse" x1="1260" y1="20" x2="680" y2="880">');
-        out.push('        <stop offset="0%" stop-color="#80b8b6"/>');
-        out.push('        <stop offset="35%" stop-color="#5a98ab"/>');
-        out.push('        <stop offset="70%" stop-color="#417c9d"/>');
-        out.push('        <stop offset="100%" stop-color="#2d6486"/>');
+        for (var gi = 0; gi < rTheme.waterGradient.length; gi++) {
+            var stp = rTheme.waterGradient[gi];
+            out.push('        <stop offset="' + stp.offset + '" stop-color="' + stp.color + '"/>');
+        }
         out.push('      </linearGradient>');
         out.push('    </defs>');
 
@@ -1293,27 +1397,27 @@
 
         var activeConf = (confluences.length > 0) ? confluences[0] : null;
 
-        // PASS 1: Vlhká louka kolem toku (měkký zelenkavý rozptyl)
+        // PASS 1: Vlhká louka kolem toku (měkký rozptyl podle živlu)
         if (activeConf) {
             var net1 = buildUnifiedNetwork(activeConf, "sides1");
-            out.push('    <path d="' + this.riverClosedPolygonPath(net1.poly) + '" fill="rgba(76,104,48,0.26)" filter="url(#riverBankBlur)"/>');
+            out.push('    <path d="' + this.riverClosedPolygonPath(net1.poly) + '" fill="' + rTheme.meadowColor + '" filter="url(#riverBankBlur)"/>');
         } else {
             for (var i1 = 0; i1 < sampledRivers.length; i1++) {
-                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i1].sides1.L, sampledRivers[i1].sides1.R) + '" fill="rgba(76,104,48,0.26)" filter="url(#riverBankBlur)"/>');
+                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i1].sides1.L, sampledRivers[i1].sides1.R) + '" fill="' + rTheme.meadowColor + '" filter="url(#riverBankBlur)"/>');
             }
         }
 
-        // PASS 2: Písčito-bahnitý břeh (jednolitý, pod vodou)
+        // PASS 2: Písčito-bahnitý / čedičový břeh (pod vodou)
         if (activeConf) {
             var net2 = buildUnifiedNetwork(activeConf, "sides2");
-            out.push('    <path d="' + this.riverClosedPolygonPath(net2.poly) + '" fill="#b9a073" opacity="0.78" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverClosedPolygonPath(net2.poly) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '" filter="url(#riverWobble)"/>');
         } else {
             for (var i2 = 0; i2 < sampledRivers.length; i2++) {
-                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i2].sides2.L, sampledRivers[i2].sides2.R) + '" fill="#b9a073" opacity="0.78" filter="url(#riverWobble)"/>');
+                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i2].sides2.L, sampledRivers[i2].sides2.R) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '" filter="url(#riverWobble)"/>');
             }
         }
 
-        // PASS 3: Hladina vody (jeden souvislý polygon se společným gradientem)
+        // PASS 3: Hladina vody (jeden souvislý polygon se živlovým gradientem)
         var net3 = activeConf ? buildUnifiedNetwork(activeConf, "sides3") : null;
         if (net3) {
             out.push('    <path d="' + this.riverClosedPolygonPath(net3.poly) + '" fill="url(#prsMasterRiverWater)" stroke="none" filter="url(#riverWobble)"/>');
@@ -1326,23 +1430,26 @@
 
         // PASS 4: Hlubší střed toku (hloubkové stínování koryta)
         for (var i4 = 0; i4 < sampledRivers.length; i4++) {
-            out.push('    <path d="' + this.riverPolyPath(sampledRivers[i4].sides4.L, sampledRivers[i4].sides4.R) + '" fill="rgba(14,44,70,0.28)" filter="url(#riverSoft)"/>');
+            out.push('    <path d="' + this.riverPolyPath(sampledRivers[i4].sides4.L, sampledRivers[i4].sides4.R) + '" fill="' + rTheme.deepWaterColor + '" filter="url(#riverSoft)"/>');
         }
+
+        // PASS 4.5: Zelené ostrůvky v toku řeky
+        out.push(this.renderRiverIslandsHTML(sampledRivers, board, rTheme, activeTheme));
 
         // PASS 5: Inkoustové břehy řeky s přirozeným soutokovým rozvětvením
         if (net3) {
-            out.push('    <path d="' + this.riverBankPath(net3.bankOpp) + '" fill="none" stroke="rgba(48,34,22,0.78)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
-            out.push('    <path d="' + this.riverBankPath(net3.bankUp) + '" fill="none" stroke="rgba(48,34,22,0.78)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
-            out.push('    <path d="' + this.riverBankPath(net3.bankDown) + '" fill="none" stroke="rgba(48,34,22,0.78)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverBankPath(net3.bankOpp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverBankPath(net3.bankUp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverBankPath(net3.bankDown) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
         } else {
             for (var i5 = 0; i5 < sampledRivers.length; i5++) {
                 var rivObj = sampledRivers[i5];
-                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.L) + '" fill="none" stroke="rgba(48,34,22,0.78)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
-                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.R) + '" fill="none" stroke="rgba(48,34,22,0.78)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.L) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.R) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
             }
         }
 
-        // PASS 6: Organický proud vody (proudnice / meandry – ŽÁDNÁ autíčka!), pramen, pobřežní vegetace
+        // PASS 6: Organický proud vody (proudnice / meandry), pramen, pobřežní vegetace
         function hashVal(seed, k) { var v = Math.sin((seed + k) * 91.345) * 23421.631; return v - Math.floor(v); }
 
         for (var i6 = 0; i6 < sampledRivers.length; i6++) {
@@ -1368,19 +1475,20 @@
             }
 
             if (streamPts1.length > 3) {
-                out.push('    <path d="' + this.riverBankPath(streamPts1) + '" fill="none" stroke="rgba(240,250,255,0.38)" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="38,24,68,32" pointer-events="none"/>');
+                out.push('    <path d="' + this.riverBankPath(streamPts1) + '" fill="none" stroke="' + rTheme.streamColor1 + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="38,24,68,32" pointer-events="none"/>');
             }
             if (streamPts2.length > 3) {
-                out.push('    <path d="' + this.riverBankPath(streamPts2) + '" fill="none" stroke="rgba(215,245,255,0.26)" stroke-width="0.9" stroke-linecap="round" stroke-dasharray="24,35,48,28" pointer-events="none"/>');
+                out.push('    <path d="' + this.riverBankPath(streamPts2) + '" fill="none" stroke="' + rTheme.streamColor2 + '" stroke-width="0.9" stroke-linecap="round" stroke-dasharray="24,35,48,28" pointer-events="none"/>');
             }
 
             // Horský pramen (pouze pokud začíná uvnitř mapy a není za rámem)
             if (first6.y > 40 && first6.x > 40 && first6.x < 1360) {
-                out.push('    <ellipse cx="' + first6.x.toFixed(1) + '" cy="' + (first6.y + 2).toFixed(1) + '" rx="' + (rw6 * 0.72).toFixed(1) + '" ry="' + (rw6 * 0.50).toFixed(1) + '" fill="#8fc3bd" stroke="rgba(48,34,22,0.72)" stroke-width="1" filter="url(#riverWobble)"/>');
+                out.push('    <ellipse cx="' + first6.x.toFixed(1) + '" cy="' + (first6.y + 2).toFixed(1) + '" rx="' + (rw6 * 0.72).toFixed(1) + '" ry="' + (rw6 * 0.50).toFixed(1) + '" fill="' + rTheme.springColor + '" stroke="' + rTheme.bankInkColor + '" stroke-width="1" filter="url(#riverWobble)"/>');
                 var spr = [[-1.0, -0.2, 3.6], [0.9, -0.7, 3.0], [0.2, 0.9, 2.6], [-0.5, 0.8, 2.2]];
                 for (var sp = 0; sp < spr.length; sp++) {
                     var sx = first6.x + spr[sp][0] * rw6 * 0.75, sy = first6.y + 2 + spr[sp][1] * rw6 * 0.5;
-                    out.push('    <ellipse cx="' + sx.toFixed(1) + '" cy="' + sy.toFixed(1) + '" rx="' + spr[sp][2] + '" ry="' + (spr[sp][2] * 0.72).toFixed(1) + '" fill="#8d877d" stroke="rgba(48,34,22,0.75)" stroke-width="0.8"/>');
+                    var sprCol = (activeTheme === "fire") ? "#44403c" : "#8d877d";
+                    out.push('    <ellipse cx="' + sx.toFixed(1) + '" cy="' + sy.toFixed(1) + '" rx="' + spr[sp][2] + '" ry="' + (spr[sp][2] * 0.72).toFixed(1) + '" fill="' + sprCol + '" stroke="' + rTheme.bankInkColor + '" stroke-width="0.8"/>');
                 }
             }
 
@@ -1401,10 +1509,130 @@
                     if (ddx * ddx + ddy * ddy < 34 * 34) { clash = true; break; }
                 }
                 if (clash) continue;
-                out.push(this.riverVegetationSVG(vx, vy, hashVal(rData.seedBase, vIdx + 300)));
+                out.push(this.riverVegetationSVG(vx, vy, hashVal(rData.seedBase, vIdx + 300), activeTheme));
             }
         }
         out.push('  </g>');
+        return out.join("\n");
+    },
+
+    renderRiverIslandsHTML: function (sampledRivers, board, rTheme, activeTheme) {
+        if (!sampledRivers || sampledRivers.length === 0) return "";
+        var out = [];
+        var nodes = (board && board.nodes) || [];
+        var bridges = (board && board.bridges) || [];
+        var ink = rTheme.bankInkColor || "rgba(45,26,14,0.92)";
+
+        for (var sr = 0; sr < sampledRivers.length; sr++) {
+            var rivData = sampledRivers[sr];
+            if (rivData.isTributary || rivData.len < 260) continue;
+
+            // Robustní skenování celé trasy řeky pro nalezení nejvolnějších meandrů
+            var candidates = [];
+            var step = Math.max(3, Math.floor(rivData.n * 0.035));
+            var startIdx = Math.floor(rivData.n * 0.16);
+            var endIdx = Math.floor(rivData.n * 0.84);
+
+            for (var idx = startIdx; idx <= endIdx; idx += step) {
+                var pt = rivData.pts[idx];
+                var hw = rivData.halfW[idx];
+                if (hw < 10) continue;
+
+                // Minimální vzdálenost k herním uzlům (poloměr uzlu je 22px, takže 36px dává 14px čistého odstupu)
+                var minNodeDist = 9999;
+                for (var q = 0; q < nodes.length; q++) {
+                    var ndx = nodes[q].x - pt.x, ndy = nodes[q].y - pt.y;
+                    var d = Math.sqrt(ndx * ndx + ndy * ndy);
+                    if (d < minNodeDist) minNodeDist = d;
+                }
+                if (minNodeDist < 36) continue;
+
+                // Minimální vzdálenost k mostům (most má délku cca 50px, odstup 40px je bezpečný)
+                var minBridgeDist = 9999;
+                for (var b = 0; b < bridges.length; b++) {
+                    var bdx = bridges[b].x - pt.x, bdy = bridges[b].y - pt.y;
+                    var bd = Math.sqrt(bdx * bdx + bdy * bdy);
+                    if (bd < minBridgeDist) minBridgeDist = bd;
+                }
+                if (minBridgeDist < 42) continue;
+
+                candidates.push({
+                    idx: idx,
+                    pt: pt,
+                    hw: hw,
+                    score: Math.min(minNodeDist, minBridgeDist)
+                });
+            }
+
+            if (candidates.length === 0) continue;
+
+            // Seřadíme kandidáty podle největšího volného prostoru
+            candidates.sort(function (a, b) { return b.score - a.score; });
+
+            // Vybereme až 2 nejlepší nekolidující ostrovy
+            var chosen = [candidates[0]];
+            if (rivData.len > 480) {
+                for (var c = 1; c < candidates.length; c++) {
+                    var cPt = candidates[c].pt;
+                    var d0x = cPt.x - chosen[0].pt.x, d0y = cPt.y - chosen[0].pt.y;
+                    if (Math.sqrt(d0x * d0x + d0y * d0y) >= 160) {
+                        chosen.push(candidates[c]);
+                        break;
+                    }
+                }
+            }
+
+            for (var ci = 0; ci < chosen.length; ci++) {
+                var isl = chosen[ci];
+                var pt = isl.pt;
+                var hw = isl.hw;
+                var angleDeg = Math.atan2(pt.ty, pt.tx) * 180 / Math.PI;
+
+                // Zřetelná a majestátní velikost ostrova
+                var islRx = Math.min(28, Math.max(16, hw * 0.74));
+                var islRy = Math.min(13, Math.max(7, hw * 0.38));
+
+                out.push('    <g class="river-island" transform="translate(' + pt.x.toFixed(1) + ',' + pt.y.toFixed(1) + ') rotate(' + angleDeg.toFixed(1) + ')" pointer-events="none">');
+                
+                // 1. Měkký stín ostrova v korytu řeky
+                out.push('      <ellipse cx="0" cy="3" rx="' + (islRx + 4).toFixed(1) + '" ry="' + (islRy + 3.5).toFixed(1) + '" fill="' + (rTheme.deepWaterColor || "rgba(0,0,0,0.30)") + '" filter="url(#riverSoft)"/>');
+
+                // 2. Bílá příbojová vlna lámající se o špici ostrova proti proudu
+                var bowWaveW = (islRx + 7).toFixed(1);
+                out.push('      <path d="M -' + bowWaveW + ' -4 Q -' + (islRx + 1).toFixed(1) + ' 0 -' + bowWaveW + ' 4" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.85)") + '" stroke-width="1.6" stroke-linecap="round"/>');
+
+                // 3. Písčito-štěrková pláž ostrova s texturovaným okrajem
+                out.push('      <ellipse cx="0" cy="0" rx="' + islRx.toFixed(1) + '" ry="' + islRy.toFixed(1) + '" fill="' + (rTheme.bankColor || "#dfbe86") + '" stroke="' + ink + '" stroke-width="1.3" filter="url(#riverWobble)"/>');
+
+                // 4. Vyvýšený zelený travnatý kopec / čedičový val
+                var lawnFill = (activeTheme === "fire") ? "#451a03" : (activeTheme === "earth" ? "#166534" : (activeTheme === "water" ? "#0369a1" : (activeTheme === "air" ? "#6366f1" : "#5d8438")));
+                out.push('      <ellipse cx="-1" cy="0" rx="' + (islRx * 0.70).toFixed(1) + '" ry="' + (islRy * 0.65).toFixed(1) + '" fill="' + lawnFill + '" opacity="0.92"/>');
+
+                // 5. Přírodní dominanta ostrova (strom, balvany, květy)
+                if (activeTheme === "fire") {
+                    out.push('      <ellipse cx="2" cy="0" rx="4.5" ry="2.8" fill="#1c1917" stroke="rgba(249,115,22,0.9)" stroke-width="0.9"/>');
+                    out.push('      <circle cx="-3" cy="-1" r="2.2" fill="#ea580c"/>');
+                    out.push('      <circle cx="5" cy="1" r="1.5" fill="#fef08a"/>');
+                } else if (activeTheme === "air") {
+                    out.push('      <polygon points="0,-7 3,2 -3,2" fill="#e0e7ff" stroke="#4f46e5" stroke-width="0.7"/>');
+                    out.push('      <circle cx="4" cy="0" r="2.5" fill="#c7d2fe"/>');
+                } else {
+                    // Majestátní smuteční vrba a balvan
+                    out.push('      <circle cx="2" cy="-1.5" r="4.2" fill="#4d7c2a" stroke="' + ink + '" stroke-width="0.7"/>');
+                    out.push('      <circle cx="4" cy="-2.5" r="2.8" fill="#65a30d"/>');
+                    out.push('      <ellipse cx="-5" cy="1" rx="3.2" ry="2.0" fill="#8d877d" stroke="' + ink + '" stroke-width="0.6"/>');
+                    out.push('      <path d="M 6 -1 L 10 -4 M 7 0 L 11 -2 M -7 2 L -10 4" stroke="#6b7d3a" stroke-width="1.2" stroke-linecap="round"/>');
+                }
+
+                // 6. Plynulé vlnové proudnice po obou stranách ostrova (wake waves)
+                var sternWaveStart = (islRx + 2).toFixed(1);
+                var sternWaveMid = (islRx + 10).toFixed(1);
+                var sternWaveEnd = (islRx + 18).toFixed(1);
+                out.push('      <path d="M ' + sternWaveStart + ' -4 Q ' + sternWaveMid + ' 0 ' + sternWaveEnd + ' 0 M ' + sternWaveStart + ' 4 Q ' + sternWaveMid + ' 0 ' + sternWaveEnd + ' 0" fill="none" stroke="' + (rTheme.streamColor2 || "rgba(255,255,255,0.6)") + '" stroke-width="1.2" stroke-linecap="round"/>');
+
+                out.push('    </g>');
+            }
+        }
         return out.join("\n");
     },
 
@@ -1416,29 +1644,96 @@
         return false;
     },
 
-    riverVegetationSVG: function (x, y, h) {
-        var ink = "rgba(48,34,22,0.7)";
+    riverVegetationSVG: function (x, y, h, activeTheme) {
+        var ink = "rgba(45,26,14,0.85)";
         var g = '    <g transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')" pointer-events="none">';
-        if (h < 0.42) {
-            // Rákosí s palicemi
-            g += '<path d="M-4 3 L-5 -7 M0 3 L0 -10 M4 3 L5 -6" stroke="#6b7d3a" stroke-width="1.3" stroke-linecap="round" fill="none"/>' +
-                '<ellipse cx="0" cy="-10" rx="1.3" ry="2.6" fill="#6b4a2a" stroke="' + ink + '" stroke-width="0.4"/>' +
-                '<ellipse cx="5" cy="-6.5" rx="1.1" ry="2.2" fill="#6b4a2a" stroke="' + ink + '" stroke-width="0.4"/>';
-        } else if (h < 0.68) {
-            // Kameny
-            g += '<ellipse cx="0" cy="1" rx="5" ry="3.4" fill="#8d877d" stroke="' + ink + '" stroke-width="0.8"/>' +
-                '<ellipse cx="6" cy="2.5" rx="3" ry="2.1" fill="#a39d92" stroke="' + ink + '" stroke-width="0.7"/>';
-        } else if (h < 0.88) {
-            // Smuteční vrba
-            g += '<ellipse cx="0" cy="6" rx="8" ry="2.6" fill="rgba(0,0,0,0.20)"/>' +
-                '<path d="M0 6 L0 -4" stroke="#5a4028" stroke-width="2.2" stroke-linecap="round"/>' +
-                '<circle cx="0" cy="-8" r="7" fill="#5f8a3c" stroke="' + ink + '" stroke-width="0.7"/>' +
-                '<path d="M-6 -6 Q-8 2 -6 5 M-2 -2 Q-3 4 -2 6 M3 -2 Q4 4 3 6 M7 -6 Q9 2 7 5" stroke="#7aa24c" stroke-width="1.1" fill="none" stroke-linecap="round"/>';
+        
+        if (activeTheme === "fire") {
+            // Sopečný a lávový biom
+            if (h < 0.40) {
+                // Žhavé uhlíky a kouřící trsy
+                g += '<circle cx="0" cy="0" r="4.2" fill="#ea580c" opacity="0.85"/>' +
+                     '<circle cx="2" cy="-2" r="2.2" fill="#fef08a"/>' +
+                     '<path d="M-4 3 L-5 -7 M0 3 L1 -10 M4 3 L6 -6" stroke="#78350f" stroke-width="1.4" stroke-linecap="round"/>';
+            } else if (h < 0.70) {
+                // Čedičové balvany se žhavými prasklinami
+                g += '<ellipse cx="0" cy="1" rx="7" ry="4.2" fill="#1c1917" stroke="#ea580c" stroke-width="1"/>' +
+                     '<path d="M-3 1 L1 -1 L4 2" stroke="#fbbf24" stroke-width="0.9"/>';
+            } else {
+                // Lávový obelisk / vyhaslý kmen
+                g += '<path d="M-3 5 L0 -11 L3 5 Z" fill="#292524" stroke="#b45309" stroke-width="1"/>' +
+                     '<circle cx="0" cy="-11" r="2" fill="#f97316"/>';
+            }
+        } else if (activeTheme === "water") {
+            // Vodní a safírový biom
+            if (h < 0.45) {
+                // Lekníny a modré vodní květy
+                g += '<ellipse cx="0" cy="1" rx="8" ry="4.5" fill="#047857" opacity="0.9"/>' +
+                     '<circle cx="1" cy="-1" r="3.2" fill="#38bdf8" stroke="#ffffff" stroke-width="0.7"/>';
+            } else if (h < 0.72) {
+                // Oblé říční valouny s perletí
+                g += '<ellipse cx="0" cy="1" rx="6.5" ry="4" fill="#64748b" stroke="#cbd5e1" stroke-width="0.9"/>' +
+                     '<ellipse cx="6" cy="2.5" rx="4" ry="2.6" fill="#94a3b8"/>';
+            } else {
+                // Vodní vrba
+                g += '<path d="M0 8 L0 -5" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>' +
+                     '<circle cx="0" cy="-9" r="8.5" fill="#0284c7" stroke="' + ink + '" stroke-width="0.8"/>' +
+                     '<path d="M-6 -6 Q-9 3 -6 7 M-1 -2 Q-3 5 -1 8 M4 -2 Q5 5 4 8 M8 -6 Q10 3 8 7" stroke="#38bdf8" stroke-width="1.3" fill="none"/>';
+            }
+        } else if (activeTheme === "earth") {
+            // Zemský mechový hvozd
+            if (h < 0.45) {
+                // Mechové rákosí
+                g += '<path d="M-5 4 L-6 -9 M0 4 L0 -13 M5 4 L6 -8" stroke="#22c55e" stroke-width="1.6" stroke-linecap="round" fill="none"/>' +
+                     '<ellipse cx="0" cy="-13" rx="1.8" ry="3.6" fill="#365314"/>';
+            } else if (h < 0.75) {
+                // Zelené mechem porostlé balvany
+                g += '<ellipse cx="0" cy="1" rx="7" ry="4.5" fill="#3f6212" stroke="#14532d" stroke-width="1"/>' +
+                     '<circle cx="-1" cy="0" r="3.2" fill="#65a30d"/>';
+            } else {
+                // Husté kapradí a keř
+                g += '<ellipse cx="0" cy="4" rx="9" ry="3" fill="rgba(0,0,0,0.22)"/>' +
+                     '<circle cx="-4" cy="0" r="5.8" fill="#15803d" stroke="' + ink + '" stroke-width="0.8"/>' +
+                     '<circle cx="4" cy="1" r="5.2" fill="#166534" stroke="' + ink + '" stroke-width="0.8"/>';
+            }
+        } else if (activeTheme === "air") {
+            // Vzdušný éterický biom
+            if (h < 0.45) {
+                // Stříbrné křehké rákosí
+                g += '<path d="M-5 4 L-5 -10 M0 4 L1 -14 M5 4 L4 -9" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>' +
+                     '<circle cx="1" cy="-14" r="2" fill="#e0e7ff"/>';
+            } else if (h < 0.75) {
+                // Krystalové stříbrné kameny
+                g += '<polygon points="-5,4 0,-6 5,4" fill="#c7d2fe" stroke="#6366f1" stroke-width="0.9"/>' +
+                     '<polygon points="3,4 7,-3 10,4" fill="#e0e7ff" stroke="#818cf8" stroke-width="0.8"/>';
+            } else {
+                // Větrný stříbrný strom
+                g += '<path d="M0 8 L0 -5" stroke="#64748b" stroke-width="2.4" stroke-linecap="round"/>' +
+                     '<circle cx="0" cy="-9" r="8" fill="#a5b4fc" stroke="#4f46e5" stroke-width="0.8"/>';
+            }
         } else {
-            // Keř
-            g += '<ellipse cx="0" cy="4" rx="7" ry="2.2" fill="rgba(0,0,0,0.18)"/>' +
-                '<circle cx="-3" cy="0" r="4.4" fill="#58803a" stroke="' + ink + '" stroke-width="0.6"/>' +
-                '<circle cx="3" cy="1" r="4" fill="#6a9644" stroke="' + ink + '" stroke-width="0.6"/>';
+            // Výchozí klasický královský biom (Světlo / Doubravka)
+            if (h < 0.42) {
+                // Rákosí s palicemi
+                g += '<path d="M-5 4 L-6 -9 M0 4 L0 -14 M5 4 L6 -8" stroke="#6b7d3a" stroke-width="1.6" stroke-linecap="round" fill="none"/>' +
+                     '<ellipse cx="0" cy="-14" rx="1.6" ry="3.5" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.5"/>' +
+                     '<ellipse cx="6" cy="-8.5" rx="1.4" ry="2.8" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.5"/>';
+            } else if (h < 0.68) {
+                // Říční balvany na pláži
+                g += '<ellipse cx="0" cy="1" rx="6.5" ry="4.2" fill="#8d877d" stroke="' + ink + '" stroke-width="1"/>' +
+                     '<ellipse cx="7" cy="2.8" rx="4" ry="2.7" fill="#a39d92" stroke="' + ink + '" stroke-width="0.8"/>';
+            } else if (h < 0.88) {
+                // Smuteční vrba sklánějící se k vodě
+                g += '<ellipse cx="0" cy="7" rx="10" ry="3.2" fill="rgba(0,0,0,0.22)"/>' +
+                     '<path d="M0 8 L0 -5" stroke="#5a4028" stroke-width="2.8" stroke-linecap="round"/>' +
+                     '<circle cx="0" cy="-10" r="9" fill="#5f8a3c" stroke="' + ink + '" stroke-width="0.9"/>' +
+                     '<path d="M-7 -8 Q-10 2 -7 6 M-2 -3 Q-3 5 -2 8 M3 -3 Q5 5 4 8 M8 -8 Q11 2 9 6" stroke="#84cc16" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
+            } else {
+                // Pobřežní keř
+                g += '<ellipse cx="0" cy="5" rx="9" ry="2.8" fill="rgba(0,0,0,0.20)"/>' +
+                     '<circle cx="-4" cy="0" r="5.6" fill="#58803a" stroke="' + ink + '" stroke-width="0.8"/>' +
+                     '<circle cx="4" cy="1" r="5.2" fill="#6a9644" stroke="' + ink + '" stroke-width="0.8"/>';
+            }
         }
         return g + '</g>';
     },
@@ -1446,30 +1741,137 @@
     renderBoardBridgesHTML: function (board) {
         if (!board || !board.bridges || board.bridges.length === 0) return "";
         var out = [];
-        var ink = "rgba(40,28,18,0.85)";
+        var ink = "rgba(40,24,14,0.92)";
+        var activeTheme = (document.documentElement && document.documentElement.getAttribute("data-theme")) ||
+                          (typeof localStorage !== "undefined" && localStorage.getItem("kidesky_element_theme")) || "light";
+        var th = (this.RIVER_THEMES && this.RIVER_THEMES[activeTheme]) || (this.RIVER_THEMES && this.RIVER_THEMES.light) || {};
+        var nodes = board.nodes || [];
+
         out.push('  <g id="prs-bridges-layer">');
         for (var b = 0; b < board.bridges.length; b++) {
             var brg = board.bridges[b];
-            // Lokální osa X = směr cesty. Kamenný obloukový most (pohled shora).
-            out.push('    <g class="board-bridge-item" transform="translate(' + brg.x + ',' + brg.y + ') rotate(' + brg.angle + ')">');
-            // Stín mostu na hladině
-            out.push('      <rect x="-23" y="-8" width="46" height="21" rx="9" fill="rgba(8,24,40,0.32)" filter="url(#riverSoft)"/>');
-            // Kamenná klenba (boční pohled na oblouky)
-            out.push('      <path d="M-13 10 A13 8 0 0 0 13 10 Z" fill="#6f6860" stroke="' + ink + '" stroke-width="0.9"/>');
-            out.push('      <path d="M-13 -10 A13 8 0 0 1 13 -10 Z" fill="#6f6860" stroke="' + ink + '" stroke-width="0.9"/>');
-            // Tělo mostu a cesta
-            out.push('      <rect x="-23" y="-10" width="46" height="20" rx="6" fill="#a9a196" stroke="' + ink + '" stroke-width="1.2"/>');
-            out.push('      <rect x="-22" y="-6" width="44" height="12" rx="3" fill="#cdbb98"/>');
-            // Dlažební kostky
-            out.push('      <path d="M-14 -6 L-14 6 M-6 -6 L-6 6 M2 -6 L2 6 M10 -6 L10 6" stroke="rgba(110,92,62,0.55)" stroke-width="0.8"/>');
-            // Kamenné parapety
-            out.push('      <rect x="-23" y="-10" width="46" height="4" rx="2" fill="#8d857b" stroke="' + ink + '" stroke-width="0.9"/>');
-            out.push('      <rect x="-23" y="6" width="46" height="4" rx="2" fill="#8d857b" stroke="' + ink + '" stroke-width="0.9"/>');
-            // Sloupky na koncích
-            out.push('      <circle cx="-22" cy="-8" r="3.2" fill="#9b9388" stroke="' + ink + '" stroke-width="0.9"/>');
-            out.push('      <circle cx="22" cy="-8" r="3.2" fill="#9b9388" stroke="' + ink + '" stroke-width="0.9"/>');
-            out.push('      <circle cx="-22" cy="8" r="3.2" fill="#9b9388" stroke="' + ink + '" stroke-width="0.9"/>');
-            out.push('      <circle cx="22" cy="8" r="3.2" fill="#9b9388" stroke="' + ink + '" stroke-width="0.9"/>');
+            var nA = null, nB = null;
+            if (brg.nodeAId !== undefined && brg.nodeBId !== undefined) {
+                for (var ni = 0; ni < nodes.length; ni++) {
+                    if (nodes[ni].id === brg.nodeAId) nA = nodes[ni];
+                    if (nodes[ni].id === brg.nodeBId) nB = nodes[ni];
+                }
+            }
+
+            // Automatická inteligentní volba typu přechodu
+            var cType = brg.crossingType;
+            if (!cType) {
+                var isGrand = (nA && (nA.type === "castle" || nA.type === "town" || nA.type === "start")) ||
+                              (nB && (nB.type === "castle" || nB.type === "town" || nB.type === "start"));
+                var isVillage = (nA && (nA.type === "village" || nA.type === "tavern" || nA.type === "trade" || nA.type === "craft")) ||
+                                (nB && (nB.type === "village" || nB.type === "tavern" || nB.type === "trade" || nB.type === "craft"));
+                if (isGrand) {
+                    cType = "stone_arch";
+                } else if (isVillage) {
+                    cType = "wood_plank";
+                } else {
+                    cType = (b % 2 === 0) ? "stone_ford" : "wood_plank";
+                }
+            }
+
+            out.push('    <g class="board-bridge-item board-crossing-' + cType + '" transform="translate(' + brg.x + ',' + brg.y + ') rotate(' + brg.angle + ')">');
+
+            if (cType === "wood_plank") {
+                // ============================================================
+                // TYP 2: DŘEVĚNÁ TRÁMOVÁ LÁVKA (DÉLKA 54 PX, ŠÍŘKA 22 PX)
+                // ============================================================
+                // Hluboký stín lávky na hladině
+                out.push('      <rect x="-27" y="-9" width="54" height="22" rx="7" fill="rgba(8,20,32,0.42)" filter="url(#riverSoft)"/>');
+                // Tři podélné nosné dubové trámy přes řeku
+                var beamCol = (activeTheme === "fire") ? "#1c1917" : "#3e240f";
+                out.push('      <rect x="-28" y="-8.5" width="56" height="3.2" rx="1.5" fill="' + beamCol + '" stroke="' + ink + '" stroke-width="0.7"/>');
+                out.push('      <rect x="-28" y="-1.6" width="56" height="3.2" rx="1.5" fill="' + beamCol + '" stroke="' + ink + '" stroke-width="0.7"/>');
+                out.push('      <rect x="-28" y="5.3" width="56" height="3.2" rx="1.5" fill="' + beamCol + '" stroke="' + ink + '" stroke-width="0.7"/>');
+                // Příčná dřevěná prkna (fošny) se zřetelnými spárami
+                var plankColors = (activeTheme === "fire")
+                    ? ["#44403c", "#57534e", "#292524", "#3f3f46"]
+                    : ["#8a5d34", "#7b5029", "#96673b", "#6f4722", "#84572f"];
+                for (var pk = -25; pk <= 23; pk += 4.2) {
+                    var pCol = plankColors[Math.abs(Math.round(pk * 3)) % plankColors.length];
+                    var extraLen = (Math.sin(pk * 7) * 1.8);
+                    out.push('      <rect x="' + pk.toFixed(1) + '" y="' + (-9.5 - extraLen * 0.4).toFixed(1) + '" width="3.5" height="' + (19 + extraLen).toFixed(1) + '" rx="1" fill="' + pCol + '" stroke="rgba(30,18,10,0.8)" stroke-width="0.6"/>');
+                    out.push('      <circle cx="' + (pk + 1.7).toFixed(1) + '" cy="-6.5" r="0.5" fill="#1c1108"/>');
+                    out.push('      <circle cx="' + (pk + 1.7).toFixed(1) + '" cy="6.5" r="0.5" fill="#1c1108"/>');
+                }
+                // Sloupky zábradlí a dřevěné madlo
+                var postCol = (activeTheme === "fire") ? "#78350f" : "#b08552";
+                out.push('      <circle cx="-25" cy="-9" r="2.2" fill="' + beamCol + '" stroke="' + ink + '" stroke-width="0.8"/>');
+                out.push('      <circle cx="25" cy="-9" r="2.2" fill="' + beamCol + '" stroke="' + ink + '" stroke-width="0.8"/>');
+                out.push('      <circle cx="-25" cy="9" r="2.2" fill="' + beamCol + '" stroke="' + ink + '" stroke-width="0.8"/>');
+                out.push('      <circle cx="25" cy="9" r="2.2" fill="' + beamCol + '" stroke="' + ink + '" stroke-width="0.8"/>');
+                out.push('      <line x1="-25" y1="-9" x2="25" y2="-9" stroke="' + postCol + '" stroke-width="1.8" stroke-linecap="round"/>');
+                out.push('      <line x1="-25" y1="9" x2="25" y2="9" stroke="' + postCol + '" stroke-width="1.8" stroke-linecap="round"/>');
+
+            } else if (cType === "stone_ford") {
+                // ============================================================
+                // TYP 3: PŘÍRODNÍ KAMENNÝ BROD (7 VELKÝCH ŠLAPÁKŮ VE VODĚ)
+                // ============================================================
+                var stones = [
+                    { x: -22, y: -3.5, rx: 5.6, ry: 4.4, rot: 15 },
+                    { x: -15, y: 3.8,  rx: 5.2, ry: 4.2, rot: -18 },
+                    { x: -7,  y: -2.0, rx: 6.2, ry: 4.8, rot: 8 },
+                    { x: 0,   y: 4.0,  rx: 6.0, ry: 4.6, rot: -12 },
+                    { x: 8,   y: -3.0, rx: 6.4, ry: 5.0, rot: 14 },
+                    { x: 15,  y: 3.2,  rx: 5.4, ry: 4.2, rot: -16 },
+                    { x: 22,  y: -2.5, rx: 5.8, ry: 4.5, rot: 20 }
+                ];
+                var rockBase = (activeTheme === "fire") ? "#1c1917" : "#57534e";
+                var rockTop  = (activeTheme === "fire") ? "#44403c" : "#a8a29e";
+                var frothCol = (activeTheme === "fire") ? "rgba(251,146,60,0.85)" : "rgba(255,255,255,0.90)";
+
+                for (var si = 0; si < stones.length; si++) {
+                    var st = stones[si];
+                    out.push('      <g transform="translate(' + st.x + ',' + st.y + ') rotate(' + st.rot + ')">');
+                    out.push('        <ellipse cx="1" cy="2.5" rx="' + (st.rx + 2.5).toFixed(1) + '" ry="' + (st.ry + 2.5).toFixed(1) + '" fill="rgba(8,20,32,0.40)" filter="url(#riverSoft)"/>');
+                    out.push('        <path d="M -' + (st.rx + 2.8).toFixed(1) + ' 0 Q 0 ' + (st.ry + 4.5).toFixed(1) + ' ' + (st.rx + 2.8).toFixed(1) + ' 0" fill="none" stroke="' + frothCol + '" stroke-width="1.4" stroke-linecap="round"/>');
+                    out.push('        <ellipse cx="0" cy="0" rx="' + st.rx + '" ry="' + st.ry + '" fill="' + rockBase + '" stroke="' + ink + '" stroke-width="1"/>');
+                    out.push('        <ellipse cx="-1" cy="-0.8" rx="' + (st.rx * 0.65).toFixed(1) + '" ry="' + (st.ry * 0.62).toFixed(1) + '" fill="' + rockTop + '"/>');
+                    if (activeTheme !== "fire") {
+                        out.push('        <path d="M -' + (st.rx * 0.6).toFixed(1) + ' ' + (st.ry * 0.3).toFixed(1) + ' Q 0 ' + (st.ry * 0.6).toFixed(1) + ' ' + (st.rx * 0.5).toFixed(1) + ' ' + (st.ry * 0.3).toFixed(1) + '" fill="none" stroke="#65a30d" stroke-width="1" stroke-linecap="round"/>');
+                    } else {
+                        out.push('        <path d="M -' + (st.rx * 0.5).toFixed(1) + ' 0 L ' + (st.rx * 0.5).toFixed(1) + ' 0" stroke="#f97316" stroke-width="1"/>');
+                    }
+                    out.push('      </g>');
+                }
+
+            } else {
+                // ============================================================
+                // TYP 1: KRÁLOVSKÝ KAMENNÝ OBLOUKOVÝ MOST (DÉLKA 56 PX, ŠÍŘKA 26 PX)
+                // ============================================================
+                var bodyCol = th.bridgeStoneBody || "#78716c";
+                var roadCol = th.bridgeStoneRoad || "#e7e5e4";
+                var archCol = th.bridgeArch || "#44403c";
+
+                // Hluboký stín mostovky na vodě
+                out.push('      <rect x="-28" y="-11" width="56" height="26" rx="10" fill="rgba(4,18,36,0.40)" filter="url(#riverSoft)"/>');
+                // Masivní vystupující klenbové oblouky a pilíře ve vodě (proti i po proudu)
+                out.push('      <path d="M-16 13 A16 9 0 0 0 16 13 Z" fill="' + archCol + '" stroke="' + ink + '" stroke-width="1.1"/>');
+                out.push('      <path d="M-16 -13 A16 9 0 0 1 16 -13 Z" fill="' + archCol + '" stroke="' + ink + '" stroke-width="1.1"/>');
+                // Těleso mostu s kamennou obrubou
+                out.push('      <rect x="-28" y="-12" width="56" height="24" rx="7" fill="' + bodyCol + '" stroke="' + ink + '" stroke-width="1.4"/>');
+                // Dlážděná světlá vozovka
+                out.push('      <rect x="-27" y="-7.5" width="54" height="15" rx="3.5" fill="' + roadCol + '"/>');
+                // Spáry kamenné dlažby vozovky
+                out.push('      <path d="M-18 -7.5 L-18 7.5 M-9 -7.5 L-9 7.5 M0 -7.5 L0 7.5 M9 -7.5 L9 7.5 M18 -7.5 L18 7.5" stroke="rgba(80,60,40,0.6)" stroke-width="1"/>');
+                out.push('      <path d="M-27 0 L27 0" stroke="rgba(80,60,40,0.45)" stroke-width="0.8" stroke-dasharray="4,4"/>');
+                if (activeTheme === "fire") {
+                    out.push('      <path d="M-22 0 L22 0" stroke="rgba(249,115,22,0.75)" stroke-width="1.3" stroke-dasharray="4,4"/>');
+                }
+                // Masivní kamenné parapety (zábradlí)
+                out.push('      <rect x="-28" y="-12" width="56" height="4.5" rx="2" fill="' + archCol + '" stroke="' + ink + '" stroke-width="1"/>');
+                out.push('      <rect x="-28" y="7.5" width="56" height="4.5" rx="2" fill="' + archCol + '" stroke="' + ink + '" stroke-width="1"/>');
+                // 4 rohové heraldické patníky / sloupky
+                out.push('      <circle cx="-27" cy="-9.8" r="3.8" fill="' + bodyCol + '" stroke="' + ink + '" stroke-width="1.1"/>');
+                out.push('      <circle cx="27" cy="-9.8" r="3.8" fill="' + bodyCol + '" stroke="' + ink + '" stroke-width="1.1"/>');
+                out.push('      <circle cx="-27" cy="9.8" r="3.8" fill="' + bodyCol + '" stroke="' + ink + '" stroke-width="1.1"/>');
+                out.push('      <circle cx="27" cy="9.8" r="3.8" fill="' + bodyCol + '" stroke="' + ink + '" stroke-width="1.1"/>');
+            }
+
             out.push('    </g>');
         }
         out.push('  </g>');

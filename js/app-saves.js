@@ -61,6 +61,12 @@
                 setTimeout(function () { titleInput.select(); }, 100);
             }
 
+            var tplInput = document.getElementById("save-game-template-name-input");
+            var curBName = (this.state.board && this.state.board.name) ? this.state.board.name : "Vlastní plán";
+            if (tplInput) {
+                tplInput.value = curBName;
+            }
+
             if (infoEl) {
                 var playersHtml = [];
                 for (var i = 0; i < (this.state.players || []).length; i++) {
@@ -102,8 +108,70 @@
                 title = "Výprava " + new Date().toLocaleString("cs-CZ");
             }
 
+            var tplCheck = document.getElementById("save-game-as-template-check");
+            var tplInput = document.getElementById("save-game-template-name-input");
+            if (tplCheck && tplCheck.checked && this.state && this.state.board) {
+                var tplName = (tplInput && tplInput.value.trim()) ? tplInput.value.trim() : (this.state.board.name || "Vlastní plán");
+                this.saveBoardAsTemplate(this.state.board, tplName);
+            }
+
             this.saveCurrentGame(title);
             this.closeSaveGameModal();
+        },
+
+        // Uloží herní plán do stálých šablon (Map Studio / Moje plány)
+        saveBoardAsTemplate: function (board, customName) {
+            if (!board) return;
+            var list = [];
+            try { list = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { list = []; }
+
+            var recipe = board.recipe || (this.customBoardRecipe ? JSON.parse(JSON.stringify(this.customBoardRecipe)) : null);
+            if (!recipe && window.KiDeskyMapGenerator) {
+                recipe = JSON.parse(JSON.stringify(window.KiDeskyMapGenerator.DEFAULT_RECIPE));
+            }
+            if (!recipe) recipe = { nodeCount: (board.nodes ? board.nodes.length : 96) };
+
+            var seed = board.seed || (board.options && board.options.seed) || this.mapStudioSeed || 12345;
+            var nodeCount = (board.nodes && board.nodes.length) ? board.nodes.length : (recipe.nodeCount || 96);
+            var name = customName || recipe.customName || board.name || ("Vlastní plán #" + seed);
+            recipe.customName = name;
+            recipe.seed = seed;
+
+            // Zkontrolujeme, zda již stejný plán (dle jména nebo seedu) neexistuje
+            var existingIdx = -1;
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].name === name || (list[i].seed === seed && list[i].nodeCount === nodeCount)) {
+                    existingIdx = i;
+                    break;
+                }
+            }
+
+            var entry = {
+                id: (existingIdx !== -1) ? list[existingIdx].id : ("map_" + Date.now()),
+                code: board.seedCode || ("KID-" + seed),
+                name: name,
+                seed: seed,
+                nodeCount: nodeCount,
+                recipe: recipe,
+                savedAt: new Date().toLocaleString("cs-CZ")
+            };
+
+            if (existingIdx !== -1) {
+                list[existingIdx] = entry;
+            } else {
+                list.unshift(entry);
+            }
+
+            try { localStorage.setItem("prs_saved_maps", JSON.stringify(list)); } catch (e) { }
+
+            if (this.refreshBoardTemplateSelects) this.refreshBoardTemplateSelects();
+            if (this.renderSavedMapsInStudio) this.renderSavedMapsInStudio();
+            if (this.updateSavedGamesUI) this.updateSavedGamesUI();
+            if (this.renderSavedGamesList) this.renderSavedGamesList();
+
+            if (window.KiDeskyToast) {
+                window.KiDeskyToast.show("⭐ Šablona plánu „" + name + "“ byla uložena do mých plánů!", "good");
+            }
         },
 
         // Provede samotné uložení stavu
@@ -146,6 +214,7 @@
                 roundNumber: this.state.roundNumber || 1,
                 turnNumber: this.state.turnNumber || 0,
                 currentPlayerIndex: this.state.currentPlayerIndex || 0,
+                myOnlinePlayerIndex: (typeof this.myOnlinePlayerIndex === "number") ? this.myOnlinePlayerIndex : 0,
                 savedAt: new Date().toISOString(),
                 savedAtFormatted: new Date().toLocaleString("cs-CZ"),
                 playersSummary: playersSummary,
@@ -163,7 +232,9 @@
 
             // Pokud je to online místnost, odešleme i na server
             if (isOnline) {
-                if (typeof this.saveOnlineSessionState === "function") {
+                if (typeof this.saveCurrentSessionToCloud === "function") {
+                    this.saveCurrentSessionToCloud();
+                } else if (typeof this.saveOnlineSessionState === "function") {
                     this.saveOnlineSessionState(null, false);
                 }
             }
@@ -193,6 +264,177 @@
             this.renderSavedGamesList();
         },
 
+        // Sanitizace obnoveného stavu (zpětná kompatibilita pro starší savy a autosave)
+        sanitizeRestoredState: function (restoredState) {
+            if (!restoredState) return;
+            if (restoredState.pendingAction) {
+                var pa = restoredState.pendingAction;
+                if (pa.canUpgradeVillage && (typeof pa.upgradeCost !== "number" || isNaN(pa.upgradeCost))) {
+                    var prices = (restoredState.config && restoredState.config.estates && restoredState.config.estates.villagePrices) ? restoredState.config.estates.villagePrices : [0, 1500, 3000];
+                    var n = (restoredState.board && restoredState.board.nodes && pa.nodeId !== undefined) ? restoredState.board.nodes[pa.nodeId] : null;
+                    var lv = (n && n.villageLevel) ? n.villageLevel : 1;
+                    pa.upgradeCost = prices[lv] || 1500;
+                }
+                if (pa.canBuyNode && (typeof pa.buyPrice !== "number" || isNaN(pa.buyPrice))) {
+                    var nBuy = (restoredState.board && restoredState.board.nodes && pa.nodeId !== undefined) ? restoredState.board.nodes[pa.nodeId] : null;
+                    pa.buyPrice = (nBuy && nBuy.price) ? nBuy.price : 1000;
+                }
+            }
+            if (Array.isArray(restoredState.players)) {
+                for (var pi = 0; pi < restoredState.players.length; pi++) {
+                    var plObj = restoredState.players[pi];
+                    if (typeof plObj.gold !== "number" || isNaN(plObj.gold)) plObj.gold = 0;
+                    if (typeof plObj.totalHearts !== "number" || isNaN(plObj.totalHearts)) plObj.totalHearts = 0;
+                    if (!Array.isArray(plObj.ownedNodes)) plObj.ownedNodes = [];
+                    if (!Array.isArray(plObj.inventory)) plObj.inventory = [];
+                    if (!plObj.skills || typeof plObj.skills !== "object") plObj.skills = { boj: 0, jizda: 0, tanec: 0, charisma: 0 };
+                }
+            }
+            if (restoredState.board && restoredState.board.rivers && restoredState.board.rivers.length > 0 && (!restoredState.board.bridges || restoredState.board.bridges.length === 0)) {
+                if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
+                    window.PRS_BoardBuilder.computeRiverBridges(restoredState.board);
+                }
+            }
+        },
+
+        // Uloží aktuální rozehranou hru do automatického autosavu (pro zachování při F5, Ctrl+F5)
+        saveActiveGameAutosave: function () {
+            if (!this.state || !this.hasGameStarted) return;
+            if (this.state.phase === "GAME_OVER") {
+                this.clearActiveGameAutosave();
+                return;
+            }
+            try {
+                var payload = {
+                    timestamp: Date.now(),
+                    currentBoardSeed: this.currentBoardSeed,
+                    selectedRoyalCastle: this.selectedRoyalCastle,
+                    selectedGameScenario: this.selectedGameScenario,
+                    selectedDifficultyMode: this.selectedDifficultyMode,
+                    customBoardRecipe: this.customBoardRecipe,
+                    stateJson: JSON.stringify(this.state)
+                };
+                localStorage.setItem("prs_active_autosave", JSON.stringify(payload));
+                sessionStorage.setItem("prs_active_tab", "board");
+                this.updateResumeGameButtonUI();
+            } catch (e) {
+                console.warn("[Autosave] Nelze zapsat autosave:", e);
+            }
+        },
+
+        // Vymaže automatický autosave (při řádném skončení hry nebo potvrzeném novém začátku)
+        clearActiveGameAutosave: function () {
+            try {
+                localStorage.removeItem("prs_active_autosave");
+                sessionStorage.removeItem("prs_active_tab");
+            } catch (e) { }
+            this.updateResumeGameButtonUI();
+        },
+
+        // Pokusí se obnovit hru z autosavu
+        tryRestoreActiveGameAutosave: function () {
+            try {
+                var raw = localStorage.getItem("prs_active_autosave");
+                if (!raw) return false;
+                var data = JSON.parse(raw);
+                if (!data || !data.stateJson) return false;
+                var restored = JSON.parse(data.stateJson);
+                if (!restored || !restored.players || restored.phase === "GAME_OVER") {
+                    this.clearActiveGameAutosave();
+                    return false;
+                }
+
+                this.sanitizeRestoredState(restored);
+                this.state = restored;
+                this.hasGameStarted = true;
+                this.currentBoardSeed = data.currentBoardSeed || (restored.board && restored.board.seed);
+                this.selectedRoyalCastle = data.selectedRoyalCastle || "auto";
+                this.selectedGameScenario = data.selectedGameScenario || "classic";
+                this.selectedDifficultyMode = data.selectedDifficultyMode || "standard";
+                if (data.customBoardRecipe) this.customBoardRecipe = data.customBoardRecipe;
+
+                this.isBoardStaticDirty = true;
+                this.isMoveAnimating = false;
+                this.animatingPlayerIndex = null;
+                this.animTokenPos = null;
+                return true;
+            } catch (e) {
+                console.error("[Auto-Restore] Chyba při obnově autosavu:", e);
+                return false;
+            }
+        },
+
+        // Obnoví a vstoupí do rozehrané hry z tlačítka na Landing Page
+        resumeActiveAutosavedGame: function () {
+            if (this.tryRestoreActiveGameAutosave()) {
+                this.switchTab("board");
+                this.renderGameScreen();
+                this.updateUserUI();
+                if (this.centerOnActivePlayer) this.centerOnActivePlayer();
+                if (this.scheduleBotTurnIfNeeded) this.scheduleBotTurnIfNeeded();
+                if (window.KiDeskyToast) {
+                    window.KiDeskyToast.show("🛡️ Návrat ke stolu rozehrané výpravy!", "good");
+                }
+            } else {
+                alert("Nebyly nalezeny žádné uložené kroky rozehrané partie.");
+            }
+        },
+
+        // Zahodí rozehranou hru z autosavu z Landing Page
+        discardActiveAutosavedGame: async function () {
+            var conf = await KiDeskyDialog.confirm("Přeješ si definitivně zahodit rozehranou partii a začít novou výpravu od začátku?", {
+                title: "Zahodit rozehranou partii",
+                icon: "🗑️",
+                isDanger: true,
+                confirmText: "🗑️ Ano, zahodit",
+                cancelText: "Ponechat hru"
+            });
+            if (!conf) return;
+            this.clearActiveGameAutosave();
+            this.hasGameStarted = false;
+            this.state = null;
+            if (window.KiDeskyToast) {
+                window.KiDeskyToast.show("Rozehraná partie byla smazána.", "turn");
+            }
+        },
+
+        // Aktualizuje vizuální stav banneru na Landing Page pro návrat do rozehrané hry
+        updateResumeGameButtonUI: function () {
+            var banner = document.getElementById("welcome-resume-game-banner");
+            var desc = document.getElementById("welcome-resume-game-desc");
+            if (!banner) return;
+
+            try {
+                var raw = localStorage.getItem("prs_active_autosave");
+                if (!raw) {
+                    banner.style.display = "none";
+                    return;
+                }
+                var data = JSON.parse(raw);
+                if (!data || !data.stateJson) {
+                    banner.style.display = "none";
+                    return;
+                }
+                var st = JSON.parse(data.stateJson);
+                if (!st || !st.players || st.phase === "GAME_OVER") {
+                    banner.style.display = "none";
+                    return;
+                }
+
+                var roundNum = st.roundNumber || 1;
+                var turnNum = st.turnNumber || 0;
+                var curP = (st.players && st.players[st.currentPlayerIndex]) ? st.players[st.currentPlayerIndex].name : "Rytíř";
+                var bName = (st.board && st.board.name) ? st.board.name : "Království";
+
+                if (desc) {
+                    desc.innerHTML = "Kolo " + roundNum + " (Tah #" + turnNum + ") • Na tahu: <strong>" + this.escapeHtml(curP) + "</strong> • Mapa: " + this.escapeHtml(bName);
+                }
+                banner.style.display = "block";
+            } catch (e) {
+                banner.style.display = "none";
+            }
+        },
+
         // Načte uloženou hru (Solo / Hot-Seat / Online)
         loadSavedGame: function (saveId) {
             var saves = this.getSavedGames();
@@ -219,35 +461,7 @@
             try {
                 var restoredState = JSON.parse(target.stateJson);
 
-                // Sanitizace obnoveného stavu (zpětná kompatibilita pro starší savy)
-                if (restoredState.pendingAction) {
-                    var pa = restoredState.pendingAction;
-                    if (pa.canUpgradeVillage && (typeof pa.upgradeCost !== "number" || isNaN(pa.upgradeCost))) {
-                        var prices = (restoredState.config && restoredState.config.estates && restoredState.config.estates.villagePrices) ? restoredState.config.estates.villagePrices : [0, 1500, 3000];
-                        var n = (restoredState.board && restoredState.board.nodes && pa.nodeId !== undefined) ? restoredState.board.nodes[pa.nodeId] : null;
-                        var lv = (n && n.villageLevel) ? n.villageLevel : 1;
-                        pa.upgradeCost = prices[lv] || 1500;
-                    }
-                    if (pa.canBuyNode && (typeof pa.buyPrice !== "number" || isNaN(pa.buyPrice))) {
-                        var nBuy = (restoredState.board && restoredState.board.nodes && pa.nodeId !== undefined) ? restoredState.board.nodes[pa.nodeId] : null;
-                        pa.buyPrice = (nBuy && nBuy.price) ? nBuy.price : 1000;
-                    }
-                }
-                if (Array.isArray(restoredState.players)) {
-                    for (var pi = 0; pi < restoredState.players.length; pi++) {
-                        var plObj = restoredState.players[pi];
-                        if (typeof plObj.gold !== "number" || isNaN(plObj.gold)) plObj.gold = 0;
-                        if (typeof plObj.totalHearts !== "number" || isNaN(plObj.totalHearts)) plObj.totalHearts = 0;
-                        if (!Array.isArray(plObj.ownedNodes)) plObj.ownedNodes = [];
-                        if (!Array.isArray(plObj.inventory)) plObj.inventory = [];
-                        if (!plObj.skills || typeof plObj.skills !== "object") plObj.skills = { boj: 0, jizda: 0, tanec: 0, charisma: 0 };
-                    }
-                }
-                if (restoredState.board && restoredState.board.rivers && restoredState.board.rivers.length > 0 && (!restoredState.board.bridges || restoredState.board.bridges.length === 0)) {
-                    if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
-                        window.PRS_BoardBuilder.computeRiverBridges(restoredState.board);
-                    }
-                }
+                this.sanitizeRestoredState(restoredState);
 
                 this.state = restoredState;
                 this.hasGameStarted = true;
@@ -255,6 +469,9 @@
                 this.isMoveAnimating = false;
                 this.animatingPlayerIndex = null;
                 this.animTokenPos = null;
+
+                // Uložíme i do aktivního autosavu
+                this.saveActiveGameAutosave();
 
                 // Přepneme na herní stůl
                 this.switchTab("board");
@@ -273,12 +490,186 @@
             }
         },
 
-        // Načtení online multiplayerové hry a otevření dialogu křesel
+        // Načtení online multiplayerové hry s volbou pokračování (Nové hostování, solo proti botům, nebo původní stůl)
         loadOnlineSavedGame: function (saveEntry) {
             var self = this;
-            var roomCode = saveEntry.roomCode;
+            if (!saveEntry) return;
 
-            // Pokusíme se stáhnout nejčerstvější stav ze serveru, případně použijeme uložený JSON jako fallback
+            var rCode = saveEntry.roomCode || "ONLINE";
+
+            KiDeskyDialog.choice(
+                "Tato uložená výprava pochází z <strong>Online multiplayeru</strong> (Původní stůl: <code>" + self.escapeHtml(rCode) + "</code>).<br><br>Jak si přeješ v této výpravě pokračovat?",
+                [
+                    {
+                        id: "new_host",
+                        label: "👑 Založit nový Online stůl (Být hostitelem)",
+                        description: "Vytvoří novou online místnost ze stavu hry, kde budeš hostitelem Ty. Ostatní hráče můžeš nahradit přáteli nebo PC boty.",
+                        isPrimary: true
+                    },
+                    {
+                        id: "solo_bots",
+                        label: "🤖 Hrát lokálně proti PC botům (Offline)",
+                        description: "Odpojí partii ze sítě a převede ostatní lidské hráče na inteligentní PC boty. Můžeš hrát ihned offline.",
+                        isPrimary: false
+                    },
+                    {
+                        id: "original_room",
+                        label: "🔄 Připojit se k původnímu stolu (" + self.escapeHtml(rCode) + ")",
+                        description: "Pokusí se načíst aktuální živý stav původní online místnosti ze serveru.",
+                        isPrimary: false
+                    }
+                ],
+                {
+                    title: "Načtení multiplayerové výpravy",
+                    icon: "🏰"
+                }
+            ).then(function (chosenMode) {
+                if (!chosenMode) return;
+
+                if (chosenMode === "new_host") {
+                    self.branchSavedGameToNewOnlineRoom(saveEntry);
+                } else if (chosenMode === "solo_bots") {
+                    self.branchSavedGameToSoloBots(saveEntry);
+                } else if (chosenMode === "original_room") {
+                    self.connectToOriginalOnlineRoom(saveEntry);
+                }
+            });
+        },
+
+        // Vytvoří novou online místnost, kde se načítající hráč stane hostitelem
+        branchSavedGameToNewOnlineRoom: function (saveEntry) {
+            var self = this;
+            try {
+                var newState = JSON.parse(saveEntry.stateJson);
+                if (typeof this.sanitizeRestoredState === "function") {
+                    this.sanitizeRestoredState(newState);
+                }
+
+                // Vymažeme původní identifikátory místnosti, aby vznikla nová
+                newState.roomCode = null;
+                newState.sessionGuid = null;
+
+                var myClientId = (typeof this.getOnlineClientId === "function") ? this.getOnlineClientId() : "client_host";
+                var targetSlot = 0;
+                if (typeof saveEntry.myOnlinePlayerIndex === "number" && saveEntry.myOnlinePlayerIndex >= 0 && saveEntry.myOnlinePlayerIndex < (newState.players || []).length) {
+                    targetSlot = saveEntry.myOnlinePlayerIndex;
+                }
+
+                if (newState.players && Array.isArray(newState.players)) {
+                    for (var i = 0; i < newState.players.length; i++) {
+                        var p = newState.players[i];
+                        if (i === targetSlot) {
+                            p.type = "Human";
+                            p.isOnlineHost = true;
+                            p.claimedBy = myClientId;
+                            if (this.currentUser && this.currentUser.role !== "Guest") {
+                                p.name = this.currentUser.displayName || this.currentUser.username || p.name;
+                            }
+                        } else {
+                            delete p.isOnlineHost;
+                            delete p.claimedBy;
+                            p.type = "Bot_Balanced";
+                            p.pawnId = "bot_balanced";
+                            var cleanName = p.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
+                            p.name = cleanName + " (PC)";
+                        }
+                    }
+                }
+
+                this.state = newState;
+                this.myOnlinePlayerIndex = targetSlot;
+                this.hasGameStarted = true;
+                this.isBoardStaticDirty = true;
+                this.isMoveAnimating = false;
+
+                this.switchTab("board");
+                this.renderGameScreen();
+                this.updateUserUI();
+
+                // Okamžitě zaregistrujeme nový online stůl na serveru a získáme nový kód místnosti
+                if (typeof this.saveOnlineGameState === "function") {
+                    this.saveOnlineGameState();
+                } else if (typeof this.saveCurrentSessionToCloud === "function") {
+                    this.saveCurrentSessionToCloud();
+                }
+
+                this.addLog("👑 Založil jsi nový online stůl z uložené výpravy! Jsi hostitelem hry.", "win");
+            } catch (err) {
+                console.error("Chyba při zakládání nového online stolu z uložené hry:", err);
+                KiDeskyDialog.alert("Nepodařilo se vytvořit nový online stůl: " + err.message, { title: "Chyba", icon: "⚠️" });
+            }
+        },
+
+        // Převede uloženou hru na čistě lokální hru proti inteligentním PC botům
+        branchSavedGameToSoloBots: function (saveEntry) {
+            var self = this;
+            try {
+                var newState = JSON.parse(saveEntry.stateJson);
+                if (typeof this.sanitizeRestoredState === "function") {
+                    this.sanitizeRestoredState(newState);
+                }
+
+                newState.roomCode = null;
+                newState.sessionGuid = null;
+
+                var targetSlot = 0;
+                if (typeof saveEntry.myOnlinePlayerIndex === "number" && saveEntry.myOnlinePlayerIndex >= 0 && saveEntry.myOnlinePlayerIndex < (newState.players || []).length) {
+                    targetSlot = saveEntry.myOnlinePlayerIndex;
+                }
+
+                if (newState.players && Array.isArray(newState.players)) {
+                    for (var i = 0; i < newState.players.length; i++) {
+                        var p = newState.players[i];
+                        if (i === targetSlot) {
+                            p.type = "Human";
+                            delete p.isOnlineHost;
+                            delete p.claimedBy;
+                        } else {
+                            p.type = "Bot_Balanced";
+                            p.pawnId = "bot_balanced";
+                            delete p.isOnlineHost;
+                            delete p.claimedBy;
+                            var cleanName = p.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
+                            p.name = cleanName + " (PC)";
+                        }
+                    }
+                }
+
+                try {
+                    localStorage.removeItem("prs_active_online_room");
+                    if (window.history && window.history.replaceState) {
+                        window.history.replaceState(null, "", window.location.pathname);
+                    }
+                } catch (e) { }
+
+                this.state = newState;
+                this.myOnlinePlayerIndex = targetSlot;
+                this.hasGameStarted = true;
+                this.isBoardStaticDirty = true;
+                this.isMoveAnimating = false;
+
+                if (typeof this.saveActiveGameAutosave === "function") {
+                    this.saveActiveGameAutosave();
+                }
+
+                this.switchTab("board");
+                this.renderGameScreen();
+                this.updateUserUI();
+
+                this.addLog("🤖 Pokračuješ v rozehrané výpravě lokálně proti PC botům.", "turn");
+                if (window.PRS_Audio) window.PRS_Audio.playNotice();
+
+                this.scheduleBotTurnIfNeeded();
+            } catch (err) {
+                console.error("Chyba při přechodu na solo hru:", err);
+                KiDeskyDialog.alert("Nepodařilo se načíst hru proti botům: " + err.message, { title: "Chyba", icon: "⚠️" });
+            }
+        },
+
+        // Připojí se k původnímu online stolu
+        connectToOriginalOnlineRoom: function (saveEntry) {
+            var self = this;
+            var roomCode = saveEntry.roomCode;
             fetch("api.ashx?action=load-session&code=" + encodeURIComponent(roomCode))
                 .then(function (r) { return r.json(); })
                 .then(function (res) {
@@ -288,21 +679,20 @@
                         self.state.roomCode = res.session.roomCode;
                         self.lastKnownTurnNumber = self.state.turnNumber;
                     } else {
-                        // Fallback z lokálního uložení
                         self.state = JSON.parse(saveEntry.stateJson);
                     }
-
                     self.hasGameStarted = true;
                     self.isBoardStaticDirty = true;
-
-                    // Otevřeme správu křesel u stolu (možnost poslat znovu odkaz nebo nahradit boty)
+                    self.switchTab("board");
+                    self.renderGameScreen();
                     self.openOnlineSeatsModal();
                 })
                 .catch(function () {
-                    // Fallback
                     self.state = JSON.parse(saveEntry.stateJson);
                     self.hasGameStarted = true;
                     self.isBoardStaticDirty = true;
+                    self.switchTab("board");
+                    self.renderGameScreen();
                     self.openOnlineSeatsModal();
                 });
         },
@@ -645,11 +1035,11 @@
         },
 
         // Převede slot hráče na PC Bota
-        convertSeatToBot: function (slotIndex) {
+        convertSeatToBot: function (slotIndex, optionalBotType) {
             if (!this.state || !this.state.players || !this.state.players[slotIndex]) return;
 
             var selectEl = document.getElementById("bot-type-select-" + slotIndex);
-            var botType = selectEl ? selectEl.value : "Bot_Balanced";
+            var botType = optionalBotType || (selectEl ? selectEl.value : "Bot_Balanced");
 
             var botNameTag = "";
             var botPawnId = "bot_balanced";
@@ -659,19 +1049,35 @@
             else { botNameTag = "Vyvážený"; botPawnId = "bot_balanced"; }
 
             var p = this.state.players[slotIndex];
+            var oldName = p.name;
             p.type = botType;
             p.pawnId = botPawnId;
-            var cleanName = p.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").trim();
+            delete p.claimedBy;
+            delete p.isOnlineHost;
+            var cleanName = p.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
             p.name = cleanName + " (PC " + botNameTag + ")";
 
             // Uložíme aktualizovaný stav do cloudu i lokálně
-            if (typeof this.saveOnlineSessionState === "function") {
-                this.saveOnlineSessionState(null, false);
+            if (typeof this.saveCurrentSessionToCloud === "function") {
+                this.saveCurrentSessionToCloud(true);
+            } else if (typeof this.saveSessionAuto === "function") {
+                this.saveSessionAuto();
+            }
+            if (typeof this.saveActiveGameAutosave === "function") {
+                this.saveActiveGameAutosave();
             }
             this.saveCurrentGame(this.state.title || ("Online – Kolo " + this.state.roundNumber));
 
-            this.addLog("🤖 Křeslo #" + (slotIndex + 1) + " převzal PC Bot (" + botNameTag + ").", "turn");
-            this.renderOnlineSeatsModal();
+            this.addLog("🤖 Rytíř " + oldName + " (křeslo #" + (slotIndex + 1) + ") byl převeden na PC Bota (" + botNameTag + ").", "turn");
+
+            if (this.renderOnlineSeatsModal) this.renderOnlineSeatsModal();
+            if (this.renderOnlineRoleGrid) this.renderOnlineRoleGrid();
+            this.renderGameScreen();
+
+            // Pokud byl tento hráč právě na tahu, spustíme tah bota!
+            if (this.state.currentPlayerIndex === slotIndex && typeof this.scheduleBotTurnIfNeeded === "function") {
+                this.scheduleBotTurnIfNeeded();
+            }
         },
 
         // Uvolní slot zpět pro živého hráče
@@ -681,16 +1087,26 @@
             var p = this.state.players[slotIndex];
             p.type = "Human";
             p.pawnId = "knight_valiant";
-            var cleanName = p.name.replace(/\s*\(PC.*?\)/gi, "").trim();
+            delete p.claimedBy;
+            delete p.isOnlineHost;
+            var cleanName = p.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
             p.name = cleanName;
 
-            if (typeof this.saveOnlineSessionState === "function") {
-                this.saveOnlineSessionState(null, false);
+            if (typeof this.saveCurrentSessionToCloud === "function") {
+                this.saveCurrentSessionToCloud();
+            } else if (typeof this.saveSessionAuto === "function") {
+                this.saveSessionAuto();
+            }
+            if (typeof this.saveActiveGameAutosave === "function") {
+                this.saveActiveGameAutosave();
             }
             this.saveCurrentGame(this.state.title || ("Online – Kolo " + this.state.roundNumber));
 
-            this.addLog("👤 Křeslo #" + (slotIndex + 1) + " bylo uvolněno pro živého hráče.", "turn");
-            this.renderOnlineSeatsModal();
+            this.addLog("👤 Křeslo #" + (slotIndex + 1) + " bylo uvolněno pro nového živého hráče.", "turn");
+
+            if (this.renderOnlineSeatsModal) this.renderOnlineSeatsModal();
+            if (this.renderOnlineRoleGrid) this.renderOnlineRoleGrid();
+            this.renderGameScreen();
         },
 
         // Zkopíruje zvací odkaz do schránky

@@ -1319,7 +1319,7 @@
 
         html.push('    <div class="property-animal-slot" title="Šlechtický chov loveckých psů z herních polí (bonus k lovu zvěře U1 a Turnaji)"><span class="property-animal-icon">🐕</span><span class="property-animal-qty">' + (stats.dogs || 0) + ' psů</span><small style="font-size:0.62rem; color:#94a3b8; display:block;">Šlechtický chov</small></div>');
 
-        html.push('    <div class="property-animal-slot" title="Šlechtický chov loveckých sokolů z herních polí (umožňuje Sokolí navigaci ±1 pole)"><span class="property-animal-icon">🦅</span><span class="property-animal-qty">' + (stats.falcons || 0) + ' sokolů</span><small style="font-size:0.62rem; color:#94a3b8; display:block;">Šlechtický chov</small></div>');
+        html.push('    <div class="property-animal-slot" title="Šlechtický chov loveckých sokolů z herních polí (umožňuje Sokolí navigaci ±1 pole při pěší chůzi či taktickém manévru na koni)"><span class="property-animal-icon">🦅</span><span class="property-animal-qty">' + (stats.falcons || 0) + ' sokolů</span><small style="font-size:0.62rem; color:#94a3b8; display:block;">Šlechtický chov</small></div>');
 
         html.push('    <div class="property-animal-slot" title="Hospodářský skot z velkých osad (3★), dokoupených stád a karet Náhody: každá kráva dává +200 zl. u Výběrčího daní a +100 zl. k nájmu vesnic"><span class="property-animal-icon">🐄</span><span class="property-animal-qty">' + (stats.cattle || 0) + ' krav</span><small style="font-size:0.62rem; color:#fde047; display:block;">Výnos +200 zl./ks</small></div>');
 
@@ -4007,6 +4007,10 @@
                     validBuyoutCandidates.push(bcCandidate);
                 }
             }
+            if (validBuyoutCandidates.length === 0) {
+                pa.canBuyoutAnimalSet = false;
+                pa.buyoutCandidates = [];
+            }
         }
 
         if (validBuyoutCandidates.length > 0) {
@@ -4901,63 +4905,43 @@
         var headerTitle = canSprint ? "Královský trysk" : (canGallop ? "Koňský cval" : "Koňský klus");
 
         var headerSub = canGallop
+            ? ("Díky mistrovství Jízdy (" + jz + "/5) a koni máš volbu mezi bleskovým cvalem či přesným manévrem.")
+            : ("Koňský klus (Jízda " + jz + "/5): Volíš z obou kostek (plný cval d1+d2 vyžaduje Jízdu ≥ 2).");
 
-            ? ("Díky mistrovství Jízdy (" + jz + "/5) a koni máš plnou volbu mezi bleskovým cvalem či přesným manévrem!")
-
-            : ("Koňský klus (Jízda " + jz + "/5): Volíš z obou kostek (plný cval d1+d2 vyžaduje Jízdu ≥ 2)!");
+        if (hasFalcon) {
+            headerSub += "<br><span style='color:#7dd3fc; font-size:0.8rem;'>🦅 <strong>Sokolí navigaci (±1 pole)</strong> můžeš využít při taktických manévrech (při plném cvalu či trysku kůň pádí příliš rychle na navigaci sokolem).</span>";
+        }
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid var(--gold); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
-
             '<div style="font-size:2rem; margin-bottom:0.3rem;">🏇 🎲 🎲</div>' +
-
             '<h3 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + headerTitle + ': Padlo ' + d1 + ' a ' + d2 + '!</h3>' +
-
             '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">' + headerSub + '</div>' +
-
             '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
 
         if (canSprint && targetSprint) {
-
-            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #7c3aed, #4f46e5); border-color:#c084fc;" onclick="PRS_App.confirmHorseRoll(' + sprintSum + ', ' + hasFalcon + ')">' +
-
-                '    <div style="font-weight:700; color:#f5d0fe;">👑 Královský trysk (' + sprintSum + ' polí: ' + sum + '+2)</div>' +
-
+            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #7c3aed, #4f46e5); border-color:#c084fc;" onclick="PRS_App.confirmHorseRoll(' + sprintSum + ', false)">' +
+                '    <div style="font-weight:700; color:#f5d0fe;">👑 Královský trysk (' + sprintSum + ' polí: ' + sum + '+2)' + (hasFalcon ? ' <small style="font-size:0.72rem; color:#fbcfe8; font-weight:normal;">(přímý trysk – bez sokola)</small>' : '') + '</div>' +
                 '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + self.escapeHtml(targetSprint.name) + '</div>' +
-
                 '  </button>';
-
         }
 
         if (canGallop && targetSum) {
-
-            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmHorseRoll(' + sum + ', ' + hasFalcon + ')">' +
-
-                '    <div style="font-weight:700; color:#fef08a;">⚡ Plný cval (' + sum + ' polí)</div>' +
-
+            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmHorseRoll(' + sum + ', false)">' +
+                '    <div style="font-weight:700; color:#fef08a;">⚡ Plný cval (' + sum + ' polí)' + (hasFalcon ? ' <small style="font-size:0.72rem; color:#fde047; font-weight:normal;">(přímý cval – bez sokola)</small>' : '') + '</div>' +
                 '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + self.escapeHtml(targetSum.name) + '</div>' +
-
                 '  </button>';
-
         }
 
         html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d1 + ', ' + hasFalcon + ')">' +
-
-            '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d1 + ' ' + (d1 === 1 ? 'pole' : (d1 < 5 ? 'pole' : 'polí')) + ')</div>' +
-
+            '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d1 + ' ' + (d1 === 1 ? 'pole' : (d1 < 5 ? 'pole' : 'polí')) + ')' + (hasFalcon ? ' <span style="color:#7dd3fc; font-size:0.78rem; font-weight:normal;">🦅 + Sokolí navigace (±1)</span>' : '') + '</div>' +
             '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + (targetD1 ? self.escapeHtml(targetD1.name) : '') + '</div>' +
-
             '  </button>';
 
         if (targetD2) {
-
             html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d2 + ', ' + hasFalcon + ')">' +
-
-                '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d2 + ' ' + (d2 < 5 ? 'pole' : 'polí') + ')</div>' +
-
+                '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d2 + ' ' + (d2 < 5 ? 'pole' : 'polí') + ')' + (hasFalcon ? ' <span style="color:#7dd3fc; font-size:0.78rem; font-weight:normal;">🦅 + Sokolí navigace (±1)</span>' : '') + '</div>' +
                 '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + self.escapeHtml(targetD2.name) + '</div>' +
-
                 '  </button>';
-
         }
 
         html += '</div></div>';
@@ -5547,14 +5531,15 @@
 
         var currentP = this.state.players[this.state.currentPlayerIndex];
 
-        if (currentP && currentP.type !== "Human") {
+        if (currentP && currentP.type !== "Human" && !currentP.claimedBy) {
 
-            var delay = self.isMoveAnimating ? 220 : 130;
+            var delay = this.state.roomCode ? 800 : (self.isMoveAnimating ? 220 : 130);
 
             this.autoBotTimer = setTimeout(function () {
-
+                if (!self.state) return;
+                var checkP = self.state.players[self.state.currentPlayerIndex];
+                if (!checkP || checkP.type === "Human" || checkP.claimedBy) return;
                 self.stepBotNow();
-
             }, delay);
 
         }

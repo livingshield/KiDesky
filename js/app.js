@@ -192,6 +192,15 @@ window.PRS_App = {
 
         });
 
+        // Automatické zachování stavu rozehrané hry před jakýmkoliv obnovením (F5, Ctrl+F5) nebo zavřením
+        window.addEventListener("beforeunload", function () {
+            if (self.hasGameStarted && self.state && self.state.phase !== "GAME_OVER") {
+                if (typeof self.saveActiveGameAutosave === "function") {
+                    self.saveActiveGameAutosave();
+                }
+            }
+        });
+
         if (window.PRS_Audio) {
 
             window.PRS_Audio.init();
@@ -216,20 +225,46 @@ window.PRS_App = {
 
         this.startOnlinePollingLoop();
 
-        // Výchozí záložka při startu: Propagační Brána (welcome), při F5 obnovení uloženého stavu
-        var initialTab = "welcome";
-        try {
-            var sTab = sessionStorage.getItem("prs_active_tab");
-            if (sTab && (sTab === "lobby" || (sTab === "board" && this.hasGameStarted) || sTab === "rules" || sTab === "admin")) {
-                initialTab = sTab;
-            }
-        } catch (eInit) { }
+        // Automatická obnova rozehrané hry z autosavu při F5 / Ctrl+F5
         var curSearch = (window.location && window.location.search) ? window.location.search : "";
-        if (curSearch.indexOf("room=") !== -1) {
-            initialTab = "lobby";
+        var forceWelcome = (curSearch.indexOf("welcome=1") !== -1 || curSearch.indexOf("new=1") !== -1);
+        var restoredOk = false;
+
+        if (!forceWelcome && curSearch.indexOf("room=") === -1) {
+            if (typeof this.tryRestoreActiveGameAutosave === "function") {
+                restoredOk = this.tryRestoreActiveGameAutosave();
+            }
         }
+
+        // Výchozí záložka při startu: pokud máme rozehranou hru, zůstáváme přímo u stolu!
+        var initialTab = "welcome";
+        if (restoredOk && this.hasGameStarted && this.state) {
+            initialTab = "board";
+        } else {
+            try {
+                var sTab = sessionStorage.getItem("prs_active_tab");
+                if (sTab && (sTab === "lobby" || sTab === "rules" || sTab === "admin")) {
+                    initialTab = sTab;
+                }
+            } catch (eInit) { }
+            if (curSearch.indexOf("room=") !== -1) {
+                initialTab = "lobby";
+            }
+        }
+
         this.switchTab(initialTab);
         this.refreshBoardTemplateSelects();
+
+        if (initialTab === "board" && restoredOk && this.state) {
+            this.renderGameScreen();
+            this.updateUserUI();
+            this.addLog("🛡️ Rozehraná výprava (Kolo " + (this.state.roundNumber || 1) + ") byla po obnovení stránky zachována.", "turn");
+            setTimeout(function () {
+                if (self.centerOnActivePlayer) self.centerOnActivePlayer();
+                if (self.scheduleBotTurnIfNeeded) self.scheduleBotTurnIfNeeded();
+            }, 100);
+        }
+
         if (initialTab === "lobby" && curSearch.indexOf("room=") !== -1) {
             this.switchGameHallRoom("online");
         }
@@ -447,57 +482,215 @@ window.PRS_App = {
     // ========================================================================
     initPwa: function () {
         var self = this;
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function () {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(function (reg) {
-                        console.log('[PWA] Service Worker registrován se scope:', reg.scope);
-                    })
-                    .catch(function (err) {
-                        console.warn('[PWA] Registrace Service Workeru selhala:', err);
-                    });
-            });
+        var topBtn = document.getElementById('topbar-pwa-install-btn');
+        var setStatus = document.getElementById('settings-pwa-status');
+        var setBtn = document.getElementById('settings-pwa-install-btn');
+
+        this.checkPwaInstalledStatus();
+
+        // Pokud nejsme v standalone režimu a už máme prompt, aktualizujeme UI
+        if (window._pwaDeferredPrompt) {
+            if (topBtn) topBtn.style.display = 'inline-flex';
+            if (setStatus) setStatus.textContent = 'Aplikace je připravena k rychlé instalaci na jedno kliknutí.';
+            if (setBtn) {
+                setBtn.style.display = 'inline-flex';
+                setBtn.innerHTML = '📲 Nainstalovat na plochu';
+            }
+        } else if (topBtn && !window._pwaIsInstalled) {
+            topBtn.style.display = 'inline-flex';
+        }
+    },
+
+    checkPwaInstalledStatus: function () {
+        var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+        if (isStandalone) {
+            window._pwaIsInstalled = true;
+            this.updatePwaUiForInstalled();
+            return;
+        }
+        var self = this;
+        if ('getInstalledRelatedApps' in navigator) {
+            navigator.getInstalledRelatedApps().then(function (apps) {
+                if (apps && apps.length > 0) {
+                    window._pwaIsInstalled = true;
+                    self.updatePwaUiForInstalled();
+                }
+            }).catch(function () {});
+        }
+    },
+
+    updatePwaUiForInstalled: function () {
+        var topBtn = document.getElementById('topbar-pwa-install-btn');
+        if (topBtn) topBtn.style.display = 'none';
+        var setStatus = document.getElementById('settings-pwa-status');
+        if (setStatus) setStatus.innerHTML = '✅ <strong style="color:#4ade80;">Hra je úspěšně nainstalována na tomto zařízení!</strong>';
+        var setBtn = document.getElementById('settings-pwa-install-btn');
+        if (setBtn) {
+            setBtn.innerHTML = '✅ Nainstalováno na ploše';
+            setBtn.style.background = 'rgba(16, 185, 129, 0.2)';
+            setBtn.style.borderColor = '#10b981';
+        }
+    },
+
+    promptPwaInstall: function () {
+        var self = this;
+        var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+        if (isStandalone || window._pwaIsInstalled) {
+            if (this.showToast) {
+                this.showToast('✅ KiDesky již běží jako nainstalovaná aplikace na tvém zařízení!', 'good');
+            }
+            return;
         }
 
-        window.addEventListener('beforeinstallprompt', function (e) {
-            e.preventDefault();
-            window._pwaDeferredPrompt = e;
-            var topBtn = document.getElementById('topbar-pwa-install-btn');
-            if (topBtn) topBtn.style.display = 'inline-flex';
-            var setStatus = document.getElementById('settings-pwa-status');
-            if (setStatus) setStatus.textContent = 'Aplikace je připravena k rychlé instalaci jedním kliknutím.';
-            var setBtn = document.getElementById('settings-pwa-install-btn');
-            if (setBtn) setBtn.style.display = 'inline-flex';
-        });
+        // 1. Přímé spuštění nativního instalačního dialogu (1-klik v Chrome / Edge / Android)
+        if (window._pwaDeferredPrompt) {
+            var deferred = window._pwaDeferredPrompt;
+            deferred.prompt();
+            deferred.userChoice.then(function (choiceResult) {
+                if (choiceResult && choiceResult.outcome === 'accepted') {
+                    console.log('[PWA] Uživatel potvrdil instalaci aplikace.');
+                    if (self.showToast) {
+                        self.showToast('📲 KiDesky se instaluje na tvou plochu...', 'success');
+                    }
+                    window._pwaDeferredPrompt = null;
+                    self.updatePwaUiForInstalled();
+                } else {
+                    console.log('[PWA] Uživatel odložil instalaci.');
+                }
+            }).catch(function (err) {
+                console.warn('[PWA] Chyba při vyvolání promptu:', err);
+                self.openPwaInstallHelpModal();
+            });
+            return;
+        }
 
-        window.addEventListener('appinstalled', function () {
-            window._pwaDeferredPrompt = null;
-            var topBtn = document.getElementById('topbar-pwa-install-btn');
-            if (topBtn) topBtn.style.display = 'none';
-            var setStatus = document.getElementById('settings-pwa-status');
-            if (setStatus) setStatus.innerHTML = '✅ <strong style="color:#4ade80;">Aplikace je úspěšně nainstalována na této ploše!</strong>';
-            var setBtn = document.getElementById('settings-pwa-install-btn');
-            if (setBtn) setBtn.style.display = 'none';
-            if (self.showToast) {
-                self.showToast('📲 KiDesky bylo úspěšně nainstalováno na tvou plochu!', 'success');
+        // 2. Pokud prompt zatím nedorazil na PC / Android (prohlížeč ještě inicializuje SW)
+        var platform = this.detectPlatformForPwa();
+        if (platform === 'pc' || platform === 'android') {
+            if (this.showToast) {
+                this.showToast('⏳ Otevírám instalaci aplikace pro tvůj prohlížeč...', 'info');
+            }
+            window._pwaInstallRequested = true;
+
+            // Počkáme 1.6s zda událost dorazí a automaticky vyvolá dialog
+            setTimeout(function () {
+                if (!window._pwaDeferredPrompt && window._pwaInstallRequested) {
+                    window._pwaInstallRequested = false;
+                    if ('getInstalledRelatedApps' in navigator) {
+                        navigator.getInstalledRelatedApps().then(function (apps) {
+                            if (apps && apps.length > 0) {
+                                window._pwaIsInstalled = true;
+                                self.updatePwaUiForInstalled();
+                                if (self.showToast) {
+                                    self.showToast('ℹ️ KiDesky je již na tomto počítači nainstalována! Spustit ji můžeš z nabídky Start nebo ikony v adresním řádku.', 'info');
+                                }
+                                return;
+                            }
+                            self.openPwaInstallHelpModal();
+                        }).catch(function () {
+                            self.openPwaInstallHelpModal();
+                        });
+                    } else {
+                        self.openPwaInstallHelpModal();
+                    }
+                }
+            }, 1600);
+            return;
+        }
+
+        // 3. Na iOS Safari (kde Apple nativní tlačítko nepodporuje) otevřeme srozumitelný návod
+        this.openPwaInstallHelpModal();
+    },
+
+    detectPlatformForPwa: function () {
+        var ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
+        if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+            return 'ios';
+        }
+        if (/Android/i.test(ua)) {
+            return 'android';
+        }
+        return 'pc';
+    },
+
+    openPwaInstallHelpModal: function (forceTab) {
+        var tab = forceTab || this.detectPlatformForPwa();
+        this.setPwaInstallTab(tab);
+        var modal = document.getElementById('pwa-install-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        } else if (this.showToast) {
+            this.showToast('ℹ️ Pro instalaci na mobilu použij volbu „Přidat na plochu“ v nabídce prohlížeče.', 'info');
+        }
+    },
+
+    closePwaInstallModal: function () {
+        var modal = document.getElementById('pwa-install-modal');
+        if (modal) modal.style.display = 'none';
+    },
+
+    setPwaInstallTab: function (tab) {
+        var tabs = ['ios', 'android', 'pc'];
+        tabs.forEach(function (t) {
+            var btn = document.getElementById('pwa-tab-' + t);
+            var content = document.getElementById('pwa-content-' + t);
+            if (btn) {
+                if (t === tab) {
+                    btn.style.borderColor = 'rgba(212,175,55,0.7)';
+                    btn.style.background = 'rgba(212,175,55,0.25)';
+                    btn.style.color = '#fef3c7';
+                } else {
+                    btn.style.borderColor = 'rgba(255,255,255,0.12)';
+                    btn.style.background = 'rgba(0,0,0,0.3)';
+                    btn.style.color = '#94a3b8';
+                }
+            }
+            if (content) {
+                content.style.display = (t === tab) ? 'block' : 'none';
             }
         });
     },
 
-    promptPwaInstall: function () {
-        if (!window._pwaDeferredPrompt) {
-            if (this.showToast) {
-                this.showToast('ℹ️ Pro instalaci na mobilu použij volbu „Přidat na plochu“ v menu prohlížeče.', 'notice');
+    showToast: function (message, type) {
+        try {
+            var container = document.getElementById('kidesky-toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'kidesky-toast-container';
+                container.style.cssText = 'position:fixed; top:24px; left:50%; transform:translateX(-50%); z-index:9999999; display:flex; flex-direction:column; gap:8px; pointer-events:none; width:min(90vw, 440px);';
+                document.body.appendChild(container);
             }
-            return;
+            var toast = document.createElement('div');
+            var bg = 'linear-gradient(135deg, rgba(30, 20, 15, 0.97), rgba(15, 10, 8, 0.98))';
+            var border = '1px solid rgba(212, 175, 55, 0.6)';
+            var color = '#fef3c7';
+            if (type === 'good' || type === 'success') {
+                border = '1px solid #10b981';
+                color = '#a7f3d0';
+            } else if (type === 'warning' || type === 'danger' || type === 'error') {
+                border = '1px solid #f87171';
+                color = '#fecaca';
+            } else if (type === 'info' || type === 'notice') {
+                border = '1px solid #38bdf8';
+                color = '#bae6fd';
+            }
+            toast.style.cssText = 'background:' + bg + '; border:' + border + '; color:' + color + '; padding:10px 18px; border-radius:10px; font-family:"Outfit",sans-serif; font-size:0.88rem; box-shadow:0 10px 30px rgba(0,0,0,0.7); pointer-events:auto; text-align:center; transition:opacity 0.28s ease, transform 0.28s ease; opacity:0; transform:translateY(-12px); display:flex; align-items:center; justify-content:center; gap:8px; line-height:1.45; font-weight:500; backdrop-filter:blur(6px);';
+            toast.innerHTML = message;
+            container.appendChild(toast);
+            requestAnimationFrame(function () {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            });
+            setTimeout(function () {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-12px)';
+                setTimeout(function () {
+                    if (toast.parentNode) toast.parentNode.removeChild(toast);
+                }, 300);
+            }, 3800);
+        } catch (e) {
+            console.log('[Toast Error]', e);
         }
-        window._pwaDeferredPrompt.prompt();
-        window._pwaDeferredPrompt.userChoice.then(function (choiceResult) {
-            if (choiceResult && choiceResult.outcome === 'accepted') {
-                console.log('[PWA] Uživatel potvrdil instalaci aplikace.');
-            }
-            window._pwaDeferredPrompt = null;
-        });
     },
 
     // ========================================================================
@@ -996,6 +1189,7 @@ window.PRS_App = {
         this.activeTab = tabId;
         try { sessionStorage.setItem("prs_active_tab", tabId); } catch (e) { }
         try { document.body.setAttribute("data-active-tab", tabId); } catch (e) { }
+        if (this.updateResumeGameButtonUI) this.updateResumeGameButtonUI();
 
         // Královský posel nesmí být ve hře vůbec
         var annBanner = document.getElementById("topbar-announcement-banner");
@@ -3898,6 +4092,7 @@ window.PRS_App = {
 
             this.hasGameStarted = true;
             this.updateUserUI();
+            if (this.saveActiveGameAutosave) this.saveActiveGameAutosave();
 
             if (window.PRS_Audio) window.PRS_Audio.playNotice();
 
@@ -3933,11 +4128,23 @@ window.PRS_App = {
 
             bSel.title = inGame ? ("Plán: " + curBoardName + " (nelze měnit v průběhu rozehrané partie)") : "Přepnout rozložení plánu";
 
-            if (this.state.config && this.state.config.boardTemplate) {
-
-                bSel.value = this.state.config.boardTemplate;
-
+            var curCode = (this.state.config && this.state.config.boardTemplate) || (this.state.board && this.state.board.code) || "classic_96";
+            var optionFound = false;
+            for (var oi = 0; oi < bSel.options.length; oi++) {
+                if (bSel.options[oi].value === curCode) {
+                    optionFound = true;
+                    break;
+                }
             }
+
+            if (!optionFound && inGame && this.state.board) {
+                var dynamicOpt = document.createElement("option");
+                dynamicOpt.value = curCode;
+                dynamicOpt.textContent = "Plán: " + curBoardName + " (" + (this.state.board.nodes ? this.state.board.nodes.length : 96) + " polí)";
+                bSel.appendChild(dynamicOpt);
+            }
+
+            bSel.value = curCode;
 
             var optCustom = bSel.querySelector('option[value="custom_dynamic"]');
             if (optCustom && this.state.board && this.state.board.name) {
@@ -4394,6 +4601,57 @@ window.PRS_App = {
         }
     },
 
+    switchMapStudioTab: function (tab) {
+        this._mapStudioActiveTab = tab;
+        var rView = document.getElementById("ms-recipe-view");
+        var eView = document.getElementById("ms-editor-view");
+        var footer = document.getElementById("ms-modal-footer");
+        var btnR = document.getElementById("ms-tab-btn-recipe");
+        var btnE = document.getElementById("ms-tab-btn-editor");
+        if (!rView || !eView) return;
+
+        if (tab === "editor") {
+            rView.style.display = "none";
+            eView.style.display = "flex";
+            if (footer) {
+                footer.style.setProperty("display", "none", "important");
+                footer.classList.add("hidden");
+            }
+            if (btnR) {
+                btnR.style.background = "rgba(0,0,0,0.4)";
+                btnR.style.borderColor = "rgba(212,175,55,0.3)";
+                btnR.style.color = "#cbd5e1";
+            }
+            if (btnE) {
+                btnE.style.background = "linear-gradient(135deg, #a855f7, #7e22ce)";
+                btnE.style.borderColor = "#c084fc";
+                btnE.style.color = "#fff";
+            }
+            if (window.PRS_MapEditor) {
+                var boardToEdit = this._currentMapStudioBoard || this.mapStudioBoard;
+                window.PRS_MapEditor.init(boardToEdit);
+            }
+        } else {
+            eView.style.display = "none";
+            rView.style.display = "grid";
+            if (footer) {
+                footer.style.removeProperty("display");
+                footer.style.display = "flex";
+                footer.classList.remove("hidden");
+            }
+            if (btnR) {
+                btnR.style.background = "linear-gradient(135deg, #d4af37, #b45309)";
+                btnR.style.borderColor = "#fde047";
+                btnR.style.color = "#fff";
+            }
+            if (btnE) {
+                btnE.style.background = "rgba(0,0,0,0.4)";
+                btnE.style.borderColor = "rgba(168,85,247,0.4)";
+                btnE.style.color = "#e9d5ff";
+            }
+        }
+    },
+
     openMapStudioModal: function (initialSeed, initialRecipe) {
         this.mapStudioSeed = initialSeed || this.currentBoardSeed || Math.floor(Math.random() * 899999 + 100000);
         if (initialRecipe && window.KiDeskyMapGenerator) {
@@ -4411,6 +4669,7 @@ window.PRS_App = {
             this.syncMapStudioInputsFromRecipe();
             this.renderSavedMapsInStudio();
             this.updateMapStudioPreview();
+            this.switchMapStudioTab("recipe");
         }
     },
 
@@ -4663,26 +4922,57 @@ window.PRS_App = {
         }
     },
 
-    saveCurrentMapToFavorites: function () {
+    saveCurrentMapToFavorites: async function () {
         if (!this._currentMapStudioBoard || !this.customBoardRecipe) return;
         var code = this._currentMapStudioBoard.seedCode || ("KID-" + this.mapStudioSeed);
-        var name = (this.customBoardRecipe && this.customBoardRecipe.customName) || this._currentMapStudioBoard.name || ("Vlastní plán #" + this.mapStudioSeed);
+        var defaultName = (this.customBoardRecipe && this.customBoardRecipe.customName) || this._currentMapStudioBoard.name || ("Vlastní plán #" + this.mapStudioSeed);
+        var chosenName = defaultName;
+
+        if (window.KiDeskyDialog && typeof window.KiDeskyDialog.prompt === "function") {
+            var promptRes = await window.KiDeskyDialog.prompt("Zadej název pro tuto šablonu plánu:", defaultName, {
+                title: "Uložit šablonu do mých plánů",
+                icon: "⭐",
+                confirmText: "💾 Uložit šablonu",
+                cancelText: "Zrušit"
+            });
+            if (promptRes === null) return; // Uživatel zrušil
+            if (promptRes && promptRes.trim()) chosenName = promptRes.trim();
+        }
+
         var list = [];
         try { list = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { list = []; }
 
         var clonedRecipe = JSON.parse(JSON.stringify(this.customBoardRecipe));
         clonedRecipe.seed = this.mapStudioSeed;
-        clonedRecipe.customName = name;
+        clonedRecipe.customName = chosenName;
+        this._currentMapStudioBoard.name = chosenName;
 
-        list.unshift({
+        // Pokud již existuje plán se stejným názvem nebo seedem, aktualizujeme jej
+        var existingIdx = -1;
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].name === chosenName || (list[i].seed === this.mapStudioSeed && list[i].nodeCount === (this._currentMapStudioBoard.nodes ? this._currentMapStudioBoard.nodes.length : 96))) {
+                existingIdx = i;
+                break;
+            }
+        }
+
+        var entry = {
+            id: (existingIdx !== -1) ? list[existingIdx].id : ("map_" + Date.now()),
             seedCode: code,
             seed: this.mapStudioSeed,
-            name: name,
+            name: chosenName,
             nodeCount: this._currentMapStudioBoard.nodes ? this._currentMapStudioBoard.nodes.length : 96,
             recipe: clonedRecipe,
             savedAt: new Date().toLocaleDateString("cs-CZ")
-        });
-        if (list.length > 20) list = list.slice(0, 20);
+        };
+
+        if (existingIdx !== -1) {
+            list[existingIdx] = entry;
+        } else {
+            list.unshift(entry);
+        }
+
+        if (list.length > 25) list = list.slice(0, 25);
         try { localStorage.setItem("prs_saved_maps", JSON.stringify(list)); } catch (e) { }
         this.renderSavedMapsInStudio();
         this.refreshBoardTemplateSelects();
@@ -4692,7 +4982,9 @@ window.PRS_App = {
         if (bSel) bSel.value = "saved_map_0";
         if (this.updateSavedGamesUI) this.updateSavedGamesUI();
         if (this.renderSavedGamesList) this.renderSavedGamesList();
-        KiDeskyToast.show("⭐ Šablona „" + name + "“ byla uložena a nastavena pro hru!", "good");
+        if (window.KiDeskyToast) {
+            window.KiDeskyToast.show("⭐ Šablona „" + chosenName + "“ byla uložena a nastavena pro hru!", "good");
+        }
     },
 
     applySavedFavoriteMap: function (idx) {
@@ -4846,6 +5138,10 @@ window.PRS_App = {
     },
 
     applyMapStudioBoardAndStart: async function () {
+        if (this._mapStudioActiveTab === "editor" && window.PRS_MapEditor && window.PRS_MapEditor.board) {
+            window.PRS_MapEditor.playOnThisBoard();
+            return;
+        }
         if (!this._currentMapStudioBoard || !this.customBoardRecipe) return;
         this.closeMapStudioModal();
 
@@ -4864,10 +5160,17 @@ window.PRS_App = {
         }
 
         this._customProceduralBoard = this._currentMapStudioBoard;
+
+        // Automaticky zajistit, aby byl plán uložen i v mých šablonách (prs_saved_maps)
+        if (this.saveBoardAsTemplate) {
+            var activeName = (this.customBoardRecipe && this.customBoardRecipe.customName) || this._currentMapStudioBoard.name || ("Vlastní plán #" + newSeed);
+            this.saveBoardAsTemplate(this._currentMapStudioBoard, activeName);
+        }
+
         var bSel = document.getElementById("board-template-select");
-        if (bSel) bSel.value = "custom_dynamic";
+        if (bSel) bSel.value = "saved_map_0";
         var lobbySel = document.getElementById("lobby-board-select");
-        if (lobbySel) lobbySel.value = "custom_dynamic";
+        if (lobbySel) lobbySel.value = "saved_map_0";
 
         this.startNewGame(true);
         if (this.showPawnToast && this.state) {
@@ -4881,5 +5184,15 @@ window.PRS_App = {
         if (this.renderAll) this.renderAll();
         else if (this.renderGameScreen) this.renderGameScreen();
         if (this.renderTurnActionPanel) this.renderTurnActionPanel();
+    }
+};
+
+window.KiDeskyToast = {
+    show: function (message, type) {
+        if (window.PRS_App && window.PRS_App.showToast) {
+            window.PRS_App.showToast(message, type);
+        } else {
+            console.log('[Toast ' + (type || 'info') + ']', message);
+        }
     }
 };
