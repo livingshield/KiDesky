@@ -428,61 +428,67 @@ openAuthModal: function () {
             : null;
 
         var myRoleText = myPl
-
             ? '🛡️ Hraješ za: <strong style="color:' + myPl.color + ';">' + myPl.badge + ' ' + this.escapeHtml(myPl.name) + '</strong>'
-
             : '🛋️ Všichni hráči (Hot-Seat bez zámku)';
+
+        var restoreMyRoleBtn = '';
+        if (this.myOnlinePlayerIndex === -1 && this.state.players) {
+            var myMatchingIdx = -1;
+            for (var pi = 0; pi < this.state.players.length; pi++) {
+                if (typeof this.isMySlot === "function" && this.isMySlot(this.state.players[pi], pi)) {
+                    myMatchingIdx = pi;
+                    break;
+                }
+            }
+            if (myMatchingIdx >= 0) {
+                var myTargetP = this.state.players[myMatchingIdx];
+                restoreMyRoleBtn = '  <button class="btn-gold-lg" style="font-size:0.75rem; padding:0.22rem 0.55rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + myMatchingIdx + ')" title="Znovu uzamknout toto okno pouze pro tvou postavu">🔒 Hrát pouze za ' + this.escapeHtml(myTargetP.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "")) + '</button>';
+            }
+        }
 
         var optionsHtml = '<option value="-1" ' + (this.myOnlinePlayerIndex === -1 ? 'selected' : '') + '>🛋️ Všichni hráči u 1 PC (Hot-Seat bez zámku)</option>';
 
         for (var i = 0; i < this.state.players.length; i++) {
-
             var pl = this.state.players[i];
-
             var typeTag = (pl.type === "Human") ? "Hráč" : "PC";
-
             optionsHtml += '<option value="' + i + '" ' + (this.myOnlinePlayerIndex === i ? 'selected' : '') + '>🛡️ ' + pl.badge + ' ' + (i + 1) + '. ' + this.escapeHtml(pl.name) + ' (' + typeTag + ')</option>';
-
         }
 
         barEl.innerHTML = '<div class="online-room-banner">' +
-
             '<div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">' +
-
             '  <span class="online-pulse-dot" title="Online místnost je aktivní"></span>' +
-
             '  <span style="font-size:0.88rem; color:#f0f9ff;">🌐 Online Stůl: <strong style="color:var(--gold-light); letter-spacing:1px; font-size:0.98rem;">' + this.escapeHtml(code) + '</strong></span>' +
-
             '  <button class="btn-secondary" style="font-size:0.76rem; padding:0.22rem 0.55rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.copyRoomInviteLink()">📋 Kopírovat odkaz pro přátele</button>' +
-
             '  <span id="online-copy-feedback" style="font-size:0.76rem; color:#86efac;"></span>' +
-
             '</div>' +
-
             '<div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">' +
-
             '  <span style="font-size:0.82rem; background:rgba(0,0,0,0.3); border:1px solid rgba(56,189,248,0.3); border-radius:6px; padding:0.22rem 0.55rem;">' + myRoleText + '</span>' +
-
+            restoreMyRoleBtn +
             '  <button class="btn-gold-lg" style="font-size:0.76rem; padding:0.24rem 0.6rem;" onclick="PRS_App.openOnlineRoleModal()" title="Zvolit si rytíře pro tuto online partii">👤 Zvolit / změnit rytíře</button>' +
-
             '  <button class="btn-secondary" style="font-size:0.76rem; padding:0.24rem 0.6rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.openOnlineSeatsModal()" title="Spravovat křesla u stolu a nahradit nepřítomné hráče boty">🏰 Křesla &amp; Boti</button>' +
-
             '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.22rem 0.5rem;" onclick="PRS_App.pollOnlineSessionNow(true)" title="Okamžitě zkontrolovat tah ze serveru">🔄 Sync (Tah #' + (this.state.turnNumber || 1) + ')</button>' +
-
             '</div>' +
-
             '</div>';
-
     },
 
-    setMyOnlinePlayerSlot: function (val) {
-
+    setMyOnlinePlayerSlot: async function (val) {
         var idx = parseInt(val, 10);
-
         if (isNaN(idx)) idx = -1;
 
-        this.claimOnlineRole(idx);
+        if (idx === -1) {
+            var conf = await KiDeskyDialog.confirm(
+                "Přeješ si v tomto okně <strong>odemknout stůl pro hraní za všechny rytíře (Hot-Seat)</strong>?<br><br>V tomto režimu nebude okno čekat na síťové spoluhráče a budeš moci odehrát tah za kteréhokoliv rytíře přímo odsud.",
+                {
+                    title: "Odemknout hraní za všechny u 1 PC?",
+                    icon: "🛋️",
+                    confirmText: "Ano, hrát za všechny (Hot-Seat)",
+                    cancelText: "Ponechat zamčeno na svou roli"
+                }
+            );
+            if (!conf) return;
+        }
 
+        this.claimOnlineRole(idx);
     },
 
     // --- MODAL VÝBĚRU POSTAVY PRO ONLINE MULTIPLAYER ---
