@@ -3215,38 +3215,50 @@
 
         if (this.state.roomCode && this.myOnlinePlayerIndex >= 0 && this.state.currentPlayerIndex !== this.myOnlinePlayerIndex && !isBot) {
 
-            var myP = this.state.players[this.myOnlinePlayerIndex];
+            // Pokud hráč na tahu ve skutečnosti patří tomuto přihlášenému uživateli, okamžitě přepneme lokální slot
+            if (typeof this.isMySlot === "function" && this.isMySlot(player, this.state.currentPlayerIndex)) {
+                this.myOnlinePlayerIndex = this.state.currentPlayerIndex;
+                player.type = "Human";
+                player.claimedBy = this.getOnlineClientId();
+                try {
+                    localStorage.setItem("prs_slot_" + this.state.roomCode, String(this.state.currentPlayerIndex));
+                } catch (e) { }
+                this.saveCurrentSessionToCloud();
+            } else {
+                var myP = this.state.players[this.myOnlinePlayerIndex];
+                var myName = myP ? myP.name : "Tvůj rytíř";
 
-            var myName = myP ? myP.name : "Tvůj rytíř";
+                var canClaimActiveTurn = false;
+                if (this.currentUser && this.currentUser.role !== "Guest") {
+                    var curU = (this.currentUser.username || "").toLowerCase();
+                    var curD = (this.currentUser.displayName || "").toLowerCase();
+                    var pClean = (player.name || "").replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").trim().toLowerCase();
+                    if (pClean === curD || pClean === curU || (player.isOnlineHost && (this.state.hostUsername || "").toLowerCase() === curU)) {
+                        canClaimActiveTurn = true;
+                    }
+                }
 
-            el.innerHTML = '<div class="waiting-turn-card">' +
+                var claimBtnHtml = '';
+                if (canClaimActiveTurn) {
+                    claimBtnHtml = '<div style="margin-bottom:0.75rem;"><button class="btn-gold-lg" style="width:100%; font-size:0.92rem; padding:0.5rem 0.85rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + this.state.currentPlayerIndex + ')">⚔️ Hrát za ' + this.escapeHtml(player.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "")) + ' (Převzít svůj tah)</button></div>';
+                }
 
-                '<div style="font-size:1.5rem; margin-bottom:0.35rem;">⏳</div>' +
-
-                '<div style="font-family:\'Cinzel\',serif; font-size:1.05rem; color:var(--gold-light); font-weight:700; margin-bottom:0.35rem;">' +
-
-                '  Čeká se na tah spoluhráče: <span style="color:' + player.color + ';">' + player.badge + ' ' + this.escapeHtml(player.name) + '</span>' +
-
-                '</div>' +
-
-                '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:0.75rem;">' +
-
-                '  Tvůj zvolený rytíř u stolu je <strong>' + this.escapeHtml(myName) + '</strong>. Herní plán se automaticky synchronizuje každé 3 sekundy.' +
-
-                '</p>' +
-
-                '<div style="display:flex; justify-content:center; gap:0.5rem; flex-wrap:wrap;">' +
-
-                '  <button class="btn-secondary" style="font-size:0.8rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.pollOnlineSessionNow(true)">🔄 Zkontrolovat tah hned</button>' +
-
-                '  <button class="btn-secondary" style="font-size:0.78rem;" onclick="PRS_App.setMyOnlinePlayerSlot(-1)">🔓 Odemknout (hrát za všechny u 1 PC)</button>' +
-
-                '</div>' +
-
-                '</div>';
-
-            return;
-
+                el.innerHTML = '<div class="waiting-turn-card">' +
+                    '<div style="font-size:1.5rem; margin-bottom:0.35rem;">⏳</div>' +
+                    '<div style="font-family:\'Cinzel\',serif; font-size:1.05rem; color:var(--gold-light); font-weight:700; margin-bottom:0.35rem;">' +
+                    '  Čeká se na tah spoluhráče: <span style="color:' + player.color + ';">' + player.badge + ' ' + this.escapeHtml(player.name) + '</span>' +
+                    '</div>' +
+                    '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:0.75rem;">' +
+                    '  Tvůj zvolený rytíř u stolu je <strong>' + this.escapeHtml(myName) + '</strong>. Herní plán se automaticky synchronizuje každé 3 sekundy.' +
+                    '</p>' +
+                    claimBtnHtml +
+                    '<div style="display:flex; justify-content:center; gap:0.5rem; flex-wrap:wrap;">' +
+                    '  <button class="btn-secondary" style="font-size:0.8rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.pollOnlineSessionNow(true)">🔄 Zkontrolovat tah hned</button>' +
+                    '  <button class="btn-secondary" style="font-size:0.78rem;" onclick="PRS_App.setMyOnlinePlayerSlot(-1)">🔓 Odemknout (hrát za všechny u 1 PC)</button>' +
+                    '</div>' +
+                    '</div>';
+                return;
+            }
         }
 
         // Trvalé stabilní zobrazení tahu bota - tlačítko je nahoře na pevné pozici, text pod ním

@@ -274,6 +274,9 @@ openAuthModal: function () {
                     localStorage.setItem("prs_user", JSON.stringify(self.currentUser));
                     self.updateUserUI();
                     self.closeAuthModal();
+                    if (typeof self.rebindOnlineSeatAfterLogin === "function") {
+                        self.rebindOnlineSeatAfterLogin();
+                    }
                     self.enterGameHall();
                     self.fetchServerStatusAndSessions();
 
@@ -338,6 +341,43 @@ openAuthModal: function () {
         } catch (e) {
             return "c_temp_" + Math.random().toString(36).substring(2, 9);
         }
+    },
+
+    // Zjistí, zda daný slot rytíře patří aktuálnímu hráči (podle ID zařízení nebo účtu přihlášeného rytíře)
+    isMySlot: function (pl, slotIndex) {
+        if (!pl) return false;
+        if (this.myOnlinePlayerIndex === slotIndex) return true;
+        var myClientId = this.getOnlineClientId();
+        if (pl.claimedBy && pl.claimedBy === myClientId) return true;
+
+        if (this.currentUser && this.currentUser.role !== "Guest") {
+            var uName = (this.currentUser.username || "").trim().toLowerCase();
+            var dName = (this.currentUser.displayName || "").trim().toLowerCase();
+
+            // 1. Zaznamenané uživatelské jméno přímo na křesle
+            if (pl.userUsername && pl.userUsername.trim().toLowerCase() === uName) {
+                return true;
+            }
+
+            // 2. Křeslo hostitele (#0 nebo isOnlineHost) a shoda s hostUsername místnosti
+            var hostUser = (this.state && (this.state.hostUsername || this.state.sessionHostUsername || "")) || "";
+            if (hostUser && hostUser.trim().toLowerCase() === uName && (slotIndex === 0 || pl.isOnlineHost)) {
+                return true;
+            }
+
+            // 3. Shoda zobrazovaného jména nebo loginu rytíře
+            var cleanPlName = (pl.name || "")
+                .replace(/\s*\(PC.*?\)/gi, "")
+                .replace(/\s*\(Ty\)/gi, "")
+                .replace(/\s*\(Hostitel\)/gi, "")
+                .trim()
+                .toLowerCase();
+
+            if (cleanPlName && (cleanPlName === dName || cleanPlName === uName)) {
+                return true;
+            }
+        }
+        return false;
     },
 
     renderOnlineRoomBar: function () {
@@ -539,14 +579,17 @@ openAuthModal: function () {
             var pl = this.state.players[i];
             var isHost = (i === 0 || !!pl.isOnlineHost);
             var isHuman = (pl.type === "Human");
-            var isMyCurrentSlot = (this.myOnlinePlayerIndex === i) || (pl.claimedBy && pl.claimedBy === myClientId);
-            var isOccupiedByOther = !isMyCurrentSlot && (isHost || isHuman || (pl.claimedBy && pl.claimedBy !== myClientId));
+            var isMyAccount = this.isMySlot(pl, i);
+            var isMyCurrentSlot = (this.myOnlinePlayerIndex === i) || (pl.claimedBy && pl.claimedBy === myClientId) || isMyAccount;
+            var isOccupiedByOther = !isMyAccount && !isMyCurrentSlot && (isHost || isHuman || (pl.claimedBy && pl.claimedBy !== myClientId));
 
             var st = window.PRS_GameEngine ? window.PRS_GameEngine.getEffectiveStats(this.state, pl) : pl.skills;
             var roleTag = '';
 
-            if (isMyCurrentSlot) {
+            if (isMyCurrentSlot && this.myOnlinePlayerIndex === i) {
                 roleTag = '<span style="background:#22c55e; color:#fff; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">✅ Tvoje role</span>';
+            } else if (isMyAccount) {
+                roleTag = '<span style="background:rgba(234,179,8,0.25); color:#fef08a; border:1px solid #eab308; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">👑 Tvůj rytířský účet</span>';
             } else if (isOccupiedByOther) {
                 if (isHost) {
                     roleTag = '<span style="background:rgba(234,179,8,0.2); color:#fbbf24; border:1px solid #fbbf24; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">👑 Hostitel (' + this.escapeHtml(pl.name) + ')</span>';
@@ -573,8 +616,10 @@ openAuthModal: function () {
             html.push('    <span>✨' + (st.charisma || 0) + '</span>');
             html.push('  </div>');
 
-            if (isMyCurrentSlot) {
+            if (isMyCurrentSlot && this.myOnlinePlayerIndex === i) {
                 html.push('  <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; opacity:0.9; cursor:default; background:rgba(34,197,94,0.25); border-color:#22c55e; color:#86efac;">✓ Hraješ za tohoto rytíře</button>');
+            } else if (isMyAccount) {
+                html.push('  <button class="btn-gold-lg" style="width:100%; font-size:0.84rem; padding:0.4rem 0.5rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + i + ')">👑 Převzít svého rytíře (' + this.escapeHtml(pl.name.replace(" (PC)", "").replace(" (Ty)", "")) + ')</button>');
             } else if (isOccupiedByOther) {
                 html.push('  <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; opacity:0.6; cursor:not-allowed; background:rgba(60,40,30,0.5); border:1px dashed #78350f; color:#fed7aa;" title="Tuto postavu již obsadil jiný hráč">🔒 Již obsazeno</button>');
                 var amIHost = (this.myOnlinePlayerIndex === 0 || (this.state.players[this.myOnlinePlayerIndex] && this.state.players[this.myOnlinePlayerIndex].isOnlineHost));
@@ -603,8 +648,9 @@ openAuthModal: function () {
 
         if (selIdx >= 0 && selIdx < this.state.players.length) {
             var pl = this.state.players[selIdx];
+            var isMyAccount = this.isMySlot(pl, selIdx);
             var isHost = (selIdx === 0 || !!pl.isOnlineHost);
-            var isOccupiedByOther = (pl.type === "Human" || isHost) && (pl.claimedBy && pl.claimedBy !== myClientId);
+            var isOccupiedByOther = !isMyAccount && (pl.type === "Human" || isHost) && (pl.claimedBy && pl.claimedBy !== myClientId);
 
             if (isOccupiedByOther) {
                 KiDeskyDialog.alert("Role rytíře **" + this.escapeHtml(pl.name) + "** je již obsazena jiným hráčem. Zvol si prosím volnou roli označenou jako ✨ Volné k převzetí.", {
@@ -614,12 +660,31 @@ openAuthModal: function () {
                 return;
             }
 
+            // Pokud hráč předtím obsadil jiné křeslo (např. omylem jako dočasný Host po restartu PC)
+            var prevIdx = this.myOnlinePlayerIndex;
+            if (prevIdx >= 0 && prevIdx !== selIdx && this.state.players[prevIdx]) {
+                var oldP = this.state.players[prevIdx];
+                if (oldP.claimedBy === myClientId) {
+                    delete oldP.claimedBy;
+                    delete oldP.isOnlineHost;
+                    delete oldP.userUsername;
+                    oldP.type = "Bot_Balanced";
+                    var cName = oldP.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
+                    if (!cName || cName.toLowerCase() === "host") cName = "Zikmund z Chovu";
+                    oldP.name = cName + " (PC Vyvážený)";
+                }
+            }
+
             var nameInput = document.getElementById("online-player-custom-name");
             var customName = nameInput ? nameInput.value.trim() : "";
 
             pl.type = "Human"; // Povýšení na lidského hráče, aby za něj netahal automatický bot!
             pl.pawnId = this.selectedPawnId || "knight_valiant"; // Nahrazení bot figurky vlastní zvolenou figurkou hráče!
             pl.claimedBy = myClientId;
+
+            if (this.currentUser && this.currentUser.role !== "Guest") {
+                pl.userUsername = this.currentUser.username;
+            }
 
             if (customName) {
                 pl.name = customName;
@@ -1405,6 +1470,7 @@ openAuthModal: function () {
                     self.state.sessionGuid = res.session.sessionGuid;
 
                     self.state.roomCode = res.session.roomCode;
+                    self.state.hostUsername = res.session.hostUsername;
 
                     self.lastKnownTurnNumber = self.state.turnNumber;
 
@@ -1422,10 +1488,22 @@ openAuthModal: function () {
 
                     self.switchTab("board");
 
-                    // Zjistíme, zda už má tento hráč pro tuto místnost přiřazený slot podle clientId nebo localStorage
+                    // Zjistíme, zda už má tento hráč pro tuto místnost přiřazený slot podle účtu nebo clientId
                     var myClientId = self.getOnlineClientId();
                     var autoSlotIdx = -1;
-                    if (self.state.players && Array.isArray(self.state.players)) {
+
+                    // 1. Nejvyšší priorita: Shoda s účtem přihlášeného rytíře (hostitel nebo rytíř se stejným jménem)
+                    if (self.currentUser && self.currentUser.role !== "Guest" && self.state.players && Array.isArray(self.state.players)) {
+                        for (var pi = 0; pi < self.state.players.length; pi++) {
+                            if (self.isMySlot(self.state.players[pi], pi)) {
+                                autoSlotIdx = pi;
+                                break;
+                            }
+                        }
+                    }
+
+                    // 2. Druhá priorita: Shoda s ID klientského zařízení
+                    if (autoSlotIdx < 0 && self.state.players && Array.isArray(self.state.players)) {
                         for (var pi = 0; pi < self.state.players.length; pi++) {
                             if (self.state.players[pi] && self.state.players[pi].claimedBy === myClientId) {
                                 autoSlotIdx = pi;
@@ -1440,20 +1518,40 @@ openAuthModal: function () {
                     } catch (e) { }
 
                     if (autoSlotIdx >= 0) {
+                        // Uvolníme případná duplicitní křesla držená tímto zařízením
+                        for (var opi = 0; opi < self.state.players.length; opi++) {
+                            if (opi !== autoSlotIdx && self.state.players[opi] && self.state.players[opi].claimedBy === myClientId) {
+                                delete self.state.players[opi].claimedBy;
+                                delete self.state.players[opi].isOnlineHost;
+                                delete self.state.players[opi].userUsername;
+                                self.state.players[opi].type = "Bot_Balanced";
+                                var cName = self.state.players[opi].name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
+                                if (!cName || cName.toLowerCase() === "host") cName = "Zikmund z Chovu";
+                                self.state.players[opi].name = cName + " (PC Vyvážený)";
+                            }
+                        }
+
                         self.myOnlinePlayerIndex = autoSlotIdx;
                         self.state.players[autoSlotIdx].type = "Human";
                         self.state.players[autoSlotIdx].claimedBy = myClientId;
+                        if (self.currentUser && self.currentUser.role !== "Guest") {
+                            self.state.players[autoSlotIdx].userUsername = self.currentUser.username;
+                        }
                         self.state.players[autoSlotIdx].name = self.state.players[autoSlotIdx].name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
                         try {
                             localStorage.setItem("prs_slot_" + self.state.roomCode, String(autoSlotIdx));
                         } catch (e) { }
                         self.renderGameScreen();
+                        self.saveCurrentSessionToCloud();
                     } else if (savedSlot !== null && savedSlot !== undefined && savedSlot !== "" && savedSlot !== "-1") {
                         var sIdx = parseInt(savedSlot, 10);
-                        if (self.state.players && self.state.players[sIdx] && (!self.state.players[sIdx].claimedBy || self.state.players[sIdx].claimedBy === myClientId)) {
+                        if (self.state.players && self.state.players[sIdx] && (!self.state.players[sIdx].claimedBy || self.state.players[sIdx].claimedBy === myClientId || self.isMySlot(self.state.players[sIdx], sIdx))) {
                             self.myOnlinePlayerIndex = sIdx;
                             self.state.players[sIdx].type = "Human";
                             self.state.players[sIdx].claimedBy = myClientId;
+                            if (self.currentUser && self.currentUser.role !== "Guest") {
+                                self.state.players[sIdx].userUsername = self.currentUser.username;
+                            }
                             self.state.players[sIdx].name = self.state.players[sIdx].name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
                             self.renderGameScreen();
                             self.saveCurrentSessionToCloud();
@@ -1521,6 +1619,54 @@ openAuthModal: function () {
         setTimeout(function () {
             if (bubble.parentNode) bubble.parentNode.removeChild(bubble);
         }, 3600);
+    },
+
+    // --- AUTOMATICKÉ PÁROVÁNÍ KŘESLA PŘI PŘIHLÁŠENÍ UŽIVATELE ---
+    rebindOnlineSeatAfterLogin: function () {
+        if (!this.state || !this.state.roomCode || !this.state.players) return;
+        if (!this.currentUser || this.currentUser.role === "Guest") return;
+
+        var myClientId = this.getOnlineClientId();
+        var targetIdx = -1;
+        for (var i = 0; i < this.state.players.length; i++) {
+            if (this.isMySlot(this.state.players[i], i)) {
+                targetIdx = i;
+                break;
+            }
+        }
+
+        if (targetIdx >= 0) {
+            var prevIdx = this.myOnlinePlayerIndex;
+            // Pokud hráč před přihlášením držel jiné křeslo (např. omylem dočasný Host)
+            if (prevIdx >= 0 && prevIdx !== targetIdx && this.state.players[prevIdx]) {
+                var oldP = this.state.players[prevIdx];
+                if (oldP.claimedBy === myClientId) {
+                    delete oldP.claimedBy;
+                    delete oldP.isOnlineHost;
+                    delete oldP.userUsername;
+                    oldP.type = "Bot_Balanced";
+                    var cName = oldP.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
+                    if (!cName || cName.toLowerCase() === "host") cName = "Zikmund z Chovu";
+                    oldP.name = cName + " (PC Vyvážený)";
+                }
+            }
+
+            var pl = this.state.players[targetIdx];
+            pl.type = "Human";
+            pl.claimedBy = myClientId;
+            pl.userUsername = this.currentUser.username;
+            if (this.currentUser.displayName) {
+                pl.name = this.currentUser.displayName;
+            }
+            this.myOnlinePlayerIndex = targetIdx;
+            try {
+                localStorage.setItem("prs_slot_" + this.state.roomCode, String(targetIdx));
+            } catch (e) { }
+
+            this.saveCurrentSessionToCloud();
+            this.renderGameScreen();
+            this.addLog("👑 Účet rytíře byl spárován s křeslem. Hraješ za **" + pl.badge + " " + pl.name + "**!", "win");
+        }
     },
 
     // --- PŘEDÁNÍ TAHU NEAKTIVNÍHO HRÁČE KRÁLOVSKÉMU BOTOVI ---
@@ -1604,6 +1750,9 @@ openAuthModal: function () {
 
                         setTimeout(function () {
                             PRS_App.closeAuthModal();
+                            if (typeof PRS_App.rebindOnlineSeatAfterLogin === "function") {
+                                PRS_App.rebindOnlineSeatAfterLogin();
+                            }
                             PRS_App.enterGameHall();
                             PRS_App.fetchServerStatusAndSessions();
                             if (window.PRS_Audio && window.PRS_Audio.playFanfare) {
