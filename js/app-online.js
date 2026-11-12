@@ -794,6 +794,27 @@ openAuthModal: function () {
 
     },
 
+    amIOnlineHost: function () {
+        if (!this.state) return false;
+        if (this.myOnlinePlayerIndex === 0) return true;
+        if (this.state.players && this.state.players[this.myOnlinePlayerIndex] && this.state.players[this.myOnlinePlayerIndex].isOnlineHost) {
+            return true;
+        }
+        if (this.currentUser && this.currentUser.role !== "Guest" && this.currentUser.username) {
+            var u = this.currentUser.username.trim().toLowerCase();
+            var h = (this.state.hostUsername || "").trim().toLowerCase();
+            if (h && h === u) return true;
+        }
+        return false;
+    },
+
+    stopOnlinePollingLoop: function () {
+        if (this.onlinePollTimer) {
+            clearInterval(this.onlinePollTimer);
+            this.onlinePollTimer = null;
+        }
+    },
+
     startOnlinePollingLoop: function () {
         var self = this;
         if (this.onlinePollTimer) clearInterval(this.onlinePollTimer);
@@ -812,7 +833,8 @@ openAuthModal: function () {
     checkTurnInactivity: function () {
         if (!this.state || !this.state.players || this.state.phase === "GAME_OVER") return;
 
-        // 1. Podmínka: Upozornění neplatí pro hru jednoho hráče (vyžaduje 2+ lidské hráče ve hře)
+        // 1. Podmínka: Upozornění neplatí pro hru jednoho hráče (vyžaduje online stůl a 2+ lidské hráče ve hře)
+        if (!this.state.roomCode) return;
         var humanCount = 0;
         for (var i = 0; i < this.state.players.length; i++) {
             if (this.state.players[i].type === "Human") humanCount++;
@@ -820,8 +842,7 @@ openAuthModal: function () {
         if (humanCount <= 1) return;
 
         // 2. Podmínka: Upozornění je určeno pouze pro zakladatele / hostitele stolu
-        var isHost = (this.myOnlinePlayerIndex === 0 || (this.state.players[this.myOnlinePlayerIndex] && this.state.players[this.myOnlinePlayerIndex].isOnlineHost));
-        if (!isHost) return;
+        if (!this.amIOnlineHost()) return;
 
         // 3. Podmínka: Hráč na tahu je člověk a NENÍ to hostitel
         var curIdx = this.state.currentPlayerIndex;
@@ -846,19 +867,88 @@ openAuthModal: function () {
             if (window.PRS_Audio && window.PRS_Audio.playNotice) {
                 try { window.PRS_Audio.playNotice(); } catch (e) {}
             }
-            KiDeskyDialog.confirm(
-                "Rytíř <strong>" + this.escapeHtml(curPlayer.name) + "</strong> (křeslo #" + (curIdx + 1) + ") je na tahu již <strong>více než 2 minuty</strong> a neodehrál svůj tah.<br><br>Přeješ si ho jako zakladatel stolu převést na PC bota, aby hra mohla plynule pokračovat?",
+
+            KiDeskyDialog.choice(
+                "Rytíř <strong>" + this.escapeHtml(curPlayer.name) + "</strong> (křeslo #" + (curIdx + 1) + ") je na tahu již <strong>více než 2 minuty</strong> a neodehrál svůj tah.<br><br>Jako hostitel stolu můžeš zvolit, jak situaci vyřešit:",
+                [
+                    {
+                        id: "step_once",
+                        label: "⚡ Odehrát tento 1 tah botem",
+                        description: "Královský rádce okamžitě provede tah za nepřítomného rytíře, ale křeslo mu ponechá pro příští kolo.",
+                        isPrimary: true
+                    },
+                    {
+                        id: "convert_perm",
+                        label: "🤖 Trvale převést křeslo na PC bota",
+                        description: "Křeslo trvale převezme počítačový bot. Pokud se hráč vrátí, můžeš křeslo v menu Křesla & Boti znovu uvolnit.",
+                        isPrimary: false
+                    },
+                    {
+                        id: "wait_more",
+                        label: "⏱️ Počkat ještě (dalších 60 s)",
+                        description: "Dát hráči ještě minutu času před dalším upozorněním.",
+                        isPrimary: false
+                    }
+                ],
                 {
-                    title: "Neaktivní hráč na tahu (2+ min)",
-                    icon: "⏳",
-                    confirmText: "🤖 Převést na PC bota",
-                    cancelText: "Počkat ještě"
+                    title: "Neaktivita hráče u online stolu",
+                    icon: "⏳"
                 }
-            ).then(function (confirmed) {
-                if (confirmed && self.state && self.state.currentPlayerIndex === curIdx) {
+            ).then(function (chosen) {
+                if (!self.state || self.state.currentPlayerIndex !== curIdx) return;
+                if (chosen === "step_once") {
+                    self.stepAfkPlayerOnce();
+                } else if (chosen === "convert_perm") {
                     self.convertSeatToBot(curIdx);
+                } else if (chosen === "wait_more") {
+                    self._inactivityTurnStart = Date.now() - 60000;
+                    self._inactivityAlertShown = false;
                 }
             });
+        }
+    },
+
+    // Odehraje jeden tah za neaktivního lidského hráče pomocí logiky bota, ale ponechá mu křeslo jako Human
+    stepAfkPlayerOnce: function () {
+        if (!this.state || this.state.phase === "GAME_OVER") return;
+        var curIdx = this.state.currentPlayerIndex;
+        var p = this.state.players[curIdx];
+        if (!p) return;
+
+        var origType = p.type;
+        var self = this;
+
+        this.addLog("⚡ Hráč " + p.name + " neodpovídal. Hostitel nechal jeho tah odehrát královským rádcem.", "danger");
+
+        // Dočasně nastavíme typ hráče na bota, aby bot AI rozhodovala
+        p.type = "Bot_Balanced";
+
+        if (this.state.phase === "ROLL") {
+            this.executeRollAndAnimateMove(p, function () {
+                if (window.PRS_GameEngine && window.PRS_GameEngine.executeBotTurn) {
+                    window.PRS_GameEngine.executeBotTurn(self.state);
+                }
+                p.type = origType;
+                self._inactivityTurnStart = Date.now();
+                self._inactivityAlertShown = false;
+                self.syncFocusToActivePlayer(true);
+                self.renderGameScreen();
+                if (typeof self.saveCurrentSessionToCloud === "function") {
+                    self.saveCurrentSessionToCloud();
+                }
+            });
+        } else {
+            if (window.PRS_GameEngine && window.PRS_GameEngine.executeBotTurn) {
+                window.PRS_GameEngine.executeBotTurn(self.state);
+            }
+            p.type = origType;
+            self._inactivityTurnStart = Date.now();
+            self._inactivityAlertShown = false;
+            self.syncFocusToActivePlayer(true);
+            self.renderGameScreen();
+            if (typeof self.saveCurrentSessionToCloud === "function") {
+                self.saveCurrentSessionToCloud();
+            }
         }
     },
 

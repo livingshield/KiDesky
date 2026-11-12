@@ -1141,6 +1141,68 @@
 
             // Pokud je na tahu bot (např. právě dosazený), rovnou spustíme jeho tah
             this.scheduleBotTurnIfNeeded();
+        },
+
+        // Převede celou rozehranou online hru na čistě offline partii proti PC botům
+        convertEntireGameToOfflineBots: async function () {
+            if (!this.state || !this.state.players) return;
+            var conf = await KiDeskyDialog.confirm(
+                "Přeješ si odpojit hru ze sítě a převést všechny ostatní hráče na inteligentní PC boty?<br><br>V partii budeš moci ihned plynule pokračovat offline a celou ji dohrát sám.",
+                {
+                    title: "Převést na offline hru proti botům",
+                    icon: "🤖",
+                    confirmText: "🤖 Ano, hrát offline proti botům",
+                    cancelText: "Zůstat online"
+                }
+            );
+            if (!conf) return;
+
+            var myIdx = (typeof this.myOnlinePlayerIndex === "number" && this.myOnlinePlayerIndex >= 0) ? this.myOnlinePlayerIndex : 0;
+            this.state.roomCode = null;
+            this.state.sessionGuid = null;
+
+            if (this.state.players && Array.isArray(this.state.players)) {
+                for (var i = 0; i < this.state.players.length; i++) {
+                    var p = this.state.players[i];
+                    if (i === myIdx) {
+                        p.type = "Human";
+                        delete p.isOnlineHost;
+                        delete p.claimedBy;
+                    } else {
+                        p.type = "Bot_Balanced";
+                        p.pawnId = "bot_balanced";
+                        delete p.isOnlineHost;
+                        delete p.claimedBy;
+                        var cleanName = p.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").replace(/\s*\(Ty\)/gi, "").trim();
+                        p.name = cleanName + " (PC)";
+                    }
+                }
+            }
+
+            try {
+                localStorage.removeItem("prs_active_online_room");
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, "", window.location.pathname);
+                }
+            } catch (e) { }
+
+            this.closeOnlineSeatsModal();
+            if (typeof this.stopOnlinePollingLoop === "function") {
+                this.stopOnlinePollingLoop();
+            }
+            this.saveActiveGameAutosave();
+            this.renderOnlineRoomBar();
+            this.renderGameScreen();
+            this.updateUserUI();
+
+            this.addLog("🤖 Celá výprava byla odpojena ze sítě a převedena na hru proti PC botům. Můžeš nerušeně hrát offline!", "win");
+            if (window.PRS_Audio && window.PRS_Audio.playFanfare) {
+                window.PRS_Audio.playFanfare();
+            }
+
+            if (this.scheduleBotTurnIfNeeded) {
+                this.scheduleBotTurnIfNeeded();
+            }
         }
 
     });

@@ -3243,6 +3243,34 @@
                     claimBtnHtml = '<div style="margin-bottom:0.75rem;"><button class="btn-gold-lg" style="width:100%; font-size:0.92rem; padding:0.5rem 0.85rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + this.state.currentPlayerIndex + ')">⚔️ Hrát za ' + this.escapeHtml(player.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "")) + ' (Převzít svůj tah)</button></div>';
                 }
 
+                var isHostWaiting = typeof this.amIOnlineHost === "function" && this.amIOnlineHost();
+                var afkHostControls = '';
+                if (isHostWaiting && player.type === "Human" && this.state.currentPlayerIndex !== this.myOnlinePlayerIndex) {
+                    var elapsedSec = 0;
+                    var turnKey = (this.state.turnNumber || 1) + "_" + this.state.currentPlayerIndex;
+                    if (this._inactivityTurnStart && this._inactivityTrackingKey === turnKey) {
+                        elapsedSec = Math.floor((Date.now() - this._inactivityTurnStart) / 1000);
+                    }
+                    var m = Math.floor(elapsedSec / 60);
+                    var s = elapsedSec % 60;
+                    var timeStr = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+                    var isAfk = (elapsedSec >= 120);
+
+                    afkHostControls = '<div style="margin:0.65rem 0; padding:0.5rem 0.65rem; background:rgba(0,0,0,0.35); border:1px solid ' + (isAfk ? '#ef4444' : 'rgba(212,175,55,0.25)') + '; border-radius:8px;">' +
+                        '<div style="font-size:0.75rem; color:' + (isAfk ? '#fca5a5' : '#cbd5e1') + '; margin-bottom:' + (isAfk ? '0.45rem' : '0.15rem') + '; display:flex; justify-content:space-between; align-items:center;">' +
+                        '  <span>⏱️ Čas rytíře na tahu:</span>' +
+                        '  <strong style="font-family:monospace; font-size:0.82rem; color:' + (isAfk ? '#ef4444' : '#fef08a') + ';">' + timeStr + (isAfk ? ' (Neaktivní!)' : '') + '</strong>' +
+                        '</div>' +
+                        (isAfk
+                            ? '<div style="display:flex; gap:0.4rem; justify-content:center; flex-wrap:wrap;">' +
+                              '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_App.stepAfkPlayerOnce()">⚡ Odehrát 1 tah botem</button>' +
+                              '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem; border-color:#ef4444; color:#fca5a5;" onclick="PRS_App.convertSeatToBot(' + this.state.currentPlayerIndex + ')">🤖 Převést na PC</button>' +
+                              '</div>'
+                            : '<div style="font-size:0.7rem; color:var(--text-muted); text-align:center;">Při neaktivitě > 2 min můžeš tah odehrát rádcem.</div>'
+                        ) +
+                        '</div>';
+                }
+
                 el.innerHTML = '<div class="waiting-turn-card">' +
                     '<div style="font-size:1.5rem; margin-bottom:0.35rem;">⏳</div>' +
                     '<div style="font-family:\'Cinzel\',serif; font-size:1.05rem; color:var(--gold-light); font-weight:700; margin-bottom:0.35rem;">' +
@@ -3252,6 +3280,7 @@
                     '  Tvůj zvolený rytíř u stolu je <strong>' + this.escapeHtml(myName) + '</strong>. Herní plán se automaticky synchronizuje každé 3 sekundy.' +
                     '</p>' +
                     claimBtnHtml +
+                    afkHostControls +
                     '<div style="display:flex; justify-content:center; gap:0.5rem; flex-wrap:wrap;">' +
                     '  <button class="btn-secondary" style="font-size:0.8rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.pollOnlineSessionNow(true)">🔄 Zkontrolovat tah hned</button>' +
                     '  <button class="btn-secondary" style="font-size:0.78rem;" onclick="PRS_App.setMyOnlinePlayerSlot(-1)">🔓 Odemknout (hrát za všechny u 1 PC)</button>' +

@@ -2814,10 +2814,10 @@
     <script src="js/app-dialog.js?v=202611112245" defer></script>
     <script src="js/app.js?v=202611112245" defer></script>
     <script src="js/app-board.js?v=202611112245" defer></script>
-    <script src="js/app-hud.js?v=202611120935" defer></script>
-    <script src="js/app-modals.js?v=202611120935" defer></script>
-    <script src="js/app-online.js?v=202611120935" defer></script>
-    <script src="js/app-saves.js?v=202611112245" defer></script>
+    <script src="js/app-hud.js?v=202611121150" defer></script>
+    <script src="js/app-modals.js?v=202611121150" defer></script>
+    <script src="js/app-online.js?v=202611121150" defer></script>
+    <script src="js/app-saves.js?v=202611121150" defer></script>
     <script src="js/app-map-editor.js?v=202611112245" defer></script>
     <script src="js/app-catalog.js?v=202611112245" defer></script>
     <script src="js/app-admin.js?v=202611112245" defer></script>
@@ -3523,9 +3523,14 @@
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-top:1px solid rgba(212,175,55,0.2); padding-top:0.75rem;">
                 <button class="btn-secondary" onclick="PRS_App.closeOnlineSeatsModal()">Zavřít</button>
-                <button class="btn-gold-lg" style="padding:0.55rem 1.25rem; font-size:0.92rem;" onclick="PRS_App.resumeOnlineGameFromSeats()">
-                    ⚔️ Vstoupit ke stolu a pokračovat ve hře →
-                </button>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn-secondary" style="border-color:#f59e0b; color:#fde68a; font-size:0.82rem; padding:0.45rem 0.75rem;" onclick="PRS_App.convertEntireGameToOfflineBots()" title="Odpojit hru ze sítě a pokračovat sólo offline proti PC botům">
+                        🤖 Hrát offline proti botům
+                    </button>
+                    <button class="btn-gold-lg" style="padding:0.55rem 1.25rem; font-size:0.92rem;" onclick="PRS_App.resumeOnlineGameFromSeats()">
+                        ⚔️ Vstoupit ke stolu a pokračovat ve hře →
+                    </button>
+                </div>
             </div>
         </div>
     </div>
