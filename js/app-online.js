@@ -616,9 +616,9 @@ openAuthModal: function () {
             html.push('  <div style="font-size:1rem; font-weight:bold; color:' + pl.color + '; margin-bottom:0.2rem;">' + this.escapeHtml(pl.name) + '</div>');
             html.push('  <div style="font-size:0.85rem; color:#f472b6; font-weight:bold; margin-bottom:0.5rem;">' + pl.totalHearts + ' 💖 • ' + pl.gold.toLocaleString("cs-CZ") + ' zl.</div>');
             html.push('  <div style="display:flex; justify-content:center; gap:0.4rem; font-size:0.76rem; margin-bottom:0.75rem; color:var(--text-muted); background:rgba(0,0,0,0.3); border-radius:6px; padding:0.25rem;">');
-            html.push('    <span>⚔️' + (st.boj || 0) + '</span>');
-            html.push('    <span>🏇' + (st.jizda || 0) + '</span>');
-            html.push('    <span>💃' + (st.tanec || 0) + '</span>');
+            html.push('    <span>⚔️' + (st.combat || 0) + '</span>');
+            html.push('    <span>🏇' + (st.riding || 0) + '</span>');
+            html.push('    <span>💃' + (st.dance || 0) + '</span>');
             html.push('    <span>✨' + (st.charisma || 0) + '</span>');
             html.push('  </div>');
 
@@ -791,7 +791,7 @@ openAuthModal: function () {
             try { savedRoom = localStorage.getItem("prs_active_online_room"); } catch (e) { }
             var activeTab = null;
             try { activeTab = sessionStorage.getItem("prs_active_tab"); } catch (e) { }
-            if (savedRoom && activeTab === "board") {
+            if (savedRoom && activeTab === "board" && (!this.hasGameStarted || (this.state && this.state.roomCode))) {
                 console.log("[KiDesky] Obnovuji online stůl z předchozí relace:", savedRoom);
                 this.loadSessionFromCloud(savedRoom);
             }

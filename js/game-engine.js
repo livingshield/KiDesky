@@ -199,11 +199,11 @@ window.PRS_GameEngine = {
 
                 skills: {
 
-                    boj: 0,
+                    combat: 0,
 
-                    jizda: 0,
+                    riding: 0,
 
-                    tanec: 0,
+                    dance: 0,
 
                     charisma: 0
 
@@ -370,7 +370,7 @@ window.PRS_GameEngine = {
 
         if (!realNode) return 0;
 
-        var animalBase = (cfg && cfg.animalBasePrices) ? cfg.animalBasePrices : { sokol: 400, pes: 500, kun: 600 };
+        var animalBase = (cfg && cfg.animalBasePrices) ? cfg.animalBasePrices : { falcon: 400, dog: 500, horse: 600 };
 
         var estates = (cfg && cfg.estates) ? cfg.estates : (window.PRS_DEFAULT_CONFIG ? window.PRS_DEFAULT_CONFIG.estates : {});
 
@@ -656,11 +656,11 @@ window.PRS_GameEngine = {
 
         var eq = this.getEquippedItems(player);
 
-        var boj = player.skills.boj;
+        var combat = player.skills.combat;
 
-        var jizda = player.skills.jizda;
+        var riding = player.skills.riding;
 
-        var tanec = player.skills.tanec;
+        var dance = player.skills.dance;
 
         var charisma = player.skills.charisma;
 
@@ -672,11 +672,11 @@ window.PRS_GameEngine = {
 
             if (item) {
 
-                boj += (item.boj || 0);
+                combat += (item.combat || 0);
 
-                jizda += (item.jizda || 0);
+                riding += (item.riding || 0);
 
-                tanec += (item.tanec || 0);
+                dance += (item.dance || 0);
 
                 charisma += (item.charisma || 0);
 
@@ -688,7 +688,7 @@ window.PRS_GameEngine = {
 
         var ownedCastles = 0, ownedTowns = 0, ownedVillages = 0, ownedBuildings = 0, ownedJesters = 0;
 
-        var hasStaje = false, hasKovarna = false, hasKrejci = false, hasSokolnik = false, hasPsovod = false;
+        var hasStables = false, hasForge = false, hasTailor = false, hasFalconer = false, hasDoghandler = false;
 
         var horses = 0, dogs = 0, falcons = 0;
 
@@ -718,25 +718,25 @@ window.PRS_GameEngine = {
 
                 ownedBuildings++;
 
-                if (nd.subtype === "staje") hasStaje = true;
+                if (nd.subtype === "stables") hasStables = true;
 
-                if (nd.subtype === "kovarna") hasKovarna = true;
+                if (nd.subtype === "forge") hasForge = true;
 
-                if (nd.subtype === "krejci") hasKrejci = true;
+                if (nd.subtype === "tailor") hasTailor = true;
 
-                if (nd.subtype === "sokolnik") hasSokolnik = true;
+                if (nd.subtype === "falconer") hasFalconer = true;
 
-                if (nd.subtype === "psovod") hasPsovod = true;
+                if (nd.subtype === "doghandler") hasDoghandler = true;
 
             }
 
             if (nd.type === "ANIMAL") {
 
-                if (nd.subtype === "kun") horses++;
+                if (nd.subtype === "horse") horses++;
 
-                if (nd.subtype === "pes") dogs++;
+                if (nd.subtype === "dog") dogs++;
 
-                if (nd.subtype === "sokol") falcons++;
+                if (nd.subtype === "falcon") falcons++;
 
             }
 
@@ -765,7 +765,7 @@ window.PRS_GameEngine = {
         var rentPigs = (lsCfg.pigsRent !== undefined) ? Number(lsCfg.pigsRent) : 75;
         var rentSheep = (lsCfg.sheepRent !== undefined) ? Number(lsCfg.sheepRent) : 50;
 
-        var livestockCapacity = (ownedVillages * capVil) + (ownedTowns * capTown) + (hasStaje ? capStaje : 0);
+        var livestockCapacity = (ownedVillages * capVil) + (ownedTowns * capTown) + (hasStables ? capStaje : 0);
         var extraLivestockCount = extraCattle + extraSheep + extraPigs;
         var livestockTaxBonus = (totalCattle * taxCattle) + (totalPigs * taxPigs) + (totalSheep * taxSheep);
         var livestockVillageRentBonus = (extraCattle * rentCattle) + (extraPigs * rentPigs) + (extraSheep * rentSheep);
@@ -774,23 +774,23 @@ window.PRS_GameEngine = {
 
         charisma += ownedCastles * castleBonus;
 
-        if (hasKovarna) boj += 1;
+        if (hasForge) combat += 1;
 
-        if (hasStaje) jizda += 1;
+        if (hasStables) riding += 1;
 
-        if (hasKrejci) tanec += 1;
+        if (hasTailor) dance += 1;
 
         if (player.activeScrolls && player.activeScrolls.combatBonus) {
-            boj += player.activeScrolls.combatBonus;
+            combat += player.activeScrolls.combatBonus;
         }
 
         return {
 
-            boj: Math.max(0, boj),
+            combat: Math.max(0, combat),
 
-            jizda: Math.max(0, jizda),
+            riding: Math.max(0, riding),
 
-            tanec: Math.max(0, tanec),
+            dance: Math.max(0, dance),
 
             charisma: Math.max(0, charisma),
 
@@ -846,15 +846,15 @@ window.PRS_GameEngine = {
 
             trophyItem: eq.trophy,
 
-            hasStaje: hasStaje,
+            hasStables: hasStables,
 
-            hasKovarna: hasKovarna,
+            hasForge: hasForge,
 
-            hasKrejci: hasKrejci,
+            hasTailor: hasTailor,
 
-            hasSokolnik: hasSokolnik,
+            hasFalconer: hasFalconer,
 
-            hasPsovod: hasPsovod,
+            hasDoghandler: hasDoghandler,
 
             equipped: eq
 
@@ -976,7 +976,7 @@ window.PRS_GameEngine = {
 
                 var sid = an.setId;
 
-                if (!setCounts[sid]) setCounts[sid] = { kun: 0, pes: 0, sokol: 0 };
+                if (!setCounts[sid]) setCounts[sid] = { horse: 0, dog: 0, falcon: 0 };
 
                 if (an.subtype) setCounts[sid][an.subtype]++;
 
@@ -990,11 +990,11 @@ window.PRS_GameEngine = {
 
             var sc = setCounts[sKey];
 
-            var totalInSet = (sc.kun ? 1 : 0) + (sc.pes ? 1 : 0) + (sc.sokol ? 1 : 0);
+            var totalInSet = (sc.horse ? 1 : 0) + (sc.dog ? 1 : 0) + (sc.falcon ? 1 : 0);
 
             if (totalInSet === 2) {
 
-                var missingSubtype = !sc.kun ? "kun" : (!sc.pes ? "pes" : "sokol");
+                var missingSubtype = !sc.horse ? "horse" : (!sc.dog ? "dog" : "falcon");
 
                 for (var ni = 0; ni < state.board.nodes.length; ni++) {
 
@@ -1145,7 +1145,7 @@ window.PRS_GameEngine = {
                     var animNode = state.board.nodes[plObj.ownedNodes[on]];
                     if (animNode && animNode.type === "ANIMAL" && animNode.setId) {
                         var sid = animNode.setId;
-                        if (!setCounts[sid]) setCounts[sid] = { kun: 0, pes: 0, sokol: 0 };
+                        if (!setCounts[sid]) setCounts[sid] = { horse: 0, dog: 0, falcon: 0 };
                         if (animNode.subtype) setCounts[sid][animNode.subtype]++;
                     }
                 }
@@ -1153,7 +1153,7 @@ window.PRS_GameEngine = {
 
             var completeSets = 0;
             for (var sKey in setCounts) {
-                if (setCounts[sKey].kun >= 1 && setCounts[sKey].pes >= 1 && setCounts[sKey].sokol >= 1) {
+                if (setCounts[sKey].horse >= 1 && setCounts[sKey].dog >= 1 && setCounts[sKey].falcon >= 1) {
                     completeSets++;
                 }
             }
@@ -1439,7 +1439,7 @@ window.PRS_GameEngine = {
                 }
 
                 // Dvorní tanec: Tanec >= 2 se šaty nebo Tanec >= 3 získá přízeň princezny na dvořanské hostině (+0.5 💖, při Tanec >= 5 dokonce +1.0 💖)
-                var danceHearts = (stNow.tanec >= 5) ? 1.0 : ((stNow.tanec >= 3 || (stNow.tanec >= 2 && stNow.hasDress)) ? 0.5 : 0);
+                var danceHearts = (stNow.dance >= 5) ? 1.0 : ((stNow.dance >= 3 || (stNow.dance >= 2 && stNow.hasDress)) ? 0.5 : 0);
 
                 var stipendDesc = isLandless ? "zvýšenou královskou podporu pro nemajetné **+" + stipend + " zl.**" : "žold +" + stipend + " zl.";
 
@@ -1507,7 +1507,7 @@ window.PRS_GameEngine = {
 
         if (passedBridgeFestival && landedNode.type !== "FESTIVAL") {
 
-            var festTypes = ["turnaj", "ples", "zavod"];
+            var festTypes = ["tournament", "ball", "race"];
 
             state.pendingAction.canResolveFestival = true;
 
@@ -1719,7 +1719,7 @@ window.PRS_GameEngine = {
                 }
 
                 // Dvorní tanec: Tanec >= 2 se šaty nebo Tanec >= 3 získá přízeň princezny na dvořanské hostině (+0.5 💖, při Tanec >= 5 dokonce +1.0 💖)
-                var danceHearts = (stNow.tanec >= 5) ? 1.0 : ((stNow.tanec >= 3 || (stNow.tanec >= 2 && stNow.hasDress)) ? 0.5 : 0);
+                var danceHearts = (stNow.dance >= 5) ? 1.0 : ((stNow.dance >= 3 || (stNow.dance >= 2 && stNow.hasDress)) ? 0.5 : 0);
 
                 var stipendDesc = isLandless ? "zvýšenou královskou podporu pro nemajetné **+" + stipend + " zl.**" : "žold +" + stipend + " zl.";
 
@@ -1813,7 +1813,7 @@ window.PRS_GameEngine = {
 
         if (passedBridgeFestival && landedNode.type !== "FESTIVAL") {
 
-            var festTypes = ["turnaj", "ples", "zavod"];
+            var festTypes = ["tournament", "ball", "race"];
 
             state.pendingAction.canResolveFestival = true;
 
@@ -1984,8 +1984,8 @@ window.PRS_GameEngine = {
             // Aktivní bonus Tance: Vystoupení na Hradě (+0.5 💖, u Tanec >= 5 až +1.0 💖)
             if (node.type === "CASTLE") {
                 var cStats = this.getEffectiveStats(state, player);
-                if (cStats.tanec >= 2) {
-                    var cBonus = (cStats.tanec >= 5) ? 1.0 : 0.5;
+                if (cStats.dance >= 2) {
+                    var cBonus = (cStats.dance >= 5) ? 1.0 : 0.5;
                     player.permanentHearts += cBonus;
                     player.stats.heartsFromFestivals += cBonus;
                     this.addLog(state, "💃 Dvorní tanec na Hradě! " + player.badge + " " + player.name + " okouzlil společnost na " + node.name + " vznešeným tancem (+" + cBonus + " 💖)!", "festival");
@@ -1995,8 +1995,8 @@ window.PRS_GameEngine = {
             // Aktivní bonus Tance: Kejklířský dar od trubadúrů (+200 zl. za každý bod Tance)
             if (node.type === "JESTER") {
                 var jStats = this.getEffectiveStats(state, player);
-                if (jStats.tanec >= 1) {
-                    var jGift = jStats.tanec * 200;
+                if (jStats.dance >= 1) {
+                    var jGift = jStats.dance * 200;
                     player.gold += jGift;
                     this.addLog(state, "🃏 Trubadúrský dar! Kejklíři na " + node.name + " ocenili tvé taneční umění a darovali ti +" + jGift.toLocaleString("cs-CZ") + " zl.!", "gold");
                 }
@@ -2030,7 +2030,7 @@ window.PRS_GameEngine = {
 
                 }
 
-                if (node.type === "BUILDING" && node.subtype === "staje") {
+                if (node.type === "BUILDING" && node.subtype === "stables") {
 
                     state.pendingAction.canShopLivestock = true;
 
@@ -2082,7 +2082,7 @@ window.PRS_GameEngine = {
 
                 // Královský trysk: Sleva 30 % na mýtné na Vesnicích pro zkušené jezdce v plném cvalu
                 var pMoveStats = this.getEffectiveStats(state, player);
-                if (node.type === "VILLAGE" && pMoveStats.jizda >= 4 && pMoveStats.horses > 0) {
+                if (node.type === "VILLAGE" && pMoveStats.riding >= 4 && pMoveStats.horses > 0) {
                     rent = Math.round(rent * 0.70);
                 }
 
@@ -2432,15 +2432,15 @@ window.PRS_GameEngine = {
 
                 if (!bn) continue;
 
-                if (node.subtype === "staje" && bn.type === "ANIMAL" && bn.subtype === "kun") count++;
+                if (node.subtype === "stables" && bn.type === "ANIMAL" && bn.subtype === "horse") count++;
 
-                if (node.subtype === "sokolnik" && bn.type === "ANIMAL" && bn.subtype === "sokol") count++;
+                if (node.subtype === "falconer" && bn.type === "ANIMAL" && bn.subtype === "falcon") count++;
 
-                if (node.subtype === "psovod" && bn.type === "ANIMAL" && bn.subtype === "pes") count++;
+                if (node.subtype === "doghandler" && bn.type === "ANIMAL" && bn.subtype === "dog") count++;
 
             }
 
-            if (node.subtype === "kovarna" || node.subtype === "krejci") {
+            if (node.subtype === "forge" || node.subtype === "tailor") {
 
                 count = owner.items.length;
 
@@ -2487,8 +2487,8 @@ window.PRS_GameEngine = {
             totalRentSum += rent;
 
             if (nd.type === "ANIMAL") {
-                if (nd.subtype === "kun") horseCount++;
-                else if (nd.subtype === "pes") dogCount++;
+                if (nd.subtype === "horse") horseCount++;
+                else if (nd.subtype === "dog") dogCount++;
                 else falconCount++;
             } else if (nd.type === "VILLAGE") {
                 villageCount++;
@@ -2542,7 +2542,7 @@ window.PRS_GameEngine = {
             completeSetsCount: player.completeSetsCount || 0,
             breedingHearts: player.breedingHearts || 0,
             setHeartsBonus: player.setHeartsBonus || 0,
-            hasStaje: st.hasStaje
+            hasStables: st.hasStables
         };
     },
 
@@ -2863,11 +2863,11 @@ window.PRS_GameEngine = {
 
         } else if (card.effect === "robbers") {
 
-            if (stats.boj >= 3) {
+            if (stats.combat >= 3) {
 
                 player.gold += card.value;
 
-                msg += " (Tvůj Boj je " + stats.boj + " -> Lapkové zahnáni, +" + card.value + " zl.!)";
+                msg += " (Tvůj Boj je " + stats.combat + " -> Lapkové zahnáni, +" + card.value + " zl.!)";
 
                 if (window.PRS_TROPHIES && window.PRS_TROPHIES.trophy_robbers) {
 
@@ -2897,7 +2897,7 @@ window.PRS_GameEngine = {
 
                 player.gold = Math.max(0, player.gold - card.value);
 
-                msg += " (Tvůj Boj je jen " + stats.boj + " -> Ztrácíš " + card.value + " zl.)";
+                msg += " (Tvůj Boj je jen " + stats.combat + " -> Ztrácíš " + card.value + " zl.)";
 
             }
 
@@ -2951,7 +2951,7 @@ window.PRS_GameEngine = {
 
         } else if (card.effect === "ball") {
 
-            if (stats.hasDress || stats.tanec >= 2) {
+            if (stats.hasDress || stats.dance >= 2) {
 
                 player.permanentHearts += card.value;
 
@@ -2969,7 +2969,7 @@ window.PRS_GameEngine = {
 
         } else if (card.effect === "riding") {
 
-            if (stats.horses > 0 || stats.jizda >= 2) {
+            if (stats.horses > 0 || stats.riding >= 2) {
 
                 player.permanentHearts += card.value;
 
@@ -2999,7 +2999,7 @@ window.PRS_GameEngine = {
 
         } else if (card.effect === "free_skill") {
 
-            var skKeys = ["boj", "jizda", "tanec", "charisma"];
+            var skKeys = ["combat", "riding", "dance", "charisma"];
 
             skKeys.sort(function (a, b) { return player.skills[a] - player.skills[b]; });
 
@@ -3085,7 +3085,7 @@ window.PRS_GameEngine = {
 
             if (r < 0.6) {
 
-                var skKeys = ["boj", "jizda", "tanec", "charisma"];
+                var skKeys = ["combat", "riding", "dance", "charisma"];
 
                 skKeys.sort(function (a, b) { return player.skills[a] - player.skills[b]; });
 
@@ -3121,15 +3121,15 @@ window.PRS_GameEngine = {
 
             }
 
-        } else if (opt.effect === "gain_jizda") {
+        } else if (opt.effect === "gain_riding") {
 
-            if (player.skills.jizda < 5) player.skills.jizda++;
+            if (player.skills.riding < 5) player.skills.riding++;
 
             msg += "Získáno +1 k Jízdě na koni!";
 
-        } else if (opt.effect === "gain_boj") {
+        } else if (opt.effect === "gain_combat") {
 
-            if (player.skills.boj < 5) player.skills.boj++;
+            if (player.skills.combat < 5) player.skills.combat++;
 
             msg += "Získáno +1 k Boji!";
 
@@ -3149,13 +3149,13 @@ window.PRS_GameEngine = {
 
         } else if (opt.effect === "fencer_duel") {
 
-            if (stats.boj >= 3) {
+            if (stats.combat >= 3) {
 
                 player.permanentHearts += 1.0;
 
                 player.gold += 600;
 
-                msg += "Tvůj Boj " + stats.boj + " stačil na vítězství (+1 💖, +600 zl.)!";
+                msg += "Tvůj Boj " + stats.combat + " stačil na vítězství (+1 💖, +600 zl.)!";
 
             } else {
 
@@ -3183,7 +3183,7 @@ window.PRS_GameEngine = {
 
         } else if (opt.effect === "free_skill") {
 
-            var sks = ["boj", "jizda", "tanec", "charisma"];
+            var sks = ["combat", "riding", "dance", "charisma"];
 
             sks.sort(function (a, b) { return player.skills[a] - player.skills[b]; });
 
@@ -4089,9 +4089,9 @@ window.PRS_GameEngine = {
         player.gold -= cost;
 
         var trainedCombat = false;
-        if (player.skills.boj < 2) {
+        if (player.skills.combat < 2) {
 
-            player.skills.boj++;
+            player.skills.combat++;
             trainedCombat = true;
 
         }
@@ -4263,7 +4263,7 @@ window.PRS_GameEngine = {
 
         var stNow = this.getEffectiveStats(state, player);
 
-        var gainHearts = (stNow.tanec >= 2) ? 1.0 : 0.5;
+        var gainHearts = (stNow.dance >= 2) ? 1.0 : 0.5;
 
         player.permanentHearts += gainHearts;
 
@@ -4271,7 +4271,7 @@ window.PRS_GameEngine = {
 
         pa.canBuyTavernRound = false;
 
-        var msg = "🍻 Runda medoviny na účet rytíře " + player.badge + " " + player.name + "! Celá krčma bouří a pěje oslavné písně (+" + gainHearts + " 💖 k přízni princezny za " + cost + " zl." + (stNow.tanec >= 2 ? " – hosty nadchl tvůj taneční věhlas!" : "") + ").";
+        var msg = "🍻 Runda medoviny na účet rytíře " + player.badge + " " + player.name + "! Celá krčma bouří a pěje oslavné písně (+" + gainHearts + " 💖 k přízni princezny za " + cost + " zl." + (stNow.dance >= 2 ? " – hosty nadchl tvůj taneční věhlas!" : "") + ").";
 
         pa.summary = msg;
 

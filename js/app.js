@@ -4036,6 +4036,7 @@ window.PRS_App = {
             seed: activeSeed,
             royalCastle: royalCastle,
             customRecipe: customRec,
+            customBoard: (boardCode === "custom_dynamic" || (boardCode && String(boardCode).indexOf("saved_map_") === 0)) ? this._customProceduralBoard : null,
 
             scenario: scenario,
 
@@ -4051,9 +4052,16 @@ window.PRS_App = {
             this.state.config.turnTimerSeconds = turnTimerSec;
         }
 
+        if (this.state) {
+            this.state.roomCode = null;
+            this.state.sessionGuid = null;
+        }
+        this.roomCode = null;
+        this.sessionGuid = null;
+
         try {
             localStorage.removeItem("prs_active_online_room");
-            if (window.history && window.history.replaceState && !window.location.search.includes("room=")) {
+            if (window.history && window.history.replaceState) {
                 window.history.replaceState(null, "", window.location.pathname);
             }
         } catch (e) { }
@@ -4717,17 +4725,17 @@ window.PRS_App = {
         var html = "";
         for (var lvl = 1; lvl <= 14; lvl++) {
             var isSelected = activeLevels.indexOf(lvl) !== -1;
-            var sDef = setsCatalog[lvl - 1] || { kun: "Kůň " + lvl, sokol: "Sokol " + lvl, pes: "Pes " + lvl };
+            var sDef = setsCatalog[lvl - 1] || { horse: "Kůň " + lvl, falcon: "Sokol " + lvl, dog: "Pes " + lvl };
             var col = ribbonColors[lvl] || "#2563eb";
             var bg = isSelected ? "rgba(16,185,129,0.18)" : "rgba(15,23,42,0.55)";
             var border = isSelected ? "#34d399" : "rgba(255,255,255,0.12)";
             var textCol = isSelected ? "#f8fafc" : "#94a3b8";
 
-            html += '<div onclick="PRS_App.toggleMapStudioAnimalLevel(' + lvl + ')" style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:' + bg + '; border:1px solid ' + border + '; border-radius:6px; padding:4px 6px; cursor:pointer; user-select:none; transition:all 0.15s;" title="Level ' + lvl + ': ' + this.escapeHtml(sDef.kun + ' • ' + sDef.sokol + ' • ' + sDef.pes) + ' (Cena ' + (lvl * 400) + '/' + (lvl * 500) + '/' + (lvl * 600) + ' zl.)">' +
+            html += '<div onclick="PRS_App.toggleMapStudioAnimalLevel(' + lvl + ')" style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:' + bg + '; border:1px solid ' + border + '; border-radius:6px; padding:4px 6px; cursor:pointer; user-select:none; transition:all 0.15s;" title="Level ' + lvl + ': ' + this.escapeHtml(sDef.horse + ' • ' + sDef.falcon + ' • ' + sDef.dog) + ' (Cena ' + (lvl * 400) + '/' + (lvl * 500) + '/' + (lvl * 600) + ' zl.)">' +
                 '<div style="display:flex; align-items:center; gap:5px; min-width:0;">' +
                     '<span style="width:14px; height:14px; border-radius:50%; background:' + col + '; color:#fff; font-size:0.62rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid rgba(255,255,255,0.5);">' + lvl + '</span>' +
                     '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.7rem; color:' + textCol + '; font-weight:' + (isSelected ? '700' : '500') + ';">' +
-                        this.escapeHtml(sDef.kun) + ' <span style="opacity:0.7; font-size:0.64rem;">(+S+P)</span>' +
+                        this.escapeHtml(sDef.horse) + ' <span style="opacity:0.7; font-size:0.64rem;">(+S+P)</span>' +
                     '</div>' +
                 '</div>' +
                 '<span style="font-size:0.74rem; color:' + (isSelected ? '#4ade80' : '#475569') + '; font-weight:bold; flex-shrink:0;">' + (isSelected ? '✓ 3' : '○') + '</span>' +
@@ -4999,6 +5007,10 @@ window.PRS_App = {
             if (item.name) this.customBoardRecipe.customName = item.name;
             this._currentMapStudioBoard = window.KiDeskyMapGenerator.compileDynamicRecipe(this.customBoardRecipe, this.mapStudioSeed);
             this._customProceduralBoard = this._currentMapStudioBoard;
+        if (window.PRS_MapEditor && typeof window.PRS_MapEditor.normalizeBoardForEngine === "function") {
+            window.PRS_MapEditor.normalizeBoardForEngine(this._customProceduralBoard);
+            window.PRS_MapEditor.normalizeBoardForEngine(this._currentMapStudioBoard);
+        }
             this.syncMapStudioInputsFromRecipe();
             this.updateMapStudioPreview();
             KiDeskyToast.show("🗺️ Načtena vlastní šablona: " + (item.name || item.seedCode), "good");
@@ -5137,8 +5149,8 @@ window.PRS_App = {
         }
     },
 
-    applyMapStudioBoardAndStart: async function () {
-        if (this._mapStudioActiveTab === "editor" && window.PRS_MapEditor && window.PRS_MapEditor.board) {
+    applyMapStudioBoardAndStart: async function (fromEditor) {
+        if (!fromEditor && this._mapStudioActiveTab === "editor" && window.PRS_MapEditor && window.PRS_MapEditor.board) {
             window.PRS_MapEditor.playOnThisBoard();
             return;
         }
@@ -5160,6 +5172,10 @@ window.PRS_App = {
         }
 
         this._customProceduralBoard = this._currentMapStudioBoard;
+        if (window.PRS_MapEditor && typeof window.PRS_MapEditor.normalizeBoardForEngine === "function") {
+            window.PRS_MapEditor.normalizeBoardForEngine(this._customProceduralBoard);
+            window.PRS_MapEditor.normalizeBoardForEngine(this._currentMapStudioBoard);
+        }
 
         // Automaticky zajistit, aby byl plán uložen i v mých šablonách (prs_saved_maps)
         if (this.saveBoardAsTemplate) {
@@ -5172,7 +5188,14 @@ window.PRS_App = {
         var lobbySel = document.getElementById("lobby-board-select");
         if (lobbySel) lobbySel.value = "saved_map_0";
 
-        this.startNewGame(true);
+        try {
+            localStorage.removeItem("prs_active_online_room");
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, "", window.location.pathname);
+            }
+        } catch (e) { }
+
+        await this.startNewGame(true);
         if (this.showPawnToast && this.state) {
             this.showPawnToast(this.state.currentPlayerIndex, "Vítej na plánu " + (this._currentMapStudioBoard.name || ("#" + newSeed)), "🗺️", "#a855f7", "rgba(15, 23, 42, 0.96)");
         }

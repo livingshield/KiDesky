@@ -12,9 +12,9 @@ window.PRS_DEFAULT_CONFIG = {
     masterCosts: [1000, 2000, 3000, 4000, 5000],
     masterMinRoll: 4, // 4, 5, 6 cvičí
     animalBasePrices: {
-        sokol: 400, // S_n = 400 * n
-        pes: 500,   // P_n = 500 * n
-        kun: 600    // K_n = 600 * n
+        falcon: 400, // F_n = 400 * n
+        dog: 500,    // D_n = 500 * n
+        horse: 600   // H_n = 600 * n
     },
     animalRentRatios: {
         single: 0.20,
@@ -47,7 +47,7 @@ window.PRS_DEFAULT_CONFIG = {
         cattleRent: 100,
         capacityPerVillage: 3,
         capacityPerTown: 2,
-        capacityPerStaje: 4
+        capacityPerStables: 4
     },
     jesterPrice: 2000,
     jesterRentMultiplier: 100, // hod kostkou * 100 * počet kejklířů
@@ -81,9 +81,9 @@ window.PRS_DEFAULT_CONFIG = {
         u3HeartReward: 3.0
     },
     festivalGoldPrizes: {
-        turnaj: [1500, 800, 400],
-        ples: [1000, 500, 250],
-        zavod: [1200, 600, 300],
+        tournament: [1500, 800, 400],
+        ball: [1000, 500, 250],
+        race: [1200, 600, 300],
         lov: [1400, 700, 350]
     }
 };
@@ -103,9 +103,9 @@ window.PRS_GRAPHICS_CONFIG = {
     // Cesty k bitmapám podle typu/podtypu políčka (pokud je prázdné, použije se generovaný erbovní medailon)
     tileBitmapsByType: {
         START: "assets/tiles/start.png",
-        kun: "assets/tiles/kun.png",
-        pes: "assets/tiles/pes.png",
-        sokol: "assets/tiles/sokol.png",
+        horse: "assets/tiles/kun.png",
+        dog: "assets/tiles/pes.png",
+        falcon: "assets/tiles/sokol.png",
         VILLAGE: "assets/tiles/village.png",
         TOWN: "assets/tiles/town.png",
         CASTLE: "assets/tiles/castle.png",
@@ -113,11 +113,11 @@ window.PRS_GRAPHICS_CONFIG = {
         MERCHANT: "assets/tiles/merchant.png",
         TAX: "assets/tiles/tax.png",
         JESTER: "assets/tiles/jester.png",
-        staje: "assets/tiles/kun.jpg",
-        kovarna: "assets/tiles/kovarna.png",
-        krejci: "assets/tiles/krejci.png",
-        sokolnik: "assets/tiles/sokol.jpg",
-        psovod: "assets/tiles/pes.jpg",
+        stables: "assets/tiles/kun.jpg",
+        forge: "assets/tiles/kovarna.png",
+        tailor: "assets/tiles/krejci.png",
+        falconer: "assets/tiles/sokol.jpg",
+        doghandler: "assets/tiles/pes.jpg",
         U1: "assets/tiles/u1_zver.png",
         U2: "assets/tiles/u2_monstrum.png",
         U3: "assets/tiles/u3_drak.png",
@@ -290,31 +290,31 @@ window.PRS_CASTLES = {
 // Cena = počet plusů * 1000 - počet mínusů * 500
 window.PRS_ITEMS = [
     // --- 1. STUPEŇ (VĚCI 1) ---
-    { id: "it1_1", name: "Lovecký tesák", tier: 1, slot: "weapon", icon: "🗡️", boj: 2, jizda: 0, tanec: 0, charisma: 0, pluses: 2, minuses: 0, price: 2000 },
-    { id: "it1_2", name: "Těžký rytířský palcát", tier: 1, slot: "weapon", icon: "🔨", boj: 3, jizda: 0, tanec: -1, charisma: 0, pluses: 3, minuses: 1, price: 2500 },
-    { id: "it1_3", name: "Jezdecké kopí", tier: 1, slot: "weapon", icon: "🔱", boj: 2, jizda: 1, tanec: 0, charisma: 0, pluses: 3, minuses: 0, price: 3000 },
-    { id: "it1_4", name: "Prošívaná zbroj", tier: 1, slot: "armor", icon: "🛡️", boj: 2, jizda: 1, tanec: 0, charisma: 0, pluses: 3, minuses: 0, price: 3000 },
-    { id: "it1_5", name: "Kroužková košile", tier: 1, slot: "armor", icon: "⛓️", boj: 3, jizda: 0, tanec: -1, charisma: 0, pluses: 3, minuses: 1, price: 2500 },
-    { id: "it1_6", name: "Hedvábný kabátec", tier: 1, slot: "dress", icon: "🧥", boj: 0, jizda: 0, tanec: 2, charisma: 1, pluses: 3, minuses: 0, price: 3000 },
-    { id: "it1_7", name: "Sametový plášť", tier: 1, slot: "dress", icon: "🧣", boj: 0, jizda: 0, tanec: 1, charisma: 2, pluses: 3, minuses: 0, price: 3000 },
-    { id: "it1_8", name: "Postříbřené ostruhy", tier: 1, slot: "jewel", icon: "👢", boj: 0, jizda: 3, tanec: -1, charisma: 0, pluses: 3, minuses: 1, price: 2500 },
-    { id: "it1_9", name: "Zlatá spona s erbem", tier: 1, slot: "jewel", icon: "🎗️", boj: 0, jizda: 1, tanec: 1, charisma: 1, pluses: 3, minuses: 0, price: 3000 },
+    { id: "it1_1", name: "Lovecký tesák", tier: 1, slot: "weapon", icon: "🗡️", combat: 2, riding: 0, dance: 0, charisma: 0, pluses: 2, minuses: 0, price: 2000 },
+    { id: "it1_2", name: "Těžký rytířský palcát", tier: 1, slot: "weapon", icon: "🔨", combat: 3, riding: 0, dance: -1, charisma: 0, pluses: 3, minuses: 1, price: 2500 },
+    { id: "it1_3", name: "Jezdecké kopí", tier: 1, slot: "weapon", icon: "🔱", combat: 2, riding: 1, dance: 0, charisma: 0, pluses: 3, minuses: 0, price: 3000 },
+    { id: "it1_4", name: "Prošívaná zbroj", tier: 1, slot: "armor", icon: "🛡️", combat: 2, riding: 1, dance: 0, charisma: 0, pluses: 3, minuses: 0, price: 3000 },
+    { id: "it1_5", name: "Kroužková košile", tier: 1, slot: "armor", icon: "⛓️", combat: 3, riding: 0, dance: -1, charisma: 0, pluses: 3, minuses: 1, price: 2500 },
+    { id: "it1_6", name: "Hedvábný kabátec", tier: 1, slot: "dress", icon: "🧥", combat: 0, riding: 0, dance: 2, charisma: 1, pluses: 3, minuses: 0, price: 3000 },
+    { id: "it1_7", name: "Sametový plášť", tier: 1, slot: "dress", icon: "🧣", combat: 0, riding: 0, dance: 1, charisma: 2, pluses: 3, minuses: 0, price: 3000 },
+    { id: "it1_8", name: "Postříbřené ostruhy", tier: 1, slot: "jewel", icon: "👢", combat: 0, riding: 3, dance: -1, charisma: 0, pluses: 3, minuses: 1, price: 2500 },
+    { id: "it1_9", name: "Zlatá spona s erbem", tier: 1, slot: "jewel", icon: "🎗️", combat: 0, riding: 1, dance: 1, charisma: 1, pluses: 3, minuses: 0, price: 3000 },
 
     // --- 2. STUPEŇ (VĚCI 2) ---
-    { id: "it2_1", name: "Damaškový meč", tier: 2, slot: "weapon", icon: "⚔️", boj: 4, jizda: 1, tanec: 0, charisma: 2, pluses: 7, minuses: 0, price: 7000 },
-    { id: "it2_2", name: "Turnajové dřevce šampionů", tier: 2, slot: "weapon", icon: "🏇", boj: 4, jizda: 4, tanec: -1, charisma: 0, pluses: 8, minuses: 1, price: 7500 },
-    { id: "it2_3", name: "Plátová rytířská zbroj", tier: 2, slot: "armor", icon: "🛡️", boj: 5, jizda: 1, tanec: -2, charisma: 2, pluses: 8, minuses: 2, price: 7000 },
-    { id: "it2_4", name: "Stříbrný erbovní štít", tier: 2, slot: "armor", icon: "🛡️", boj: 4, jizda: 2, tanec: 0, charisma: 1, pluses: 7, minuses: 0, price: 7000 },
-    { id: "it2_5", name: "Brokátová dvorská róba", tier: 2, slot: "dress", icon: "👗", boj: 0, jizda: 0, tanec: 4, charisma: 3, pluses: 7, minuses: 0, price: 7000 },
-    { id: "it2_6", name: "Slavnostní hermelínový šat", tier: 2, slot: "dress", icon: "👑", boj: 0, jizda: 0, tanec: 3, charisma: 4, pluses: 7, minuses: 0, price: 7000 },
-    { id: "it2_7", name: "Rubínový pečetní prsten", tier: 2, slot: "jewel", icon: "💍", boj: 1, jizda: 1, tanec: 2, charisma: 3, pluses: 7, minuses: 0, price: 7000 },
+    { id: "it2_1", name: "Damaškový meč", tier: 2, slot: "weapon", icon: "⚔️", combat: 4, riding: 1, dance: 0, charisma: 2, pluses: 7, minuses: 0, price: 7000 },
+    { id: "it2_2", name: "Turnajové dřevce šampionů", tier: 2, slot: "weapon", icon: "🏇", combat: 4, riding: 4, dance: -1, charisma: 0, pluses: 8, minuses: 1, price: 7500 },
+    { id: "it2_3", name: "Plátová rytířská zbroj", tier: 2, slot: "armor", icon: "🛡️", combat: 5, riding: 1, dance: -2, charisma: 2, pluses: 8, minuses: 2, price: 7000 },
+    { id: "it2_4", name: "Stříbrný erbovní štít", tier: 2, slot: "armor", icon: "🛡️", combat: 4, riding: 2, dance: 0, charisma: 1, pluses: 7, minuses: 0, price: 7000 },
+    { id: "it2_5", name: "Brokátová dvorská róba", tier: 2, slot: "dress", icon: "👗", combat: 0, riding: 0, dance: 4, charisma: 3, pluses: 7, minuses: 0, price: 7000 },
+    { id: "it2_6", name: "Slavnostní hermelínový šat", tier: 2, slot: "dress", icon: "👑", combat: 0, riding: 0, dance: 3, charisma: 4, pluses: 7, minuses: 0, price: 7000 },
+    { id: "it2_7", name: "Rubínový pečetní prsten", tier: 2, slot: "jewel", icon: "💍", combat: 1, riding: 1, dance: 2, charisma: 3, pluses: 7, minuses: 0, price: 7000 },
 
     // --- 3. STUPEŇ (VĚCI 3) ---
-    { id: "it3_1", name: "Meč Dračího bijce", tier: 3, slot: "weapon", icon: "🗡️", boj: 8, jizda: 0, tanec: 0, charisma: 2, pluses: 10, minuses: 0, price: 10000 },
-    { id: "it3_2", name: "Královská zlatá zbroj", tier: 3, slot: "armor", icon: "🛡️", boj: 7, jizda: 0, tanec: -3, charisma: 3, pluses: 10, minuses: 3, price: 8500 },
-    { id: "it3_3", name: "Velkolepý knížecí šat", tier: 3, slot: "dress", icon: "👘", boj: 0, jizda: 0, tanec: 6, charisma: 6, pluses: 12, minuses: 0, price: 12000 },
-    { id: "it3_4", name: "Korunovační klenot předků", tier: 3, slot: "jewel", icon: "💎", boj: 3, jizda: 3, tanec: 3, charisma: 4, pluses: 13, minuses: 0, price: 13000 },
-    { id: "it3_5", name: "Pegasovo královské sedlo", tier: 3, slot: "jewel", icon: "🏇", boj: 1, jizda: 5, tanec: 1, charisma: 3, pluses: 10, minuses: 0, price: 10000 }
+    { id: "it3_1", name: "Meč Dračího bijce", tier: 3, slot: "weapon", icon: "🗡️", combat: 8, riding: 0, dance: 0, charisma: 2, pluses: 10, minuses: 0, price: 10000 },
+    { id: "it3_2", name: "Královská zlatá zbroj", tier: 3, slot: "armor", icon: "🛡️", combat: 7, riding: 0, dance: -3, charisma: 3, pluses: 10, minuses: 3, price: 8500 },
+    { id: "it3_3", name: "Velkolepý knížecí šat", tier: 3, slot: "dress", icon: "👘", combat: 0, riding: 0, dance: 6, charisma: 6, pluses: 12, minuses: 0, price: 12000 },
+    { id: "it3_4", name: "Korunovační klenot předků", tier: 3, slot: "jewel", icon: "💎", combat: 3, riding: 3, dance: 3, charisma: 4, pluses: 13, minuses: 0, price: 13000 },
+    { id: "it3_5", name: "Pegasovo královské sedlo", tier: 3, slot: "jewel", icon: "🏇", combat: 1, riding: 5, dance: 1, charisma: 3, pluses: 10, minuses: 0, price: 10000 }
 ];
 
 // ============================================================================
@@ -330,7 +330,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🐗",
         source: "Divoký kňour (U1)",
-        boj: 2, jizda: 0, tanec: 0, charisma: 0,
+        combat: 2, riding: 0, dance: 0, charisma: 0,
         pluses: 2, minuses: 0, price: 2000,
         desc: "Ostré zahnité kly statného kňoura. Nošené na opasku dodávají kuráž v šarvátkách."
     },
@@ -341,7 +341,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🐺",
         source: "Smečka šedých vlků (U1)",
-        boj: 1, jizda: 1, tanec: 0, charisma: 0,
+        combat: 1, riding: 1, dance: 0, charisma: 0,
         pluses: 2, minuses: 0, price: 2200,
         desc: "Tesáky vůdce vlčí smečky navlečené na koženém řemínku. Zlepšují lovecké reflexy."
     },
@@ -352,7 +352,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🐻",
         source: "Horský medvěd (U1)",
-        boj: 2, jizda: 1, tanec: -1, charisma: 0,
+        combat: 2, riding: 1, dance: -1, charisma: 0,
         pluses: 3, minuses: 1, price: 2500,
         desc: "Masivní dráp medvěda z horského průsmyku. Důkaz obrovské fyzické síly lovce."
     },
@@ -363,7 +363,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🦌",
         source: "Královský bílý jelen (U1)",
-        boj: 0, jizda: 1, tanec: 1, charisma: 2,
+        combat: 0, riding: 1, dance: 1, charisma: 2,
         pluses: 4, minuses: 0, price: 3500,
         desc: "Posvátná trofej královského jelena. Celý dvůr i princezna žasnou nad tvou ušlechtilostí."
     },
@@ -376,7 +376,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "👹",
         source: "Skalní obr (U2)",
-        boj: 4, jizda: 1, tanec: -2, charisma: 0,
+        combat: 4, riding: 1, dance: -2, charisma: 0,
         pluses: 5, minuses: 2, price: 6500,
         desc: "Zlomek kamenného kyje obra z horského mostu. Propůjčuje drtivou údernou sílu."
     },
@@ -387,7 +387,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🧙‍♂️",
         source: "Temný černokněžník (U2)",
-        boj: 2, jizda: 0, tanec: 1, charisma: 3,
+        combat: 2, riding: 0, dance: 1, charisma: 3,
         pluses: 6, minuses: 0, price: 7000,
         desc: "Tajemně pulzující krystal vytržený z čarodějovy hole. Chránil jeho kletby, nyní slouží tobě."
     },
@@ -398,7 +398,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "⚔️",
         source: "Černý loupeživý rytíř (U2)",
-        boj: 4, jizda: 2, tanec: 0, charisma: 1,
+        combat: 4, riding: 2, dance: 0, charisma: 1,
         pluses: 7, minuses: 0, price: 7500,
         desc: "Kovaný emblém z přilby poraženého padoucha. Rytíři uznávají tvé válečnické mistrovství."
     },
@@ -409,7 +409,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🐺",
         source: "Jeskynní vlkodlak (U2)",
-        boj: 3, jizda: 3, tanec: 0, charisma: 1,
+        combat: 3, riding: 3, dance: 0, charisma: 1,
         pluses: 7, minuses: 0, price: 7000,
         desc: "Děsivý fetiš obávaného nočního dravce, který dává divokou vytrvalost v jezdeckém sedle."
     },
@@ -420,7 +420,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🗡️",
         source: "Přepadení loupežníky (Náhoda)",
-        boj: 2, jizda: 0, tanec: 0, charisma: 1,
+        combat: 2, riding: 0, dance: 0, charisma: 1,
         pluses: 3, minuses: 0, price: 3000,
         desc: "Zlatý pečetní prsten ukořistěný veliteli lesních banditů, kteří tě zkusili přepadnout."
     },
@@ -433,7 +433,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🌲",
         source: "Zelený lesní drak (U3)",
-        boj: 3, jizda: 3, tanec: 0, charisma: 1,
+        combat: 3, riding: 3, dance: 0, charisma: 1,
         pluses: 7, minuses: 0, price: 8000,
         desc: "Tvrzená šupina pokrytá zkamenělou kůrou a mechem. Odolává šípům i čepelím v hvozdech."
     },
@@ -444,7 +444,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🐊",
         source: "Bažinný jedový drak (U3)",
-        boj: 4, jizda: 1, tanec: 0, charisma: 1,
+        combat: 4, riding: 1, dance: 0, charisma: 1,
         pluses: 6, minuses: 0, price: 8500,
         desc: "Ostrý bodec napuštěný tlejícím jedem z močálů. Nepřátelé před tebou v souboji couvají."
     },
@@ -455,7 +455,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🦋",
         source: "Pohádkový pestrý drak (U3)",
-        boj: 1, jizda: 1, tanec: 4, charisma: 3,
+        combat: 1, riding: 1, dance: 4, charisma: 3,
         pluses: 9, minuses: 0, price: 9000,
         desc: "Třpytivá lahvička plná motýlího kouzelného prachu. Rytíř s tímto prachem exceluje na plesech!"
     },
@@ -466,7 +466,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🌊",
         source: "Vodní jezerní drak (U3)",
-        boj: 2, jizda: 2, tanec: 1, charisma: 4,
+        combat: 2, riding: 2, dance: 1, charisma: 4,
         pluses: 9, minuses: 0, price: 9000,
         desc: "Zářivá mořská perla vylovená ze zatopené truhlice. Oslňuje svým leskem celý královský dvůr."
     },
@@ -477,7 +477,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🌪️",
         source: "Větrný nebeský drak (U3)",
-        boj: 2, jizda: 4, tanec: 2, charisma: 1,
+        combat: 2, riding: 4, dance: 2, charisma: 1,
         pluses: 9, minuses: 0, price: 9000,
         desc: "Lehoučké pero vznášející se v průvanu. Dodává koni neuvěřitelnou rychlost v závodech."
     },
@@ -490,7 +490,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🐉",
         source: "Červený ohnivý drak (U3)",
-        boj: 5, jizda: 2, tanec: 0, charisma: 3,
+        combat: 5, riding: 2, dance: 0, charisma: 3,
         pluses: 10, minuses: 0, price: 13000,
         desc: "Žhnoucí drahokam vyňatý z nitra červeného draka. Hřeje věčným plamenem a dává velkou bojovou sílu."
     },
@@ -501,7 +501,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🌋",
         source: "Sopečný lávový drak (U3)",
-        boj: 6, jizda: 1, tanec: -1, charisma: 2,
+        combat: 6, riding: 1, dance: -1, charisma: 2,
         pluses: 9, minuses: 1, price: 13500,
         desc: "Kus ztvrdlé sopečné lávy naplněné žárem. Roztaví i nejpevnější ocel protivníka."
     },
@@ -512,7 +512,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "❄️",
         source: "Mrazivý ledový drak (U3)",
-        boj: 4, jizda: 4, tanec: 0, charisma: 2,
+        combat: 4, riding: 4, dance: 0, charisma: 2,
         pluses: 10, minuses: 0, price: 13000,
         desc: "Neroztajitelný krystal ledu z mrazivých skal. Zpomaluje údery protivníků v turnajích."
     },
@@ -523,7 +523,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "⚡",
         source: "Bouřný bleskový drak (U3)",
-        boj: 5, jizda: 3, tanec: 1, charisma: 2,
+        combat: 5, riding: 3, dance: 1, charisma: 2,
         pluses: 11, minuses: 0, price: 14000,
         desc: "Šupina sršící statickou elektřinou. Každý tvůj útok doprovází hrozivý zvuk hromu."
     },
@@ -534,7 +534,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🌑",
         source: "Černý stínový drak (U3)",
-        boj: 5, jizda: 2, tanec: 0, charisma: 3,
+        combat: 5, riding: 2, dance: 0, charisma: 3,
         pluses: 10, minuses: 0, price: 13500,
         desc: "Ostrý černofialový dráp, z něhož uniká magický kouř. Vzbuzuje posvátnou hrůzu."
     },
@@ -545,7 +545,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "💎",
         source: "Křišťálový drahokamový drak (U3)",
-        boj: 3, jizda: 2, tanec: 3, charisma: 5,
+        combat: 3, riding: 2, dance: 3, charisma: 5,
         pluses: 13, minuses: 0, price: 15000,
         desc: "Pohádkový drahokam nesmírné hodnoty. Jeho záře z tebe učiní nejvýraznější osobnost dvora."
     },
@@ -556,7 +556,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "💀",
         source: "Kostěný nemrtvý drak (U3)",
-        boj: 6, jizda: 2, tanec: -2, charisma: 2,
+        combat: 6, riding: 2, dance: -2, charisma: 2,
         pluses: 10, minuses: 2, price: 13000,
         desc: "Děsivá lebka dýchající zelenofialový plamen. Důkaz, že ani smrt nezastaví tvé hrdinství."
     },
@@ -567,7 +567,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "👑",
         source: "Zlatý královský drak (U3)",
-        boj: 3, jizda: 2, tanec: 4, charisma: 6,
+        combat: 3, riding: 2, dance: 4, charisma: 6,
         pluses: 15, minuses: 0, price: 16000,
         desc: "Tkanina ze zlatých šupin nejbohatšího draka světa. Princezně vyrazí dech svou nádherou."
     },
@@ -578,7 +578,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "👻",
         source: "Přízračný drak stínů (U3)",
-        boj: 4, jizda: 3, tanec: 1, charisma: 4,
+        combat: 4, riding: 3, dance: 1, charisma: 4,
         pluses: 12, minuses: 0, price: 14000,
         desc: "Mlžný klenot z jiné dimenze. Umožňuje rytíři pohybovat se neslyšně a elegantně."
     },
@@ -591,7 +591,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🐉",
         source: "Dvouhlavý strážný drak (U3)",
-        boj: 5, jizda: 4, tanec: 0, charisma: 3,
+        combat: 5, riding: 4, dance: 0, charisma: 3,
         pluses: 12, minuses: 0, price: 15500,
         desc: "Dvojice propletených rohových výrůstků. Poskytuje dvojnásobnou bdělost a reflexy."
     },
@@ -602,7 +602,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🐲",
         source: "Tříhlavá královská saň (U3)",
-        boj: 6, jizda: 3, tanec: 2, charisma: 5,
+        combat: 6, riding: 3, dance: 2, charisma: 5,
         pluses: 16, minuses: 0, price: 17500,
         desc: "Zlatá koruna ze středu hlav legendární saně. Kdo ji nosí, stává se živoucí legendou království!"
     },
@@ -613,7 +613,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🐍",
         source: "Prastará lesní hydra (U3)",
-        boj: 5, jizda: 4, tanec: 1, charisma: 4,
+        combat: 5, riding: 4, dance: 1, charisma: 4,
         pluses: 14, minuses: 0, price: 16500,
         desc: "Šupina pulzující neutuchající přírodní silou. Zaručuje nevídanou výdrž v jakémkoliv klání."
     },
@@ -624,7 +624,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🔮",
         source: "Čtyřhlavý živelný drak (U3)",
-        boj: 5, jizda: 5, tanec: 4, charisma: 5,
+        combat: 5, riding: 5, dance: 4, charisma: 5,
         pluses: 19, minuses: 0, price: 19000,
         desc: "Mystický klenot spojující Oheň, Led, Jed i Blesk. Posiluje všechny čtyři rytířské ctnosti!"
     },
@@ -635,7 +635,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "🖤",
         source: "Temný stínový vícehlavý drak (U3)",
-        boj: 6, jizda: 3, tanec: 2, charisma: 5,
+        combat: 6, riding: 3, dance: 2, charisma: 5,
         pluses: 16, minuses: 0, price: 18500,
         desc: "Posvátný klenot temnot. Zažene jakékoliv zlé kouzlo a dává nositeli respekt mocných pánů."
     },
@@ -646,7 +646,7 @@ window.PRS_TROPHIES = {
         slot: "trophy",
         icon: "👑",
         source: "Pětihlavý drak Zkázy (U3)",
-        boj: 7, jizda: 4, tanec: 3, charisma: 6,
+        combat: 7, riding: 4, dance: 3, charisma: 6,
         pluses: 20, minuses: 0, price: 22000,
         desc: "Ultimátní trofej ze samotného dračího císaře! Žezlo ze zlata a obsidiánu zaručující věčnou slávu."
     },
@@ -656,176 +656,176 @@ window.PRS_TROPHIES = {
     // --- U1 Trofeje ze zvěře a lesních dravců ---
     trophy_lynx: {
         id: "trophy_lynx", name: "Ostrý rysí zrak", tier: 1, slot: "trophy", icon: "🐱",
-        source: "Rys ostrovid (U1)", boj: 1, jizda: 1, tanec: 0, charisma: 0, pluses: 2, minuses: 0, price: 2000,
+        source: "Rys ostrovid (U1)", combat: 1, riding: 1, dance: 0, charisma: 0, pluses: 2, minuses: 0, price: 2000,
         desc: "Vyčiněný amulet s rysími drápy a lístky kapradí. Zlepšuje postřeh v nočním lese."
     },
     trophy_bison: {
         id: "trophy_bison", name: "Zubří rohovina", tier: 1, slot: "trophy", icon: "🦬",
-        source: "Zuřivý pralesní zubr (U1)", boj: 2, jizda: 0, tanec: -1, charisma: 0, pluses: 2, minuses: 1, price: 2200,
+        source: "Zuřivý pralesní zubr (U1)", combat: 2, riding: 0, dance: -1, charisma: 0, pluses: 2, minuses: 1, price: 2200,
         desc: "Hladce vyleštěný roh pralesního obra. Dává nositeli nezlomnou průbojnost."
     },
     trophy_panther: {
         id: "trophy_panther", name: "Plášť z panteří kůže", tier: 1, slot: "trophy", icon: "🐆",
-        source: "Černý královský panter (U1)", boj: 0, jizda: 1, tanec: 1, charisma: 1, pluses: 3, minuses: 0, price: 2500,
+        source: "Černý královský panter (U1)", combat: 0, riding: 1, dance: 1, charisma: 1, pluses: 3, minuses: 0, price: 2500,
         desc: "Hebká ebenová kožešina královské šelmy. Dodává rytíři neslyšný krok a vznešenou auru."
     },
     trophy_spider: {
         id: "trophy_spider", name: "Jedový váček pavouka", tier: 1, slot: "trophy", icon: "🕷️",
-        source: "Obří lesní pavouk (U1)", boj: 1, jizda: 0, tanec: 0, charisma: 1, pluses: 2, minuses: 0, price: 2300,
+        source: "Obří lesní pavouk (U1)", combat: 1, riding: 0, dance: 0, charisma: 1, pluses: 2, minuses: 0, price: 2300,
         desc: "Krystalizovaný kapkovitý váček se třpytivým jedem. Nošen na opasku budí respekt lapků."
     },
     trophy_croc: {
         id: "trophy_croc", name: "Pancéřový opasek z krokodýla", tier: 1, slot: "trophy", icon: "🐊",
-        source: "Jezerní krokodýl (U1)", boj: 2, jizda: 1, tanec: 0, charisma: 0, pluses: 3, minuses: 0, price: 2600,
+        source: "Jezerní krokodýl (U1)", combat: 2, riding: 1, dance: 0, charisma: 0, pluses: 3, minuses: 0, price: 2600,
         desc: "Opasek z hrubé šupinaté kůže jezerní bestie. Chrání před zákeřnými výpady zblízka."
     },
     trophy_eagle: {
         id: "trophy_eagle", name: "Péro orlího krále", tier: 1, slot: "trophy", icon: "🦅",
-        source: "Skalní orel (U1)", boj: 0, jizda: 2, tanec: 0, charisma: 1, pluses: 3, minuses: 0, price: 3000,
+        source: "Skalní orel (U1)", combat: 0, riding: 2, dance: 0, charisma: 1, pluses: 3, minuses: 0, price: 3000,
         desc: "Zlatohnědé pero horského dravce zdobící chochol přilbice. Zvyšuje rychlost a přehled v sedle."
     },
     trophy_boar_lone: {
         id: "trophy_boar_lone", name: "Válečný tesák Samotáře", tier: 1, slot: "trophy", icon: "🐗",
-        source: "Hvozdný divočák Samotář (U1)", boj: 2, jizda: 1, tanec: -1, charisma: 0, pluses: 3, minuses: 1, price: 2700,
+        source: "Hvozdný divočák Samotář (U1)", combat: 2, riding: 1, dance: -1, charisma: 0, pluses: 3, minuses: 1, price: 2700,
         desc: "Zahnutý tesák ze starého kance. Důkaz odvahy rytíře, který svedl boj muž proti muži."
     },
     trophy_wolverine: {
         id: "trophy_wolverine", name: "Hřejivá rosomáčí hučka", tier: 1, slot: "trophy", icon: "🦡",
-        source: "Severní vlkobijec (U1)", boj: 2, jizda: 0, tanec: 0, charisma: 1, pluses: 3, minuses: 0, price: 2800,
+        source: "Severní vlkobijec (U1)", combat: 2, riding: 0, dance: 0, charisma: 1, pluses: 3, minuses: 0, price: 2800,
         desc: "Nezničitelná hučka ze severského dravce. Žádný mráz ani bouře rytíře nezlomí."
     },
     trophy_pike: {
         id: "trophy_pike", name: "Jezerní stříbrná šupina", tier: 1, slot: "trophy", icon: "🐟",
-        source: "Obří jezerní štika (U1)", boj: 1, jizda: 0, tanec: 1, charisma: 2, pluses: 4, minuses: 0, price: 3200,
+        source: "Obří jezerní štika (U1)", combat: 1, riding: 0, dance: 1, charisma: 2, pluses: 4, minuses: 0, price: 3200,
         desc: "Obrovská zrcadlová šupina ulovená v hlubokých tůních. Odráží měsíční svit a těší dvůr."
     },
     trophy_unicorn: {
         id: "trophy_unicorn", name: "Roh čistoty a světla", tier: 1, slot: "trophy", icon: "🦄",
-        source: "Magický bílý jednorožec (U1)", boj: 0, jizda: 1, tanec: 2, charisma: 2, pluses: 5, minuses: 0, price: 3800,
+        source: "Magický bílý jednorožec (U1)", combat: 0, riding: 1, dance: 2, charisma: 2, pluses: 5, minuses: 0, price: 3800,
         desc: "Spirálovitý perleťový roh posvátné bytosti. Princezna na plese zatají dech úžasem."
     },
 
     // --- U2 Trofeje z bájných monster a protivníků ---
     trophy_basilisk: {
         id: "trophy_basilisk", name: "Zkamenělé baziliščí oko", tier: 2, slot: "trophy", icon: "🦎",
-        source: "Zkamenělý bazilišek (U2)", boj: 2, jizda: 0, tanec: 0, charisma: 3, pluses: 5, minuses: 0, price: 6500,
+        source: "Zkamenělý bazilišek (U2)", combat: 2, riding: 0, dance: 0, charisma: 3, pluses: 5, minuses: 0, price: 6500,
         desc: "Klenot ze ztuhlého jantaru a smaragdu. Soupeři při pohledu do něj znejistí."
     },
     trophy_wisp: {
         id: "trophy_wisp", name: "Lucerna bludiček", tier: 2, slot: "trophy", icon: "🕯️",
-        source: "Močálová jezinka (U2)", boj: 0, jizda: 1, tanec: 2, charisma: 3, pluses: 6, minuses: 0, price: 6800,
+        source: "Močálová jezinka (U2)", combat: 0, riding: 1, dance: 2, charisma: 3, pluses: 6, minuses: 0, price: 6800,
         desc: "Mosazná lucerna s věčně tančícím modrým plamínkem. Ukazuje bezpečnou cestu mlhou."
     },
     trophy_troll: {
         id: "trophy_troll", name: "Kamenné srdce trolla", tier: 2, slot: "trophy", icon: "🧌",
-        source: "Horský kamenný troll (U2)", boj: 4, jizda: 1, tanec: -2, charisma: 0, pluses: 5, minuses: 2, price: 6500,
+        source: "Horský kamenný troll (U2)", combat: 4, riding: 1, dance: -2, charisma: 0, pluses: 5, minuses: 2, price: 6500,
         desc: "Těžký křemencový kámen tepající horskou silou. Rytíř získá údernost skalního balvanu."
     },
     trophy_minotaur: {
         id: "trophy_minotaur", name: "Zlatý kroužek Minotaura", tier: 2, slot: "trophy", icon: "🐂",
-        source: "Minotaurus z labyrintu (U2)", boj: 4, jizda: 2, tanec: -1, charisma: 1, pluses: 7, minuses: 1, price: 7200,
+        source: "Minotaurus z labyrintu (U2)", combat: 4, riding: 2, dance: -1, charisma: 1, pluses: 7, minuses: 1, price: 7200,
         desc: "Masivní tepaný kroužek pána labyrintu. Propůjčuje neomylný orientační smysl a hrubou sílu."
     },
     trophy_manticore: {
         id: "trophy_manticore", name: "Trn z ocasu mantikory", tier: 2, slot: "trophy", icon: "🦁",
-        source: "Pralesní mantikora (U2)", boj: 3, jizda: 2, tanec: 0, charisma: 2, pluses: 7, minuses: 0, price: 7400,
+        source: "Pralesní mantikora (U2)", combat: 3, riding: 2, dance: 0, charisma: 2, pluses: 7, minuses: 0, price: 7400,
         desc: "Kostěný osten z bájné mantikory. Přidělán k jílcové záštitě meče vzbuzuje posvátnou hrůzu."
     },
     trophy_griffin: {
         id: "trophy_griffin", name: "Gryfí letka a spáry", tier: 2, slot: "trophy", icon: "🦅",
-        source: "Skalní gryf (U2)", boj: 2, jizda: 4, tanec: 0, charisma: 1, pluses: 7, minuses: 0, price: 7500,
+        source: "Skalní gryf (U2)", combat: 2, riding: 4, dance: 0, charisma: 1, pluses: 7, minuses: 0, price: 7500,
         desc: "Obruby štítu zdobené zlatým gryfím peřím a spárem. Zvyšují rychlost rytíře při zteči."
     },
     trophy_siren: {
         id: "trophy_siren", name: "Kouzelná mušle mořské sirény", tier: 2, slot: "trophy", icon: "🧜‍♀️",
-        source: "Zrádná siréna (U2)", boj: 0, jizda: 0, tanec: 4, charisma: 3, pluses: 7, minuses: 0, price: 7600,
+        source: "Zrádná siréna (U2)", combat: 0, riding: 0, dance: 4, charisma: 3, pluses: 7, minuses: 0, price: 7600,
         desc: "Duhová perleťová ulita znějící zpěvem vln. Kdo ji přiloží k uchu, tančí s lehkostí vánku."
     },
     trophy_ghost_knight: {
         id: "trophy_ghost_knight", name: "Prokletá rytířská pečeť", tier: 2, slot: "trophy", icon: "💀",
-        source: "Kostlivý přízrak (U2)", boj: 3, jizda: 1, tanec: 0, charisma: 2, pluses: 6, minuses: 0, price: 7500,
+        source: "Kostlivý přízrak (U2)", combat: 3, riding: 1, dance: 0, charisma: 2, pluses: 6, minuses: 0, price: 7500,
         desc: "Zrezivělá stříbrná pečeť dávného turnajového vítěze. Osvobozena od temnoty, slouží novému hrdinovi."
     },
     trophy_lesovik: {
         id: "trophy_lesovik", name: "Kouzelná větev Lesovika", tier: 2, slot: "trophy", icon: "👺",
-        source: "Lesní hejkal (U2)", boj: 2, jizda: 2, tanec: 2, charisma: 1, pluses: 7, minuses: 0, price: 7800,
+        source: "Lesní hejkal (U2)", combat: 2, riding: 2, dance: 2, charisma: 1, pluses: 7, minuses: 0, price: 7800,
         desc: "Rostlá dubová hůlka z nitra kouzelného hvozdu. Zvířata v lese rytíře poslouchají na slovo."
     },
     trophy_ghoul: {
         id: "trophy_ghoul", name: "Amulet věčného odpočinku", tier: 2, slot: "trophy", icon: "🧟",
-        source: "Hřbitovní ghúl (U2)", boj: 2, jizda: 0, tanec: 1, charisma: 4, pluses: 7, minuses: 0, price: 8000,
+        source: "Hřbitovní ghúl (U2)", combat: 2, riding: 0, dance: 1, charisma: 4, pluses: 7, minuses: 0, price: 8000,
         desc: "Stříbrný medailon se svěcenou vodou. Zajišťuje přízeň kněží a uznání královského dvora."
     },
     trophy_golem: {
         id: "trophy_golem", name: "Šém hliněného Golema", tier: 2, slot: "trophy", icon: "🗿",
-        source: "Magický hliněný Golem (U2)", boj: 4, jizda: 0, tanec: -2, charisma: 3, pluses: 7, minuses: 2, price: 8200,
+        source: "Magický hliněný Golem (U2)", combat: 4, riding: 0, dance: -2, charisma: 3, pluses: 7, minuses: 2, price: 8200,
         desc: "Zlatá destička s posvátnými runami vyňatá z čela obra. Zaručuje železnou pevnost v obraně."
     },
     trophy_harpy: {
         id: "trophy_harpy", name: "Ostrý pařát skalní harpyje", tier: 2, slot: "trophy", icon: "🪶",
-        source: "Skalní krvežíznivá Harpyje (U2)", boj: 3, jizda: 2, tanec: 1, charisma: 0, pluses: 6, minuses: 0, price: 7500,
+        source: "Skalní krvežíznivá Harpyje (U2)", combat: 3, riding: 2, dance: 1, charisma: 0, pluses: 6, minuses: 0, price: 7500,
         desc: "Zahnutý pařát z horských štítů. Rytíř s ním snadno zdolá strmé průsmyky i úskoky nepřátel."
     },
     trophy_alpha_werewolf: {
         id: "trophy_alpha_werewolf", name: "Stříbrem kovaný tesák Alfy", tier: 2, slot: "trophy", icon: "🐺",
-        source: "Alfa vlkodlak noční smečky (U2)", boj: 4, jizda: 2, tanec: 0, charisma: 1, pluses: 7, minuses: 0, price: 8500,
+        source: "Alfa vlkodlak noční smečky (U2)", combat: 4, riding: 2, dance: 0, charisma: 1, pluses: 7, minuses: 0, price: 8500,
         desc: "Masivní tesák vůdce vlkodlačí smečky zasazený ve stříbře. Celé království uznává tvou autoritu."
     },
 
     // --- U2+/U3 Trofeje z legendárních titánů a bájných monster ---
     trophy_kraken: {
         id: "trophy_kraken", name: "Chapadlo z mořských hlubin", tier: 3, slot: "trophy", icon: "🐙",
-        source: "Mořský kraken (U2+)", boj: 4, jizda: 2, tanec: 0, charisma: 3, pluses: 9, minuses: 0, price: 11000,
+        source: "Mořský kraken (U2+)", combat: 4, riding: 2, dance: 0, charisma: 3, pluses: 9, minuses: 0, price: 11000,
         desc: "Fosilní zkamenělé chapadlo mořské saňe. Svědectví o vítězství nad samotným oceánem."
     },
     trophy_sphinx: {
         id: "trophy_sphinx", name: "Smaragdové oko sfingy", tier: 3, slot: "trophy", icon: "🦁",
-        source: "Královská sfinga (U2+)", boj: 1, jizda: 2, tanec: 2, charisma: 6, pluses: 11, minuses: 0, price: 12000,
+        source: "Královská sfinga (U2+)", combat: 1, riding: 2, dance: 2, charisma: 6, pluses: 11, minuses: 0, price: 12000,
         desc: "Zářivý klenot z roucha moudré strážkyně pouště. Propůjčuje nepřekonatelné vladařské Charisma."
     },
     trophy_yeti: {
         id: "trophy_yeti", name: "Kožešina sněžného yettiho", tier: 3, slot: "trophy", icon: "❄️",
-        source: "Sněžný yetti (U2+)", boj: 4, jizda: 3, tanec: -1, charisma: 2, pluses: 9, minuses: 1, price: 11500,
+        source: "Sněžný yetti (U2+)", combat: 4, riding: 3, dance: -1, charisma: 2, pluses: 9, minuses: 1, price: 11500,
         desc: "Bělostná nepromokavá srst vládce velehor. Žádný mrazivý dech nestvůry rytíře neohrozí."
     },
     trophy_phoenix: {
         id: "trophy_phoenix", name: "Zlaté pero věčného Fénixe", tier: 3, slot: "trophy", icon: "🪶",
-        source: "Ohnivý pták Fénix (U2+)", boj: 2, jizda: 2, tanec: 4, charisma: 5, pluses: 13, minuses: 0, price: 13000,
+        source: "Ohnivý pták Fénix (U2+)", combat: 2, riding: 2, dance: 4, charisma: 5, pluses: 13, minuses: 0, price: 13000,
         desc: "Pero planoucí teplým zlatavým ohněm, které nikdy nevyhasne. Přináší věčné štěstí a slávu."
     },
     trophy_chimera: {
         id: "trophy_chimera", name: "Štít z chiméří lebky", tier: 3, slot: "trophy", icon: "🐐",
-        source: "Tříhlavá chiméra (U2+)", boj: 5, jizda: 2, tanec: 0, charisma: 2, pluses: 9, minuses: 0, price: 12500,
+        source: "Tříhlavá chiméra (U2+)", combat: 5, riding: 2, dance: 0, charisma: 2, pluses: 9, minuses: 0, price: 12500,
         desc: "Štít pobitý bronzem a rohy chiméry. Odráží plameny i jedovaté kousance."
     },
     trophy_cerberus: {
         id: "trophy_cerberus", name: "Železný obojek podsvětí", tier: 3, slot: "trophy", icon: "🐕‍🦺",
-        source: "Kerberos (U2+)", boj: 4, jizda: 1, tanec: 0, charisma: 4, pluses: 9, minuses: 0, price: 12000,
+        source: "Kerberos (U2+)", combat: 4, riding: 1, dance: 0, charisma: 4, pluses: 9, minuses: 0, price: 12000,
         desc: "Těžký kovaný obojek strážce temných bran. Nošený jako nátepník dodává nadlidskou sílu."
     },
     trophy_centaur: {
         id: "trophy_centaur", name: "Tětiva z hřívy kentaura", tier: 3, slot: "trophy", icon: "🏹",
-        source: "Urozený kentaur (U2+)", boj: 4, jizda: 4, tanec: 0, charisma: 2, pluses: 10, minuses: 0, price: 13500,
+        source: "Urozený kentaur (U2+)", combat: 4, riding: 4, dance: 0, charisma: 2, pluses: 10, minuses: 0, price: 13500,
         desc: "Nezlomná hedvábná tětiva z hřívy lesního šampiona. Zaručuje neomylnou mušku a mistrovskou jízdu."
     },
     trophy_titan: {
         id: "trophy_titan", name: "Hromový blesk titánů", tier: 3, slot: "trophy", icon: "⚡",
-        source: "Hromovládný titán bouří (U2+)", boj: 6, jizda: 2, tanec: -1, charisma: 3, pluses: 11, minuses: 1, price: 14000,
+        source: "Hromovládný titán bouří (U2+)", combat: 6, riding: 2, dance: -1, charisma: 3, pluses: 11, minuses: 1, price: 14000,
         desc: "Ztuhlý hromoklín z modrého meteoru. Srší z něj blesky a otřásá bojištěm."
     },
     trophy_skeleton_king: {
         id: "trophy_skeleton_king", name: "Zlatá koruna padlého vladaře", tier: 3, slot: "trophy", icon: "👑",
-        source: "Král kostlivců na trůně (U2+)", boj: 4, jizda: 1, tanec: 2, charisma: 6, pluses: 13, minuses: 0, price: 15000,
+        source: "Král kostlivců na trůně (U2+)", combat: 4, riding: 1, dance: 2, charisma: 6, pluses: 13, minuses: 0, price: 15000,
         desc: "Starobylá královská koruna posázená safíry. Princezna v ní spatřuje právoplatného panovníka."
     },
     trophy_shadow_demon: {
         id: "trophy_shadow_demon", name: "Krystal temného vykoupení", tier: 3, slot: "trophy", icon: "👿",
-        source: "Stínový démon z propasti (U2+)", boj: 4, jizda: 3, tanec: 3, charisma: 3, pluses: 13, minuses: 0, price: 15500,
+        source: "Stínový démon z propasti (U2+)", combat: 4, riding: 3, dance: 3, charisma: 3, pluses: 13, minuses: 0, price: 15500,
         desc: "Fialově pulzující kámen očištěný od zla. Dokonalá harmonie všech čtyř ctností rytířského stavu."
     },
     trophy_behemoth: {
         id: "trophy_behemoth", name: "Kly bájného Behemota", tier: 3, slot: "trophy", icon: "🦣",
-        source: "Bájný obří Behemot (U2+)", boj: 6, jizda: 1, tanec: -2, charisma: 2, pluses: 9, minuses: 2, price: 14500,
+        source: "Bájný obří Behemot (U2+)", combat: 6, riding: 1, dance: -2, charisma: 2, pluses: 9, minuses: 2, price: 14500,
         desc: "Monstrózní kly prastarého pozemního titána. Žádná hradba ani zbroj jim neodolá."
     }
 
@@ -1024,7 +1024,7 @@ window.PRS_CHANCE_CARDS = [
         id: "ch_43", category: "dilemma", title: "Zbloudilý panský hřebec", icon: "🐎",
         text: "V bučině jsi narazil na nádherného opuštěného koně s panským cejchem sousedního hrabství.",
         options: [
-            { id: "opt_keep_horse", title: "Přivlastnit si hřebce", icon: "🏇", costGold: 1000, effect: "gain_jizda", desc: "Zaplatíš 1 000 zl. podkoním za ututlání cejchu a získáš +1 k Jízdě na koni!" },
+            { id: "opt_keep_horse", title: "Přivlastnit si hřebce", icon: "🏇", costGold: 1000, effect: "gain_riding", desc: "Zaplatíš 1 000 zl. podkoním za ututlání cejchu a získáš +1 k Jízdě na koni!" },
             { id: "opt_return_horse", title: "Vrátit koně majiteli", icon: "🤝", gainGold: 500, gainHearts: 0.5, desc: "Pán ti vyplatí nálezné +500 zl. a tvá pověst poctivce roste (+0,5 💖)." }
         ]
     },
@@ -1049,7 +1049,7 @@ window.PRS_CHANCE_CARDS = [
         text: "U mostu tě zastavil vyhlášený potulný šermíř a vyzývá tě k rytířskému měření sil.",
         options: [
             { id: "opt_duel_fencer", title: "Přijmout šermířský souboj", icon: "⚔️", effect: "fencer_duel", desc: "Pokud je tvůj Boj alespoň 3, mistra porazíš (+1 💖 a 600 zl.). Jinak tě ošetření stojí 600 zl." },
-            { id: "opt_tavern_fencer", title: "Pozvat ho na korbel piva", icon: "🍺", costGold: 400, effect: "gain_boj", desc: "Zaplatíš 400 zl. za hostinu v krčmě a šermíř tě naučí tajné bojové finty (+1 Boj)!" }
+            { id: "opt_tavern_fencer", title: "Pozvat ho na korbel piva", icon: "🍺", costGold: 400, effect: "gain_combat", desc: "Zaplatíš 400 zl. za hostinu v krčmě a šermíř tě naučí tajné bojové finty (+1 Boj)!" }
         ]
     },
     {

@@ -7,6 +7,9 @@
 
     Object.assign(window.PRS_App, {
 // --- PRAVIDLA, ENCYKLOPEDIE, BESTIÁŘ, HRADY A TROFEJE ---
+    rulesCurrentView: "quick",
+    rulesVisualMode: "art", // "art" nebo "scheme"
+
     switchRulesSubtab: function (subtabId) {
         this.rulesSubtab = subtabId;
         var subtabs = ["rules", "dragons", "castles", "trophies", "decorations"];
@@ -24,34 +27,495 @@
         else if (subtabId === "castles") this.renderCastlesGallery();
         else if (subtabId === "trophies") this.renderTrophiesHall();
         else if (subtabId === "decorations") this.renderDecorationsGallery();
+        else if (subtabId === "rules") {
+            this.switchRulesView(this.rulesCurrentView || "quick");
+            var savedMode = "art";
+            try { savedMode = localStorage.getItem("prs_rules_visual_mode") || "art"; } catch(e){}
+            this.setRulesVisualMode(savedMode);
+        }
     },
 
-    renderRulesAndCatalog: function () {
-        // 1. Základní katalog výbavy (pouze běžné předměty, trofeje mají vlastní Síň)
-        var itemsBox = document.getElementById("catalog-items-table");
-        if (itemsBox) {
-            var rows = "";
-            var basicItems = (window.PRS_ITEMS || []).filter(function (it) { return it.slot !== "trophy"; });
-            for (var i = 0; i < basicItems.length; i++) {
-                var it = basicItems[i];
-                rows += "<tr>" +
-                    "<td><span class='tier-badge tier-" + it.tier + "'>Věci " + it.tier + "</span></td>" +
-                    "<td>" + it.icon + " <strong>" + this.escapeHtml(it.name) + "</strong></td>" +
-                    "<td>" + (it.boj ? (it.boj > 0 ? "+" + it.boj : it.boj) : "—") + "</td>" +
-                    "<td>" + (it.jizda ? (it.jizda > 0 ? "+" + it.jizda : it.jizda) : "—") + "</td>" +
-                    "<td>" + (it.tanec ? (it.tanec > 0 ? "+" + it.tanec : it.tanec) : "—") + "</td>" +
-                    "<td>" + (it.charisma ? (it.charisma > 0 ? "+" + it.charisma : it.charisma) : "—") + "</td>" +
-                    "<td><strong>" + it.price.toLocaleString("cs-CZ") + " zl.</strong></td>" +
-                    "</tr>";
+    // --- PŘEPÍNÁNÍ VRSTEV PRAVIDEL (Rychlý start / Průvodce / Tabulky / Slovníček / Atlas) ---
+    switchRulesView: function (viewId) {
+        this.rulesCurrentView = viewId;
+        var views = ["quick", "guide", "tables", "glossary", "atlas"];
+        for (var i = 0; i < views.length; i++) {
+            var v = views[i];
+            var secEl = document.getElementById("rules-view-" + v);
+            var btnEl = document.getElementById("btn-rules-view-" + v);
+            if (secEl) secEl.style.display = (v === viewId) ? "block" : "none";
+            if (btnEl) {
+                if (v === viewId) btnEl.classList.add("active");
+                else btnEl.classList.remove("active");
             }
-            itemsBox.innerHTML = rows;
         }
+        if (viewId === "atlas") {
+            this.renderTilesAtlas();
+        }
+    },
+
+    // --- PŘEPÍNÁNÍ VIZUÁLNÍHO REŽIMU: SCHÉMA VS. ILUSTRACE ---
+    setRulesVisualMode: function (mode) {
+        this.rulesVisualMode = (mode === "scheme") ? "scheme" : "art";
+        try { localStorage.setItem("prs_rules_visual_mode", this.rulesVisualMode); } catch (e) { }
+
+        var container = document.getElementById("rules-subtab-rules");
+        if (container) {
+            container.classList.remove("rules-mode-art", "rules-mode-scheme");
+            container.classList.add("rules-mode-" + this.rulesVisualMode);
+        }
+
+        var btnArt = document.getElementById("btn-rules-mode-art");
+        var btnScheme = document.getElementById("btn-rules-mode-scheme");
+        if (btnArt) {
+            if (this.rulesVisualMode === "art") {
+                btnArt.classList.add("active");
+                btnArt.textContent = "🎨 Malovaný (aktivní)";
+            } else {
+                btnArt.classList.remove("active");
+                btnArt.textContent = "🎨 Malovaný";
+            }
+        }
+        if (btnScheme) {
+            if (this.rulesVisualMode === "scheme") {
+                btnScheme.classList.add("active");
+                btnScheme.textContent = "📐 Schéma (aktivní)";
+            } else {
+                btnScheme.classList.remove("active");
+                btnScheme.textContent = "📐 Schéma";
+            }
+        }
+    },
+
+    // --- ROZBALOVACÍ AKORDEONY V PRŮVODCI ---
+    toggleRuleAccordion: function (id) {
+        var el = document.getElementById("rule-acc-" + id);
+        if (el) {
+            el.classList.toggle("open");
+        }
+    },
+
+    expandAllRuleAccordions: function (open) {
+        var accs = document.querySelectorAll("#rules-view-guide .rule-accordion");
+        accs.forEach(function (acc) {
+            if (open) acc.classList.add("open");
+            else acc.classList.remove("open");
+        });
+    },
+
+    filterRulesTopics: function (query) {
+        var q = (query || "").trim().toLowerCase();
+        var accs = document.querySelectorAll("#rules-view-guide .rule-accordion");
+        accs.forEach(function (acc) {
+            if (!q) {
+                acc.style.display = "";
+            } else {
+                var text = acc.textContent.toLowerCase();
+                if (text.indexOf(q) !== -1) {
+                    acc.style.display = "";
+                    acc.classList.add("open");
+                } else {
+                    acc.style.display = "none";
+                }
+            }
+        });
+    },
+
+    // --- ATLAS VŠECH TYPŮ DLAŽDIC HERNÍ DESKY ---
+    renderTilesAtlas: function () {
+        var container = document.getElementById("rules-atlas-grid-container");
+        if (!container) return;
+
+        var tileDefinitions = [
+            {
+                code: "START",
+                name: "Královský START",
+                cat: "Speciální",
+                img: "assets/tiles/start.png",
+                art: "assets/tiles/castle.jpg",
+                cost: "—",
+                action: "Žold <strong>+3 000 zl.</strong> (nemajetní bezzemci <strong>+5 000 zl.</strong>). Šlechtici, majitelé Města/Hradu nebo zkušení tanečníci (Tanec ≥ 2 a šaty) navíc získávají <strong>audienci u krále (+0,5 až +1,0 💖)</strong>.",
+                tip: "Využij včasný zisk šatů k čerpání královské přízně při každém oběhu plánu."
+            },
+            {
+                code: "VESNICE",
+                name: "Poddanská vesnice (V1–V12)",
+                cat: "Panství",
+                img: "assets/tiles/village.png",
+                art: "assets/tiles/village.jpg",
+                cost: "1 500 zl.",
+                action: "Koupě panství a výběr nájmu (100–300 zl.) od projíždějících rytířů. Možnost rozvoje: 1★ Vesnice → 2★ Městečko (+1 500 zl.) → 3★ Velká osada (+1 500 zl.). Plně rozvinutá vesnice dává trvale <strong>+0,5 💖</strong> a chová dobytek.",
+                tip: "Vesnice jsou základem stabilního příjmu. Na 3★ generují vysoký nájem a automatická stáda."
+            },
+            {
+                code: "MĚSTO",
+                name: "Královské město (M1–M4)",
+                cat: "Panství",
+                img: "assets/tiles/town.png",
+                art: "assets/tiles/town.jpg",
+                cost: "4 000 zl.",
+                action: "Bohaté sídlo s vysokým nájmem (500 zl.) a stálou prestiží: majiteli uděluje trvale <strong>+0,5 💖</strong> a přináší <strong>+1 200 zl.</strong> při návštěvě Výběrčího daní.",
+                tip: "Město rozšiřuje kapacitu stád o +2 a zaručuje královskou audienci na STARTu."
+            },
+            {
+                code: "HRAD",
+                name: "Šlechtický hrad (H1–H4)",
+                cat: "Panství",
+                img: "assets/tiles/castle.png",
+                art: "assets/tiles/castle.jpg",
+                cost: "7 000 zl.",
+                action: "Vrchol feudální moci: trvale <strong>+1,0 💖</strong> a <strong>+1 Charisma</strong> pro majitele! Nájem 1 000 zl., výnos u Výběrčího daní činí celých <strong>+2 500 zl.</strong>",
+                tip: "Nejrychlejší způsob, jak si trvale pojistit srdce a získat převahu na královském dvoře."
+            },
+            {
+                code: "KŮŇ",
+                name: "Chov koní (K1–K12)",
+                cat: "Zvířata",
+                img: "assets/tiles/kun.png",
+                art: "assets/tiles/kun.jpg",
+                cost: "600 × úroveň zl.",
+                action: "Koupě koně. Zpřístupňuje <strong>koňský pohyb (klus, cval, trysk)</strong>, umožňuje obranu obratností v duelech a je nutnou podmínkou účasti ve <strong>Velkém závodě</strong>.",
+                tip: "Kůň je klíč k rychlému pohybu po mapě. V kombinaci se psem a sokolem tvoří Chovnou sadu (+1,5 💖)."
+            },
+            {
+                code: "PES",
+                name: "Lovecký pes (P1–P12)",
+                cat: "Zvířata",
+                img: "assets/tiles/pes.png",
+                art: "assets/tiles/pes.jpg",
+                cost: "500 × úroveň zl.",
+                action: "Koupě loveckého psa. Věrný společník ti dává taktickou výhodu v aréně draků – při těsné prohře o 1–2 body získáš <strong>🎲 Taktický reroll 1 kostky</strong> zdarma!",
+                tip: "Pes ti zachrání život v aréně draků a chrání tě před převozem do Lazaretu."
+            },
+            {
+                code: "SOKOL",
+                name: "Lovecký sokol (S1–S12)",
+                cat: "Zvířata",
+                img: "assets/tiles/sokol.png",
+                art: "assets/tiles/sokol.jpg",
+                cost: "400 × úroveň zl.",
+                action: "Koupě dravce. Umožňuje <strong>Sokolí navigaci (±1 pole)</strong> při taktickém manévrování pěšky, čímž ti dovolí přesně dosednout na cíl nebo se vyhnout pasti.",
+                tip: "Sokolí navigace nefunguje při plném koňském cvalu a trysku – kůň letí kupředu příliš rychle."
+            },
+            {
+                code: "STAJE",
+                name: "Královské stáje & Dobytčí trh",
+                cat: "Ekonomika",
+                img: "assets/tiles/kun.png",
+                art: "assets/tiles/kun.jpg",
+                cost: "Dle druhu",
+                action: "Nákup hospodářského dobytka: <strong>🐑 Ovce (500 zl.)</strong>, <strong>🐖 Prase (600 zl.)</strong> a <strong>🐄 Skot (800 zl.)</strong>. Stáda zvyšují nájmy vesnic a generují pasivní výnos u Výběrčího daní.",
+                tip: "Kapacita stád závisí na počtu tvých vesnic a měst. Stáje samy o sobě přidávají +4 místa."
+            },
+            {
+                code: "MISTR",
+                name: "Sídlo Mistra (MB, MJ, MT, MCH, VM)",
+                cat: "Výcvik",
+                img: "assets/tiles/master.png",
+                art: "assets/tiles/master.jpg",
+                cost: "1 000–5 000 zl.",
+                action: "Trénink ctností (Boj, Jízda, Tanec, Charisma). Hod kostkou: 1–3 = nepřijat, 4–6 = přijat k výcviku. Úspěšný trénink uděluje <strong>Pečeť mistra</strong>. 3 různé pečetě = <strong>Rytířská záštita</strong>!",
+                tip: "Velmistr (VM) učí jakoukoliv vlastnost dle tvé volby. Investuj do své primární ctnosti co nejdříve."
+            },
+            {
+                code: "FESTIVAL",
+                name: "Královská slavnost (♡ ♡ ♡)",
+                cat: "Soutěž",
+                img: "assets/tiles/festival.png",
+                art: "assets/tiles/festival.jpg",
+                cost: "—",
+                action: "Turnaj (Boj + Jízda), Zámecký ples (Tanec + Charisma) nebo Velký závod (Jízda + koně). Hlavní zdroj srdcí ve hře! Vítěz získá <strong>až +5 💖 a 1 200 zl.</strong>",
+                tip: "Při účasti méně než 2 rytířů se slavnost nekoná, ale pořadatel dostane útěchu +800 zl. a +0,5 💖."
+            },
+            {
+                code: "U1",
+                name: "Běžná stvůra (Lesní dravci)",
+                cat: "Lov",
+                img: "assets/tiles/u1_zver.png",
+                art: "assets/tiles/u1_zver.jpg",
+                cost: "—",
+                action: "Lov vlků, medvědů a divočáků. Vítězství přináší <strong>1 000–2 500 zl.</strong> a <strong>+0,5 až +1,5 💖</strong>. Skvělý bezpečný trénink pro začínající válečníky.",
+                tip: "Použij Taktický postoj: Opatrná obrana tě ochrání před zraněním i v případě prohry."
+            },
+            {
+                code: "U2",
+                name: "Mocné monstrum (Bájní netvoři)",
+                cat: "Lov",
+                img: "assets/tiles/u2_monstrum.png",
+                art: "assets/tiles/u2_monstrum.jpg",
+                cost: "—",
+                action: "Boj s Chimérami, Trolly a Golemy. Odměna <strong>2 600 zl.</strong>, <strong>+1,5 až +2,5 💖</strong> a 65% šance na unikátní trofej. Lze uplatnit taktický ústup za 400 zl.",
+                tip: "Před bojem zkontroluj slabinu monstra v Bestiáři pro automatický bonus +2 k síle."
+            },
+            {
+                code: "U3",
+                name: "Dračí sluj (Legendární draci)",
+                cat: "Drakobijci",
+                img: "assets/tiles/u3_drak.png",
+                art: "assets/tiles/u3_drak.jpg",
+                cost: "—",
+                action: "Souboj o čest s jedním z 20 unikátních draků! Odměna <strong>6 000 zl.</strong>, <strong>+2,5 až +5,0 💖</strong> a garantovaná dračí trofej. <strong>Skolení 2 draků = okamžitá výhra v celé hře!</strong>",
+                tip: "Taktický ústup z dračí sluje stojí 800 zl. Pokud nemáš dostatečný Boj a zbraně, raději ustup."
+            },
+            {
+                code: "MERCHANT",
+                name: "Královský obchodník",
+                cat: "Trh",
+                img: "assets/tiles/merchant.png",
+                art: "assets/tiles/merchant.jpg",
+                cost: "Dle nákupu",
+                action: "Nákup balíčků výstroje (zbraně, zbroje, plesové šaty, klenoty). Možnost dobrovolného odprodeje majetku bance (věci za 50 % ceny, nemovitosti za 100 %).",
+                tip: "Nakupuj přednostně věci, které odpovídají tvé zvolené cestě k vítězství."
+            },
+            {
+                code: "KOVARNA",
+                name: "Cechovní kovárna",
+                cat: "Trh",
+                img: "assets/tiles/kovarna.png",
+                art: "assets/tiles/kovarna.jpg",
+                cost: "Dle zbraně",
+                action: "Výroba a nákup mečů, seker, kopí a brnění. Zbraně zvyšují Boj a poskytují taktickou výhodu proti specifickým drakům.",
+                tip: "Kopí platí na Vodní draky, těžké brnění na ohnivé plameny."
+            },
+            {
+                code: "KREJCI",
+                name: "Zámecký krejčí",
+                cat: "Trh",
+                img: "assets/tiles/krejci.png",
+                art: "assets/tiles/krejci.jpg",
+                cost: "Dle oděvu",
+                action: "Ušití dvorských šatů a brokátových rouch. Poskytuje bonusy k Tanci a Charismatu, zásadní pro vítězství na Zámeckém plese.",
+                tip: "Šaty ti na Zámeckém plese přinášejí automatický bonus +2 ke skóre."
+            },
+            {
+                code: "TAVERN",
+                name: "Krčma U Zlatého korbelu",
+                cat: "Služby",
+                img: "assets/tiles/tavern.png",
+                art: "assets/tiles/tavern.jpg",
+                cost: "500 zl.",
+                action: "Odpočinek a pohoštění. Runda medoviny za 500 zl. Pro zkušené tanečníky (Tanec ≥ 2) přináší dvorní obdiv a zisk <strong>+1,0 💖</strong> za okouzlující zábavu.",
+                tip: "Diplomaté a tanečníci zde proměňují drobné mince v cenná srdce."
+            },
+            {
+                code: "TAX",
+                name: "Výběrčí daní",
+                cat: "Ekonomika",
+                img: "assets/tiles/tax.png",
+                art: "assets/tiles/tax.jpg",
+                cost: "—",
+                action: "Výplata feudálních rent: Vesnice (500/900/1 400 zl.), Města (1 200 zl.), Hrady (2 500 zl.) a dobytek (ovce +120, prase +150, kráva +200 zl.).",
+                tip: "Rytíř s Rytířskou záštitou (3 pečetě mistrů) je navíc osvobozen od všech plateb královských desátků."
+            },
+            {
+                code: "PRISON",
+                name: "Hradní šatlava",
+                cat: "Trest",
+                img: "assets/tiles/prison.png",
+                art: "assets/tiles/prison.jpg",
+                cost: "Kauce 1 000 zl.",
+                action: "Uvěznění na 1 kolo. Možnosti záchrany: zaplacení kauce 1 000 zl., úspěšný útěk (hod kostkou 6), nebo okamžité zahrání svitku <strong>Královská amnestie</strong> z brašny.",
+                tip: "Pokud máš v brašně svitek Královské amnestie, jsi propuštěn okamžitě bez ztráty tahu i peněz."
+            },
+            {
+                code: "HOSPITAL",
+                name: "Královský lazaret",
+                cat: "Léčení",
+                img: "assets/tiles/hospital.png",
+                art: "assets/tiles/hospital.jpg",
+                cost: "1 000 zl.",
+                action: "Zotavení po těžkém zranění. Hojivý elixír za 1 000 zl. trvale zvýší Boj o +1 (pokud Boj < 2), udělí <strong>+0,5 💖 za statečnost</strong> a ochranný amulet proti dalšímu převozu!",
+                tip: "Držitelé Rytířské záštity (3 pečetě mistrů) jsou v lazaretu ošetřeni zcela zdarma."
+            },
+            {
+                code: "JESTER",
+                name: "Dvorní Kejklíř & Šašek",
+                cat: "Speciální",
+                img: "assets/tiles/jester.png",
+                art: "assets/tiles/jester.jpg",
+                cost: "2 000 zl. (Kejklíř)",
+                action: "Zábava u dvora. Kejklíř skládá posměšnou baladu na protivníky; Šašek odměňuje zkušené tanečníky královským darem <strong>+200 zl. × stupeň Tance</strong>.",
+                tip: "Vysoký Tanec promění návštěvu Šaška ve štědrou královskou rentu."
+            },
+            {
+                code: "CHANCE",
+                name: "Náhoda & Královský dar",
+                cat: "Osud",
+                img: "assets/tiles/chance.png",
+                art: "assets/tiles/chance.jpg",
+                cost: "—",
+                action: "Tažení osudové karty ze zemského balíčku: královské dotace, turnajové výzvy, lapkové, zkoušky jezdectví i nález <strong>taktických pergamenů do brašny rytíře</strong>.",
+                tip: "Taktické pergameny můžeš uschovat do brašny (kapacita 3) a zahrát je kdykoliv ve svém tahu."
+            }
+        ];
+
+        this.atlasTileDefinitions = tileDefinitions;
+
+        var html = '<div class="atlas-tiles-grid">';
+        for (var i = 0; i < tileDefinitions.length; i++) {
+            var t = tileDefinitions[i];
+            html += '<div class="atlas-tile-card" onclick="PRS_App.openTileAtlasModal(\'' + t.code + '\')" style="cursor:pointer;" title="Kliknutím otevřeš velký detail s ilustrací a přesnými pravidly">' +
+                '<div style="display:flex; align-items:center; gap:0.75rem;">' +
+                '  <img src="' + t.img + '" alt="' + t.name + '" class="atlas-tile-thumb" onerror="this.src=\'assets/tiles/castle.png\';" />' +
+                '  <div style="flex:1;">' +
+                '    <div style="display:flex; align-items:center; justify-content:space-between; gap:0.35rem;">' +
+                '      <span style="font-size:0.72rem; font-weight:700; color:var(--gold); background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.3); border-radius:4px; padding:1px 6px;">' + t.code + '</span>' +
+                '      <span style="font-size:0.75rem; color:#94a3b8;">' + t.cat + '</span>' +
+                '    </div>' +
+                '    <div style="font-weight:700; font-size:0.92rem; color:var(--gold-light); margin-top:2px;">' + t.name + '</div>' +
+                '    <div style="font-size:0.76rem; color:#cbd5e1;">Cena: <strong style="color:#fde68a;">' + t.cost + '</strong></div>' +
+                '  </div>' +
+                '</div>' +
+                '<div style="font-size:0.82rem; color:#e2e8f0; line-height:1.45; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.45rem;">' + t.action + '</div>' +
+                '<div style="font-size:0.78rem; color:#93c5fd; background:rgba(59,130,246,0.1); border-left:3px solid #60a5fa; padding:0.35rem 0.55rem; border-radius:0 4px 4px 0;"><strong>💡 Tip:</strong> ' + t.tip + '</div>' +
+                '<div style="text-align:right; margin-top:0.4rem;">' +
+                '  <button type="button" class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.65rem; color:var(--gold-light); border-color:var(--gold); cursor:pointer; font-weight:600;" onclick="PRS_App.openTileAtlasModal(\'' + t.code + '\'); event.stopPropagation();">🔍 Zvětšit detail →</button>' +
+                '</div>' +
+                '</div>';
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    },
+
+    openTileAtlasModal: function (code) {
+        var modal = document.getElementById("tile-atlas-modal");
+        var content = document.getElementById("tile-atlas-modal-content") || document.getElementById("tile-atlas-modal-body");
+        if (!modal) {
+            console.error("tile-atlas-modal element not found");
+            return;
+        }
+
+        if (!this.atlasTileDefinitions || this.atlasTileDefinitions.length === 0) {
+            this.renderTilesAtlas();
+        }
+        if (!this.atlasTileDefinitions) return;
+
+        var t = null;
+        for (var i = 0; i < this.atlasTileDefinitions.length; i++) {
+            if (this.atlasTileDefinitions[i].code === code) {
+                t = this.atlasTileDefinitions[i];
+                break;
+            }
+        }
+        if (!t) return;
+
+        if (content) {
+            content.innerHTML = '<div class="tile-atlas-modal-box">' +
+                '  <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; flex-shrink:0;">' +
+                '    <img src="' + t.img + '" alt="' + t.name + '" class="tile-atlas-modal-img" onerror="this.src=\'assets/tiles/castle.png\';" />' +
+                '    <span style="font-size:0.75rem; font-weight:700; color:var(--gold); background:rgba(212,175,55,0.18); border:1px solid rgba(212,175,55,0.45); border-radius:6px; padding:2px 10px;">Kód: ' + t.code + '</span>' +
+                '  </div>' +
+                '  <div style="flex:1; min-width:0;">' +
+                '    <div style="font-size:0.78rem; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">Kategorie: ' + t.cat + '</div>' +
+                '    <h3 style="margin:0 0 0.35rem; color:var(--gold-light); font-family:\'Cinzel\',serif; font-size:1.25rem;">' + t.name + '</h3>' +
+                '    <div style="font-size:0.86rem; color:#fde68a; margin-bottom:0.75rem;">Pořizovací hodnota / Náklad: <strong>' + t.cost + '</strong></div>' +
+                '    <div style="background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.85rem 1rem; font-size:0.88rem; line-height:1.55; color:#e2e8f0; margin-bottom:0.75rem;">' +
+                '      ' + t.action +
+                '    </div>' +
+                '    <div style="font-size:0.83rem; color:#93c5fd; background:rgba(59,130,246,0.12); border-left:4px solid #60a5fa; padding:0.55rem 0.8rem; border-radius:0 6px 6px 0; margin-bottom:0.85rem; line-height:1.45;">' +
+                '      <strong>👑 Doporučení Královského rádce:</strong> ' + t.tip +
+                '    </div>' +
+                '    <div style="display:flex; gap:0.5rem; justify-content:flex-end; flex-wrap:wrap;">' +
+                '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="PRS_App.closeTileAtlasModal(); PRS_App.openRulesHelpForTile(\'' + t.code + '\', \'' + t.code + '\');">📖 Otevřít kapitolu v Průvodci</button>' +
+                '      <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="PRS_App.closeTileAtlasModal();">✕ Zavřít</button>' +
+                '    </div>' +
+                '  </div>' +
+                '</div>';
+        }
+
+        modal.style.display = "flex";
+    },
+
+    closeTileAtlasModal: function () {
+        var modal = document.getElementById("tile-atlas-modal");
+        if (modal) modal.style.display = "none";
+    },
+
+    // --- FILTROVÁNÍ REFERENČNÍ TABULKY PŘEDMĚTŮ & TROFEJÍ ---
+    setRulesItemsFilter: function (filter) {
+        this.rulesItemsFilter = filter;
+        var btns = ["all", "basic", "trophies"];
+        for (var b = 0; b < btns.length; b++) {
+            var btn = document.getElementById("btn-items-filter-" + btns[b]);
+            if (btn) {
+                if (btns[b] === filter) btn.classList.add("active");
+                else btn.classList.remove("active");
+            }
+        }
+        this.renderRulesItemsTable();
+    },
+
+    renderRulesItemsTable: function () {
+        var itemsBox = document.getElementById("catalog-items-table");
+        if (!itemsBox) return;
+
+        var filter = this.rulesItemsFilter || "all";
+        var allItems = window.PRS_ITEMS || [];
+        var filtered = [];
+
+        if (filter === "basic") {
+            filtered = allItems.filter(function (it) { return it.slot !== "trophy"; });
+        } else if (filter === "trophies") {
+            filtered = allItems.filter(function (it) { return it.slot === "trophy"; });
+        } else {
+            filtered = allItems;
+        }
+
+        var rows = "";
+        for (var i = 0; i < filtered.length; i++) {
+            var it = filtered[i];
+            var tierTag = "";
+            if (it.slot === "trophy") {
+                var tLabel = (it.tier === 3) ? "Dračí trofej U3" : ("Trofej U" + it.tier);
+                var tBg = (it.tier === 3)
+                    ? "background:linear-gradient(135deg, #b91c1c, #7f1d1d); border-color:#f87171;"
+                    : (it.tier === 2 ? "background:linear-gradient(135deg, #7c3aed, #4c1d95); border-color:#c084fc;" : "background:linear-gradient(135deg, #15803d, #14532d); border-color:#86efac;");
+                tierTag = "<span class='tier-badge' style='" + tBg + " font-size:0.7rem; padding:2px 7px;'>" + tLabel + "</span>";
+            } else {
+                tierTag = "<span class='tier-badge tier-" + it.tier + "'>Věci " + it.tier + "</span>";
+            }
+
+            var nameExtra = it.source ? (" <small style='color:#94a3b8; font-weight:normal; display:block; font-size:0.75rem;'>Zdroj: " + this.escapeHtml(it.source) + "</small>") : "";
+
+            rows += "<tr>" +
+                "<td>" + tierTag + "</td>" +
+                "<td>" + it.icon + " <strong>" + this.escapeHtml(it.name) + "</strong>" + nameExtra + "</td>" +
+                "<td>" + (it.combat ? (it.combat > 0 ? "+" + it.combat : it.combat) : "—") + "</td>" +
+                "<td>" + (it.riding ? (it.riding > 0 ? "+" + it.riding : it.riding) : "—") + "</td>" +
+                "<td>" + (it.dance ? (it.dance > 0 ? "+" + it.dance : it.dance) : "—") + "</td>" +
+                "<td>" + (it.charisma ? (it.charisma > 0 ? "+" + it.charisma : it.charisma) : "—") + "</td>" +
+                "<td><strong>" + (it.price ? it.price.toLocaleString("cs-CZ") + " zl." : "—") + "</strong></td>" +
+                "</tr>";
+        }
+        itemsBox.innerHTML = rows;
+    },
+
+    filterGlossaryTerms: function (query) {
+        var q = (query || "").trim().toLowerCase();
+        var items = document.querySelectorAll("#rules-view-glossary .glossary-term-item");
+        items.forEach(function (el) {
+            if (!q) {
+                el.style.display = "";
+            } else {
+                var text = el.textContent.toLowerCase();
+                el.style.display = (text.indexOf(q) !== -1) ? "" : "none";
+            }
+        });
+    },
+
+// --- KONEC PRAVIDEL A ENCYKLOPEDIE ---
+
+    renderRulesAndCatalog: function () {
+        // 1. Základní katalog výbavy & trofejí
+        this.renderRulesItemsTable();
 
         // 2. Bestiář, hrady a trofeje
         this.renderBestiary();
         this.renderCastlesGallery();
         this.renderTrophiesHall();
         this.renderDecorationsGallery();
+        this.switchRulesView(this.rulesCurrentView || "quick");
+        this.updateFestivalCalculator();
     },
 
     // --- DRAČÍ BESTIÁŘ (20 DRAKŮ) ---
@@ -145,9 +609,9 @@
 
             if (trophyDef) {
                 var statsBonus = [];
-                if (trophyDef.boj) statsBonus.push("⚔️+" + trophyDef.boj);
-                if (trophyDef.jizda) statsBonus.push("🏇+" + trophyDef.jizda);
-                if (trophyDef.tanec) statsBonus.push("💃+" + trophyDef.tanec);
+                if (trophyDef.combat) statsBonus.push("⚔️+" + trophyDef.combat);
+                if (trophyDef.riding) statsBonus.push("🏇+" + trophyDef.riding);
+                if (trophyDef.dance) statsBonus.push("💃+" + trophyDef.dance);
                 if (trophyDef.charisma) statsBonus.push("✨+" + trophyDef.charisma);
                 html.push('    <div class="card-callout-box" style="border-color:rgba(212,175,55,0.4); color:var(--gold-light); margin-top:4px;">');
                 html.push('      🏆 <strong>Trofej po porážce:</strong> ' + trophyDef.icon + ' ' + this.escapeHtml(trophyDef.name) + ' (' + statsBonus.join(" ") + ')');
@@ -241,9 +705,9 @@
             var tr = list[i];
             var tierClass = "tier-" + (tr.tier || 1);
             var statChips = [];
-            if (tr.boj) statChips.push('<span class="armory-stat-chip ' + (tr.boj > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (tr.boj > 0 ? '+' : '') + tr.boj + ' Boj</span>');
-            if (tr.jizda) statChips.push('<span class="armory-stat-chip ' + (tr.jizda > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (tr.jizda > 0 ? '+' : '') + tr.jizda + ' Jízda</span>');
-            if (tr.tanec) statChips.push('<span class="armory-stat-chip ' + (tr.tanec > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (tr.tanec > 0 ? '+' : '') + tr.tanec + ' Tanec</span>');
+            if (tr.combat) statChips.push('<span class="armory-stat-chip ' + (tr.combat > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (tr.combat > 0 ? '+' : '') + tr.combat + ' Boj</span>');
+            if (tr.riding) statChips.push('<span class="armory-stat-chip ' + (tr.riding > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (tr.riding > 0 ? '+' : '') + tr.riding + ' Jízda</span>');
+            if (tr.dance) statChips.push('<span class="armory-stat-chip ' + (tr.dance > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (tr.dance > 0 ? '+' : '') + tr.dance + ' Tanec</span>');
             if (tr.charisma) statChips.push('<span class="armory-stat-chip ' + (tr.charisma > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">✨ ' + (tr.charisma > 0 ? '+' : '') + tr.charisma + ' Charisma</span>');
 
             html.push('<div class="trophy-item-card ' + tierClass + '">');
@@ -687,6 +1151,139 @@
             .catch(function () {
                 if (msgEl) msgEl.textContent = "✅ Konfigurace aktivována lokálně.";
             });
+    },
+
+    // --- KONTEXTOVÁ NÁPOVĚDA '?' Z HERNÍ PLOCHY DO KODEXU PRAVIDEL ---
+    openRulesHelpForTile: function (tileType, tileCode) {
+        if (!tileType && tileCode) tileType = tileCode;
+        var t = (tileType || "").toUpperCase();
+        var code = (tileCode || "").toUpperCase();
+
+        var chapterMap = {
+            "START": "board",
+            "VILLAGE": "estates",
+            "TOWN": "estates",
+            "CASTLE": "estates",
+            "TAX": "estates",
+            "KUN": "animals",
+            "PES": "animals",
+            "SOKOL": "animals",
+            "STAJE": "animals",
+            "PSOVID": "animals",
+            "SOKOLNIK": "animals",
+            "MASTER": "virtues",
+            "U1": "combat",
+            "U2": "combat",
+            "U3": "combat",
+            "FESTIVAL": "festivals",
+            "MERCHANT": "scrolls",
+            "KOVARNA": "scrolls",
+            "KREJCI": "scrolls",
+            "HOSPITAL": "locations",
+            "PRISON": "locations",
+            "TAVERN": "locations",
+            "JESTER": "locations",
+            "CHANCE": "locations",
+            "BONUS": "locations"
+        };
+
+        var chapterId = chapterMap[t] || "board";
+        if (code.indexOf("V") === 0) chapterId = "estates";
+        else if (code.indexOf("M") === 0 && code.indexOf("MB") !== 0 && code.indexOf("MJ") !== 0 && code.indexOf("MT") !== 0 && code.indexOf("MCH") !== 0) chapterId = "estates";
+        else if (code.indexOf("H") === 0 && code !== "HOSPITAL") chapterId = "estates";
+        else if (code.indexOf("K") === 0) chapterId = "animals";
+        else if (code.indexOf("P") === 0 && code !== "PRISON") chapterId = "animals";
+        else if (code.indexOf("S") === 0 && code !== "START") chapterId = "animals";
+        else if (code === "MB" || code === "MJ" || code === "MT" || code === "MCH" || code === "VM") chapterId = "virtues";
+        else if (code.indexOf("U1") === 0 || code.indexOf("U2") === 0 || code.indexOf("U3") === 0) chapterId = "combat";
+
+        this.openRulesHelpTopic(chapterId);
+    },
+
+    openRulesHelpTopic: function (topicId) {
+        if (typeof this.switchTab === "function") this.switchTab("rules");
+        if (typeof this.switchRulesSubtab === "function") this.switchRulesSubtab("rules");
+        if (typeof this.switchRulesView === "function") this.switchRulesView("guide");
+
+        var self = this;
+        setTimeout(function () {
+            var acc = document.getElementById("rule-acc-" + topicId);
+            if (acc) {
+                acc.classList.add("open");
+                acc.scrollIntoView({ behavior: "smooth", block: "center" });
+                acc.classList.remove("rule-highlight-pulse");
+                void acc.offsetWidth; // trigger reflow
+                acc.classList.add("rule-highlight-pulse");
+                setTimeout(function () {
+                    acc.classList.remove("rule-highlight-pulse");
+                }, 3000);
+            }
+        }, 60);
+    },
+
+    // --- INTERAKTIVNÍ KALKULAČKA KRÁLOVSKÝCH SLAVNOSTÍ ---
+    updateFestivalCalculator: function () {
+        var festType = (document.getElementById("calc-fest-type") || {}).value || "tournament";
+        var optGroupTournament = document.getElementById("calc-group-tournament");
+        var optGroupBall = document.getElementById("calc-group-ball");
+        var optGroupRace = document.getElementById("calc-group-race");
+
+        if (optGroupTournament) optGroupTournament.style.display = (festType === "tournament") ? "block" : "none";
+        if (optGroupBall) optGroupBall.style.display = (festType === "ball") ? "block" : "none";
+        if (optGroupRace) optGroupRace.style.display = (festType === "race") ? "block" : "none";
+
+        var diceRoll = parseInt((document.getElementById("calc-dice-roll") || {}).value || "4", 10);
+        var score = 0;
+        var r1Heart = 0, r1Gold = 1200;
+        var r2Heart = 0, r2Gold = 600;
+        var r3Heart = 0, r3Gold = 300;
+
+        if (festType === "tournament") {
+            var b = parseInt((document.getElementById("calc-tour-boj") || {}).value || "3", 10);
+            var j = parseInt((document.getElementById("calc-tour-jizda") || {}).value || "2", 10);
+            var ch = parseInt((document.getElementById("calc-tour-ch") || {}).value || "2", 10);
+            var setBonus = (document.getElementById("calc-tour-set") || {}).checked ? 3 : 0;
+            score = diceRoll + b + j + setBonus;
+            r1Heart = 3.0 + 0.3 * b + 0.2 * ch;
+            r2Heart = 2.0 + 0.2 * b + 0.1 * ch;
+            r3Heart = 1.0 + 0.15 * b;
+        } else if (festType === "ball") {
+            var t = parseInt((document.getElementById("calc-ball-tanec") || {}).value || "3", 10);
+            var ch2 = parseInt((document.getElementById("calc-ball-ch") || {}).value || "3", 10);
+            var dressBonus = (document.getElementById("calc-ball-dress") || {}).checked ? 2 : 0;
+            var armorMalus = (document.getElementById("calc-ball-armor") || {}).checked ? -2 : 0;
+            score = diceRoll + t + ch2 + dressBonus + armorMalus;
+            r1Heart = 2.5 + 0.4 * t + 0.3 * ch2;
+            r2Heart = 1.5 + 0.2 * t + 0.15 * ch2;
+            r3Heart = 0.5 + 0.15 * t;
+        } else if (festType === "race") {
+            var j2 = parseInt((document.getElementById("calc-race-jizda") || {}).value || "3", 10);
+            var ch3 = parseInt((document.getElementById("calc-race-ch") || {}).value || "2", 10);
+            var horses = parseInt((document.getElementById("calc-race-horses") || {}).value || "2", 10);
+            score = diceRoll + 2 * j2 + Math.min(3, horses);
+            r1Heart = 2.5 + 0.4 * j2 + 0.2 * ch3;
+            r2Heart = 1.5 + 0.2 * j2 + 0.1 * ch3;
+            r3Heart = 0.5 + 0.15 * j2;
+        }
+
+        var scoreEl = document.getElementById("calc-score-val");
+        var outcomeEl = document.getElementById("calc-outcome-val");
+        var rewardEl = document.getElementById("calc-reward-val");
+
+        if (scoreEl) scoreEl.textContent = score + " bodů";
+
+        var standing = "🥇 1. Místo (Vysoká šance na triumf)";
+        var rewardStr = "+" + r1Heart.toFixed(1) + " 💖 a +" + r1Gold + " zl.";
+        if (score < 8) {
+            standing = "🥉 3. Místo (Bude to tuhý boj)";
+            rewardStr = "+" + r3Heart.toFixed(1) + " 💖 a +" + r3Gold + " zl.";
+        } else if (score < 12) {
+            standing = "🥈 2. Místo (Přední příčky království)";
+            rewardStr = "+" + r2Heart.toFixed(1) + " 💖 a +" + r2Gold + " zl.";
+        }
+
+        if (outcomeEl) outcomeEl.textContent = standing;
+        if (rewardEl) rewardEl.innerHTML = rewardStr;
     }
     });
 })();

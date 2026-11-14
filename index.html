@@ -47,7 +47,7 @@
 
     <link rel="stylesheet" href="css/main.css?v=202611101045">
 
-    <link rel="stylesheet" href="css/board.css?v=202611091330">
+    <link rel="stylesheet" href="css/board.css?v=202611141715">
 
     <link rel="stylesheet" href="css/modals.css?v=202611112245">
 
@@ -1196,304 +1196,947 @@
 
                     <button id="rules-subtab-btn-trophies" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('trophies')">🏆 Síň trofejí &amp; Relikvií (29)</button>
 
-                    <button id="rules-subtab-btn-decorations" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('decorations')">🌲 Atlas dekorací &amp; krajiny (34)</button>
+                    <button id="rules-subtab-btn-decorations" class="rules-subnav-btn" onclick="PRS_App.switchRulesSubtab('decorations')">🌲 Atlas dekorací &amp; krajiny (42)</button>
 
                 </div>
 
                 <!-- SUB-ZÁLOŽKA 1: PRAVIDLA HRY -->
+                <div id="rules-subtab-rules" class="rules-mode-art">
 
-                <div id="rules-subtab-rules">
-
-                    <h2>📜 Kompletní pravidla hry „Princeznino srdce“</h2>
-
-                    <p style="color:var(--text-muted); margin-bottom:1rem;">
-
-                        Tato pravidla věrně spojují všech 7 ručně psaných listů (<code>IMG_4594</code> až <code>IMG_4600</code>) do vyvážené 1–2hodinové stolní i online hry.
-
-                    </p>
-
-                    <!-- BANNER: CÍL HRY A TŘI CESTY K VÍTĚZSTVÍ -->
-                    <div style="background: linear-gradient(135deg, rgba(30, 22, 14, 0.95), rgba(18, 12, 7, 0.95)); border: 2px solid var(--gold); border-radius: 14px; padding: 1.25rem 1.4rem; margin-bottom: 1.4rem; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
-                        <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.6rem;">
-                            <span style="font-size:1.6rem;">👑</span>
-                            <h3 style="margin:0; font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.15rem;">Cíl hry a tři rovnocenné cesty k vítězství</h3>
-                        </div>
-                        <p style="font-size:0.88rem; color:var(--text-main); margin-bottom:0.8rem; line-height:1.5;">
-                            Vítězem se stává rytíř, který jako první dosáhne <strong>30 💖 Princezniných srdcí</strong>, nebo který jako udatný hrdina <strong>skolí 2 obávané draky království</strong> (okamžitý dračí triumf). Do cíle vedou tři odlišné, vzájemně vyvážené strategické cesty:
-                        </p>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:0.9rem;">
-                            <div style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:0.8rem;">
-                                <div style="font-weight:700; color:#fca5a5; font-size:0.92rem; margin-bottom:4px;">⚔️ 1. Cesta Válečníka &amp; Drakobijce</div>
-                                <div style="font-size:0.82rem; color:#e2e8f0; line-height:1.4;">
-                                    Investice do <strong>Boje</strong>, těžkých zbraní a zbroje. Plnění úkolů U1–U3, dominance na rytířských Turnajích a skolení 2 draků pro okamžitý triumf.
-                                </div>
-                            </div>
-                            <div style="background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.3); border-radius:10px; padding:0.8rem;">
-                                <div style="font-weight:700; color:#86efac; font-size:0.92rem; margin-bottom:4px;">🐎 2. Cesta Šlechtického chovatele &amp; Statkáře</div>
-                                <div style="font-size:0.82rem; color:#e2e8f0; line-height:1.4;">
-                                    Skupování sad koní, psů a sokolů, dobytčí trh ve stájích (ovce, prasata, skot), rozvoj vesnic na města a držení trvalé <strong>Chovatelské prémie (+4,0 / +2,5 / +1,5 💖)</strong>.
-                                </div>
-                            </div>
-                            <div style="background:rgba(168, 85, 247, 0.1); border:1px solid rgba(168, 85, 247, 0.3); border-radius:10px; padding:0.8rem;">
-                                <div style="font-weight:700; color:#d8b4fe; font-size:0.92rem; margin-bottom:4px;">💃 3. Cesta Dvorního diplomata &amp; Tanečníka</div>
-                                <div style="font-size:0.82rem; color:#e2e8f0; line-height:1.4;">
-                                    Investice do <strong>Tance, Charismatu a plesových šatů</strong>. Audience u krále na STARTu a Hradě (+0,5 až +1,0 💖), královské dary a drtivá dominance na Zámeckých plesech (až +5 💖 za ples).
-                                </div>
-                            </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div>
+                            <h2 style="margin:0; font-family:'Cinzel',serif; color:var(--gold-light);">📜 Kodex pravidel „Princeznino srdce“</h2>
+                            <p style="color:var(--text-muted); font-size:0.86rem; margin:0.25rem 0 0;">
+                                Oficiální pravidla deskové a online hry – od rychlého startu na 1 obrazovku až po detailního průvodce a atlas všech polí.
+                            </p>
                         </div>
                     </div>
 
-                    <div class="lobby-grid">
+                    <!-- PŘEPÍNAČ VRSTEV PRAVIDEL (Rychlý start / Průvodce / Tabulky / Slovníček / Atlas) -->
+                    <div class="rules-subviews-nav">
+                        <button id="btn-rules-view-quick" class="rules-view-btn active" onclick="PRS_App.switchRulesView('quick')">⚡ Rychlý start</button>
+                        <button id="btn-rules-view-guide" class="rules-view-btn" onclick="PRS_App.switchRulesView('guide')">📖 Průvodce hrou</button>
+                        <button id="btn-rules-view-tables" class="rules-view-btn" onclick="PRS_App.switchRulesView('tables')">📊 Referenční tabulky</button>
+                        <button id="btn-rules-view-glossary" class="rules-view-btn" onclick="PRS_App.switchRulesView('glossary')">🔤 Slovníček &amp; Ikony</button>
+                        <button id="btn-rules-view-atlas" class="rules-view-btn" onclick="PRS_App.switchRulesView('atlas')">🗺️ Atlas polí (22)</button>
+                    </div>
 
-                        <div>
+                    <!-- HORNÍ LIŠTA NASTAVENÍ: HLEDÁNÍ, PŘEPÍNAČ VZHLEDU A TISK -->
+                    <div class="rules-mode-toggle-bar">
+                        <div style="display:flex; align-items:center; gap:0.6rem; flex:1; max-width:420px;">
+                            <span style="font-size:0.9rem; color:var(--gold);">🔍</span>
+                            <input type="text" id="rules-search-input" placeholder="Hledat v pravidlech (např. sokol, nájem, ples, lazaret, brašna)..." 
+                                style="background:rgba(0,0,0,0.4); border:1px solid rgba(212,175,55,0.3); border-radius:5px; padding:0.28rem 0.6rem; color:#fff; font-size:0.82rem; width:100%; outline:none;" 
+                                oninput="PRS_App.filterRulesTopics(this.value)" />
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; gap:0.35rem; font-size:0.78rem; color:#94a3b8;">
+                                <span>Vzhled:</span>
+                                <div class="mode-toggle-group" id="rules-mode-toggle-group">
+                                    <button id="btn-rules-mode-art" class="mode-toggle-btn active" onclick="PRS_App.setRulesVisualMode('art')" title="Zobrazit malovanou verzi s ilustracemi a medailonky">🎨 Malovaný</button>
+                                    <button id="btn-rules-mode-scheme" class="mode-toggle-btn" onclick="PRS_App.setRulesVisualMode('scheme')" title="Zobrazit kompaktní technická schémata a diagramy">📐 Schéma</button>
+                                </div>
+                            </div>
+                            <button id="btn-print-cheat-sheet" class="btn-secondary" style="font-size:0.78rem; padding:0.25rem 0.65rem;" onclick="window.print()" title="Vytisknout přehledný tahák pravidel na tiskárnu nebo do PDF">🖨️ Tisknout tahák</button>
+                        </div>
+                    </div>
 
-                            <h3>1. Základní ekonomika, pohyb a dražba</h3>
+                    <!-- ========================================================= -->
+                    <!-- VRSTVA 1: RYCHLÝ START (1 OBRAZOVKA)                      -->
+                    <!-- ========================================================= -->
+                    <div id="rules-view-quick" class="rules-view-section">
 
-                            <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4; margin-bottom:1rem;">
-
-                                <li><strong>Startovní jmění:</strong> Každý rytíř začíná na poli <code>START</code> s <strong>10 000 zl.</strong></li>
-
-                                <li><strong>Průchod STARTem &amp; Dvorní audience:</strong> Běžný žold činí <strong>+3 000 zl.</strong> Pro nemajetné rytíře bez panství a zvířat (bezzemky) poskytuje král podporu <strong>+5 000 zl.</strong> Rytíři se šlechtickým statusem (vlastní Město či Hrad), vysokým Charismatem nebo zkušení tanečníci (<strong>Tanec ≥ 2 a šaty</strong>, popř. <strong>Tanec ≥ 3</strong>) získávají navíc audienci u dvora (<strong>+0,5 až +1,0 💖</strong>).</li>
-
-                                <li><strong>🔀 Volba trasy na rozcestích:</strong> Konec pasivního pochodu! Kdykoliv tvůj rytíř dorazí na rozcestí (křižovatku tras na plánu), figurka se zastaví a <strong>hráč si sám zvolí směr</strong>: zda pokračovat vnějším okruhem (pastviny, vesnice, kovárny), nebo vnitřní královskou stezkou (slavnosti u hradu, arény monster, mistři vlastností). V dialogu navíc vidíš přesný název cílového pole pro obě větve!</li>
-
-                                <li><strong>🚶 Taktické tempo pohybu, Jízda a zvířecí navigace:</strong>
-
-                                    <ul style="margin-top:4px; padding-left:1rem; font-size:0.86rem; color:#cbd5e1;">
-
-                                        <li><strong>🚶 Opatrný krok (1–4):</strong> Pomalý, opatrný postup (hod 1d4) pro bezpečné manévrování na políčka v těsné blízkosti.</li>
-
-                                        <li><strong>🎲 Standardní pochod &amp; Pěší sprint:</strong> Běžný rytířský krok (1d6). Pěší rytíř s dovedností <strong>Jízda ≥ 2</strong> může využít atletický sprint a zvolit si <strong>+1 pole navíc</strong>, při <strong>Jízda ≥ 4</strong> dokonce <strong>+2 pole navíc</strong>!</li>
-
-                                        <li><strong>🏇 Koňský pohyb (vyžaduje koně) – stupně Jízdy:</strong>
-                                            <ul style="margin-top:2px; padding-left:1rem; font-size:0.83rem; color:#94a3b8;">
-                                                <li><em>Jízda &lt; 2 (Koňský klus):</em> Hod 2d6 – volba 1 příznivější kostky pro přesné dosednutí na vytoužené pole.</li>
-                                                <li><em>Jízda 2–3 (Koňský cval):</em> Plný součet obou kostek (d1 + d2) pro bleskový trysk přes mapu.</li>
-                                                <li><em>Jízda ≥ 4 (Královský trysk):</em> Bleskový cval (d1 + d2) + <strong>bonusová +2 pole zdarma</strong>!</li>
-                                            </ul>
-                                        </li>
-
-                                        <li><strong>🦅 Sokolí navigace (vyžaduje sokola):</strong> Kroužící dravec prozkoumá terén z výšky a umožní ti upravit výsledný pohyb o <strong>±1 pole</strong> (např. při hodu 4 si zvolit pole 3, 4 nebo 5 pro vyhnutí se pasti či zisk klenotu)!</li>
-
-                                        <li><strong>🐎 Speciální výhody jezdce v království:</strong>
-                                            <ul style="margin-top:2px; padding-left:1rem; font-size:0.83rem; color:#94a3b8;">
-                                                <li><em>Sleva na nájem 30 %:</em> Rytíř s Jízdou ≥ 4 a koněm platí v cizích vesnicích o 30 % nižší nájem.</li>
-                                                <li><em>Jezdecký únik v PvP duelech:</em> Napadený jezdec se může bránit obratností koně (<code>Obrana = max(Boj, Jízda + min(2, Koně))</code>). Zvítězí-li o 3+ body, získá <strong>+0,5 💖</strong> za mistrný manévr!</li>
-                                            </ul>
-                                        </li>
-
-                                    </ul>
-
-                                </li>
-
-                                <li><strong>Královská dražba při dluhu (60 %):</strong> Nemá-li hráč hotovost na nájem cizího pole, nejprve odevzdá všechno zbývající zlato a zbytek dluhu uhradí nuceným odprodejem majetku bance za <strong>60 % pořizovací ceny</strong> (přebytek se vrací). Hráč nikdy nevypadává ze hry (dluh pod nulou se smaže). Dobrovolný prodej u Obchodníka je za 50 % (věci) a 100 % (statky).</li>
-
-                            </ul>
-
-                            <h3>2. Čtyři vlastnosti a Mistři (MB, MJ, MT, MCH, VM)</h3>
-
-                            <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4; margin-bottom:1rem;">
-
-                                <li>Každý rytíř rozvíjí 4 klíčové ctnosti na stupních <strong>1 až 5</strong>:
-                                    <ul style="margin-top:3px; padding-left:1rem; font-size:0.85rem; color:#cbd5e1;">
-                                        <li><strong>⚔️ Boj (MB):</strong> Zvyšuje sílu v soubojové aréně draků, v PvP duelech a na rytířském Turnaji.</li>
-                                        <li><strong>🏇 Jízda (MJ):</strong> Zrychluje pohyb (klus, cval, trysk), zlevňuje nájmy o 30 %, brání v duelech a dominuje Velkému závodu.</li>
-                                        <li><strong>💃 Tanec (MT):</strong> Dominuje Královskému plesu, otevírá audience u dvora na STARTu a Hradě (+0,5 až +1,0 💖), násobí přípitek v Krčmě (+1,0 💖) a dary u Šaška (+200 zl. × Tanec).</li>
-                                        <li><strong>👑 Charisma (MCH):</strong> Zvyšuje zisk srdcí ze všech slavností, zlevňuje kauce a násobí dvorní odměny.</li>
-                                    </ul>
-                                </li>
-
-                                <li>Při stoupnutí na Mistra nejprve hodíš kostkou: <strong>1, 2, 3 = Mistr tě nepřijme</strong>; <strong>4, 5, 6 = Můžeš zaplatit výcvik</strong> dalšího stupně: <strong>1 000 / 2 000 / 3 000 / 4 000 / 5 000 zl.</strong> <strong>Velmistr (VM)</strong> učí libovolnou vlastnost.</li>
-
-                            </ul>
-
-                            <h3>3. Sady zvířat (1–12), Hospodářský dobytek, Panství a Výběrčí daní (VD)</h3>
-
-                            <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4;">
-
-                                <li><strong>12 sad zvířat:</strong> Sokol 400 × n, Pes 500 × n a Kůň 600 × n. Nájem cizího hráče činí <strong>20 %</strong> (1 zvíře), <strong>40 %</strong> (pár ze sady) nebo <strong>80 %</strong> (všechna 3 zvířata sady).</li>
-
-                                <li><strong>Chovný bonus za ucelenou sadu:</strong> Za každou zkompletovanou trojici (Kůň + Pes + Sokol ze stejné sady) získává majitel okamžitý a trvalý bonus <strong>+1,5 💖</strong>.</li>
-
-                                <li><strong>Bonus za jednodruhové stádo:</strong> Vlastnictví 3 zvířat stejného druhu (3 koně, 3 psi nebo 3 sokoli) přináší chovateli trvalý bonus <strong>+1,0 💖</strong>.</li>
-
-                                <li><strong>Chovatelská prémie:</strong> 3 hráči s nejvyšším součtem cen zvířat drží průběžně <strong>+4,0 💖</strong> (1. místo), <strong>+2,5 💖</strong> (2. místo) a <strong>+1,5 💖</strong> (3. místo).</li>
-
-                                <li><strong>🌾 Dobytčí trh a hospodářská zvířata (Stáje &amp; Obchodník):</strong>
-                                    Na Dobytčím trhu ve stájích nebo u Obchodníka můžeš nakupovat užitková stáda:
-                                    <ul style="margin-top:2px; padding-left:1rem; font-size:0.84rem; color:#cbd5e1;">
-                                        <li>🐑 <em>Chovná ovce (500 zl.):</em> Přináší <strong>+120 zl.</strong> u Výběrčího daní a <strong>+50 zl.</strong> k nájmu každé tvé vesnice.</li>
-                                        <li>🐖 <em>Královské prase (600 zl.):</em> Přináší <strong>+150 zl.</strong> u Výběrčího daní a <strong>+75 zl.</strong> k nájmu každé tvé vesnice.</li>
-                                        <li>🐄 <em>Ušlechtilý skot (800 zl.):</em> Přináší <strong>+200 zl.</strong> u Výběrčího daní a <strong>+100 zl.</strong> k nájmu každé tvé vesnice.</li>
-                                        <li><em>Automatický chov z rozvoje sídel:</em> 1★ Vesnice automaticky chová 1 ovci, 2★ Městečko chová 1 ovci + 1 prase, 3★ Velká osada chová 1 ovci + 1 prase + 1 krávu!</li>
-                                        <li><em>Kapacita stád:</em> Maximální počet dobytka: <code>Vesnice × 3 + Města × 2 + Stáje (+4)</code>.</li>
-                                    </ul>
-                                </li>
-
-                                <li><strong>Prestiž feudálních panství:</strong> Každý Hrad přináší držiteli trvale <strong>+1,0 💖</strong> a +1 Charisma. Každé Město nebo plně vylepšená 3★ Vesnice dává <strong>+0,5 💖</strong>. U <strong>Výběrčího daní (VD)</strong> nesou Vesnice 500/900/1 400 zl., Města 1 200 zl. a Hrady 2 500 zl.</li>
-
-                            </ul>
-
-                            <h3 style="margin-top:1.1rem;">4. Speciální lokace, Dračí souboje a Bestiář (U1–U3)</h3>
-
-                            <ul style="padding-left:1.2rem; font-size:0.9rem; color:#e7e5e4;">
-
-                                <li><strong>Výpravy &amp; Dračí doupata (U1–U3):</strong> Souboje s monstry a 20 unikátními draky:
-                                    <ul style="margin-top:2px; padding-left:1rem; font-size:0.85rem; color:#cbd5e1;">
-                                        <li><em>U1 (Běžné stvůry):</em> 1 000–2 500 zl. a +0,5 až +1,5 💖.</li>
-                                        <li><em>U2 (Mocná monstra):</em> 2 600 zl., +1,5 až +2,5 💖, 65% šance na trofej.</li>
-                                        <li><em>U3 (Dračí doupata):</em> 6 000 zl., +2,5 až +5,0 💖 a 100% garantovaný drop dračí trofeje!</li>
-                                        <li><em>Bonusová výstroj ze zbrojnice:</em> Padá pouze při <strong>drtivém vítězství o 3+ body</strong>.</li>
-                                    </ul>
-                                </li>
-
-                                <li><strong>🏃 Taktický ústup z arény:</strong> Pokud máš z monstra obavy, můžeš před zahájením boje zaplatit výkupné (<strong>400 zl. u U2, 800 zl. u U3</strong>) a bezpečně vycouvat bez ztráty srdcí a převozu do Špitálu!</li>
-
-                                <li><strong>🎯 Využití slabin z Bestiáře (+2 k síle):</strong> Znalost dračích slabin ti dává rozhodující převahu v boji. Pokud do arény vstoupíš s výbavou, ctností, živlem či zvířaty odpovídajícími slabině dané bestie (např. <em>Kopí</em> na Vodního draka, <em>Tanec</em> na Pohádkového draka, <em>Oheň</em> na Ledového draka, <em>Světlo/Klenoty</em> na Stínového draka, <em>Lovečtí psi</em> na Zeleného draka apod.), získáš v aréně automatický bonus <strong>+2 k bojové síle (🎯 Využitá slabina)</strong>!</li>
-
-                                <li><strong>⚔️ Taktické bojové postoje v aréně:</strong> Před hodem kostkou si rytíř zvolí jeden ze 3 bojových stylů:
-
-                                    <ul style="margin-top:4px; padding-left:1rem; font-size:0.86rem; color:#cbd5e1;">
-
-                                        <li><strong>⚔️ Dravý útok:</strong> <em>+2 k Bojové síle</em>, ale při porážce utržíš kritické zranění (ztráta 2 💖 nebo dvojnásobná pokuta).</li>
-
-                                        <li><strong>🎯 Taktický manévr (Výchozí):</strong> Standardní síla. Pokud prohraješ o pouhé 1–2 body a máš loveckého psa, sokola či Boj ≥ 2, získáš <strong>🎲 Taktický opravný hod (Reroll 1 kostky)</strong>!</li>
-
-                                        <li><strong>🛡️ Opatrná obrana:</strong> <em>-1 k Bojové síle</em>, ale při porážce se bezpečně stáhneš za štít: <strong>ztráta 0 💖</strong> a žádný převoz do Špitálu!</li>
-
-                                    </ul>
-
-                                </li>
-
-                                <li><strong>❓ Karty Náhody &amp; Dilemata:</strong> Balíček obsahuje vyvážené události: dary, dotace, plesová pozvání pro tanečníky, jezdecké zkoušky pro jezdce i přepadení lapky a válečné daně.</li>
-
-                                <li><strong>Špitál sv. Lazara &amp; Hojivý lektvar:</strong> Lektvar za 1 000 zl. trvale zvýší Boj o +1 (pouze pokud Boj &lt; 2) a navíc poskytuje <strong>jednorázový ochranný amulet</strong>, který rytíře zachrání před Špitálem při příští porážce v boji.</li>
-
-                                <li><strong>Krčma U Zlatého korbelu &amp; Šašek:</strong> Runda medoviny v krčmě dává tanečníkům (Tanec ≥ 2) prestižní odměnu <strong>+1,0 💖</strong>. Pole Šašek odměňuje zkušené tanečníky královským darem <strong>+200 zl. × Tanec</strong>.</li>
-
-                                <li><strong>Šatlava:</strong> Uvržení do vězení; vykoupení kaucí 1 000 zl., pokusem o útěk (hod 6), nebo čekáním 1 kolo.</li>
-
-                            </ul>
-
+                        <!-- BANNER: CÍL HRY -->
+                        <div style="background:linear-gradient(135deg, rgba(30, 22, 14, 0.95), rgba(18, 12, 7, 0.95)); border:2px solid var(--gold); border-radius:12px; padding:1.1rem 1.3rem; margin-bottom:1.15rem; box-shadow:0 6px 20px rgba(0,0,0,0.5);">
+                            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.45rem;">
+                                <span style="font-size:1.6rem;">👑</span>
+                                <h3 style="margin:0; font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.15rem;">Cíl hry a podmínka vítězství</h3>
+                            </div>
+                            <p style="font-size:0.9rem; color:var(--text-main); margin:0; line-height:1.5;">
+                                Vítězem se stává rytíř, který jako první dosáhne <strong>30 💖 Princezniných srdcí</strong>, nebo který jako nepřemožitelný hrdina <strong>skolí 2 obávané draky království</strong> (okamžitý dračí triumf)!
+                            </p>
                         </div>
 
-                        <div>
+                        <!-- SMYČKA TAHU: 4 KROKY -->
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.05rem; margin:1rem 0 0.4rem; display:flex; align-items:center; gap:0.5rem;">
+                            <span>🔄</span> Průběh tahu ve 4 krocích
+                        </h3>
+                        <p style="color:var(--text-muted); font-size:0.83rem; margin-bottom:0.7rem;">
+                            Každý tah rytíře probíhá ve stejném přehledném pořadí:
+                        </p>
 
-                            <h3>5. Slavnosti (♡ ♡ ♡) – Hlavní zdroj Princezniných srdcí</h3>
+                        <div class="turn-loop-grid">
+                            <div class="turn-step-card">
+                                <div class="visual-art-only">
+                                    <div class="turn-step-badge-art">KROK 1</div>
+                                    <div class="turn-step-art-circle">🎲</div>
+                                </div>
+                                <div class="visual-scheme-only" style="display:none;">
+                                    <div class="turn-step-badge-scheme">[1/4]</div>
+                                    <div class="scheme-code">ROLL(1d6 / 2d6)</div>
+                                </div>
+                                <div class="turn-step-title">Hod kostkou</div>
+                                <div class="turn-step-desc">
+                                    Hoď 1d6 pro standardní pochod, zvol opatrný krok (1–4), nebo naskoč na koně pro bleskový klus, cval či trysk.
+                                </div>
+                            </div>
+                            <div class="turn-step-card">
+                                <div class="visual-art-only">
+                                    <div class="turn-step-badge-art">KROK 2</div>
+                                    <div class="turn-step-art-circle">🧭</div>
+                                </div>
+                                <div class="visual-scheme-only" style="display:none;">
+                                    <div class="turn-step-badge-scheme">[2/4]</div>
+                                    <div class="scheme-code">MOVE &amp; FORK</div>
+                                </div>
+                                <div class="turn-step-title">Pohyb &amp; Rozcestí</div>
+                                <div class="turn-step-desc">
+                                    Postupuj vpřed. Dorazíš-li na rozcestí, figurka se zastaví a <strong>ty sám si zvolíš směr</strong> (vnější vsi vs. vnitřní královská stezka).
+                                </div>
+                            </div>
+                            <div class="turn-step-card">
+                                <div class="visual-art-only">
+                                    <div class="turn-step-badge-art">KROK 3</div>
+                                    <div class="turn-step-art-circle">🏰</div>
+                                </div>
+                                <div class="visual-scheme-only" style="display:none;">
+                                    <div class="turn-step-badge-scheme">[3/4]</div>
+                                    <div class="scheme-code">ACTION(TILE)</div>
+                                </div>
+                                <div class="turn-step-title">Akce na cílovém poli</div>
+                                <div class="turn-step-desc">
+                                    Kup volné panství / zaplať nájem sokovi / trénuj u Mistra / vstup do arény draků / zúčastni se královské slavnosti!
+                                </div>
+                            </div>
+                            <div class="turn-step-card">
+                                <div class="visual-art-only">
+                                    <div class="turn-step-badge-art">KROK 4</div>
+                                    <div class="turn-step-art-circle">📜</div>
+                                </div>
+                                <div class="visual-scheme-only" style="display:none;">
+                                    <div class="turn-step-badge-scheme">[4/4]</div>
+                                    <div class="scheme-code">END_TURN()</div>
+                                </div>
+                                <div class="turn-step-title">Konec tahu</div>
+                                <div class="turn-step-desc">
+                                    Předání tahu dalšímu rytíři v pořadí. Můžeš také aktivovat pergamen z brašny nebo zkontrolovat stav svého panství.
+                                </div>
+                            </div>
+                        </div>
 
-                            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:0.5rem;">
+                        <!-- TŘI CESTY K VÍTĚZSTVÍ -->
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.05rem; margin:1.35rem 0 0.5rem; display:flex; align-items:center; gap:0.5rem;">
+                            <span>🏆</span> Tři rovnocenné cesty k vítězství
+                        </h3>
 
-                                Slavnost proběhne, pokud podmínku účasti splňují <strong>alespoň 2 hráči</strong>. Vítězství závisí na příslušné rytířské ctnosti (Boj, Tanec, Jízda) a Charismatu. Platí přísná hierarchie – 1. místo vždy obdrží minimálně o 0,5 💖 více než 2. místo:
-
-                            </p>
-
-                            <table class="rules-table">
-
-                                <thead>
-
-                                    <tr>
-
-                                        <th>Slavnost</th>
-
-                                        <th>Podmínka účasti &amp; Skóre</th>
-
-                                        <th>1. místo</th>
-
-                                        <th>2. místo</th>
-
-                                        <th>3. místo</th>
-
-                                    </tr>
-
-                                </thead>
-
-                                <tbody>
-
-                                    <tr>
-
-                                        <td><strong>⚔️ Turnaj</strong></td>
-
-                                        <td>Kůň + Pes + Sokol (nebo Kůň + Zbroj/Zbraň)<br/><small style="color:#f87171;">Skóre: <strong>Hod 1d6 + Boj + Jízda + Set (+3)</strong></small></td>
-
-                                        <td><code>3,0 + 0,3×B + 0,2×CH</code> 💖<br/><small style="color:#fef08a;">+1 200 zl.</small></td>
-
-                                        <td><code>2,0 + 0,2×B + 0,1×CH</code> 💖<br/><small style="color:#fef08a;">+600 zl.</small></td>
-
-                                        <td><code>1,0 + 0,15×B</code> 💖<br/><small style="color:#fef08a;">+300 zl.</small></td>
-
-                                    </tr>
-
-                                    <tr>
-
-                                        <td><strong>💃 Zámecký ples</strong></td>
-
-                                        <td>Šaty nebo Tanec ≥ 1 (těžká zbroj: postih -2)<br/><small style="color:#c084fc;">Skóre: <strong>Hod 1d6 + Tanec + Charisma + Šaty (+2)</strong></small></td>
-
-                                        <td><code>2,5 + 0,4×T + 0,3×CH</code> 💖<br/><small style="color:#fef08a;">+1 200 zl.</small></td>
-
-                                        <td><code>1,5 + 0,2×T + 0,15×CH</code> 💖<br/><small style="color:#fef08a;">+600 zl.</small></td>
-
-                                        <td><code>0,5 + 0,15×T</code> 💖<br/><small style="color:#fef08a;">+300 zl.</small></td>
-
-                                    </tr>
-
-                                    <tr>
-
-                                        <td><strong>🏇 Velký závod</strong></td>
-
-                                        <td>Kůň ve stáji<br/><small style="color:#38bdf8;">Skóre: <strong>Hod 1d6 + 2×Jízda + Koně (max 3)</strong></small></td>
-
-                                        <td><code>2,5 + 0,4×J + 0,2×CH</code> 💖<br/><small style="color:#fef08a;">+1 200 zl.</small></td>
-
-                                        <td><code>1,5 + 0,2×J + 0,1×CH</code> 💖<br/><small style="color:#fef08a;">+600 zl.</small></td>
-
-                                        <td><code>0,5 + 0,15×J</code> 💖<br/><small style="color:#fef08a;">+300 zl.</small></td>
-
-                                    </tr>
-
-                                </tbody>
-
-                            </table>
-
-                            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">
-                                <em>Tip:</em> Pokud podmínku účasti splňuje méně než 2 hráči, slavnost se nekoná, ale pořadatel obdrží od krále útěchu <strong>+800 zl. a +0,5 💖</strong> za snahu.
-                            </p>
-
-                            <h3 style="margin-top:1.1rem;">6. Základní výstroj zbrojnice (Vzorec: +1 000 zl. za plus, -500 zl. za mínus)</h3>
-
-                            <div style="max-height:245px; overflow-y:auto;">
-
-                                <table class="rules-table">
-
-                                    <thead>
-
-                                        <tr>
-
-                                            <th>Stupeň</th>
-
-                                            <th>Předmět</th>
-
-                                            <th>⚔️</th>
-
-                                            <th>🏇</th>
-
-                                            <th>💃</th>
-
-                                            <th>✨</th>
-
-                                            <th>Cena</th>
-
-                                        </tr>
-
-                                    </thead>
-
-                                    <tbody id="catalog-items-table"></tbody>
-
-                                </table>
-
+                        <div class="victory-paths-grid">
+                            <!-- Válečník -->
+                            <div class="victory-path-card victory-path-warrior">
+                                <div class="visual-art-only">
+                                    <div class="victory-path-header-row">
+                                        <div style="font-weight:700; color:#fca5a5; font-size:1rem;">⚔️ 1. Cesta Válečníka</div>
+                                        <img class="victory-path-medallion" src="assets/dragons/dragon_red.jpg" alt="Drakobijce" />
+                                    </div>
+                                </div>
+                                <div class="visual-scheme-only" style="display:none;">
+                                    <div class="victory-path-scheme-box">
+                                        <div style="font-weight:700; color:#f87171; font-size:0.85rem; margin-bottom:0.25rem;">[SCHÉMA: WARRIOR BUILD]</div>
+                                        <div><strong>Podmínka:</strong> Boj ≥ 6, Plátová zbroj, Obouruční meč</div>
+                                        <div><strong>Cíl:</strong> Arény netvorů U1–U2 + Turnaje + 2× Drak U3</div>
+                                        <div style="color:#ef4444; font-weight:700; margin-top:0.25rem;">⚡ KILL(DRAGONS) == 2 ➔ INSTANT WIN!</div>
+                                    </div>
+                                </div>
+                                <div style="font-size:0.83rem; color:#e2e8f0; line-height:1.45;">
+                                    • Investuj do ctnosti <strong>Boj</strong>, kováren a zbraní.<br/>
+                                    • Plň úkoly netvorů U1–U2 a dominuj na <strong>Turnajích</strong>.<br/>
+                                    • <strong>Dračí triumf:</strong> Skolením 2 draků okamžitě vyhráváš hru bez ohledu na počet srdcí!
+                                </div>
                             </div>
 
+                            <!-- Chovatel -->
+                            <div class="victory-path-card victory-path-breeder">
+                                <div class="visual-art-only">
+                                    <div class="victory-path-header-row">
+                                        <div style="font-weight:700; color:#86efac; font-size:1rem;">🐎 2. Cesta Chovatele</div>
+                                        <img class="victory-path-medallion" src="assets/tiles/kun.png" alt="Chovatel" />
+                                    </div>
+                                </div>
+                                <div class="visual-scheme-only" style="display:none;">
+                                    <div class="victory-path-scheme-box">
+                                        <div style="font-weight:700; color:#4ade80; font-size:0.85rem; margin-bottom:0.25rem;">[SCHÉMA: BREEDER BUILD]</div>
+                                        <div><strong>Podmínka:</strong> Kůň + Pes + Sokol (Set = +1,5 💖)</div>
+                                        <div><strong>Stáda:</strong> Ovce, prasata, skot ve stájích</div>
+                                        <div style="color:#22c55e; font-weight:700; margin-top:0.25rem;">🏆 1. Místo v prémii: +4,0 💖 / Velký závod: +5 💖</div>
+                                    </div>
+                                </div>
+                                <div style="font-size:0.83rem; color:#e2e8f0; line-height:1.45;">
+                                    • Skupuj trojice zvířat (kůň + pes + sokol) pro bonus <strong>+1,5 💖</strong>.<br/>
+                                    • Nakupuj hospodářská stáda ve stájích (ovce, prasata, skot).<br/>
+                                    • Drž 1. místo v <strong>Chovatelské prémii (+4,0 💖)</strong> a vyhrávej Velké závody.
+                                </div>
+                            </div>
+
+                            <!-- Diplomat -->
+                            <div class="victory-path-card victory-path-diplomat">
+                                <div class="visual-art-only">
+                                    <div class="victory-path-header-row">
+                                        <div style="font-weight:700; color:#d8b4fe; font-size:1rem;">💃 3. Cesta Diplomata</div>
+                                        <img class="victory-path-medallion" src="assets/tiles/festival.png" alt="Diplomat" />
+                                    </div>
+                                </div>
+                                <div class="visual-scheme-only" style="display:none;">
+                                    <div class="victory-path-scheme-box">
+                                        <div style="font-weight:700; color:#c084fc; font-size:0.85rem; margin-bottom:0.25rem;">[SCHÉMA: DIPLOMAT BUILD]</div>
+                                        <div><strong>Podmínka:</strong> Tanec ≥ 6 + Charisma ≥ 6 + Plesové šaty</div>
+                                        <div><strong>Interakce:</strong> Královské audience (+1,0 💖) + Hrad</div>
+                                        <div style="color:#a855f7; font-weight:700; margin-top:0.25rem;">🎭 Vítězství na Plese: až +5 💖 a 1 200 zl.</div>
+                                    </div>
+                                </div>
+                                <div style="font-size:0.83rem; color:#e2e8f0; line-height:1.45;">
+                                    • Investuj do <strong>Tance, Charismatu a plesových šatů</strong>.<br/>
+                                    • Audience u krále na STARTu a Hradě (<strong>+0,5 až +1,0 💖</strong>).<br/>
+                                    • Drť soupeře na <strong>Zámeckých plesech</strong> (až +5 💖 a 1 200 zl. za vítězství).
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- 5 ZLATÝCH RAD PRO NOVÁČKY -->
+                        <div style="background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.3); border-radius:10px; padding:1rem 1.2rem; margin-top:1.15rem;">
+                            <div style="font-weight:700; color:var(--gold-light); font-size:0.95rem; margin-bottom:0.45rem; display:flex; align-items:center; gap:0.4rem;">
+                                <span>💡</span> 5 zlatých rad pro začínajícího lorda
+                            </div>
+                            <ol style="margin:0; padding-left:1.3rem; font-size:0.84rem; color:#e2e8f0; line-height:1.55;">
+                                <li><strong>Pořiď si koně co nejdříve:</strong> Zpřístupní ti 2 kostky pro pohyb, umožní rychlý cval a otevře vstup do Velkého závodu.</li>
+                                <li><strong>Rozcestí je tvá strategie:</strong> Vnější okruh skýtá vesnice a zvířata; vnitřní královská stezka nabízí mistry ctností, arény draků a slavnosti.</li>
+                                <li><strong>Slavnosti jsou klíčem k srdcím:</strong> Sleduj podmínky účasti na Turnaji, Plese a Závodě. 1. místo dává obrovský skok v srdcích!</li>
+                                <li><strong>Chraň se před zraněním:</strong> V boji s monstry používej postoj <em>Opatrná obrana</em> za štítem, nebo si v lazaretu kup <em>Hojivý elixír</em> s ochranným amuletem.</li>
+                                <li><strong>Sbírej pečetě mistrů:</strong> Zisk 3 různých pečetí ti udělí <em>Rytířskou záštitu</em> – osvobození od válečných daní a ošetření v lazaretu zdarma!</li>
+                            </ol>
+                        </div>
+
+                        <!-- TLAČÍTKA NA DALŠÍ VRSTVY -->
+                        <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1.25rem;">
+                            <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.45rem 1rem;" onclick="PRS_App.switchRulesView('guide')">📖 Otevřít podrobného Průvodce hrou</button>
+                            <button class="btn-secondary" style="font-size:0.84rem; padding:0.45rem 1rem;" onclick="PRS_App.switchRulesView('atlas')">🗺️ Prohlédnout Atlas všech 22 polí</button>
+                            <button class="btn-secondary" style="font-size:0.84rem; padding:0.45rem 1rem;" onclick="PRS_App.switchRulesView('tables')">📊 Zobrazit Referenční tabulky</button>
+                        </div>
+
+                    </div>
+
+                    <!-- ========================================================= -->
+                    <!-- VRSTVA 2: PODROBNÝ PRŮVODCE HROU (KAPITOLY V AKORDEONU)   -->
+                    <!-- ========================================================= -->
+                    <div id="rules-view-guide" class="rules-view-section" style="display:none;">
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.85rem;">
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin:0;">
+                                Kliknutím na kapitolu ji rozbalíš nebo sbalíš. Všechna pravidla jsou plně synchronizována s herním enginem.
+                            </p>
+                            <div style="display:flex; gap:0.35rem;">
+                                <button class="btn-secondary" style="font-size:0.75rem; padding:0.2rem 0.5rem;" onclick="PRS_App.expandAllRuleAccordions(true)">Rozbalit vše</button>
+                                <button class="btn-secondary" style="font-size:0.75rem; padding:0.2rem 0.5rem;" onclick="PRS_App.expandAllRuleAccordions(false)">Sbalit vše</button>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 1: PLÁN, START A ROZCESTÍ -->
+                        <div class="rule-accordion open" id="rule-acc-board">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('board')">
+                                <h3><span>🚩</span> 1. Herní plán, Královský START a Volba rozcestí</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <ul style="margin:0 0 0.6rem; padding-left:1.2rem; line-height:1.55;">
+                                    <li><strong>Startovní jmění:</strong> Každý rytíř vstupuje do hry na poli <code>START</code> s <strong>10 000 zl.</strong></li>
+                                    <li><strong>Průchod STARTem &amp; Dvorní audience:</strong> Běžný žold za oběh činí <strong>+3 000 zl.</strong> Nemajetní bezzemci (rytíři bez panství a zvířat) dostávají sociální dar krále <strong>+5 000 zl.</strong> Majitelé Města či Hradu, rytíři s vysokým Charismatem nebo zkušení tanečníci (<strong>Tanec ≥ 2 a šaty</strong>) získávají navíc audienci u dvora (<strong>+0,5 až +1,0 💖</strong>).</li>
+                                    <li><strong>🔀 Volba trasy na rozcestích:</strong> Kdykoliv tvůj rytíř dorazí na křižovatku tras, figurka se zastaví a <strong>hráč si sám zvolí směr</strong>: zda pokračovat vnějším okruhem (vesnice, dobytek, zvířata, kovárny), nebo vnitřní královskou stezkou (slavnosti, mistři ctností, arény monster a draků).</li>
+                                </ul>
+                                <div class="rule-advisor-box">
+                                    <strong>👑 Rada Královského rádce:</strong> Na rozcestí zvažuj svůj aktuální kapitál. Nemáš-li zbraně a Boj, vyhni se vnitřnímu okruhu monster a zvol raději hospodářské vsi.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 2: POHYB, JÍZDA A SOKOLÍ NAVIGACE -->
+                        <div class="rule-accordion" id="rule-acc-movement">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('movement')">
+                                <h3><span>🚶</span> 2. Pohyb pěšky, Koňský cval a Sokolí navigace</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <ul style="margin:0 0 0.6rem; padding-left:1.2rem; line-height:1.55;">
+                                    <li><strong>🚶 Opatrný krok (1–4):</strong> Pomalý, kontrolovaný postup (hod 1d4) pro bezpečné dosednutí na blízká pole bez rizika přeskočení cíle.</li>
+                                    <li><strong>🎲 Standardní pochod:</strong> Klasický krok rytíře (hod 1d6). Pěší rytíř s dovedností <strong>Jízda ≥ 2</strong> může využít atletický sprint a zvolit si <strong>+1 pole navíc</strong>, při <strong>Jízda ≥ 4</strong> dokonce <strong>+2 pole navíc</strong>!</li>
+                                    <li><strong>🏇 Koňský pohyb (vyžaduje koně ve stáji):</strong>
+                                        <ul style="margin-top:3px; padding-left:1rem;">
+                                            <li><em>Jízda &lt; 2 (Koňský klus):</em> Hod 2d6 – volba 1 příznivější kostky pro přesný manévr.</li>
+                                            <li><em>Jízda 2–3 (Koňský cval):</em> Plný součet obou kostek (d1 + d2) pro bleskový trysk přes mapu.</li>
+                                            <li><em>Jízda ≥ 4 (Královský trysk):</em> Bleskový cval (d1 + d2) + <strong>bonusová +2 pole zdarma</strong>!</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>🦅 Sokolí navigace (vyžaduje sokola):</strong> Kroužící dravec prozkoumá terén z výšky a umožní ti upravit výsledný pohyb o <strong>±1 pole</strong> (např. při hodu 4 si zvolit pole 3, 4 nebo 5).<br/>
+                                        <strong style="color:#fca5a5;">⚠️ Omezení sokolí navigace:</strong> Sokolí manévr funguje pouze při <em>pěším pohybu a taktickém manévrování</em>. Při plném koňském cvalu či trysku kůň letí plnou rychlostí kupředu a sokolí navigace není dostupná!</li>
+                                    <li><strong>🐎 Speciální výhody jezdce:</strong>
+                                        <ul style="margin-top:3px; padding-left:1rem;">
+                                            <li><em>Sleva na nájem 30 %:</em> Rytíř s Jízdou ≥ 4 a koněm platí v cizích vesnicích o 30 % nižší nájem.</li>
+                                            <li><em>Jezdecký únik v duelech:</em> Napadený jezdec se může bránit obratností (<code>Obrana = max(Boj, Jízda + min(2, Koně))</code>). Zvítězí-li o 3+ body, získá <strong>+0,5 💖</strong> za mistrný únik!</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <div class="rule-example-box">
+                                    <strong>Příklad ze hry:</strong> Chceš vstoupit na pole Mistra vzdálené 4 pole. Házíš kostkou a padne 3. Díky sokolovi si zvolíš 3 + 1 = 4 a bezpečně vstupuješ k Mistrovi!
+                                </div>
+
+                                <!-- SCHÉMA G4: POROVNÁNÍ TEMPA POHYBU -->
+                                <div class="rule-visual-container">
+                                    <div style="font-weight:700; color:var(--gold-light); font-size:0.9rem; margin:0.8rem 0 0.4rem; display:flex; align-items:center; gap:0.4rem;">
+                                        <span>📐</span> Schéma: Porovnání stylů pohybu, rychlosti a zvířat
+                                    </div>
+                                    <div class="movement-scheme-grid">
+                                        <div class="movement-tier-card">
+                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                <strong style="color:#fde047;">🚶 Opatrný krok</strong>
+                                                <span style="font-size:0.75rem; background:rgba(234,179,8,0.2); padding:1px 6px; border-radius:4px; color:#fef08a;">Kostka 1d4</span>
+                                            </div>
+                                            <div style="font-size:0.8rem; color:#cbd5e1;">Pohyb: <strong>1 až 4 pole</strong>. Ideální pro bezpečné manévrování k cíli bez přeskočení.</div>
+                                        </div>
+                                        <div class="movement-tier-card">
+                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                <strong style="color:#60a5fa;">🎲 Standardní pochod</strong>
+                                                <span style="font-size:0.75rem; background:rgba(59,130,246,0.2); padding:1px 6px; border-radius:4px; color:#93c5fd;">Kostka 1d6</span>
+                                            </div>
+                                            <div style="font-size:0.8rem; color:#cbd5e1;">Pohyb: <strong>1 až 6 polí</strong>. Pěší rytíř navíc získá sprint: <em>Jízda ≥ 2:</em> <strong>+1 pole</strong>, <em>Jízda ≥ 4:</em> <strong>+2 pole</strong>!</div>
+                                        </div>
+                                        <div class="movement-tier-card">
+                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                <strong style="color:#86efac;">🏇 Koňský klus (Jízda &lt; 2)</strong>
+                                                <span style="font-size:0.75rem; background:rgba(34,197,94,0.2); padding:1px 6px; border-radius:4px; color:#86efac;">2d6 volba</span>
+                                            </div>
+                                            <div style="font-size:0.8rem; color:#cbd5e1;">Hod 2 kostkami – <strong>vybereš si 1 výhodnější kostku</strong> (např. hod 2 a 5 → jdeš o 5 nebo o 2).</div>
+                                        </div>
+                                        <div class="movement-tier-card">
+                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                <strong style="color:#f472b6;">🏇 Koňský cval (Jízda 2–3)</strong>
+                                                <span style="font-size:0.75rem; background:rgba(244,114,182,0.2); padding:1px 6px; border-radius:4px; color:#fbcfe8;">2d6 součet</span>
+                                            </div>
+                                            <div style="font-size:0.8rem; color:#cbd5e1;">Plný součet obou kostek (<strong>2 až 12 polí!</strong>). Bleskový přelet přes mapu.</div>
+                                        </div>
+                                        <div class="movement-tier-card">
+                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                <strong style="color:#fbbf24;">⚡ Královský trysk (Jízda ≥ 4)</strong>
+                                                <span style="font-size:0.75rem; background:rgba(251,191,36,0.2); padding:1px 6px; border-radius:4px; color:#fef08a;">2d6 + 2 pole</span>
+                                            </div>
+                                            <div style="font-size:0.8rem; color:#cbd5e1;">Součet kostek (d1 + d2) + <strong>bonusová +2 pole navíc</strong> zdarma!</div>
+                                        </div>
+                                        <div class="movement-tier-card">
+                                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                                <strong style="color:#38bdf8;">🦅 Sokolí navigace</strong>
+                                                <span style="font-size:0.75rem; background:rgba(56,189,248,0.2); padding:1px 6px; border-radius:4px; color:#7dd3fc;">±1 pole (pouze pěšky)</span>
+                                            </div>
+                                            <div style="font-size:0.8rem; color:#cbd5e1;">Umožní upravit cílové pole o ±1. Neplatí při koňském cvalu/trysku (kůň letí plnou rychlostí).</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 3: FEUDÁLNÍ PANSTVÍ A NÁJMY -->
+                        <div class="rule-accordion" id="rule-acc-estates">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('estates')">
+                                <h3><span>🏰</span> 3. Feudální panství, Sídla a Výběrčí daní</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <ul style="margin:0 0 0.6rem; padding-left:1.2rem; line-height:1.55;">
+                                    <li><strong>Vesnice (1 500 zl.):</strong> Základní poddanské sídlo. Možnost rozvoje:
+                                        <ul style="margin-top:2px; padding-left:1rem;">
+                                            <li><em>1★ Vesnice:</em> Nájem 100 zl. (automaticky chová 1 ovci).</li>
+                                            <li><em>2★ Městečko (+1 500 zl.):</em> Nájem 200 zl. (chová 1 ovci + 1 prase).</li>
+                                            <li><em>3★ Velká osada (+1 500 zl.):</em> Nájem 300 zl. (chová 1 ovci + 1 prase + 1 krávu) a uděluje majiteli trvale <strong>+0,5 💖</strong>!</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Město (4 000 zl.):</strong> Prestižní obchodní centrum. Nájem 500 zl., majiteli dává trvale <strong>+0,5 💖</strong> a rozšiřuje kapacitu stád.</li>
+                                    <li><strong>Hrad (7 000 zl.):</strong> Vrchol feudální dominance. Majiteli uděluje trvale <strong>+1,0 💖</strong> a <strong>+1 Charisma</strong>. Nájem činí 1 000 zl.</li>
+                                    <li><strong>💰 Výběrčí daní (VD):</strong> Při návštěvě Výběrčího daní rytíř inkasuje výnosy ze všech svých lén: Vesnice nesou 500 / 900 / 1 400 zl., Město nese 1 200 zl., Hrad nese 2 500 zl.</li>
+                                    <li><strong>Královská dražba při dluhu:</strong> Nemá-li hráč hotovost na úhradu nájmu, banka provede nucený odkup majetku za <strong>60 % pořizovací ceny</strong>. Hráč nikdy nevypadává ze hry!</li>
+                                </ul>
+
+                                <!-- SCHÉMA G7: TOK ZLAŤÁKŮ -->
+                                <div class="rule-visual-container">
+                                    <div style="font-weight:700; color:var(--gold-light); font-size:0.9rem; margin:0.8rem 0 0.4rem; display:flex; align-items:center; gap:0.4rem;">
+                                        <span>📐</span> Schéma: Tok peněz v království (Příjmy vs. Výdaje)
+                                    </div>
+                                    <div class="cashflow-diagram-grid">
+                                        <div class="cashflow-col-in">
+                                            <div style="font-weight:700; color:#86efac; font-size:0.92rem; margin-bottom:0.45rem; display:flex; align-items:center; gap:0.4rem;">
+                                                <span>🟢</span> Příjmy rytíře (Kde vzít zlato)
+                                            </div>
+                                            <ul style="margin:0; padding-left:1.1rem; font-size:0.82rem; color:#e2e8f0; line-height:1.5;">
+                                                <li><strong>START žold:</strong> +3 000 zl. (+5 000 zl. pro bezzemky).</li>
+                                                <li><strong>Nájmy od soupeřů:</strong> Vesnice 100–300 zl., Město 500 zl., Hrad 1 000 zl., Zvířata 20–80 %.</li>
+                                                <li><strong>Výběrčí daní:</strong> 500 až 2 500 zl. ze sídel + výnosy stád (ovce +120, prase +150, kráva +200 zl.).</li>
+                                                <li><strong>Kořist z monster:</strong> 1 000–2 600 zl. z U1/U2, 6 000 zl. z draků U3.</li>
+                                                <li><strong>Odměny ze slavností:</strong> +1 200 zl. (1. místo), +600 zl. (2. místo), +300 zl. (3. místo).</li>
+                                                <li><strong>Zlaté rouno z brašny:</strong> +1 500 zl. okamžitě.</li>
+                                                <li><strong>Prodej u Obchodníka:</strong> Věci za 50 % ceny, nemovitosti za 100 %.</li>
+                                            </ul>
+                                        </div>
+                                        <div class="cashflow-col-out">
+                                            <div style="font-weight:700; color:#fca5a5; font-size:0.92rem; margin-bottom:0.45rem; display:flex; align-items:center; gap:0.4rem;">
+                                                <span>🔴</span> Výdaje rytíře (Za co zlato utrácet)
+                                            </div>
+                                            <ul style="margin:0; padding-left:1.1rem; font-size:0.82rem; color:#e2e8f0; line-height:1.5;">
+                                                <li><strong>Koupě panství:</strong> Vesnice 1 500 zl., Město 4 000 zl., Hrad 7 000 zl.</li>
+                                                <li><strong>Koupě zvířat &amp; stád:</strong> Sokol 400×, pes 500×, kůň 600×, dobytek 500–800 zl.</li>
+                                                <li><strong>Výcvik u Mistrů:</strong> 1 000 / 2 000 / 3 000 / 4 000 / 5 000 zl. za stupeň.</li>
+                                                <li><strong>Zbrojnice, zbraně &amp; šaty:</strong> Nákup výstroje pro boj, plesy a obranu.</li>
+                                                <li><strong>Nájmy cizím rytířům:</strong> Platby při šlápnutí na pole obsazené sokem.</li>
+                                                <li><strong>Kauce v šatlavě:</strong> 1 000 zl. za okamžité propuštění z vězení.</li>
+                                                <li><strong>Královský lazaret:</strong> Hojivý elixír 1 000 zl. (pro rytíře bez Rytířské záštity).</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 4: ZVÍŘATA, DOBYTEK A CHOVATELSTVÍ -->
+                        <div class="rule-accordion" id="rule-acc-animals">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('animals')">
+                                <h3><span>🐎</span> 4. Sady zvířat, Hospodářský dobytek a Chovatelská prémie</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <ul style="margin:0 0 0.6rem; padding-left:1.2rem; line-height:1.55;">
+                                    <li><strong>12 sad ušlechtilých zvířat:</strong> Sokol (400 × úroveň), Pes (500 × úroveň), Kůň (600 × úroveň). Cizí rytíř platí nájem za pobyt na tvém zvířeti: <strong>20 %</strong> (1 zvíře), <strong>40 %</strong> (dvojice) nebo <strong>80 %</strong> (kompletní sada).</li>
+                                    <li><strong>Chovný bonus za ucelenou sadu:</strong> Za každou zkompletovanou trojici (Kůň + Pes + Sokol ze stejné sady) získává majitel okamžitý a trvalý bonus <strong>+1,5 💖</strong>!</li>
+                                    <li><strong>Bonus za jednodruhové stádo:</strong> Vlastnictví 3 zvířat stejného druhu (např. 3 koně nebo 3 psi) přináší trvalý bonus <strong>+1,0 💖</strong>.</li>
+                                    <li><strong>Chovatelská prémie:</strong> Rytíři s nejvyšším součtem hodnoty zvířat průběžně drží královskou prémii: <strong>1. místo: +4,0 💖</strong>, <strong>2. místo: +2,5 💖</strong>, <strong>3. místo: +1,5 💖</strong>.</li>
+                                    <li><strong>🌾 Dobytčí trh ve stájích:</strong> Můžeš nakupovat užitkový dobytek:
+                                        <ul style="margin-top:2px; padding-left:1rem;">
+                                            <li>🐑 <em>Chovná ovce (500 zl.):</em> +120 zl. u Výběrčího daní, +50 zl. k nájmu každé tvé vesnice.</li>
+                                            <li>🐖 <em>Královské prase (600 zl.):</em> +150 zl. u Výběrčího daní, +75 zl. k nájmu každé tvé vesnice.</li>
+                                            <li>🐄 <em>Ušlechtilý skot (800 zl.):</em> +200 zl. u Výběrčího daní, +100 zl. k nájmu každé tvé vesnice.</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 5: ČTYŘI CTNOSTI, MISTŘI A RYTÍŘSKÁ ZÁŠTITA -->
+                        <div class="rule-accordion" id="rule-acc-virtues">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('virtues')">
+                                <h3><span>🥋</span> 5. Čtyři ctnosti, Mistři a Rytířská záštita</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <ul style="margin:0 0 0.6rem; padding-left:1.2rem; line-height:1.55;">
+                                    <li>Každý rytíř může rozvíjet 4 klíčové ctnosti na stupních <strong>1 až 5</strong>:
+                                        <ul style="margin-top:2px; padding-left:1rem;">
+                                            <li><strong>⚔️ Boj (MB):</strong> Zvyšuje sílu v soubojové aréně draků, v PvP duelech a na Turnaji.</li>
+                                            <li><strong>🏇 Jízda (MJ):</strong> Zrychluje pohyb (klus, cval, trysk), zlevňuje nájmy o 30 %, posiluje obranu v duelech a rozhoduje Velký závod.</li>
+                                            <li><strong>💃 Tanec (MT):</strong> Dominuje Zámeckému plesu, otevírá audience u krále na STARTu a Hradě, násobí přípitek v Krčmě (+1,0 💖) a dary u Šaška (+200 zl. × Tanec).</li>
+                                            <li><strong>👑 Charisma (MCH):</strong> Zvyšuje zisk srdcí ze všech slavností, zlevňuje výkupné a násobí dvorní odměny.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Výcvik u Mistra:</strong> Při stoupnutí na Mistra nejprve házíš kostkou: <strong>1, 2, 3 = nepřijat</strong>; <strong>4, 5, 6 = přijat k výcviku</strong>. Poplatek za stupeň: 1 000 / 2 000 / 3 000 / 4 000 / 5 000 zl. <strong>Velmistr (VM)</strong> tě vycvičí v libovolné ctnosti.</li>
+                                    <li><strong>🛡️ Pečetě mistrů &amp; Rytířská záštita:</strong> Úspěšný trénink u Mistra ti udělí Pečeť příslušného řádu. Získáním <strong>3 různých pečetí mistrů</strong> obdržíš prestižní titul a trvalou <strong>Rytířskou záštitu</strong>:
+                                        <ul style="margin-top:2px; padding-left:1rem; color:#86efac;">
+                                            <li>Osvobození od všech královských válečných daní a desátků.</li>
+                                            <li>Bezplatné ošetření a ubytování v Královském lazaretu (zcela zdarma bez poplatku).</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 6: MONSTRA, DRAČÍ SOUBOJE A SLABINY -->
+                        <div class="rule-accordion" id="rule-acc-combat">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('combat')">
+                                <h3><span>⚔️</span> 6. Souboje s monstry, Taktické postoje a Slabiny draků</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <ul style="margin:0 0 0.6rem; padding-left:1.2rem; line-height:1.55;">
+                                    <li><strong>Výpravy &amp; Arény netvorů (U1–U3):</strong>
+                                        <ul style="margin-top:2px; padding-left:1rem;">
+                                            <li><em>U1 (Lesní zvěř):</em> Výhra 1 000–2 500 zl. a +0,5 až +1,5 💖.</li>
+                                            <li><em>U2 (Bájná monstra):</em> Výhra 2 600 zl., +1,5 až +2,5 💖, 65% šance na trofej. Lze uplatnit taktický ústup za 400 zl.</li>
+                                            <li><em>U3 (Dračí doupata):</em> Výhra 6 000 zl., +2,5 až +5,0 💖 a 100% garantovaná dračí trofej! Ústup stojí 800 zl. <strong>Skolením 2 draků okamžitě vyhráváš celou hru!</strong></li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>🎯 Využití slabin z Bestiáře (+2 k síle):</strong> Pokud do arény vstoupíš s výbavou, ctností, živlem či zvířaty odpovídajícími slabině dané bestie (např. <em>Kopí</em> na Vodního draka, <em>Tanec</em> na Pohádkového draka, <em>Oheň</em> na Ledového draka, <em>Lovečtí psi</em> na Zeleného draka apod.), získáš v aréně automatický bonus <strong>+2 k bojové síle</strong>!</li>
+                                    <li><strong>⚔️ Taktické bojové postoje v aréně:</strong> Před hodem si zvol styl:
+                                        <ul style="margin-top:2px; padding-left:1rem;">
+                                            <li><strong>⚔️ Dravý útok:</strong> <em>+2 k Bojové síle</em>, ale při porážce utržíš kritické zranění (ztráta srdcí nebo dvojnásobná pokuta).</li>
+                                            <li><strong>🎯 Taktický manévr (Výchozí):</strong> Standardní síla. Při těsné prohře o 1–2 body ti lovecký pes, sokol či Boj ≥ 2 umožní <strong>🎲 Taktický reroll 1 kostky</strong>!</li>
+                                            <li><strong>🛡️ Opatrná obrana:</strong> <em>-1 k Bojové síle</em>, ale při porážce se bezpečně stáhneš za štít: <strong>ztráta 0 💖</strong> a žádný převoz do Lazaretu!</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <!-- SCHÉMA G5: BOJOVÁ ARÉNA A FLOW SOUBOJE -->
+                                <div class="rule-visual-container">
+                                    <div style="font-weight:700; color:var(--gold-light); font-size:0.9rem; margin:0.8rem 0 0.4rem; display:flex; align-items:center; gap:0.4rem;">
+                                        <span>📐</span> Schéma: Průběh souboje s monstry a draky v 5 krocích
+                                    </div>
+                                    <div class="combat-flow-wrapper">
+                                        <div class="combat-flow-step" style="border-left-color:#38bdf8;">
+                                            <div style="font-size:1.35rem;">1️⃣</div>
+                                            <div>
+                                                <strong style="color:#7dd3fc;">Volba bojového postoje:</strong> 
+                                                <span style="color:#e2e8f0;">⚔️ Dravý útok (+2 síla, vyšší riziko) | 🎯 Taktický manévr (standard + reroll) | 🛡️ Opatrná obrana (-1 síla, 0 ztráta)</span>
+                                            </div>
+                                        </div>
+                                        <div class="combat-flow-step" style="border-left-color:#fbbf24;">
+                                            <div style="font-size:1.35rem;">2️⃣</div>
+                                            <div>
+                                                <strong style="color:#fef08a;">Kontrola taktické slabiny netvora:</strong> 
+                                                <span style="color:#e2e8f0;">Odpovídá-li tvá výstroj, živel či zvířata slabině z Bestiáře, získáváš automaticky <strong>+2 k bojové síle</strong>!</span>
+                                            </div>
+                                        </div>
+                                        <div class="combat-flow-step" style="border-left-color:#a855f7;">
+                                            <div style="font-size:1.35rem;">3️⃣</div>
+                                            <div>
+                                                <strong style="color:#d8b4fe;">Hod kostkou &amp; Porovnání sil:</strong> 
+                                                <span style="color:#e2e8f0;">(Hod 1d6 + Boj + Zbraně + Postoj + Slabina) <strong>vs.</strong> Síla monstra/draka.</span>
+                                            </div>
+                                        </div>
+                                        <div class="combat-flow-step" style="border-left-color:#10b981;">
+                                            <div style="font-size:1.35rem;">4️⃣</div>
+                                            <div>
+                                                <strong style="color:#86efac;">Taktický opravný hod (Reroll):</strong> 
+                                                <span style="color:#e2e8f0;">Při těsné prohře o 1–2 body ti lovecký pes, sokol či Boj ≥ 2 umožní <strong>hodit 1 kostkou znovu</strong>!</span>
+                                            </div>
+                                        </div>
+                                        <div class="combat-flow-step" style="border-left-color:#f59e0b;">
+                                            <div style="font-size:1.35rem;">5️⃣</div>
+                                            <div>
+                                                <strong style="color:#fde68a;">Vyhodnocení:</strong> 
+                                                <span style="color:#e2e8f0;">🏆 <strong>Vítězství:</strong> Zlaťáky + srdce + trofej (při výhře o 3+ body kořist zbroje). 🐉 <strong>Skolení 2 draků = okamžitá výhra ve hře!</strong> | 💔 <strong>Porážka:</strong> Převoz do Lazaretu (při Opatrné obraně kryto štítem).</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 7: SLAVNOSTI -->
+                        <div class="rule-accordion" id="rule-acc-festivals">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('festivals')">
+                                <h3><span>🎪</span> 7. Královské slavnosti (Turnaj, Ples, Závod)</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <p style="margin:0 0 0.5rem; line-height:1.5;">
+                                    Slavnost proběhne, pokud podmínku účasti splňují <strong>alespoň 2 hráči</strong>. Pokud podmínku splňuje méně než 2 hráči, slavnost se nekoná, ale pořadatel obdrží od krále útěchu <strong>+800 zl. a +0,5 💖</strong> za přípravu.
+                                </p>
+                                <ul style="margin:0 0 0.8rem; padding-left:1.2rem; line-height:1.55;">
+                                    <li><strong>⚔️ Rytířský turnaj:</strong> Podmínka: Kůň + Pes + Sokol (nebo Kůň + zbraň/zbroj). Skóre: <code>Hod 1d6 + Boj + Jízda + Set (+3)</code>. Vítěz získá <strong>až +5 💖 a 1 200 zl.</strong></li>
+                                    <li><strong>💃 Zámecký ples:</strong> Podmínka: Plesové šaty nebo Tanec ≥ 1. Těžká zbroj dává postih -2. Skóre: <code>Hod 1d6 + Tanec + Charisma + Šaty (+2)</code>. Vítěz získá <strong>až +5 💖 a 1 200 zl.</strong></li>
+                                    <li><strong>🏇 Velký závod:</strong> Podmínka: Kůň ve stáji. Skóre: <code>Hod 1d6 + 2×Jízda + Koně (max 3)</code>. Vítěz získá <strong>až +5 💖 a 1 200 zl.</strong></li>
+                                </ul>
+
+                                <!-- INTERAKTIVNÍ KALKULAČKA SLAVNOSTÍ -->
+                                <div class="rules-calc-card">
+                                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                                        <div style="font-family:'Cinzel',serif; color:var(--gold-light); font-size:1.05rem; font-weight:700; display:flex; align-items:center; gap:0.4rem;">
+                                            <span>🧮</span> Kalkulačka královských slavností
+                                        </div>
+                                        <div style="font-size:0.78rem; color:#94a3b8;">
+                                            Vyzkoušej své šance a skóre před vstupem na slavnost!
+                                        </div>
+                                    </div>
+
+                                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">
+                                        <div>
+                                            <div class="calc-input-group">
+                                                <label for="calc-fest-type" style="color:var(--gold); font-weight:700;">Typ slavnosti:</label>
+                                                <select id="calc-fest-type" style="background:#1e1710; border:1px solid rgba(212,175,55,0.4); border-radius:4px; padding:0.25rem 0.5rem; color:#fff; font-size:0.84rem;" onchange="PRS_App.updateFestivalCalculator()">
+                                                    <option value="tournament">⚔️ Rytířský turnaj</option>
+                                                    <option value="ball">💃 Zámecký ples</option>
+                                                    <option value="race">🏇 Velký závod</option>
+                                                </select>
+                                            </div>
+
+                                            <div id="calc-group-tournament">
+                                                <div class="calc-input-group">
+                                                    <span>⚔️ Ctnost Boj: <strong id="calc-tour-boj-val" style="color:#fca5a5;">3</strong></span>
+                                                    <input type="range" id="calc-tour-boj" min="1" max="5" value="3" class="calc-range-slider" oninput="document.getElementById('calc-tour-boj-val').textContent=this.value; PRS_App.updateFestivalCalculator();" />
+                                                </div>
+                                                <div class="calc-input-group">
+                                                    <span>🏇 Ctnost Jízda: <strong id="calc-tour-jizda-val" style="color:#86efac;">2</strong></span>
+                                                    <input type="range" id="calc-tour-jizda" min="1" max="5" value="2" class="calc-range-slider" oninput="document.getElementById('calc-tour-jizda-val').textContent=this.value; PRS_App.updateFestivalCalculator();" />
+                                                </div>
+                                                <div class="calc-input-group">
+                                                    <span>👑 Charisma: <strong id="calc-tour-ch-val" style="color:#fde047;">2</strong></span>
+                                                    <input type="range" id="calc-tour-ch" min="1" max="5" value="2" class="calc-range-slider" oninput="document.getElementById('calc-tour-ch-val').textContent=this.value; PRS_App.updateFestivalCalculator();" />
+                                                </div>
+                                                <div style="margin-top:0.35rem; font-size:0.82rem;">
+                                                    <label style="display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                                        <input type="checkbox" id="calc-tour-set" checked onchange="PRS_App.updateFestivalCalculator()" />
+                                                        <span>Mám chovnou sadu koně, psa a sokola (+3 body)</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div id="calc-group-ball" style="display:none;">
+                                                <div class="calc-input-group">
+                                                    <span>💃 Ctnost Tanec: <strong id="calc-ball-tanec-val" style="color:#d8b4fe;">3</strong></span>
+                                                    <input type="range" id="calc-ball-tanec" min="1" max="5" value="3" class="calc-range-slider" oninput="document.getElementById('calc-ball-tanec-val').textContent=this.value; PRS_App.updateFestivalCalculator();" />
+                                                </div>
+                                                <div class="calc-input-group">
+                                                    <span>👑 Charisma: <strong id="calc-ball-ch-val" style="color:#fde047;">3</strong></span>
+                                                    <input type="range" id="calc-ball-ch" min="1" max="5" value="3" class="calc-range-slider" oninput="document.getElementById('calc-ball-ch-val').textContent=this.value; PRS_App.updateFestivalCalculator();" />
+                                                </div>
+                                                <div style="margin-top:0.35rem; font-size:0.82rem; display:flex; flex-direction:column; gap:0.3rem;">
+                                                    <label style="display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                                                        <input type="checkbox" id="calc-ball-dress" checked onchange="PRS_App.updateFestivalCalculator()" />
+                                                        <span>Mám plesové šaty (+2 body)</span>
+                                                    </label>
+                                                    <label style="display:flex; align-items:center; gap:0.4rem; cursor:pointer; color:#f87171;">
+                                                        <input type="checkbox" id="calc-ball-armor" onchange="PRS_App.updateFestivalCalculator()" />
+                                                        <span>Mám na sobě těžkou zbroj (-2 body)</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div id="calc-group-race" style="display:none;">
+                                                <div class="calc-input-group">
+                                                    <span>🏇 Ctnost Jízda: <strong id="calc-race-jizda-val" style="color:#86efac;">3</strong></span>
+                                                    <input type="range" id="calc-race-jizda" min="1" max="5" value="3" class="calc-range-slider" oninput="document.getElementById('calc-race-jizda-val').textContent=this.value; PRS_App.updateFestivalCalculator();" />
+                                                </div>
+                                                <div class="calc-input-group">
+                                                    <span>👑 Charisma: <strong id="calc-race-ch-val" style="color:#fde047;">2</strong></span>
+                                                    <input type="range" id="calc-race-ch" min="1" max="5" value="2" class="calc-range-slider" oninput="document.getElementById('calc-race-ch-val').textContent=this.value; PRS_App.updateFestivalCalculator();" />
+                                                </div>
+                                                <div class="calc-input-group">
+                                                    <span>🐎 Počet koní ve stáji: <strong id="calc-race-horses-val" style="color:#86efac;">2</strong></span>
+                                                    <input type="range" id="calc-race-horses" min="1" max="3" value="2" class="calc-range-slider" oninput="document.getElementById('calc-race-horses-val').textContent=this.value; PRS_App.updateFestivalCalculator();" />
+                                                </div>
+                                            </div>
+
+                                            <div class="calc-input-group" style="margin-top:0.6rem; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.4rem;">
+                                                <span style="color:#cbd5e1;">🎲 Simulovaný hod kostkou: <strong id="calc-dice-roll-val" style="color:#fde047;">4</strong></span>
+                                                <input type="range" id="calc-dice-roll" min="1" max="6" value="4" class="calc-range-slider" oninput="document.getElementById('calc-dice-roll-val').textContent=this.value; PRS_App.updateFestivalCalculator();" />
+                                            </div>
+                                        </div>
+
+                                        <div class="calc-score-display">
+                                            <div style="font-size:0.8rem; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">Vypočtené skóre</div>
+                                            <div id="calc-score-val" style="font-size:2rem; font-weight:800; color:var(--gold-light); font-family:'Cinzel',serif; margin:0.2rem 0;">12 bodů</div>
+                                            <div id="calc-outcome-val" style="font-size:0.92rem; font-weight:700; color:#86efac; margin-bottom:0.4rem;">🥇 1. Místo (Vysoká šance na triumf)</div>
+                                            <div style="border-top:1px solid rgba(212,175,55,0.3); padding-top:0.5rem; margin-top:0.3rem;">
+                                                <span style="font-size:0.78rem; color:#cbd5e1;">Očekávaná královská odměna:</span>
+                                                <div id="calc-reward-val" style="font-size:1.05rem; font-weight:700; color:#fde047; margin-top:2px;">+4.3 💖 a +1 200 zl.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 8: BRAŠNA, PERGAMENY A ZBROJNICE -->
+                        <div class="rule-accordion" id="rule-acc-scrolls">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('scrolls')">
+                                <h3><span>📜</span> 8. Brašna rytíře, Taktické pergameny a Zbrojnice</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <ul style="margin:0 0 0.6rem; padding-left:1.2rem; line-height:1.55;">
+                                    <li><strong>Brašna rytíře (kapacita 3 svitky):</strong> Taktické pergameny můžeš získat z karet Náhody, pokladnic nebo za vítězství nad draky. Svitky lze uložit do brašny a <strong>zahrát kdykoliv během svého tahu</strong> kliknutím na chip svitku v panelu hráče.</li>
+                                    <li><strong>Pět královských svitků:</strong>
+                                        <ul style="margin-top:2px; padding-left:1rem;">
+                                            <li>📜 <em>Svitek bleskového kroku (`scroll_speed`):</em> Přidá <strong>+2 až +3 pole</strong> k tvému pohybu v tomto tahu.</li>
+                                            <li>📜 <em>Královská amnestie (`scroll_amnesty`):</em> Okamžité propuštění ze šatlavy bez placení kauce a bez ztráty tahu.</li>
+                                            <li>📜 <em>Válečné požehnání (`scroll_strength`):</em> Udělí <strong>+2 k bojové síle</strong> pro nadcházející souboj v aréně draků.</li>
+                                            <li>📜 <em>Zlaté rouno (`scroll_fleece`):</em> Okamžitý zisk <strong>1 500 zl.</strong> z královské pokladnice.</li>
+                                            <li>📜 <em>Kolo štěstěny (`scroll_fortune`):</em> Možnost znovu hodit kostkou při nepříznivém výsledku.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Výstroj ze zbrojnice:</strong> Věci 1., 2. a 3. stupně (zbraně, zbroje, šaty, klenoty) zvyšují ctnosti a poskytují bonusy na slavnostech a v duelech. Padají také jako kořist při drtivém vítězství nad monstry o 3+ body.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 9: LAZARET, ŠATLAVA, KEJKLÍŘ A KRČMA -->
+                        <div class="rule-accordion" id="rule-acc-locations">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('locations')">
+                                <h3><span>🏥</span> 9. Královský lazaret, Šatlava, Kejklíř a Krčma</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <ul style="margin:0; padding-left:1.2rem; line-height:1.55;">
+                                    <li><strong>🏥 Královský lazaret &amp; Hojivý elixír:</strong> Zde končí zranění rytíři po těžké porážce v aréně. Nákup <em>Hojivého elixíru</em> za 1 000 zl. trvale zvýší Boj o +1 (pokud Boj &lt; 2), udělí <strong>+0,5 💖 za statečnost</strong> a poskytne <strong>jednorázový ochranný amulet</strong> proti dalšímu převozu! Držitelé <em>Rytířské záštity</em> jsou ošetřeni zcela zdarma.</li>
+                                    <li><strong>⛓️ Hradní šatlava:</strong> Uvržení do vězení na 1 kolo. Možnosti propuštění: kauce 1 000 zl., úspěšný útěk (hod 6), zahrání svitku Královské amnestie z brašny, nebo vyčkání 1 kolo.</li>
+                                    <li><strong>🎭 Kejklíř &amp; Dvorní šašek:</strong> Kejklíř skládá posměšnou baladu na protivníky za 2 000 zl. Pole Šašek odměňuje zkušené tanečníky královským darem <strong>+200 zl. × stupeň Tance</strong>.</li>
+                                    <li><strong>🍺 Krčma U Zlatého korbelu:</strong> Runda pohoštění za 500 zl. Tanečníkům (Tanec ≥ 2) přináší dvorní obdiv a zisk <strong>+1,0 💖</strong>.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- KAPITOLA 10: ONLINE MULTIPLAYER A KŘESLA -->
+                        <div class="rule-accordion" id="rule-acc-online">
+                            <div class="rule-acc-header" onclick="PRS_App.toggleRuleAccordion('online')">
+                                <h3><span>🌐</span> 10. Online stůl, Multiplayer a Správa křesel</h3>
+                                <span class="rule-acc-icon-arrow">▼</span>
+                            </div>
+                            <div class="rule-acc-body">
+                                <ul style="margin:0; padding-left:1.2rem; line-height:1.55;">
+                                    <li><strong>Kód stolu &amp; Pozvánka:</strong> Hru založí host a zkopíruje odkaz přátelům (např. <code>?room=ABC123</code>). Připojení hráči si v okně <em>Zvolit / změnit rytíře</em> vyberou svou volnou postavu.</li>
+                                    <li><strong>Ochrana slotů a znovupřipojení:</strong> Každé okno si pamatuje svou postavu. Pokud se odpojíš a vrátíš, tlačítko <em>🔒 Hrát pouze za...</em> okamžitě obnoví tvé uzamčení.</li>
+                                    <li><strong>🏰 Křesla &amp; Boti:</strong> Host může v okně <em>Křesla &amp; Boti</em> kdykoliv převést odpojeného živého hráče na bota (nebo naopak), nastavit obtížnost AI botů (Easy, Standard, Hard, Ultimate) a převzít kontrolu.</li>
+                                    <li><strong>⏱️ AFK časovač (2 minuty):</strong> Pokud živý spoluhráč neodehraje svůj tah do 120 sekund, host obdrží interaktivní dialog s možnostmi: jednorázově odehrát tah za něj, trvale jej převést na bota, nebo počkat další 2 minuty.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ========================================================= -->
+                    <!-- VRSTVA 3: REFERENČNÍ TABULKY (ČÍSLA, CENY, VZORCE)        -->
+                    <!-- ========================================================= -->
+                    <div id="rules-view-tables" class="rules-view-section" style="display:none;">
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                            <h3 style="margin:0; font-family:'Cinzel',serif; color:var(--gold-light);">📊 Ceníky, nájmy a referenční hodnoty</h3>
+                            <button class="btn-secondary" style="font-size:0.78rem; padding:0.25rem 0.65rem;" onclick="window.print()">🖨️ Vytisknout tuto stránku</button>
+                        </div>
+
+                        <!-- TABULKA 1: VÝSTROJ A TROFEJE -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin:0.85rem 0 0.45rem;">
+                            <h4 style="color:var(--gold); margin:0; font-size:0.92rem;">⚔️ Výstroj ze zbrojnice a trofeje</h4>
+                            <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                                <button id="btn-items-filter-all" class="mode-toggle-btn active" onclick="PRS_App.setRulesItemsFilter('all')">⚔️ Všechny předměty (52)</button>
+                                <button id="btn-items-filter-basic" class="mode-toggle-btn" onclick="PRS_App.setRulesItemsFilter('basic')">🛡️ Zbrojnice (23)</button>
+                                <button id="btn-items-filter-trophies" class="mode-toggle-btn" onclick="PRS_App.setRulesItemsFilter('trophies')">🏆 Trofeje netvorů (29)</button>
+                            </div>
+                        </div>
+                        <div style="max-height:280px; overflow-y:auto; border:1px solid rgba(212,175,55,0.25); border-radius:8px; margin-bottom:1.15rem;">
+                            <table class="rules-table">
+                                <thead>
+                                    <tr>
+                                        <th>Stupeň</th>
+                                        <th>Předmět</th>
+                                        <th>⚔️ Boj</th>
+                                        <th>🏇 Jízda</th>
+                                        <th>💃 Tanec</th>
+                                        <th>👑 Charisma</th>
+                                        <th>Cena</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catalog-items-table"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- TABULKA 2: SLAVNOSTI A ODMĚNY -->
+                        <h4 style="color:var(--gold); margin:0.85rem 0 0.35rem; font-size:0.92rem;">🎪 Odměny a skóre královských slavností</h4>
+                        <div style="overflow-x:auto; border:1px solid rgba(212,175,55,0.25); border-radius:8px; margin-bottom:1.15rem;">
+                            <table class="rules-table">
+                                <thead>
+                                    <tr>
+                                        <th>Slavnost</th>
+                                        <th>Podmínka &amp; Výpočet skóre</th>
+                                        <th>1. místo</th>
+                                        <th>2. místo</th>
+                                        <th>3. místo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>⚔️ Turnaj</strong></td>
+                                        <td>Kůň + Pes + Sokol (nebo Zbroj/Zbraň)<br/><small style="color:#f87171;">Skóre: 1d6 + Boj + Jízda + Set (+3)</small></td>
+                                        <td><strong>až +5 💖</strong><br/><small style="color:#fef08a;">+1 200 zl.</small></td>
+                                        <td><strong>+2 až +3 💖</strong><br/><small style="color:#fef08a;">+600 zl.</small></td>
+                                        <td><strong>+1 až +1,5 💖</strong><br/><small style="color:#fef08a;">+300 zl.</small></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>💃 Zámecký ples</strong></td>
+                                        <td>Plesové šaty nebo Tanec ≥ 1 (zbroj: -2)<br/><small style="color:#c084fc;">Skóre: 1d6 + Tanec + Charisma + Šaty (+2)</small></td>
+                                        <td><strong>až +5 💖</strong><br/><small style="color:#fef08a;">+1 200 zl.</small></td>
+                                        <td><strong>+2 až +3 💖</strong><br/><small style="color:#fef08a;">+600 zl.</small></td>
+                                        <td><strong>+0,5 až +1 💖</strong><br/><small style="color:#fef08a;">+300 zl.</small></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>🏇 Velký závod</strong></td>
+                                        <td>Kůň ve stáji<br/><small style="color:#38bdf8;">Skóre: 1d6 + 2×Jízda + Koně (max 3)</small></td>
+                                        <td><strong>až +5 💖</strong><br/><small style="color:#fef08a;">+1 200 zl.</small></td>
+                                        <td><strong>+2 až +3 💖</strong><br/><small style="color:#fef08a;">+600 zl.</small></td>
+                                        <td><strong>+0,5 až +1 💖</strong><br/><small style="color:#fef08a;">+300 zl.</small></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- TABULKA 3: FEUDÁLNÍ SÍDLA A VÝNOSY -->
+                        <h4 style="color:var(--gold); margin:0.85rem 0 0.35rem; font-size:0.92rem;">🏰 Feudální panství, nákupní ceny, nájmy a výnosy daní</h4>
+                        <div style="overflow-x:auto; border:1px solid rgba(212,175,55,0.25); border-radius:8px;">
+                            <table class="rules-table">
+                                <thead>
+                                    <tr>
+                                        <th>Panství</th>
+                                        <th>Pořizovací cena</th>
+                                        <th>Nájem od soupeře</th>
+                                        <th>Výnos u Výběrčího daní</th>
+                                        <th>Trvalý bonus 💖</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>🌾 1★ Vesnice</strong></td>
+                                        <td>1 500 zl.</td>
+                                        <td>100 zl.</td>
+                                        <td>+500 zl.</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>🏡 2★ Městečko</strong></td>
+                                        <td>+1 500 zl. (celkem 3 000 zl.)</td>
+                                        <td>200 zl.</td>
+                                        <td>+900 zl.</td>
+                                        <td>—</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>🏘️ 3★ Velká osada</strong></td>
+                                        <td>+1 500 zl. (celkem 4 500 zl.)</td>
+                                        <td>300 zl.</td>
+                                        <td>+1 400 zl.</td>
+                                        <td><strong>+0,5 💖</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>🏙️ Královské město</strong></td>
+                                        <td>4 000 zl.</td>
+                                        <td>500 zl.</td>
+                                        <td>+1 200 zl.</td>
+                                        <td><strong>+0,5 💖</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>🏰 Šlechtický hrad</strong></td>
+                                        <td>7 000 zl.</td>
+                                        <td>1 000 zl.</td>
+                                        <td>+2 500 zl.</td>
+                                        <td><strong>+1,0 💖 (+1 Charisma)</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <!-- ========================================================= -->
+                    <!-- VRSTVA 4: SLOVNÍČEK, ZKRATKY A LEGENDA IKON               -->
+                    <!-- ========================================================= -->
+                    <div id="rules-view-glossary" class="rules-view-section" style="display:none;">
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.85rem;">
+                            <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0;">🔤 Slovníček pojmů, zkratek a legenda symbolů</h3>
+                            <div style="display:flex; align-items:center; gap:0.5rem; flex:1; max-width:360px;">
+                                <input type="text" id="glossary-search-input" placeholder="Hledat pojem (např. renta, šatlava, postoj)..."
+                                    style="background:rgba(0,0,0,0.4); border:1px solid rgba(212,175,55,0.3); border-radius:5px; padding:0.28rem 0.6rem; color:#fff; font-size:0.82rem; width:100%; outline:none;"
+                                    oninput="PRS_App.filterGlossaryTerms(this.value)" />
+                            </div>
+                        </div>
+
+                        <div id="glossary-cards-container" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:1rem;">
+                            <!-- Zkratky Mistrů -->
+                            <div class="glossary-category-card" style="background:rgba(18,14,10,0.85); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.95rem;">
+                                <h4 style="color:var(--gold); margin:0 0 0.5rem; font-size:0.95rem;">🥋 Zkratky Mistrů a Ctností</h4>
+                                <ul style="margin:0; padding-left:1.1rem; font-size:0.84rem; color:#e2e8f0; line-height:1.65;">
+                                    <li class="glossary-term"><strong>MB</strong> – Mistr Boje (zvyšuje sílu v soubojích s monstry a draky; 1 000–5 000 zl.).</li>
+                                    <li class="glossary-term"><strong>MJ</strong> – Mistr Jízdy (zrychluje pohyb na koni, zlevňuje cizí nájmy a zvyšuje šanci na Turnaji).</li>
+                                    <li class="glossary-term"><strong>MT</strong> – Mistr Tance (dominuje na Plese a odemyká královské audience s princeznou).</li>
+                                    <li class="glossary-term"><strong>MCH</strong> – Mistr Charismatu (zvyšuje zisk srdcí a zlevňuje propouštěcí kauce).</li>
+                                    <li class="glossary-term"><strong>VM</strong> – Velmistr (učí kteroukoliv ze 4 ctností dle volby hráče, bez omezení stupně).</li>
+                                    <li class="glossary-term"><strong>VD</strong> – Výběrčí daní (vyplácí feudální renty z hradů a výnosy stád ve stájích).</li>
+                                    <li class="glossary-term"><strong>Pečeť mistra</strong> – Ocenění za trénink u mistra; zisk 3 různých pečetí dává titul Rytířská záštita.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Symboly a ikony -->
+                            <div class="glossary-category-card" style="background:rgba(18,14,10,0.85); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.95rem;">
+                                <h4 style="color:var(--gold); margin:0 0 0.5rem; font-size:0.95rem;">✨ Klíčové symboly a měny</h4>
+                                <ul style="margin:0; padding-left:1.1rem; font-size:0.84rem; color:#e2e8f0; line-height:1.65;">
+                                    <li class="glossary-term"><strong>💖 Princeznino srdce:</strong> Hlavní měřítko vítězství. Cílem hry je dosáhnout 30 💖.</li>
+                                    <li class="glossary-term"><strong>zl. Zlaťáky:</strong> Královská měna pro nákup panství, výcvik ctností, výstroj a sázky na slavnostech.</li>
+                                    <li class="glossary-term"><strong>HP (Životy):</strong> Rytíř má 30 HP. Pokles na 0 znamená bezvědomí a převoz do Lazaretu.</li>
+                                    <li class="glossary-term"><strong>⚔️ Bojová síla:</strong> Součet ctnosti Boj, bonusů zbraní, bojových postojů a slabin nestvůr.</li>
+                                    <li class="glossary-term"><strong>🏇 Jezdecká obratnost:</strong> Určuje rychlost pohybu figurky, hod 2 kostkami a body na Turnaji i Závodu.</li>
+                                    <li class="glossary-term"><strong>💃 Taneční um:</strong> Společenský šarm rozhodující skóre na Zámeckých plesech a audiencích.</li>
+                                    <li class="glossary-term"><strong>👑 Charisma:</strong> Vznešenost násobící přízeň dvora, zisk srdcí a snižující kauce v Šatlavě.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Úkoly a arény -->
+                            <div class="glossary-category-card" style="background:rgba(18,14,10,0.85); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.95rem;">
+                                <h4 style="color:var(--gold); margin:0 0 0.5rem; font-size:0.95rem;">🐉 Úkoly a arény monster (U1–U3)</h4>
+                                <ul style="margin:0; padding-left:1.1rem; font-size:0.84rem; color:#e2e8f0; line-height:1.65;">
+                                    <li class="glossary-term"><strong>Arény U1:</strong> Běžná zvěř a dravci (snadný lov, odměna 1 000–2 500 zl., +0,5 až +1,5 💖).</li>
+                                    <li class="glossary-term"><strong>Arény U2:</strong> Bájná monstra a netvoři (odměna 2 600 zl., +1,5 až +2,5 💖, šance na trofej 65 %).</li>
+                                    <li class="glossary-term"><strong>Dračí sluj U3:</strong> Legendární draci (6 000 zl., +2,5 až +5,0 💖, trofej 100 %, šance na dračí vejce).</li>
+                                    <li class="glossary-term"><strong>Dračí triumf:</strong> Okamžitá výhra ve hře po skolení 2 libovolných draků U3 bez ohledu na počet srdcí!</li>
+                                    <li class="glossary-term"><strong>Bojový postoj (Útočný / Opatrný / Ústup):</strong> Volba před kolem boje (+2 síla / -2 zranění / útěk).</li>
+                                    <li class="glossary-term"><strong>Slabina monstra:</strong> Specifická zbraň či element dávající bonus +3 k síle.</li>
+                                    <li class="glossary-term"><strong>Trofej netvora:</strong> Cenná relikvie zvyšující trvale atributy rytíře (lze vystavit v síni slávy).</li>
+                                </ul>
+                            </div>
+
+                            <!-- Speciální stavy a tituly -->
+                            <div class="glossary-category-card" style="background:rgba(18,14,10,0.85); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.95rem;">
+                                <h4 style="color:var(--gold); margin:0 0 0.5rem; font-size:0.95rem;">🛡️ Speciální stavy, tituly a tresty</h4>
+                                <ul style="margin:0; padding-left:1.1rem; font-size:0.84rem; color:#e2e8f0; line-height:1.65;">
+                                    <li class="glossary-term"><strong>Rytířská záštita:</strong> Udělena za 3 různé pečeti mistrů. Osvobození od daní a bezplatný lazaret.</li>
+                                    <li class="glossary-term"><strong>Chovatelská prémie:</strong> Titul pro 3 největší chovatele zvířat (+4,0 / +2,5 / +1,5 💖).</li>
+                                    <li class="glossary-term"><strong>Bezzemek:</strong> Rytíř bez panství a zvířat – na STARTu dostává vyšší královský žold 5 000 zl.</li>
+                                    <li class="glossary-term"><strong>Šatlava:</strong> Trest na 1 kolo – propuštění kaucí 1 000 zl., hodem 6, nebo svitkem Amnestie.</li>
+                                    <li class="glossary-term"><strong>Lazaret:</strong> Políčko pro léčení zranění po prohře v boji (léčení 500 zl. nebo zdarma se záštitou).</li>
+                                </ul>
+                            </div>
+
+                            <!-- Panství, renty a ekonomika -->
+                            <div class="glossary-category-card" style="background:rgba(18,14,10,0.85); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.95rem;">
+                                <h4 style="color:var(--gold); margin:0 0 0.5rem; font-size:0.95rem;">🏰 Feudální řád a panství</h4>
+                                <ul style="margin:0; padding-left:1.1rem; font-size:0.84rem; color:#e2e8f0; line-height:1.65;">
+                                    <li class="glossary-term"><strong>Léno / Panství:</strong> Vesnice a hrady na plánu, které lze koupit a inkasovat z nich nájmy od soupeřů.</li>
+                                    <li class="glossary-term"><strong>Monopol (Barva panství):</strong> Vlastnictví všech panství jedné barvy zdvojnásobuje základní nájem!</li>
+                                    <li class="glossary-term"><strong>Rytířská věž &amp; Pevnost:</strong> Stavební vylepšení hradů zvyšující nájem až na čtyřnásobek.</li>
+                                    <li class="glossary-term"><strong>Výběr daní (VD):</strong> Průchodem či návštěvou Výběrčího daní získáváš feudální rentu ze všech svých držav.</li>
+                                    <li class="glossary-term"><strong>Stáje a pastviny:</strong> Nákup dobytka, ovcí a prasat generuje pasivní příjem při výběru daní.</li>
+                                    <li class="glossary-term"><strong>Obchodník:</strong> Políčko trhu, kde lze nakupovat zbroj a předměty s 50% slevou nebo výhodně prodávat majetek.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Pergameny a brašna rytíře -->
+                            <div class="glossary-category-card" style="background:rgba(18,14,10,0.85); border:1px solid rgba(212,175,55,0.25); border-radius:10px; padding:0.95rem;">
+                                <h4 style="color:var(--gold); margin:0 0 0.5rem; font-size:0.95rem;">📜 Pergameny a brašna</h4>
+                                <ul style="margin:0; padding-left:1.1rem; font-size:0.84rem; color:#e2e8f0; line-height:1.65;">
+                                    <li class="glossary-term"><strong>Brašna na pergameny:</strong> Pojme až 3 magické svitky získané na políčkách Náhoda a Tajemná truhla.</li>
+                                    <li class="glossary-term"><strong>Královská amnestie:</strong> Okamžité bezplatné propuštění ze Šatlavy bez nutnosti platit kauci.</li>
+                                    <li class="glossary-term"><strong>Šťastná hvězda:</strong> Umožňuje přehodit neúspěšný hod kostkou v boji, na rozcestí nebo u mistra.</li>
+                                    <li class="glossary-term"><strong>Daňový pardon:</strong> Osvobozuje tě od platby nájmu při vstupu na cizí hrad či vesnici.</li>
+                                    <li class="glossary-term"><strong>Královský posel:</strong> Umožňuje přesunout se přímo na libovolné políčko ve stejném kraji.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ========================================================= -->
+                    <!-- VRSTVA 5: ATLAS VŠECH 22 TYPŮ POLÍČEK                     -->
+                    <!-- ========================================================= -->
+                    <div id="rules-view-atlas" class="rules-view-section" style="display:none;">
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                            <div>
+                                <h3 style="margin:0; font-family:'Cinzel',serif; color:var(--gold-light);">🗺️ Atlas všech 22 políček herní desky</h3>
+                                <p style="color:var(--text-muted); font-size:0.85rem; margin:0.2rem 0 0;">
+                                    Kompletní přehled všech typů polí, jejich medailonků, akcí a strategických doporučení.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="rules-atlas-grid-container">
+                            <!-- Dynamicky vykresleno pomocí PRS_App.renderTilesAtlas() -->
+                        </div>
+
 
                     </div>
 
@@ -1617,7 +2260,7 @@
 
                             <p style="color:var(--text-muted); font-size:0.85rem; margin:0.2rem 0 0;">
 
-                                34 unikátních izometrických dekorací a staveb oživujících království, kotvených k políčkům a rozptýlených v terénu.
+                                42 unikátních izometrických dekorací a staveb oživujících království, kotvených k políčkům a rozptýlených v terénu.
 
                             </p>
 
@@ -1625,7 +2268,7 @@
 
                         <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
 
-                            <button class="rules-subnav-btn active decor-filter-btn" data-cat="all" onclick="PRS_App.setDecorationsCategory('all')">Všechny (34)</button>
+                            <button class="rules-subnav-btn active decor-filter-btn" data-cat="all" onclick="PRS_App.setDecorationsCategory('all')">Všechny (42)</button>
 
                             <button class="rules-subnav-btn decor-filter-btn" data-cat="vegetation" onclick="PRS_App.setDecorationsCategory('vegetation')">🌲 Lesy &amp; Stromy</button>
 
@@ -2806,22 +3449,22 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/game-data.js?v=202611112245" defer></script>
-    <script src="js/game-boards.js?v=202611112245" defer></script>
-    <script src="js/game-engine.js?v=202611112245" defer></script>
-    <script src="js/game-combat-ai.js?v=202611112245" defer></script>
-    <script src="js/app-audio.js?v=202611112245" defer></script>
-    <script src="js/app-dialog.js?v=202611112245" defer></script>
-    <script src="js/app.js?v=202611112245" defer></script>
-    <script src="js/app-board.js?v=202611112245" defer></script>
-    <script src="js/app-hud.js?v=202611121150" defer></script>
-    <script src="js/app-modals.js?v=202611121150" defer></script>
-    <script src="js/app-online.js?v=202611121500" defer></script>
-    <script src="js/app-saves.js?v=202611121150" defer></script>
-    <script src="js/app-map-editor.js?v=202611112245" defer></script>
-    <script src="js/app-catalog.js?v=202611112245" defer></script>
-    <script src="js/app-admin.js?v=202611112245" defer></script>
-    <script src="js/app-musicwidget.js?v=202611112245" defer></script>
+    <script src="js/game-data.js?v=202611142200" defer></script>
+    <script src="js/game-boards.js?v=202611142200" defer></script>
+    <script src="js/game-engine.js?v=202611142200" defer></script>
+    <script src="js/game-combat-ai.js?v=202611142200" defer></script>
+    <script src="js/app-audio.js?v=202611142200" defer></script>
+    <script src="js/app-dialog.js?v=202611142200" defer></script>
+    <script src="js/app.js?v=202611142200" defer></script>
+    <script src="js/app-board.js?v=202611142200" defer></script>
+    <script src="js/app-hud.js?v=202611142200" defer></script>
+    <script src="js/app-modals.js?v=202611142200" defer></script>
+    <script src="js/app-online.js?v=202611142200" defer></script>
+    <script src="js/app-saves.js?v=202611142200" defer></script>
+    <script src="js/app-map-editor.js?v=202611142200" defer></script>
+    <script src="js/app-catalog.js?v=202611142200" defer></script>
+    <script src="js/app-admin.js?v=202611142200" defer></script>
+    <script src="js/app-musicwidget.js?v=202611142200" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3031,6 +3674,17 @@
                 <button class="btn-secondary" onclick="PRS_App.closeCardPreviewModal()" style="font-size:0.85rem; padding:0.35rem 0.9rem; cursor:pointer;">← Zpět na balíček</button>
                 <button class="rules-subnav-btn active" onclick="PRS_App.closeCardPreviewModal()" style="padding:0.35rem 1.1rem; cursor:pointer; font-size:0.85rem;">Zavřít</button>
             </div>
+        </div>
+    </div>
+
+    <!-- DETAIL POLÍČKA V ATLASE -->
+    <div id="tile-atlas-modal" class="modal-backdrop" style="display:none; z-index:10060;" onclick="if(event.target===this)PRS_App.closeTileAtlasModal()">
+        <div class="modal-box" style="max-width:680px; width:95%; padding:1.35rem; border-color:var(--gold); box-shadow:0 16px 45px rgba(0,0,0,0.85); background:linear-gradient(180deg, #1c150e 0%, #0d0a07 100%); position:relative; box-sizing:border-box;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.55rem;">
+                <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; display:flex; align-items:center; gap:0.5rem; font-size:1.15rem;">🗺️ Detail herního políčka</h3>
+                <button class="btn-icon-danger" onclick="PRS_App.closeTileAtlasModal()" title="Zavřít detail">✕</button>
+            </div>
+            <div id="tile-atlas-modal-content" style="max-height:75vh; overflow-y:auto; line-height:1.45;"></div>
         </div>
     </div>
 
@@ -3664,6 +4318,7 @@
                                     <option value="single" selected>Královská řeka (1 tok)</option>
                                     <option value="dual">Dvojí soutok (2 řeky)</option>
                                     <option value="island">Říční ostrov (Meandr)</option>
+                                    <option value="delta">Říční delta (Rozvětvené ústí)</option>
                                 </select>
                             </div>
                         </div>

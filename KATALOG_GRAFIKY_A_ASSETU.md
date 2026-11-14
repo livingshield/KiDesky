@@ -80,11 +80,11 @@ Hrady představují nejcennější nemovitosti na herním plánu. Hráč za jeji
 
 ---
 
-## 🌲 Kapitola 3: Dekorace krajiny a rekvizity (34 prvků)
+## 🌲 Kapitola 3: Dekorace krajiny a rekvizity (42 prvků)
 
-Dekorace krajiny oživují prostor herního plánu mezi políčky. Herní engine využívá inteligentní rozvrhovač s **Poisson-disk distribucí**, který hlídá kolize s cestami, dominantami i kartami. Prvky jsou rozděleny na **ukotvené k políčkům** a **rozptýlené po krajině**.
+Dekorace krajiny oživují prostor herního plánu mezi políčky. Herní engine využívá inteligentní rozvrhovač s **Poisson-disk distribucí**, který hlídá kolize s cestami, dominantami i kartami. Prvky jsou rozděleny na **ukotvené k políčkům** a **rozptýlené po krajině**. Každý prvek má i oboustrannou variantu `*_flip.png`.
 
-### 1. Lesy a vegetace (10 prvků)
+### 1. Lesy a vegetace (11 prvků)
 - `tree_oak.png` (Listnatý dub): 56×68 px, clearance 28 px. Klasický solitérní dub s hustou korunou na loukách.
 - `tree_pine.png` (Horská borovice): 48×72 px, clearance 25 px. Jehličnatý strom podhůří a severních hor.
 - `tree_birch.png` (Bělostná bříza): 44×64 px, clearance 22 px. Světlá bříza s bílou kůrou u pastvin koní.
@@ -95,6 +95,7 @@ Dekorace krajiny oživují prostor herního plánu mezi políčky. Herní engine
 - `orchad_plum.png` (Švestkový sad): 96×76 px, clearance 44 px. Sad se zrajícími modrými švestkami.
 - `hruskovy_sad.png` (Hruškový sad): 96×76 px, clearance 44 px. Sad se zralými žlutozelenými hruškami na slunných stráních.
 - `bush.png` (Hustý keř): 48×42 px, clearance 22 px. Přírodní nízký podrost lemující křižovatky a potoky.
+- `forest_ent.png` (Prastarý lesní ent): 66×84 px, clearance 36 px. Obří oživlý stromový strážce hvozdu s parožím a mechovým vousem.
 
 ### 2. Terén a geologie (2 prvky)
 - `rock_boulder.png` (Mechem porostlý balvan): 52×40 px, clearance 24 px. Puklý žulový balvan s mechovým kobercem.
@@ -104,31 +105,47 @@ Dekorace krajiny oživují prostor herního plánu mezi políčky. Herní engine
 - `farm_field.png` (Lán pšeničného pole): 105×60 px, clearance 48 px. Zlatavý obdélníkový lán dozrávající pšenice s brázdami.
 - `pasture_fence.png` (Pastvina s dřevěným plůtkem): 78×48 px, clearance 36 px. Oplocený travnatý výběh kotvený k políčkům zvířat.
 - `windmill.png` (Středověký větrný mlýn): 68×88 px, clearance 34 px. Dřevěný holandský mlýn s otáčivými lopatkami.
-- `watermill.png` (Vodní mlýn s náhonem): 64×84 px, clearance 36 px. Roubený mlýn s mohutným vodním kolem a proudem vody.
+- `watermill.png` (Vodní mlýn s náhonem): 78×84 px, clearance 38 px. Roubený mlýn s mohutným vodním kolem a proudem vody.
 
-### 4. Lidská sídla, kultura a rekvizity (8 prvků)
+### 4. Lidská sídla, kultura a rekvizity (9 prvků)
 - `cottage_timber.png` (Roubená chalupa): 70×64 px, clearance 35 px. Tradiční podstávková chalupa se šindelovou střechou.
 - `village_well.png` (Kamenná studna): 42×46 px, clearance 22 px. Návesní studna s rumpálem, stříškou a okovem s vodou.
 - `merchant_wagon.png` (Kupecký krytý vůz): 68×52 px, clearance 32 px. Trhový povoz s plachtou a loukoťovými koly u obchodníka.
 - `tournament_tent.png` (Turnajový královský stan): 78×70 px, clearance 38 px. Červeno-zlatý pavilon s korouhví pro rytířská klání.
-- `signpost.png` (Dřevěný rozcestník): 32×44 px, clearance 18 px. Rozcestník se šipkami označující směry na rozcestích 1–3 vs 4–6.
+- `signpost.png` (Dřevěný rozcestník): 32×44 px, clearance 18 px. Rozcestník se šipkami označující směry na rozcestích.
 - `signpost2.png` (Kamenný rozcestník): 44×54 px, clearance 20 px. Otesaný kamenný milník s vytesanými erby a směry.
-- `wooden_watchtower.png` (Dřevěná strážní věž): 84×50 px, clearance 36 px. Pohraniční pozorovatelna s žebříkem a pochodní.
+- `wooden_watchtower.png` (Dřevěná strážní věž): 66×84 px, clearance 36 px. Pohraniční dřevěná pozorovatelna s žebříkem a pochodní.
+- `ancient_tower_ruin.png` (Zřícenina kamenné věže): 64×84 px, clearance 36 px. Stará kamenná věž prorostlá větvemi mohutného stromu.
 - `hrad.png` (Strážní hrad): 80×80 px, clearance 40 px. Malý kamenný donjon kotvený na vyvýšeninách.
 
-### 5. Vodní toky, mosty a močály (3 prvky)
+### 5. Vodní toky, mosty a močály (5 prvků)
 - `lake_pond.png` (Modré lesní jezírko): 96×58 px, clearance 46 px. Průzračná tůň s lekníny, rákosím a vodními vlnkami.
 - `swamp_bridge.png` (Dřevěná lávka přes močál): 84×57 px, clearance 38 px. Polorozpadlá dřevěná lávka přes kalnou tůň s bludičkami.
 - `pegasus_pond.png` (Pegas u lesní studánky): 84×62 px, clearance 38 px. Sněhobílý okřídlený kůň pijící z posvátného pramene.
+- `lake_nymphs.png` (Jezerní rusalky na molu): 88×52 px, clearance 38 px. Půvabné jezerní víly a rusalky vyhřívající se na dřevěném molu.
+- `vodnik_pond.png` (Vodník u tůně): 88×53 px, clearance 38 px. Zelený vodník kouřící fajfku na vrbě nad temnou tůní se síťkou a hrníčky.
 
-### 6. Magická místa, posvátné háje a ruiny (7 prvků)
-- `fairy_ring_mushrooms.png` (Vílí houbový kruh): 66×84 px, clearance 34 px. Kruh světélkujících hub tvořící portál v mechu.
-- `druid_monoliths.png` (Druidské menhiry): 79×84 px, clearance 38 px. Kamenný kruh vztyčených menhirů s vyrytými runami.
+### 6. Magická místa, posvátné háje a ruiny (9 prvků)
+- `fairy_ring_mushrooms.png` (Vílí houbový kruh): 84×67 px, clearance 36 px. Kruh světélkujících hub se třpytivým vílím prachem v mechu.
+- `druid_monoliths.png` (Druidské menhiry): 84×72 px, clearance 38 px. Kamenný kruh vztyčených menhirů s vyrytými zářícími runami a oltářem.
 - `dryad_sacred_oak.png` (Posvátný dub s dryádou): 65×84 px, clearance 36 px. Prastarý košatý dub, z jehož kmene vystupuje lesní víla.
 - `unicorn_grove.png` (Kouzelný háj s jednorožcem): 84×75 px, clearance 38 px. Ušlechtilý jednorožec ve stříbřité lesní mýtině.
-- `ancient_ruins.png` (Zarostlé kamenné zříceniny): 80×84 px, clearance 38 px. Opuštěné hradní zdi s gotickým obloukem obrostlé břečťanem.
+- `ancient_ruins.png` (Zarostlé kamenné zříceniny): 84×79 px, clearance 38 px. Opuštěné hradní zdi s gotickým obloukem a polozakopanou truhlou.
 - `ancient_graveyard.png` (Tajemný starý hřbitov): 84×60 px, clearance 38 px. Kamenná zídka, staré náhrobky, suchý strom a železná brána.
-- `witch_hut.png` (Perníková chaloupka ježibaby): 84×58 px, clearance 38 px. Podivná chaloupka s křivým komínem a bylinkami u močálu.
+- `witch_hut.png` (Perníková chaloupka ježibaby): 74×84 px, clearance 38 px. Perníková chaloupka s polevou a fialovým kouřem z komína.
+- `crystal_golem.png` (Krystalový golem): 79×84 px, clearance 38 px. Mohutný kamenný golem obrostlý mechem a fialovo-modrými krystaly.
+- `phoenix_nest.png` (Hnízdo ohnivého Fénixe): 82×84 px, clearance 38 px. Planoucí ohnivý pták Fénix sedící v hnízdě na skalním pilíři.
+
+### 7. Doupata nestvůr a sluje (9 prvků)
+- `cave_bear_den.png` (Medvědí jeskyně): 84×84 px, clearance 38 px. Skalní jeskyně střežená obřím divokým medvědem u vchodu plného kostí.
+- `bandit_cave.png` (Loupežnická jeskyně s pokladem): 84×82 px, clearance 38 px. Loupežnické doupě osvětlené pochodněmi s otevřenými truhlami zlaťáků.
+- `griffin_nest.png` (Hnízdo skalního gryfa): 64×84 px, clearance 38 px. Skalní sloup s hnízdem, vejci a zlatem hlídaným okřídleným gryfem.
+- `fire_salamander.png` (Ohnivý salamandr): 80×84 px, clearance 38 px. Magický ohnivý ještěr vyhřívající se na žhavých lávových kamenech.
+- `dragon_cave.png` (Spící drak ve sluji): 88×61 px, clearance 38 px. Červený drak spící stočený na obří hromadě zlatých mincí a trofejí.
+- `basilisk_cave.png` (Jeskyně baziliška): 84×57 px, clearance 38 px. Skalní rozsedlina plná zkamenělých těl střežená smrtícím ještěrem.
+- `snow_troll_cave.png` (Ledová jeskyně sněžného trolla): 84×56 px, clearance 38 px. Ledové krápníky a doupě mocného bílého trolla s kyjem.
+- `swamp_troll.png` (Bažinný troll u tůně): 84×62 px, clearance 38 px. Zavalitý bažinný troll odpočívající pod kořeny u kalné tůně.
+- `swamp_hydra.png` (Pětihlavá bažinná hydra): 84×56 px, clearance 38 px. Děsivá pětihlavá zelená hydra vynořující se z hlubin bažiny.
 
 ---
 

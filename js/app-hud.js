@@ -579,11 +579,11 @@
 
             html += '<div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:12px; background:rgba(0,0,0,0.35); padding:8px; border-radius:10px; text-align:center;">' +
 
-                '<div><small style="color:var(--text-muted);">⚔️ Boj</small><div style="font-weight:bold; font-size:1.1rem; color:#f87171;">' + stats.boj + '</div></div>' +
+                '<div><small style="color:var(--text-muted);">⚔️ Boj</small><div style="font-weight:bold; font-size:1.1rem; color:#f87171;">' + stats.combat + '</div></div>' +
 
-                '<div><small style="color:var(--text-muted);">🏇 Jízda</small><div style="font-weight:bold; font-size:1.1rem; color:#60a5fa;">' + stats.jizda + '</div></div>' +
+                '<div><small style="color:var(--text-muted);">🏇 Jízda</small><div style="font-weight:bold; font-size:1.1rem; color:#60a5fa;">' + stats.riding + '</div></div>' +
 
-                '<div><small style="color:var(--text-muted);">💃 Tanec</small><div style="font-weight:bold; font-size:1.1rem; color:#f472b6;">' + stats.tanec + '</div></div>' +
+                '<div><small style="color:var(--text-muted);">💃 Tanec</small><div style="font-weight:bold; font-size:1.1rem; color:#f472b6;">' + stats.dance + '</div></div>' +
 
                 '<div><small style="color:var(--text-muted);">✨ Charisma</small><div style="font-weight:bold; font-size:1.1rem; color:#fbbf24;">' + stats.charisma + '</div></div>' +
 
@@ -1022,7 +1022,7 @@
 
                     '  <span>🐎 Chov: +' + p.breedingHearts + ' ❤️</span>' +
 
-                    '  <span>⚔️' + p.skills.boj + ' 🏇' + p.skills.jizda + ' 💃' + p.skills.tanec + ' 👑' + p.skills.charisma + '</span>' +
+                    '  <span>⚔️' + p.skills.combat + ' 🏇' + p.skills.riding + ' 💃' + p.skills.dance + ' 👑' + p.skills.charisma + '</span>' +
 
                     '</div>' +
 
@@ -1246,17 +1246,17 @@
 
                     }
 
-                    var aTypeLabel = pNode.subtype === "kun" ? "Chov koní" : (pNode.subtype === "pes" ? "Chov psů" : "Chov sokolů");
+                    var aTypeLabel = pNode.subtype === "horse" ? "Chov koní" : (pNode.subtype === "dog" ? "Chov psů" : "Chov sokolů");
 
                     catLabel = aTypeLabel + " (Sada #" + pNode.setId + " • " + countInSet + "/3 ks)";
 
                 } else if (pNode.type === "BUILDING") {
 
-                    var bName = pNode.subtype === "staje" ? "Královské stáje (+1 Jízda)" :
-                               (pNode.subtype === "kovarna" ? "Kovárna (+1 Boj)" :
-                               (pNode.subtype === "krejci" ? "Krejčovská dílna (+1 Tanec)" :
-                               (pNode.subtype === "sokolnik" ? "Sokolník" :
-                               (pNode.subtype === "psovod" ? "Psovod" : "Živnost"))));
+                    var bName = pNode.subtype === "stables" ? "Královské stáje (+1 Jízda)" :
+                               (pNode.subtype === "forge" ? "Kovárna (+1 Boj)" :
+                               (pNode.subtype === "tailor" ? "Krejčovská dílna (+1 Tanec)" :
+                               (pNode.subtype === "falconer" ? "Sokolník" :
+                               (pNode.subtype === "doghandler" ? "Psovod" : "Živnost"))));
 
                     catLabel = "Živnost: " + bName;
 
@@ -1583,7 +1583,7 @@
 
         } else if (node.type === "ANIMAL") {
 
-            var animalName = (node.subtype === "kun" ? "Kůň" : (node.subtype === "pes" ? "Pes" : "Sokol"));
+            var animalName = (node.subtype === "horse" ? "Kůň" : (node.subtype === "dog" ? "Pes" : "Sokol"));
 
             if (isOwnedByMe) {
 
@@ -1748,19 +1748,15 @@
             : '';
 
         el.innerHTML = '<div class="standing-tile-card" style="' + (isMyCurrentStandingTile ? '' : 'border-color:#38bdf8; box-shadow:0 6px 20px rgba(56,189,248,0.25);') + '">' +
-
             '  <div class="standing-tile-header">' +
-
             '    <div class="standing-tile-medallion">' + imgHtml + '</div>' +
-
             '    <div class="standing-tile-meta">' +
-
-            '      ' + headerTag +
-
+            '      <div style="display:flex; align-items:center; justify-content:space-between; gap:0.4rem; margin-bottom:2px;">' +
+            '        ' + headerTag +
+            '        <button class="btn-help-bubble" onclick="PRS_App.openRulesHelpForTile(\'' + (node.type || '') + '\', \'' + (node.code || '') + '\')" title="Přečíst pravidla a tipy k tomuto poli v Kodexu">❓ Nápověda</button>' +
+            '      </div>' +
             '      <div class="standing-tile-title">' + node.icon + ' ' + this.escapeHtml(node.name) + '</div>' +
-
             '    </div>' +
-
             '  </div>' +
 
             '  <div class="standing-tile-body">' +
@@ -1970,7 +1966,7 @@
 
             '    <div style="font-size:0.74rem; color:var(--text-muted);">⚔️ Bojová síla</div>' +
 
-            '    <div style="font-size:1.15rem; font-weight:bold; color:#fca5a5;">' + st.boj + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.boj + '/5)</small></div>' +
+            '    <div style="font-size:1.15rem; font-weight:bold; color:#fca5a5;">' + st.combat + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.combat + '/5)</small></div>' +
 
             '  </div>' +
 
@@ -1978,7 +1974,7 @@
 
             '    <div style="font-size:0.74rem; color:var(--text-muted);">🏇 Jezdecké umění</div>' +
 
-            '    <div style="font-size:1.15rem; font-weight:bold; color:#7dd3fc;">' + st.jizda + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.jizda + '/5)</small></div>' +
+            '    <div style="font-size:1.15rem; font-weight:bold; color:#7dd3fc;">' + st.riding + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.riding + '/5)</small></div>' +
 
             '  </div>' +
 
@@ -1986,7 +1982,7 @@
 
             '    <div style="font-size:0.74rem; color:var(--text-muted);">💃 Dvorní tanec</div>' +
 
-            '    <div style="font-size:1.15rem; font-weight:bold; color:#f472b6;">' + st.tanec + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.tanec + '/5)</small></div>' +
+            '    <div style="font-size:1.15rem; font-weight:bold; color:#f472b6;">' + st.dance + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.dance + '/5)</small></div>' +
 
             '  </div>' +
 
@@ -2215,9 +2211,9 @@
             '  📍 Pozice: <strong>' + (currNode ? this.escapeHtml(currNode.name) : "-") + '</strong>' +
             '</div>' +
             '<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem; font-size:0.8rem; background:rgba(0,0,0,0.45); padding:0.45rem; border-radius:6px; margin-bottom:0.45rem;">' +
-            '  <div>⚔️ Boj: <strong>' + st.boj + '</strong> <small style="color:var(--text-muted);">(' + p.skills.boj + '/5)</small></div>' +
-            '  <div>🏇 Jízda: <strong>' + st.jizda + '</strong> <small style="color:var(--text-muted);">(' + p.skills.jizda + '/5)</small></div>' +
-            '  <div>💃 Tanec: <strong>' + st.tanec + '</strong> <small style="color:var(--text-muted);">(' + p.skills.tanec + '/5)</small></div>' +
+            '  <div>⚔️ Boj: <strong>' + st.combat + '</strong> <small style="color:var(--text-muted);">(' + p.skills.combat + '/5)</small></div>' +
+            '  <div>🏇 Jízda: <strong>' + st.riding + '</strong> <small style="color:var(--text-muted);">(' + p.skills.riding + '/5)</small></div>' +
+            '  <div>💃 Tanec: <strong>' + st.dance + '</strong> <small style="color:var(--text-muted);">(' + p.skills.dance + '/5)</small></div>' +
             '  <div>✨ Charisma: <strong>' + st.charisma + '</strong> <small style="color:var(--text-muted);">(' + p.skills.charisma + '/5)</small></div>' +
             '</div>' +
             '<div style="font-size:0.78rem; color:#e2e8f0; margin-bottom:0.3rem;">' +
@@ -2444,9 +2440,9 @@
 
                 if (nd.type === "ANIMAL") {
 
-                    if (nd.subtype === "kun") horseCount++;
+                    if (nd.subtype === "horse") horseCount++;
 
-                    else if (nd.subtype === "pes") dogCount++;
+                    else if (nd.subtype === "dog") dogCount++;
 
                     else falconCount++;
 
@@ -2621,11 +2617,11 @@
 
             '  <div class="compact-virtues-row">' +
 
-            '    <span class="cv-item" title="Boj: ' + st.boj + ' (výcvik ' + p.skills.boj + '/5) – síla v arénách, lov draků a Turnaje">⚔️ <strong>' + st.boj + '</strong></span>' +
+            '    <span class="cv-item" title="Boj: ' + st.combat + ' (výcvik ' + p.skills.combat + '/5) – síla v arénách, lov draků a Turnaje">⚔️ <strong>' + st.combat + '</strong></span>' +
 
-            '    <span class="cv-item" title="Jízda: ' + st.jizda + ' (výcvik ' + p.skills.jizda + '/5) – rychlost pohybu, slevy nájmů a Závody">🏇 <strong>' + st.jizda + '</strong></span>' +
+            '    <span class="cv-item" title="Jízda: ' + st.riding + ' (výcvik ' + p.skills.riding + '/5) – rychlost pohybu, slevy nájmů a Závody">🏇 <strong>' + st.riding + '</strong></span>' +
 
-            '    <span class="cv-item" title="Tanec: ' + st.tanec + ' (výcvik ' + p.skills.tanec + '/5) – audience u krále (+💖), Zámecké plesy a dary">💃 <strong>' + st.tanec + '</strong></span>' +
+            '    <span class="cv-item" title="Tanec: ' + st.dance + ' (výcvik ' + p.skills.dance + '/5) – audience u krále (+💖), Zámecké plesy a dary">💃 <strong>' + st.dance + '</strong></span>' +
 
             '    <span class="cv-item" title="Charisma: ' + st.charisma + ' (výcvik ' + p.skills.charisma + '/5) – násobí zisk srdcí ze slavností a audiencí">✨ <strong>' + st.charisma + '</strong></span>' +
 
@@ -2949,7 +2945,7 @@
                             title: "Královský rádce",
                             badge: "Nákup zvířete",
                             badgeClass: "advisor-tip",
-                            text: "Volné chovné zvíře (" + (currNode.subtype === "kun" ? "Kůň – nutný pro cval a závody" : (currNode.subtype === "pes" ? "Pes – bonus k lovu monster" : "Sokol – bonus k turnajům")) + "). Po nákupu ti zbyde bezpečných **" + rem.toLocaleString("cs-CZ") + " zl.**",
+                            text: "Volné chovné zvíře (" + (currNode.subtype === "horse" ? "Kůň – nutný pro cval a závody" : (currNode.subtype === "pes" ? "Pes – bonus k lovu monster" : "Sokol – bonus k turnajům")) + "). Po nákupu ti zbyde bezpečných **" + rem.toLocaleString("cs-CZ") + " zl.**",
                             actionPrompt: "Klepni na 'Koupit toto pole'."
                         };
                     }
@@ -3013,8 +3009,8 @@
             if (pa && pa.canResolveQuest && pa.questCard) {
                 var q = pa.questCard;
                 var animalBonus = (q.questTier === "U1" && (effStats.dogs > 0 || effStats.falcons > 0)) ? 1 : ((q.questTier === "U3" && effStats.dogs > 0 && effStats.falcons > 0) ? 2 : (effStats.dogs > 0 || effStats.falcons > 0 ? 1 : 0));
-                var horseBonus = (q.questTier !== "U1" && effStats.horses > 0) ? (1 + Math.floor(effStats.jizda / 2)) : 0;
-                var basePower = effStats.boj + animalBonus + horseBonus;
+                var horseBonus = (q.questTier !== "U1" && effStats.horses > 0) ? (1 + Math.floor(effStats.riding / 2)) : 0;
+                var basePower = effStats.combat + animalBonus + horseBonus;
                 var needed = Math.max(1, q.difficulty - basePower);
                 var winRate = (needed > 6) ? 0 : Math.round(((7 - Math.max(1, needed)) / 6) * 100);
 
@@ -3591,7 +3587,7 @@
 
         }
 
-        if (pa.canShopLivestock || (currNode && currNode.type === "BUILDING" && currNode.subtype === "staje")) {
+        if (pa.canShopLivestock || (currNode && currNode.type === "BUILDING" && currNode.subtype === "stables")) {
 
             btns.push('<button class="btn-action-buy" onclick="PRS_App.openLivestockMarket()" style="width:100%; font-weight:bold; background:linear-gradient(135deg, #15803d, #16a34a); border-color:#86efac; padding:0.6rem; margin-bottom:0.4rem;">🌾 Vstoupit do stájí (Dobytčí trh &amp; Chov)</button>');
 
@@ -3635,9 +3631,9 @@
 
             }
 
-            var horseBonus = (q.questTier !== "U1" && stats.horses > 0) ? (1 + Math.floor(stats.jizda / 2)) : 0;
+            var horseBonus = (q.questTier !== "U1" && stats.horses > 0) ? (1 + Math.floor(stats.riding / 2)) : 0;
 
-            var basePower = stats.boj + animalBonus + horseBonus;
+            var basePower = stats.combat + animalBonus + horseBonus;
 
             var neededRoll = Math.max(1, q.difficulty - basePower);
 
@@ -3703,11 +3699,11 @@
 
                 var statParts = [];
 
-                if (trDef.boj) statParts.push("⚔️+" + trDef.boj);
+                if (trDef.combat) statParts.push("⚔️+" + trDef.combat);
 
-                if (trDef.jizda) statParts.push("🏇+" + trDef.jizda);
+                if (trDef.riding) statParts.push("🏇+" + trDef.riding);
 
-                if (trDef.tanec) statParts.push("💃+" + trDef.tanec);
+                if (trDef.dance) statParts.push("💃+" + trDef.dance);
 
                 if (trDef.charisma) statParts.push("✨+" + trDef.charisma);
 
@@ -3749,7 +3745,7 @@
 
                 '    <div class="duel-fighter-sub">' +
 
-                '      Boj ' + stats.boj +
+                '      Boj ' + stats.combat +
 
                 (horseBonus > 0 ? ' + Kůň ' + horseBonus : '') +
 
@@ -3810,9 +3806,9 @@
 
         if (pa.canResolveFestival) {
 
-            var fType = pa.festivalType || "turnaj";
+            var fType = pa.festivalType || "tournament";
 
-            var fTitle = (fType === "turnaj" ? "Královský Turnaj 🏇" : (fType === "ples" ? "Zámecký Ples 💃" : "Velký Závod 🐎"));
+            var fTitle = (fType === "tournament" ? "Královský Turnaj 🏇" : (fType === "ball" ? "Zámecký Ples 💃" : "Velký Závod 🐎"));
 
             specialCardHtml = '<div class="festival-encounter-card">' +
 
@@ -4844,9 +4840,9 @@
         }
 
         // Pěší bonus za výcvik Jízdy (Jízda >= 2 dává +1 pole, Jízda >= 4 dává +2 pole)
-        if (!hasHorse && effStats.jizda >= 2) {
+        if (!hasHorse && effStats.riding >= 2) {
 
-            var jzBonus = (effStats.jizda >= 4) ? 2 : 1;
+            var jzBonus = (effStats.riding >= 4) ? 2 : 1;
 
             self.showPedestrianSprintDialog(player, baseRoll, jzBonus);
 
@@ -4915,7 +4911,7 @@
 
         var effStats = window.PRS_GameEngine.getEffectiveStats(self.state, player);
 
-        var jz = effStats.jizda || 0;
+        var jz = effStats.riding || 0;
 
         var canGallop = jz >= 2;
 

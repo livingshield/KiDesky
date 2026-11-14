@@ -153,14 +153,14 @@
                 seed: seed,
                 nodeCount: nodeCount,
                 recipe: recipe,
+                customBoard: JSON.parse(JSON.stringify(board)),
                 savedAt: new Date().toLocaleString("cs-CZ")
             };
 
             if (existingIdx !== -1) {
-                list[existingIdx] = entry;
-            } else {
-                list.unshift(entry);
+                list.splice(existingIdx, 1);
             }
+            list.unshift(entry);
 
             try { localStorage.setItem("prs_saved_maps", JSON.stringify(list)); } catch (e) { }
 
@@ -287,7 +287,7 @@
                     if (typeof plObj.totalHearts !== "number" || isNaN(plObj.totalHearts)) plObj.totalHearts = 0;
                     if (!Array.isArray(plObj.ownedNodes)) plObj.ownedNodes = [];
                     if (!Array.isArray(plObj.inventory)) plObj.inventory = [];
-                    if (!plObj.skills || typeof plObj.skills !== "object") plObj.skills = { boj: 0, jizda: 0, tanec: 0, charisma: 0 };
+                    if (!plObj.skills || typeof plObj.skills !== "object") plObj.skills = { combat: 0, riding: 0, dance: 0, charisma: 0 };
                 }
             }
             if (restoredState.board && restoredState.board.rivers && restoredState.board.rivers.length > 0 && (!restoredState.board.bridges || restoredState.board.bridges.length === 0)) {
@@ -352,6 +352,11 @@
                 this.selectedGameScenario = data.selectedGameScenario || "classic";
                 this.selectedDifficultyMode = data.selectedDifficultyMode || "standard";
                 if (data.customBoardRecipe) this.customBoardRecipe = data.customBoardRecipe;
+                if (restored.board) {
+                    this._customProceduralBoard = restored.board;
+                    this._currentMapStudioBoard = restored.board;
+                    this.mapStudioBoard = restored.board;
+                }
 
                 this.isBoardStaticDirty = true;
                 this.isMoveAnimating = false;
@@ -767,7 +772,7 @@
                         '    <span>🏙️ ' + (r.towns !== undefined ? r.towns : 6) + ' měst</span>' +
                         '    <span>🏘️ ' + (r.villages !== undefined ? r.villages : 8) + ' vesnic</span>' +
                         '    <span>🐲 ' + (r.questsU3 !== undefined ? r.questsU3 : 2) + ' draků</span>' +
-                        '    <span>🌊 Řeka: ' + (r.riverMode === "none" ? "Bez řeky" : (r.riverMode === "dual" ? "Soutok 2 řek" : "Královská")) + '</span>' +
+                        '    <span>🌊 Řeka: ' + (r.riverMode === "none" ? "Bez řeky" : (r.riverMode === "dual" ? "Soutok 2 řek" : (r.riverMode === "island" ? "Říční ostrov" : (r.riverMode === "delta" ? "Říční delta" : "Královská")))) + '</span>' +
                         '  </div>' +
                         '</div>'
                     );

@@ -96,15 +96,15 @@
 
                 var isSlayerMode = (state.config && state.config.scenario === "slayer");
                 if (isSlayerMode) {
-                    if (effStats.boj >= 10 && curHearts >= 1.5) {
+                    if (effStats.combat >= 10 && curHearts >= 1.5) {
                         score += (pType === "Bot_Aggressive" ? 55 : 40);
-                    } else if (effStats.boj >= 7 && curHearts >= 1.5) {
+                    } else if (effStats.combat >= 7 && curHearts >= 1.5) {
                         score += 25;
                     } else {
                         score -= 20;
                     }
                 } else {
-                    if (effStats.boj >= 14 && curHearts >= 2.0) {
+                    if (effStats.combat >= 14 && curHearts >= 2.0) {
                         score += (pType === "Bot_Aggressive" ? 35 : 15);
                     } else {
                         score -= 40;
@@ -113,7 +113,7 @@
 
             } else if (subtype === "U2") {
 
-                if (effStats.boj >= 8 && curHearts >= 1.0) {
+                if (effStats.combat >= 8 && curHearts >= 1.0) {
 
                     score += (pType === "Bot_Aggressive" ? 25 : 12);
 
@@ -243,7 +243,7 @@
         if (hasHorse) {
             var d1 = Math.floor(Math.random() * 6) + 1;
             var d2 = Math.floor(Math.random() * 6) + 1;
-            var jz = effStats.jizda || 0;
+            var jz = effStats.riding || 0;
             var canGallop = jz >= 2;
             var canSprint = jz >= 4;
 
@@ -437,7 +437,7 @@
 
         } else if (w === "horse") {
 
-            if (stats.horses > 0 || tactics.charge || stats.jizda >= 2) {
+            if (stats.horses > 0 || tactics.charge || stats.riding >= 2) {
 
                 return { exploited: true, reason: "Drtivý nájezd z plné jízdy na koni zlomil obranu" };
 
@@ -459,7 +459,7 @@
 
             });
 
-            if ((stats.horses > 0 || stats.dogs > 0) && (hasSpear || stats.boj >= 4)) {
+            if ((stats.horses > 0 || stats.dogs > 0) && (hasSpear || stats.combat >= 4)) {
 
                 return { exploited: true, reason: "Mistrovská koordinace jízdy na koni a turnajového kopí" };
 
@@ -483,7 +483,7 @@
 
             }
 
-            if (stats.boj >= 3 && stats.jizda >= 2) {
+            if (stats.combat >= 3 && stats.riding >= 2) {
 
                 return { exploited: true, reason: "Rytířské ovládnutí jezdeckého kopí a manévrů" };
 
@@ -533,7 +533,7 @@
 
             var curTheme = (state && state.config && state.config.elementTheme) || (state && state.currentTheme);
 
-            if (fireIt || curTheme === "fire" || stats.boj >= 4) {
+            if (fireIt || curTheme === "fire" || stats.combat >= 4) {
 
                 return { exploited: true, reason: "Žhavé plameny a sopečný žár roztavily ledový krunýř" };
 
@@ -549,7 +549,7 @@
 
             var curTheme2 = (state && state.config && state.config.elementTheme) || (state && state.currentTheme);
 
-            if (iceIt || curTheme2 === "water" || stats.boj >= 4) {
+            if (iceIt || curTheme2 === "water" || stats.combat >= 4) {
 
                 return { exploited: true, reason: "Mrazivý chlad a ledové krystaly zchladily lávovou tlamu" };
 
@@ -573,7 +573,7 @@
 
         else if (w === "dance") {
 
-            if (stats.tanec >= 2 || stats.hasDress) {
+            if (stats.dance >= 2 || stats.hasDress) {
 
                 return { exploited: true, reason: "Půvabný taneční krok a dvorský šat okouzlily hravého draka" };
 
@@ -593,7 +593,7 @@
 
         else if (w === "courage") {
 
-            if (stats.boj >= 3 || stats.jizda >= 3) {
+            if (stats.combat >= 3 || stats.riding >= 3) {
 
                 return { exploited: true, reason: "Nezlomná rytířská odvaha pronikla mlhou stínů" };
 
@@ -615,7 +615,7 @@
 
         } else if (w === "mastery") {
 
-            if (stats.boj >= 2 && stats.jizda >= 2 && stats.tanec >= 2 && stats.charisma >= 2) {
+            if (stats.combat >= 2 && stats.riding >= 2 && stats.dance >= 2 && stats.charisma >= 2) {
 
                 return { exploited: true, reason: "Dokonalé ovládnutí všech 4 rytířských ctností (Boj, Jízda, Tanec, Charisma)" };
 
@@ -701,13 +701,13 @@
 
         }
 
-        var horseBonus = (q.questTier !== "U1" && stats.horses > 0) ? (1 + Math.floor(stats.jizda / 2)) : 0;
+        var horseBonus = (q.questTier !== "U1" && stats.horses > 0) ? (1 + Math.floor(stats.riding / 2)) : 0;
 
         var wRes = this.checkQuestWeakness(state, player, q, tactics);
 
         var weaknessBonus = wRes.exploited ? 2 : 0;
 
-        var totalPower = roll + stats.boj + animalBonus + horseBonus + tacticBonus + weaknessBonus + stanceBonus;
+        var totalPower = roll + stats.combat + animalBonus + horseBonus + tacticBonus + weaknessBonus + stanceBonus;
 
         pa.canResolveQuest = false;
 
@@ -821,7 +821,7 @@
 
             // Kontrola taktického Rerollu (při taktickém postoji, prohře o 1-2 body a přítomnosti psa/sokola či Boj >= 2)
 
-            var canReroll = (stance === "tactical" && (q.difficulty - totalPower <= 2) && (stats.dogs > 0 || stats.falcons > 0 || stats.boj >= 2));
+            var canReroll = (stance === "tactical" && (q.difficulty - totalPower <= 2) && (stats.dogs > 0 || stats.falcons > 0 || stats.combat >= 2));
 
             if (canReroll && !tactics.isReroll) {
 
@@ -974,7 +974,7 @@
 
             stanceName: stanceName,
 
-            canTacticalReroll: (stance === "tactical" && !won && (q.difficulty - totalPower <= 2) && (stats.dogs > 0 || stats.falcons > 0 || stats.boj >= 2))
+            canTacticalReroll: (stance === "tactical" && !won && (q.difficulty - totalPower <= 2) && (stats.dogs > 0 || stats.falcons > 0 || stats.combat >= 2))
 
         };
 
@@ -988,7 +988,7 @@
 
         if (!pa || !pa.canResolveFestival) return null;
 
-        var fType = pa.festivalType || "turnaj";
+        var fType = pa.festivalType || "tournament";
 
         var organizer = state.players[state.currentPlayerIndex];
 
@@ -1006,19 +1006,19 @@
 
             var eligible = false;
 
-            if (fType === "turnaj") {
+            if (fType === "tournament") {
 
                 // Podmínka z IMG_4596: Kůň, Pes, Sokol (nebo alespoň Kůň + Zbroj/Zbraň pro plynulost hry, pokud ještě nikdo nemá všechna 3 zvířata)
 
                 eligible = (st.horses >= 1 && st.dogs >= 1 && st.falcons >= 1) || (st.horses >= 1 && (st.hasWeapon || st.hasArmor));
 
-            } else if (fType === "ples") {
+            } else if (fType === "ball") {
 
                 // Podmínka z IMG_4596: Šaty (nebo Tanec >= 1)
 
-                eligible = st.hasDress || st.tanec >= 1;
+                eligible = st.hasDress || st.dance >= 1;
 
-            } else if (fType === "zavod") {
+            } else if (fType === "race") {
 
                 // Podmínka z IMG_4596: Kůň
 
@@ -1032,21 +1032,21 @@
 
                 var score = roll;
 
-                if (fType === "turnaj") {
+                if (fType === "tournament") {
 
                     var animalSetBonus = (st.horses >= 1 && st.dogs >= 1 && st.falcons >= 1) ? 3 : 0;
 
-                    score = roll + st.boj + st.jizda + animalSetBonus;
+                    score = roll + st.combat + st.riding + animalSetBonus;
 
-                } else if (fType === "ples") {
+                } else if (fType === "ball") {
 
                     var armorPenalty = st.hasArmor ? 2 : 0;
 
-                    score = roll + st.tanec + st.charisma + (st.hasDress ? 2 : 0) - armorPenalty;
+                    score = roll + st.dance + st.charisma + (st.hasDress ? 2 : 0) - armorPenalty;
 
-                } else if (fType === "zavod") {
+                } else if (fType === "race") {
 
-                    score = roll + (st.jizda * 2) + Math.min(3, st.horses);
+                    score = roll + (st.riding * 2) + Math.min(3, st.horses);
 
                 }
 
@@ -1066,7 +1066,7 @@
 
         }
 
-        var fNames = { turnaj: "Královský Turnaj", ples: "Zámecký Ples", zavod: "Velký Jezdecký Závod" };
+        var fNames = { tournament: "Královský Turnaj", ball: "Zámecký Ples", race: "Velký Jezdecký Závod" };
 
         var festTitle = fNames[fType] || "Královská Slavnost";
 
@@ -1105,14 +1105,14 @@
             var pl = part.player;
 
             var ch = part.stats.charisma || 0;
-            var jz = part.stats.jizda || 0;
-            var tn = part.stats.tanec || 0;
-            var bj = part.stats.boj || 0;
+            var jz = part.stats.riding || 0;
+            var tn = part.stats.dance || 0;
+            var bj = part.stats.combat || 0;
 
             var heartsWon = 0;
 
             // Vyvážené slavnostní odměny: zohledňují příslušnou dovednost i Charisma a garantují 1. > 2. > 3.
-            if (fType === "turnaj") {
+            if (fType === "tournament") {
 
                 if (r === 0) heartsWon = 3.0 + (bj * 0.3) + (ch * 0.2);
 
@@ -1120,7 +1120,7 @@
 
                 else heartsWon = 1.0 + (bj * 0.15);
 
-            } else if (fType === "ples") {
+            } else if (fType === "ball") {
 
                 if (r === 0) heartsWon = 2.5 + (tn * 0.4) + (ch * 0.3);
 
@@ -1128,7 +1128,7 @@
 
                 else heartsWon = 0.5 + (tn * 0.15);
 
-            } else if (fType === "zavod") {
+            } else if (fType === "race") {
 
                 if (r === 0) heartsWon = 2.5 + (jz * 0.4) + (ch * 0.2);
 
@@ -1216,12 +1216,12 @@
 
         var r2 = Math.floor(Math.random() * 6) + 1;
 
-        var power1 = p1Stats.boj + r1;
+        var power1 = p1Stats.combat + r1;
 
         // Obránce může použít Jezdecký úhyb na koni (Jízda + min(2, koně)), pokud je vyšší než Boj
-        var defRidingVal = (p2Stats.jizda >= 1 && p2Stats.horses > 0) ? (p2Stats.jizda + Math.min(2, p2Stats.horses)) : p2Stats.jizda;
-        var usedEvasion = defRidingVal > p2Stats.boj;
-        var defStat = usedEvasion ? defRidingVal : p2Stats.boj;
+        var defRidingVal = (p2Stats.riding >= 1 && p2Stats.horses > 0) ? (p2Stats.riding + Math.min(2, p2Stats.horses)) : p2Stats.riding;
+        var usedEvasion = defRidingVal > p2Stats.combat;
+        var defStat = usedEvasion ? defRidingVal : p2Stats.combat;
 
         var power2 = defStat + r2;
 
@@ -1233,7 +1233,7 @@
 
             winnerIndex: null,
 
-            p1: { index: player.index, name: player.name, badge: player.badge, color: player.color, roll: r1, combat: p1Stats.boj, total: power1, type: player.type },
+            p1: { index: player.index, name: player.name, badge: player.badge, color: player.color, roll: r1, combat: p1Stats.combat, total: power1, type: player.type },
 
             p2: { index: target.index, name: target.name, badge: target.badge, color: target.color, roll: r2, combat: defStat, total: power2, type: target.type, usedEvasion: usedEvasion },
 
@@ -1411,7 +1411,7 @@
 
         var tStats = this.getEffectiveStats(state, player);
 
-        var toastHearts = (tStats.tanec >= 3) ? 1.0 : 0.5;
+        var toastHearts = (tStats.dance >= 3) ? 1.0 : 0.5;
 
         player.permanentHearts += toastHearts;
 
@@ -1658,7 +1658,7 @@
 
         this.breakTradePact(state, player.index, rival.index, "osobní výzva na slavnosti");
 
-        var discKey = discipline || "boj";
+        var discKey = discipline || "combat";
 
         var s1 = player.skills[discKey] || 0;
 
@@ -1841,17 +1841,17 @@
             // Dvořan a Panoš jsou opatrní u Draků (U3) a Netvorů (U2)
             if (qTier === "U3") {
 
-                if (bot.type === "Bot_Noble" && effStats.boj < 13) shouldFight = false;
+                if (bot.type === "Bot_Noble" && effStats.combat < 13) shouldFight = false;
 
-                if (bot.type === "Bot_Easy" && effStats.boj < 14) shouldFight = false;
+                if (bot.type === "Bot_Easy" && effStats.combat < 14) shouldFight = false;
 
-                if (bot.type === "Bot_Breeder" && effStats.boj < 11) shouldFight = false;
+                if (bot.type === "Bot_Breeder" && effStats.combat < 11) shouldFight = false;
 
             } else if (qTier === "U2") {
 
-                if (bot.type === "Bot_Noble" && effStats.boj < 8) shouldFight = false;
+                if (bot.type === "Bot_Noble" && effStats.combat < 8) shouldFight = false;
 
-                if (bot.type === "Bot_Breeder" && effStats.boj < 7) shouldFight = false;
+                if (bot.type === "Bot_Breeder" && effStats.combat < 7) shouldFight = false;
 
             }
 
@@ -1865,7 +1865,7 @@
 
                 } else if (bot.type === "Bot_Noble" || bot.type === "Bot_Easy") {
 
-                    botStance = (pa.questCard && pa.questCard.difficulty > effStats.boj + 6) ? "defensive" : "tactical";
+                    botStance = (pa.questCard && pa.questCard.difficulty > effStats.combat + 6) ? "defensive" : "tactical";
 
                 }
 
@@ -1898,9 +1898,9 @@
 
         if (pa.canResolveFestival) {
 
-            var fType = pa.festivalType || "turnaj";
+            var fType = pa.festivalType || "tournament";
 
-            if (fType === "ples") {
+            if (fType === "ball") {
 
                 // Obléknout šaty a klenot
 
@@ -1914,7 +1914,7 @@
 
                 }
 
-            } else if (fType === "turnaj") {
+            } else if (fType === "tournament") {
 
                 // Obléknout zbraň a zbroj
 
@@ -1976,7 +1976,7 @@
 
                     } else if (bot.type === "Bot_Aggressive") {
 
-                        neededReserve = (targetNode.subtype === "kun") ? 400 : 700;
+                        neededReserve = (targetNode.subtype === "horse") ? 400 : 700;
 
                     }
 
@@ -1995,15 +1995,15 @@
 
                 else if (targetNode.type === "BUILDING") {
 
-                    if (bot.type === "Bot_Breeder" && (targetNode.subtype === "staje" || targetNode.subtype === "psovod" || targetNode.subtype === "sokolnik")) {
+                    if (bot.type === "Bot_Breeder" && (targetNode.subtype === "stables" || targetNode.subtype === "doghandler" || targetNode.subtype === "falconer")) {
 
                         neededReserve = 300;
 
-                    } else if (bot.type === "Bot_Aggressive" && targetNode.subtype === "kovarna") {
+                    } else if (bot.type === "Bot_Aggressive" && targetNode.subtype === "forge") {
 
                         neededReserve = 300;
 
-                    } else if (bot.type === "Bot_Noble" && targetNode.subtype === "krejci") {
+                    } else if (bot.type === "Bot_Noble" && targetNode.subtype === "tailor") {
 
                         neededReserve = 300;
 
@@ -2056,19 +2056,19 @@
 
                 if (bot.type === "Bot_Aggressive") {
 
-                    chosenSkill = (bot.skills.boj < 5) ? "boj" : ((bot.skills.jizda < 5) ? "jizda" : "charisma");
+                    chosenSkill = (bot.skills.combat < 5) ? "combat" : ((bot.skills.riding < 5) ? "riding" : "charisma");
 
                 } else if (bot.type === "Bot_Breeder") {
 
-                    chosenSkill = (bot.skills.jizda < 5) ? "jizda" : ((bot.skills.boj < 5) ? "boj" : "tanec");
+                    chosenSkill = (bot.skills.riding < 5) ? "riding" : ((bot.skills.combat < 5) ? "combat" : "dance");
 
                 } else if (bot.type === "Bot_Noble") {
 
-                    chosenSkill = (bot.skills.charisma < 5) ? "charisma" : ((bot.skills.tanec < 5) ? "tanec" : "jizda");
+                    chosenSkill = (bot.skills.charisma < 5) ? "charisma" : ((bot.skills.dance < 5) ? "dance" : "riding");
 
                 } else if (bot.type === "Bot_Balanced") {
 
-                    var sks = ["boj", "jizda", "tanec", "charisma"];
+                    var sks = ["combat", "riding", "dance", "charisma"];
 
                     sks.sort(function (a, b) { return bot.skills[a] - bot.skills[b]; });
 
@@ -2076,7 +2076,7 @@
 
                 } else {
 
-                    chosenSkill = (bot.skills.charisma < 3) ? "charisma" : "boj";
+                    chosenSkill = (bot.skills.charisma < 3) ? "charisma" : "combat";
 
                 }
 

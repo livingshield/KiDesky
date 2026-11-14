@@ -112,6 +112,7 @@ foreach ($rb in $remoteBases) {
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/monsters"
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/tiles"
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/pawns"
+    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/decorations"
     foreach ($rel in $codeFiles) {
         $localF = Join-Path $localBase $rel.Replace('/', '\')
         if (Test-Path $localF) {
@@ -150,6 +151,16 @@ foreach ($rb in $remoteBases) {
             foreach ($tf in $tileFiles) {
                 $remoteF = "ftp://$FtpServer$($rb)assets/tiles/$($tf.Name)"
                 Upload-FtpFile $tf.FullName $remoteF
+            }
+        }
+
+        # Deploy decorations if any
+        $decorDir = Join-Path $localBase "assets\decorations"
+        if (Test-Path $decorDir) {
+            $decorFiles = Get-ChildItem -Path $decorDir -Include "*.png","*.jpg" -Recurse
+            foreach ($df in $decorFiles) {
+                $remoteF = "ftp://$FtpServer$($rb)assets/decorations/$($df.Name)"
+                Upload-FtpFile $df.FullName $remoteF
             }
         }
     }

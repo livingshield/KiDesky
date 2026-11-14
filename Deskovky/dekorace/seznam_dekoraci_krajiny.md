@@ -2,7 +2,7 @@
 
 Tento dokument slouží jako ucelený **seznam a specifikace grafických prvků** pro oživení herních plánů deskové hry **KiDesky: Princeznino srdce**.
 
-Celkem katalog obsahuje **34 unikátních typů dekorací** (včetně oboustranných zrcadlených variant `*_flip.png`, celkem přes 68 připravených transparentních herních assetů). Všechny jsou plně integrovány do herního enginu (`js/game-data.js`), kde se dynamicky kotví k herním políčkům nebo přirozeně rozmisťují v izometrické krajině.
+Celkem katalog obsahuje **42 unikátních typů dekorací** (včetně oboustranných zrcadlených variant `*_flip.png`, celkem přes 84 připravených transparentních herních assetů). Všechny jsou plně integrovány do herního enginu (`js/game-boards.js`), kde se dynamicky kotví k herním políčkům nebo přirozeně rozmisťují v izometrické krajině.
 
 ---
 
@@ -11,14 +11,14 @@ Celkem katalog obsahuje **34 unikátních typů dekorací** (včetně oboustrann
 > [!IMPORTANT]
 > **Vlastnosti herních dekorací:**
 > 1. **Formát:** Čistý 32bitový PNG s alfa průhledností (`RGBA`, bez bílo-šedých šachovnic v pozadí).
-> 2. **Perspektiva a styl:** Mírně vyvýšený izometrický 2D pohled (pohádkový ink-and-watercolor akvarelový styl ladící s hrady a draky).
+> 2. **Perspektiva a styl:** Mírně vyvýšený izometrický 2D pohled (pohádkový ink-and-watercolor akvarelový styl na zaobleném dioramatu s hlínou, trávou a plůtkem).
 > 3. **Spodní hrana:** Přirozené zakončení u země s jemným měkkým stínem.
 > 4. **Obousměrnost:** Každý prvek má vygenerovanou i otočenou variantu `*_flip.png` pro přirozenou variabilitu pohledů zleva i zprava.
 > 5. **Umístění na disku:** Zdrojové předlohy v `Deskovky/dekorace/*.jpg`, optimalizované webové assety v `assets/decorations/*.png`.
 
 ---
 
-## 📋 Přehled dekorací podle kategorií (34 prvků)
+## 📋 Přehled dekorací podle kategorií (42 prvků)
 
 ### 1. Lesy a stromy (Vegetace)
 
@@ -34,6 +34,7 @@ Celkem katalog obsahuje **34 unikátních typů dekorací** (včetně oboustrann
 | `orchad_plum.png` | **Švestkový sad** | Okraje vesnic a pahorkatiny | ✅ PNG aktivní (+flip) |
 | `hruskovy_sad.png` | **Hruškový sad** | Slunné stráně | ✅ PNG aktivní (+flip) |
 | `bush.png` | **Hustý keř** | Lemování cest a břehů | ✅ PNG aktivní (+flip) |
+| `forest_ent.png` | **Prastarý lesní ent** | Posvátné hvozdy, ochránce lesní zvěře | ✅ PNG aktivní (+flip) |
 
 ---
 
@@ -68,6 +69,7 @@ Celkem katalog obsahuje **34 unikátních typů dekorací** (včetně oboustrann
 | `signpost.png` | **Dřevěný rozcestník** | Rozcestí a křižovatky tras | ✅ PNG aktivní (+flip) |
 | `signpost2.png` | **Kamenný rozcestník** | Křižovatky horských a kamenných cest | ✅ PNG aktivní (+flip) |
 | `wooden_watchtower.png` | **Dřevěná strážní věž** | Pomezí hranic, výběrčí daní, hrady | ✅ PNG aktivní (+flip) |
+| `ancient_tower_ruin.png` | **Zřícenina kamenné věže** | Opuštěné cesty, zemské hranice | ✅ PNG aktivní (+flip) |
 | `hrad.png` | **Strážní hrad** | Obranné vyvýšeniny | ✅ PNG aktivní (+flip) |
 
 ---
@@ -79,6 +81,8 @@ Celkem katalog obsahuje **34 unikátních typů dekorací** (včetně oboustrann
 | `lake_pond.png` | **Modré lesní jezírko s lekníny** | Přírodní prohlubně v krajině | ✅ PNG aktivní (+flip) |
 | `swamp_bridge.png` | **Dřevěná lávka přes močál** | Pěšiny přes močály a tůně | ✅ PNG aktivní (+flip) |
 | `pegasus_pond.png` | **Pegas u lesní studánky** | Skryté prameny a posvátná zvířata | ✅ PNG aktivní (+flip) |
+| `lake_nymphs.png` | **Jezerní rusalky na molu** | Tůně, meandry řek a jezera | ✅ PNG aktivní (+flip) |
+| `vodnik_pond.png` | **Vodník u tůně** | Temné tůně u vrb a močálů | ✅ PNG aktivní (+flip) |
 
 ---
 
@@ -93,6 +97,8 @@ Celkem katalog obsahuje **34 unikátních typů dekorací** (včetně oboustrann
 | `ancient_ruins.png` | **Zarostlé kamenné zříceniny** | Opuštěné pevnosti a staré cesty | ✅ PNG aktivní (+flip) |
 | `ancient_graveyard.png` | **Tajemný starý hřbitov** | Okolí lazaretů a stinná údolí | ✅ PNG aktivní (+flip) |
 | `witch_hut.png` | **Perníková chaloupka ježibaby** | Hluboké hvozdy a tajemná setkání | ✅ PNG aktivní (+flip) |
+| `crystal_golem.png` | **Krystalový golem** | Magická zřídla a runová pole | ✅ PNG aktivní (+flip) |
+| `phoenix_nest.png` | **Hnízdo ohnivého Fénixe** | Ohnivá zřídla, mystické sloupy | ✅ PNG aktivní (+flip) |
 
 ---
 
@@ -102,8 +108,10 @@ Celkem katalog obsahuje **34 unikátních typů dekorací** (včetně oboustrann
 | :--- | :--- | :--- | :--- |
 | `cave_bear_den.png` | **Medvědí jeskyně** | Lovecké výpravy a divočina (U1) | ✅ PNG aktivní (+flip) |
 | `bandit_cave.png` | **Loupežnická jeskyně s pokladem** | Skryté rokle a bandití stezky | ✅ PNG aktivní (+flip) |
-| `dragon_cave.png` | **Spící drak ve sluji** | Vrcholné dračí výzvy a zlaté poklady | ✅ PNG aktivní (+flip) |
-| `basilisk_cave.png` | **Jeskyně baziliška** | Skalní rozsedliny a nebezpečné zkoušky | ✅ PNG aktivní (+flip) |
-| `snow_troll_cave.png` | **Ledová jeskyně sněžného trolla** | Severní zasněžené štíty | ✅ PNG aktivní (+flip) |
-| `swamp_troll.png` | **Bažinný troll u tůně** | Zrádné močály a temné vody | ✅ PNG aktivní (+flip) |
-| `swamp_hydra.png` | **Pětihlavá bažinná hydra** | Hluboké bažiny a legendární nestvůry | ✅ PNG aktivní (+flip) |
+| `griffin_nest.png` | **Hnízdo skalního gryfa** | Skalní útesy a hnízda dravců (U1/U2) | ✅ PNG aktivní (+flip) |
+| `fire_salamander.png` | **Ohnivý salamandr** | Lávové kameny a ohňová doupata (U1/U2) | ✅ PNG aktivní (+flip) |
+| `dragon_cave.png` | **Spící drak ve sluji** | Vrcholné dračí výzvy a zlaté poklady (U3) | ✅ PNG aktivní (+flip) |
+| `basilisk_cave.png` | **Jeskyně baziliška** | Skalní rozsedliny a nebezpečné zkoušky (U2) | ✅ PNG aktivní (+flip) |
+| `snow_troll_cave.png` | **Ledová jeskyně sněžného trolla** | Severní zasněžené štíty (U2) | ✅ PNG aktivní (+flip) |
+| `swamp_troll.png` | **Bažinný troll u tůně** | Zrádné močály a temné vody (U2) | ✅ PNG aktivní (+flip) |
+| `swamp_hydra.png` | **Pětihlavá bažinná hydra** | Hluboké bažiny a legendární nestvůry (U2/U3) | ✅ PNG aktivní (+flip) |

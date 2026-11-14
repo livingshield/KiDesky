@@ -16,11 +16,11 @@
 
         this.setInputValue("gfx-board-bg", this.graphicsConfig.boardBgUrl || "");
 
-        this.setInputValue("gfx-tile-kun", this.graphicsConfig.tileBitmapsByType.kun || "");
+        this.setInputValue("gfx-tile-horse", this.graphicsConfig.tileBitmapsByType.horse || "");
 
-        this.setInputValue("gfx-tile-pes", this.graphicsConfig.tileBitmapsByType.pes || "");
+        this.setInputValue("gfx-tile-dog", this.graphicsConfig.tileBitmapsByType.dog || "");
 
-        this.setInputValue("gfx-tile-sokol", this.graphicsConfig.tileBitmapsByType.sokol || "");
+        this.setInputValue("gfx-tile-falcon", this.graphicsConfig.tileBitmapsByType.falcon || "");
 
         this.setInputValue("gfx-tile-village", this.graphicsConfig.tileBitmapsByType.VILLAGE || "");
 
@@ -50,11 +50,11 @@
 
         this.graphicsConfig.boardBgUrl = document.getElementById("gfx-board-bg").value.trim();
 
-        this.graphicsConfig.tileBitmapsByType.kun = document.getElementById("gfx-tile-kun").value.trim();
+        this.graphicsConfig.tileBitmapsByType.horse = document.getElementById("gfx-tile-horse").value.trim();
 
-        this.graphicsConfig.tileBitmapsByType.pes = document.getElementById("gfx-tile-pes").value.trim();
+        this.graphicsConfig.tileBitmapsByType.dog = document.getElementById("gfx-tile-dog").value.trim();
 
-        this.graphicsConfig.tileBitmapsByType.sokol = document.getElementById("gfx-tile-sokol").value.trim();
+        this.graphicsConfig.tileBitmapsByType.falcon = document.getElementById("gfx-tile-falcon").value.trim();
 
         this.graphicsConfig.tileBitmapsByType.VILLAGE = document.getElementById("gfx-tile-village").value.trim();
 
@@ -876,11 +876,11 @@
 
                     html.push('  <div style="margin-bottom:0.6rem;">');
 
-                    if (it.boj) html.push('<span class="armory-stat-chip ' + (it.boj > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (it.boj > 0 ? '+' : '') + it.boj + ' Boj</span> ');
+                    if (it.combat) html.push('<span class="armory-stat-chip ' + (it.combat > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (it.combat > 0 ? '+' : '') + it.combat + ' Boj</span> ');
 
-                    if (it.jizda) html.push('<span class="armory-stat-chip ' + (it.jizda > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (it.jizda > 0 ? '+' : '') + it.jizda + ' Jízda</span> ');
+                    if (it.riding) html.push('<span class="armory-stat-chip ' + (it.riding > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (it.riding > 0 ? '+' : '') + it.riding + ' Jízda</span> ');
 
-                    if (it.tanec) html.push('<span class="armory-stat-chip ' + (it.tanec > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (it.tanec > 0 ? '+' : '') + it.tanec + ' Tanec</span> ');
+                    if (it.dance) html.push('<span class="armory-stat-chip ' + (it.dance > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (it.dance > 0 ? '+' : '') + it.dance + ' Tanec</span> ');
 
                     if (it.charisma) html.push('<span class="armory-stat-chip ' + (it.charisma > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">👑 ' + (it.charisma > 0 ? '+' : '') + it.charisma + ' Charisma</span> ');
 
@@ -1011,7 +1011,7 @@
         // 2.5 ZÁLOŽKA DOBYTČÍ TRH & HOSPODÁŘSKÝ CHOV (Krávy, Ovce, Prasata)
         if (tab === "livestock") {
             var st = window.PRS_GameEngine.getEffectiveStats(this.state, player);
-            var isAtStables = currNode && currNode.type === "BUILDING" && currNode.subtype === "staje";
+            var isAtStables = currNode && currNode.type === "BUILDING" && currNode.subtype === "stables";
             var canShopAnimals = canShop || isAtStables;
             var canBuyMore = (st.extraLivestockCount < st.livestockCapacity);
 
@@ -1130,11 +1130,11 @@
 
             html.push('  <div style="display:flex; flex-wrap:wrap; gap:0.3rem; margin-bottom:0.75rem;">');
 
-            if (item.boj) html.push('<span class="armory-stat-chip ' + (item.boj > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (item.boj > 0 ? '+' : '') + item.boj + ' Boj</span>');
+            if (item.combat) html.push('<span class="armory-stat-chip ' + (item.combat > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (item.combat > 0 ? '+' : '') + item.combat + ' Boj</span>');
 
-            if (item.jizda) html.push('<span class="armory-stat-chip ' + (item.jizda > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (item.jizda > 0 ? '+' : '') + item.jizda + ' Jízda</span>');
+            if (item.riding) html.push('<span class="armory-stat-chip ' + (item.riding > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (item.riding > 0 ? '+' : '') + item.riding + ' Jízda</span>');
 
-            if (item.tanec) html.push('<span class="armory-stat-chip ' + (item.tanec > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (item.tanec > 0 ? '+' : '') + item.tanec + ' Tanec</span>');
+            if (item.dance) html.push('<span class="armory-stat-chip ' + (item.dance > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (item.dance > 0 ? '+' : '') + item.dance + ' Tanec</span>');
 
             if (item.charisma) html.push('<span class="armory-stat-chip ' + (item.charisma > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">👑 ' + (item.charisma > 0 ? '+' : '') + item.charisma + ' Charisma</span>');
 
@@ -1378,7 +1378,7 @@
 
         }
 
-        var horseBonus = (q.questTier !== "U1" && hasHorse) ? (1 + Math.floor(stats.jizda / 2)) : 0;
+        var horseBonus = (q.questTier !== "U1" && hasHorse) ? (1 + Math.floor(stats.riding / 2)) : 0;
 
         var wRes = window.PRS_GameEngine.checkQuestWeakness(this.state, player, q, tacticObj);
 
@@ -1390,7 +1390,7 @@
 
         else if (this.selectedDuelStance === "defensive") stanceBonus = -1;
 
-        var basePower = stats.boj + animalBonus + horseBonus + tacticBonus + weaknessBonus + stanceBonus;
+        var basePower = stats.combat + animalBonus + horseBonus + tacticBonus + weaknessBonus + stanceBonus;
 
         var neededRoll = q.difficulty - basePower;
 
@@ -1456,11 +1456,11 @@
 
             var trBonuses = [];
 
-            if (tr.boj) trBonuses.push("⚔️+" + tr.boj);
+            if (tr.combat) trBonuses.push("⚔️+" + tr.combat);
 
-            if (tr.jizda) trBonuses.push("🏇+" + tr.jizda);
+            if (tr.riding) trBonuses.push("🏇+" + tr.riding);
 
-            if (tr.tanec) trBonuses.push("💃+" + tr.tanec);
+            if (tr.dance) trBonuses.push("💃+" + tr.dance);
 
             if (tr.charisma) trBonuses.push("✨+" + tr.charisma);
 
@@ -1558,7 +1558,7 @@
 
         html.push('        <div class="duel-fighter-stat">⚔️ ' + basePower + ' <small>stálá síla</small></div>');
 
-        html.push('        <div class="duel-fighter-sub">Boj ' + stats.boj + (horseBonus > 0 ? ' + Kůň ' + horseBonus : '') + (animalBonus > 0 ? ' + Zvěř ' + animalBonus : '') + (tacticBonus > 0 ? ' + Taktika ' + tacticBonus : '') + (weaknessBonus > 0 ? ' + Slabina ' + weaknessBonus : '') + (stanceBonus !== 0 ? (stanceBonus > 0 ? ' + Postoj +' + stanceBonus : ' + Postoj ' + stanceBonus) : '') + '</div>');
+        html.push('        <div class="duel-fighter-sub">Boj ' + stats.combat + (horseBonus > 0 ? ' + Kůň ' + horseBonus : '') + (animalBonus > 0 ? ' + Zvěř ' + animalBonus : '') + (tacticBonus > 0 ? ' + Taktika ' + tacticBonus : '') + (weaknessBonus > 0 ? ' + Slabina ' + weaknessBonus : '') + (stanceBonus !== 0 ? (stanceBonus > 0 ? ' + Postoj +' + stanceBonus : ' + Postoj ' + stanceBonus) : '') + '</div>');
 
         html.push('      </div>');
 
@@ -1826,9 +1826,9 @@
             if (res.trophyWon) {
                 var tr = res.trophyWon;
                 var statParts = [];
-                if (tr.boj) statParts.push("⚔️ +" + tr.boj + " Boj");
-                if (tr.jizda) statParts.push("🏇 +" + tr.jizda + " Jízda");
-                if (tr.tanec) statParts.push("💃 +" + tr.tanec + " Tanec");
+                if (tr.combat) statParts.push("⚔️ +" + tr.combat + " Boj");
+                if (tr.riding) statParts.push("🏇 +" + tr.riding + " Jízda");
+                if (tr.dance) statParts.push("💃 +" + tr.dance + " Tanec");
                 if (tr.charisma) statParts.push("✨ +" + tr.charisma + " Charisma");
 
                 html.push('  <div class="quest-trophy-ceremony-card">');
@@ -2292,7 +2292,7 @@
 
         if (!pa || !pa.canResolveFestival) return;
 
-        var fType = pa.festivalType || "turnaj";
+        var fType = pa.festivalType || "tournament";
 
         var organizer = this.state.players[this.state.currentPlayerIndex];
 
@@ -2390,35 +2390,35 @@
 
             var bonusText = "";
 
-            if (fType === "turnaj") {
+            if (fType === "tournament") {
 
                 eligible = (st.horses >= 1 && st.dogs >= 1 && st.falcons >= 1) || (st.horses >= 1 && (st.hasWeapon || st.hasArmor));
 
                 var setB = (st.horses >= 1 && st.dogs >= 1 && st.falcons >= 1) ? 3 : 0;
 
-                var baseB = st.boj + st.jizda + setB;
+                var baseB = st.combat + st.riding + setB;
 
-                bonusText = "⚔️ Boj: " + st.boj + " | 🏇 Jízda: " + st.jizda + (setB ? " | 🐕🦅 Set: +3" : "") + " (Základ: +" + baseB + ")";
+                bonusText = "⚔️ Boj: " + st.combat + " | 🏇 Jízda: " + st.riding + (setB ? " | 🐕🦅 Set: +3" : "") + " (Základ: +" + baseB + ")";
 
-            } else if (fType === "ples") {
+            } else if (fType === "ball") {
 
-                eligible = st.hasDress || st.tanec >= 1;
+                eligible = st.hasDress || st.dance >= 1;
 
                 var dressB = st.hasDress ? 2 : 0;
 
-                var baseB = st.tanec + st.charisma + dressB;
+                var baseB = st.dance + st.charisma + dressB;
 
-                bonusText = "💃 Tanec: " + st.tanec + " | ✨ Charisma: " + st.charisma + (dressB ? " | 👗 Šaty: +2" : "") + " (Základ: +" + baseB + ")";
+                bonusText = "💃 Tanec: " + st.dance + " | ✨ Charisma: " + st.charisma + (dressB ? " | 👗 Šaty: +2" : "") + " (Základ: +" + baseB + ")";
 
-            } else if (fType === "zavod") {
+            } else if (fType === "race") {
 
                 eligible = st.horses >= 1;
 
                 var horseB = Math.min(3, st.horses);
 
-                var baseB = (st.jizda * 2) + horseB;
+                var baseB = (st.riding * 2) + horseB;
 
-                bonusText = "🏇 2× Jízda: " + (st.jizda * 2) + " | 🐎 Koně: +" + horseB + " (Základ: +" + baseB + ")";
+                bonusText = "🏇 2× Jízda: " + (st.riding * 2) + " | 🐎 Koně: +" + horseB + " (Základ: +" + baseB + ")";
 
             }
 
@@ -2428,7 +2428,7 @@
 
             } else {
 
-                var reason = (fType === "turnaj") ? "Nemá potřebná zvířata / zbroj" : ((fType === "ples") ? "Nemá slavnostní šaty ani tanec" : "Nemá žádného koně");
+                var reason = (fType === "tournament") ? "Nemá potřebná zvířata / zbroj" : ((fType === "ball") ? "Nemá slavnostní šaty ani tanec" : "Nemá žádného koně");
 
                 spectators.push({ player: p, reason: reason });
 
@@ -3218,16 +3218,16 @@
             '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
         for (var r = 0; r < rivals.length; r++) {
             var riv = rivals[r];
-            var rBoj = (riv.skills && riv.skills.boj !== undefined) ? riv.skills.boj : 1;
-            var rJizda = (riv.skills && riv.skills.jizda !== undefined) ? riv.skills.jizda : 1;
-            var rTanec = (riv.skills && riv.skills.tanec !== undefined) ? riv.skills.tanec : 1;
+            var rCombat = (riv.skills && riv.skills.combat !== undefined) ? riv.skills.combat : 1;
+            var rRiding = (riv.skills && riv.skills.riding !== undefined) ? riv.skills.riding : 1;
+            var rDance = (riv.skills && riv.skills.dance !== undefined) ? riv.skills.dance : 1;
             var btnDis = !canAfford ? 'disabled style="flex:1; font-size:0.78rem; padding:0.35rem; opacity:0.5;"' : 'style="flex:1; font-size:0.78rem; padding:0.35rem;"';
             html += '<div style="background:rgba(0,0,0,0.35); border:1px solid rgba(236,72,153,0.3); border-radius:8px; padding:0.55rem; text-align:left;">' +
                 '<div style="font-weight:700; color:#fbcfe8; margin-bottom:4px;">' + riv.badge + ' ' + (self.escapeHtml ? self.escapeHtml(riv.name) : riv.name) + ' (' + riv.totalHearts + ' 💖)</div>' +
                 '<div style="display:flex; gap:4px;">' +
-                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'boj\')">⚔️ Boj (' + rBoj + ')</button>' +
-                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'jizda\')">🏇 Jízda (' + rJizda + ')</button>' +
-                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'tanec\')">💃 Tanec (' + rTanec + ')</button>' +
+                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'boj\')">⚔️ Boj (' + rCombat + ')</button>' +
+                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'jizda\')">🏇 Jízda (' + rRiding + ')</button>' +
+                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'tanec\')">💃 Tanec (' + rDance + ')</button>' +
                 '</div>' +
                 '</div>';
         }
@@ -3544,9 +3544,9 @@
 
             if (trophyDef) {
                 var statsBonus = [];
-                if (trophyDef.boj) statsBonus.push("⚔️+" + trophyDef.boj);
-                if (trophyDef.jizda) statsBonus.push("🏇+" + trophyDef.jizda);
-                if (trophyDef.tanec) statsBonus.push("💃+" + trophyDef.tanec);
+                if (trophyDef.combat) statsBonus.push("⚔️+" + trophyDef.combat);
+                if (trophyDef.riding) statsBonus.push("🏇+" + trophyDef.riding);
+                if (trophyDef.dance) statsBonus.push("💃+" + trophyDef.dance);
                 if (trophyDef.charisma) statsBonus.push("✨+" + trophyDef.charisma);
                 html.push('    <div class="card-callout-box" style="border-color:rgba(212,175,55,0.4); color:var(--gold-light); background:rgba(255,255,255,0.04); font-size:0.83rem; padding:0.5rem 0.75rem; border-radius:6px;">');
                 html.push('      🏆 <strong>Trofej po porážce:</strong> ' + trophyDef.icon + ' ' + this.escapeHtml(trophyDef.name) + (statsBonus.length ? ' (' + statsBonus.join(" ") + ')' : ''));
@@ -3572,9 +3572,9 @@
             modalTitle = (it.icon || "🛡️") + " " + it.name;
 
             var statChips = [];
-            if (it.boj) statChips.push('<span class="armory-stat-chip ' + (it.boj > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (it.boj > 0 ? '+' : '') + it.boj + ' Boj</span>');
-            if (it.jizda) statChips.push('<span class="armory-stat-chip ' + (it.jizda > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (it.jizda > 0 ? '+' : '') + it.jizda + ' Jízda</span>');
-            if (it.tanec) statChips.push('<span class="armory-stat-chip ' + (it.tanec > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (it.tanec > 0 ? '+' : '') + it.tanec + ' Tanec</span>');
+            if (it.combat) statChips.push('<span class="armory-stat-chip ' + (it.combat > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (it.combat > 0 ? '+' : '') + it.combat + ' Boj</span>');
+            if (it.riding) statChips.push('<span class="armory-stat-chip ' + (it.riding > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (it.riding > 0 ? '+' : '') + it.riding + ' Jízda</span>');
+            if (it.dance) statChips.push('<span class="armory-stat-chip ' + (it.dance > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (it.dance > 0 ? '+' : '') + it.dance + ' Tanec</span>');
             if (it.charisma) statChips.push('<span class="armory-stat-chip ' + (it.charisma > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">✨ ' + (it.charisma > 0 ? '+' : '') + it.charisma + ' Charisma</span>');
 
             var slotLabels = {

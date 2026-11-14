@@ -649,7 +649,7 @@
         if (!node || !this.graphicsConfig) return "";
 
         // 1. Explicitní bitmapa hradu definovaná na uzlu plánu (z generátoru)
-        if (node.castleImg) {
+        if (node.castleImg && typeof node.castleImg === "string") {
             var cImg = node.castleImg;
             if (node.x > 700 && cImg.indexOf("_flip") === -1) {
                 return cImg.replace(".png", "_flip.png");
@@ -678,8 +678,8 @@
                 H9: "assets/castles/castle_ice.png"
             };
             var cUrl = (node.estateId && castleMap[node.estateId]) || (node.code && castleMap[node.code]);
-            if (cUrl) {
-                if (node.x > 700) return cUrl.replace(".png", "_flip.png");
+            if (cUrl && typeof cUrl === "string") {
+                if (node.x > 700 && cUrl.indexOf("_flip") === -1) return cUrl.replace(".png", "_flip.png");
                 return cUrl;
             }
         }
@@ -688,19 +688,40 @@
 
         var url = "";
 
-        if (node.subtype && byType[node.subtype]) {
+        // Normalizace klíče podtypu (česky i anglicky)
+        var subKey = (node.subtype || "").toLowerCase();
+        if (subKey === "kun") subKey = "horse";
+        else if (subKey === "pes") subKey = "dog";
+        else if (subKey === "sokol") subKey = "falcon";
 
-            url = byType[node.subtype];
-
-        } else if (byType[node.type]) {
-
-            url = byType[node.type];
-
+        // Pokud je uzel zvíře, ale chybí nebo nesedí subtype, odvodíme z kódu / jména
+        var isAnimalType = ((node.type || "").toUpperCase() === "ANIMAL" || node.type === "animal");
+        if (isAnimalType && (!subKey || (subKey !== "falcon" && subKey !== "dog" && subKey !== "horse"))) {
+            var c = (node.code || "").toUpperCase();
+            var n = (node.name || "").toLowerCase();
+            if (c.indexOf("S") === 0 || n.indexOf("sokol") !== -1 || n.indexOf("pták") !== -1 || n.indexOf("poštolka") !== -1) subKey = "falcon";
+            else if (c.indexOf("P") === 0 || c.indexOf("D") === 0 || n.indexOf("pes") !== -1 || n.indexOf("dog") !== -1 || n.indexOf("ohař") !== -1 || n.indexOf("chrt") !== -1 || n.indexOf("bígl") !== -1) subKey = "dog";
+            else subKey = "horse";
         }
 
-        if (!url && (node.type === "START" || node.type === "CASTLE" || node.code === "START")) {
+        if (subKey && byType[subKey]) {
+            url = byType[subKey];
+        } else if (node.subtype && byType[node.subtype]) {
+            url = byType[node.subtype];
+        } else if (node.type && byType[node.type]) {
+            url = byType[node.type];
+        } else if (node.type && byType[String(node.type).toUpperCase()]) {
+            url = byType[String(node.type).toUpperCase()];
+        }
 
-            url = (node.type === "START" || node.code === "START") ? "assets/tiles/start.png" : "assets/tiles/castle.png";
+        // Záchranný fallback pro zvířata
+        if (!url && isAnimalType) {
+            url = (subKey === "falcon") ? "assets/tiles/sokol.png" : ((subKey === "dog") ? "assets/tiles/pes.png" : "assets/tiles/kun.png");
+        }
+
+        if (!url && (node.type === "START" || node.type === "CASTLE" || node.code === "START" || (node.type || "").toUpperCase() === "START")) {
+
+            url = (node.type === "START" || node.code === "START" || (node.type || "").toUpperCase() === "START") ? "assets/tiles/start.png" : "assets/tiles/castle.png";
 
         }
 
@@ -709,7 +730,7 @@
             if (url.endsWith(".jpg")) url = url.replace(".jpg", ".png");
 
             // Na pravé polovině plánu zrcadlit směrová zvířata, hrady a draky
-            if (node.x > 700 && (node.subtype === "kun" || node.subtype === "pes" || node.subtype === "sokol" || node.subtype === "U3" || node.type === "CASTLE")) {
+            if (node.x > 700 && (subKey === "horse" || subKey === "dog" || subKey === "falcon" || node.subtype === "horse" || node.subtype === "dog" || node.subtype === "falcon" || node.subtype === "U3" || node.type === "CASTLE")) {
 
                 var flipUrl = url.replace(".png", "_flip.png");
 
@@ -956,42 +977,83 @@
     sampleRiverPath: function (d, step) {
         try {
             var svg = document.getElementById("prs-board-svg") || (document.querySelector && document.querySelector("svg"));
-            var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            p.setAttribute("d", d);
-            var attached = false;
-            if (svg && svg.appendChild) {
-                p.style.display = "none";
-                svg.appendChild(p);
-                attached = true;
-            }
-            var len = p.getTotalLength();
-            if (!(len > 20)) {
+            var p = (document.createElementNS && document.createElementNS("http://www.w3.org/2000/svg", "path"));
+            if (p && typeof p.getTotalLength === "function") {
+                p.setAttribute("d", d);
+                var attached = false;
+                if (svg && svg.appendChild) {
+                    p.style.display = "none";
+                    svg.appendChild(p);
+                    attached = true;
+                }
+                var len = p.getTotalLength();
+                if (len > 20) {
+                    var n = Math.max(14, Math.ceil(len / step));
+                    var pts = [], i;
+                    for (i = 0; i <= n; i++) {
+                        var pt = p.getPointAtLength(len * i / n);
+                        pts.push({ x: pt.x, y: pt.y, t: i / n, s: len * i / n });
+                    }
+                    if (attached && p.parentNode) p.parentNode.removeChild(p);
+                    for (i = 0; i <= n; i++) {
+                        var a = pts[Math.max(0, i - 1)], b = pts[Math.min(n, i + 1)];
+                        var dx = b.x - a.x, dy = b.y - a.y;
+                        var l = Math.sqrt(dx * dx + dy * dy) || 1;
+                        pts[i].tx = dx / l; pts[i].ty = dy / l;
+                        pts[i].nx = -dy / l; pts[i].ny = dx / l;
+                    }
+                    for (i = 0; i <= n; i++) {
+                        var a2 = pts[Math.max(0, i - 3)], b2 = pts[Math.min(n, i + 3)];
+                        var cross = a2.tx * b2.ty - a2.ty * b2.tx;
+                        pts[i].curv = Math.max(-1, Math.min(1, cross * 2.2));
+                    }
+                    return { pts: pts, len: len };
+                }
                 if (attached && p.parentNode) p.parentNode.removeChild(p);
-                return null;
             }
-            var n = Math.max(14, Math.ceil(len / step));
-            var pts = [], i;
-            for (i = 0; i <= n; i++) {
-                var pt = p.getPointAtLength(len * i / n);
-                pts.push({ x: pt.x, y: pt.y, t: i / n, s: len * i / n });
+        } catch (e) { }
+
+        // Analytický fallback (pro případ, že prohlížeč ještě nemá vložené SVG nebo pro testovací běh)
+        var sRPS = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.sampleRiverPathSimple) ||
+                   (window.PRS_BoardBuilder && window.PRS_BoardBuilder.sampleRiverPathSimple);
+        if (sRPS) {
+            var rawPts = sRPS(d);
+            if (rawPts && rawPts.length > 5) {
+                var totalLen = 0;
+                var cumulative = [0];
+                for (var ci = 1; ci < rawPts.length; ci++) {
+                    var cdx = rawPts[ci].x - rawPts[ci - 1].x;
+                    var cdy = rawPts[ci].y - rawPts[ci - 1].y;
+                    totalLen += Math.sqrt(cdx * cdx + cdy * cdy);
+                    cumulative.push(totalLen);
+                }
+                var ptsArr = [];
+                for (var pi = 0; pi < rawPts.length; pi++) {
+                    var frac = (totalLen > 0) ? (cumulative[pi] / totalLen) : (pi / (rawPts.length - 1));
+                    ptsArr.push({
+                        x: rawPts[pi].x,
+                        y: rawPts[pi].y,
+                        t: frac,
+                        s: cumulative[pi]
+                    });
+                }
+                var nPts = ptsArr.length;
+                for (var ni = 0; ni < nPts; ni++) {
+                    var pA = ptsArr[Math.max(0, ni - 1)], pB = ptsArr[Math.min(nPts - 1, ni + 1)];
+                    var dX = pB.x - pA.x, dY = pB.y - pA.y;
+                    var distL = Math.sqrt(dX * dX + dY * dY) || 1;
+                    ptsArr[ni].tx = dX / distL; ptsArr[ni].ty = dY / distL;
+                    ptsArr[ni].nx = -dY / distL; ptsArr[ni].ny = dX / distL;
+                }
+                for (var ni2 = 0; ni2 < nPts; ni2++) {
+                    var pA2 = ptsArr[Math.max(0, ni2 - 3)], pB2 = ptsArr[Math.min(nPts - 1, ni2 + 3)];
+                    var crs = pA2.tx * pB2.ty - pA2.ty * pB2.tx;
+                    ptsArr[ni2].curv = Math.max(-1, Math.min(1, crs * 2.2));
+                }
+                return { pts: ptsArr, len: totalLen };
             }
-            if (attached && p.parentNode) p.parentNode.removeChild(p);
-            for (i = 0; i <= n; i++) {
-                var a = pts[Math.max(0, i - 1)], b = pts[Math.min(n, i + 1)];
-                var dx = b.x - a.x, dy = b.y - a.y;
-                var l = Math.sqrt(dx * dx + dy * dy) || 1;
-                pts[i].tx = dx / l; pts[i].ty = dy / l;
-                pts[i].nx = -dy / l; pts[i].ny = dx / l;
-            }
-            for (i = 0; i <= n; i++) {
-                var a2 = pts[Math.max(0, i - 3)], b2 = pts[Math.min(n, i + 3)];
-                var cross = a2.tx * b2.ty - a2.ty * b2.tx;
-                pts[i].curv = Math.max(-1, Math.min(1, cross * 2.2));
-            }
-            return { pts: pts, len: len };
-        } catch (e) {
-            return null;
         }
+        return null;
     },
 
     riverPolyPath: function (L, R) {
@@ -1176,8 +1238,8 @@
         var out = [];
         var nodes = board.nodes || [];
         var bridges = board.bridges || [];
-        var activeTheme = (document.documentElement && document.documentElement.getAttribute("data-theme")) ||
-                          (typeof localStorage !== "undefined" && localStorage.getItem("kidesky_element_theme")) || "light";
+        var activeTheme = (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
+                          (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
         var rTheme = this.RIVER_THEMES[activeTheme] || this.RIVER_THEMES.light;
         out.push('  <g id="prs-rivers-layer">');
 
@@ -1436,6 +1498,12 @@
         // PASS 4.5: Zelené ostrůvky v toku řeky
         out.push(this.renderRiverIslandsHTML(sampledRivers, board, rTheme, activeTheme));
 
+        // PASS 4.6: Jezírka v meandrech (mrtvá ramena)
+        out.push(this.renderOxbowLakesHTML(sampledRivers, board, rTheme, activeTheme));
+
+        // PASS 4.7: Ústí v deltě (rozvětvená delta a naplavené ostrovy)
+        out.push(this.renderRiverDeltaHTML(sampledRivers, board, rTheme, activeTheme));
+
         // PASS 5: Inkoustové břehy řeky s přirozeným soutokovým rozvětvením
         if (net3) {
             out.push('    <path d="' + this.riverBankPath(net3.bankOpp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
@@ -1447,6 +1515,28 @@
                 out.push('    <path d="' + this.riverBankPath(rivObj.sides3.L) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
                 out.push('    <path d="' + this.riverBankPath(rivObj.sides3.R) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
             }
+        }
+
+        // PASS 5.5: Soutokové náplavky a víry na soutocích přítoků
+        var ink5 = rTheme.bankInkColor || "rgba(45,26,14,0.92)";
+        for (var ci = 0; ci < confluences.length; ci++) {
+            var cnf = confluences[ci];
+            var mRiv = sampledRivers[cnf.mainIdx];
+            var tRiv = sampledRivers[cnf.tribIdx];
+            var cPoint = mRiv.pts[cnf.mainConfIdx];
+            var tEnd = tRiv.pts[tRiv.n - 1];
+            var tBeforeMouth = tRiv.pts[Math.max(0, tRiv.n - 4)];
+            var sAngle = Math.atan2(tEnd.y - tBeforeMouth.y, tEnd.x - tBeforeMouth.x) * 180 / Math.PI;
+
+            out.push('    <g class="river-confluence-detail" transform="translate(' + cnf.mouthX.toFixed(1) + ',' + cnf.mouthY.toFixed(1) + ')" pointer-events="none">');
+            var sSide = (cnf.confSide === "L") ? -1 : 1;
+            var spX = (cPoint.nx * sSide * 16).toFixed(1);
+            var spY = (cPoint.ny * sSide * 16).toFixed(1);
+            out.push('      <ellipse cx="' + spX + '" cy="' + spY + '" rx="12" ry="7" transform="rotate(' + (sAngle + 20) + ' ' + spX + ' ' + spY + ')" fill="' + rTheme.bankColor + '" stroke="' + ink5 + '" stroke-width="1.0" filter="url(#riverWobble)"/>');
+            out.push('      <circle cx="' + (parseFloat(spX) + 2).toFixed(1) + '" cy="' + (parseFloat(spY) - 1).toFixed(1) + '" r="2.2" fill="#8d877d"/>');
+            out.push('      <circle cx="' + (parseFloat(spX) - 3).toFixed(1) + '" cy="' + (parseFloat(spY) + 1).toFixed(1) + '" r="1.6" fill="#a8a29e"/>');
+            out.push('      <path d="M -7 -3 Q 0 -7 7 -4 Q 10 2 4 7" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.8)") + '" stroke-width="1.1" stroke-linecap="round" opacity="0.85"/>');
+            out.push('    </g>');
         }
 
         // PASS 6: Organický proud vody (proudnice / meandry), pramen, pobřežní vegetace
@@ -1636,6 +1726,225 @@
         return out.join("\n");
     },
 
+    renderOxbowLakesHTML: function (sampledRivers, board, rTheme, activeTheme) {
+        if (!sampledRivers || sampledRivers.length === 0) return "";
+        var out = [];
+        var nodes = (board && board.nodes) || [];
+        var bridges = (board && board.bridges) || [];
+        var ink = rTheme.bankInkColor || "rgba(45,26,14,0.92)";
+
+        var lakes = (board && board.oxbowLakes && board.oxbowLakes.length > 0) ? board.oxbowLakes.slice() : [];
+
+        if (lakes.length === 0) {
+            for (var sr = 0; sr < sampledRivers.length; sr++) {
+                var rivData = sampledRivers[sr];
+                if (rivData.isTributary && rivData.len < 280) continue;
+                var pts = rivData.pts;
+                var candidates = [];
+
+                for (var i = 12; i < pts.length - 18; i += 4) {
+                    var pt = pts[i];
+                    var nx = pt.nx, ny = pt.ny;
+                    var sidesToTest = [-1, 1];
+
+                    for (var sIdx = 0; sIdx < sidesToTest.length; sIdx++) {
+                        var side = sidesToTest[sIdx];
+                        for (var dist = 52; dist <= 78; dist += 13) {
+                            var cx = pt.x + nx * side * dist;
+                            var cy = pt.y + ny * side * dist;
+                            if (cx < 65 || cx > 1335 || cy < 65 || cy > 815) continue;
+
+                            var minNodeD = 9999;
+                            for (var q = 0; q < nodes.length; q++) {
+                                var nd = Math.hypot(nodes[q].x - cx, nodes[q].y - cy);
+                                if (nd < minNodeD) minNodeD = nd;
+                            }
+                            if (minNodeD < 42) continue;
+
+                            var minBridgeD = 9999;
+                            for (var b = 0; b < bridges.length; b++) {
+                                var bd = Math.hypot(bridges[b].x - cx, bridges[b].y - cy);
+                                if (bd < minBridgeD) minBridgeD = bd;
+                            }
+                            if (minBridgeD < 50) continue;
+
+                            var minRivD = 9999;
+                            for (var rp = 0; rp < pts.length; rp += 2) {
+                                var rd = Math.hypot(pts[rp].x - cx, pts[rp].y - cy);
+                                if (rd < minRivD) minRivD = rd;
+                            }
+                            if (minRivD < 34 || minRivD > 92) continue;
+
+                            candidates.push({
+                                cx: cx,
+                                cy: cy,
+                                rx: Math.round(19 + Math.abs(pt.curv) * 12),
+                                ry: Math.round(11 + Math.abs(pt.curv) * 6),
+                                angle: Math.round(Math.atan2(pt.ty, pt.tx) * 180 / Math.PI + (side * 18)),
+                                score: minNodeD + minBridgeD + (Math.abs(pt.curv) * 120),
+                                seed: Math.round(cx * 3.1 + cy * 7.7)
+                            });
+                        }
+                    }
+                }
+
+                if (candidates.length > 0) {
+                    candidates.sort(function (a, b) { return b.score - a.score; });
+                    var selected = [candidates[0]];
+                    for (var c = 1; c < candidates.length && selected.length < 2; c++) {
+                        var can = candidates[c];
+                        var dPrev = Math.hypot(can.cx - selected[0].cx, can.cy - selected[0].cy);
+                        if (dPrev >= 180) {
+                            selected.push(can);
+                        }
+                    }
+                    for (var s = 0; s < selected.length; s++) {
+                        lakes.push(selected[s]);
+                    }
+                }
+            }
+        }
+
+        if (lakes.length === 0) return "";
+
+        for (var li = 0; li < lakes.length; li++) {
+            var lk = lakes[li];
+            var lcx = lk.cx, lcy = lk.cy;
+            var lrx = lk.rx || 22, lry = lk.ry || 13;
+            var rot = lk.angle || 0;
+
+            out.push('    <g class="meander-oxbow-lake" transform="translate(' + lcx.toFixed(1) + ',' + lcy.toFixed(1) + ') rotate(' + rot + ')" pointer-events="none">');
+
+            // 1. Vlhká louka / rašeliniště kolem jezírka
+            out.push('      <ellipse cx="0" cy="0" rx="' + (lrx + 16).toFixed(1) + '" ry="' + (lry + 13).toFixed(1) + '" fill="' + rTheme.meadowColor + '" filter="url(#riverBankBlur)" opacity="0.85"/>');
+
+            // 2. Písčito-štěrkový břeh s texturovaným vlněním
+            out.push('      <ellipse cx="0" cy="0" rx="' + (lrx + 5).toFixed(1) + '" ry="' + (lry + 4).toFixed(1) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '" stroke="' + ink + '" stroke-width="1.1" filter="url(#riverWobble)"/>');
+
+            // 3. Klidná zrcadlová hladina jezírka
+            out.push('      <ellipse cx="0" cy="0" rx="' + lrx.toFixed(1) + '" ry="' + lry.toFixed(1) + '" fill="url(#prsMasterRiverWater)" filter="url(#riverWobble)"/>');
+
+            // 4. Hluboké jádro mrtvého ramene
+            out.push('      <ellipse cx="-1" cy="0" rx="' + (lrx * 0.62).toFixed(1) + '" ry="' + (lry * 0.58).toFixed(1) + '" fill="' + rTheme.deepWaterColor + '" filter="url(#riverSoft)"/>');
+
+            // 5. Jemné kruhy čeření / odlesk hladiny
+            out.push('      <ellipse cx="' + (lrx * 0.25).toFixed(1) + '" cy="' + (-lry * 0.2).toFixed(1) + '" rx="' + (lrx * 0.35).toFixed(1) + '" ry="' + (lry * 0.25).toFixed(1) + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.7)") + '" stroke-width="0.9" stroke-dasharray="8,5" opacity="0.8"/>');
+            out.push('      <circle cx="' + (-lrx * 0.3).toFixed(1) + '" cy="' + (lry * 0.15).toFixed(1) + '" r="2.2" fill="none" stroke="' + (rTheme.streamColor2 || "rgba(255,255,255,0.5)") + '" stroke-width="0.7"/>');
+
+            // 6. Přírodní detaily: Lekníny, rákosí a rybářská pramička
+            out.push('      <ellipse cx="' + (-lrx * 0.45).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" rx="4.5" ry="3.0" fill="#2d6a4f" stroke="' + ink + '" stroke-width="0.5"/>');
+            out.push('      <ellipse cx="' + (-lrx * 0.35).toFixed(1) + '" cy="' + (-lry * 0.55).toFixed(1) + '" rx="3.6" ry="2.4" fill="#40916c"/>');
+            out.push('      <circle cx="' + (-lrx * 0.45).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" r="1.3" fill="#fbcfe8"/>');
+
+            out.push('      <path d="M ' + (lrx * 0.55).toFixed(1) + ' ' + (lry * 0.3).toFixed(1) + ' L ' + (lrx * 0.62).toFixed(1) + ' ' + (-lry * 0.7).toFixed(1) + ' M ' + (lrx * 0.70).toFixed(1) + ' ' + (lry * 0.4).toFixed(1) + ' L ' + (lrx * 0.78).toFixed(1) + ' ' + (-lry * 0.85).toFixed(1) + '" stroke="#606c38" stroke-width="1.3" stroke-linecap="round"/>');
+            out.push('      <ellipse cx="' + (lrx * 0.62).toFixed(1) + '" cy="' + (-lry * 0.7).toFixed(1) + '" rx="1.2" ry="2.6" fill="#4a2810" stroke="' + ink + '" stroke-width="0.4"/>');
+            out.push('      <ellipse cx="' + (lrx * 0.78).toFixed(1) + '" cy="' + (-lry * 0.85).toFixed(1) + '" rx="1.1" ry="2.3" fill="#4a2810" stroke="' + ink + '" stroke-width="0.4"/>');
+
+            var boatX = (lrx * 0.30).toFixed(1);
+            var boatY = (lry * 0.45).toFixed(1);
+            out.push('      <g transform="translate(' + boatX + ',' + boatY + ') rotate(-22)">');
+            out.push('        <ellipse cx="0" cy="1" rx="6.5" ry="2.6" fill="rgba(0,0,0,0.28)"/>');
+            out.push('        <path d="M -6.5 0 Q 0 -2.4 6.5 0 Q 0 2.4 -6.5 0 Z" fill="#854d0e" stroke="' + ink + '" stroke-width="0.8"/>');
+            out.push('        <line x1="-3" y1="0" x2="3" y2="0" stroke="#ca8a04" stroke-width="0.6"/>');
+            out.push('        <line x1="0" y1="-2" x2="0" y2="2" stroke="#713f12" stroke-width="0.7"/>');
+            out.push('        <circle cx="7.2" cy="0.6" r="0.9" fill="#78350f"/>');
+            out.push('        <line x1="6" y1="0" x2="7.2" y2="0.6" stroke="#fef08a" stroke-width="0.5"/>');
+            out.push('      </g>');
+
+            out.push('    </g>');
+        }
+        return out.join("\n");
+    },
+
+    renderRiverDeltaHTML: function (sampledRivers, board, rTheme, activeTheme) {
+        if (!sampledRivers || sampledRivers.length === 0) return "";
+        var out = [];
+        var ink = rTheme.bankInkColor || "rgba(45,26,14,0.92)";
+
+        for (var sr = 0; sr < sampledRivers.length; sr++) {
+            var rData = sampledRivers[sr];
+            if (rData.isTributary) continue;
+            var pts = rData.pts, n = pts.length;
+            if (n < 20) continue;
+
+            var lastPt = pts[n - 1];
+            var isDeltaZone = (lastPt.y >= 780 || lastPt.x <= 70 || lastPt.x >= 1330 || (board && board.riverMode === "delta"));
+            if (!isDeltaZone) continue;
+
+            var forkIdx = Math.max(0, Math.floor(n * 0.80));
+            var forkPt = pts[forkIdx];
+            var fHw = rData.halfW[forkIdx];
+
+            var leftBranchEnd = {
+                x: lastPt.x - (rData.rw * 1.8 + 26),
+                y: Math.min(895, lastPt.y + 25)
+            };
+            var leftMid = {
+                x: (forkPt.x + leftBranchEnd.x) / 2 - 12,
+                y: (forkPt.y + leftBranchEnd.y) / 2
+            };
+
+            var rightBranchEnd = {
+                x: lastPt.x + (rData.rw * 1.8 + 26),
+                y: Math.min(895, lastPt.y + 25)
+            };
+            var rightMid = {
+                x: (forkPt.x + rightBranchEnd.x) / 2 + 12,
+                y: (forkPt.y + rightBranchEnd.y) / 2
+            };
+
+            var dLeft = "M " + forkPt.x.toFixed(1) + " " + forkPt.y.toFixed(1) +
+                        " Q " + leftMid.x.toFixed(1) + " " + leftMid.y.toFixed(1) + " " + leftBranchEnd.x.toFixed(1) + " " + leftBranchEnd.y.toFixed(1);
+            var dRight = "M " + forkPt.x.toFixed(1) + " " + forkPt.y.toFixed(1) +
+                         " Q " + rightMid.x.toFixed(1) + " " + rightMid.y.toFixed(1) + " " + rightBranchEnd.x.toFixed(1) + " " + rightBranchEnd.y.toFixed(1);
+
+            out.push('    <g class="river-delta-system" pointer-events="none">');
+
+            var deltaFanPoly = [
+                { x: forkPt.x - fHw * 1.6, y: forkPt.y },
+                { x: leftBranchEnd.x - 28, y: leftBranchEnd.y },
+                { x: rightBranchEnd.x + 28, y: rightBranchEnd.y },
+                { x: forkPt.x + fHw * 1.6, y: forkPt.y }
+            ];
+            out.push('      <polygon points="' + deltaFanPoly.map(function(p){ return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ') + '" fill="' + rTheme.meadowColor + '" filter="url(#riverBankBlur)" opacity="0.75"/>');
+
+            out.push('      <path d="' + dLeft + '" fill="none" stroke="' + rTheme.bankColor + '" stroke-width="' + (rData.rw * 0.85).toFixed(1) + '" stroke-linecap="round" opacity="' + rTheme.bankOpacity + '" filter="url(#riverWobble)"/>');
+            out.push('      <path d="' + dRight + '" fill="none" stroke="' + rTheme.bankColor + '" stroke-width="' + (rData.rw * 0.85).toFixed(1) + '" stroke-linecap="round" opacity="' + rTheme.bankOpacity + '" filter="url(#riverWobble)"/>');
+
+            out.push('      <path d="' + dLeft + '" fill="none" stroke="url(#prsMasterRiverWater)" stroke-width="' + (rData.rw * 0.62).toFixed(1) + '" stroke-linecap="round" filter="url(#riverWobble)"/>');
+            out.push('      <path d="' + dRight + '" fill="none" stroke="url(#prsMasterRiverWater)" stroke-width="' + (rData.rw * 0.62).toFixed(1) + '" stroke-linecap="round" filter="url(#riverWobble)"/>');
+
+            out.push('      <path d="' + dLeft + '" fill="none" stroke="' + ink + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="14,2,26,4"/>');
+            out.push('      <path d="' + dRight + '" fill="none" stroke="' + ink + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="14,2,26,4"/>');
+
+            out.push('      <path d="' + dLeft + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.7)") + '" stroke-width="1.0" stroke-linecap="round" stroke-dasharray="24,18,36,22"/>');
+            out.push('      <path d="' + dRight + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.7)") + '" stroke-width="1.0" stroke-linecap="round" stroke-dasharray="20,16,40,24"/>');
+
+            var island1X = (forkPt.x + leftBranchEnd.x + lastPt.x) / 3;
+            var island1Y = (forkPt.y + leftBranchEnd.y + lastPt.y) / 3;
+            var island2X = (forkPt.x + rightBranchEnd.x + lastPt.x) / 3;
+            var island2Y = (forkPt.y + rightBranchEnd.y + lastPt.y) / 3;
+
+            out.push('      <ellipse cx="' + island1X.toFixed(1) + '" cy="' + island1Y.toFixed(1) + '" rx="18" ry="9.5" fill="' + rTheme.bankColor + '" stroke="' + ink + '" stroke-width="1.1" filter="url(#riverWobble)"/>');
+            out.push('      <ellipse cx="' + (island1X - 1).toFixed(1) + '" cy="' + island1Y.toFixed(1) + '" rx="13" ry="6.5" fill="' + (activeTheme === "fire" ? "#451a03" : "#5d8438") + '" opacity="0.9"/>');
+            out.push('      <path d="M ' + (island1X - 6).toFixed(1) + ' ' + (island1Y - 2).toFixed(1) + ' L ' + (island1X - 7).toFixed(1) + ' ' + (island1Y - 9).toFixed(1) + ' M ' + (island1X - 2).toFixed(1) + ' ' + island1Y.toFixed(1) + ' L ' + (island1X - 2).toFixed(1) + ' ' + (island1Y - 8).toFixed(1) + '" stroke="#606c38" stroke-width="1.3" stroke-linecap="round"/>');
+
+            out.push('      <ellipse cx="' + island2X.toFixed(1) + '" cy="' + island2Y.toFixed(1) + '" rx="16" ry="8.5" fill="' + rTheme.bankColor + '" stroke="' + ink + '" stroke-width="1.1" filter="url(#riverWobble)"/>');
+            out.push('      <ellipse cx="' + island2X.toFixed(1) + '" cy="' + island2Y.toFixed(1) + '" rx="11" ry="5.8" fill="' + (activeTheme === "fire" ? "#451a03" : "#5d8438") + '" opacity="0.9"/>');
+
+            var surfY1 = Math.min(880, lastPt.y + 12);
+            var surfY2 = Math.min(890, lastPt.y + 22);
+            out.push('      <path d="M ' + (leftBranchEnd.x - 22).toFixed(1) + ' ' + surfY1 + ' Q ' + lastPt.x.toFixed(1) + ' ' + (surfY1 - 4) + ' ' + (rightBranchEnd.x + 22).toFixed(1) + ' ' + surfY1 + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.75)") + '" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="18,12,32,16"/>');
+            out.push('      <path d="M ' + (leftBranchEnd.x - 30).toFixed(1) + ' ' + surfY2 + ' Q ' + lastPt.x.toFixed(1) + ' ' + (surfY2 - 3) + ' ' + (rightBranchEnd.x + 30).toFixed(1) + ' ' + surfY2 + '" fill="none" stroke="' + (rTheme.streamColor2 || "rgba(255,255,255,0.5)") + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="24,14,40,18"/>');
+
+            out.push('      <line x1="' + island1X.toFixed(1) + '" y1="' + (island1Y - 2).toFixed(1) + '" x2="' + island1X.toFixed(1) + '" y2="' + (island1Y - 14).toFixed(1) + '" stroke="#78350f" stroke-width="1.6" stroke-linecap="round"/>');
+            out.push('      <polygon points="' + island1X.toFixed(1) + ',' + (island1Y - 14).toFixed(1) + ' ' + (island1X + 4).toFixed(1) + ',' + (island1Y - 12).toFixed(1) + ' ' + island1X.toFixed(1) + ',' + (island1Y - 10).toFixed(1) + '" fill="#ea580c"/>');
+
+            out.push('    </g>');
+        }
+        return out.join("\n");
+    },
+
     riverNearBridge: function (pt, bridges, radius) {
         for (var b = 0; b < bridges.length; b++) {
             var dx = bridges[b].x - pt.x, dy = bridges[b].y - pt.y;
@@ -1742,8 +2051,8 @@
         if (!board || !board.bridges || board.bridges.length === 0) return "";
         var out = [];
         var ink = "rgba(40,24,14,0.92)";
-        var activeTheme = (document.documentElement && document.documentElement.getAttribute("data-theme")) ||
-                          (typeof localStorage !== "undefined" && localStorage.getItem("kidesky_element_theme")) || "light";
+        var activeTheme = (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
+                          (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
         var th = (this.RIVER_THEMES && this.RIVER_THEMES[activeTheme]) || (this.RIVER_THEMES && this.RIVER_THEMES.light) || {};
         var nodes = board.nodes || [];
 
@@ -2386,7 +2695,7 @@
 
             var bmpUrl = this.getTileBitmapUrl(nd);
 
-            var shortCode = nd.code.replace("BLD_", "").replace("SLAV_", "").replace("_OUT", "").replace("_BR1", "").replace("_BR2", "").replace("_R1", "").replace("_R2", "").replace("_L1", "");
+            var shortCode = (nd.code && typeof nd.code === "string") ? nd.code.replace("BLD_", "").replace("SLAV_", "").replace("_OUT", "").replace("_BR1", "").replace("_BR2", "").replace("_R1", "").replace("_R2", "").replace("_L1", "") : (nd.name || nd.type || String(nd.id || ""));
 
             out.push('  <g class="board-node" style="cursor:pointer" onclick="PRS_App.handleNodeClick(' + nd.id + ')" onmouseenter="PRS_App.handleNodeMouseEnter(event, ' + nd.id + ')" onmouseleave="PRS_App.handleNodeMouseLeave()" onmousemove="PRS_App.handleNodeMouseMove(event)">');
 
@@ -2916,7 +3225,7 @@
                 9: "#16a34a", 10: "#db2777", 11: "#ca8a04", 12: "#0d9488",
                 13: "#9333ea", 14: "#475569"
             };
-            var setNum = nd.setId || (nd.code.match(/\d+/) || [1])[0];
+            var setNum = nd.setId || (nd.code && nd.code.match(/\d+/) ? nd.code.match(/\d+/)[0] : 1);
             var rColor = ribbonColors[setNum] || "#2563eb";
 
             // Indikátor zkompletované sady 3/3 (zlatá koruna) nebo pulz pro aktivního hráče (má 2/3)
@@ -2925,7 +3234,7 @@
             if (this.state.board && this.state.board.nodes) {
                 for (var an = 0; an < this.state.board.nodes.length; an++) {
                     var aNode = this.state.board.nodes[an];
-                    if (aNode.type === "ANIMAL" && (aNode.setId == setNum || (aNode.code.match(/\d+/) || [1])[0] == setNum)) {
+                    if (aNode.type === "ANIMAL" && (aNode.setId == setNum || (aNode.code && aNode.code.match(/\d+/) && aNode.code.match(/\d+/)[0] == setNum))) {
                         if (aNode.owner !== null && aNode.owner !== undefined) {
                             animalSetOwners[aNode.owner] = (animalSetOwners[aNode.owner] || 0) + 1;
                         }
@@ -3039,9 +3348,9 @@
 
             case "ANIMAL":
 
-                if (node.subtype === "kun") return "#422006";
+                if (node.subtype === "horse") return "#422006";
 
-                if (node.subtype === "pes") return "#14532d";
+                if (node.subtype === "dog") return "#14532d";
 
                 return "#1e3a8a";
 
@@ -3325,7 +3634,7 @@
 
         if (nd.type === "ANIMAL") {
 
-            var setNum = nd.setId || (nd.code.match(/\d+/) || [1])[0];
+            var setNum = nd.setId || (nd.code && nd.code.match(/\d+/) ? nd.code.match(/\d+/)[0] : 1);
 
             var myAnimals = [];
 
@@ -3335,7 +3644,7 @@
 
                 if (anNode && anNode.type === "ANIMAL") {
 
-                    var anSet = anNode.setId || (anNode.code.match(/\d+/) || [1])[0];
+                    var anSet = anNode.setId || (anNode.code && anNode.code.match(/\d+/) ? anNode.code.match(/\d+/)[0] : 1);
 
                     if (anSet == setNum && activePlayer && activePlayer.ownedNodes.indexOf(anNode.id) !== -1) {
 
@@ -3353,7 +3662,7 @@
 
             } else if (myAnimals.length > 0) {
 
-                var myKinds = myAnimals.map(function(a){ return a.subtype === "kun" ? "Kůň" : (a.subtype === "pes" ? "Pes" : "Sokol"); }).join(", ");
+                var myKinds = myAnimals.map(function(a){ return a.subtype === "horse" ? "Kůň" : (a.subtype === "dog" ? "Pes" : "Sokol"); }).join(", ");
 
                 extraInfoHtml = '<div class="prs-tooltip-set prs-set-partial">🐾 V sadě č. ' + setNum + ' vlastníš: <strong>' + myAnimals.length + '/3 (' + myKinds + ')</strong></div>';
 
@@ -3407,7 +3716,7 @@
 
         tip.innerHTML = '<div class="prs-tooltip-header"><span>' + (nd.icon || '📍') + '</span> <span>' + this.escapeHtml(nd.name || nd.code) + '</span></div>' +
 
-            '<div class="prs-tooltip-meta">' + typeLabel + ' (' + nd.code + ')</div>' +
+            '<div class="prs-tooltip-meta">' + typeLabel + (nd.code ? ' (' + nd.code + ')' : '') + '</div>' +
 
             ownerText +
 
@@ -3469,9 +3778,9 @@
 
             case "ANIMAL":
 
-                var animalKind = nd.subtype === "kun" ? "Kůň" : (nd.subtype === "pes" ? "Pes" : "Sokol");
+                var animalKind = nd.subtype === "horse" ? "Kůň" : (nd.subtype === "dog" ? "Pes" : "Sokol");
 
-                var setN = nd.setId || (nd.code.match(/\d+/) || [""])[0];
+                var setN = nd.setId || (nd.code && nd.code.match(/\d+/) ? nd.code.match(/\d+/)[0] : "");
 
                 return "Chovné zvíře - " + animalKind + " (Sada " + setN + ")";
 
@@ -3822,6 +4131,7 @@
     wrapText: function (str, maxChars) {
 
         if (!str) return [""];
+        if (typeof str !== "string") str = String(str);
 
         if (str.length <= maxChars) return [str];
 
@@ -4066,7 +4376,7 @@
                 html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong></span>');
                 html.push('    <span style="font-size:0.72rem; color:var(--gold-light);">🔍 Náhled</span>');
                 html.push('  </div>');
-                html.push('  <div style="font-size:0.75rem; color:#fef08a; margin-top:2px;">' + (it.boj ? "⚔️+" + it.boj + " " : "") + (it.jizda ? "🏇+" + it.jizda + " " : "") + (it.tanec ? "💃+" + it.tanec + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
+                html.push('  <div style="font-size:0.75rem; color:#fef08a; margin-top:2px;">' + (it.combat ? "⚔️+" + it.combat + " " : "") + (it.riding ? "🏇+" + it.riding + " " : "") + (it.dance ? "💃+" + it.dance + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
                 html.push('</div>');
 
             }
@@ -4100,7 +4410,7 @@
                 html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong></span>');
                 html.push('    <span style="font-size:0.72rem; color:#d8b4fe;">🔍 Náhled</span>');
                 html.push('  </div>');
-                html.push('  <div style="font-size:0.75rem; color:#e9d5ff; margin-top:2px;">' + (it.boj ? "⚔️+" + it.boj + " " : "") + (it.jizda ? "🏇+" + it.jizda + " " : "") + (it.tanec ? "💃+" + it.tanec + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
+                html.push('  <div style="font-size:0.75rem; color:#e9d5ff; margin-top:2px;">' + (it.combat ? "⚔️+" + it.combat + " " : "") + (it.riding ? "🏇+" + it.riding + " " : "") + (it.dance ? "💃+" + it.dance + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
                 html.push('</div>');
 
             }
@@ -4134,7 +4444,7 @@
                 html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> (' + it.price.toLocaleString("cs-CZ") + ' zl.)</span>');
                 html.push('    <span style="font-size:0.75rem; color:#fde047;">🔍 Náhled</span>');
                 html.push('  </div>');
-                html.push('  <div style="color:#fef08a; font-size:0.8rem; margin-top:2px;">' + (it.boj ? "⚔️+" + it.boj + " " : "") + (it.jizda ? "🏇+" + it.jizda + " " : "") + (it.tanec ? "💃+" + it.tanec + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
+                html.push('  <div style="color:#fef08a; font-size:0.8rem; margin-top:2px;">' + (it.combat ? "⚔️+" + it.combat + " " : "") + (it.riding ? "🏇+" + it.riding + " " : "") + (it.dance ? "💃+" + it.dance + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
                 html.push('</div>');
 
             }
