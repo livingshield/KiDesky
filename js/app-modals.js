@@ -97,30 +97,34 @@
         var winner = this.state.players[winIdx];
 
         var subEl = document.getElementById("victory-winner-subtitle");
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tModal = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var currGold = isEn ? "g." : "zl.";
         var titleEl = document.querySelector("#victory-modal .victory-title");
         var crownEl = document.querySelector("#victory-modal .victory-crown-icon");
 
         if (subEl) {
             var subText = "";
             var winType = this.state.winType || "";
+            var bName = '<strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong>';
 
             if (winType === "slayer_dragons") {
-                if (titleEl) titleEl.innerHTML = "🐉 Dračí triumf &amp; Královská svatba";
+                if (titleEl) titleEl.innerHTML = tModal("modals.endgame.title_slayer", null, "🐉 Dračí triumf &amp; Královská svatba");
                 if (crownEl) crownEl.innerHTML = "🐉👑";
-                subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> skolil 2 obávané draky království a v ' + this.state.roundNumber + '. kole získává věčnou slávu i ruku princezny!';
+                subText = tModal("modals.endgame.sub_slayer", { badge_name: bName, round: this.state.roundNumber });
             } else if (winType === "tycoon_estates") {
-                if (titleEl) titleEl.innerHTML = "🏰 Feudální triumf &amp; Královská svatba";
+                if (titleEl) titleEl.innerHTML = tModal("modals.endgame.title_tycoon", null, "🏰 Feudální triumf &amp; Královská svatba");
                 if (crownEl) crownEl.innerHTML = "🏰👑";
-                subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> ovládl 3 města i královský hrad a v ' + this.state.roundNumber + '. kole získává ruku princezny!';
+                subText = tModal("modals.endgame.sub_tycoon", { badge_name: bName, round: this.state.roundNumber });
             } else if (winType === "sole_survivor") {
-                if (titleEl) titleEl.innerHTML = "💀 Přeživší šampion &amp; Triumf";
+                if (titleEl) titleEl.innerHTML = tModal("modals.endgame.title_survivor", null, "💀 Přeživší šampion &amp; Triumf");
                 if (crownEl) crownEl.innerHTML = "💀👑";
-                subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> jako jediný přežil kruté nástrahy království v režimu Na život a smrt!';
+                subText = tModal("modals.endgame.sub_survivor", { badge_name: bName, round: this.state.roundNumber });
             } else {
-                if (titleEl) titleEl.innerHTML = "Královská svatba &amp; Triumf";
+                if (titleEl) titleEl.innerHTML = tModal("modals.endgame.title_default", null, "Královská svatba &amp; Triumf");
                 if (crownEl) crownEl.innerHTML = "👑";
                 var tgtH = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : winner.totalHearts;
-                subText = 'Rytíř <strong style="color:' + winner.color + '; font-size:1.15rem;">' + winner.badge + ' ' + this.escapeHtml(winner.name) + '</strong> dosáhl cílových <strong>' + tgtH + ' 💖</strong> (získal celkem ' + winner.totalHearts + ' 💖) a v ' + this.state.roundNumber + '. kole získává ruku princezny!';
+                subText = tModal("modals.endgame.sub_default", { badge_name: bName, target: tgtH, total: winner.totalHearts, round: this.state.roundNumber });
             }
 
             if (!this.victoryCreditsAwarded && this.state.roundNumber > 0) {
@@ -138,7 +142,7 @@
                     if (isHumanWinner) creditsEarned += 150; // triumf
                     if (winType === "slayer_dragons" && isHumanWinner) creditsEarned += 50; // drakobijec bonus
                     if (this.awardCredits) {
-                        this.awardCredits(creditsEarned, isHumanWinner ? "Královský triumf" : "Účast v turnaji", isHumanWinner);
+                        this.awardCredits(creditsEarned, isHumanWinner ? (isEn ? "Royal Triumph" : "Královský triumf") : (isEn ? "Tournament Participation" : "Účast v turnaji"), isHumanWinner);
                     }
                     if (this.recordGameStats) {
                         var castlesCount = 0;
@@ -162,7 +166,8 @@
                             festivalHearts: humanPlayer.stats ? (humanPlayer.stats.festivalHearts || 0) : 0
                         });
                     }
-                    subText += '<div style="margin-top:0.45rem; padding:0.35rem 0.65rem; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); border-radius:6px; color:#7dd3fc; font-size:0.83rem;">💎 Odměna: Získal jsi <strong>+' + creditsEarned + ' kreditů</strong> do Rytířské šatny! (Zůstatek: <strong>' + (this.userCredits || 0) + ' 💎</strong>)</div>';
+                    var rewBanner = tModal("modals.endgame.reward_banner", { credits: creditsEarned, balance: (this.userCredits || 0) });
+                    subText += '<div style="margin-top:0.45rem; padding:0.35rem 0.65rem; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); border-radius:6px; color:#7dd3fc; font-size:0.83rem;">' + rewBanner + '</div>';
                 }
             }
 
@@ -217,9 +222,9 @@
         if (podEl) {
             var podHtml = [];
             var ranks = [
-                { rank: 1, title: "🏆 VÍTĚZ", cls: "podium-rank-1", badgeCls: "#fbbf24" },
-                { rank: 2, title: "🥈 2. MÍSTO", cls: "podium-rank-2", badgeCls: "#94a3b8" },
-                { rank: 3, title: "🥉 3. MÍSTO", cls: "podium-rank-3", badgeCls: "#d97706" }
+                { rank: 1, title: tModal("modals.endgame.podium_rank_1", null, "🏆 VÍTĚZ"), cls: "podium-rank-1", badgeCls: "#fbbf24" },
+                { rank: 2, title: tModal("modals.endgame.podium_rank_2", null, "🥈 2. MÍSTO"), cls: "podium-rank-2", badgeCls: "#94a3b8" },
+                { rank: 3, title: tModal("modals.endgame.podium_rank_3", null, "🥉 3. MÍSTO"), cls: "podium-rank-3", badgeCls: "#d97706" }
             ];
 
             for (var r = 0; r < Math.min(3, ranked.length); r++) {
@@ -233,9 +238,9 @@
                 podHtml.push('  <div style="font-weight:bold; font-size:0.95rem; color:' + rp.color + '; margin-bottom:0.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:145px;' + (isDeadP ? ' text-decoration:line-through; opacity:0.75;' : '') + '" title="' + this.escapeHtml(rp.name) + '">' + this.escapeHtml(rp.name) + '</div>');
                 podHtml.push('  <div style="font-size:1.2rem; font-weight:bold; color:#f472b6;">' + formatH(rp.totalHearts) + ' 💖</div>');
                 if (isDeadP) {
-                    podHtml.push('  <small style="color:#ef4444; font-size:0.75rem; font-weight:700;">💀 Vyřazen (bankrot)</small>');
+                    podHtml.push('  <small style="color:#ef4444; font-size:0.75rem; font-weight:700;">' + tModal("modals.endgame.podium_bankrupt", null, "💀 Vyřazen (bankrot)") + '</small>');
                 } else {
-                    podHtml.push('  <small style="color:var(--text-muted); font-size:0.75rem;">' + rp.gold.toLocaleString("cs-CZ") + ' zl.</small>');
+                    podHtml.push('  <small style="color:var(--text-muted); font-size:0.75rem;">' + rp.gold.toLocaleString(isEn ? "en-US" : "cs-CZ") + ' ' + currGold + '</small>');
                 }
                 podHtml.push('</div>');
             }
@@ -246,14 +251,14 @@
         if (tblEl) {
             var tHtml = [];
             tHtml.push('<thead><tr>');
-            tHtml.push('  <th>Pořadí</th>');
-            tHtml.push('  <th>Rytíř</th>');
-            tHtml.push('  <th style="color:#f472b6;">Srdce celkem</th>');
-            tHtml.push('  <th>Slavnosti</th>');
-            tHtml.push('  <th>Bojové úkoly</th>');
-            tHtml.push('  <th>Chov zvířat</th>');
-            tHtml.push('  <th>Měšec</th>');
-            tHtml.push('  <th>Majetek celkem</th>');
+            tHtml.push('  <th>' + tModal("modals.endgame.th_rank", null, "Pořadí") + '</th>');
+            tHtml.push('  <th>' + tModal("modals.endgame.th_knight", null, "Rytíř") + '</th>');
+            tHtml.push('  <th style="color:#f472b6;">' + tModal("modals.endgame.th_total_hearts", null, "Srdce celkem") + '</th>');
+            tHtml.push('  <th>' + tModal("modals.endgame.th_festivals", null, "Slavnosti") + '</th>');
+            tHtml.push('  <th>' + tModal("modals.endgame.th_quests", null, "Bojové úkoly") + '</th>');
+            tHtml.push('  <th>' + tModal("modals.endgame.th_animals", null, "Chov zvířat") + '</th>');
+            tHtml.push('  <th>' + tModal("modals.endgame.th_pouch", null, "Měšec") + '</th>');
+            tHtml.push('  <th>' + tModal("modals.endgame.th_wealth", null, "Majetek celkem") + '</th>');
             tHtml.push('</tr></thead><tbody>');
 
             for (var i = 0; i < ranked.length; i++) {
@@ -266,22 +271,26 @@
                     if (nObj) wealth += window.PRS_GameEngine.getNodeInvestedValue(this.state, nObj);
                 }
 
-                var deadBadge = isDeadRow ? ' <span style="background:#dc2626; color:#fff; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px; margin-left:4px;">💀 Vyřazen</span>' : '';
+                var deadBadge = isDeadRow ? (' <span style="background:#dc2626; color:#fff; font-size:0.65rem; font-weight:800; padding:1px 5px; border-radius:4px; margin-left:4px;">' + tModal("modals.endgame.badge_eliminated", null, "💀 Vyřazen") + '</span>') : '';
                 var pNameStyle = 'color:' + p.color + ';' + (isDeadRow ? ' text-decoration:line-through; opacity:0.7;' : '');
+
+                var fWonStr = tModal("modals.endgame.festivals_won", { count: p.stats.festivalsWon }, p.stats.festivalsWon + "x výhra");
+                var qSlainStr = tModal("modals.endgame.quests_slain", { count: p.stats.questsWon }, p.stats.questsWon + "x skoleno");
+                var dSlainStr = p.stats.dragonsSlain > 0 ? (' <strong style="color:#ef4444; display:block; font-size:0.8rem;">' + tModal("modals.endgame.dragons_slain", { count: p.stats.dragonsSlain }, "🐉 " + p.stats.dragonsSlain + "x drak") + '</strong>') : '';
 
                 tHtml.push('<tr>');
                 tHtml.push('  <td><strong>#' + (i + 1) + '</strong></td>');
                 tHtml.push('  <td><strong style="' + pNameStyle + '">' + p.badge + ' ' + this.escapeHtml(p.name) + '</strong> <small style="color:var(--text-muted);">(' + p.type + ')</small>' + deadBadge + '</td>');
                 tHtml.push('  <td><strong style="color:#f472b6; font-size:1.05rem;">' + formatH(p.totalHearts) + ' 💖</strong></td>');
-                tHtml.push('  <td>' + formatH(p.stats.heartsFromFestivals) + ' 💖 (' + p.stats.festivalsWon + 'x výhra)</td>');
-                tHtml.push('  <td>' + formatH(p.stats.heartsFromQuests) + ' 💖 (' + p.stats.questsWon + 'x skoleno)' + (p.stats.dragonsSlain > 0 ? ' <strong style="color:#ef4444; display:block; font-size:0.8rem;">🐉 ' + p.stats.dragonsSlain + 'x drak</strong>' : '') + '</td>');
+                tHtml.push('  <td>' + formatH(p.stats.heartsFromFestivals) + ' 💖 (' + fWonStr + ')</td>');
+                tHtml.push('  <td>' + formatH(p.stats.heartsFromQuests) + ' 💖 (' + qSlainStr + ')' + dSlainStr + '</td>');
                 tHtml.push('  <td>' + formatH(p.breedingHearts || 0) + ' 💖</td>');
                 if (isDeadRow) {
-                    tHtml.push('  <td><strong style="color:#ef4444;">💀 0 zl.</strong></td>');
+                    tHtml.push('  <td><strong style="color:#ef4444;">💀 0 ' + currGold + '</strong></td>');
                 } else {
-                    tHtml.push('  <td><strong style="color:var(--gold-light);">' + p.gold.toLocaleString("cs-CZ") + ' zl.</strong></td>');
+                    tHtml.push('  <td><strong style="color:var(--gold-light);">' + p.gold.toLocaleString(isEn ? "en-US" : "cs-CZ") + ' ' + currGold + '</strong></td>');
                 }
-                tHtml.push('  <td>' + wealth.toLocaleString("cs-CZ") + ' zl.</td>');
+                tHtml.push('  <td>' + wealth.toLocaleString(isEn ? "en-US" : "cs-CZ") + ' ' + currGold + '</td>');
                 tHtml.push('</tr>');
             }
             tHtml.push('</tbody>');
@@ -565,6 +574,9 @@
             ctx.fill();
         });
 
+        var isEnDip = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tDip = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+
         // 3. Záhlaví a koruna
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -574,11 +586,11 @@
 
         ctx.font = "bold 15px 'Cinzel', serif";
         ctx.fillStyle = "#854d0e";
-        ctx.fillText("KRÁLOVSTVÍ KIDESKY", w / 2, 102);
+        ctx.fillText(tDip("modals.diploma.realm_header", null, "KRÁLOVSTVÍ KIDESKY"), w / 2, 102);
 
         ctx.font = "bold 24px 'Cinzel', serif";
         ctx.fillStyle = "#451a03";
-        ctx.fillText("PRINCEZNINO SRDCE", w / 2, 130);
+        ctx.fillText(tDip("modals.diploma.game_title", null, "PRINCEZNINO SRDCE"), w / 2, 130);
 
         // Dělící zlatá linka s ornamentem
         ctx.strokeStyle = "#c59b27";
@@ -594,12 +606,12 @@
         // 4. Titul diplomu
         ctx.font = "bold 27px 'Cinzel', serif";
         ctx.fillStyle = "#b45309";
-        ctx.fillText("KRÁLOVSKÝ DIPLOM VÍTĚZE", w / 2, 188);
+        ctx.fillText(tDip("modals.diploma.diploma_title", null, "KRÁLOVSKÝ DIPLOM VÍTĚZE"), w / 2, 188);
 
         // 5. Provolání
         ctx.font = "italic 15px 'Outfit', sans-serif";
         ctx.fillStyle = "#5c3d18";
-        ctx.fillText("Tímto slavnostním dekretem se dává na vědomí celému světu, že udatný rytíř", w / 2, 225);
+        ctx.fillText(tDip("modals.diploma.proclamation", null, "Tímto slavnostním dekretem se dává na vědomí celému světu, že udatný rytíř"), w / 2, 225);
 
         // Jméno vítěze
         ctx.font = "bold 32px 'Cinzel', serif";
@@ -610,12 +622,12 @@
         // Dekretový text o vítězství
         ctx.font = "16px 'Outfit', sans-serif";
         ctx.fillStyle = "#3e2710";
-        var mapTxt = data.boardName || "Království";
+        var mapTxt = data.boardName || (isEnDip ? "Realm of KiDesky" : "Království");
         var rTxt = data.roundNumber || 1;
         var hTxt = data.winnerHearts || 30;
-        ctx.fillText("dokázal v nelítostném a čestném zápolení po " + rTxt + " kolech ovládnout turnaj", w / 2, 315);
-        ctx.fillText("na herním stole „" + mapTxt + "“ a získal celkem " + hTxt + " Princezniných srdcí,", w / 2, 342);
-        ctx.fillText("čímž si vydobyl nehynoucí slávu rytířského stavu i ruku spanilé princezny.", w / 2, 369);
+        ctx.fillText(tDip("modals.diploma.decree_p1", { round: rTxt }, "dokázal v nelítostném a čestném zápolení po " + rTxt + " kolech ovládnout turnaj"), w / 2, 315);
+        ctx.fillText(tDip("modals.diploma.decree_p2", { board: mapTxt, hearts: hTxt }, "na herním stole „" + mapTxt + "“ a získal celkem " + hTxt + " Princezniných srdcí,"), w / 2, 342);
+        ctx.fillText(tDip("modals.diploma.decree_p3", null, "čímž si vydobyl nehynoucí slávu rytířského stavu i ruku spanilé princezny."), w / 2, 369);
 
         // 6. Královské pečetě a podpis
         // Levá pečeť (Červený vosk)
@@ -636,18 +648,20 @@
         ctx.font = "24px serif";
         ctx.fillText("👑", sealX, sealY - 4);
         ctx.font = "bold 8px 'Cinzel', serif";
-        ctx.fillText("KRÁLOVSKÁ PEČEŤ", sealX, sealY + 18);
+        ctx.fillText(tDip("modals.diploma.seal_label", null, "KRÁLOVSKÁ PEČEŤ"), sealX, sealY + 18);
 
         // Středové údaje
         ctx.font = "12px 'Outfit', sans-serif";
         ctx.fillStyle = "#78350f";
-        ctx.fillText("Dáno v sídelním městě království KiDesky", w / 2, 445);
+        ctx.fillText(tDip("modals.diploma.issued_in", null, "Dáno v sídelním městě království KiDesky"), w / 2, 445);
         ctx.font = "bold 13px 'Cinzel', serif";
         ctx.fillStyle = "#451a03";
-        ctx.fillText("Datum: " + (data.date || new Date().toLocaleDateString("cs-CZ")), w / 2, 468);
+        var dateFormatted = data.date || new Date().toLocaleDateString(isEnDip ? "en-US" : "cs-CZ");
+        ctx.fillText(tDip("modals.diploma.date_label", { date: dateFormatted }, "Datum: " + dateFormatted), w / 2, 468);
         ctx.font = "11px 'Outfit', sans-serif";
         ctx.fillStyle = "#854d0e";
-        ctx.fillText("Dekret koruny č. KD-" + String(data.id || "").replace("game_", "").slice(-6), w / 2, 490);
+        var decNo = String(data.id || "").replace("game_", "").slice(-6);
+        ctx.fillText(tDip("modals.diploma.decree_no", { no: decNo }, "Dekret koruny č. KD-" + decNo), w / 2, 490);
 
         // Pravá strana: podpis kancléře
         var signX = w - 160, signY = 455;
