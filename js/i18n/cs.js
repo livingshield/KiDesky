@@ -293,7 +293,20 @@ window.PRS_I18N.cs = {
         "knight_encounter_title": "🤺 Setkání rytířů: {badge} {name}",
         "knight_encounter_desc": "Na tomto poli stojí soupeř. Zvol rytířský duel cti, nebo ukaž dvorskou noblesu přátelským přípitkem:",
         "knight_encounter_duel": "⚔️ Rytířský duel cti (Sázka {stake} & 0.5 💖)",
-        "knight_encounter_toast": "🍷 Přátelský přípitek ({cost} ➔ Zisk +0,5 💖)"
+        "knight_encounter_toast": "🍷 Přátelský přípitek ({cost} ➔ Zisk +0,5 💖)",
+        "endless_banner_title": "🏆 HRA JE DOHRÁNA • VÍTĚZ: <strong style=\"color:{color};\">{name}</strong> ({round}. kolo)!",
+        "endless_banner_desc": "♾️ <em>Režim nekonečné volné hry: pokračuješ ve stavění, chovu a plnění zbývajících cílů pro radost ze hry.</em>",
+        "endless_banner_results": "🏆 Výsledky & Síň slávy",
+        "endless_banner_results_title": "Zobrazit slavnostní tabulku a statistiky vítězství",
+        "endless_banner_new_game": "🔄 Nová partie",
+        "endless_banner_new_game_title": "Začít novou partii od začátku",
+        "game_over_banner_title": "👑 Královská svatba! Vítězem je {badge} {name}!",
+        "game_over_banner_slayer": "Skolil 2 obávané draky království za {round} kol a získává ruku princezny.",
+        "game_over_banner_tycoon": "Ovládl 3 města a královský hrad za {round} kol a získává ruku princezny.",
+        "game_over_banner_default": "Získal celkem <strong>{hearts} 💖</strong> za {round} kol a získává ruku princezny.",
+        "game_over_banner_endless": "♾️ Pokračovat v nekonečné hře",
+        "game_over_banner_endless_title": "Pokračovat ve volné hře na stávajícím herním plánu",
+        "game_over_banner_ceremony": "👑 Otevřít ceremoniál & Síň slávy"
     },
     "modals": {
         "armory_tab_weapon": "🗡️ Zbraně",
@@ -357,7 +370,11 @@ window.PRS_I18N.cs = {
             "badge_eliminated": "💀 Vyřazen",
             "festivals_won": "{count}x výhra",
             "quests_slain": "{count}x skoleno",
-            "dragons_slain": "🐉 {count}x drak"
+            "dragons_slain": "🐉 {count}x drak",
+            "hall_saving": "Zapisuji vítězství do Síně slávy na MSSQL databázi...",
+            "hall_saved_ok": "✅ <strong>Skvělé! Vítězství bylo trvale zapsáno do Síně slávy na serveru (kód: {code}).</strong>",
+            "hall_saved_db": "✅ Partie uložena do databáze.",
+            "hall_saved_local": "✅ Partie zaznamenána lokálně."
         },
         "diploma": {
             "download": "💾 Stáhnout diplom (PNG)",
@@ -372,7 +389,12 @@ window.PRS_I18N.cs = {
             "seal_label": "KRÁLOVSKÁ PEČEŤ",
             "issued_in": "Dáno v sídelním městě království KiDesky",
             "date_label": "Datum: {date}",
-            "decree_no": "Dekret koruny č. KD-{no}"
+            "decree_no": "Dekret koruny č. KD-{no}",
+            "modal_title": "Královský diplom vítěze",
+            "modal_subtitle": "Oficiální listina krále s pečetí a podpisem kancléře",
+            "close_title": "Zavřít diplom",
+            "behalf_of": "V zastoupení koruny a dvora:",
+            "chancellor_title": "Nejvyšší královský kancléř"
         },
         "online_role": {
             "free_play": "🛋️ Hrát bez zámku (Všichni hráči / Hot-Seat)"

@@ -363,83 +363,54 @@
     },
 
     saveVictoryToCloud: function () {
-
         var self = this;
-
         var fb = document.getElementById("victory-cloud-feedback");
-
         var btn = document.getElementById("btn-save-hall-of-fame");
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tModal = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
-        if (fb) fb.textContent = "Zapisuji vítězství do Síně slávy na MSSQL databázi...";
-
+        if (fb) fb.textContent = tModal("modals.endgame.hall_saving", null, isEn ? "Recording victory in Hall of Fame on database..." : "Zapisuji vítězství do Síně slávy na MSSQL databázi...");
         if (btn) btn.disabled = true;
 
         var winIdx = (this.state.winnerIndex !== null) ? this.state.winnerIndex : 0;
-
         var winner = this.state.players[winIdx];
 
         var payload = {
-
             sessionGuid: this.state.sessionGuid || ("v_" + Date.now()),
-
             roomCode: (this.state.sessionGuid ? this.state.sessionGuid.substring(0, 6).toUpperCase() : "VICTORY"),
-
-            title: "Princeznino srdce - Vítězství: " + winner.name,
-
+            title: (isEn ? "The Princess's Heart - Victory: " : "Princeznino srdce - Vítězství: ") + winner.name,
             boardCode: this.state.board.code,
-
             status: "Finished",
-
             currentTurnPlayer: winIdx,
-
             turnNumber: this.state.turnNumber,
-
             targetHearts: this.state.config.targetHearts,
-
             winnerName: winner.name,
-
             stateJson: JSON.stringify(this.state),
-
             players: this.state.players
-
         };
 
         fetch("api.ashx?action=save-session", {
-
             method: "POST",
-
             headers: { "Content-Type": "application/json" },
-
             body: JSON.stringify(payload)
-
         })
-
             .then(function (r) { return r.json(); })
-
             .then(function (res) {
-
                 if (btn) btn.disabled = false;
-
                 if (fb) {
-
-                    fb.innerHTML = (res && res.ok)
-
-                        ? "✅ <strong>Skvělé! Vítězství bylo trvale zapsáno do Síně slávy na serveru (kód: " + (res.roomCode || "ULOŽENO") + ").</strong>"
-
-                        : "✅ Partie uložena do databáze.";
-
+                    if (res && res.ok) {
+                        var code = res.roomCode || (isEn ? "SAVED" : "ULOŽENO");
+                        fb.innerHTML = tModal("modals.endgame.hall_saved_ok", { code: code },
+                            "✅ <strong>" + (isEn ? "Great! Victory was permanently recorded in the Hall of Fame on the server (code: " : "Skvělé! Vítězství bylo trvale zapsáno do Síně slávy na serveru (kód: ") + code + ").</strong>");
+                    } else {
+                        fb.innerHTML = tModal("modals.endgame.hall_saved_db", null, isEn ? "✅ Game saved to database." : "✅ Partie uložena do databáze.");
+                    }
                 }
-
             })
-
             .catch(function () {
-
                 if (btn) btn.disabled = false;
-
-                if (fb) fb.textContent = "✅ Partie zaznamenána lokálně.";
-
+                if (fb) fb.textContent = tModal("modals.endgame.hall_saved_local", null, isEn ? "✅ Match recorded locally." : "✅ Partie zaznamenána lokálně.");
             });
-
     },
 
     // Uložení odehrané partie do historie a profilu
@@ -515,6 +486,9 @@
         this._currentDiplomaMatch = matchData;
         modal.style.display = "flex";
         this.updateBodyModalClass();
+        if (window.PRS_I18n && window.PRS_I18n.updateDOM) {
+            window.PRS_I18n.updateDOM(modal);
+        }
         this.renderWinnerDiploma(matchData);
         if (window.PRS_Audio) window.PRS_Audio.playFanfare();
     },
@@ -667,7 +641,7 @@
         var signX = w - 160, signY = 455;
         ctx.font = "italic 13px 'Outfit', sans-serif";
         ctx.fillStyle = "#5c3d18";
-        ctx.fillText("V zastoupení koruny a dvora:", signX, signY - 18);
+        ctx.fillText(tDip("modals.diploma.behalf_of", null, "V zastoupení koruny a dvora:"), signX, signY - 18);
         ctx.font = "italic bold 18px 'Cinzel', serif";
         ctx.fillStyle = "#1e293b";
         ctx.fillText("Lord Kikin", signX, signY + 6);
@@ -679,7 +653,7 @@
         ctx.stroke();
         ctx.font = "10px 'Outfit', sans-serif";
         ctx.fillStyle = "#64748b";
-        ctx.fillText("Nejvyšší královský kancléř", signX, signY + 28);
+        ctx.fillText(tDip("modals.diploma.chancellor_title", null, "Nejvyšší královský kancléř"), signX, signY + 28);
     },
 
     // Stažení certifikátu jako PNG

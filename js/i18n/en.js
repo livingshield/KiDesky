@@ -293,7 +293,20 @@ window.PRS_I18N.en = {
         "knight_encounter_title": "🤺 Knight Encounter: {badge} {name}",
         "knight_encounter_desc": "An opponent stands on this tile. Choose a knightly duel of honor, or show courtly nobility with a friendly toast:",
         "knight_encounter_duel": "⚔️ Knightly duel of honor (Stake {stake} & 0.5 💖)",
-        "knight_encounter_toast": "🍷 Friendly toast ({cost} ➔ Gain +0.5 💖)"
+        "knight_encounter_toast": "🍷 Friendly toast ({cost} ➔ Gain +0.5 💖)",
+        "endless_banner_title": "🏆 GAME FINISHED • WINNER: <strong style=\"color:{color};\">{name}</strong> (Round {round})!",
+        "endless_banner_desc": "♾️ <em>Endless free play mode: continue building, breeding, and completing remaining goals for the joy of the game.</em>",
+        "endless_banner_results": "🏆 Results & Hall of Fame",
+        "endless_banner_results_title": "View victory table and game statistics",
+        "endless_banner_new_game": "🔄 New Game",
+        "endless_banner_new_game_title": "Start a new match from the beginning",
+        "game_over_banner_title": "👑 Royal Wedding! The winner is {badge} {name}!",
+        "game_over_banner_slayer": "Slain 2 feared dragons of the realm in {round} rounds and claims the hand of the princess.",
+        "game_over_banner_tycoon": "Captured 3 towns and the royal castle in {round} rounds and wins the hand of the princess.",
+        "game_over_banner_default": "Earned a total of <strong>{hearts} 💖</strong> in {round} rounds and wins the hand of the princess.",
+        "game_over_banner_endless": "♾️ Continue in Endless Mode",
+        "game_over_banner_endless_title": "Continue playing freely on the current board",
+        "game_over_banner_ceremony": "👑 Open Ceremony & Hall of Fame"
     },
     "modals": {
         "armory_tab_weapon": "🗡️ Weapons",
@@ -357,7 +370,11 @@ window.PRS_I18N.en = {
             "badge_eliminated": "💀 Eliminated",
             "festivals_won": "{count}x won",
             "quests_slain": "{count}x slain",
-            "dragons_slain": "🐉 {count}x dragon"
+            "dragons_slain": "🐉 {count}x dragon",
+            "hall_saving": "Recording victory in Hall of Fame on database...",
+            "hall_saved_ok": "✅ <strong>Great! Victory was permanently recorded in the Hall of Fame on the server (code: {code}).</strong>",
+            "hall_saved_db": "✅ Game saved to database.",
+            "hall_saved_local": "✅ Match recorded locally."
         },
         "diploma": {
             "download": "💾 Download Diploma (PNG)",
@@ -372,7 +389,12 @@ window.PRS_I18N.en = {
             "seal_label": "ROYAL SEAL",
             "issued_in": "Issued in the capital seat of the Realm of KiDesky",
             "date_label": "Date: {date}",
-            "decree_no": "Crown Decree No. KD-{no}"
+            "decree_no": "Crown Decree No. KD-{no}",
+            "modal_title": "Royal Victory Diploma",
+            "modal_subtitle": "Official royal decree with seal and chancellor's signature",
+            "close_title": "Close diploma",
+            "behalf_of": "On behalf of the Crown and Court:",
+            "chancellor_title": "High Royal Chancellor"
         },
         "online_role": {
             "free_play": "🛋️ Play without lock (All Players / Hot-Seat)"

@@ -776,21 +776,39 @@
         var winColor = winner ? winner.color : "var(--gold-light)";
         var winRound = this.state.originalWinRound || this.state.roundNumber || 1;
 
+        var isEnEndless = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tHudE = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+
+        var bannerTitle = tHudE("hud.endless_banner_title", {
+            color: winColor,
+            name: this.escapeHtml(winName),
+            round: winRound
+        }, '🏆 ' + (isEnEndless ? 'GAME FINISHED • WINNER: ' : 'HRA JE DOHRÁNA • VÍTĚZ: ') + '<strong style="color:' + winColor + ';">' + this.escapeHtml(winName) + '</strong> (' + (isEnEndless ? 'Round ' + winRound : winRound + '. kolo') + ')!');
+
+        var bannerDesc = tHudE("hud.endless_banner_desc", null, isEnEndless ?
+            '♾️ <em>Endless free play mode: continue building, breeding, and completing remaining goals for the joy of the game.</em>' :
+            '♾️ <em>Režim nekonečné volné hry: pokračuješ ve stavění, chovu a plnění zbývajících cílů pro radost ze hry.</em>');
+
+        var btnRes = tHudE("hud.endless_banner_results", null, isEnEndless ? "🏆 Results &amp; Hall of Fame" : "🏆 Výsledky &amp; Síň slávy");
+        var btnResTitle = tHudE("hud.endless_banner_results_title", null, isEnEndless ? "View victory table and game statistics" : "Zobrazit slavnostní tabulku a statistiky vítězství");
+        var btnNew = tHudE("hud.endless_banner_new_game", null, isEnEndless ? "🔄 New Game" : "🔄 Nová partie");
+        var btnNewTitle = tHudE("hud.endless_banner_new_game_title", null, isEnEndless ? "Start a new match from the beginning" : "Začít novou partii od začátku");
+
         banner.innerHTML =
             '<div style="display:flex; align-items:center; gap:0.65rem;">' +
             '  <span style="font-size:1.5rem; filter:drop-shadow(0 0 6px rgba(234,179,8,0.7));">👑</span>' +
             '  <div>' +
             '    <div style="color:var(--gold-light); font-size:0.95rem; font-weight:700; font-family:\'Cinzel\',serif;">' +
-            '      🏆 HRA JE DOHRÁNA • VÍTĚZ: <strong style="color:' + winColor + ';">' + this.escapeHtml(winName) + '</strong> (' + winRound + '. kolo)!' +
+            '      ' + bannerTitle +
             '    </div>' +
             '    <div style="font-size:0.77rem; color:#fde68a; margin-top:2px;">' +
-            '      ♾️ <em>Režim nekonečné volné hry: pokračuješ ve stavění, chovu a plnění zbývajících cílů pro radost ze hry.</em>' +
+            '      ' + bannerDesc +
             '    </div>' +
             '  </div>' +
             '</div>' +
             '<div style="display:flex; gap:0.45rem; align-items:center;">' +
-            '  <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.75rem; border-color:var(--gold); color:var(--gold-light); font-weight:700;" onclick="PRS_App.openVictoryModal()" title="Zobrazit slavnostní tabulku a statistiky vítězství">🏆 Výsledky &amp; Síň slávy</button>' +
-            '  <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.75rem;" onclick="PRS_App.startNewGame(true)" title="Začít novou partii od začátku">🔄 Nová partie</button>' +
+            '  <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.75rem; border-color:var(--gold); color:var(--gold-light); font-weight:700;" onclick="PRS_App.openVictoryModal()" title="' + btnResTitle + '">' + btnRes + '</button>' +
+            '  <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.75rem;" onclick="PRS_App.startNewGame(true)" title="' + btnNewTitle + '">' + btnNew + '</button>' +
             '</div>';
     },
 
@@ -3353,18 +3371,37 @@
 
             }
 
+            var isEnGameOver = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var tHudG = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+
+            var headTitle = tHudG("hud.game_over_banner_title", {
+                badge: (winP ? winP.badge : "👑"),
+                name: this.escapeHtml(winP ? winP.name : "Vítěz")
+            }, isEnGameOver ? ("👑 Royal Wedding! The winner is " + (winP ? winP.badge : "👑") + " " + this.escapeHtml(winP ? winP.name : "Winner") + "!") : ("👑 Královská svatba! Vítězem je " + (winP ? winP.badge : "👑") + " " + this.escapeHtml(winP ? winP.name : "Vítěz") + "!"));
+
+            var descText = "";
+            if (this.state.winType === "slayer_dragons") {
+                descText = tHudG("hud.game_over_banner_slayer", { round: this.state.roundNumber }, isEnGameOver ? ("Slain 2 feared dragons of the realm in " + this.state.roundNumber + " rounds and claims the hand of the princess.") : ("Skolil 2 obávané draky království za " + this.state.roundNumber + " kol a získává ruku princezny."));
+            } else if (this.state.winType === "tycoon_estates") {
+                descText = tHudG("hud.game_over_banner_tycoon", { round: this.state.roundNumber }, isEnGameOver ? ("Captured 3 towns and the royal castle in " + this.state.roundNumber + " rounds and wins the hand of the princess.") : ("Ovládl 3 města a královský hrad za " + this.state.roundNumber + " kol a získává ruku princezny."));
+            } else {
+                var heartsVal = winP ? winP.totalHearts : 30;
+                descText = tHudG("hud.game_over_banner_default", { hearts: heartsVal, round: this.state.roundNumber }, isEnGameOver ? ("Earned a total of <strong>" + heartsVal + " 💖</strong> in " + this.state.roundNumber + " rounds and wins the hand of the princess.") : ("Získal celkem <strong>" + heartsVal + " 💖</strong> za " + this.state.roundNumber + " kol a získává ruku princezny."));
+            }
+
+            var btnEndless = tHudG("hud.game_over_banner_endless", null, isEnGameOver ? "♾️ Continue in Endless Mode" : "♾️ Pokračovat v nekonečné hře");
+            var btnEndlessTitle = tHudG("hud.game_over_banner_endless_title", null, isEnGameOver ? "Continue playing freely on the current board" : "Pokračovat ve volné hře na stávajícím herním plánu");
+            var btnCeremony = tHudG("hud.game_over_banner_ceremony", null, isEnGameOver ? "👑 Open Ceremony &amp; Hall of Fame" : "👑 Otevřít ceremoniál &amp; Síň slávy");
+            var btnNewG = tHudG("hud.endless_banner_new_game", null, isEnGameOver ? "🔄 New Game" : "🔄 Nová partie");
+
             el.innerHTML = '<div class="action-card victory-banner">' +
-
-                '<h3>👑 Královská svatba! Vítězem je ' + winP.badge + ' ' + this.escapeHtml(winP.name) + '!</h3>' +
-
-                '<p>' + (this.state.winType === "slayer_dragons" ? "Skolil 2 obávané draky království" : (this.state.winType === "tycoon_estates" ? "Ovládl 3 města a královský hrad" : ("Získal celkem <strong>" + winP.totalHearts + " 💖</strong>"))) + ' za ' + this.state.roundNumber + ' kol a získává ruku princezny.</p>' +
-
+                '<h3>' + headTitle + '</h3>' +
+                '<p>' + descText + '</p>' +
                 '<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.6rem;">' +
-                '  <button class="btn-gold-lg" onclick="PRS_App.continueInEndlessMode()" title="Pokračovat ve volné hře na stávajícím herním plánu">♾️ Pokračovat v nekonečné hře</button>' +
-                '  <button class="btn-secondary" onclick="PRS_App.openVictoryModal()">👑 Otevřít ceremoniál &amp; Síň slávy</button>' +
-                '  <button class="btn-secondary" onclick="PRS_App.startNewGame(true)">🔄 Nová partie</button>' +
+                '  <button class="btn-gold-lg" onclick="PRS_App.continueInEndlessMode()" title="' + btnEndlessTitle + '">' + btnEndless + '</button>' +
+                '  <button class="btn-secondary" onclick="PRS_App.openVictoryModal()">' + btnCeremony + '</button>' +
+                '  <button class="btn-secondary" onclick="PRS_App.startNewGame(true)">' + btnNewG + '</button>' +
                 '</div>' +
-
                 '</div>';
 
             return;
