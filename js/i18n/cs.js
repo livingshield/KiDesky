@@ -1830,7 +1830,20 @@ window.PRS_I18N.cs = {
         "filter_settlement": "🌾 Sídla & Venkov",
         "filter_water": "🌊 Voda & Močály",
         "filter_magic": "✨ Magická místa",
-        "filter_quest_lair": "⛰️ Doupata & Sluje"
+        "filter_quest_lair": "⛰️ Doupata & Sluje",
+        "clearance": "🏷️ Bezpečná zóna (Clearance):",
+        "btn_mirror": "🔄 Otočit zrcadlení",
+        "btn_original": "↩️ Původní směr",
+        "categories": {
+            "vegetation": "Lesy & Vegetace",
+            "terrain": "Skály & Hory",
+            "agriculture": "Zemědělství",
+            "settlement": "Sídla & Stavby",
+            "civilization": "Opevnění & Stráže",
+            "water": "Voda & Močály",
+            "magic": "Magie & Ruiny",
+            "quest_lair": "Doupata & Sluje"
+        }
     },
     "admin": {
         "title": "🛡️ Královská Administrace",
@@ -2267,5 +2280,245 @@ window.PRS_I18N.cs = {
     "achievements": {
         "modal_title": "🏆 Rytířská síň slávy &amp; Úspěchy",
         "modal_close": "Zavřít síň slávy"
+    },
+    "dialogs": {
+        "new_realm": {
+            "title": "Nové království",
+            "msg": "Generování nového světa vyžaduje novou partii.\nPřeješ si vygenerovat nové království (Seed #{seed}) a začít novou hru?",
+            "confirm": "🎲 Vygenerovat a začít",
+            "cancel": "Zpět k partii"
+        },
+        "custom_map": {
+            "title": "Zahájení výpravy na vlastním plánu",
+            "msg": "Spuštění nové výpravy na vlastním dynamickém plánu vyžaduje restart partie.\nPřeješ si začít hrát na plánu „{name}“ ({count} polí)?",
+            "confirm": "⚔️ Zahájit hru na tomto plánu",
+            "cancel": "Zpět k partii"
+        },
+        "change_map": {
+            "title": "Změna herního plánu",
+            "msg": "V rozehrané partii nelze měnit mapu bez restartu hry.\nPřeješ si opravdu ukončit aktuální partii a začít novou hru na zvoleném plánu?",
+            "confirm": "⚔️ Změnit plán a začít znovu",
+            "cancel": "Zpět k partii"
+        }
+    },
+    "chat": {
+        "title": "💬 Královská sněmovna (Chat)",
+        "empty": "💬 Žádné zprávy u stolu.<br/>Napiš zprávu nebo zvol rychlý pokřik výše!",
+        "placeholder": "Napiš zprávu rytířům u stolu...",
+        "send": "Odeslat",
+        "shouts": {
+            "duel": "⚔️ Duel!",
+            "toast": "🍻 Přípitek",
+            "dragon": "🐉 Pozor na draka!",
+            "peace": "🤝 Mír",
+            "village": "🏰 Moje vesnice",
+            "victory": "👑 Sláva vítězi"
+        },
+        "shout_texts": {
+            "duel": "⚔️ Vyzývám tě na turnajový duel!",
+            "toast": "🍻 Připíjím na královnu a dobré sousedy!",
+            "dragon": "🐉 Drak na obzoru, kryjte se!",
+            "peace": "🤝 Nabízím čestný mír a přátelství.",
+            "village": "🏰 Mé panství roste, chystejte nájem!",
+            "victory": "👑 Princeznino srdce bude brzy mé!"
+        }
+    },
+    "decorations": {
+        "tree_oak": {
+            "name": "Listnatý dub",
+            "desc": "Mohutný solitérní dub s hustou zelenou korunou, poskytující stín pocestným a rytířům na královských loukách."
+        },
+        "tree_pine": {
+            "name": "Horská borovice",
+            "desc": "Štíhlá jehličnatá borovice odolávající drsným horským větrům v podhůří i na skalnatých srázech."
+        },
+        "tree_birch": {
+            "name": "Bělostná bříza",
+            "desc": "Půvabná bělostná bříza se stříbřitou kůrou a jemným listovím, oblíbená v hájích u koňských pastvin."
+        },
+        "grove_oak": {
+            "name": "Dubový hájek",
+            "desc": "Malebné seskupení tří starých dubů tvořící přirozený stinný předěl mezi jednotlivými stezkami."
+        },
+        "grove_pine": {
+            "name": "Borový lesík",
+            "desc": "Hustý borový lesík vonící jehličím a pryskyřicí, lemující odlehlejší kouty a stezky k Dračí sluji."
+        },
+        "rock_boulder": {
+            "name": "Mechem porostlý balvan",
+            "desc": "Prastarý žulový balvan obrostlý mechem a lišejníky, označující skalnaté úseky a stezky odvahy."
+        },
+        "mountain_peaks": {
+            "name": "Zasněžený horský štít",
+            "desc": "Monumentální horský masiv s věčným sněhem na vrcholcích, tvořící velkolepý severní horizont království."
+        },
+        "farm_field": {
+            "name": "Pšeničné lánové pole",
+            "desc": "Zlatavý lán zralého pšeničného obilí s úrodnými brázdami, symbol blahobytu a míru v podhradí."
+        },
+        "pasture_fence": {
+            "name": "Pastvina s dřevěnou ohradou",
+            "desc": "Trámová dřevěná ohrada lemující šťavnaté pastviny, kde se chovají ušlechtilí královští koně a lovečtí psi."
+        },
+        "windmill": {
+            "name": "Větrný mlýn",
+            "desc": "Dřevěný větrný mlýn s mohutnými plachtovými lopatkami, který mele zrno na otevřených větrných pláních."
+        },
+        "cottage_timber": {
+            "name": "Roubená chalupa",
+            "desc": "Pohádková roubená chalupa s kamennou podezdívkou a šindelovou střechou v srdci královských vsí."
+        },
+        "village_well": {
+            "name": "Kamenná studna s rumpálem",
+            "desc": "Hluboká návesní studna z kamene s poctivým dřevěným rumpálem a okovem křišťálově čisté vody."
+        },
+        "merchant_wagon": {
+            "name": "Kupecký krytý vůz",
+            "desc": "Krytý povoz potulného kupce se sudy a truhlami, nabízející zbraně, vzácná sukna a lektvary z dalekých zemí."
+        },
+        "tournament_tent": {
+            "name": "Královský turnajový pavilon",
+            "desc": "Nádherný královský pavilon v purpurových a zlatých barvách koruny, připravený pro šlechtická klání a slavnosti."
+        },
+        "signpost": {
+            "name": "Dřevěný rozcestník",
+            "desc": "Dřevěný rozcestník se směrovkami ukazujícími cesty k hradům, vesnicím a nebezpečným stezkám."
+        },
+        "lake_pond": {
+            "name": "Modré lesní jezírko",
+            "desc": "Klidná lesní tůňka s kvetoucími lekníny, rákosím a průzračnou vodou, kde se zrcadlí koruny stromů."
+        },
+        "orchad_apple": {
+            "name": "Jabloňový sad",
+            "desc": "Pravidelně vysázený sad obsypaný sladkými červenými jablky přinášející osvěžení putujícím družinám."
+        },
+        "hruskovy_sad": {
+            "name": "Hruškový sad",
+            "desc": "Slunný ovocný sad se šťavnatými žlutými hruškami na mírných pahorcích královského panství."
+        },
+        "orchad_plum": {
+            "name": "Švestkový sad",
+            "desc": "Sad starých švestkových stromů s modrými plody, ze kterých vesničané vaří vyhlášená povidla."
+        },
+        "bush": {
+            "name": "Hustý keř",
+            "desc": "Hustý kvetoucí keř oživující okraje cest a poskytující bezpečný úkryt pro drobnou lesní zvěř."
+        },
+        "signpost2": {
+            "name": "Kamenný rozcestník",
+            "desc": "Otesaný kamenný rozcestník s vyrytými rodovými erby a směry na křižovatkách horských cest."
+        },
+        "grove_pine2": {
+            "name": "Hluboký borový hvozd",
+            "desc": "Hluboký a neprostupný borový hvozd, v jehož větvích se ozývá tajemné houkání sov a šumění větru."
+        },
+        "hrad": {
+            "name": "Strážní hrad",
+            "desc": "Kamenný strážní hrádek s cimbuřím a střílnami, střežící zemské hranice před nájezdy banditů."
+        },
+        "watermill": {
+            "name": "Vodní mlýn s náhonem",
+            "desc": "Klapající roubený vodní mlýn s proudem vody stékajícím po lopatkách velkého dřevěného kola na zurčícím potoce."
+        },
+        "swamp_bridge": {
+            "name": "Dřevěná lávka přes močál",
+            "desc": "Dřevěná lávka klenoucí se přes zrádný močál mezi orobincem, lekníny a tančícími bludičkami."
+        },
+        "lake_nymphs": {
+            "name": "Jezerní rusalky na molu",
+            "desc": "Tajemné jezerní rusalky a vodní víly odpočívající na dřevěném molu uprostřed leknínů, lákající pocestné svým líbezným zpěvem."
+        },
+        "vodnik_pond": {
+            "name": "Vodník u tůně",
+            "desc": "Zelený hastrman bafající z dýmky na vyvrácené vrbě nad temnou tůní, schovávající hrníčky s dušičkami a chytající ryby do sítě."
+        },
+        "wooden_watchtower": {
+            "name": "Dřevěná strážní věž",
+            "desc": "Vysoká dřevěná trámová pozorovatelna s žebříkem a pochodní, odkud královské hlídky střeží obchodní stezky a hranice panství."
+        },
+        "ancient_tower_ruin": {
+            "name": "Zřícenina kamenné věže",
+            "desc": "Opuštěná kamenná věž obrostlá břečťanem a mohutnými kořeny prastarého stromu, střežící tajemství dávných dynastií."
+        },
+        "witch_hut": {
+            "name": "Perníková chaloupka ježibaby",
+            "desc": "Perníková chaloupka s cukrovou polevou a křivým komínem, ze kterého stoupá fialový kouř od bublajícího čarodějného lektvaru."
+        },
+        "fairy_ring_mushrooms": {
+            "name": "Vílí houbový kruh",
+            "desc": "Magický kruh světélkujících hub na lesní mýtině se třpytivým vílím prachem, kde za svitu měsíce tančí lesní víly a bludičky."
+        },
+        "druid_monoliths": {
+            "name": "Druidské menhiry a megalit",
+            "desc": "Kruh starobylých mechem obrostlých menhirů s vyrytými zářícími runami a kamenným oltářem, které pulzují zemskou magií."
+        },
+        "crystal_golem": {
+            "name": "Krystalový golem",
+            "desc": "Monumentální kamenný golem protkaný zářícími magickými krystaly a runovými žilami, probuzený ze staletého spánku v hlubinách země."
+        },
+        "phoenix_nest": {
+            "name": "Hnízdo ohnivého Fénixe",
+            "desc": "Starobylý kamenný pilíř s hnízdem plným žhnoucího popela a magických vajec, v němž plane vznešený ohnivý pták Fénix."
+        },
+        "ancient_ruins": {
+            "name": "Zarostlé kamenné zříceniny",
+            "desc": "Zarostlé kamenné zříceniny s gotickým obloukem, rozpadlými zdmi a polozakopanou truhlou, skrývající dávno zapomenuté poklady."
+        },
+        "ancient_graveyard": {
+            "name": "Tajemný starý hřbitov",
+            "desc": "Starobylý tajemný hřbitov s kamennou zídkou, náhrobky a uschlým stromem opředený rytířskými legendami."
+        },
+        "dryad_sacred_oak": {
+            "name": "Posvátný dub s lesní dryádou",
+            "desc": "Posvátný dub prastarých věků, z jehož kmene vystupuje ochranitelská lesní dryáda obklopená světélky."
+        },
+        "forest_ent": {
+            "name": "Prastarý lesní ent",
+            "desc": "Probuzený strážce hvozdu v podobě obřího oživlého stromu s parožím a mechovým vousem, chránící posvátné lesy království."
+        },
+        "unicorn_grove": {
+            "name": "Kouzelný háj s jednorožcem",
+            "desc": "Stříbřitá mýtina v hlubokém hvozdu, kde se prochází bájný bílý jednorožec se zlatou hřívou."
+        },
+        "pegasus_pond": {
+            "name": "Pegas u lesní studánky",
+            "desc": "Kouzelná lesní studánka, k níž slétá pít sněhobílý okřídlený Pegas s rozpjatými křídly."
+        },
+        "cave_bear_den": {
+            "name": "Medvědí jeskyně",
+            "desc": "Skalní jeskyně plná kostí a trofejí, sloužící jako brloh obrovského divokého medvěda střežícího vstup do jeskyně."
+        },
+        "bandit_cave": {
+            "name": "Loupežnická jeskyně s pokladem",
+            "desc": "Loupežnické doupě osvětlené plápolajícími pochodněmi, plné otevřených truhel se zlaťáky, drahokamy a zcizenými cennostmi."
+        },
+        "griffin_nest": {
+            "name": "Hnízdo skalního gryfa",
+            "desc": "Vysoký skalní masiv s obřím hnízdem z větví a kostí, kde na vejcích sedí hrdý skalní gryf střežící blýskavé poklady."
+        },
+        "fire_salamander": {
+            "name": "Ohnivý salamandr",
+            "desc": "Mystický lávový salamandr vyhřívající se na žhnoucích balvanech u ohořelého stromu, chrlící drobné plaménky a jiskry."
+        },
+        "dragon_cave": {
+            "name": "Spící drak ve sluji",
+            "desc": "Monumentální skalní jeskyně, v jejímž nitru tvrdě spí červený drak svinutý na obrovské hromadě zlaťáků, pohárů a zbraní padlých rytířů."
+        },
+        "basilisk_cave": {
+            "name": "Jeskyně baziliška",
+            "desc": "Zlověstná skalní rozsedlina plná zkamenělých těl dobrodruhů, střežená smrtícím ještěřím baziliškem."
+        },
+        "snow_troll_cave": {
+            "name": "Ledová jeskyně sněžného trolla",
+            "desc": "Mrazivá ledová jeskyně s obřími rampouchy, kde se v závějích ukrývá mocný sněžný troll s kyjem."
+        },
+        "swamp_troll": {
+            "name": "Bažinný troll u tůně",
+            "desc": "Zavalitý bažinný troll porostlý řasami, který líně odpočívá pod kořeny u kalné tůně."
+        },
+        "swamp_hydra": {
+            "name": "Pětihlavá bažinná hydra",
+            "desc": "Děsivá pětihlavá ještěří hydra vynořující se z hlubin močálu a chrlící jedovatou mlhu."
+        }
     }
 };

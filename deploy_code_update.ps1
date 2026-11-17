@@ -83,6 +83,9 @@ $codeFiles = @(
     "css/board.css",
     "css/modals.css",
     "css/mobile.css",
+    "js/i18n/cs.js",
+    "js/i18n/en.js",
+    "js/app-i18n.js",
     "js/game-data.js",
     "js/game-boards.js",
     "js/game-engine.js",
@@ -107,6 +110,7 @@ foreach ($rb in $remoteBases) {
     Write-Host "=== Deploying code files to $rb ===" -ForegroundColor Yellow
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)css"
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)js"
+    Ensure-FtpDirectory "ftp://$FtpServer$($rb)js/i18n"
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets"
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/icons"
     Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/monsters"

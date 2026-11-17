@@ -77,9 +77,9 @@
     var Dialog = {
         alert: function (message, options) {
             options = options || {};
-            var title = options.title || "Královské poselství";
+            var title = options.title || (window.PRS_I18n ? window.PRS_I18n.t("dialog.alert_title", null, "Královské poselství") : "Královské poselství");
             var icon = options.icon || "👑";
-            var btnText = options.buttonText || "👑 Rozumím";
+            var btnText = options.buttonText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.ok", null, "👑 Rozumím") : "👑 Rozumím");
 
             var msgStr = String(message || "");
             // Extract leading emoji if present for the badge
@@ -140,10 +140,10 @@
 
         confirm: function (message, options) {
             options = options || {};
-            var title = options.title || "Královské rozhodnutí";
+            var title = options.title || (window.PRS_I18n ? window.PRS_I18n.t("dialog.confirm_title", null, "Královské rozhodnutí") : "Královské rozhodnutí");
             var icon = options.icon || "⚔️";
-            var confirmText = options.confirmText || "Ano, provést";
-            var cancelText = options.cancelText || "Zrušit";
+            var confirmText = options.confirmText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.confirm_btn", null, "Ano, provést") : "Ano, provést");
+            var cancelText = options.cancelText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.cancel_btn", null, "Zrušit") : "Zrušit");
             var isDanger = !!options.isDanger;
 
             var msgStr = String(message || "");
@@ -217,10 +217,10 @@
 
         prompt: function (message, defaultValue, options) {
             options = options || {};
-            var title = options.title || "Královská otázka";
+            var title = options.title || (window.PRS_I18n ? window.PRS_I18n.t("dialog.prompt_title", null, "Královská otázka") : "Královská otázka");
             var icon = options.icon || "✍️";
-            var confirmText = options.confirmText || "Potvrdit";
-            var cancelText = options.cancelText || "Zrušit";
+            var confirmText = options.confirmText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.submit_btn", null, "Potvrdit") : "Potvrdit");
+            var cancelText = options.cancelText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.cancel_btn", null, "Zrušit") : "Zrušit");
             var placeholder = options.placeholder || "";
             var inputType = options.inputType || "text";
 
@@ -310,8 +310,9 @@
 
         choice: function (message, choices, options) {
             options = options || {};
-            var title = options.title || "Královská volba";
+            var title = options.title || (window.PRS_I18n ? window.PRS_I18n.t("dialog.choice_title", null, "Královská volba") : "Královská volba");
             var icon = options.icon || "👑";
+            var cancelText = options.cancelText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.back_cancel", null, "Zpět / Zrušit") : "Zrušit");
 
             return new Promise(function (resolve) {
                 var root = ensureDOM();
@@ -336,7 +337,7 @@
                     var extraStyle = c.style || 'width:100%; text-align:left; justify-content:flex-start; padding:0.6rem 0.85rem; font-size:0.86rem; box-sizing:border-box; margin-bottom:0.25rem;';
                     btnsHtml.push('<button type="button" class="' + cls + '" id="kd-dialog-choice-' + idx + '" style="' + extraStyle + '">' + c.label + (c.description ? ('<div style="font-size:0.75rem; opacity:0.82; font-weight:normal; margin-top:3px; line-height:1.25;">' + c.description + '</div>') : '') + '</button>');
                 });
-                btnsHtml.push('<button type="button" class="kd-dialog-btn kd-dialog-btn-secondary" id="kd-dialog-choice-cancel" style="margin-top:0.35rem; width:100%; justify-content:center;">Zrušit</button>');
+                btnsHtml.push('<button type="button" class="kd-dialog-btn kd-dialog-btn-secondary" id="kd-dialog-choice-cancel" style="margin-top:0.35rem; width:100%; justify-content:center;">' + cancelText + '</button>');
 
                 if (actions) {
                     actions.style.flexDirection = 'column';

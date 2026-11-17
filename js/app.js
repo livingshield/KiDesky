@@ -994,6 +994,12 @@ window.PRS_App = {
                 console.warn("[PRS_App] Chyba při přerenderování katalogu po změně jazyka:", catErr);
             }
         }
+        if (typeof this.renderDecorationsGallery === "function") {
+            try { this.renderDecorationsGallery(); } catch (decErr) {}
+        }
+        if (typeof this.renderChatMessagesList === "function") {
+            try { this.renderChatMessagesList(); } catch (chatErr) {}
+        }
     },
 
     // --- HUDEBNÍ PŘEHRÁVAČ & BGM KONTROLER ---,
@@ -4353,11 +4359,15 @@ window.PRS_App = {
         if (bSel) bSel.value = "procedural";
 
         if (this.state && this.state.turnNumber > 0) {
-            var conf = await KiDeskyDialog.confirm("Generování nového světa vyžaduje novou partii.\nPřeješ si vygenerovat nové království (Seed #" + newSeed + ") a začít novou hru?", {
-                title: "Nové království",
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var msg = isEn
+                ? ("Generating a new world requires starting a new quest.\nDo you wish to generate a new realm (Seed #" + newSeed + ") and start a new game?")
+                : ("Generování nového světa vyžaduje novou partii.\nPřeješ si vygenerovat nové království (Seed #" + newSeed + ") a začít novou hru?");
+            var conf = await KiDeskyDialog.confirm(msg, {
+                title: isEn ? "New Realm" : "Nové království",
                 icon: "🎲",
-                confirmText: "🎲 Vygenerovat a začít",
-                cancelText: "Zpět k partii"
+                confirmText: isEn ? "🎲 Generate & Start" : "🎲 Vygenerovat a začít",
+                cancelText: isEn ? "Back to Quest" : "Zpět k partii"
             });
             if (!conf) return;
         }
@@ -4487,11 +4497,15 @@ window.PRS_App = {
 
         if (this.state && this.state.turnNumber > 0) {
 
-            var conf = await KiDeskyDialog.confirm("V rozehrané partii nelze měnit mapu bez restartu hry.\nPřeješ si opravdu ukončit aktuální partii a začít novou hru na zvoleném plánu?", {
-                title: "Změna mapy království",
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var msg = isEn
+                ? "You cannot switch maps in an active game without restarting.\nDo you really want to end the current game and start a new one on the selected map?"
+                : "V rozehrané partii nelze měnit mapu bez restartu hry.\nPřeješ si opravdu ukončit aktuální partii a začít novou hru na zvoleném plánu?";
+            var conf = await KiDeskyDialog.confirm(msg, {
+                title: isEn ? "Change Realm Map" : "Změna mapy království",
                 icon: "🗺️",
-                confirmText: "🗺️ Změnit mapu",
-                cancelText: "Ponechat stávající"
+                confirmText: isEn ? "🗺️ Switch Map & Restart" : "🗺️ Změnit mapu",
+                cancelText: isEn ? "Keep Current" : "Ponechat stávající"
             });
 
             if (!conf) {
@@ -5644,11 +5658,16 @@ window.PRS_App = {
         if (bSel) bSel.value = "saved_map_" + idx;
 
         if (this.state && this.state.turnNumber > 0) {
-            var conf = await KiDeskyDialog.confirm("Spuštění výpravy na šabloně „" + (item.name || "Vlastní plán") + "“ vyžaduje restart partie.\nPřeješ si začít hrát?", {
-                title: "Zahájení výpravy na vybraném plánu",
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var tmplName = item.name || (isEn ? "Custom Map" : "Vlastní plán");
+            var msg = isEn
+                ? ("Starting a quest on template \"" + tmplName + "\" requires restarting the match.\nDo you wish to start playing?")
+                : ("Spuštění výpravy na šabloně „" + tmplName + "“ vyžaduje restart partie.\nPřeješ si začít hrát?");
+            var conf = await KiDeskyDialog.confirm(msg, {
+                title: isEn ? "Start Quest on Selected Map" : "Zahájení výpravy na vybraném plánu",
                 icon: "🗺️",
-                confirmText: "⚔️ Zahájit hru",
-                cancelText: "Zpět"
+                confirmText: isEn ? "⚔️ Start Game" : "⚔️ Zahájit hru",
+                cancelText: isEn ? "Back" : "Zpět"
             });
             if (!conf) return;
         }
@@ -5777,11 +5796,17 @@ window.PRS_App = {
         this.customBoardRecipe.seed = newSeed;
 
         if (this.state && this.state.turnNumber > 0) {
-            var conf = await KiDeskyDialog.confirm("Spuštění nové výpravy na vlastním dynamickém plánu vyžaduje restart partie.\nPřeješ si začít hrát na plánu „" + (this._currentMapStudioBoard.name || newSeed) + "“ (" + this._currentMapStudioBoard.nodes.length + " polí)?", {
-                title: "Zahájení výpravy na vlastním plánu",
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var bName = this._currentMapStudioBoard.name || newSeed;
+            var nodeCount = this._currentMapStudioBoard.nodes ? this._currentMapStudioBoard.nodes.length : 96;
+            var msg = isEn
+                ? ("Starting a new quest on a custom dynamic map requires restarting the match.\nDo you wish to start playing on map \"" + bName + "\" (" + nodeCount + " tiles)?")
+                : ("Spuštění nové výpravy na vlastním dynamickém plánu vyžaduje restart partie.\nPřeješ si začít hrát na plánu „" + bName + "“ (" + nodeCount + " polí)?");
+            var conf = await KiDeskyDialog.confirm(msg, {
+                title: isEn ? "Start Quest on Custom Map" : "Zahájení výpravy na vlastním plánu",
                 icon: "🗺️",
-                confirmText: "⚔️ Zahájit hru na tomto plánu",
-                cancelText: "Zpět k partii"
+                confirmText: isEn ? "⚔️ Start Game on this Map" : "⚔️ Zahájit hru na tomto plánu",
+                cancelText: isEn ? "Back to Quest" : "Zpět k partii"
             });
             if (!conf) return;
         }

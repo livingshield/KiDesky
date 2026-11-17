@@ -461,21 +461,25 @@
             filtered = allItems;
         }
 
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en';
+        var curr = (window.PRS_I18n && window.PRS_I18n.t("ui.currency")) || (isEn ? "g." : "zl.");
+        var locale = isEn ? "en-US" : "cs-CZ";
         var rows = "";
         for (var i = 0; i < filtered.length; i++) {
             var it = filtered[i];
             var tierTag = "";
             if (it.slot === "trophy") {
-                var tLabel = (it.tier === 3) ? "Dračí trofej U3" : ("Trofej U" + it.tier);
+                var tLabel = isEn ? ((it.tier === 3) ? "Dragon Trophy U3" : ("Trophy U" + it.tier)) : ((it.tier === 3) ? "Dračí trofej U3" : ("Trofej U" + it.tier));
                 var tBg = (it.tier === 3)
                     ? "background:linear-gradient(135deg, #b91c1c, #7f1d1d); border-color:#f87171;"
                     : (it.tier === 2 ? "background:linear-gradient(135deg, #7c3aed, #4c1d95); border-color:#c084fc;" : "background:linear-gradient(135deg, #15803d, #14532d); border-color:#86efac;");
                 tierTag = "<span class='tier-badge' style='" + tBg + " font-size:0.7rem; padding:2px 7px;'>" + tLabel + "</span>";
             } else {
-                tierTag = "<span class='tier-badge tier-" + it.tier + "'>Věci " + it.tier + "</span>";
+                var itTierLabel = isEn ? ("Tier " + it.tier) : ("Věci " + it.tier);
+                tierTag = "<span class='tier-badge tier-" + it.tier + "'>" + itTierLabel + "</span>";
             }
 
-            var nameExtra = it.source ? (" <small style='color:#94a3b8; font-weight:normal; display:block; font-size:0.75rem;'>Zdroj: " + this.escapeHtml(it.source) + "</small>") : "";
+            var nameExtra = it.source ? (" <small style='color:#94a3b8; font-weight:normal; display:block; font-size:0.75rem;'>" + (isEn ? "Source: " : "Zdroj: ") + this.escapeHtml(it.source) + "</small>") : "";
 
             rows += "<tr>" +
                 "<td>" + tierTag + "</td>" +
@@ -484,7 +488,7 @@
                 "<td>" + (it.riding ? (it.riding > 0 ? "+" + it.riding : it.riding) : "—") + "</td>" +
                 "<td>" + (it.dance ? (it.dance > 0 ? "+" + it.dance : it.dance) : "—") + "</td>" +
                 "<td>" + (it.charisma ? (it.charisma > 0 ? "+" + it.charisma : it.charisma) : "—") + "</td>" +
-                "<td><strong>" + (it.price ? it.price.toLocaleString("cs-CZ") + " zl." : "—") + "</strong></td>" +
+                "<td><strong>" + (it.price ? it.price.toLocaleString(locale) + " " + curr : "—") + "</strong></td>" +
                 "</tr>";
         }
         itemsBox.innerHTML = rows;
@@ -553,6 +557,16 @@
             return d.tierGroup === tierFilter;
         });
 
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en';
+        var curr = (window.PRS_I18n && window.PRS_I18n.t("ui.currency")) || (isEn ? "g." : "zl.");
+        var locale = isEn ? "en-US" : "cs-CZ";
+        var rewardLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.reward")) || "Odměna:";
+        var heartsLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.hearts")) || (isEn ? "Hearts" : "Srdcí");
+        var diffLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.difficulty")) || (isEn ? "Difficulty" : "Obtížnost");
+        var weaknessLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.weakness")) || "Využitelná slabina (+2 k síle):";
+        var trophyLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.trophy_after_defeat")) || "Trofej po porážce:";
+        var flipLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.flip_view")) || "🔄 Otočit směr pohledu draka";
+
         var wMap = {
             dogs: "Lovečtí psi odlákají pozornost (+2 k síle se psy v chovu nebo taktikou smečky)",
             falcon: "Sokol útočí na zranitelná místa (+2 k síle se sokolem v chovu)",
@@ -572,14 +586,34 @@
             animals_and_spear: "Koordinace koně, zvířat a kopí (+2 k síle s koněm, zvířaty a kopím)"
         };
 
+        var wMapEn = {
+            dogs: "Hunting hounds distract attention (+2 strength with hounds or pack tactics)",
+            falcon: "Hunting falcon strikes vulnerable spots (+2 strength with falcon)",
+            animals: "Hounds and falcon confuse dragon in battle (+2 strength with hound & falcon)",
+            horse: "Mounted charge at full gallop (+2 strength with steed or charge tactic)",
+            dance: "Playful dragon enchanted by noble dance (+2 strength with Dance ≥ 2 or court robe)",
+            elixir: "Healing elixir neutralizes breath (+2 strength with elixir / insurance tactic)",
+            water_armor: "Water pearl or heavy plate dampens heat (+2 strength with armor or water relic)",
+            ice: "Glacial weapons counter volcanic dragon (+2 strength with frost weapon / relic)",
+            fire: "Fire melts ice and crystals (+2 strength with fire weapon / relic / theme)",
+            armor: "Heavy plate armor grounds lightning strikes (+2 strength with equipped armor)",
+            light: "Consecrated relics dispel darkness (+2 strength with light relic / jewel)",
+            charisma: "Noble charisma pacifies the dragon (+2 strength with Charisma ≥ 3 or jewel)",
+            holy: "Holy relics banish undead (+2 strength with sacred relic)",
+            courage: "Steadfast courage cuts through mist (+2 strength with Combat ≥ 3 or Riding ≥ 3)",
+            mastery: "Mastery test of all 4 virtues (+2 strength with all virtues ≥ 2)",
+            animals_and_spear: "Coordinating horse, animals, and spear (+2 strength with steed, animals, and spear)"
+        };
+        var activeWMap = isEn ? wMapEn : wMap;
+
         var html = [];
         for (var i = 0; i < filtered.length; i++) {
             var d = filtered[i];
-            var tierTitle = (d.id && d.id.indexOf("u1_") === 0) ? "Tier U1 (Lesní zvěř)" :
-                            (d.id && d.id.indexOf("u2_") === 0 && d.difficulty >= 12 ? "Tier U2+ (Mýtický titán)" :
-                            (d.id && d.id.indexOf("u2_") === 0 ? "Tier U2 (Bájné monstrum)" :
-                            (d.tierGroup === "young" ? "Tier A (Mladý drak)" :
-                            (d.tierGroup === "elemental" ? "Tier B (Živlový drak)" : "Tier C (Legendární Boss)"))));
+            var tierTitle = (d.id && d.id.indexOf("u1_") === 0) ? (isEn ? "Tier U1 (Forest Beasts)" : "Tier U1 (Lesní zvěř)") :
+                            (d.id && d.id.indexOf("u2_") === 0 && d.difficulty >= 12 ? (isEn ? "Tier U2+ (Mythic Titan)" : "Tier U2+ (Mýtický titán)") :
+                            (d.id && d.id.indexOf("u2_") === 0 ? (isEn ? "Tier U2 (Mythical Monster)" : "Tier U2 (Bájné monstrum)") :
+                            (d.tierGroup === "young" ? (isEn ? "Tier A (Young Dragon)" : "Tier A (Mladý drak)") :
+                            (d.tierGroup === "elemental" ? (isEn ? "Tier B (Elemental Dragon)" : "Tier B (Živlový drak)") : (isEn ? "Tier C (Legendary Boss)" : "Tier C (Legendární Boss)")))));
             var tierColor = (d.id && d.id.indexOf("u1_") === 0) ? "#10b981" :
                             (d.id && d.id.indexOf("u2_") === 0 && d.difficulty >= 12 ? "#ec4899" :
                             (d.id && d.id.indexOf("u2_") === 0 ? "#f59e0b" :
@@ -591,19 +625,18 @@
             html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(d.name) + '\', \'' + this.escapeHtml(d.desc) + '\')" title="Klikni pro zvětšení ilustrace">');
             html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(d.name) + '" class="card-media-img" loading="lazy" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.png\';" />');
             html.push('    <span class="card-media-badge-left" style="border-color:' + tierColor + '; color:' + tierColor + ';">' + tierTitle + '</span>');
-            html.push('    <span class="card-media-badge-right">⚔️ Obtížnost ' + d.difficulty + '</span>');
+            html.push('    <span class="card-media-badge-right">⚔️ ' + diffLabel + ' ' + d.difficulty + '</span>');
             html.push('  </div>');
 
             html.push('  <div class="card-media-body">');
             html.push('    <div class="card-media-title">' + d.icon + ' ' + this.escapeHtml(d.name) + '</div>');
             html.push('    <div style="font-size:0.84rem; color:var(--gold-light); margin-bottom:0.4rem; font-weight:bold;">');
-            html.push('      💰 Odměna: +' + d.gold.toLocaleString("cs-CZ") + ' zl. &nbsp;|&nbsp; 💖 +' + d.hearts + ' Srdcí');
-            html.push('    </div>');
+            html.push('      💰 ' + rewardLabel + ' +' + d.gold.toLocaleString(locale) + ' ' + curr + ' &nbsp;|&nbsp; 💖 +' + d.hearts + ' ' + heartsLabel + '</div>');
             html.push('    <div class="card-media-desc">' + this.escapeHtml(d.desc) + '</div>');
 
-            if (d.weakness && wMap[d.weakness]) {
+            if (d.weakness && activeWMap[d.weakness]) {
                 html.push('    <div class="card-callout-box" style="border-color:rgba(253,224,71,0.35); color:#fef08a; background:rgba(212,175,55,0.12); font-size:0.8rem;">');
-                html.push('      🎯 <strong>Využitelná slabina (+2 k síle):</strong> ' + wMap[d.weakness]);
+                html.push('      🎯 <strong>' + weaknessLabel + '</strong> ' + activeWMap[d.weakness]);
                 html.push('    </div>');
             }
 
@@ -614,12 +647,12 @@
                 if (trophyDef.dance) statsBonus.push("💃+" + trophyDef.dance);
                 if (trophyDef.charisma) statsBonus.push("✨+" + trophyDef.charisma);
                 html.push('    <div class="card-callout-box" style="border-color:rgba(212,175,55,0.4); color:var(--gold-light); margin-top:4px;">');
-                html.push('      🏆 <strong>Trofej po porážce:</strong> ' + trophyDef.icon + ' ' + this.escapeHtml(trophyDef.name) + ' (' + statsBonus.join(" ") + ')');
+                html.push('      🏆 <strong>' + trophyLabel + '</strong> ' + trophyDef.icon + ' ' + this.escapeHtml(trophyDef.name) + ' (' + statsBonus.join(" ") + ')');
                 html.push('    </div>');
             }
 
             if (d.imgFlip) {
-                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + d.img + '\', \'' + d.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">🔄 Otočit směr pohledu draka</button>');
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + d.img + '\', \'' + d.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">' + flipLabel + '</button>');
             }
             html.push('  </div>');
             html.push('</div>');
@@ -631,6 +664,14 @@
     renderCastlesGallery: function () {
         var container = document.getElementById("castles-grid-container");
         if (!container || !window.PRS_CASTLES) return;
+
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en';
+        var curr = (window.PRS_I18n && window.PRS_I18n.t("ui.currency")) || (isEn ? "g." : "zl.");
+        var locale = isEn ? "en-US" : "cs-CZ";
+        var elemLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.element_label")) || (isEn ? "Element:" : "Živel:");
+        var priceLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.price_label")) || (isEn ? "Price:" : "Cena:");
+        var benefitHtml = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.castle_benefit")) || (isEn ? "🏰 <strong>Estate Benefit:</strong> Tax income +2,500 g., rent 1,500 g., permanent +1 Charisma and audience with the Princess." : "🏰 <strong>Výhoda panství:</strong> Výnos daní +2 500 zl., nájem 1 500 zl., trvale +1 Charisma a audience u princezny.");
+        var flipCastleLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.flip_castle")) || (isEn ? "🔄 Flip Castle View" : "🔄 Otočit pohled na hrad");
 
         var castles = window.PRS_CASTLES;
         var elemColors = {
@@ -653,18 +694,18 @@
             html.push('<div class="castle-card">');
             html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + c.img + '\', \'' + this.escapeHtml(c.name) + '\', \'' + this.escapeHtml(c.desc) + '\')" title="Klikni pro zvětšení ilustrace">');
             html.push('    <img src="' + c.img + '" alt="' + this.escapeHtml(c.name) + '" class="card-media-img" loading="lazy" />');
-            html.push('    <span class="card-media-badge-left" style="border-color:' + col + '; color:' + col + ';">Živel: ' + (c.element ? c.element.toUpperCase() : 'KRÁLOVSKÝ') + '</span>');
-            html.push('    <span class="card-media-badge-right" style="border-color:var(--gold); color:var(--gold-light);">Cena: 8 000 zl.</span>');
+            html.push('    <span class="card-media-badge-left" style="border-color:' + col + '; color:' + col + ';">' + elemLabel + ' ' + (c.element ? c.element.toUpperCase() : (isEn ? 'ROYAL' : 'KRÁLOVSKÝ')) + '</span>');
+            html.push('    <span class="card-media-badge-right" style="border-color:var(--gold); color:var(--gold-light);">' + priceLabel + ' 8 000 ' + curr + '</span>');
             html.push('  </div>');
 
             html.push('  <div class="card-media-body">');
             html.push('    <div class="card-media-title">' + c.icon + ' ' + this.escapeHtml(c.name) + '</div>');
             html.push('    <div class="card-media-desc">' + this.escapeHtml(c.desc) + '</div>');
             html.push('    <div class="card-callout-box" style="border-color:rgba(212,175,55,0.3); color:#fef08a;">');
-            html.push('      🏰 <strong>Výhoda panství:</strong> Výnos daní +2 500 zl., nájem 1 500 zl., trvale +1 Charisma a audience u princezny.');
+            html.push('      ' + benefitHtml);
             html.push('    </div>');
             if (c.imgFlip) {
-                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + c.img + '\', \'' + c.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">🔄 Otočit pohled na hrad</button>');
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + c.img + '\', \'' + c.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">' + flipCastleLabel + '</button>');
             }
             html.push('  </div>');
             html.push('</div>');
@@ -687,6 +728,15 @@
         var container = document.getElementById("trophies-grid-container");
         if (!container || !window.PRS_TROPHIES) return;
 
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en';
+        var curr = (window.PRS_I18n && window.PRS_I18n.t("ui.currency")) || (isEn ? "g." : "zl.");
+        var locale = isEn ? "en-US" : "cs-CZ";
+        var sCombat = window.PRS_SKILLS ? window.PRS_SKILLS.getName("combat") : "Boj";
+        var sRiding = window.PRS_SKILLS ? window.PRS_SKILLS.getName("riding") : "Jízda";
+        var sDance = window.PRS_SKILLS ? window.PRS_SKILLS.getName("dance") : "Tanec";
+        var sCharisma = window.PRS_SKILLS ? window.PRS_SKILLS.getName("charisma") : "Charisma";
+        var slotLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.slots.trophy")) || (isEn ? "Trophy" : "Trofej");
+
         var trophies = window.PRS_TROPHIES;
         var filter = this.trophiesActiveCategory || "all";
 
@@ -705,15 +755,15 @@
             var tr = list[i];
             var tierClass = "tier-" + (tr.tier || 1);
             var statChips = [];
-            if (tr.combat) statChips.push('<span class="armory-stat-chip ' + (tr.combat > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (tr.combat > 0 ? '+' : '') + tr.combat + ' Boj</span>');
-            if (tr.riding) statChips.push('<span class="armory-stat-chip ' + (tr.riding > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (tr.riding > 0 ? '+' : '') + tr.riding + ' Jízda</span>');
-            if (tr.dance) statChips.push('<span class="armory-stat-chip ' + (tr.dance > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (tr.dance > 0 ? '+' : '') + tr.dance + ' Tanec</span>');
-            if (tr.charisma) statChips.push('<span class="armory-stat-chip ' + (tr.charisma > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">✨ ' + (tr.charisma > 0 ? '+' : '') + tr.charisma + ' Charisma</span>');
+            if (tr.combat) statChips.push('<span class="armory-stat-chip ' + (tr.combat > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">⚔️ ' + (tr.combat > 0 ? '+' : '') + tr.combat + ' ' + sCombat + '</span>');
+            if (tr.riding) statChips.push('<span class="armory-stat-chip ' + (tr.riding > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">🏇 ' + (tr.riding > 0 ? '+' : '') + tr.riding + ' ' + sRiding + '</span>');
+            if (tr.dance) statChips.push('<span class="armory-stat-chip ' + (tr.dance > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (tr.dance > 0 ? '+' : '') + tr.dance + ' ' + sDance + '</span>');
+            if (tr.charisma) statChips.push('<span class="armory-stat-chip ' + (tr.charisma > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">✨ ' + (tr.charisma > 0 ? '+' : '') + tr.charisma + ' ' + sCharisma + '</span>');
 
             html.push('<div class="trophy-item-card ' + tierClass + '">');
             html.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">');
-            html.push('    <span class="armory-badge-tier" style="background:rgba(212,175,55,0.18); color:var(--gold-light); font-size:0.75rem;">' + (tr.tier || 1) + '. stupeň</span>');
-            html.push('    <span style="font-size:0.75rem; color:#9ca3af; font-style:italic;">' + this.escapeHtml(tr.source || 'Boj') + '</span>');
+            html.push('    <span class="armory-badge-tier" style="background:rgba(212,175,55,0.18); color:var(--gold-light); font-size:0.75rem;">' + (isEn ? ('Tier ' + (tr.tier || 1)) : ((tr.tier || 1) + '. stupeň')) + '</span>');
+            html.push('    <span style="font-size:0.75rem; color:#9ca3af; font-style:italic;">' + this.escapeHtml(tr.source || (isEn ? 'Battle' : 'Boj')) + '</span>');
             html.push('  </div>');
 
             html.push('  <div style="font-weight:bold; font-size:0.95rem; color:#f8fafc; margin-bottom:0.35rem;">' + tr.icon + ' ' + this.escapeHtml(tr.name) + '</div>');
@@ -722,8 +772,8 @@
             html.push('  <div style="display:flex; flex-wrap:wrap; gap:0.25rem; margin-bottom:0.6rem;">' + statChips.join("") + '</div>');
 
             html.push('  <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.4rem; font-size:0.82rem;">');
-            html.push('    <span style="color:var(--text-muted);">Slot: <strong>🏆 Trofej</strong></span>');
-            html.push('    <span style="color:var(--gold-light); font-weight:bold;">' + tr.price.toLocaleString("cs-CZ") + ' zl.</span>');
+            html.push('    <span style="color:var(--text-muted);">Slot: <strong>🏆 ' + slotLabel + '</strong></span>');
+            html.push('    <span style="color:var(--gold-light); font-weight:bold;">' + (tr.price ? tr.price.toLocaleString(locale) : '0') + ' ' + curr + '</span>');
             html.push('  </div>');
             html.push('</div>');
         }
@@ -748,7 +798,17 @@
         var catalog = window.PRS_DECOR_CATALOG;
         var filter = this.decorationsActiveCategory || "all";
 
-        var categoryLabels = {
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var categoryLabels = isEn ? {
+            vegetation: "Forests & Trees",
+            terrain: "Rocks & Mountains",
+            agriculture: "Agriculture & Fields",
+            settlement: "Settlements & Buildings",
+            civilization: "Fortifications & Guards",
+            water: "Water & Swamps",
+            magic: "Magic & Ruins",
+            quest_lair: "Lairs & Caves"
+        } : {
             vegetation: "Lesy & Vegetace",
             terrain: "Skály & Hory",
             agriculture: "Zemědělství",
@@ -788,22 +848,28 @@
             var col = categoryColors[cat] || "var(--gold-light)";
             var catName = categoryLabels[cat] || cat.toUpperCase();
             var icon = d.icon || "🌲";
-            var desc = d.desc || "Malebný prvek oživující herní plochu království.";
+
+            var decorLang = (isEn && window.PRS_I18N && window.PRS_I18N.en && window.PRS_I18N.en.decorations && window.PRS_I18N.en.decorations[k]) ? window.PRS_I18N.en.decorations[k] : null;
+            var dName = decorLang ? decorLang.name : d.name;
+            var desc = decorLang ? decorLang.desc : (d.desc || (isEn ? "Picturesque element enlivening the kingdom board." : "Malebný prvek oživující herní plochu království."));
+            var clearanceLabel = isEn ? "🏷️ Clearance Zone:" : "🏷️ Bezpečná zóna (Clearance):";
+            var flipBtnText = isEn ? "🔄 Mirror Orientation" : "🔄 Otočit zrcadlení";
+            var zoomTitle = isEn ? "Click to enlarge illustration" : "Klikni pro zvětšení ilustrace";
 
             html.push('<div class="decor-card" style="background:var(--card-bg, #1a1625); border:1px solid rgba(212,175,55,0.25); border-radius:8px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 4px 14px rgba(0,0,0,0.4);">');
-            html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(d.name) + '\', \'' + this.escapeHtml(desc) + '\')" title="Klikni pro zvětšení ilustrace" style="position:relative; background:radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.5) 100%); padding:1rem 0.5rem; display:flex; justify-content:center; align-items:center; min-height:160px; cursor:pointer;">');
-            html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(d.name) + '" class="card-media-img" loading="lazy" style="max-height:130px; max-width:85%; object-fit:contain; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.6)); transition:transform 0.2s;" />');
+            html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(dName) + '\', \'' + this.escapeHtml(desc) + '\')" title="' + zoomTitle + '" style="position:relative; background:radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.5) 100%); padding:1rem 0.5rem; display:flex; justify-content:center; align-items:center; min-height:160px; cursor:pointer;">');
+            html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(dName) + '" class="card-media-img" loading="lazy" style="max-height:130px; max-width:85%; object-fit:contain; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.6)); transition:transform 0.2s;" />');
             html.push('    <span class="card-media-badge-left" style="position:absolute; top:8px; left:8px; font-size:0.7rem; font-weight:bold; border:1px solid ' + col + '; color:' + col + '; background:rgba(0,0,0,0.75); padding:2px 6px; border-radius:4px;">' + catName + '</span>');
             html.push('    <span class="card-media-badge-right" style="position:absolute; top:8px; right:8px; font-size:0.7rem; font-weight:bold; border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; background:rgba(0,0,0,0.75); padding:2px 6px; border-radius:4px;">📐 ' + d.w + '×' + d.h + ' px</span>');
             html.push('  </div>');
 
             html.push('  <div class="card-media-body" style="padding:0.75rem; display:flex; flex-direction:column; flex:1;">');
-            html.push('    <div class="card-media-title" style="font-family:\'Cinzel\',serif; font-size:0.95rem; font-weight:bold; color:var(--gold-light, #fef08a); margin-bottom:0.35rem;">' + icon + ' ' + this.escapeHtml(d.name) + '</div>');
+            html.push('    <div class="card-media-title" style="font-family:\'Cinzel\',serif; font-size:0.95rem; font-weight:bold; color:var(--gold-light, #fef08a); margin-bottom:0.35rem;">' + icon + ' ' + this.escapeHtml(dName) + '</div>');
             html.push('    <div class="card-media-desc" style="font-size:0.8rem; color:#94a3b8; line-height:1.35; flex:1; margin-bottom:0.5rem;">' + this.escapeHtml(desc) + '</div>');
-            html.push('    <div style="font-size:0.72rem; color:#64748b; margin-bottom:0.4rem;">🏷️ Bezpečná zóna (Clearance): <strong>' + (d.clearance || 35) + ' px</strong></div>');
+            html.push('    <div style="font-size:0.72rem; color:#64748b; margin-bottom:0.4rem;">' + clearanceLabel + ' <strong>' + (d.clearance || 35) + ' px</strong></div>');
 
             if (d.imgFlip) {
-                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + d.img + '\', \'' + d.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; width:100%; cursor:pointer;">🔄 Otočit zrcadlení</button>');
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + d.img + '\', \'' + d.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; width:100%; cursor:pointer;">' + flipBtnText + '</button>');
             }
             html.push('  </div>');
             html.push('</div>');
@@ -817,14 +883,15 @@
         if (!card) return;
         var img = card.querySelector(".card-media-img");
         if (!img) return;
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         if (img.getAttribute("data-is-flipped") === "true") {
             img.src = normalSrc;
             img.setAttribute("data-is-flipped", "false");
-            btn.textContent = "🔄 Otočit zrcadlení";
+            btn.textContent = isEn ? "🔄 Mirror Orientation" : "🔄 Otočit zrcadlení";
         } else {
             img.src = flipSrc || normalSrc;
             img.setAttribute("data-is-flipped", "true");
-            btn.textContent = "↩️ Původní směr";
+            btn.textContent = isEn ? "↩️ Original Facing" : "↩️ Původní směr";
         }
     },
 

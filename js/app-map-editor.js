@@ -15,8 +15,12 @@
 
     var Editor = {
         board: null,
-        activeTool: "select", // "select" | "pan" | "move" | "add" | "swap" | "link"
+        activeTool: "select", // "select" | "pan" | "move" | "add" | "swap" | "link" | "river" | "castle"
         selectedNodeId: null,
+        selectedEdge: null, // { from: number, to: number }
+        selectedRiverIdx: 0,
+        selectedRiverPtIdx: null,
+        inspectorMode: "node", // "node" | "edge" | "river" | "castle"
         swapSourceNodeId: null,
         linkSourceNodeId: null,
         isDragging: false,
@@ -52,9 +56,15 @@
 
             // Samostatná hluboká kopie pro editaci
             this.board = JSON.parse(JSON.stringify(board));
+            this.syncNodeBranches(this.board, !this.board._branchesSynced);
+            this.board._branchesSynced = true;
             this.normalizeBoardForEngine(this.board);
             this.activeTool = "select";
             this.selectedNodeId = null;
+            this.selectedEdge = null;
+            this.selectedRiverIdx = 0;
+            this.selectedRiverPtIdx = null;
+            this.inspectorMode = "node";
             this.swapSourceNodeId = null;
             this.linkSourceNodeId = null;
             this.isDragging = false;
@@ -97,15 +107,21 @@
                     e.preventDefault();
                     self.undo();
                 } else if (e.key === "Delete" || e.key === "Backspace") {
-                    if (self.selectedNodeId !== null) {
+                    if (self.inspectorMode === "edge" && self.selectedEdge) {
+                        e.preventDefault();
+                        self.removeEdge(self.selectedEdge.from, self.selectedEdge.to);
+                    } else if (self.selectedNodeId !== null) {
                         e.preventDefault();
                         self.deleteSelectedNode();
                     }
                 } else if (e.key === "Escape") {
                     e.preventDefault();
                     self.selectedNodeId = null;
+                    self.selectedEdge = null;
+                    self.selectedRiverPtIdx = null;
                     self.swapSourceNodeId = null;
                     self.linkSourceNodeId = null;
+                    self.inspectorMode = "node";
                     self.updateStatusHelp();
                     self.updateInspectorUI();
                     self.renderCanvas();
@@ -131,6 +147,7 @@
             if (this.undoStack.length > this.maxUndo) {
                 this.undoStack.shift();
             }
+            this.board.isCustomWysiwyg = true;
             var btnUndo = document.getElementById("me-btn-undo");
             if (btnUndo) btnUndo.disabled = false;
         },
@@ -142,8 +159,13 @@
             try {
                 this.board = JSON.parse(prev);
                 this.selectedNodeId = null;
+                this.selectedEdge = null;
+                this.selectedRiverPtIdx = null;
                 this.swapSourceNodeId = null;
                 this.linkSourceNodeId = null;
+                if (this.inspectorMode !== "river" && this.inspectorMode !== "castle") {
+                    this.inspectorMode = "node";
+                }
                 this.renderCanvas();
                 this.updateInspectorUI();
                 if (window.KiDeskyToast) window.KiDeskyToast.show("↩️ Krok vrácen zpět", "turn");
@@ -159,9 +181,31 @@
             this.activeTool = toolName;
             this.swapSourceNodeId = null;
             this.linkSourceNodeId = null;
+            this.selectedRiverPtIdx = null;
+
+            if (toolName === "river") {
+                if (this.board && !Array.isArray(this.board.rivers)) this.board.rivers = [];
+                this.selectedNodeId = null;
+                this.selectedEdge = null;
+                this.inspectorMode = "river";
+                if (this.board && this.selectedRiverIdx >= this.board.rivers.length) {
+                    this.selectedRiverIdx = 0;
+                }
+            } else if (toolName === "castle") {
+                if (this.board) this.getRoyalCastleLandmark();
+                this.selectedNodeId = null;
+                this.selectedEdge = null;
+                this.inspectorMode = "castle";
+            } else if (toolName !== "link") {
+                if (this.inspectorMode === "river" || this.inspectorMode === "castle") {
+                    this.inspectorMode = this.selectedEdge ? "edge" : "node";
+                }
+            }
+
             this.updateToolButtons();
             this.updateStatusHelp();
             this.updateCursor();
+            this.updateInspectorUI();
             this.renderCanvas();
         },
 
@@ -170,9 +214,9 @@
             if (!svg) return;
             if (this.activeTool === "pan") {
                 svg.style.cursor = (this.viewport && this.viewport.isPanning) ? "grabbing" : "grab";
-            } else if (this.activeTool === "move") {
+            } else if (this.activeTool === "move" || this.activeTool === "castle") {
                 svg.style.cursor = "move";
-            } else if (this.activeTool === "add") {
+            } else if (this.activeTool === "add" || this.activeTool === "river") {
                 svg.style.cursor = "crosshair";
             } else {
                 svg.style.cursor = "pointer";
@@ -180,7 +224,7 @@
         },
 
         updateToolButtons: function () {
-            var tools = ["select", "pan", "move", "add", "swap", "link"];
+            var tools = ["select", "add", "swap", "link", "river", "castle", "pan", "move"];
             for (var i = 0; i < tools.length; i++) {
                 var btn = document.getElementById("me-tool-" + tools[i]);
                 if (btn) {
@@ -204,11 +248,11 @@
             if (!helpEl) return;
             var text = "";
             if (this.activeTool === "select") {
-                text = "👆 <strong>Inspektor & Přesun:</strong> Klikni na políčko pro otevření detailu, nebo ho <strong>rovnou chytni a přetáhni</strong> na nové místo. <em>(Pozadím mapy posouváš plátno, kolečkem zoomuješ.)</em>";
+                text = "👆 <strong>Inspektor &amp; Přesun:</strong> Klikni na políčko, <strong>cestu</strong> nebo <strong>Hlavní hrad</strong> pro úpravu parametrů a směrů, případně prvek <strong>tažením přemísti</strong>.";
             } else if (this.activeTool === "pan") {
                 text = "🧭 <strong>Posun mapy:</strong> Chytni plátno myší/prstem kdekoliv a tažením posouvej celou herní desku. Kolečkem myši přibližuj a oddaluj.";
             } else if (this.activeTool === "move") {
-                text = "📍 <strong>Režim přesunu:</strong> Chytni kterékoliv políčko a tažením ho přemísti na požadovanou pozici. Cesty i mosty se přizpůsobí.";
+                text = "📍 <strong>Režim přesunu:</strong> Chytni kterékoliv políčko nebo Hlavní hrad a tažením ho přemísti na požadovanou pozici. Cesty i mosty se přizpůsobí.";
             } else if (this.activeTool === "add") {
                 text = "➕ <strong>Přidat pole:</strong> Klikni kamkoliv na mapu pro umístění nového políčka. Pokud je vybráno předchozí pole, automaticky se propojí.";
             } else if (this.activeTool === "swap") {
@@ -219,10 +263,14 @@
                 }
             } else if (this.activeTool === "link") {
                 if (this.linkSourceNodeId === null) {
-                    text = "🔗 <strong>Cesty:</strong> Krok 1/2 – Klikni na počáteční políčko cesty.";
+                    text = "🔗 <strong>Cesty &amp; Směry:</strong> Klikni na <strong>existující čáru cesty</strong> pro otočení směru či smazání, NEBO klikni postupně na 2 políčka pro vytvoření/zrušení spojení.";
                 } else {
-                    text = "🔗 <strong>Cesty:</strong> Krok 2/2 – Klikni na cílové políčko pro vytvoření či zrušení cesty.";
+                    text = "🔗 <strong>Cesty &amp; Směry:</strong> Krok 2/2 – Nyní klikni na cílové políčko pro vytvoření cesty z #" + this.linkSourceNodeId + " (nebo zrušení existující).";
                 }
+            } else if (this.activeTool === "river") {
+                text = "🌊 <strong>Editor řeky:</strong> Chytni a táhni <strong style='color:#38bdf8;'>modré uzly</strong> (meandry) nebo <strong style='color:#facc15;'>žlutá táhla</strong> křivek. Podržením <kbd>Alt</kbd> posuneš uzel bez jeho táhel; mosty se po puštění přepočítají.";
+            } else if (this.activeTool === "castle") {
+                text = "🏰 <strong>Hlavní hrad:</strong> Tažením myší přesuň dominantu Královského hradu na libovolné místo mapy a v panelu vpravo dole uprav jeho vzhled, velikost i otočení.";
             }
             helpEl.innerHTML = text;
         },
@@ -328,34 +376,69 @@
                 }
             }
 
-            // 3. Řeka Doubravka
+            // 3. Řeka Doubravka (interaktivní výběr i editace Beziérových bodů)
+            var isRiverEditMode = (this.activeTool === "river" || this.inspectorMode === "river");
             if (board.rivers) {
                 for (var r = 0; r < board.rivers.length; r++) {
                     var riv = board.rivers[r];
-                    var rw = (riv.width && riv.width >= 28) ? riv.width : (riv.isTributary ? 22 : 36);
-                    out.push('  <path d="' + riv.path + '" stroke="#dfbe86" stroke-width="' + (rw + 14) + '" fill="none" opacity="0.85" stroke-linecap="round"/>');
-                    out.push('  <path d="' + riv.path + '" stroke="#0369a1" stroke-width="' + rw + '" fill="none" opacity="0.95" stroke-linecap="round"/>');
-                    out.push('  <path d="' + riv.path + '" stroke="#38bdf8" stroke-width="' + (rw * 0.5) + '" fill="none" opacity="0.9" stroke-linecap="round"/>');
+                    var rw = (riv.customWidth && riv.width) ? riv.width : ((riv.width && riv.width >= 28) ? riv.width : (riv.isTributary ? 24 : 38));
+                    var isSelectedRiver = (isRiverEditMode && this.selectedRiverIdx === r);
+                    if (isSelectedRiver) {
+                        out.push('  <path class="me-river-sel" data-river-idx="' + r + '" d="' + riv.path + '" stroke="rgba(250,204,21,0.55)" stroke-width="' + (rw + 22) + '" fill="none" stroke-linecap="round" stroke-dasharray="10,6" pointer-events="none"/>');
+                    }
+                    out.push('  <path class="me-river-bank" data-river-idx="' + r + '" d="' + riv.path + '" stroke="#dfbe86" stroke-width="' + (rw + 14) + '" fill="none" opacity="0.85" stroke-linecap="round" pointer-events="none"/>');
+                    out.push('  <path class="me-river-water" data-river-idx="' + r + '" d="' + riv.path + '" stroke="#0369a1" stroke-width="' + rw + '" fill="none" opacity="0.95" stroke-linecap="round" pointer-events="none"/>');
+                    out.push('  <path class="me-river-foam" data-river-idx="' + r + '" d="' + riv.path + '" stroke="#38bdf8" stroke-width="' + (rw * 0.5) + '" fill="none" opacity="0.9" stroke-linecap="round" pointer-events="none"/>');
+                    out.push('  <path class="me-river-path" data-river-idx="' + r + '" d="' + riv.path + '" stroke="transparent" stroke-width="' + Math.max(rw + 18, 44) + '" fill="none" stroke-linecap="round" style="cursor:pointer;" onclick="PRS_MapEditor.onRiverPathClick(event, ' + r + ')"/>');
                 }
             }
 
-            // 4. Cesty (hrany grafu) s data atributy pro 60 FPS real-time tažení
+            // 4. Cesty (hrany grafu) se směrovými šipkami, štítky rozcestí (1-3 / 4-6) a klikatelnou oblastí
             for (var i = 0; i < nodes.length; i++) {
                 var nA = nodes[i];
                 var tgts = nA.next || [];
-                if (nA.branchHigh !== null && nA.branchHigh !== undefined && tgts.indexOf(nA.branchHigh) === -1) {
-                    tgts = tgts.concat([nA.branchHigh]);
-                }
+                var isJunctionNode = tgts.length >= 2;
                 for (var t = 0; t < tgts.length; t++) {
                     var nB = this.getNodeById(tgts[t]);
                     if (!nB) continue;
 
+                    var isSelectedEdge = !!(this.selectedEdge && this.selectedEdge.from === nA.id && this.selectedEdge.to === nB.id);
                     var isLinkCandidate = (this.activeTool === "link" && (nA.id === this.linkSourceNodeId || nB.id === this.linkSourceNodeId));
-                    var strokeCol = isLinkCandidate ? "#38bdf8" : "rgba(212,175,55,0.65)";
-                    var strokeW = isLinkCandidate ? 6 : 4.5;
-                    var strokeDash = isLinkCandidate ? 'stroke-dasharray="8,5"' : '';
+                    var isSideBranchEdge = (isJunctionNode && t === 1);
+                    var isMainBranchEdge = (isJunctionNode && t === 0);
 
-                    out.push('  <line class="me-path-line" data-from="' + nA.id + '" data-to="' + nB.id + '" x1="' + nA.x + '" y1="' + nA.y + '" x2="' + nB.x + '" y2="' + nB.y + '" stroke="' + strokeCol + '" stroke-width="' + strokeW + '" stroke-linecap="round" ' + strokeDash + '/>');
+                    var strokeCol = isSelectedEdge ? "#facc15" : (isLinkCandidate ? "#38bdf8" : (isSideBranchEdge ? "rgba(245,158,11,0.88)" : (isMainBranchEdge ? "rgba(56,189,248,0.88)" : "rgba(212,175,55,0.68)")));
+                    var strokeW = isSelectedEdge ? 7 : (isLinkCandidate ? 6 : 4.5);
+                    var strokeDash = isLinkCandidate ? 'stroke-dasharray="8,5"' : (isSideBranchEdge ? 'stroke-dasharray="9,4"' : '');
+
+                    out.push('  <line class="me-path-line" data-from="' + nA.id + '" data-to="' + nB.id + '" x1="' + nA.x + '" y1="' + nA.y + '" x2="' + nB.x + '" y2="' + nB.y + '" stroke="' + strokeCol + '" stroke-width="' + strokeW + '" stroke-linecap="round" ' + strokeDash + ' pointer-events="none"/>');
+
+                    // Směrová šipka uprostřed hrany (ukazuje směr nA -> nB)
+                    var dx = nB.x - nA.x;
+                    var dy = nB.y - nA.y;
+                    var segLen = Math.sqrt(dx * dx + dy * dy);
+                    var midX = (nA.x + nB.x) * 0.5;
+                    var midY = (nA.y + nB.y) * 0.5;
+                    var angDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+                    var arrowFill = isSelectedEdge ? "#facc15" : (isSideBranchEdge ? "#f59e0b" : (isMainBranchEdge ? "#38bdf8" : "#fde68a"));
+                    out.push('  <g class="me-path-arrow" data-from="' + nA.id + '" data-to="' + nB.id + '" transform="translate(' + midX.toFixed(1) + ',' + midY.toFixed(1) + ') rotate(' + angDeg.toFixed(1) + ')" pointer-events="none"' + (segLen < 18 ? ' opacity="0.2"' : '') + '>');
+                    out.push('    <polygon points="7,0 -5,-5 -2,0 -5,5" fill="' + arrowFill + '" stroke="#0f172a" stroke-width="1"/>');
+                    out.push('  </g>');
+
+                    // Štítek priority rozcestí (1-3 modrý hlavní vs 4-6 jantarový boční) ve 34 % délky hrany
+                    if (isJunctionNode && (t === 0 || t === 1)) {
+                        var bx = nA.x + dx * 0.34;
+                        var by = nA.y + dy * 0.34;
+                        var bLabel = (t === 0) ? "1–3" : "4–6";
+                        var bBg = (t === 0) ? "#0284c7" : "#d97706";
+                        out.push('  <g class="me-path-jbadge" data-from="' + nA.id + '" data-to="' + nB.id + '" transform="translate(' + bx.toFixed(1) + ',' + by.toFixed(1) + ')" pointer-events="none">');
+                        out.push('    <rect x="-13" y="-8" width="26" height="16" rx="5" fill="' + bBg + '" stroke="#fef08a" stroke-width="1"/>');
+                        out.push('    <text x="0" y="3" text-anchor="middle" fill="#ffffff" font-size="8.5" font-weight="bold" font-family="sans-serif">' + bLabel + '</text>');
+                        out.push('  </g>');
+                    }
+
+                    // Průhledná klikatelná oblast pro výběr / odebrání / obrácení hrany přímo na plátně
+                    out.push('  <line class="me-path-hit" data-from="' + nA.id + '" data-to="' + nB.id + '" x1="' + nA.x + '" y1="' + nA.y + '" x2="' + nB.x + '" y2="' + nB.y + '" stroke="transparent" stroke-width="18" stroke-linecap="round" style="cursor:pointer;" onclick="PRS_MapEditor.onEdgeClick(event, ' + nA.id + ', ' + nB.id + ')"/>');
                 }
             }
 
@@ -363,16 +446,41 @@
             if (board.bridges) {
                 for (var b = 0; b < board.bridges.length; b++) {
                     var br = board.bridges[b];
-                    out.push('  <g transform="translate(' + br.x + ',' + br.y + ') rotate(' + (br.angle || 0) + ')">');
+                    out.push('  <g pointer-events="none" transform="translate(' + br.x + ',' + br.y + ') rotate(' + (br.angle || 0) + ')">');
                     out.push('    <rect x="-18" y="-10" width="36" height="20" rx="6" fill="#78716c" stroke="#fbbf24" stroke-width="1.8"/>');
                     out.push('    <rect x="-16" y="-6" width="32" height="12" rx="3" fill="#cdbb98"/>');
                     out.push('  </g>');
                 }
             }
 
-            // 6. Královské dominanty (Hrad uprostřed)
-            out.push('  <circle cx="700" cy="365" r="38" fill="rgba(212,175,55,0.18)" stroke="rgba(212,175,55,0.6)" stroke-width="2"/>');
-            out.push('  <text x="700" y="377" text-anchor="middle" font-size="34">🏰</text>');
+            // 6. Královské dominanty a interaktivní Hlavní hrad
+            if (board.landmarks) {
+                for (var lmIdx = 0; lmIdx < board.landmarks.length; lmIdx++) {
+                    var lmk = board.landmarks[lmIdx];
+                    if (lmk && !lmk.isRoyalCastle && lmk.id !== "royalCastle" && lmk.id !== "royal_castle" && lmk.x && lmk.y) {
+                        out.push('  <g pointer-events="none" opacity="0.35" transform="translate(' + lmk.x + ',' + lmk.y + ')">');
+                        out.push('    <circle cx="0" cy="0" r="18" fill="rgba(15,23,42,0.55)" stroke="rgba(212,175,55,0.45)" stroke-width="1"/>');
+                        out.push('    <text x="0" y="6" text-anchor="middle" font-size="16">' + this.escapeXml(lmk.icon || "🏛️") + '</text>');
+                        out.push('  </g>');
+                    }
+                }
+            }
+            var rc = this.getRoyalCastleLandmark();
+            if (rc) {
+                var rcImg = rc.image || rc.img || "assets/castles/castle_royal.png";
+                if (rc.isFlipped && rcImg.indexOf("_flip.png") === -1) {
+                    rcImg = rcImg.replace(".png", "_flip.png");
+                }
+                var rcScale = rc.scale || 1;
+                var isCastleSelected = (this.inspectorMode === "castle" || this.activeTool === "castle");
+                out.push('  <g id="me-royal-castle-g" class="me-royal-castle-hit" transform="translate(' + rc.x + ',' + rc.y + ') scale(' + rcScale + ')" style="cursor:grab;" onpointerdown="PRS_MapEditor.onRoyalCastlePointerDown(event)">');
+                out.push('    <circle class="me-royal-castle-aura" cx="0" cy="0" r="44" fill="rgba(212,175,55,0.16)" stroke="' + (isCastleSelected ? '#facc15' : 'rgba(212,175,55,0.65)') + '" stroke-width="' + (isCastleSelected ? '3' : '2') + '"' + (isCastleSelected ? ' stroke-dasharray="6,4"' : '') + '/>');
+                out.push('    <image href="' + rcImg + '" x="-42" y="-48" width="84" height="84" preserveAspectRatio="xMidYMid meet" pointer-events="none"/>');
+                out.push('    <rect x="-56" y="34" width="112" height="16" rx="5" fill="rgba(10,7,5,0.9)" stroke="' + (isCastleSelected ? '#facc15' : 'rgba(212,175,55,0.6)') + '" stroke-width="1" pointer-events="none"/>');
+                out.push('    <text x="0" y="45" text-anchor="middle" fill="#fde68a" font-size="9.5" font-weight="bold" font-family="sans-serif" pointer-events="none">' + this.escapeXml(rc.name || "Královský hrad") + '</text>');
+                out.push('    <circle class="me-royal-castle-hit" cx="0" cy="0" r="48" fill="transparent"/>');
+                out.push('  </g>');
+            }
 
             // 7. Uzly (Herní políčka s interakcí)
             for (var j = 0; j < nodes.length; j++) {
@@ -387,7 +495,8 @@
 
                 out.push('  <g class="me-node" id="me-node-g-' + nd.id + '" data-node-id="' + nd.id + '" transform="translate(' + nd.x + ',' + nd.y + ')" style="cursor:pointer;" onpointerdown="PRS_MapEditor.onNodePointerDown(' + nd.id + ', event)">');
 
-                // Vnější pulzující zvýraznění pro výběr / zdroj prohození
+                // Vnější pulzující zvýraznění pro výběr / zdroj prohození / slepou cestu
+                var isDeadEnd = (!nd.next || nd.next.length === 0);
                 if (isSelected) {
                     out.push('    <circle cx="0" cy="0" r="' + (rad + 8) + '" fill="none" stroke="#fef08a" stroke-width="3" stroke-dasharray="4,3"/>');
                     out.push('    <circle cx="0" cy="0" r="' + (rad + 14) + '" fill="none" stroke="#eab308" stroke-width="1.5" opacity="0.7"/>');
@@ -395,6 +504,8 @@
                     out.push('    <circle cx="0" cy="0" r="' + (rad + 9) + '" fill="none" stroke="#c084fc" stroke-width="3.5" stroke-dasharray="6,4"/>');
                 } else if (isLinkSource) {
                     out.push('    <circle cx="0" cy="0" r="' + (rad + 8) + '" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="5,3"/>');
+                } else if (isDeadEnd) {
+                    out.push('    <circle cx="0" cy="0" r="' + (rad + 7) + '" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-dasharray="3,2"/>');
                 }
 
                 // Stín políčka
@@ -410,6 +521,12 @@
                 out.push('    <rect x="-11" y="' + (-rad - 9) + '" width="22" height="11" rx="3.5" fill="rgba(0,0,0,0.8)" stroke="rgba(255,255,255,0.4)" stroke-width="0.7"/>');
                 out.push('    <text x="0" y="' + (-rad - 1) + '" text-anchor="middle" fill="#fef3c7" font-size="7.5" font-family="monospace" font-weight="bold" pointer-events="none">' + nd.id + '</text>');
 
+                // Upozornění na slepou cestu bez výstupní hrany
+                if (isDeadEnd) {
+                    out.push('    <circle cx="' + (rad + 2) + '" cy="' + (-rad - 2) + '" r="7" fill="#991b1b" stroke="#fca5a5" stroke-width="1" pointer-events="none"/>');
+                    out.push('    <text x="' + (rad + 2) + '" y="' + (-rad + 1) + '" text-anchor="middle" font-size="8.5" pointer-events="none">⚠️</text>');
+                }
+
                 // Stručný štítek názvu pod uzlem (pokud je vybráno nebo je to klíčový bod)
                 if (isSelected || nd.type === "castle" || nd.type === "town" || nd.type === "start" || (nd.type === "quest" && nd.subtype === "U3")) {
                     var label = nd.name || visual.title;
@@ -419,6 +536,32 @@
                 }
 
                 out.push('  </g>');
+            }
+
+            // 8. Interaktivní Beziérovy body a táhla pro vybranou větev řeky
+            if (isRiverEditMode && board.rivers && board.rivers[this.selectedRiverIdx]) {
+                var selRiv = board.rivers[this.selectedRiverIdx];
+                var pts = this.parseRiverPathPoints(selRiv.path);
+                if (pts && pts.length > 0) {
+                    for (var pi = 0; pi < pts.length; pi++) {
+                        if (pi % 3 === 0) {
+                            if (pi - 1 >= 0) {
+                                out.push('  <line class="me-river-guide" data-anchor="' + pi + '" data-handle="' + (pi - 1) + '" x1="' + pts[pi].x + '" y1="' + pts[pi].y + '" x2="' + pts[pi - 1].x + '" y2="' + pts[pi - 1].y + '" stroke="rgba(253,224,71,0.75)" stroke-width="1.5" stroke-dasharray="4,3" pointer-events="none"/>');
+                            }
+                            if (pi + 1 < pts.length) {
+                                out.push('  <line class="me-river-guide" data-anchor="' + pi + '" data-handle="' + (pi + 1) + '" x1="' + pts[pi].x + '" y1="' + pts[pi].y + '" x2="' + pts[pi + 1].x + '" y2="' + pts[pi + 1].y + '" stroke="rgba(253,224,71,0.75)" stroke-width="1.5" stroke-dasharray="4,3" pointer-events="none"/>');
+                            }
+                        }
+                    }
+                    for (var pj = 0; pj < pts.length; pj++) {
+                        var isAnchor = (pj % 3 === 0);
+                        var isPtSel = (this.selectedRiverPtIdx === pj);
+                        var ptRad = isAnchor ? 8.5 : 6;
+                        var ptFill = isAnchor ? "#0ea5e9" : "#facc15";
+                        var ptStroke = isPtSel ? "#ffffff" : "#0f172a";
+                        out.push('  <circle class="me-river-pt" data-riv-idx="' + this.selectedRiverIdx + '" data-pt-idx="' + pj + '" cx="' + pts[pj].x + '" cy="' + pts[pj].y + '" r="' + ptRad + '" fill="' + ptFill + '" stroke="' + ptStroke + '" stroke-width="' + (isPtSel ? 2.5 : 1.8) + '" style="cursor:grab;" onpointerdown="PRS_MapEditor.onRiverPointPointerDown(event, ' + this.selectedRiverIdx + ', ' + pj + ')"/>');
+                    }
+                }
             }
 
             out.push('</svg>');
@@ -534,6 +677,8 @@
                         self.isDragging = true;
                         self.dragNodeId = self.pendingDrag.nodeId;
                         self.selectedNodeId = self.pendingDrag.nodeId;
+                        self.selectedEdge = null;
+                        self.inspectorMode = "node";
                         self.updateInspectorUI();
                     }
                 }
@@ -557,16 +702,19 @@
                             nodeG.setAttribute("transform", "translate(" + clampedX + "," + clampedY + ")");
                         }
 
-                        // Rychlá aktualizace napojených čar
-                        var fromLines = svg.querySelectorAll('.me-path-line[data-from="' + targetNode.id + '"]');
+                        // Rychlá aktualizace napojených čar, hit-zón, šipek a štítků rozcestí
+                        var fromLines = svg.querySelectorAll('.me-path-line[data-from="' + targetNode.id + '"], .me-path-hit[data-from="' + targetNode.id + '"]');
                         for (var fl = 0; fl < fromLines.length; fl++) {
                             fromLines[fl].setAttribute("x1", clampedX);
                             fromLines[fl].setAttribute("y1", clampedY);
                         }
-                        var toLines = svg.querySelectorAll('.me-path-line[data-to="' + targetNode.id + '"]');
+                        var toLines = svg.querySelectorAll('.me-path-line[data-to="' + targetNode.id + '"], .me-path-hit[data-to="' + targetNode.id + '"]');
                         for (var tl = 0; tl < toLines.length; tl++) {
                             toLines[tl].setAttribute("x2", clampedX);
                             toLines[tl].setAttribute("y2", clampedY);
+                        }
+                        if (typeof self.refreshConnectedEdgeMarkers === "function") {
+                            self.refreshConnectedEdgeMarkers(svg, targetNode.id);
                         }
 
                         self.updateInspectorCoordinates(clampedX, clampedY);
@@ -644,6 +792,8 @@
             } else {
                 // Select i Move nástroj vyberou uzel a otevřou inspektor
                 this.selectedNodeId = nodeId;
+                this.selectedEdge = null;
+                this.inspectorMode = "node";
                 this.renderCanvas();
                 this.updateInspectorUI();
                 if (window.PRS_Audio) window.PRS_Audio.playStep();
@@ -657,7 +807,7 @@
             }
 
             var target = evt.target;
-            var nodeEl = target && target.closest ? (target.closest(".me-node") || target.closest(".me-node-group")) : null;
+            var nodeEl = target && target.closest ? (target.closest(".me-node") || target.closest(".me-node-group") || target.closest(".me-river-pt") || target.closest(".me-royal-castle-hit")) : null;
 
             // 1. Režim přidání pole: kliknutím na prázdné místo plátna vytvoříme nový uzel
             if (this.activeTool === "add" && !nodeEl) {
@@ -669,7 +819,7 @@
                 }
             }
 
-            // Pokud jsme klikli na políčko, obsluhuje ho onNodePointerDown
+            // Pokud jsme klikli na políčko, bod řeky nebo hrad, obsluhuje je příslušný handler
             if (nodeEl) return;
 
             var isPanTool = (this.activeTool === "pan");
@@ -788,11 +938,14 @@
                     if (prevNode.next.indexOf(newId) === -1) {
                         prevNode.next.push(newId);
                     }
+                    this.recomputeNodeJunctionState(prevNode);
                 }
             }
 
             this.board.nodes.push(newNode);
             this.selectedNodeId = newId;
+            this.selectedEdge = null;
+            this.inspectorMode = "node";
 
             if (this.board && window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
                 window.PRS_BoardBuilder.computeRiverBridges(this.board);
@@ -829,6 +982,7 @@
                 var n = this.board.nodes[i];
                 if (n.id === idToDelete) continue;
 
+                var touched = false;
                 if (Array.isArray(n.next)) {
                     var idx = n.next.indexOf(idToDelete);
                     if (idx !== -1) {
@@ -838,13 +992,19 @@
                                 n.next.push(targetNext[tn]);
                             }
                         }
+                        touched = true;
                     }
                 }
                 if (n.branchHigh === idToDelete) {
                     n.branchHigh = targetNext.length > 0 ? targetNext[0] : null;
+                    touched = true;
                 }
                 if (n.branchLow === idToDelete) {
                     n.branchLow = targetNext.length > 0 ? targetNext[0] : null;
+                    touched = true;
+                }
+                if (touched) {
+                    this.recomputeNodeJunctionState(n);
                 }
             }
 
@@ -856,6 +1016,8 @@
             }
 
             this.selectedNodeId = null;
+            this.selectedEdge = null;
+            if (this.inspectorMode === "node") this.inspectorMode = null;
             this.renderCanvas();
             this.updateInspectorUI();
 
@@ -882,6 +1044,8 @@
                 var nextIdx = (curIdx + step + this.board.nodes.length) % this.board.nodes.length;
                 this.selectedNodeId = this.board.nodes[nextIdx].id;
             }
+            this.selectedEdge = null;
+            this.inspectorMode = "node";
             this.renderCanvas();
             this.updateInspectorUI();
             if (window.PRS_Audio) window.PRS_Audio.playStep();
@@ -915,34 +1079,1052 @@
             if (window.PRS_Audio) window.PRS_Audio.playCoin();
         },
 
+        recomputeBridgesSafe: function () {
+            if (this.board && window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
+                window.PRS_BoardBuilder.computeRiverBridges(this.board);
+            }
+        },
+
         // ====================================================================
-        // OPERACE: SPOJENÍ / ODPOJENÍ CESTY (LINK / UNLINK)
+        // SYNCHRONIZACE VĚTVÍ ROZCESTÍ (next[] <-> branchLow / branchHigh / isJunction)
+        // ====================================================================
+        recomputeNodeJunctionState: function (nd) {
+            if (!nd) return;
+            if (!Array.isArray(nd.next)) nd.next = [];
+
+            // Odstranit duplicity a neplatné hodnoty, zachovat pořadí [1-3, 4-6, ...]
+            var cleaned = [];
+            for (var i = 0; i < nd.next.length; i++) {
+                var tid = nd.next[i];
+                if (tid === null || tid === undefined || tid === nd.id) continue;
+                if (cleaned.indexOf(tid) === -1) cleaned.push(tid);
+            }
+            nd.next = cleaned;
+
+            if (nd.next.length >= 2) {
+                nd.branchLow = nd.next[0];
+                nd.branchHigh = nd.next[1];
+                nd.isJunction = true;
+            } else {
+                nd.branchLow = null;
+                nd.branchHigh = null;
+                nd.isJunction = false;
+            }
+        },
+
+        syncNodeBranches: function (board, includeLegacyBranchFields) {
+            if (!board || !Array.isArray(board.nodes)) return;
+            var idMap = {};
+            for (var k = 0; k < board.nodes.length; k++) {
+                idMap[board.nodes[k].id] = true;
+            }
+            for (var i = 0; i < board.nodes.length; i++) {
+                var nd = board.nodes[i];
+                if (!Array.isArray(nd.next)) nd.next = [];
+
+                if (includeLegacyBranchFields) {
+                    if (nd.branchLow !== null && nd.branchLow !== undefined && idMap[nd.branchLow]) {
+                        if (nd.next.indexOf(nd.branchLow) === -1) {
+                            nd.next.unshift(nd.branchLow);
+                        }
+                    }
+                    if (nd.branchHigh !== null && nd.branchHigh !== undefined && idMap[nd.branchHigh]) {
+                        if (nd.next.indexOf(nd.branchHigh) === -1) {
+                            nd.next.push(nd.branchHigh);
+                        }
+                    }
+                }
+
+                // Ponechat jen existující cílové uzly
+                var validNext = [];
+                for (var n = 0; n < nd.next.length; n++) {
+                    var tid = nd.next[n];
+                    if (idMap[tid] && tid !== nd.id && validNext.indexOf(tid) === -1) {
+                        validNext.push(tid);
+                    }
+                }
+                nd.next = validNext;
+                this.recomputeNodeJunctionState(nd);
+            }
+            board._branchesSynced = true;
+        },
+
+        refreshConnectedEdgeMarkers: function (svg, nodeId) {
+            if (!svg) return;
+            var idStr = String(nodeId);
+            var markers = svg.querySelectorAll('.me-path-arrow[data-from="' + idStr + '"], .me-path-arrow[data-to="' + idStr + '"], .me-path-jbadge[data-from="' + idStr + '"], .me-path-jbadge[data-to="' + idStr + '"]');
+            for (var m = 0; m < markers.length; m++) {
+                var el = markers[m];
+                var fromId = parseInt(el.getAttribute("data-from"), 10);
+                var toId = parseInt(el.getAttribute("data-to"), 10);
+                var nA = this.getNodeById(fromId);
+                var nB = this.getNodeById(toId);
+                if (!nA || !nB) continue;
+                var dx = nB.x - nA.x;
+                var dy = nB.y - nA.y;
+                if (el.classList.contains("me-path-arrow")) {
+                    var midX = (nA.x + nB.x) * 0.5;
+                    var midY = (nA.y + nB.y) * 0.5;
+                    var angDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+                    el.setAttribute("transform", "translate(" + midX.toFixed(1) + "," + midY.toFixed(1) + ") rotate(" + angDeg.toFixed(1) + ")");
+                } else {
+                    var bx = nA.x + dx * 0.34;
+                    var by = nA.y + dy * 0.34;
+                    el.setAttribute("transform", "translate(" + bx.toFixed(1) + "," + by.toFixed(1) + ")");
+                }
+            }
+        },
+
+        // ====================================================================
+        // OPERACE: SPOJENÍ / ODPOJENÍ CESTY, SMĚRY A ROZCESTÍ
         // ====================================================================
         executeToggleLink: function (idA, idB) {
+            if (idA === idB) return;
             var nA = this.getNodeById(idA);
             var nB = this.getNodeById(idB);
             if (!nA || !nB) return;
 
+            if (!Array.isArray(nA.next)) nA.next = [];
+            if (!Array.isArray(nB.next)) nB.next = [];
+
+            // Odebrat hranu bez ohledu na pořadí kliknutí (A->B nebo B->A)
+            if (nA.next.indexOf(idB) !== -1) {
+                this.removeEdge(idA, idB);
+                return;
+            }
+            if (nB.next.indexOf(idA) !== -1) {
+                this.removeEdge(idB, idA);
+                return;
+            }
+
+            this.pushUndo();
+            nA.next.push(idB);
+            this.recomputeNodeJunctionState(nA);
+            this.selectedEdge = { from: idA, to: idB };
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+
+            if (window.KiDeskyToast) window.KiDeskyToast.show("🔗 Vytvořena nová cesta z #" + idA + " do #" + idB + "!", "good");
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        onEdgeClick: function (evt, fromId, toId) {
+            if (evt) evt.stopPropagation();
+            this.selectedEdge = { from: fromId, to: toId };
+            this.selectedNodeId = null;
+            this.inspectorMode = "edge";
+            this.updateStatusHelp();
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        removeEdge: function (fromId, toId, skipUndo) {
+            var nA = this.getNodeById(fromId);
+            if (!nA) return false;
+            if (!Array.isArray(nA.next)) nA.next = [];
+
+            var idx = nA.next.indexOf(toId);
+            var hadLegacy = (nA.branchHigh === toId || nA.branchLow === toId);
+            if (idx === -1 && !hadLegacy) return false;
+
+            if (!skipUndo) this.pushUndo();
+            if (idx !== -1) nA.next.splice(idx, 1);
+            if (nA.branchHigh === toId) nA.branchHigh = null;
+            if (nA.branchLow === toId) nA.branchLow = null;
+            this.recomputeNodeJunctionState(nA);
+
+            if (this.selectedEdge && this.selectedEdge.from === fromId && this.selectedEdge.to === toId) {
+                this.selectedEdge = null;
+                if (this.inspectorMode === "edge") this.inspectorMode = null;
+            }
+
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+
+            if (!skipUndo && window.KiDeskyToast) {
+                window.KiDeskyToast.show("✂️ Cesta #" + fromId + " ➔ #" + toId + " byla odstraněna.", "turn");
+            }
+            if (!skipUndo && window.PRS_Audio) window.PRS_Audio.playStep();
+            return true;
+        },
+
+        reverseEdgeDirection: function (fromId, toId) {
+            var nA = this.getNodeById(fromId);
+            var nB = this.getNodeById(toId);
+            if (!nA || !nB || !Array.isArray(nA.next)) return false;
+
+            var idx = nA.next.indexOf(toId);
+            if (idx === -1) return false;
+
+            this.pushUndo();
+            nA.next.splice(idx, 1);
+            if (nA.branchHigh === toId) nA.branchHigh = null;
+            if (nA.branchLow === toId) nA.branchLow = null;
+            this.recomputeNodeJunctionState(nA);
+
+            if (!Array.isArray(nB.next)) nB.next = [];
+            if (nB.next.indexOf(fromId) === -1) {
+                nB.next.push(fromId);
+            }
+            this.recomputeNodeJunctionState(nB);
+
+            if (this.inspectorMode === "edge" || (this.selectedEdge && this.selectedEdge.from === fromId && this.selectedEdge.to === toId)) {
+                this.selectedEdge = { from: toId, to: fromId };
+            }
+
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+
+            if (window.KiDeskyToast) window.KiDeskyToast.show("🔄 Směr cesty obrácen: #" + toId + " ➔ #" + fromId, "good");
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+            return true;
+        },
+
+        swapJunctionBranchPriority: function (nodeId) {
+            var nd = this.getNodeById(nodeId);
+            if (!nd || !Array.isArray(nd.next) || nd.next.length < 2) return false;
+
+            this.pushUndo();
+            var tmp = nd.next[0];
+            nd.next[0] = nd.next[1];
+            nd.next[1] = tmp;
+            this.recomputeNodeJunctionState(nd);
+
+            this.renderCanvas();
+            this.updateInspectorUI();
+
+            if (window.KiDeskyToast) {
+                window.KiDeskyToast.show("🔀 Rozcestí #" + nodeId + ": prohozeno 1–3 (#" + nd.next[0] + ") ⇄ 4–6 (#" + nd.next[1] + ").", "good");
+            }
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+            return true;
+        },
+
+        autoOrientSideBranches: function () {
+            if (!this.board || !Array.isArray(this.board.nodes) || this.board.nodes.length === 0) return { fixedEdges: 0, fixedJunctions: 0 };
             this.pushUndo();
 
-            if (!Array.isArray(nA.next)) nA.next = [];
-            var idx = nA.next.indexOf(idB);
+            var nodes = this.board.nodes;
+            this.syncNodeBranches(this.board, !this.board._branchesSynced);
 
-            if (idx !== -1) {
-                // Odstranit cestu
-                nA.next.splice(idx, 1);
-                if (window.KiDeskyToast) window.KiDeskyToast.show("✂️ Cesta z #" + idA + " do #" + idB + " byla odstraněna.", "turn");
-            } else {
-                // Přidat cestu
-                nA.next.push(idB);
-                if (window.KiDeskyToast) window.KiDeskyToast.show("🔗 Vytvořena nová cesta z #" + idA + " do #" + idB + "!", "good");
+            var idMap = {};
+            var undir = {};
+            var cx = 0;
+            var cy = 0;
+            for (var i = 0; i < nodes.length; i++) {
+                var n = nodes[i];
+                idMap[n.id] = n;
+                undir[n.id] = [];
+                cx += n.x;
+                cy += n.y;
+            }
+            var centroid = { x: cx / nodes.length, y: cy / nodes.length };
+
+            var startNode = idMap[0] || nodes.find(function (nd) { return (nd.type || "").toLowerCase() === "start"; }) || nodes[0];
+            var startId = startNode.id;
+
+            // Neorientovaná mapa sousedů + vzdálenost od Startu v neorientovaném grafu
+            for (var i2 = 0; i2 < nodes.length; i2++) {
+                var na = nodes[i2];
+                var nxt = na.next || [];
+                for (var t = 0; t < nxt.length; t++) {
+                    var tb = nxt[t];
+                    if (!idMap[tb] || tb === na.id) continue;
+                    if (undir[na.id].indexOf(tb) === -1) undir[na.id].push(tb);
+                    if (undir[tb].indexOf(na.id) === -1) undir[tb].push(na.id);
+                }
             }
 
-            // Přepočet mostů přes řeku
-            if (this.board && window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
-                window.PRS_BoardBuilder.computeRiverBridges(this.board);
+            var distFromStart = {};
+            var q = [startId];
+            distFromStart[startId] = 0;
+            for (var qi = 0; qi < q.length; qi++) {
+                var cur = q[qi];
+                var nb = undir[cur] || [];
+                for (var ni = 0; ni < nb.length; ni++) {
+                    if (distFromStart[nb[ni]] === undefined) {
+                        distFromStart[nb[ni]] = distFromStart[cur] + 1;
+                        q.push(nb[ni]);
+                    }
+                }
             }
 
+            var hasEdge = function (u, v) {
+                var nu = idMap[u];
+                return !!(nu && Array.isArray(nu.next) && nu.next.indexOf(v) !== -1);
+            };
+            var flipEdgeInternal = function (u, v) {
+                var nu = idMap[u];
+                var nv = idMap[v];
+                if (!nu || !nv) return false;
+                var idx = (nu.next || []).indexOf(v);
+                if (idx === -1) return false;
+                nu.next.splice(idx, 1);
+                if (!Array.isArray(nv.next)) nv.next = [];
+                if (nv.next.indexOf(u) === -1) nv.next.push(u);
+                return true;
+            };
+
+            // 1. Najít všechny neorientované řetězce mezi křižovatkami / slepými konci (uzly se stupněm != 2) a opravit protichůdné hrany
+            var fixedEdges = 0;
+            var visitedChainKey = {};
+            for (var si = 0; si < nodes.length; si++) {
+                var root = nodes[si];
+                if (undir[root.id].length === 2) continue;
+
+                var rootNeighbors = undir[root.id];
+                for (var rn = 0; rn < rootNeighbors.length; rn++) {
+                    var firstStep = rootNeighbors[rn];
+                    var chain = [root.id, firstStep];
+                    var prev = root.id;
+                    var curr = firstStep;
+                    while (undir[curr].length === 2 && curr !== root.id) {
+                        var nbs = undir[curr];
+                        var nextStep = (nbs[0] === prev) ? nbs[1] : nbs[0];
+                        chain.push(nextStep);
+                        prev = curr;
+                        curr = nextStep;
+                        if (chain.length > nodes.length + 2) break;
+                    }
+                    if (chain.length < 2) continue;
+
+                    var startEnd = chain[0];
+                    var finishEnd = chain[chain.length - 1];
+                    var chainKey = (startEnd < finishEnd ? startEnd + "-" + finishEnd : finishEnd + "-" + startEnd) + ":" + chain[1] + ":" + chain[chain.length - 2];
+                    if (visitedChainKey[chainKey]) continue;
+                    visitedChainKey[chainKey] = true;
+
+                    // Určení požadovaného směru řetězce (forward = startEnd -> finishEnd, nebo obráceně)
+                    var fwdVote = 0;
+                    var revVote = 0;
+                    var startOut = hasEdge(chain[0], chain[1]);
+                    var finishIn = hasEdge(chain[chain.length - 2], chain[chain.length - 1]);
+                    if (startOut) fwdVote += 2; else revVote += 2;
+                    if (finishIn) fwdVote += 2; else revVote += 2;
+
+                    // Pokud se koncové šipky rozchází (shoda 2:2), rozhodne vzdálenost od Startu nebo slepý konec
+                    var orientForward = true;
+                    if (fwdVote !== revVote) {
+                        orientForward = (fwdVote > revVote);
+                    } else {
+                        var dA = distFromStart[startEnd] !== undefined ? distFromStart[startEnd] : 99999;
+                        var dB = distFromStart[finishEnd] !== undefined ? distFromStart[finishEnd] : 99999;
+                        if (undir[finishEnd].length === 1 && undir[startEnd].length > 1) orientForward = true;
+                        else if (undir[startEnd].length === 1 && undir[finishEnd].length > 1) orientForward = false;
+                        else orientForward = (dA <= dB);
+                    }
+
+                    var ordered = orientForward ? chain : chain.slice().reverse();
+                    for (var ci = 0; ci < ordered.length - 1; ci++) {
+                        var u = ordered[ci];
+                        var v = ordered[ci + 1];
+                        if (!hasEdge(u, v) && hasEdge(v, u)) {
+                            if (flipEdgeInternal(v, u)) fixedEdges++;
+                        }
+                    }
+                }
+            }
+
+            // Re-sync všech větví po opravě hran
+            this.syncNodeBranches(this.board, false);
+
+            // 2. U rozcestí ověřit, která větev je hlavní okruh (1-3) a která boční větev (4-6)
+            var fixedJunctions = 0;
+            var inspectBranch = function (jId, firstTgtId) {
+                var path = [];
+                var seen = {};
+                var curId = firstTgtId;
+                var reachesStartWithoutJ = false;
+                var steps = 0;
+                while (curId !== null && curId !== undefined && idMap[curId] && !seen[curId] && steps <= nodes.length) {
+                    if (curId === jId) break;
+                    seen[curId] = true;
+                    path.push(curId);
+                    if (curId === startId) {
+                        reachesStartWithoutJ = true;
+                        break;
+                    }
+                    var ndObj = idMap[curId];
+                    if (!ndObj.next || ndObj.next.length === 0) break;
+                    curId = ndObj.next[0];
+                    steps++;
+                }
+                return {
+                    path: path,
+                    seen: seen,
+                    reachesStartWithoutJ: reachesStartWithoutJ,
+                    hitsDeadEnd: (path.length === 0) || (!reachesStartWithoutJ && (!idMap[path[path.length - 1]].next || idMap[path[path.length - 1]].next.length === 0))
+                };
+            };
+
+            for (var ji = 0; ji < nodes.length; ji++) {
+                var jn = nodes[ji];
+                if (!jn.next || jn.next.length < 2) continue;
+
+                var t0 = jn.next[0];
+                var t1 = jn.next[1];
+                var info0 = inspectBranch(jn.id, t0);
+                var info1 = inspectBranch(jn.id, t1);
+
+                var preferSecond = false;
+                if (info1.reachesStartWithoutJ && !info0.reachesStartWithoutJ) {
+                    preferSecond = true;
+                } else if (info0.hitsDeadEnd && !info1.hitsDeadEnd) {
+                    preferSecond = true;
+                } else if (info0.reachesStartWithoutJ === info1.reachesStartWithoutJ) {
+                    var seq0 = (Math.abs(t0 - jn.id) === 1 || t0 === startId) ? 1 : 0;
+                    var seq1 = (Math.abs(t1 - jn.id) === 1 || t1 === startId) ? 1 : 0;
+                    if (seq1 !== seq0) {
+                        preferSecond = (seq1 > seq0);
+                    } else {
+                        // Průměrná vzdálenost před prvním společným uzlem (vnější delší okruh vs vnitřní zkratka)
+                        var mergeId = null;
+                        for (var p0 = 0; p0 < info0.path.length; p0++) {
+                            if (info1.seen[info0.path[p0]]) {
+                                mergeId = info0.path[p0];
+                                break;
+                            }
+                        }
+                        var avgRad = function (arr) {
+                            var cnt = 0;
+                            var radSum = 0;
+                            for (var ai = 0; ai < arr.length; ai++) {
+                                if (arr[ai] === mergeId) break;
+                                var pt = idMap[arr[ai]];
+                                if (pt) {
+                                    radSum += Math.hypot(pt.x - centroid.x, pt.y - centroid.y);
+                                    cnt++;
+                                }
+                            }
+                            return { len: cnt, avgRadius: cnt > 0 ? radSum / cnt : 0 };
+                        };
+                        var stat0 = avgRad(info0.path);
+                        var stat1 = avgRad(info1.path);
+                        if (stat1.len !== stat0.len) {
+                            preferSecond = (stat1.len > stat0.len);
+                        } else if (stat1.avgRadius > stat0.avgRadius + 15) {
+                            preferSecond = true;
+                        }
+                    }
+                }
+
+                if (preferSecond) {
+                    jn.next[0] = t1;
+                    jn.next[1] = t0;
+                    this.recomputeNodeJunctionState(jn);
+                    fixedJunctions++;
+                }
+            }
+
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+
+            if (window.KiDeskyToast) {
+                if (fixedEdges + fixedJunctions > 0) {
+                    window.KiDeskyToast.show("🧭 Opraveno cest: " + fixedEdges + ", srovnáno rozcestí: " + fixedJunctions + ".", "good");
+                } else {
+                    window.KiDeskyToast.show("🧭 Všechny boční větve a rozcestí už mají správný směr.", "turn");
+                }
+            }
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+            return { fixedEdges: fixedEdges, fixedJunctions: fixedJunctions };
+        },
+
+        // ====================================================================
+        // HLAVNÍ HRAD (UMÍSTĚNÍ, SKIN, NÁZEV, VELIKOST, ZRCADLENÍ)
+        // ====================================================================
+        getRoyalCastleLandmark: function () {
+            if (!this.board) return null;
+            if (!Array.isArray(this.board.landmarks)) this.board.landmarks = [];
+            for (var i = 0; i < this.board.landmarks.length; i++) {
+                var lm = this.board.landmarks[i];
+                if (lm && (lm.id === "royalCastle" || lm.isRoyalCastle || lm.id === "royal_castle")) {
+                    lm.id = "royalCastle";
+                    if (lm.x === undefined) lm.x = 700;
+                    if (lm.y === undefined) lm.y = 365;
+                    lm.image = lm.image || lm.img || "assets/castles/castle_royal.png";
+                    lm.img = lm.image;
+                    lm.baseW = lm.baseW || lm.w || 220;
+                    lm.baseH = lm.baseH || lm.h || 180;
+                    if (!lm.w) lm.w = lm.baseW;
+                    if (!lm.h) lm.h = lm.baseH;
+                    if (!lm.scale) lm.scale = 1;
+                    return lm;
+                }
+            }
+            var created = {
+                id: "royalCastle",
+                isRoyalCastle: true,
+                x: 700,
+                y: 365,
+                w: 220,
+                h: 180,
+                baseW: 220,
+                baseH: 180,
+                name: "Královský hrad",
+                icon: "👑",
+                image: "assets/castles/castle_royal.png",
+                img: "assets/castles/castle_royal.png",
+                scale: 1,
+                isFlipped: false,
+                customPositioned: false
+            };
+            this.board.landmarks.push(created);
+            return created;
+        },
+
+        onRoyalCastlePointerDown: function (evt) {
+            if (evt.button !== 0) return;
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            var rc = this.getRoyalCastleLandmark();
+            if (!rc) return;
+
+            var self = this;
+            var dragState = {
+                startX: evt.clientX,
+                startY: evt.clientY,
+                started: false
+            };
+
+            function onMove(e) {
+                var dx = e.clientX - dragState.startX;
+                var dy = e.clientY - dragState.startY;
+                if (!dragState.started) {
+                    if (Math.hypot(dx, dy) < 4) return;
+                    dragState.started = true;
+                    self.pushUndo();
+                    self.selectedNodeId = null;
+                    self.selectedEdge = null;
+                    self.inspectorMode = "castle";
+                    self.updateInspectorUI();
+                }
+
+                e.preventDefault();
+                var svg = document.getElementById("me-svg-canvas");
+                if (!svg) return;
+                var pt = self.getSvgCoordinates(e, svg);
+                var cx = Math.max(120, Math.min(1280, Math.round(pt.x)));
+                var cy = Math.max(100, Math.min(760, Math.round(pt.y)));
+
+                rc.x = cx;
+                rc.y = cy;
+                rc.customPositioned = true;
+                if (self.board) self.board._decorDirty = true;
+
+                var g = document.getElementById("me-royal-castle-g");
+                if (g) {
+                    g.setAttribute("transform", "translate(" + cx + "," + cy + ") scale(" + (rc.scale || 1) + ")");
+                }
+                var coordsEl = document.getElementById("me-insp-castle-coords");
+                if (coordsEl) coordsEl.textContent = "[" + cx + ", " + cy + "]";
+            }
+
+            function onUp() {
+                window.removeEventListener("pointermove", onMove);
+                window.removeEventListener("pointerup", onUp);
+                window.removeEventListener("pointercancel", onUp);
+
+                self.selectedNodeId = null;
+                self.selectedEdge = null;
+                self.inspectorMode = "castle";
+                self.updateStatusHelp();
+                self.renderCanvas();
+                self.updateInspectorUI();
+                if (window.PRS_Audio) window.PRS_Audio.playStep();
+            }
+
+            window.addEventListener("pointermove", onMove);
+            window.addEventListener("pointerup", onUp);
+            window.addEventListener("pointercancel", onUp);
+        },
+
+        applyRoyalCastleSkin: function (castleId) {
+            var rc = this.getRoyalCastleLandmark();
+            if (!rc) return;
+            var catalog = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ALL_CASTLES) || [];
+            var found = null;
+            for (var i = 0; i < catalog.length; i++) {
+                if (catalog[i].id === castleId || catalog[i].id === "castle_" + castleId) {
+                    found = catalog[i];
+                    break;
+                }
+            }
+            if (!found) return;
+
+            this.pushUndo();
+            rc.skinId = found.id;
+            rc.selectedKey = found.id;
+            rc.image = found.img;
+            rc.img = found.img;
+            rc.icon = found.icon || "👑";
+            if (!rc.customNameEdited) rc.name = found.name;
+            rc.customPositioned = true;
+            if (this.board) this.board.royalCastle = found.id;
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        applyRoyalCastleName: function (val) {
+            var rc = this.getRoyalCastleLandmark();
+            if (!rc) return;
+            this.pushUndo();
+            rc.name = String(val || "").trim() || "Královský hrad";
+            rc.customNameEdited = true;
+            rc.customPositioned = true;
+            this.renderCanvas();
+        },
+
+        applyRoyalCastleScale: function (scaleVal) {
+            var rc = this.getRoyalCastleLandmark();
+            if (!rc) return;
+            this.pushUndo();
+            var clamped = Math.max(0.75, Math.min(1.3, parseFloat(scaleVal) || 1));
+            rc.scale = Math.round(clamped * 100) / 100;
+            rc.w = Math.round((rc.baseW || 220) * rc.scale);
+            rc.h = Math.round((rc.baseH || 180) * rc.scale);
+            rc.customPositioned = true;
+            this.renderCanvas();
+            this.updateInspectorUI();
+        },
+
+        toggleRoyalCastleFlip: function () {
+            var rc = this.getRoyalCastleLandmark();
+            if (!rc) return;
+            this.pushUndo();
+            rc.isFlipped = !rc.isFlipped;
+            rc.customPositioned = true;
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        resetRoyalCastlePosition: function () {
+            var rc = this.getRoyalCastleLandmark();
+            if (!rc) return;
+            this.pushUndo();
+            rc.x = 700;
+            rc.y = 365;
+            rc.scale = 1;
+            rc.w = rc.baseW || 220;
+            rc.h = rc.baseH || 180;
+            rc.isFlipped = false;
+            rc.customPositioned = false;
+            if (this.board) this.board._decorDirty = true;
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.KiDeskyToast) window.KiDeskyToast.show("🏰 Hlavní hrad vrácen doprostřed mapy [700, 365].", "turn");
+        },
+
+        // ====================================================================
+        // EDITACE TOKU ŘEKY (BEZIÉROVY KŘIVKY, PŘEDVOLBY, MEANDRY, MOSTY)
+        // ====================================================================
+        parseRiverPathPoints: function (pathStr) {
+            if (!pathStr || typeof pathStr !== "string") return [];
+            var tokens = pathStr.match(/[A-Za-z]|[-+]?\d*\.?\d+/g);
+            if (!tokens || tokens.length === 0) return [];
+
+            var pts = [];
+            var cur = { x: 0, y: 0 };
+            var i = 0;
+            var cmd = "";
+            var num = function () { return parseFloat(tokens[i++]); };
+
+            while (i < tokens.length) {
+                if (/^[A-Za-z]$/.test(tokens[i])) {
+                    cmd = tokens[i++];
+                }
+                if (cmd === "M" || cmd === "m") {
+                    if (i + 1 >= tokens.length) break;
+                    var mx = num();
+                    var my = num();
+                    if (cmd === "m") { mx += cur.x; my += cur.y; }
+                    cur = { x: mx, y: my };
+                    if (pts.length === 0) pts.push({ x: cur.x, y: cur.y });
+                    cmd = (cmd === "m") ? "l" : "L";
+                } else if (cmd === "C" || cmd === "c") {
+                    if (i + 5 >= tokens.length) break;
+                    var x1 = num(), y1 = num(), x2 = num(), y2 = num(), x3 = num(), y3 = num();
+                    if (cmd === "c") {
+                        x1 += cur.x; y1 += cur.y;
+                        x2 += cur.x; y2 += cur.y;
+                        x3 += cur.x; y3 += cur.y;
+                    }
+                    if (pts.length === 0) pts.push({ x: cur.x, y: cur.y });
+                    pts.push({ x: x1, y: y1 }, { x: x2, y: y2 }, { x: x3, y: y3 });
+                    cur = { x: x3, y: y3 };
+                } else if (cmd === "Q" || cmd === "q") {
+                    if (i + 3 >= tokens.length) break;
+                    var qx = num(), qy = num(), ex = num(), ey = num();
+                    if (cmd === "q") { qx += cur.x; qy += cur.y; ex += cur.x; ey += cur.y; }
+                    if (pts.length === 0) pts.push({ x: cur.x, y: cur.y });
+                    var c1x = cur.x + (2 / 3) * (qx - cur.x);
+                    var c1y = cur.y + (2 / 3) * (qy - cur.y);
+                    var c2x = ex + (2 / 3) * (qx - ex);
+                    var c2y = ey + (2 / 3) * (qy - ey);
+                    pts.push({ x: c1x, y: c1y }, { x: c2x, y: c2y }, { x: ex, y: ey });
+                    cur = { x: ex, y: ey };
+                } else if (cmd === "L" || cmd === "l") {
+                    if (i + 1 >= tokens.length) break;
+                    var lx = num(), ly = num();
+                    if (cmd === "l") { lx += cur.x; ly += cur.y; }
+                    if (pts.length === 0) pts.push({ x: cur.x, y: cur.y });
+                    pts.push(
+                        { x: cur.x + (lx - cur.x) / 3, y: cur.y + (ly - cur.y) / 3 },
+                        { x: cur.x + (2 * (lx - cur.x)) / 3, y: cur.y + (2 * (ly - cur.y)) / 3 },
+                        { x: lx, y: ly }
+                    );
+                    cur = { x: lx, y: ly };
+                } else {
+                    i++;
+                }
+            }
+            return pts;
+        },
+
+        buildRiverPathFromPoints: function (pts) {
+            if (!pts || pts.length === 0) return "";
+            var parts = ["M " + Math.round(pts[0].x) + " " + Math.round(pts[0].y)];
+            for (var i = 1; i + 2 < pts.length; i += 3) {
+                parts.push(
+                    "C " + Math.round(pts[i].x) + " " + Math.round(pts[i].y) +
+                    ", " + Math.round(pts[i + 1].x) + " " + Math.round(pts[i + 1].y) +
+                    ", " + Math.round(pts[i + 2].x) + " " + Math.round(pts[i + 2].y)
+                );
+            }
+            return parts.join(" ");
+        },
+
+        onRiverPathClick: function (evt, rivIdx) {
+            if (evt) evt.stopPropagation();
+            this.selectedRiverIdx = rivIdx;
+            this.selectedRiverPtIdx = null;
+            this.selectedNodeId = null;
+            this.selectedEdge = null;
+            this.inspectorMode = "river";
+            this.updateStatusHelp();
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        onRiverPointPointerDown: function (evt, rivIdx, ptIdx) {
+            if (evt.button !== 0) return;
+            evt.preventDefault();
+            evt.stopPropagation();
+
+            var riv = this.board && this.board.rivers && this.board.rivers[rivIdx];
+            if (!riv) return;
+            var pts = this.parseRiverPathPoints(riv.path);
+            if (!pts || !pts[ptIdx]) return;
+
+            var self = this;
+            var dragState = {
+                startX: evt.clientX,
+                startY: evt.clientY,
+                started: false
+            };
+
+            function syncPtDom(svg, idxToSync) {
+                var ptObj = pts[idxToSync];
+                if (!ptObj) return;
+                var c = svg.querySelector('.me-river-pt[data-riv-idx="' + rivIdx + '"][data-pt-idx="' + idxToSync + '"]');
+                if (c) {
+                    c.setAttribute("cx", ptObj.x);
+                    c.setAttribute("cy", ptObj.y);
+                }
+                if (idxToSync % 3 === 0) {
+                    var gOut = svg.querySelectorAll('.me-river-guide[data-anchor="' + idxToSync + '"]');
+                    for (var go = 0; go < gOut.length; go++) {
+                        gOut[go].setAttribute("x1", ptObj.x);
+                        gOut[go].setAttribute("y1", ptObj.y);
+                    }
+                } else {
+                    var gIn = svg.querySelector('.me-river-guide[data-handle="' + idxToSync + '"]');
+                    if (gIn) {
+                        gIn.setAttribute("x2", ptObj.x);
+                        gIn.setAttribute("y2", ptObj.y);
+                    }
+                }
+            }
+
+            function onMove(e) {
+                var dx = e.clientX - dragState.startX;
+                var dy = e.clientY - dragState.startY;
+                if (!dragState.started) {
+                    if (Math.hypot(dx, dy) < 3) return;
+                    dragState.started = true;
+                    self.pushUndo();
+                    self.selectedRiverIdx = rivIdx;
+                    self.selectedRiverPtIdx = ptIdx;
+                    self.selectedNodeId = null;
+                    self.selectedEdge = null;
+                    self.inspectorMode = "river";
+                }
+
+                e.preventDefault();
+                var svg = document.getElementById("me-svg-canvas");
+                if (!svg) return;
+                var curPt = self.getSvgCoordinates(e, svg);
+                var nx = Math.max(-80, Math.min(1480, Math.round(curPt.x)));
+                var ny = Math.max(-80, Math.min(940, Math.round(curPt.y)));
+                var ddx = nx - pts[ptIdx].x;
+                var ddy = ny - pts[ptIdx].y;
+
+                pts[ptIdx].x = nx;
+                pts[ptIdx].y = ny;
+
+                // Při tažení kotvy (násobek 3) bez klávesy Alt posuneme plynule i přilehlá táhla
+                if (ptIdx % 3 === 0 && !e.altKey) {
+                    if (ptIdx - 1 >= 0) {
+                        pts[ptIdx - 1].x += ddx;
+                        pts[ptIdx - 1].y += ddy;
+                        syncPtDom(svg, ptIdx - 1);
+                    }
+                    if (ptIdx + 1 < pts.length) {
+                        pts[ptIdx + 1].x += ddx;
+                        pts[ptIdx + 1].y += ddy;
+                        syncPtDom(svg, ptIdx + 1);
+                    }
+                }
+                syncPtDom(svg, ptIdx);
+
+                riv.path = self.buildRiverPathFromPoints(pts);
+                if (self.board) self.board._decorDirty = true;
+
+                var rivPaths = svg.querySelectorAll('path[data-river-idx="' + rivIdx + '"]');
+                for (var rp = 0; rp < rivPaths.length; rp++) {
+                    rivPaths[rp].setAttribute("d", riv.path);
+                }
+
+                var ptInfo = document.getElementById("me-insp-river-pt-info");
+                if (ptInfo) ptInfo.textContent = "Bod #" + ptIdx + (ptIdx % 3 === 0 ? " (kotva)" : " (táhlo)") + ": [" + nx + ", " + ny + "]";
+            }
+
+            function onUp() {
+                window.removeEventListener("pointermove", onMove);
+                window.removeEventListener("pointerup", onUp);
+                window.removeEventListener("pointercancel", onUp);
+
+                self.selectedRiverIdx = rivIdx;
+                self.selectedRiverPtIdx = ptIdx;
+                self.inspectorMode = "river";
+                self.recomputeBridgesSafe();
+                self.renderCanvas();
+                self.updateInspectorUI();
+                if (dragState.started && window.PRS_Audio) window.PRS_Audio.playStep();
+            }
+
+            window.addEventListener("pointermove", onMove);
+            window.addEventListener("pointerup", onUp);
+            window.addEventListener("pointercancel", onUp);
+        },
+
+        buildRiverPresetList: function () {
+            return {
+                standard: [
+                    { path: "M -40 180 C 260 120, 420 520, 700 420 C 980 320, 1140 680, 1440 600", width: 38, isTributary: false, customWidth: true }
+                ],
+                dual: [
+                    { path: "M -40 240 C 310 180, 520 540, 860 360 C 1100 230, 1240 460, 1440 420", width: 38, isTributary: false, customWidth: true },
+                    { path: "M 540 -40 C 580 180, 680 300, 860 360 C 980 420, 1160 720, 1280 900", width: 28, isTributary: true, customWidth: true }
+                ],
+                island: [
+                    { path: "M -40 420 C 260 220, 540 160, 700 180 C 940 210, 1160 300, 1440 420", width: 36, isTributary: false, customWidth: true },
+                    { path: "M -40 420 C 260 620, 540 680, 700 660 C 940 630, 1160 540, 1440 420", width: 34, isTributary: false, customWidth: true }
+                ],
+                delta: [
+                    { path: "M -40 380 C 320 300, 520 480, 760 410 C 980 340, 1180 280, 1440 180", width: 40, isTributary: false, customWidth: true },
+                    { path: "M 760 410 C 980 470, 1180 560, 1440 520", width: 30, isTributary: true, customWidth: true },
+                    { path: "M 640 420 C 860 590, 1100 720, 1440 760", width: 28, isTributary: true, customWidth: true }
+                ],
+                none: []
+            };
+        },
+
+        applyRiverPreset: function (presetKey) {
+            if (!this.board) return;
+            var presets = this.buildRiverPresetList();
+            if (!presets[presetKey]) return;
+
+            this.pushUndo();
+            this.board.rivers = JSON.parse(JSON.stringify(presets[presetKey]));
+            this.selectedRiverIdx = 0;
+            this.selectedRiverPtIdx = null;
+            this.board._decorDirty = true;
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.KiDeskyToast) window.KiDeskyToast.show("🌊 Použita šablona řeky: " + presetKey, "good");
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        selectRiverIndex: function (rivIdx) {
+            if (!this.board || !Array.isArray(this.board.rivers)) return;
+            if (rivIdx < 0 || rivIdx >= this.board.rivers.length) return;
+            this.selectedRiverIdx = rivIdx;
+            this.selectedRiverPtIdx = null;
+            this.inspectorMode = "river";
+            this.renderCanvas();
+            this.updateInspectorUI();
+        },
+
+        addRiverMeander: function () {
+            if (!this.board || !Array.isArray(this.board.rivers) || !this.board.rivers[this.selectedRiverIdx]) return;
+            var riv = this.board.rivers[this.selectedRiverIdx];
+            var pts = this.parseRiverPathPoints(riv.path);
+            if (!pts || pts.length < 4) return;
+
+            // Najdeme nejdelší Beziérův segment a rozdělíme ho De Casteljauovým krokem
+            var bestSegIdx = 0;
+            var bestLen = -1;
+            for (var s = 0; s + 3 < pts.length; s += 3) {
+                var d = Math.hypot(pts[s + 3].x - pts[s].x, pts[s + 3].y - pts[s].y);
+                if (d > bestLen) {
+                    bestLen = d;
+                    bestSegIdx = s;
+                }
+            }
+
+            var p0 = pts[bestSegIdx];
+            var p1 = pts[bestSegIdx + 1];
+            var p2 = pts[bestSegIdx + 2];
+            var p3 = pts[bestSegIdx + 3];
+            var midPt = function (a, b) { return { x: (a.x + b.x) * 0.5, y: (a.y + b.y) * 0.5 }; };
+            var q0 = midPt(p0, p1);
+            var q1 = midPt(p1, p2);
+            var q2 = midPt(p2, p3);
+            var r0 = midPt(q0, q1);
+            var r1 = midPt(q1, q2);
+            var m = midPt(r0, r1);
+
+            var dx = p3.x - p0.x;
+            var dy = p3.y - p0.y;
+            var len = Math.hypot(dx, dy) || 1;
+            var nx = -dy / len;
+            var ny = dx / len;
+            var sign = ((bestSegIdx / 3) % 2 === 0) ? 1 : -1;
+            var wave = 42 * sign;
+
+            r0.x += nx * wave; r0.y += ny * wave;
+            m.x += nx * wave;  m.y += ny * wave;
+            r1.x += nx * wave; r1.y += ny * wave;
+
+            this.pushUndo();
+            pts.splice(bestSegIdx + 1, 2, q0, r0, m, r1, q2);
+            riv.path = this.buildRiverPathFromPoints(pts);
+            this.selectedRiverPtIdx = bestSegIdx + 3;
+            this.board._decorDirty = true;
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+
+            if (window.KiDeskyToast) window.KiDeskyToast.show("〰️ Přidán nový zákrut (meandr) vybrané větve řeky.", "good");
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        addRiverTributary: function () {
+            if (!this.board) return;
+            if (!Array.isArray(this.board.rivers)) this.board.rivers = [];
+
+            var targetPt = { x: 700, y: 420 };
+            if (this.board.rivers.length > 0) {
+                var mainPts = this.parseRiverPathPoints(this.board.rivers[0].path);
+                if (mainPts.length > 3) {
+                    var midIdx = Math.floor(mainPts.length / 2);
+                    midIdx = midIdx - (midIdx % 3);
+                    if (mainPts[midIdx]) targetPt = mainPts[midIdx];
+                }
+            }
+
+            var startX = Math.max(80, Math.min(1320, Math.round(targetPt.x - 180)));
+            var startY = targetPt.y > 430 ? 900 : -40;
+            var c1x = Math.round(startX + 40);
+            var c1y = Math.round((startY + targetPt.y) * 0.45);
+            var c2x = Math.round(targetPt.x - 60);
+            var c2y = Math.round(targetPt.y + (startY < 0 ? -90 : 90));
+
+            this.pushUndo();
+            this.board.rivers.push({
+                path: "M " + startX + " " + startY + " C " + c1x + " " + c1y + ", " + c2x + " " + c2y + ", " + Math.round(targetPt.x) + " " + Math.round(targetPt.y),
+                width: 28,
+                isTributary: true,
+                customWidth: true
+            });
+            this.selectedRiverIdx = this.board.rivers.length - 1;
+            this.selectedRiverPtIdx = null;
+            this.inspectorMode = "river";
+            this.board._decorDirty = true;
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+
+            if (window.KiDeskyToast) window.KiDeskyToast.show("➕ Přidán nový přítok / rameno řeky.", "good");
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        flipSelectedRiverHorizontally: function () {
+            if (!this.board || !Array.isArray(this.board.rivers) || !this.board.rivers[this.selectedRiverIdx]) return;
+            var riv = this.board.rivers[this.selectedRiverIdx];
+            var pts = this.parseRiverPathPoints(riv.path);
+            if (!pts || pts.length === 0) return;
+
+            this.pushUndo();
+            for (var i = 0; i < pts.length; i++) {
+                pts[i].x = 1400 - pts[i].x;
+            }
+            riv.path = this.buildRiverPathFromPoints(pts);
+            this.board._decorDirty = true;
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        applyRiverWidth: function (w) {
+            if (!this.board || !Array.isArray(this.board.rivers) || !this.board.rivers[this.selectedRiverIdx]) return;
+            var riv = this.board.rivers[this.selectedRiverIdx];
+            var clampedW = Math.max(10, Math.min(56, parseInt(w, 10) || 36));
+            if (riv.width === clampedW && riv.customWidth) return;
+
+            this.pushUndo();
+            riv.width = clampedW;
+            riv.customWidth = true;
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+        },
+
+        deleteSelectedRiver: function () {
+            if (!this.board || !Array.isArray(this.board.rivers) || !this.board.rivers[this.selectedRiverIdx]) return;
+            this.pushUndo();
+            this.board.rivers.splice(this.selectedRiverIdx, 1);
+            this.selectedRiverIdx = Math.max(0, Math.min(this.selectedRiverIdx, this.board.rivers.length - 1));
+            this.selectedRiverPtIdx = null;
+            this.board._decorDirty = true;
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.KiDeskyToast) window.KiDeskyToast.show("🗑️ Větev řeky byla odstraněna.", "turn");
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
+        },
+
+        regenerateDecorAndBridges: function () {
+            if (!this.board) return;
+            this.recomputeBridgesSafe();
+            if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
+                var seed = this.board.seed || 4242;
+                window.PRS_BoardBuilder.generateBoardDecorations(this.board, seed);
+            }
+            this.board._decorDirty = false;
+            this.renderCanvas();
+            if (window.KiDeskyToast) window.KiDeskyToast.show("🌿 Mosty a přírodní dekorace byly přepočítány podle nové řeky a hradu.", "good");
             if (window.PRS_Audio) window.PRS_Audio.playStep();
         },
 
@@ -953,6 +2135,179 @@
             var box = document.getElementById("me-inspector-panel");
             if (!box) return;
 
+            var bodyNode = document.getElementById("me-insp-body-node");
+            var bodyEdge = document.getElementById("me-insp-body-edge");
+            var bodyCastle = document.getElementById("me-insp-body-castle");
+            var bodyRiver = document.getElementById("me-insp-body-river");
+            var titleEl = document.getElementById("me-insp-title");
+            var idEl = document.getElementById("me-insp-id");
+
+            var hideAll = function () {
+                if (bodyNode) bodyNode.style.display = "none";
+                if (bodyEdge) bodyEdge.style.display = "none";
+                if (bodyCastle) bodyCastle.style.display = "none";
+                if (bodyRiver) bodyRiver.style.display = "none";
+            };
+
+            var mode = this.inspectorMode;
+            if (!mode) {
+                if (this.selectedEdge) mode = "edge";
+                else if (this.selectedNodeId !== null) mode = "node";
+                else if (this.activeTool === "castle") mode = "castle";
+                else if (this.activeTool === "river") mode = "river";
+            }
+
+            if (!mode) {
+                box.style.display = "none";
+                return;
+            }
+
+            // 1. Režim Cesty / Hrany
+            if (mode === "edge" && this.selectedEdge) {
+                var nFrom = this.getNodeById(this.selectedEdge.from);
+                var nTo = this.getNodeById(this.selectedEdge.to);
+                if (!nFrom || !nTo || !Array.isArray(nFrom.next) || nFrom.next.indexOf(nTo.id) === -1) {
+                    this.selectedEdge = null;
+                    this.inspectorMode = null;
+                    box.style.display = "none";
+                    return;
+                }
+                box.style.display = "block";
+                hideAll();
+                if (bodyEdge) bodyEdge.style.display = "block";
+                if (titleEl) titleEl.textContent = "🔗 Inspektor cesty";
+                if (idEl) idEl.textContent = "#" + nFrom.id + " ➔ #" + nTo.id;
+
+                if (bodyEdge) {
+                    var idxInNext = nFrom.next.indexOf(nTo.id);
+                    var isJunc = nFrom.next.length >= 2;
+                    var roleTxt = isJunc
+                        ? (idxInNext === 0 ? "🔵 Hlavní směr (kostka 1–3)" : (idxInNext === 1 ? "🟠 Boční větev (kostka 4–6)" : "⚪ Vedlejší propojení"))
+                        : "Jediná výstupní cesta";
+                    var html = [];
+                    html.push('<div style="font-size:0.74rem; color:#e2e8f0; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.25); border-radius:6px; padding:0.45rem; margin-bottom:0.45rem;">');
+                    html.push('  <div style="margin-bottom:3px;"><strong>Od:</strong> #' + nFrom.id + ' ' + this.escapeXml(nFrom.name || nFrom.code || "") + '</div>');
+                    html.push('  <div style="margin-bottom:4px;"><strong>Do:</strong> #' + nTo.id + ' ' + this.escapeXml(nTo.name || nTo.code || "") + '</div>');
+                    html.push('  <div style="font-size:0.7rem; color:#fde68a;">' + roleTxt + '</div>');
+                    html.push('</div>');
+                    html.push('<div style="display:flex; flex-direction:column; gap:0.35rem;">');
+                    html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.reverseEdgeDirection(' + nFrom.id + ', ' + nTo.id + ')">🔄 Obrátit směr (#' + nTo.id + ' ➔ #' + nFrom.id + ')</button>');
+                    if (isJunc) {
+                        html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + nFrom.id + ')">🔀 Prohodit prioritu rozcestí (1–3 ⇄ 4–6)</button>');
+                    }
+                    html.push('  <button type="button" class="btn-icon-danger" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.removeEdge(' + nFrom.id + ', ' + nTo.id + ')">✂️ Odebrat cestu (Delete)</button>');
+                    html.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.5rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()">🧭 Automaticky srovnat větve</button>');
+                    html.push('</div>');
+                    bodyEdge.innerHTML = html.join("\n");
+                }
+                return;
+            }
+
+            // 2. Režim Hlavního hradu
+            if (mode === "castle") {
+                var rc = this.getRoyalCastleLandmark();
+                if (!rc) {
+                    box.style.display = "none";
+                    return;
+                }
+                box.style.display = "block";
+                hideAll();
+                if (bodyCastle) bodyCastle.style.display = "block";
+                if (titleEl) titleEl.textContent = "🏰 Hlavní hrad";
+                if (idEl) idEl.textContent = "Královský";
+
+                if (bodyCastle) {
+                    var catalog = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ALL_CASTLES) || [];
+                    var opts = [];
+                    for (var ci = 0; ci < catalog.length; ci++) {
+                        var c = catalog[ci];
+                        var isSelSkin = (rc.skinId === c.id || rc.selectedKey === c.id || rc.image === c.img || rc.img === c.img);
+                        opts.push('<option value="' + c.id + '"' + (isSelSkin ? ' selected' : '') + '>' + this.escapeXml((c.icon || "🏰") + " " + c.name) + '</option>');
+                    }
+                    var scalePct = Math.round((rc.scale || 1) * 100);
+                    var cHtml = [];
+                    cHtml.push('<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#cbd5e1; background:rgba(0,0,0,0.4); border-radius:6px; padding:4px 8px; margin-bottom:0.4rem;">');
+                    cHtml.push('  <span>Souřadnice na mapě:</span>');
+                    cHtml.push('  <strong id="me-insp-castle-coords" style="color:#fde68a; font-family:monospace;">[' + Math.round(rc.x) + ', ' + Math.round(rc.y) + ']</strong>');
+                    cHtml.push('</div>');
+                    cHtml.push('<div style="margin-bottom:0.35rem;">');
+                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Podoba (skin) hradu:</label>');
+                    cHtml.push('  <select class="prs-select" style="width:100%; font-size:0.74rem; padding:0.25rem;" onchange="PRS_MapEditor.applyRoyalCastleSkin(this.value)">' + opts.join("") + '</select>');
+                    cHtml.push('</div>');
+                    cHtml.push('<div style="margin-bottom:0.35rem;">');
+                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Název hradu:</label>');
+                    cHtml.push('  <input type="text" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" value="' + this.escapeXml(rc.name || "Královský hrad") + '" onchange="PRS_MapEditor.applyRoyalCastleName(this.value)" />');
+                    cHtml.push('</div>');
+                    cHtml.push('<div style="margin-bottom:0.45rem;">');
+                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>Velikost hradu:</span><strong id="me-insp-castle-scale-val" style="color:#fef08a;">' + scalePct + '%</strong></label>');
+                    cHtml.push('  <input type="range" min="0.75" max="1.30" step="0.05" value="' + (rc.scale || 1) + '" style="width:100%;" oninput="var el=document.getElementById(\'me-insp-castle-scale-val\'); if(el) el.textContent=Math.round(this.value*100)+\'%\';" onchange="PRS_MapEditor.applyRoyalCastleScale(this.value)" />');
+                    cHtml.push('</div>');
+                    cHtml.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem; margin-bottom:0.35rem;">');
+                    cHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.toggleRoyalCastleFlip()">↔️ Zrcadlit ' + (rc.isFlipped ? '(✓)' : '') + '</button>');
+                    cHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.resetRoyalCastlePosition()">🎯 Střed mapy</button>');
+                    cHtml.push('</div>');
+                    cHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">🌿 Přepočítat mosty &amp; dekorace</button>');
+                    bodyCastle.innerHTML = cHtml.join("\n");
+                }
+                return;
+            }
+
+            // 3. Režim Řeky
+            if (mode === "river") {
+                box.style.display = "block";
+                hideAll();
+                if (bodyRiver) bodyRiver.style.display = "block";
+                if (titleEl) titleEl.textContent = "🌊 Editor řeky";
+                var rivers = (this.board && Array.isArray(this.board.rivers)) ? this.board.rivers : [];
+                if (idEl) idEl.textContent = rivers.length > 0 ? ("Větev " + (this.selectedRiverIdx + 1) + "/" + rivers.length) : "Bez řeky";
+
+                if (bodyRiver) {
+                    var rHtml = [];
+                    rHtml.push('<div style="margin-bottom:0.4rem;">');
+                    rHtml.push('  <div style="font-size:0.68rem; color:#cbd5e1; margin-bottom:3px;">Rychlé šablony toku:</div>');
+                    rHtml.push('  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'standard\')">🌊 Hlavní</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'dual\')">🌿 Soutok</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'island\')">🏝️ Ostrov</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'delta\')">🔱 Delta</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px; grid-column:span 2; border-color:#64748b;" onclick="PRS_MapEditor.applyRiverPreset(\'none\')">🏜️ Bez řeky</button>');
+                    rHtml.push('  </div>');
+                    rHtml.push('</div>');
+
+                    if (rivers.length > 0) {
+                        if (this.selectedRiverIdx >= rivers.length) this.selectedRiverIdx = 0;
+                        var curRiv = rivers[this.selectedRiverIdx];
+                        var curW = (curRiv.width && curRiv.width >= 28) ? curRiv.width : (curRiv.isTributary ? 28 : 38);
+
+                        rHtml.push('<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:0.4rem;">');
+                        for (var ri = 0; ri < rivers.length; ri++) {
+                            var isActiveRiv = (ri === this.selectedRiverIdx);
+                            rHtml.push('<button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;' + (isActiveRiv ? ' border-color:#facc15; background:rgba(250,204,21,0.18); color:#fef08a;' : '') + '" onclick="PRS_MapEditor.selectRiverIndex(' + ri + ')">' + (rivers[ri].isTributary ? 'Přítok ' : 'Řeka ') + (ri + 1) + '</button>');
+                        }
+                        rHtml.push('</div>');
+
+                        rHtml.push('<div id="me-insp-river-pt-info" style="font-size:0.68rem; color:#bae6fd; background:rgba(14,165,233,0.12); border-radius:5px; padding:3px 6px; margin-bottom:0.35rem;">Táhni modré kotvy (s Alt bez táhel) nebo žluté úchyty.</div>');
+                        rHtml.push('<div style="margin-bottom:0.4rem;">');
+                        rHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>Šířka vybraného toku:</span><strong id="me-insp-river-w-val" style="color:#38bdf8;">' + curW + ' px</strong></label>');
+                        rHtml.push('  <input type="range" min="24" max="54" step="2" value="' + Math.max(24, Math.min(54, curW)) + '" style="width:100%;" oninput="var el=document.getElementById(\'me-insp-river-w-val\'); if(el) el.textContent=this.value+\' px\';" onchange="PRS_MapEditor.applyRiverWidth(this.value)" />');
+                        rHtml.push('</div>');
+
+                        rHtml.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem; margin-bottom:0.35rem;">');
+                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverMeander()">〰️ Přidat zákrut</button>');
+                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverTributary()">➕ Přidat přítok</button>');
+                        rHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.flipSelectedRiverHorizontally()">↔️ Překlopit X</button>');
+                        rHtml.push('  <button type="button" class="btn-icon-danger" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedRiver()">🗑️ Smazat větev</button>');
+                        rHtml.push('</div>');
+                    } else {
+                        rHtml.push('<button type="button" class="btn-secondary" style="width:100%; font-size:0.72rem; padding:0.3rem; margin-bottom:0.35rem;" onclick="PRS_MapEditor.addRiverTributary()">➕ Založit nové koryto řeky</button>');
+                    }
+                    rHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">🌿 Přepočítat mosty &amp; dekorace</button>');
+                    bodyRiver.innerHTML = rHtml.join("\n");
+                }
+                return;
+            }
+
+            // 4. Režim Políčka
             if (this.selectedNodeId === null) {
                 box.style.display = "none";
                 return;
@@ -965,8 +2320,10 @@
             }
 
             box.style.display = "block";
+            hideAll();
+            if (bodyNode) bodyNode.style.display = "block";
+            if (titleEl) titleEl.textContent = "⚙️ Inspektor políčka";
 
-            var idEl = document.getElementById("me-insp-id");
             var coordsEl = document.getElementById("me-insp-coords");
             var typeSel = document.getElementById("me-insp-type");
             var nameInp = document.getElementById("me-insp-name");
@@ -1006,6 +2363,64 @@
                 } else {
                     tierWrap.style.display = "none";
                 }
+            }
+
+            // Napojené cesty a priority rozcestí uzlu
+            var edgesWrap = document.getElementById("me-insp-node-edges");
+            if (edgesWrap && this.board && Array.isArray(this.board.nodes)) {
+                var eHtml = [];
+                var outList = Array.isArray(node.next) ? node.next : [];
+                var inList = [];
+                for (var ni = 0; ni < this.board.nodes.length; ni++) {
+                    var candidate = this.board.nodes[ni];
+                    if (candidate.id !== node.id && Array.isArray(candidate.next) && candidate.next.indexOf(node.id) !== -1) {
+                        inList.push(candidate);
+                    }
+                }
+
+                eHtml.push('<div style="border-top:1px solid rgba(212,175,55,0.2); padding-top:0.35rem; margin-bottom:0.4rem;">');
+                eHtml.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">');
+                eHtml.push('    <span style="font-size:0.7rem; color:#fde68a; font-weight:bold;">🛤️ Cesty a směry uzlu</span>');
+                eHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 5px; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()" title="Automaticky srovnat boční větve a rozcestí">🧭 Srovnat</button>');
+                eHtml.push('  </div>');
+
+                if (outList.length === 0) {
+                    eHtml.push('  <div style="font-size:0.68rem; color:#fca5a5; background:rgba(153,27,27,0.35); border:1px solid rgba(248,113,113,0.5); border-radius:5px; padding:3px 6px; margin-bottom:4px;">⚠️ Slepá cesta — pole nemá žádný výstupní směr!</div>');
+                } else {
+                    var isNodeJunc = outList.length >= 2;
+                    for (var oi = 0; oi < outList.length; oi++) {
+                        var tgt = this.getNodeById(outList[oi]);
+                        if (!tgt) continue;
+                        var jBadge = isNodeJunc
+                            ? (oi === 0 ? '<span style="background:#0284c7;color:#fff;padding:0 4px;border-radius:3px;font-size:0.64rem;margin-right:3px;">1–3</span>' : (oi === 1 ? '<span style="background:#d97706;color:#fff;padding:0 4px;border-radius:3px;font-size:0.64rem;margin-right:3px;">4–6</span>' : ''))
+                            : '';
+                        eHtml.push('  <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; font-size:0.68rem; color:#e2e8f0; background:rgba(0,0,0,0.38); padding:2px 5px; border-radius:4px; margin-bottom:3px;">');
+                        eHtml.push('    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + jBadge + '➔ #' + tgt.id + ' ' + this.escapeXml(tgt.name || tgt.code || "") + '</span>');
+                        eHtml.push('    <span style="display:flex; gap:3px; flex-shrink:0;">');
+                        eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + node.id + ', ' + tgt.id + ')" title="Obrátit směr">🔄</button>');
+                        eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + node.id + ', ' + tgt.id + ')" title="Odebrat cestu">🗑️</button>');
+                        eHtml.push('    </span>');
+                        eHtml.push('  </div>');
+                    }
+                    if (isNodeJunc) {
+                        eHtml.push('  <button type="button" class="btn-secondary" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem; margin-bottom:4px; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + node.id + ')">🔀 Prohodit 1–3 ⇄ 4–6</button>');
+                    }
+                }
+
+                for (var ii = 0; ii < inList.length; ii++) {
+                    var inc = inList[ii];
+                    eHtml.push('  <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; font-size:0.67rem; color:#94a3b8; background:rgba(0,0,0,0.25); padding:2px 5px; border-radius:4px; margin-bottom:3px;">');
+                    eHtml.push('    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">⬅️ z #' + inc.id + ' ' + this.escapeXml(inc.name || inc.code || "") + '</span>');
+                    eHtml.push('    <span style="display:flex; gap:3px; flex-shrink:0;">');
+                    eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + inc.id + ', ' + node.id + ')" title="Obrátit směr">🔄</button>');
+                    eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + inc.id + ', ' + node.id + ')" title="Odebrat cestu">🗑️</button>');
+                    eHtml.push('    </span>');
+                    eHtml.push('  </div>');
+                }
+
+                eHtml.push('  <button type="button" class="btn-zoom" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem;" onclick="PRS_MapEditor.setTool(\'link\'); PRS_MapEditor.linkSourceNodeId = ' + node.id + '; PRS_MapEditor.updateStatusHelp(); PRS_MapEditor.renderCanvas();">🔗 Přidat / odebrat cestu z #' + node.id + '</button>');
+                eHtml.push('</div>');
+                edgesWrap.innerHTML = eHtml.join("\n");
             }
         },
 
@@ -1436,6 +2851,14 @@
 
         closeInspector: function () {
             this.selectedNodeId = null;
+            this.selectedEdge = null;
+            this.inspectorMode = null;
+            if (this.activeTool === "castle" || this.activeTool === "river") {
+                this.activeTool = "select";
+                this.updateToolButtons();
+                this.updateStatusHelp();
+                this.updateCursor();
+            }
             this.updateInspectorUI();
             this.renderCanvas();
         },
@@ -1469,8 +2892,23 @@
         // ====================================================================
         // ULOŽENÍ A SPUŠTĚNÍ HRY S VLASTNÍM PLÁNEM
         // ====================================================================
+        refreshBoardDerivedLayers: function (board) {
+            if (!board) return;
+            board.isCustomWysiwyg = true;
+            if (window.PRS_BoardBuilder) {
+                if (typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
+                    window.PRS_BoardBuilder.computeRiverBridges(board);
+                }
+                if (board._decorDirty && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
+                    window.PRS_BoardBuilder.generateBoardDecorations(board, board.seed || 4242);
+                    board._decorDirty = false;
+                }
+            }
+        },
+
         saveToMyTemplates: function () {
             if (!this.board) return;
+            this.refreshBoardDerivedLayers(this.board);
             this.normalizeBoardForEngine(this.board);
             var customName = prompt("Zadej název této upravené šablony plánu:", this.board.name || "Můj ručně upravený plán");
             if (!customName || !customName.trim()) return;
@@ -1490,14 +2928,11 @@
                     window.history.replaceState(null, "", window.location.pathname);
                 }
             } catch (e) { }
+            this.refreshBoardDerivedLayers(this.board);
             this.normalizeBoardForEngine(this.board);
             if (window.PRS_App) {
-                // Přepočet mostů přes řeku
-                if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
-                    window.PRS_BoardBuilder.computeRiverBridges(this.board);
-                }
-
                 var cloned = JSON.parse(JSON.stringify(this.board));
+                delete cloned._decorDirty;
                 this.normalizeBoardForEngine(cloned);
                 window.PRS_App.mapStudioBoard = cloned;
                 window.PRS_App._currentMapStudioBoard = cloned;
@@ -1660,6 +3095,13 @@
                 }
             }
 
+            board.isCustomWysiwyg = true;
+            this.syncNodeBranches(board, !board._branchesSynced);
+            board._branchesSynced = true;
+            if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks === "function") {
+                window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks(board);
+            }
+
             return board;
         },
 
@@ -1681,6 +3123,7 @@
         // ====================================================================
         renderEditorUI: function () {
             var container = document.getElementById("ms-editor-view");
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             if (!container) return;
 
             var html = [
@@ -1692,7 +3135,10 @@
                 '      <button type="button" id="me-tool-select" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'select\')" title="Vybrat políčko a tažením přesouvat">👆 Inspektor &amp; Přesun</button>',
                 '      <button type="button" id="me-tool-add" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'add\')" title="Kliknutím kamkoliv do mapy přidáš nové políčko">➕ Přidat pole</button>',
                 '      <button type="button" id="me-tool-swap" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'swap\')" title="Vzájemné prohození obsahu dvou polí">🔄 Prohodit 2 pole</button>',
-                '      <button type="button" id="me-tool-link" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'link\')" title="Vytvořit nebo zrušit spojovací cestu mezi dvěma poli">🔗 Cesty</button>',
+                '      <button type="button" id="me-tool-link" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'link\')" title="Vytvořit / odebrat cestu mezi dvěma poli nebo upravit směry">🔗 Cesty &amp; Směry</button>',
+                '      <button type="button" id="me-tool-river" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'river\')" title="Upravit tok řeky, meandry, přítoky a mosty">🌊 Řeka</button>',
+                '      <button type="button" id="me-tool-castle" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'castle\')" title="Přemístit Hlavní hrad a zvolit jeho vzhled">🏰 Hlavní hrad</button>',
+                '      <button type="button" id="me-btn-route-shape" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.openRouteShapeModal()" title="Procedurálně přegenerovat trasu podle 7 archetypů (s historií Undo)">🧭 Tvar trasy</button>',
                 '      <button type="button" id="me-tool-pan" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'pan\')" title="Posouvat celou mapu (tažením myši / prstem)">🧭 Posun mapy</button>',
                 '      <button type="button" id="me-btn-undo" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem; border-color:#64748b;" onclick="PRS_MapEditor.undo()" title="Vrátit poslední změnu zpět (Ctrl+Z)" disabled>↩️ Zpět</button>',
                 '    </div>',
@@ -1722,7 +3168,7 @@
                 '    <div id="me-inspector-panel" style="display:none; position:absolute; bottom:12px; right:12px; width:295px; max-width:calc(100% - 24px); max-height:calc(100% - 24px); overflow-y:auto; overscroll-behavior:contain; box-sizing:border-box; background:rgba(18,12,8,0.97); border:1.5px solid #d4af37; border-radius:10px; padding:0.5rem 0.75rem; box-shadow:0 8px 24px rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:25; scrollbar-width:thin; scrollbar-color:#d4af37 rgba(0,0,0,0.5);">',
                 '      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.25rem;">',
                 '        <div style="font-size:0.82rem; font-weight:bold; color:#fef08a; display:flex; align-items:center; gap:0.35rem;">',
-                '          <span>⚙️ Inspektor políčka</span>',
+                '          <span id="me-insp-title">⚙️ Inspektor políčka</span>',
                 '          <span id="me-insp-id" style="font-family:monospace; color:#38bdf8; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.4); padding:1px 6px; border-radius:4px;">#0</span>',
                 '        </div>',
                 '        <div style="display:flex; gap:4px; align-items:center;">',
@@ -1731,87 +3177,152 @@
                 '        </div>',
                 '      </div>',
                 '',
-                '      <!-- Rychlá navigace mezi uzly trasy -->',
-                '      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem; background:rgba(0,0,0,0.4); border-radius:6px; padding:2px 4px;">',
-                '        <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;" onclick="PRS_MapEditor.selectNextNode(-1)" title="Předchozí pole">⬅️ Předchozí</button>',
-                '        <span style="font-size:0.68rem; color:#94a3b8;">Pozice: <strong id="me-insp-coords" style="color:#e2e8f0;">[0, 0]</strong></span>',
-                '        <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;" onclick="PRS_MapEditor.selectNextNode(1)" title="Následující pole">➡️ Další</button>',
-                '      </div>',
-                '',
-                '      <div style="margin-bottom:0.35rem;">',
-                '        <label for="me-insp-type" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Druh a typ pole:</label>',
-                '        <select id="me-insp-type" class="prs-select" style="width:100%; font-size:0.74rem; padding:0.25rem;" onchange="PRS_MapEditor.applyNodeTypeChange(this.value)">',
-                '          <optgroup label="Sídla a Dominanty">',
-                '            <option value="castle">🏰 Hrad (Feudální panství)</option>',
-                '            <option value="town">🏙️ Město</option>',
-                '            <option value="village">🏘️ Vesnice</option>',
-                '            <option value="start">🚩 Startovní hradní rozcestí</option>',
-                '          </optgroup>',
-                '          <optgroup label="Zvířata (Chovné sady)">',
-                '            <option value="animal_horse">🐎 Kůň (Jezdecký chov)</option>',
-                '            <option value="animal_dog">🐕 Pes (Lovecký chov)</option>',
-                '            <option value="animal_falcon">🦅 Sokol (Sokolnický chov)</option>',
-                '          </optgroup>',
-                '          <optgroup label="Dračí arény & Bestie">',
-                '            <option value="dragon">🐲 Dračí sluj (Obávaný drak U3)</option>',
-                '            <option value="monster_u2">🐺 Jeskynní nestvůra (U2)</option>',
-                '            <option value="monster_u1">🐗 Divoká lesní zvěř (U1)</option>',
-                '          </optgroup>',
-                '          <optgroup label="Mistři ctností">',
-                '            <option value="master_combat">⚔️ Mistr Boje (MB)</option>',
-                '            <option value="master_ride">🏇 Mistr Jízdy (MJ)</option>',
-                '            <option value="master_dance">💃 Mistr Tance (MT)</option>',
-                '            <option value="master_charisma">👑 Mistr Charismatu (MCH)</option>',
-                '            <option value="master_grand">🧙‍♂️ Královský Velmistr (VM)</option>',
-                '          </optgroup>',
-                '          <optgroup label="Služby a Místa království">',
-                '            <option value="festival">🎪 Královská slavnost / Turnaj</option>',
-                '            <option value="tavern">🍺 Krčma</option>',
-                '            <option value="trade">⚖️ Obchodník & Dobytčí trh</option>',
-                '            <option value="craft">⚒️ Kovárna & Zbrojírna</option>',
-                '            <option value="jester">🃏 Královský Šašek</option>',
-                '            <option value="tax">💰 Výběrčí daní</option>',
-                '            <option value="prison">⛓️ Královská Šatlava</option>',
-                '            <option value="hospital">🏥 Lazaret</option>',
-                '            <option value="chance">📜 Královská náhoda</option>',
-                '            <option value="bonus">💎 Zapomenutý poklad</option>',
-                '          </optgroup>',
-                '        </select>',
-                '      </div>',
-                '',
-                '      <!-- Úroveň zvířete / Stupeň mistra (podmíněně) -->',
-                '      <div id="me-insp-tier-wrap" style="display:none; margin-bottom:0.35rem;">',
-                '        <label for="me-insp-tier" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Úroveň / Stupeň:</label>',
-                '        <select id="me-insp-tier" class="prs-select" style="width:100%; font-size:0.74rem; padding:0.25rem;" onchange="PRS_MapEditor.applyNodeTierChange(this.value)"></select>',
-                '      </div>',
-                '',
-                '      <div style="margin-bottom:0.35rem;">',
-                '        <label for="me-insp-name" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Vlastní název pole:</label>',
-                '        <input type="text" id="me-insp-name" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" oninput="PRS_MapEditor.applyNodeNameChange(this.value)" placeholder="Např. Hrad Bezděz" />',
-                '      </div>',
-                '',
-                '      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-bottom:0.5rem;">',
-                '        <div>',
-                '          <label for="me-insp-price" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Cena (zl.):</label>',
-                '          <input type="number" id="me-insp-price" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.35rem;" oninput="PRS_MapEditor.applyNodePriceChange(this.value)" step="100" min="0" />',
+                '      <div id="me-insp-body-node">',
+                '        <!-- Rychlá navigace mezi uzly trasy -->',
+                '        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem; background:rgba(0,0,0,0.4); border-radius:6px; padding:2px 4px;">',
+                '          <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;" onclick="PRS_MapEditor.selectNextNode(-1)" title="Předchozí pole">⬅️ Předchozí</button>',
+                '          <span style="font-size:0.68rem; color:#94a3b8;">Pozice: <strong id="me-insp-coords" style="color:#e2e8f0;">[0, 0]</strong></span>',
+                '          <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;" onclick="PRS_MapEditor.selectNextNode(1)" title="Následující pole">➡️ Další</button>',
                 '        </div>',
-                '        <div>',
-                '          <label for="me-insp-rent" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Nájem (zl.):</label>',
-                '          <input type="number" id="me-insp-rent" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.35rem;" oninput="PRS_MapEditor.applyNodeRentChange(this.value)" step="50" min="0" />',
+                '',
+                '        <div style="margin-bottom:0.35rem;">',
+                '          <label for="me-insp-type" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Druh a typ pole:</label>',
+                '          <select id="me-insp-type" class="prs-select" style="width:100%; font-size:0.74rem; padding:0.25rem;" onchange="PRS_MapEditor.applyNodeTypeChange(this.value)">',
+                '            <optgroup label="Sídla a Dominanty">',
+                '              <option value="castle">🏰 Hrad (Feudální panství)</option>',
+                '              <option value="town">🏙️ Město</option>',
+                '              <option value="village">🏘️ Vesnice</option>',
+                '              <option value="start">🚩 Startovní hradní rozcestí</option>',
+                '            </optgroup>',
+                '            <optgroup label="Zvířata (Chovné sady)">',
+                '              <option value="animal_horse">🐎 Kůň (Jezdecký chov)</option>',
+                '              <option value="animal_dog">🐕 Pes (Lovecký chov)</option>',
+                '              <option value="animal_falcon">🦅 Sokol (Sokolnický chov)</option>',
+                '            </optgroup>',
+                '            <optgroup label="Dračí arény & Bestie">',
+                '              <option value="dragon">🐲 Dračí sluj (Obávaný drak U3)</option>',
+                '              <option value="monster_u2">🐺 Jeskynní nestvůra (U2)</option>',
+                '              <option value="monster_u1">🐗 Divoká lesní zvěř (U1)</option>',
+                '            </optgroup>',
+                '            <optgroup label="Mistři ctností">',
+                '              <option value="master_combat">⚔️ Mistr Boje (MB)</option>',
+                '              <option value="master_ride">🏇 Mistr Jízdy (MJ)</option>',
+                '              <option value="master_dance">💃 Mistr Tance (MT)</option>',
+                '              <option value="master_charisma">👑 Mistr Charismatu (MCH)</option>',
+                '              <option value="master_grand">🧙‍♂️ Královský Velmistr (VM)</option>',
+                '            </optgroup>',
+                '            <optgroup label="Služby a Místa království">',
+                '              <option value="festival">🎪 Královská slavnost / Turnaj</option>',
+                '              <option value="tavern">🍺 Krčma</option>',
+                '              <option value="trade">⚖️ Obchodník & Dobytčí trh</option>',
+                '              <option value="craft">⚒️ Kovárna & Zbrojírna</option>',
+                '              <option value="jester">🃏 Královský Šašek</option>',
+                '              <option value="tax">💰 Výběrčí daní</option>',
+                '              <option value="prison">⛓️ Královská Šatlava</option>',
+                '              <option value="hospital">🏥 Lazaret</option>',
+                '              <option value="chance">📜 Královská náhoda</option>',
+                '              <option value="bonus">💎 Zapomenutý poklad</option>',
+                '            </optgroup>',
+                '          </select>',
+                '        </div>',
+                '',
+                '        <!-- Úroveň zvířete / Stupeň mistra (podmíněně) -->',
+                '        <div id="me-insp-tier-wrap" style="display:none; margin-bottom:0.35rem;">',
+                '          <label for="me-insp-tier" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Úroveň / Stupeň:</label>',
+                '          <select id="me-insp-tier" class="prs-select" style="width:100%; font-size:0.74rem; padding:0.25rem;" onchange="PRS_MapEditor.applyNodeTierChange(this.value)"></select>',
+                '        </div>',
+                '',
+                '        <div style="margin-bottom:0.35rem;">',
+                '          <label for="me-insp-name" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Vlastní název pole:</label>',
+                '          <input type="text" id="me-insp-name" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" oninput="PRS_MapEditor.applyNodeNameChange(this.value)" placeholder="Např. Hrad Bezděz" />',
+                '        </div>',
+                '',
+                '        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-bottom:0.5rem;">',
+                '          <div>',
+                '            <label for="me-insp-price" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Cena (zl.):</label>',
+                '            <input type="number" id="me-insp-price" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.35rem;" oninput="PRS_MapEditor.applyNodePriceChange(this.value)" step="100" min="0" />',
+                '          </div>',
+                '          <div>',
+                '            <label for="me-insp-rent" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Nájem (zl.):</label>',
+                '            <input type="number" id="me-insp-rent" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.35rem;" oninput="PRS_MapEditor.applyNodeRentChange(this.value)" step="50" min="0" />',
+                '          </div>',
+                '        </div>',
+                '',
+                '        <!-- Cesty a priority rozcestí uzlu -->',
+                '        <div id="me-insp-node-edges"></div>',
+                '',
+                '        <!-- Akční tlačítka pro uzel -->',
+                '        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem;">',
+                '          <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.setTool(\'swap\'); PRS_MapEditor.swapSourceNodeId = PRS_MapEditor.selectedNodeId; PRS_MapEditor.updateStatusHelp(); PRS_MapEditor.renderCanvas();" title="Prohodit obsah s jiným polem">🔄 Prohodit</button>',
+                '          <button type="button" class="btn-icon-danger" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedNode()" title="Smazat toto pole a přemostit trasu">🗑️ Smazat</button>',
                 '        </div>',
                 '      </div>',
                 '',
-                '      <!-- Akční tlačítka pro uzel -->',
-                '      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem;">',
-                '        <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.setTool(\'swap\'); PRS_MapEditor.swapSourceNodeId = PRS_MapEditor.selectedNodeId; PRS_MapEditor.updateStatusHelp(); PRS_MapEditor.renderCanvas();" title="Prohodit obsah s jiným polem">🔄 Prohodit</button>',
-                '        <button type="button" class="btn-icon-danger" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedNode()" title="Smazat toto pole a přemostit trasu">🗑️ Smazat</button>',
-                '      </div>',
+                '      <div id="me-insp-body-edge" style="display:none;"></div>',
+                '      <div id="me-insp-body-castle" style="display:none;"></div>',
+                '      <div id="me-insp-body-river" style="display:none;"></div>',
                 '    </div>',
                 '  </div>',
                 '</div>'
             ];
 
             container.innerHTML = html.join("\n");
+        },
+
+        // Otevření dialogu pro volbu procedurálního tvaru trasy
+        openRouteShapeModal: function () {
+            var self = this;
+            var archetypes = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES)
+                ? window.KiDeskyMapGenerator.ROUTE_ARCHETYPES
+                : {};
+            var keys = Object.keys(archetypes);
+
+            var optionsHtml = "";
+            for (var i = 0; i < keys.length; i++) {
+                var k = keys[i];
+                var a = archetypes[k];
+                optionsHtml += '<button type="button" class="btn-gold-lg" style="text-align:left; padding:0.5rem 0.8rem; display:flex; flex-direction:column; gap:2px;" onclick="PRS_MapEditor.applyProceduralShape(\'' + k + '\')">' +
+                    '<div style="font-weight:700; color:#fef08a;">' + a.name + '</div>' +
+                    '<div style="font-size:0.72rem; color:#cbd5e1; opacity:0.85;">' + a.desc + '</div>' +
+                    '</button>';
+            }
+
+            var modal = (window.PRS_App && window.PRS_App.getGenericModal) ? window.PRS_App.getGenericModal() : document.getElementById("generic-modal");
+            if (!modal) return;
+
+            modal.innerHTML = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:480px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
+                '<div style="font-size:1.8rem; text-align:center; margin-bottom:0.3rem;">🧭 🎲</div>' +
+                '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.4rem 0; text-align:center;">Procedurální generátor trasy</h3>' +
+                '<div style="font-size:0.82rem; color:#cbd5e1; text-align:center; margin-bottom:1rem;">Vyber si archetyp křivky pro tento herní plán. Všechny stávající vlastnosti, názvy a ceny polí zůstanou zachovány, políčka se plynule rozmístí s garantovaným rozestupem. Krok lze kdykoliv vrátit pomocí ↩️ Zpět (Ctrl+Z).</div>' +
+                '<div style="display:flex; flex-direction:column; gap:0.45rem; max-height:360px; overflow-y:auto; padding-right:4px;">' +
+                optionsHtml +
+                '</div>' +
+                '<div style="display:flex; justify-content:flex-end; margin-top:1rem;">' +
+                '  <button type="button" class="btn-secondary" onclick="document.getElementById(\'generic-modal\').style.display=\'none\'">Zavřít</button>' +
+                '</div>' +
+                '</div>';
+            modal.style.display = "flex";
+        },
+
+        // Aplikace zvoleného procedurálního tvaru trasy s uložením do Undo
+        applyProceduralShape: function (shapeKey) {
+            var modal = (window.PRS_App && window.PRS_App.getGenericModal) ? window.PRS_App.getGenericModal() : document.getElementById("generic-modal");
+            if (modal) modal.style.display = "none";
+
+            if (!this.board || !window.KiDeskyMapGenerator || typeof window.KiDeskyMapGenerator.regenerateBoardGeometry !== "function") return;
+
+            this.pushUndo();
+            var seed = Math.floor(Math.random() * 900000) + 100000;
+            window.KiDeskyMapGenerator.regenerateBoardGeometry(this.board, shapeKey, seed);
+
+            this.renderCanvas();
+            this.updateInspectorUI();
+
+            var aObj = window.KiDeskyMapGenerator.ROUTE_ARCHETYPES && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES[this.board.routeShape];
+            var aName = aObj ? aObj.name : shapeKey;
+            if (window.KiDeskyToast) {
+                window.KiDeskyToast.show("✨ Nová trasa (" + aName + ") vygenerována! Lze vrátit pomocí ↩️ Zpět (Ctrl+Z)", "success");
+            }
         }
     };
 

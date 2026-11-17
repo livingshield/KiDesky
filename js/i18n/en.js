@@ -1830,7 +1830,20 @@ window.PRS_I18N.en = {
         "filter_settlement": "🌾 Settlements & Countryside",
         "filter_water": "🌊 Water & Swamps",
         "filter_magic": "✨ Magical Places",
-        "filter_quest_lair": "⛰️ Lairs & Caves"
+        "filter_quest_lair": "⛰️ Lairs & Caves",
+        "clearance": "🏷️ Clearance Zone:",
+        "btn_mirror": "🔄 Mirror Orientation",
+        "btn_original": "↩️ Original Facing",
+        "categories": {
+            "vegetation": "Forests & Trees",
+            "terrain": "Rocks & Mountains",
+            "agriculture": "Agriculture & Fields",
+            "settlement": "Settlements & Buildings",
+            "civilization": "Fortifications & Guards",
+            "water": "Water & Swamps",
+            "magic": "Magic & Ruins",
+            "quest_lair": "Lairs & Caves"
+        }
     },
     "admin": {
         "title": "🛡️ Royal Administration",
@@ -2267,5 +2280,245 @@ window.PRS_I18N.en = {
     "achievements": {
         "modal_title": "🏆 Knight's Hall of Fame &amp; Achievements",
         "modal_close": "Close Hall of Fame"
+    },
+    "dialogs": {
+        "new_realm": {
+            "title": "New Realm",
+            "msg": "Generating a new world requires starting a new quest.\nDo you wish to generate a new realm (Seed #{seed}) and start a new game?",
+            "confirm": "🎲 Generate & Start",
+            "cancel": "Back to Quest"
+        },
+        "custom_map": {
+            "title": "Start Quest on Custom Map",
+            "msg": "Starting a new quest on a custom dynamic map requires restarting the match.\nDo you wish to start playing on map \"{name}\" ({count} tiles)?",
+            "confirm": "⚔️ Start Game on this Map",
+            "cancel": "Back to Quest"
+        },
+        "change_map": {
+            "title": "Change Board Map",
+            "msg": "You cannot switch maps in an active game without restarting.\nDo you really want to end the current game and start a new one on the selected map?",
+            "confirm": "⚔️ Change Map & Restart",
+            "cancel": "Back to Quest"
+        }
+    },
+    "chat": {
+        "title": "💬 Royal Council (Chat)",
+        "empty": "💬 No messages at the table yet.<br/>Type a message or pick a quick shout above!",
+        "placeholder": "Write a message to knights at the table...",
+        "send": "Send",
+        "shouts": {
+            "duel": "⚔️ Duel!",
+            "toast": "🍻 Toast",
+            "dragon": "🐉 Dragon Alert!",
+            "peace": "🤝 Peace",
+            "village": "🏰 My Village",
+            "victory": "👑 Victory"
+        },
+        "shout_texts": {
+            "duel": "⚔️ I challenge you to a tournament duel!",
+            "toast": "🍻 A toast to the Queen and good neighbors!",
+            "dragon": "🐉 Dragon on the horizon, take cover!",
+            "peace": "🤝 I offer honorable peace and friendship.",
+            "village": "🏰 My estate grows, prepare your rent!",
+            "victory": "👑 The Princess's Heart shall soon be mine!"
+        }
+    },
+    "decorations": {
+        "tree_oak": {
+            "name": "Deciduous Oak",
+            "desc": "A mighty solitary oak with a dense green crown, providing shade to travelers and knights across royal meadows."
+        },
+        "tree_pine": {
+            "name": "Mountain Pine",
+            "desc": "A slender coniferous pine enduring harsh mountain winds in the foothills and rocky slopes."
+        },
+        "tree_birch": {
+            "name": "Silver Birch",
+            "desc": "A graceful silver birch with pale bark and delicate foliage, cherished in groves beside horse pastures."
+        },
+        "grove_oak": {
+            "name": "Oak Grove",
+            "desc": "A picturesque cluster of three ancient oaks creating a natural shaded divider between paths."
+        },
+        "grove_pine": {
+            "name": "Pine Copse",
+            "desc": "A dense pine copse fragrant with pine needles and resin, bordering secluded paths toward the Dragon's Lair."
+        },
+        "rock_boulder": {
+            "name": "Mossy Boulder",
+            "desc": "An ancient granite boulder overgrown with moss and lichens, marking rocky passages and trails of courage."
+        },
+        "mountain_peaks": {
+            "name": "Snowy Mountain Peak",
+            "desc": "A monumental alpine massif with eternal snow upon its peaks, framing the realm's grand northern horizon."
+        },
+        "farm_field": {
+            "name": "Wheat Field",
+            "desc": "A golden expanse of ripe wheat with fertile furrows, a symbol of bounty and peace in the lower realm."
+        },
+        "pasture_fence": {
+            "name": "Pasture with Timber Fence",
+            "desc": "A beam-timber enclosure bordering lush pastures where noble royal steeds and hunting hounds are bred."
+        },
+        "windmill": {
+            "name": "Windmill",
+            "desc": "A timber windmill with wide canvas sails, grinding wheat across the open windswept plains."
+        },
+        "cottage_timber": {
+            "name": "Timber Cottage",
+            "desc": "A charming half-timbered cottage with stone foundation and shingle roof in the heart of royal hamlets."
+        },
+        "village_well": {
+            "name": "Stone Village Well",
+            "desc": "A deep village well crafted from stone with a sturdy timber winch and bucket of crystal-clear water."
+        },
+        "merchant_wagon": {
+            "name": "Merchant Wagon",
+            "desc": "A covered traveling wagon laden with barrels and chests, offering weapons, fine fabrics, and foreign elixirs."
+        },
+        "tournament_tent": {
+            "name": "Royal Tournament Pavilion",
+            "desc": "A splendid royal pavilion adorned in crown purple and gold, prepared for noble jousts and festivities."
+        },
+        "signpost": {
+            "name": "Wooden Signpost",
+            "desc": "A wooden signpost with directional arrows pointing the way to castles, villages, and perilous trails."
+        },
+        "lake_pond": {
+            "name": "Blue Forest Pond",
+            "desc": "A peaceful woodland pool with blooming water lilies, reeds, and clear waters mirroring the tree canopy."
+        },
+        "orchad_apple": {
+            "name": "Apple Orchard",
+            "desc": "A neatly tended orchard bursting with sweet red apples, offering refreshing rest to traveling warbands."
+        },
+        "hruskovy_sad": {
+            "name": "Pear Orchard",
+            "desc": "A sunlit fruit grove bearing juicy golden pears upon the gentle slopes of the royal domain."
+        },
+        "orchad_plum": {
+            "name": "Plum Orchard",
+            "desc": "An orchard of venerable plum trees heavy with blue fruit, from which villagers brew legendary preserves."
+        },
+        "bush": {
+            "name": "Dense Bush",
+            "desc": "A thick flowering bush lining trail edges and providing safe refuge for small woodland creatures."
+        },
+        "signpost2": {
+            "name": "Stone Milestone",
+            "desc": "A carved stone milestone inscribed with ancestral crests and directions at the crossroads of mountain tracks."
+        },
+        "grove_pine2": {
+            "name": "Deep Pine Wildwood",
+            "desc": "A deep and untamed pine forest whose boughs whisper with the mysterious calls of owls and the wind."
+        },
+        "hrad": {
+            "name": "Guard Castle",
+            "desc": "A stone garrison keep with battlements and arrow slits, guarding the frontier against bandit raids."
+        },
+        "watermill": {
+            "name": "Watermill with Millrace",
+            "desc": "A rumbling timber watermill driven by the rushing current turning a massive wooden wheel upon the stream."
+        },
+        "swamp_bridge": {
+            "name": "Swamp Footbridge",
+            "desc": "A wooden footbridge arching across foggy marshwaters, flanked by reeds and will-o'-the-wisps."
+        },
+        "lake_nymphs": {
+            "name": "Lake Water Nymphs",
+            "desc": "Enchanting water nymphs upon a wooden pier by the moonlit lake, singing melodies that soothe weary travelers."
+        },
+        "vodnik_pond": {
+            "name": "Water Sprite's Pool",
+            "desc": "A cunning water sprite sitting on an uprooted willow over a dark pool, tending soul jars and fishing nets."
+        },
+        "wooden_watchtower": {
+            "name": "Wooden Watchtower",
+            "desc": "A tall timber watchtower with ladder and torch, where royal sentries survey trade routes and estate borders."
+        },
+        "ancient_tower_ruin": {
+            "name": "Ancient Tower Ruin",
+            "desc": "A crumbling stone tower enveloped by ivy and ancient tree roots, guarding the forgotten lore of past dynasties."
+        },
+        "witch_hut": {
+            "name": "Gingerbread Witch Cottage",
+            "desc": "A fairy-tale gingerbread cottage with sugar glaze and crooked chimney emitting violet potion smoke."
+        },
+        "fairy_ring_mushrooms": {
+            "name": "Fairy Mushroom Ring",
+            "desc": "A mystical ring of bioluminescent mushrooms upon a forest glade sparkling with fairy dust under the moonlight."
+        },
+        "druid_monoliths": {
+            "name": "Druidic Menhirs & Megalith",
+            "desc": "A circle of ancient mossy menhirs carved with glowing runes and an altar stone pulsing with earth magic."
+        },
+        "crystal_golem": {
+            "name": "Crystal Golem",
+            "desc": "A monumental stone golem laced with glowing magic crystals and runic veins, awakened from deep slumber."
+        },
+        "phoenix_nest": {
+            "name": "Phoenix Nest",
+            "desc": "An ancient stone pillar cradling a nest of glowing embers and enchanted eggs, where the majestic firebird burns."
+        },
+        "ancient_ruins": {
+            "name": "Overgrown Stone Ruins",
+            "desc": "Overgrown stone ruins with gothic arches, collapsed ramparts, and a half-buried chest concealing lost treasures."
+        },
+        "ancient_graveyard": {
+            "name": "Mysterious Ancient Graveyard",
+            "desc": "A mysterious old graveyard enclosed by a stone wall, weathered gravestones, and a withered tree steeped in knightly legend."
+        },
+        "dryad_sacred_oak": {
+            "name": "Sacred Oak of the Dryad",
+            "desc": "An ancient sacred oak from whose living trunk a guardian forest dryad emerges amidst glowing lights."
+        },
+        "forest_ent": {
+            "name": "Ancient Forest Treant",
+            "desc": "An awakened forest guardian in the guise of a living giant tree with antler branches and mossy beard."
+        },
+        "unicorn_grove": {
+            "name": "Enchanted Unicorn Grove",
+            "desc": "A shimmering silver glade in the deep woodland where the fabled white unicorn walks with golden mane."
+        },
+        "pegasus_pond": {
+            "name": "Pegasus at the Forest Spring",
+            "desc": "A magical woodland spring where the snow-white winged Pegasus swoops down to drink with outspread wings."
+        },
+        "cave_bear_den": {
+            "name": "Cave Bear Den",
+            "desc": "A rugged cavern littered with bones and hunting trophies, home to a fierce giant bear guarding the entrance."
+        },
+        "bandit_cave": {
+            "name": "Bandit Cave with Treasure",
+            "desc": "A torchlit bandit hideout crammed with open ironbound chests brimming with gold, gems, and stolen relics."
+        },
+        "griffin_nest": {
+            "name": "Crag Griffin Nest",
+            "desc": "A high mountain crag with a colossal nest of timber and bone, where a proud griffin watches over clutch and loot."
+        },
+        "fire_salamander": {
+            "name": "Fire Salamander",
+            "desc": "A mystical magma salamander basking upon glowing boulders by a scorched trunk, breathing sparks and embers."
+        },
+        "dragon_cave": {
+            "name": "Sleeping Dragon's Lair",
+            "desc": "A colossal cavern wherein a red dragon sleeps coiled atop an immense hoard of gold and fallen armor."
+        },
+        "basilisk_cave": {
+            "name": "Basilisk Cavern",
+            "desc": "A sinister rocky cleft strewn with petrified wanderers, guarded by the deadly gaze of a reptilian basilisk."
+        },
+        "snow_troll_cave": {
+            "name": "Frost Troll Ice Cave",
+            "desc": "A frigid glacial grotto adorned with giant icicles, where a mighty snow troll lurks with studded club."
+        },
+        "swamp_troll": {
+            "name": "Swamp Troll at the Mere",
+            "desc": "A stout algae-crusted marsh troll resting lazily beneath submerged roots beside a murky mere."
+        },
+        "swamp_hydra": {
+            "name": "Five-Headed Swamp Hydra",
+            "desc": "A fearsome five-headed marsh serpent rising from murky waters and exhaling noxious venomous mists."
+        }
     }
 };

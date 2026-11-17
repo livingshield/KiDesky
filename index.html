@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611171135">
+    <link rel="stylesheet" href="css/main.css?v=202611171145">
 
-    <link rel="stylesheet" href="css/board.css?v=202611171135">
+    <link rel="stylesheet" href="css/board.css?v=202611171145">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611171135">
+    <link rel="stylesheet" href="css/modals.css?v=202611171145">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611171135">
+    <link rel="stylesheet" href="css/mobile.css?v=202611171145">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -3475,25 +3475,25 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/cs.js?v=202611171135" defer></script>
-    <script src="js/i18n/en.js?v=202611171135" defer></script>
-    <script src="js/app-i18n.js?v=202611171135" defer></script>
-    <script src="js/game-data.js?v=202611171135" defer></script>
-    <script src="js/game-boards.js?v=202611171135" defer></script>
-    <script src="js/game-engine.js?v=202611171135" defer></script>
-    <script src="js/game-combat-ai.js?v=202611171135" defer></script>
-    <script src="js/app-audio.js?v=202611171135" defer></script>
-    <script src="js/app-dialog.js?v=202611171135" defer></script>
-    <script src="js/app.js?v=202611171135" defer></script>
-    <script src="js/app-board.js?v=202611171135" defer></script>
-    <script src="js/app-hud.js?v=202611171135" defer></script>
-    <script src="js/app-modals.js?v=202611171135" defer></script>
-    <script src="js/app-online.js?v=202611171135" defer></script>
-    <script src="js/app-saves.js?v=202611171135" defer></script>
-    <script src="js/app-map-editor.js?v=202611171135" defer></script>
-    <script src="js/app-catalog.js?v=202611171135" defer></script>
-    <script src="js/app-admin.js?v=202611171135" defer></script>
-    <script src="js/app-musicwidget.js?v=202611171135" defer></script>
+    <script src="js/i18n/cs.js?v=202611171145" defer></script>
+    <script src="js/i18n/en.js?v=202611171145" defer></script>
+    <script src="js/app-i18n.js?v=202611171145" defer></script>
+    <script src="js/game-data.js?v=202611171145" defer></script>
+    <script src="js/game-boards.js?v=202611171145" defer></script>
+    <script src="js/game-engine.js?v=202611171145" defer></script>
+    <script src="js/game-combat-ai.js?v=202611171145" defer></script>
+    <script src="js/app-audio.js?v=202611171145" defer></script>
+    <script src="js/app-dialog.js?v=202611171145" defer></script>
+    <script src="js/app.js?v=202611171145" defer></script>
+    <script src="js/app-board.js?v=202611171145" defer></script>
+    <script src="js/app-hud.js?v=202611171145" defer></script>
+    <script src="js/app-modals.js?v=202611171145" defer></script>
+    <script src="js/app-online.js?v=202611171145" defer></script>
+    <script src="js/app-saves.js?v=202611171145" defer></script>
+    <script src="js/app-map-editor.js?v=202611171145" defer></script>
+    <script src="js/app-catalog.js?v=202611171145" defer></script>
+    <script src="js/app-admin.js?v=202611171145" defer></script>
+    <script src="js/app-musicwidget.js?v=202611171145" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3986,19 +3986,19 @@
             <button class="btn-icon-danger" onclick="PRS_App.toggleChatDrawer(false)" title="Zavřít chat" style="padding:0.15rem 0.45rem; font-size:0.8rem;">✕</button>
         </div>
         <div class="chat-shouts-bar">
-            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('⚔️ Vyzývám tě na turnajový duel!')">⚔️ Duel!</button>
-            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('🍻 Připíjím na královnu a dobré sousedy!')">🍻 Přípitek</button>
-            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('🐉 Drak na obzoru, kryjte se!')">🐉 Pozor na draka!</button>
-            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('🤝 Nabízím čestný mír a přátelství.')">🤝 Mír</button>
-            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('🏰 Mé panství roste, chystejte nájem!')">🏰 Moje vesnice</button>
-            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('👑 Princeznino srdce bude brzy mé!')">👑 Sláva vítězi</button>
+            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('duel')" data-i18n="chat.shouts.duel">⚔️ Duel!</button>
+            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('toast')" data-i18n="chat.shouts.toast">🍻 Přípitek</button>
+            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('dragon')" data-i18n="chat.shouts.dragon">🐉 Pozor na draka!</button>
+            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('peace')" data-i18n="chat.shouts.peace">🤝 Mír</button>
+            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('village')" data-i18n="chat.shouts.village">🏰 Moje vesnice</button>
+            <button type="button" class="chat-shout-chip" onclick="PRS_App.sendQuickShout('victory')" data-i18n="chat.shouts.victory">👑 Sláva vítězi</button>
         </div>
         <div id="online-chat-messages" class="chat-messages-container">
-            <div style="text-align:center; color:var(--text-muted); font-size:0.78rem; padding:2rem 0.5rem; font-style:italic;">💬 Žádné zprávy u stolu.<br/>Napiš zprávu nebo zvol rychlý pokřik výše!</div>
+            <div style="text-align:center; color:var(--text-muted); font-size:0.78rem; padding:2rem 0.5rem; font-style:italic;" data-i18n-html="chat.empty">💬 Žádné zprávy u stolu.<br/>Napiš zprávu nebo zvol rychlý pokřik výše!</div>
         </div>
         <form class="chat-input-row" onsubmit="event.preventDefault(); PRS_App.sendChatMessage();">
-            <input type="text" id="online-chat-input" class="chat-input-field" placeholder="Napiš zprávu rytířům u stolu..." maxlength="280" autocomplete="off" />
-            <button type="submit" class="btn-primary" style="padding:0.35rem 0.8rem; font-size:0.82rem;">Odeslat</button>
+            <input type="text" id="online-chat-input" class="chat-input-field" placeholder="Napiš zprávu rytířům u stolu..." maxlength="280" autocomplete="off" data-i18n-placeholder="chat.placeholder" />
+            <button type="submit" class="btn-primary" style="padding:0.35rem 0.8rem; font-size:0.82rem;" data-i18n="chat.send">Odeslat</button>
         </form>
     </div>
 

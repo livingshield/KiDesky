@@ -769,6 +769,28 @@
             color: #94a3b8;
             margin-top: 2px;
         }
+        .music-progress-box {
+            margin-bottom: 0.9rem;
+            padding: 0.25rem 0.1rem;
+        }
+        .music-progress-box input[type="range"] {
+            width: 100%;
+            accent-color: var(--gold);
+            cursor: pointer;
+            margin: 0;
+        }
+        .music-progress-box input[type="range"]:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        .music-progress-times {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: #cbd5e1;
+            font-variant-numeric: tabular-nums;
+            margin-top: 0.2rem;
+        }
         .music-controls-row {
             display: flex;
             align-items: center;

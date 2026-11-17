@@ -686,6 +686,9 @@ openAuthModal: function () {
 
             pl.type = "Human"; // Povýšení na lidského hráče, aby za něj netahal automatický bot!
             pl.pawnId = this.selectedPawnId || "knight_valiant"; // Nahrazení bot figurky vlastní zvolenou figurkou hráče!
+            var myOnlineCrest = (typeof this.getPlayerCrest === "function") ? this.getPlayerCrest() : { crestId: "lion", tincture: "gold" };
+            pl.crestId = myOnlineCrest.crestId;
+            pl.crestColor = myOnlineCrest.tincture;
             pl.claimedBy = myClientId;
 
             if (this.currentUser && this.currentUser.role !== "Guest") {
@@ -1020,6 +1023,10 @@ openAuthModal: function () {
 
                     if (res && res.ok && res.session && res.session.stateJson) {
 
+                        if (res.chat && Array.isArray(res.chat)) {
+                            self.handleIncomingChatMessages(res.chat, true);
+                        }
+
                         var remoteState = JSON.parse(res.session.stateJson);
 
                         if (!remoteState || !remoteState.players) return;
@@ -1166,6 +1173,11 @@ openAuthModal: function () {
                                 }
                             }
                         }
+                    }
+
+                    // Kontrola příchozích zpráv chatu (Královská sněmovna)
+                    if (res.chat && Array.isArray(res.chat)) {
+                        self.handleIncomingChatMessages(res.chat);
                     }
 
                     if (needsFullFetch) {
@@ -1561,6 +1573,10 @@ openAuthModal: function () {
 
                 if (res && res.ok && res.session && res.session.stateJson) {
 
+                    if (res.chat && Array.isArray(res.chat)) {
+                        self.handleIncomingChatMessages(res.chat, true);
+                    }
+
                     self.state = JSON.parse(res.session.stateJson);
 
                     self.state.sessionGuid = res.session.sessionGuid;
@@ -1751,6 +1767,9 @@ openAuthModal: function () {
             pl.type = "Human";
             pl.claimedBy = myClientId;
             pl.userUsername = this.currentUser.username;
+            var rebCrest = (typeof this.getPlayerCrest === "function") ? this.getPlayerCrest() : { crestId: "lion", tincture: "gold" };
+            pl.crestId = rebCrest.crestId;
+            pl.crestColor = rebCrest.tincture;
             if (this.currentUser.displayName) {
                 pl.name = this.currentUser.displayName;
             }
@@ -1776,6 +1795,209 @@ openAuthModal: function () {
         this.renderGameScreen();
         this.scheduleBotTurnIfNeeded();
         this.saveSessionAuto();
+    },
+
+    // --- MULTIPLAYER CHAT (Královská sněmovna) ---
+    toggleChatDrawer: function (forceState) {
+        var drawer = document.getElementById("online-chat-drawer");
+        if (!drawer) return;
+        var willOpen = (typeof forceState === "boolean") ? forceState : drawer.classList.contains("hidden");
+        if (willOpen) {
+            drawer.classList.remove("hidden");
+            this._isChatDrawerOpen = true;
+            this._unreadChatCount = 0;
+            var badge = document.getElementById("chat-unread-badge");
+            if (badge) {
+                badge.style.display = "none";
+                badge.textContent = "0";
+            }
+            this.scrollChatToBottom();
+            var input = document.getElementById("online-chat-input");
+            if (input) {
+                setTimeout(function () { input.focus(); }, 100);
+            }
+        } else {
+            drawer.classList.add("hidden");
+            this._isChatDrawerOpen = false;
+        }
+    },
+
+    scrollChatToBottom: function () {
+        var container = document.getElementById("online-chat-messages");
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    },
+
+    sendChatMessage: function (customText) {
+        var self = this;
+        var input = document.getElementById("online-chat-input");
+        var text = (typeof customText === "string") ? customText.trim() : (input ? input.value.trim() : "");
+        if (!text) return;
+        if (input && typeof customText !== "string") {
+            input.value = "";
+        }
+
+        var myIdx = (this.myOnlinePlayerIndex >= 0) ? this.myOnlinePlayerIndex : (this.state ? this.state.currentPlayerIndex : 0);
+        var author = (this.currentUser && this.currentUser.displayName) || (this.state && this.state.players && this.state.players[myIdx] ? this.state.players[myIdx].name : "Rytíř");
+        author = author.replace(/\s*\(Ty\)/gi, "").replace(/\s*\(Hostitel\)/gi, "").trim();
+
+        var crestInfo = (typeof this.getPlayerCrest === "function") ? this.getPlayerCrest() : { crestId: "lion", tincture: "gold" };
+        var roomCode = (this.state && this.state.roomCode) ? this.state.roomCode : "";
+
+        if (roomCode) {
+            fetch("api.ashx?action=send-chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    code: roomCode,
+                    playerIndex: myIdx,
+                    author: author,
+                    crestId: crestInfo.crestId,
+                    crestColor: crestInfo.tincture,
+                    text: text
+                })
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok && res.chat) {
+                        self.handleIncomingChatMessages([res.chat], false, true);
+                    }
+                })
+                .catch(function () { });
+        } else {
+            var localMsg = {
+                id: "local_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+                code: "LOCAL",
+                playerIndex: myIdx,
+                author: author,
+                crestId: crestInfo.crestId,
+                crestColor: crestInfo.tincture,
+                text: text,
+                timestamp: Date.now()
+            };
+            this.handleIncomingChatMessages([localMsg], false, true);
+        }
+
+        if (window.PRS_Audio && window.PRS_Audio.playNotice) {
+            window.PRS_Audio.playNotice();
+        }
+    },
+
+    sendQuickShout: function (shoutKeyOrText) {
+        if (!shoutKeyOrText) return;
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var shoutMap = {
+            "duel": isEn ? "⚔️ I challenge you to a tournament duel!" : "⚔️ Vyzývám tě na turnajový duel!",
+            "toast": isEn ? "🍻 A toast to the Queen and good neighbors!" : "🍻 Připíjím na královnu a dobré sousedy!",
+            "dragon": isEn ? "🐉 Dragon on the horizon, take cover!" : "🐉 Drak na obzoru, kryjte se!",
+            "peace": isEn ? "🤝 I offer honorable peace and friendship." : "🤝 Nabízím čestný mír a přátelství.",
+            "village": isEn ? "🏰 My estate grows, prepare your rent!" : "🏰 Mé panství roste, chystejte nájem!",
+            "victory": isEn ? "👑 The Princess's Heart shall soon be mine!" : "👑 Princeznino srdce bude brzy mé!"
+        };
+        var textToSend = shoutMap[shoutKeyOrText] || shoutKeyOrText;
+        if (isEn && !shoutMap[shoutKeyOrText]) {
+            if (shoutKeyOrText.indexOf("turnajový duel") !== -1) textToSend = "⚔️ I challenge you to a tournament duel!";
+            else if (shoutKeyOrText.indexOf("Připíjím na královnu") !== -1) textToSend = "🍻 A toast to the Queen and good neighbors!";
+            else if (shoutKeyOrText.indexOf("Drak na obzoru") !== -1) textToSend = "🐉 Dragon on the horizon, take cover!";
+            else if (shoutKeyOrText.indexOf("Nabízím čestný mír") !== -1) textToSend = "🤝 I offer honorable peace and friendship.";
+            else if (shoutKeyOrText.indexOf("Mé panství roste") !== -1) textToSend = "🏰 My estate grows, prepare your rent!";
+            else if (shoutKeyOrText.indexOf("Princeznino srdce bude brzy mé") !== -1) textToSend = "👑 The Princess's Heart shall soon be mine!";
+        }
+        this.sendChatMessage(textToSend);
+    },
+
+    handleIncomingChatMessages: function (messages, isInitial, isLocalSend) {
+        if (!messages || !Array.isArray(messages) || messages.length === 0) return;
+        this._chatMessages = this._chatMessages || [];
+        this._seenChatIds = this._seenChatIds || {};
+
+        var newCount = 0;
+        for (var i = 0; i < messages.length; i++) {
+            var msg = messages[i];
+            if (!msg || !msg.id || this._seenChatIds[msg.id]) continue;
+            this._seenChatIds[msg.id] = true;
+            this._chatMessages.push(msg);
+            newCount++;
+        }
+
+        if (newCount === 0) return;
+
+        if (this._chatMessages.length > 80) {
+            this._chatMessages = this._chatMessages.slice(this._chatMessages.length - 80);
+        }
+
+        if (!this._isChatDrawerOpen && !isInitial && !isLocalSend) {
+            this._unreadChatCount = (this._unreadChatCount || 0) + newCount;
+            var badge = document.getElementById("chat-unread-badge");
+            if (badge) {
+                badge.textContent = this._unreadChatCount > 9 ? "9+" : String(this._unreadChatCount);
+                badge.style.display = "inline-block";
+            }
+            if (window.PRS_Audio && window.PRS_Audio.playNotice) {
+                window.PRS_Audio.playNotice();
+            }
+        }
+
+        this.renderChatMessagesList();
+        if (this._isChatDrawerOpen) {
+            this.scrollChatToBottom();
+        }
+    },
+
+    renderChatMessagesList: function () {
+        var container = document.getElementById("online-chat-messages");
+        if (!container) return;
+
+        if (!this._chatMessages || this._chatMessages.length === 0) {
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var emptyTxt = isEn
+                ? "💬 No messages at the table yet.<br/>Type a message or pick a quick shout above!"
+                : "💬 Žádné zprávy u stolu.<br/>Napiš zprávu nebo zvol rychlý pokřik výše!";
+            container.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:0.78rem; padding:2rem 0.5rem; font-style:italic;">' + emptyTxt + '</div>';
+            return;
+        }
+
+        var myIdx = (this.myOnlinePlayerIndex >= 0) ? this.myOnlinePlayerIndex : (this.state ? this.state.currentPlayerIndex : 0);
+        var html = "";
+
+        for (var i = 0; i < this._chatMessages.length; i++) {
+            var m = this._chatMessages[i];
+            if (m.isSystem) {
+                html += '<div class="chat-system-msg">' + this.escapeHtml(m.text) + '</div>';
+                continue;
+            }
+
+            var isMe = (m.playerIndex === myIdx);
+            var crestHtml = "";
+            if (window.PRS_renderCrestBadgeHTML) {
+                crestHtml = window.PRS_renderCrestBadgeHTML(m.crestId || "lion", m.crestColor || "gold", 26);
+            }
+
+            var timeStr = "";
+            if (m.timestamp) {
+                var d = new Date(m.timestamp);
+                var hh = String(d.getHours()).padStart(2, "0");
+                var mm = String(d.getMinutes()).padStart(2, "0");
+                timeStr = hh + ":" + mm;
+            }
+
+            var tinc = (window.PRS_getTinctureByKey) ? window.PRS_getTinctureByKey(m.crestColor) : null;
+            var authorColor = (tinc && tinc.text) ? tinc.text : "var(--gold-light)";
+
+            html += '<div class="chat-msg-item' + (isMe ? ' from-me' : '') + '">' +
+                '<div style="flex-shrink:0;">' + crestHtml + '</div>' +
+                '<div class="chat-msg-body">' +
+                    '<div class="chat-msg-header">' +
+                        '<span class="chat-msg-author" style="color:' + authorColor + ';">' + this.escapeHtml(m.author || "Rytíř") + (isMe ? ' (Ty)' : '') + '</span>' +
+                        '<span class="chat-msg-time">' + timeStr + '</span>' +
+                    '</div>' +
+                    '<div class="chat-msg-text">' + this.escapeHtml(m.text) + '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        container.innerHTML = html;
     }
 
     });
