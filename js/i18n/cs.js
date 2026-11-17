@@ -228,7 +228,8 @@ window.PRS_I18N.cs = {
         "alert_title": "Královské poselství",
         "confirm_title": "Královská volba",
         "prompt_title": "Královský dotaz",
-        "choice_title": "Rytířské rozhodnutí"
+        "choice_title": "Rytířské rozhodnutí",
+        "back_cancel": "Zpět / Zrušit"
     },
     "hud": {
         "end_turn": "➡️ Ukončit tah",
@@ -2931,7 +2932,17 @@ window.PRS_I18N.cs = {
         "btn_step_bot_once": "⚡ Odehrát 1 tah botem",
         "btn_convert_bot_permanent": "🤖 Převést na PC bota trvale",
         "btn_check_turn_now": "🔄 Zkontrolovat tah hned",
-        "btn_unlock_hotseat": "🔓 Odemknout (hrát za všechny u 1 PC)"
+        "btn_unlock_hotseat": "🔓 Odemknout (hrát za všechny u 1 PC)",
+        "afk_dialog": {
+            "title": "Neaktivita hráče u online stolu",
+            "prompt": "Rytíř <strong>{name}</strong> (křeslo #{seat}) je na tahu již <strong>více než 2 minuty</strong> a neodehrál svůj tah.<br><br>Jako hostitel stolu můžeš zvolit, jak situaci vyřešit:",
+            "step_once_label": "⚡ Odehrát tento 1 tah botem",
+            "step_once_desc": "Královský rádce okamžitě provede tah za nepřítomného rytíře, ale křeslo mu ponechá pro příští kolo.",
+            "convert_perm_label": "🤖 Trvale převést křeslo na PC bota",
+            "convert_perm_desc": "Křeslo trvale převezme počítačový bot. Pokud se hráč vrátí, můžeš křeslo v menu Křesla & Boti znovu uvolnit.",
+            "wait_more_label": "⏱️ Počkat ještě (dalších 60 s)",
+            "wait_more_desc": "Dát hráči ještě minutu času před dalším upozorněním."
+        }
     },
     "music": {
         "modal_title": "🎵 Královský hudební přehrávač",

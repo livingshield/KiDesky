@@ -881,30 +881,42 @@ openAuthModal: function () {
                 try { window.PRS_Audio.playNotice(); } catch (e) {}
             }
 
+            var isEnAfk = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var afkTitle = window.PRS_I18n ? window.PRS_I18n.t("online.afk_dialog.title") : "Neaktivita hráče u online stolu";
+            var afkPrompt = window.PRS_I18n
+                ? window.PRS_I18n.t("online.afk_dialog.prompt", { name: this.escapeHtml(curPlayer.name), seat: (curIdx + 1) })
+                : ("Rytíř <strong>" + this.escapeHtml(curPlayer.name) + "</strong> (křeslo #" + (curIdx + 1) + ") je na tahu již <strong>více než 2 minuty</strong> a neodehrál svůj tah.<br><br>Jako hostitel stolu můžeš zvolit, jak situaci vyřešit:");
+            var opt1Label = window.PRS_I18n ? window.PRS_I18n.t("online.afk_dialog.step_once_label") : "⚡ Odehrát tento 1 tah botem";
+            var opt1Desc = window.PRS_I18n ? window.PRS_I18n.t("online.afk_dialog.step_once_desc") : "Královský rádce okamžitě provede tah za nepřítomného rytíře, ale křeslo mu ponechá pro příští kolo.";
+            var opt2Label = window.PRS_I18n ? window.PRS_I18n.t("online.afk_dialog.convert_perm_label") : "🤖 Trvale převést křeslo na PC bota";
+            var opt2Desc = window.PRS_I18n ? window.PRS_I18n.t("online.afk_dialog.convert_perm_desc") : "Křeslo trvale převezme počítačový bot. Pokud se hráč vrátí, můžeš křeslo v menu Křesla & Boti znovu uvolnit.";
+            var opt3Label = window.PRS_I18n ? window.PRS_I18n.t("online.afk_dialog.wait_more_label") : "⏱️ Počkat ještě (dalších 60 s)";
+            var opt3Desc = window.PRS_I18n ? window.PRS_I18n.t("online.afk_dialog.wait_more_desc") : "Dát hráči ještě minutu času před dalším upozorněním.";
+
             KiDeskyDialog.choice(
-                "Rytíř <strong>" + this.escapeHtml(curPlayer.name) + "</strong> (křeslo #" + (curIdx + 1) + ") je na tahu již <strong>více než 2 minuty</strong> a neodehrál svůj tah.<br><br>Jako hostitel stolu můžeš zvolit, jak situaci vyřešit:",
+                afkPrompt,
                 [
                     {
                         id: "step_once",
-                        label: "⚡ Odehrát tento 1 tah botem",
-                        description: "Královský rádce okamžitě provede tah za nepřítomného rytíře, ale křeslo mu ponechá pro příští kolo.",
+                        label: opt1Label,
+                        description: opt1Desc,
                         isPrimary: true
                     },
                     {
                         id: "convert_perm",
-                        label: "🤖 Trvale převést křeslo na PC bota",
-                        description: "Křeslo trvale převezme počítačový bot. Pokud se hráč vrátí, můžeš křeslo v menu Křesla & Boti znovu uvolnit.",
+                        label: opt2Label,
+                        description: opt2Desc,
                         isPrimary: false
                     },
                     {
                         id: "wait_more",
-                        label: "⏱️ Počkat ještě (dalších 60 s)",
-                        description: "Dát hráči ještě minutu času před dalším upozorněním.",
+                        label: opt3Label,
+                        description: opt3Desc,
                         isPrimary: false
                     }
                 ],
                 {
-                    title: "Neaktivita hráče u online stolu",
+                    title: afkTitle,
                     icon: "⏳"
                 }
             ).then(function (chosen) {
@@ -931,7 +943,8 @@ openAuthModal: function () {
         var origType = p.type;
         var self = this;
 
-        this.addLog("⚡ Hráč " + p.name + " neodpovídal. Hostitel nechal jeho tah odehrát královským rádcem.", "danger");
+        var isEnStep = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        this.addLog(isEnStep ? ("⚡ Player " + p.name + " did not respond. Host had the Royal Advisor play their turn.") : ("⚡ Hráč " + p.name + " neodpovídal. Hostitel nechal jeho tah odehrát královským rádcem."), "danger");
 
         // Dočasně nastavíme typ hráče na bota, aby bot AI rozhodovala
         p.type = "Bot_Balanced";

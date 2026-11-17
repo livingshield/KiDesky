@@ -228,7 +228,8 @@ window.PRS_I18N.en = {
         "alert_title": "Royal Message",
         "confirm_title": "Royal Choice",
         "prompt_title": "Royal Inquiry",
-        "choice_title": "Knightly Decision"
+        "choice_title": "Knightly Decision",
+        "back_cancel": "Back / Cancel"
     },
     "hud": {
         "end_turn": "➡️ End Turn",
@@ -2931,7 +2932,17 @@ window.PRS_I18N.en = {
         "btn_step_bot_once": "⚡ Play 1 turn with bot",
         "btn_convert_bot_permanent": "🤖 Convert to AI bot permanently",
         "btn_check_turn_now": "🔄 Check turn now",
-        "btn_unlock_hotseat": "🔓 Unlock (play all on 1 PC)"
+        "btn_unlock_hotseat": "🔓 Unlock (play all on 1 PC)",
+        "afk_dialog": {
+            "title": "Player Inactivity at Online Table",
+            "prompt": "Knight <strong>{name}</strong> (seat #{seat}) has been on turn for <strong>more than 2 minutes</strong> and has not played their turn.<br><br>As the table host, you can choose how to resolve this situation:",
+            "step_once_label": "⚡ Play this 1 turn with bot",
+            "step_once_desc": "The Royal Advisor will immediately make the move for the absent knight, but keep their seat for the next round.",
+            "convert_perm_label": "🤖 Permanently convert seat to AI bot",
+            "convert_perm_desc": "An AI bot will permanently take over the seat. If the player returns, you can free the seat again in Seats & Bots menu.",
+            "wait_more_label": "⏱️ Wait longer (another 60 s)",
+            "wait_more_desc": "Give the player another minute before the next notice."
+        }
     },
     "music": {
         "modal_title": "🎵 Royal Music Player",
