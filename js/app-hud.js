@@ -201,15 +201,21 @@
                     horse: window.PRS_I18n ? window.PRS_I18n.t("hud.horse_gallop", null, "🏇 KOŇSKÝ CVAL (2d6)") : "🏇 KOŇSKÝ CVAL (2d6)"
                 };
 
+                var mTitleStandard = window.PRS_I18n ? window.PRS_I18n.t("hud.stance_march_title", null, "Běžný hod 1–6") : "Běžný hod 1–6";
+                var mTitleCautious = window.PRS_I18n ? window.PRS_I18n.t("hud.stance_cautious_title", null, "Opatrný krok 1–4 pro přesné manévrování") : "Opatrný krok 1–4 pro přesné manévrování";
+                var mTitleHorse = hasHorse
+                    ? (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_gallop_title", null, "Házíš 2 kostkami (2d6) – volba trysku nebo manévru!") : "Házíš 2 kostkami (2d6) – volba trysku nebo manévru!")
+                    : (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_gallop_locked_title", null, "Vyžaduje alespoň 1 koně ve stáji") : "Vyžaduje alespoň 1 koně ve stáji");
+
                 mainBtnWrap.innerHTML = '<div style="display:flex; flex-direction:column; gap:6px; width:100%;">' +
 
                     '<div class="mobile-tempo-row">' +
 
-                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')">🎲 1–6</button>' +
+                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')" title="' + mTitleStandard + '">🎲 1–6</button>' +
 
-                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')">🚶 1–4</button>' +
+                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')" title="' + mTitleCautious + '">🚶 1–4</button>' +
 
-                    '  <button type="button" class="mobile-tempo-btn ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + '>🏇 2d6</button>' +
+                    '  <button type="button" class="mobile-tempo-btn ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + ' title="' + mTitleHorse + '">🏇 2d6</button>' +
 
                     '</div>' +
 
@@ -3545,21 +3551,27 @@
                 horse: window.PRS_I18n ? window.PRS_I18n.t("hud.horse_gallop", null, "🏇 KOŇSKÝ CVAL (2d6)") : "🏇 KOŇSKÝ CVAL (2d6)"
             };
 
+            var titleStandard = window.PRS_I18n ? window.PRS_I18n.t("hud.stance_march_title", null, "Běžný hod 1–6") : "Běžný hod 1–6";
+            var titleCautious = window.PRS_I18n ? window.PRS_I18n.t("hud.stance_cautious_title", null, "Opatrný krok 1–4 pro přesné manévrování") : "Opatrný krok 1–4 pro přesné manévrování";
+            var titleHorse = hasHorse
+                ? (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_gallop_title", null, "Házíš 2 kostkami (2d6) – volba trysku nebo manévru!") : "Házíš 2 kostkami (2d6) – volba trysku nebo manévru!")
+                : (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_gallop_locked_title", null, "Vyžaduje alespoň 1 koně ve stáji") : "Vyžaduje alespoň 1 koně ve stáji");
+
             var tempoSelectorHtml = isBot ? '' : (
                 '<div class="movement-stance-selector">' +
                 '  <div style="font-size:0.73rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px; font-weight:600;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.movement_mode", null, "Režim pohybu:") : "Režim pohybu:") + '</div>' +
                 '  <div class="movement-stance-grid">' +
-                '    <button type="button" class="btn-tempo-option ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')" title="Běžný hod 1–6">' +
+                '    <button type="button" class="btn-tempo-option ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')" title="' + titleStandard + '">' +
                 '      <span class="tempo-icon">🎲</span>' +
                 '      <span class="tempo-name">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_march", null, "Pochod") : "Pochod") + '</span>' +
                 '      <span class="tempo-desc">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_march_desc", null, "1–6 polí") : "1–6 polí") + '</span>' +
                 '    </button>' +
-                '    <button type="button" class="btn-tempo-option ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')" title="Opatrný krok 1–4 pro přesné manévrování">' +
+                '    <button type="button" class="btn-tempo-option ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')" title="' + titleCautious + '">' +
                 '      <span class="tempo-icon">🚶</span>' +
                 '      <span class="tempo-name">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_cautious", null, "Opatrný") : "Opatrný") + '</span>' +
                 '      <span class="tempo-desc">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_cautious_desc", null, "1–4 pole") : "1–4 pole") + '</span>' +
                 '    </button>' +
-                '    <button type="button" class="btn-tempo-option ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + ' title="' + (hasHorse ? 'Házíš 2 kostkami (2d6) – volba trysku nebo manévru!' : 'Vyžaduje alespoň 1 koně ve stáji') + '">' +
+                '    <button type="button" class="btn-tempo-option ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + ' title="' + titleHorse + '">' +
                 '      <span class="tempo-icon">🏇</span>' +
                 '      <span class="tempo-name">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_gallop", null, "Cval") : "Cval") + '</span>' +
                 '      <span class="tempo-desc">' + (hasHorse ? (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_gallop_desc", null, "2d6 volba") : "2d6 volba") : (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_locked", null, "Zamčeno") : "Zamčeno")) + '</span>' +
