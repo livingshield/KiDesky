@@ -2947,78 +2947,99 @@
                 };
             }
 
+            var isEnAdv = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             if (opportunities.length > 0) {
                 var op = opportunities[0];
-                var opDesc = op.isEstate ? ("volné sídlo **" + this.escapeHtml(op.node.name) + "**") : (op.isFestival ? "královské Slavnosti 💖" : ("pole **" + this.escapeHtml(op.node.name) + "**"));
+                var opDesc = isEnAdv
+                    ? (op.isEstate ? ("free estate **" + this.escapeHtml(op.node.name) + "**") : (op.isFestival ? "royal Festivities 💖" : ("tile **" + this.escapeHtml(op.node.name) + "**")))
+                    : (op.isEstate ? ("volné sídlo **" + this.escapeHtml(op.node.name) + "**") : (op.isFestival ? "královské Slavnosti 💖" : ("pole **" + this.escapeHtml(op.node.name) + "**")));
                 return {
                     icon: "💡",
-                    title: "Královský rádce",
-                    badge: "Taktický dosah",
+                    title: isEnAdv ? "Royal Advisor" : "Královský rádce",
+                    badge: isEnAdv ? "Tactical Reach" : "Taktický dosah",
                     badgeClass: "advisor-tip",
-                    text: "Před tebou na hodu **" + op.roll + "** leží " + opDesc + ". Cesta je volná a příznivá pro tvůj další postup.",
-                    actionPrompt: "Hoď kostkou a vykroč na cestu."
+                    text: isEnAdv
+                        ? ("Ahead of you on roll **" + op.roll + "** lies " + opDesc + ". The path is clear and favorable for your next move.")
+                        : ("Před tebou na hodu **" + op.roll + "** leží " + opDesc + ". Cesta je volná a příznivá pro tvůj další postup."),
+                    actionPrompt: isEnAdv ? "Roll the dice and set forth on the road." : "Hoď kostkou a vykroč na cestu."
                 };
             }
 
             if (scen === "slayer") {
                 return {
                     icon: "🐉",
-                    title: "Královský rádce",
-                    badge: "Scénář Lovci draků",
+                    title: isEnAdv ? "Royal Advisor" : "Královský rádce",
+                    badge: isEnAdv ? "Dragon Slayers Scenario" : "Scénář Lovci draků",
                     badgeClass: "advisor-tip",
-                    text: "Ve scénáři Lovci draků je tvým cílem skolit 2 draky království v Dračích slujích (U3). Sleduj rozcestí a směřuj na Dračí stezku!",
-                    actionPrompt: "Klepni na kostku pro hod."
+                    text: isEnAdv
+                        ? "In the Dragon Slayers scenario, your objective is to slay 2 realm dragons in Dragon Lairs (U3). Watch crossroads and steer towards Dragon Path!"
+                        : "Ve scénáři Lovci draků je tvým cílem skolit 2 draky království v Dračích slujích (U3). Sleduj rozcestí a směřuj na Dračí stezku!",
+                    actionPrompt: isEnAdv ? "Tap the dice to roll." : "Klepni na kostku pro hod."
                 };
             }
             if (scen === "tycoon") {
                 return {
                     icon: "🏰",
-                    title: "Královský rádce",
-                    badge: "Scénář Feudální magnát",
+                    title: isEnAdv ? "Royal Advisor" : "Královský rádce",
+                    badge: isEnAdv ? "Feudal Tycoon Scenario" : "Scénář Feudální magnát",
                     badgeClass: "advisor-tip",
-                    text: "K vítězství potřebuješ ovládnout 3 města a 1 hrad. Šetři si zlaťáky na jejich nákup a nenech si je vyfouknout soupeři!",
-                    actionPrompt: "Klepni na kostku pro hod."
+                    text: isEnAdv
+                        ? "To claim victory, you need to control 3 towns and 1 castle. Save your gold for their purchase and don't let rivals snatch them!"
+                        : "K vítězství potřebuješ ovládnout 3 města a 1 hrad. Šetři si zlaťáky na jejich nákup a nenech si je vyfouknout soupeři!",
+                    actionPrompt: isEnAdv ? "Tap the dice to roll." : "Klepni na kostku pro hod."
                 };
             }
 
+            var pGoldStrAdv = player.gold.toLocaleString(isEnAdv ? "en-US" : "cs-CZ") + " " + (isEnAdv ? "g." : "zl.");
             return {
                 icon: "🧙‍♂️",
-                title: "Královský rádce",
-                badge: "Královský pochod",
+                title: isEnAdv ? "Royal Advisor" : "Královský rádce",
+                badge: isEnAdv ? "Royal March" : "Královský pochod",
                 badgeClass: "advisor-tip",
-                text: "Máš k dispozici **" + player.gold.toLocaleString("cs-CZ") + " zl.** a **" + player.totalHearts + " 💖**. Cesta před tebou je přehledná, zvol tempo pochodu a vyraz vstříc dobrodružství.",
-                actionPrompt: "Klepni na kostku pro hod."
+                text: isEnAdv
+                    ? ("You have **" + pGoldStrAdv + "** and **" + player.totalHearts + " 💖**. The path ahead is clear; choose your pace and set forth into adventure.")
+                    : ("Máš k dispozici **" + pGoldStrAdv + "** a **" + player.totalHearts + " 💖**. Cesta před tebou je přehledná, zvol tempo pochodu a vyraz vstříc dobrodružství."),
+                actionPrompt: isEnAdv ? "Tap the dice to roll." : "Klepni na kostku pro hod."
             };
         }
 
         // 4. FÁZE BRANCH_CHOICE
         if (phase === "BRANCH_CHOICE") {
+            var isEnAdvBranch = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             return {
                 icon: "🔀",
-                title: "Královský rádce",
-                badge: "Volba rozcestí",
+                title: isEnAdvBranch ? "Royal Advisor" : "Královský rádce",
+                badge: isEnAdvBranch ? "Crossroads Choice" : "Volba rozcestí",
                 badgeClass: "advisor-tip",
-                text: "Stojíš před klíčovým rozcestím. **Vnitřní královská stezka** nabízí slavnosti, turnaje a vysoké odměny, zatímco **Vnější okruh** poskytuje stabilní hospodářství a chov zvířat.",
-                actionPrompt: "Zvol si jednu ze dvou tras výše."
+                text: isEnAdvBranch
+                    ? "You stand before a pivotal crossroads. The **Inner Royal Path** offers festivals, tournaments, and high rewards, while the **Outer Ring** provides steady farming and animal breeding."
+                    : "Stojíš před klíčovým rozcestím. **Vnitřní královská stezka** nabízí slavnosti, turnaje a vysoké odměny, zatímco **Vnější okruh** poskytuje stabilní hospodářství a chov zvířat.",
+                actionPrompt: isEnAdvBranch ? "Choose one of the two routes above." : "Zvol si jednu ze dvou tras výše."
             };
         }
 
         // 5. FÁZE ACTION (Po hodu na poli)
         if (currNode) {
+            var isEnAdvAct = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             if (pa && pa.canBuyNode) {
                 var bPrice = (typeof pa.buyPrice === "number" && !isNaN(pa.buyPrice)) ? pa.buyPrice : ((currNode && typeof currNode.price === "number") ? currNode.price : 1000);
                 var pGold = (player && typeof player.gold === "number") ? player.gold : 0;
                 var canAfford = pGold >= bPrice;
                 var rem = pGold - bPrice;
+                var bPriceStr = bPrice.toLocaleString(isEnAdvAct ? "en-US" : "cs-CZ") + " " + (isEnAdvAct ? "g." : "zl.");
+                var pGoldCurStr = pGold.toLocaleString(isEnAdvAct ? "en-US" : "cs-CZ") + " " + (isEnAdvAct ? "g." : "zl.");
+                var remStr = rem.toLocaleString(isEnAdvAct ? "en-US" : "cs-CZ") + " " + (isEnAdvAct ? "g." : "zl.");
 
                 if (!canAfford) {
                     return {
                         icon: "🪙",
-                        title: "Královský rádce",
-                        badge: "Nedostatek zlata",
+                        title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                        badge: isEnAdvAct ? "Not Enough Gold" : "Nedostatek zlata",
                         badgeClass: "advisor-warn",
-                        text: "Pole **" + this.escapeHtml(currNode.name) + "** stojí **" + bPrice.toLocaleString("cs-CZ") + " zl.**, ale v měšci máš jen " + pGold.toLocaleString("cs-CZ") + " zl. Nyní pole koupit nemůžeš, pokračuj ukončením tahu.",
-                        actionPrompt: "Klepni na 'Ukončit tah'."
+                        text: isEnAdvAct
+                            ? ("Tile **" + this.escapeHtml(currNode.name) + "** costs **" + bPriceStr + "**, but your pouch holds only " + pGoldCurStr + ". You cannot buy this tile now; proceed by ending your turn.")
+                            : ("Pole **" + this.escapeHtml(currNode.name) + "** stojí **" + bPriceStr + "**, ale v měšci máš jen " + pGoldCurStr + ". Nyní pole koupit nemůžeš, pokračuj ukončením tahu."),
+                        actionPrompt: isEnAdvAct ? "Tap 'End Turn'." : "Klepni na 'Ukončit tah'."
                     };
                 }
 
@@ -3033,29 +3054,38 @@
                     if (ownedInSet === 2) {
                         return {
                             icon: "👑",
-                            title: "Královský rádce",
-                            badge: "Kompletace 3/3!",
+                            title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                            badge: isEnAdvAct ? "Completion 3/3!" : "Kompletace 3/3!",
                             badgeClass: "advisor-good",
-                            text: "⭐ **Jednoznačně doporučuji koupit!** Tímto zvířetem zkompletuješ celou chovnou sadu č. " + sId + " na **3/3**. Získáš zlatou korunu 👑, prémii **+1.5 💖** a soupeři ti budou platit **trojnásobné nájemné (80 %)**!",
-                            actionPrompt: "Klepni na zelené tlačítko 'Koupit toto pole'."
+                            text: isEnAdvAct
+                                ? ("⭐ **Highly recommend buying!** This animal will complete breeding set #" + sId + " to **3/3**. You will earn a golden crown 👑, **+1.5 💖** bonus, and rivals will pay you **triple rent (80%)**!")
+                                : ("⭐ **Jednoznačně doporučuji koupit!** Tímto zvířetem zkompletuješ celou chovnou sadu č. " + sId + " na **3/3**. Získáš zlatou korunu 👑, prémii **+1.5 💖** a soupeři ti budou platit **trojnásobné nájemné (80 %)**!"),
+                            actionPrompt: isEnAdvAct ? "Tap the green 'Buy this tile' button." : "Klepni na zelené tlačítko 'Koupit toto pole'."
                         };
                     } else if (ownedInSet === 1) {
                         return {
                             icon: "🐎",
-                            title: "Královský rádce",
-                            badge: "Zisk páru do sady",
+                            title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                            badge: isEnAdvAct ? "Pair Acquired" : "Zisk páru do sady",
                             badgeClass: "advisor-good",
-                            text: "Koupí získáš již **2. zvíře ze sady č. " + sId + "**. Nájemné stoupne na 40 % a zbývá ti už jen 1 kus do královského titulu. Skvělá investice!",
-                            actionPrompt: "Klepni na 'Koupit toto pole'."
+                            text: isEnAdvAct
+                                ? ("Buying gives you the **2nd animal of set #" + sId + "**. Rent rises to 40% and only 1 piece remains for royal acclaim. Great investment!")
+                                : ("Koupí získáš již **2. zvíře ze sady č. " + sId + "**. Nájemné stoupne na 40 % a zbývá ti už jen 1 kus do královského titulu. Skvělá investice!"),
+                            actionPrompt: isEnAdvAct ? "Tap 'Buy this tile'." : "Klepni na 'Koupit toto pole'."
                         };
                     } else {
+                        var subDesc = isEnAdvAct
+                            ? (currNode.subtype === "horse" ? "Horse – needed for gallop and races" : (currNode.subtype === "pes" ? "Dog – bonus to monster hunts" : "Falcon – bonus to tournaments"))
+                            : (currNode.subtype === "horse" ? "Kůň – nutný pro cval a závody" : (currNode.subtype === "pes" ? "Pes – bonus k lovu monster" : "Sokol – bonus k turnajům"));
                         return {
                             icon: "🐎",
-                            title: "Královský rádce",
-                            badge: "Nákup zvířete",
+                            title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                            badge: isEnAdvAct ? "Animal Purchase" : "Nákup zvířete",
                             badgeClass: "advisor-tip",
-                            text: "Volné chovné zvíře (" + (currNode.subtype === "horse" ? "Kůň – nutný pro cval a závody" : (currNode.subtype === "pes" ? "Pes – bonus k lovu monster" : "Sokol – bonus k turnajům")) + "). Po nákupu ti zbyde bezpečných **" + rem.toLocaleString("cs-CZ") + " zl.**",
-                            actionPrompt: "Klepni na 'Koupit toto pole'."
+                            text: isEnAdvAct
+                                ? ("Free breeding animal (" + subDesc + "). After purchase you retain a safe **" + remStr + "**.")
+                                : ("Volné chovné zvíře (" + subDesc + "). Po nákupu ti zbyde bezpečných **" + remStr + "**."),
+                            actionPrompt: isEnAdvAct ? "Tap 'Buy this tile'." : "Klepni na 'Koupit toto pole'."
                         };
                     }
                 }
@@ -3063,22 +3093,26 @@
                 if (currNode.type === "TOWN" || currNode.type === "CASTLE") {
                     return {
                         icon: "🏰",
-                        title: "Královský rádce",
-                        badge: "Strategické panství",
+                        title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                        badge: isEnAdvAct ? "Strategic Estate" : "Strategické panství",
                         badgeClass: "advisor-good",
-                        text: "Sídla přinášejí **pasivní daňový výnos** při každé návštěvě Výběrčího daní (VD) pro všechny hráče. Navíc hrad ti dává trvalé **+1 Charisma**. Doporučuji koupit!",
-                        actionPrompt: "Klepni na 'Koupit toto pole'."
+                        text: isEnAdvAct
+                            ? "Estates yield **passive tax revenue** upon every Tax Collector (TC) visit for all players. Moreover, a castle gives permanent **+1 Charisma**. Highly recommended to buy!"
+                            : "Sídla přinášejí **pasivní daňový výnos** při každé návštěvě Výběrčího daní (VD) pro všechny hráče. Navíc hrad ti dává trvalé **+1 Charisma**. Doporučuji koupit!",
+                        actionPrompt: isEnAdvAct ? "Tap 'Buy this tile'." : "Klepni na 'Koupit toto pole'."
                     };
                 }
 
                 if (currNode.type === "VILLAGE") {
                     return {
                         icon: "🏘️",
-                        title: "Královský rádce",
-                        badge: "Rozvoj vesnice",
+                        title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                        badge: isEnAdvAct ? "Village Development" : "Rozvoj vesnice",
                         badgeClass: "advisor-tip",
-                        text: "Vesnice je levný základ panství (výnos 500 zl.). Později ji můžeš povýšit až na 3★ (výnos 1 400 zl.). Po koupi ti zbyde **" + rem.toLocaleString("cs-CZ") + " zl.**",
-                        actionPrompt: "Klepni na 'Koupit toto pole'."
+                        text: isEnAdvAct
+                            ? ("A village is an affordable estate foundation (yield 500 g.). Later you can upgrade it up to 3★ (yield 1,400 g.). After purchase you will keep **" + remStr + "**.")
+                            : ("Vesnice je levný základ panství (výnos 500 zl.). Později ji můžeš povýšit až na 3★ (výnos 1 400 zl.). Po koupi ti zbyde **" + remStr + "**."),
+                        actionPrompt: isEnAdvAct ? "Tap 'Buy this tile'." : "Klepni na 'Koupit toto pole'."
                     };
                 }
             }
@@ -3086,11 +3120,13 @@
             if (pa && pa.canUpgradeVillage) {
                 return {
                     icon: "🏘️",
-                    title: "Královský rádce",
-                    badge: "Povýšení panství",
+                    title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                    badge: isEnAdvAct ? "Estate Upgrade" : "Povýšení panství",
                     badgeClass: "advisor-good",
-                    text: "Stojíš na své vesnici. Povýšení na vyšší úroveň zvýší daňový výnos i nájemné od soupeřů. Investice se ti vrátí již při příštím výběru daní.",
-                    actionPrompt: "Zvol 'Povýšit vesnici' nebo ukonči tah."
+                    text: isEnAdvAct
+                        ? "You stand on your village. Upgrading increases both tax yield and rent from rivals. The investment pays off on the next tax collection."
+                        : "Stojíš na své vesnici. Povýšení na vyšší úroveň zvýší daňový výnos i nájemné od soupeřů. Investice se ti vrátí již při příštím výběru daní.",
+                    actionPrompt: isEnAdvAct ? "Choose 'Upgrade Village' or end turn." : "Zvol 'Povýšit vesnici' nebo ukonči tah."
                 };
             }
 
@@ -3098,20 +3134,24 @@
                 if (pa.isMasterDuel) {
                     return {
                         icon: "⚔️",
-                        title: "Královský rádce",
-                        badge: "Rytířský duel!",
+                        title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                        badge: isEnAdvAct ? "Knightly Duel!" : "Rytířský duel!",
                         badgeClass: "advisor-good",
-                        text: "Mistr ctnosti tě vyzývá k slavnostnímu rytířskému turnaji o **1.5 💖 Srdce princezny**! Hod kostkou + tvoje ctnost rozhodne. I při prohře získáš čestné srdce za odvahu.",
-                        actionPrompt: "Klepni na 'Vyzvat mistra na duel'!"
+                        text: isEnAdvAct
+                            ? "The Virtue Master challenges you to a royal knightly tournament for **1.5 💖 Princess's Heart**! Dice roll + your virtue decides. Even on defeat, you earn an honorable heart for courage."
+                            : "Mistr ctnosti tě vyzývá k slavnostnímu rytířskému turnaji o **1.5 💖 Srdce princezny**! Hod kostkou + tvoje ctnost rozhodne. I při prohře získáš čestné srdce za odvahu.",
+                        actionPrompt: isEnAdvAct ? "Tap 'Challenge Master to Duel'!" : "Klepni na 'Vyzvat mistra na duel'!"
                     };
                 }
                 return {
                     icon: "🎓",
-                    title: "Královský rádce",
-                    badge: "Výcvik ctnosti",
+                    title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                    badge: isEnAdvAct ? "Virtue Training" : "Výcvik ctnosti",
                     badgeClass: "advisor-tip",
-                    text: "Mistr tě přijal do učení! Zvýšení vlastnosti ti dá trvalou výhodu při Slavnostech a bojových výpravách. Pokud máš dostatek zlaťáků, zaplať si lekci.",
-                    actionPrompt: "Klepni na tlačítko výcviku ctnosti."
+                    text: isEnAdvAct
+                        ? "The Master accepted you as an apprentice! Increasing your attribute gives you lasting advantage in Festivals and combat quests. If you have enough gold, pay for the lesson."
+                        : "Mistr tě přijal do učení! Zvýšení vlastnosti ti dá trvalou výhodu při Slavnostech a bojových výpravách. Pokud máš dostatek zlaťáků, zaplať si lekci.",
+                    actionPrompt: isEnAdvAct ? "Tap virtue training button." : "Klepni na tlačítko výcviku ctnosti."
                 };
             }
 
@@ -3126,40 +3166,46 @@
                 if (winRate >= 65) {
                     return {
                         icon: "⚔️",
-                        title: "Královský rádce",
-                        badge: "Příznivý boj (" + winRate + " %)",
+                        title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                        badge: isEnAdvAct ? ("Favorable Battle (" + winRate + "%)") : ("Příznivý boj (" + winRate + " %)"),
                         badgeClass: "advisor-good",
-                        text: "Tvoje bojová síla je vysoká (**+" + basePower + "**). K vítězství ti stačí hod **" + needed + "+** (šance **" + winRate + " %**). Výhra ti přinese štědré zlaťáky i srdce!",
-                        actionPrompt: "Klepni na 'Bojovat s nepřítelem'."
+                        text: isEnAdvAct
+                            ? ("Your combat power is high (**+" + basePower + "**). A roll of **" + needed + "+** is enough for victory (**" + winRate + "%** chance). Victory brings generous gold and hearts!")
+                            : ("Tvoje bojová síla je vysoká (**+" + basePower + "**). K vítězství ti stačí hod **" + needed + "+** (šance **" + winRate + " %**). Výhra ti přinese štědré zlaťáky i srdce!"),
+                        actionPrompt: isEnAdvAct ? "Tap 'Fight Enemy'." : "Klepni na 'Bojovat s nepřítelem'."
                     };
                 } else if (winRate >= 35) {
                     return {
                         icon: "⚖️",
-                        title: "Královský rádce",
-                        badge: "Vyrovnaný souboj (" + winRate + " %)",
+                        title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                        badge: isEnAdvAct ? ("Balanced Contest (" + winRate + "%)") : ("Vyrovnaný souboj (" + winRate + " %)"),
                         badgeClass: "advisor-tip",
-                        text: "Šance je vyrovnaná (**" + winRate + " %**, potřebuješ hod **" + needed + "+**). Pokud máš v brašně bojový pergamen, aktivuj jej pro vyšší jistotu.",
-                        actionPrompt: "Bojuj s odvahou nebo zvaž riziko."
+                        text: isEnAdvAct
+                            ? ("Chances are even (**" + winRate + "%**, you need roll **" + needed + "+**). If you have combat scrolls in pouch, activate them for higher certainty.")
+                            : ("Šance je vyrovnaná (**" + winRate + " %**, potřebuješ hod **" + needed + "+**). Pokud máš v brašně bojový pergamen, aktivuj jej pro vyšší jistotu."),
+                        actionPrompt: isEnAdvAct ? "Fight with valor or weigh the risks." : "Bojuj s odvahou nebo zvaž riziko."
                     };
                 } else {
                     return {
                         icon: "⚠️",
-                        title: "Královský rádce",
-                        badge: "Vysoké riziko (" + winRate + " %)",
+                        title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                        badge: isEnAdvAct ? ("High Risk (" + winRate + "%)") : ("Vysoké riziko (" + winRate + " %)"),
                         badgeClass: "advisor-warn",
-                        text: "Tento protivník je nad tvé současné síly (potřebuješ hod **" + needed + "**, šance jen **" + winRate + " %**). Porážka tě zraní a pošle do Špitálu. Doporučuji raději ustoupit.",
-                        actionPrompt: "Zvaž, zda riskovat porážku."
+                        text: isEnAdvAct
+                            ? ("This enemy exceeds your current strength (you need roll **" + needed + "**, only **" + winRate + "%** chance). Defeat will wound you and send you to the Infirmary. Recommend retreating.")
+                            : ("Tento protivník je nad tvé současné síly (potřebuješ hod **" + needed + "**, šance jen **" + winRate + " %**). Porážka tě zraní a pošle do Špitálu. Doporučuji raději ustoupit."),
+                        actionPrompt: isEnAdvAct ? "Consider whether to risk defeat." : "Zvaž, zda riskovat porážku."
                     };
                 }
             }
 
             return {
                 icon: "➡️",
-                title: "Královský rádce",
-                badge: "Tah dokončen",
+                title: isEnAdvAct ? "Royal Advisor" : "Královský rádce",
+                badge: isEnAdvAct ? "Turn Completed" : "Tah dokončen",
                 badgeClass: "advisor-tip",
-                text: "Všechny záležitosti na tomto poli jsou vyřízeny. Předej hrací kostku dalšímu rytíři.",
-                actionPrompt: "Klepni na tlačítko 'Ukončit tah'."
+                text: isEnAdvAct ? "All matters on this tile are settled. Pass the dice to the next knight." : "Všechny záležitosti na tomto poli jsou vyřízeny. Předej hrací kostku dalšímu rytíři.",
+                actionPrompt: isEnAdvAct ? "Tap 'End Turn' button." : "Klepni na tlačítko 'Ukončit tah'."
             };
         }
 
@@ -4130,26 +4176,20 @@
 
             var canToast = pa.canToastPlayer;
 
+            var isEnEnc = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var encCurrG = isEnEnc ? "g." : "zl.";
+            var encTitle = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_title", { badge: enc.badge, name: this.escapeHtml(enc.name) }) : ("🤺 Setkání rytířů: " + enc.badge + " " + this.escapeHtml(enc.name));
+            var encDesc = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_desc") : "Na tomto poli stojí soupeř. Zvol rytířský duel cti, nebo ukaž dvorskou noblesu přátelským přípitkem:";
+            var duelLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_duel", { stake: enc.duelStake + " " + encCurrG }) : ("⚔️ Rytířský duel cti (Sázka " + enc.duelStake + " zl. & 0.5 💖)");
+            var toastLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_toast", { cost: enc.toastCost + " " + encCurrG }) : ("🍷 Přátelský přípitek (" + enc.toastCost + " zl. ➔ Zisk +0,5 💖)");
+
             specialCardHtml += '<div class="encounter-interaction-card" style="border:1.5px solid #38bdf8; background:linear-gradient(180deg, rgba(12,74,110,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-
-                var isEnEnc = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var encCurrG = isEnEnc ? "g." : "zl.";
-        var encTitle = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_title", { badge: enc.badge, name: this.escapeHtml(enc.name) }) : ("🤺 Setkání rytířů: " + enc.badge + " " + this.escapeHtml(enc.name));
-        var encDesc = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_desc") : "Na tomto poli stojí soupeř. Zvol rytířský duel cti, nebo ukaž dvorskou noblesu přátelským přípitkem:";
-        var duelLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_duel", { stake: enc.duelStake + " " + encCurrG }) : ("⚔️ Rytířský duel cti (Sázka " + enc.duelStake + " zl. & 0.5 💖)");
-        var toastLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_toast", { cost: enc.toastCost + " " + encCurrG }) : ("🍷 Přátelský přípitek (" + enc.toastCost + " zl. ➔ Zisk +0,5 💖)");
-        html.push('<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">' + encTitle + '</div>');
-
-                html.push('<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">' + encDesc + '</p>');
-
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">' + encTitle + '</div>' +
+                '<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">' + encDesc + '</p>' +
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
-
                 (canDuel ? '  <button class="btn-action-duel" style="padding:0.55rem; background:linear-gradient(135deg, #ef4444, #991b1b); color:#fff; border:1px solid #fca5a5; border-radius:7px; font-weight:700; cursor:pointer;" onclick="PRS_App.handlePlayerDuel(' + enc.index + ')">' + duelLabel + '</button>' : '') +
-
                 (canToast ? '  <button class="btn-action-toast" style="padding:0.55rem; background:linear-gradient(135deg, #f59e0b, #b45309); color:#fff; border:1px solid #fde68a; border-radius:7px; font-weight:700; cursor:pointer;" onclick="PRS_App.handlePlayerToast(' + enc.index + ')">' + toastLabel + '</button>' : '') +
-
                 '</div>' +
-
                 '</div>';
 
         }
@@ -4415,18 +4455,13 @@
         var landedNode = (this.state.board && this.state.board.nodes) ? this.state.board.nodes[player.nodeId] : null;
 
         var landedLocHtml = "";
-
         if (landedNode) {
-
+            var landedNodeDisplay = (typeof this.getUnifiedNodeDisplayName === "function") ? this.getUnifiedNodeDisplayName(landedNode) : (landedNode ? landedNode.name : "");
             landedLocHtml = '<div class="dice-landed-loc">' +
-
-                '<span class="loc-name">' + (landedNode.icon ? '<span style="font-size:1.15rem; margin-right:3px;">' + landedNode.icon + '</span> ' : '📍 ') + var landedNodeDisplay = (typeof this.getUnifiedNodeDisplayName === "function") ? this.getUnifiedNodeDisplayName(landedNode) : (landedNode ? landedNode.name : "");
-        html.push('<strong>' + this.escapeHtml(landedNodeDisplay) + '</strong></span>');
-
+                '<span class="loc-name">' + (landedNode.icon ? '<span style="font-size:1.15rem; margin-right:3px;">' + landedNode.icon + '</span> ' : '📍 ') +
+                '<strong>' + this.escapeHtml(landedNodeDisplay) + '</strong></span>' +
                 (landedNode.code ? ' <span class="loc-code">' + this.escapeHtml(landedNode.code) + '</span>' : '') +
-
                 '</div>';
-
         }
 
         var summaryRaw = pa.summary || "";
@@ -4436,58 +4471,36 @@
         var encounterHtml = this.parseTurnEncounter(summaryRaw);
 
         var targetHeartsAction = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30;
+        var isEnActPanel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var actGoldStr = player.gold.toLocaleString(isEnActPanel ? "en-US" : "cs-CZ") + " " + (isEnActPanel ? "g." : "zl.");
 
         var actTreasuryHtml = '<div class="turn-active-treasury-banner">' +
-
             '<div style="display:flex; justify-content:space-between; align-items:center;">' +
-
             '  <div style="display:flex; align-items:center; gap:0.45rem;">' +
-
             '    <span class="top-hud-avatar" style="background:' + player.color + '; width:28px; height:28px; font-size:0.95rem;">' + player.badge + '</span>' +
-
             '    <div>' +
-
             '      <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.active_knight") : "Rytíř na tahu") + '</div>' +
-
             '      <strong style="color:' + player.color + '; font-size:0.95rem;">' + this.escapeHtml(player.name) + '</strong>' +
-
             '    </div>' +
-
             '  </div>' +
-
             '  <div style="text-align:right;">' +
-
-            var isEnActPanel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var actGoldStr = player.gold.toLocaleString(isEnActPanel ? "en-US" : "cs-CZ") + " " + (isEnActPanel ? "g." : "zl.");
-        html.push('    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + actGoldStr + '</div>');
-
+            '    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + actGoldStr + '</div>' +
             '    <div style="font-size:0.76rem; font-weight:bold;">' + (this.state.config && this.state.config.scenario === "slayer" ? ('<span style="color:#ef4444;">🐉 ' + ((player.stats && player.stats.dragonsSlain) ? player.stats.dragonsSlain : 0) + ' / 2 draků</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : (this.state.config && this.state.config.scenario === "tycoon" ? ('<span style="color:#f59e0b;">🏰 ' + (player.ownedNodes ? player.ownedNodes.length : 0) + ' sídel</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : ('<span style="color:#f472b6;">💖 ' + player.totalHearts + ' / ' + targetHeartsAction + '</span>'))) + '</div>' +
-
             '  </div>' +
-
             '</div>' +
-
             '</div>';
 
         var pouchHudHtml = this.getKnightPouchHudHtml(player, true);
+        var diceBadgeText = window.PRS_I18n ? window.PRS_I18n.t("hud.dice_roll_prefix", { roll: rollVal }) : ("🎲 Hod kostkou: <strong>" + rollVal + "</strong>");
 
         el.innerHTML = '<div class="action-card">' +
-
             actTreasuryHtml +
-
             '<div class="dice-badge-row">' +
-
             '  <div class="dice-cube-mini" title="Hod: ' + rollVal + '">' + rollGlyph + '</div>' +
-
             '  <div class="dice-badge-content">' +
-
-            var diceBadgeText = window.PRS_I18n ? window.PRS_I18n.t("hud.dice_roll_prefix", { roll: rollVal }) : ("🎲 Hod kostkou: <strong>" + rollVal + "</strong>");
-        html.push('    <div class="dice-roll-badge">' + diceBadgeText + '</div>');
-
+            '    <div class="dice-roll-badge">' + diceBadgeText + '</div>' +
             landedLocHtml +
-
             '  </div>' +
-
             '</div>' +
 
             (btns.length > 0 ? ('<div class="action-buttons-wrap" style="margin:0.75rem 0 0.85rem 0; display:flex; flex-direction:column; gap:0.45rem;">' + btns.join(" ") + '</div>') : '') +

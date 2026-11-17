@@ -4259,59 +4259,97 @@ window.PRS_App = {
         var body = document.getElementById("catalog-game-modal-body");
         if (!body) return;
 
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+
         if (gameKey === "dragon_dungeon") {
+            var badgeText = isEn ? "🔨 In Development • KiDesky Edition" : "🔨 V přípravě • Edice KiDesky";
+            var titleText = isEn ? "🐉 Conquest of Dragon Mountain" : "🐉 Dobytí Dračí Hory";
+            var subtitleText = isEn ? "Cooperative dungeon crawler for 1–4 players" : "Kooperativní dungeon crawler pro 1–4 hráče";
+            var pill1 = isEn ? "👥 1–4 Heroes (Co-op)" : "👥 1–4 Hrdinové (Kooperace)";
+            var pill2 = isEn ? "⏱️ 60–90 minutes" : "⏱️ 60–90 minut";
+            var pill3 = isEn ? "🗺️ Modular dungeon board" : "🗺️ Modulární podzemní deska";
+            var pill4 = isEn ? "🎲 Tactical dice battles" : "🎲 Kostkové taktické souboje";
+            var hStory = isEn ? "Story Background &amp; Rules" : "Příběhové pozadí &amp; Pravidla";
+            var pStory = isEn
+                ? "Deep within Black Rock, the ancient dragon Vermithrax has awakened and his minions infest the surrounding lands. Players are not rivals, but a united party of valiant heroes. Each player chooses a unique class: <strong>Warrior</strong> (tank & crushing strikes), <strong>Mage</strong> (area fire & lightning magic), <strong>Rogue</strong> (chest unlocking & critical hits), or <strong>Cleric</strong> (healing & sacred warding)."
+                : "Hluboko v nitru Černé skály procitl prastarý drak Vermithrax a jeho služebníci zamořili okolní kraje. Hráči netvoří soupeře, nýbrž společnou družinu odvážných hrdinů. Každý hráč si volí unikátní třídu: <strong>Válečníka</strong> (tank a drtivé údery), <strong>Kouzelníka</strong> (plošná magie ohně a blesků), <strong>Zlodějku</strong> (odemykání truhel a kritické zásahy) nebo <strong>Klerika</strong> (léčení a posvátná ochrana).";
+            var hMech = isEn ? "Game Mechanics" : "Herní mechaniky";
+            var li1 = isEn ? "<strong>Modular dungeon:</strong> Each descent into the lair randomly generates new halls, traps, and relic chests." : "<strong>Modulární podzemí:</strong> Každé sestoupení do sluje náhodně generuje nové sály, pasti a truhly s relikviemi.";
+            var li2 = isEn ? "<strong>Dragon boss fight:</strong> Multi-phase final encounter requiring coordinated team strategy." : "<strong>Boss fight s drakem:</strong> Vícefázový závěrečný souboj vyžadující sehranou týmovou strategii.";
+            var li3 = isEn ? "<strong>Shared life pool:</strong> If one hero falls and is not revived in time, the entire quest fails!" : "<strong>Sdílená zásoba životů:</strong> Padne-li jeden hrdina a není včas oživen, celá výprava prohrává!";
+            var btnSub = isEn ? "🔔 Follow Development &amp; Get Beta Access" : "🔔 Sledovat vývoj &amp; Získat přístup do Beta testu";
+            var btnClose = isEn ? "Close Preview" : "Zavřít náhled";
+
             body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/landmarks/dragon.jpg\');">' +
                 '  <div class="catalog-modal-banner-overlay"></div>' +
                 '  <div style="position:relative; z-index:2;">' +
-                '    <span class="lp-kicker-badge" style="background:rgba(249,115,22,0.25); border-color:#fb923c; color:#fed7aa;">🔨 V přípravě • Edice KiDesky</span>' +
-                '    <h2 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.6rem; margin:0.35rem 0 0.15rem;">🐉 Dobytí Dračí Hory</h2>' +
-                '    <div style="font-size:0.85rem; color:#fde68a;">Kooperativní dungeon crawler pro 1–4 hráče</div>' +
+                '    <span class="lp-kicker-badge" style="background:rgba(249,115,22,0.25); border-color:#fb923c; color:#fed7aa;">' + badgeText + '</span>' +
+                '    <h2 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.6rem; margin:0.35rem 0 0.15rem;">' + titleText + '</h2>' +
+                '    <div style="font-size:0.85rem; color:#fde68a;">' + subtitleText + '</div>' +
                 '  </div>' +
                 '</div>' +
                 '<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.1rem;">' +
-                '  <span class="catalog-feature-pill">👥 1–4 Hrdinové (Kooperace)</span>' +
-                '  <span class="catalog-feature-pill">⏱️ 60–90 minut</span>' +
-                '  <span class="catalog-feature-pill">🗺️ Modulární podzemní deska</span>' +
-                '  <span class="catalog-feature-pill">🎲 Kostkové taktické souboje</span>' +
+                '  <span class="catalog-feature-pill">' + pill1 + '</span>' +
+                '  <span class="catalog-feature-pill">' + pill2 + '</span>' +
+                '  <span class="catalog-feature-pill">' + pill3 + '</span>' +
+                '  <span class="catalog-feature-pill">' + pill4 + '</span>' +
                 '</div>' +
-                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">Příběhové pozadí &amp; Pravidla</h4>' +
-                '<p style="font-size:0.88rem; line-height:1.5; color:#cbd5e1; margin-bottom:0.9rem;">Hluboko v nitru Černé skály procitl prastarý drak Vermithrax a jeho služebníci zamořili okolní kraje. Hráči netvoří soupeře, nýbrž společnou družinu odvážných hrdinů. Každý hráč si volí unikátní třídu: <strong>Válečníka</strong> (tank a drtivé údery), <strong>Kouzelníka</strong> (plošná magie ohně a blesků), <strong>Zlodějku</strong> (odemykání truhel a kritické zásahy) nebo <strong>Klerika</strong> (léčení a posvátná ochrana).</p>' +
-                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">Herní mechaniky</h4>' +
+                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">' + hStory + '</h4>' +
+                '<p style="font-size:0.88rem; line-height:1.5; color:#cbd5e1; margin-bottom:0.9rem;">' + pStory + '</p>' +
+                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">' + hMech + '</h4>' +
                 '<ul style="font-size:0.86rem; line-height:1.5; color:#cbd5e1; margin-left:1.2rem; margin-bottom:1.2rem;">' +
-                '  <li><strong>Modulární podzemí:</strong> Každé sestoupení do sluje náhodně generuje nové sály, pasti a truhly s relikviemi.</li>' +
-                '  <li><strong>Boss fight s drakem:</strong> Vícefázový závěrečný souboj vyžadující sehranou týmovou strategii.</li>' +
-                '  <li><strong>Sdílená zásoba životů:</strong> Padne-li jeden hrdina a není včas oživen, celá výprava prohrává!</li>' +
+                '  <li>' + li1 + '</li>' +
+                '  <li>' + li2 + '</li>' +
+                '  <li>' + li3 + '</li>' +
                 '</ul>' +
                 '<div style="display:flex; gap:0.6rem; flex-wrap:wrap;">' +
-                '  <button class="btn-gold-lg" style="flex:1; padding:0.65rem;" onclick="PRS_App.subscribeGameNewsletter(\'dragon_dungeon\')">🔔 Sledovat vývoj &amp; Získat přístup do Beta testu</button>' +
-                '  <button class="btn-secondary" style="padding:0.65rem 1rem;" onclick="PRS_App.closeGameCatalogPreview()">Zavřít náhled</button>' +
+                '  <button class="btn-gold-lg" style="flex:1; padding:0.65rem;" onclick="PRS_App.subscribeGameNewsletter(\'dragon_dungeon\')">' + btnSub + '</button>' +
+                '  <button class="btn-secondary" style="padding:0.65rem 1rem;" onclick="PRS_App.closeGameCatalogPreview()">' + btnClose + '</button>' +
                 '</div>';
         } else {
+            var mBadgeText = isEn ? "📐 Draft Concept • KiDesky Edition" : "📐 Koncept v návrhu • Edice KiDesky";
+            var mTitleText = isEn ? "⚖️ Merchants of the Realm" : "⚖️ Obchodníci Království";
+            var mSubtitleText = isEn ? "Strategic economic board game for 2–5 merchants" : "Strategická ekonomická desková hra pro 2–5 kupců";
+            var mPill1 = isEn ? "👥 2–5 Merchants" : "👥 2–5 Kupců";
+            var mPill2 = isEn ? "⏱️ 45–75 minutes" : "⏱️ 45–75 minut";
+            var mPill3 = isEn ? "⛵ Trade Routes &amp; Guilds" : "⛵ Obchodní stezky &amp; Cechy";
+            var mPill4 = isEn ? "🪙 Market Price Fluctuation" : "🪙 Fluktuace tržních cen";
+            var mHStory = isEn ? "Story Background &amp; Rules" : "Příběhové pozadí &amp; Pravidla";
+            var mPStory = isEn
+                ? "Vast empires are linked by caravan trails and naval convoys. As head of a merchant guild, you buy silk, amber, rare spices, and royal wines cheaply in harbors and sell them for multipliers in inland metropolises with high demand."
+                : "Rozlehlé říše propojují karavanní stezky a námořní konvoje. Jako představený kupeckého cechu nakupuješ levně hedvábí, jantar, vzácné koření a královská vína v přístavech a prodáváš je za násobky ve vnitrozemských metropolích s vysokou poptávkou.";
+            var mHMech = isEn ? "Game Mechanics" : "Herní mechaniky";
+            var mLi1 = isEn ? "<strong>Dynamic supply &amp; demand market:</strong> As soon as a merchant floods a city with spices, the price drops for everyone!" : "<strong>Živý trh s nabídkou a poptávkou:</strong> Jakmile kupec zaplaví město kořením, jeho cena klesá pro všechny!";
+            var mLi2 = isEn ? "<strong>Guild warehouse construction:</strong> Build trading posts along trade routes and collect toll fees from rivals." : "<strong>Výstavba cechovních skladů:</strong> Možnost stavět faktorie podél obchodních tras a vybírat celní poplatky od soupeřů.";
+            var mLi3 = isEn ? "<strong>Pirates and robber knights:</strong> Travel risks mitigated by hiring mercenary escorts." : "<strong>Piráti a loupeživí rytíři:</strong> Riziko na cestách snižované najímáním žoldnéřských eskort.";
+            var mBtnSub = isEn ? "🔔 Follow Development &amp; Get Beta Access" : "🔔 Sledovat vývoj &amp; Získat přístup do Beta testu";
+            var mBtnClose = isEn ? "Close Preview" : "Zavřít náhled";
+
             body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/tiles/merchant.jpg\');">' +
                 '  <div class="catalog-modal-banner-overlay"></div>' +
                 '  <div style="position:relative; z-index:2;">' +
-                '    <span class="lp-kicker-badge" style="background:rgba(56,189,248,0.25); border-color:#38bdf8; color:#bae6fd;">📐 Koncept v návrhu • Edice KiDesky</span>' +
-                '    <h2 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.6rem; margin:0.35rem 0 0.15rem;">⚖️ Obchodníci Království</h2>' +
-                '    <div style="font-size:0.85rem; color:#bae6fd;">Strategická ekonomická desková hra pro 2–5 kupců</div>' +
+                '    <span class="lp-kicker-badge" style="background:rgba(56,189,248,0.25); border-color:#38bdf8; color:#bae6fd;">' + mBadgeText + '</span>' +
+                '    <h2 style="font-family:\'Cinzel\',serif; color:var(--gold-light); font-size:1.6rem; margin:0.35rem 0 0.15rem;">' + mTitleText + '</h2>' +
+                '    <div style="font-size:0.85rem; color:#bae6fd;">' + mSubtitleText + '</div>' +
                 '  </div>' +
                 '</div>' +
                 '<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.1rem;">' +
-                '  <span class="catalog-feature-pill">👥 2–5 Kupců</span>' +
-                '  <span class="catalog-feature-pill">⏱️ 45–75 minut</span>' +
-                '  <span class="catalog-feature-pill">⛵ Obchodní stezky &amp; Cechy</span>' +
-                '  <span class="catalog-feature-pill">🪙 Fluktuace tržních cen</span>' +
+                '  <span class="catalog-feature-pill">' + mPill1 + '</span>' +
+                '  <span class="catalog-feature-pill">' + mPill2 + '</span>' +
+                '  <span class="catalog-feature-pill">' + mPill3 + '</span>' +
+                '  <span class="catalog-feature-pill">' + mPill4 + '</span>' +
                 '</div>' +
-                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">Příběhové pozadí &amp; Pravidla</h4>' +
-                '<p style="font-size:0.88rem; line-height:1.5; color:#cbd5e1; margin-bottom:0.9rem;">Rozlehlé říše propojují karavanní stezky a námořní konvoje. Jako představený kupeckého cechu nakupuješ levně hedvábí, jantar, vzácné koření a královská vína v přístavech a prodáváš je za násobky ve vnitrozemských metropolích s vysokou poptávkou.</p>' +
-                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">Herní mechaniky</h4>' +
+                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">' + mHStory + '</h4>' +
+                '<p style="font-size:0.88rem; line-height:1.5; color:#cbd5e1; margin-bottom:0.9rem;">' + mPStory + '</p>' +
+                '<h4 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.4rem;">' + mHMech + '</h4>' +
                 '<ul style="font-size:0.86rem; line-height:1.5; color:#cbd5e1; margin-left:1.2rem; margin-bottom:1.2rem;">' +
-                '  <li><strong>Živý trh s nabídkou a poptávkou:</strong> Jakmile kupec zaplaví město kořením, jeho cena klesá pro všechny!</li>' +
-                '  <li><strong>Výstavba cechovních skladů:</strong> Možnost stavět faktorie podél obchodních tras a vybírat celní poplatky od soupeřů.</li>' +
-                '  <li><strong>Piráti a loupeživí rytíři:</strong> Riziko na cestách snižované najímáním žoldnéřských eskort.</li>' +
+                '  <li>' + mLi1 + '</li>' +
+                '  <li>' + mLi2 + '</li>' +
+                '  <li>' + mLi3 + '</li>' +
                 '</ul>' +
                 '<div style="display:flex; gap:0.6rem; flex-wrap:wrap;">' +
-                '  <button class="btn-gold-lg" style="flex:1; padding:0.65rem;" onclick="PRS_App.subscribeGameNewsletter(\'merchants\')">🔔 Sledovat vývoj &amp; Získat přístup do Beta testu</button>' +
-                '  <button class="btn-secondary" style="padding:0.65rem 1rem;" onclick="PRS_App.closeGameCatalogPreview()">Zavřít náhled</button>' +
+                '  <button class="btn-gold-lg" style="flex:1; padding:0.65rem;" onclick="PRS_App.subscribeGameNewsletter(\'merchants\')">' + mBtnSub + '</button>' +
+                '  <button class="btn-secondary" style="padding:0.65rem 1rem;" onclick="PRS_App.closeGameCatalogPreview()">' + mBtnClose + '</button>' +
                 '</div>';
         }
     },
@@ -4322,10 +4360,17 @@ window.PRS_App = {
     },
 
     subscribeGameNewsletter: function (gameKey) {
-        var gName = (gameKey === "dragon_dungeon") ? "Dobytí Dračí Hory" : "Obchodníci Království";
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var gName = (gameKey === "dragon_dungeon")
+            ? (isEn ? "Conquest of Dragon Mountain" : "Dobytí Dračí Hory")
+            : (isEn ? "Merchants of the Realm" : "Obchodníci Království");
         if (window.PRS_Audio) window.PRS_Audio.playCoin();
-        KiDeskyDialog.alert("Děkujeme za tvůj zájem o hru <strong>" + gName + "</strong>!<br><br>Tvůj rytířský profil byl zaznamenán mezi přednostní zájemce pro nadcházející uzavřené Beta testování.", {
-            title: "Přihláška k testování přijata",
+        var alertMsg = isEn
+            ? ("Thank you for your interest in <strong>" + gName + "</strong>!<br><br>Your knight profile has been registered among priority applicants for the upcoming closed Beta testing.")
+            : ("Děkujeme za tvůj zájem o hru <strong>" + gName + "</strong>!<br><br>Tvůj rytířský profil byl zaznamenán mezi přednostní zájemce pro nadcházející uzavřené Beta testování.");
+        var alertTitle = isEn ? "Beta Testing Application Accepted" : "Přihláška k testování přijata";
+        KiDeskyDialog.alert(alertMsg, {
+            title: alertTitle,
             icon: "📜"
         });
     },
