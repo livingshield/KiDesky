@@ -10,6 +10,7 @@
         open: false,
         el: null,
         timer: null,
+        _seeking: false,
 
         init: function () {
             if (this.el || !document.body) return;
@@ -26,19 +27,23 @@
                 '    </div>' +
                 '    <button class="prs-mw-x" onclick="PRS_MusicWidget.toggle(false)" title="Sbalit">✕</button>' +
                 '  </div>' +
-                '  <div class="prs-mw-ctrl">' +
-                '    <button class="prs-mw-btn" onclick="PRS_MusicWidget.prev()" title="Předchozí skladba">⏮</button>' +
-                '    <button class="prs-mw-btn prs-mw-play" id="prs-mw-play" onclick="PRS_MusicWidget.playPause()" title="Přehrát / pozastavit hudbu">▶</button>' +
-                '    <button class="prs-mw-btn" onclick="PRS_MusicWidget.next()" title="Další skladba">⏭</button>' +
-                '    <button class="prs-mw-btn prs-mw-mute" id="prs-mw-mute" onclick="PRS_MusicWidget.toggleMute()" title="Zapnout / vypnout veškerý zvuk">🔊</button>' +
+                '  <div class="prs-mw-prog">' +
+                '    <input type="range" min="0" max="1000" value="0" id="prs-mw-seek" oninput="PRS_MusicWidget.onSeekInput(this.value)" onchange="PRS_MusicWidget.onSeekCommit(this.value)" title="' + (window.PRS_I18n ? window.PRS_I18n.t('music_widget.seek') : 'Posunout přehrávání') + '">' +
+                '    <div class="prs-mw-times"><span id="prs-mw-cur">0:00</span><span id="prs-mw-dur">--:--</span></div>' +
                 '  </div>' +
-                '  <label class="prs-mw-row"><span>🎵 Hudba</span>' +
-                '    <input type="range" min="0" max="100" id="prs-mw-bgm" oninput="PRS_MusicWidget.setBgm(this.value)"><b id="prs-mw-bgm-l">35%</b></label>' +
-                '  <label class="prs-mw-row"><span>🎲 Efekty</span>' +
-                '    <input type="range" min="0" max="100" id="prs-mw-sfx" oninput="PRS_MusicWidget.setSfx(this.value)"><b id="prs-mw-sfx-l">70%</b></label>' +
-                '  <button class="prs-mw-more" onclick="PRS_MusicWidget.toggle(false); PRS_App.openMusicPopup();">📜 Celý seznam skladeb…</button>' +
+                '  <div class="prs-mw-ctrl">' +
+                '    <button class="prs-mw-btn" onclick="PRS_MusicWidget.prev()" title="' + (window.PRS_I18n ? window.PRS_I18n.t('music_widget.prev') : 'Předchozí skladba') + '">⏮</button>' +
+                '    <button class="prs-mw-btn prs-mw-play" id="prs-mw-play" onclick="PRS_MusicWidget.playPause()" title="' + (window.PRS_I18n ? window.PRS_I18n.t('music_widget.play_pause') : 'Přehrát / pozastavit hudbu') + '">▶</button>' +
+                '    <button class="prs-mw-btn" onclick="PRS_MusicWidget.next()" title="' + (window.PRS_I18n ? window.PRS_I18n.t('music_widget.next') : 'Další skladba') + '">⏭</button>' +
+                '    <button class="prs-mw-btn prs-mw-mute" id="prs-mw-mute" onclick="PRS_MusicWidget.toggleMute()" title="' + (window.PRS_I18n ? window.PRS_I18n.t('music_widget.mute') : 'Zapnout / vypnout veškerý zvuk') + '">🔊</button>' +
+                '  </div>' +
+                '  <label class="prs-mw-row"><span>' + (window.PRS_I18n ? window.PRS_I18n.t('music_widget.music_label') : '🎵 Hudba') + '</span>' +
+'    <input type="range" min="0" max="100" id="prs-mw-bgm" oninput="PRS_MusicWidget.setBgm(this.value)"><b id="prs-mw-bgm-l">35%</b></label>' +
+'  <label class="prs-mw-row"><span>' + (window.PRS_I18n ? window.PRS_I18n.t('music_widget.sfx_label') : '🎲 Efekty') + '</span>' +
+'    <input type="range" min="0" max="100" id="prs-mw-sfx" oninput="PRS_MusicWidget.setSfx(this.value)"><b id="prs-mw-sfx-l">70%</b></label>' +
+'  <button class="prs-mw-more" onclick="PRS_MusicWidget.toggle(false); PRS_App.openMusicPopup();">' + (window.PRS_I18n ? window.PRS_I18n.t('music_widget.full_playlist') : '📜 Celý seznam skladeb…') + '</button>' +
                 '</div>' +
-                '<button id="prs-mw-fab" class="prs-mw-fab" onclick="PRS_MusicWidget.toggle()" title="Hudba a zvuky">' +
+                '<button id="prs-mw-fab" class="prs-mw-fab" onclick="PRS_MusicWidget.toggle()" title="' + (window.PRS_I18n ? window.PRS_I18n.t('music_widget.fab_title') : 'Hudba a zvuky') + '">' +
                 '  <span id="prs-mw-fab-icon">🎵</span>' +
                 '</button>';
             document.body.appendChild(root);
@@ -60,7 +65,7 @@
                 window.PRS_App._mwWrapped = true;
             }
             this.refresh();
-            this.timer = setInterval(function () { if (self.open) self.refresh(); }, 1000);
+            this.timer = setInterval(function () { if (self.open) self.refresh(); }, 500);
         },
 
         toggle: function (force) {
@@ -99,6 +104,27 @@
             var l = document.getElementById("prs-mw-sfx-l"); if (l) l.textContent = v + "%";
         },
 
+        onSeekInput: function (val) {
+            var A = this._A(); if (!A || !A.getPlaybackProgress) return;
+            var p = A.getPlaybackProgress();
+            if (!p.supported) return;
+            this._seeking = true;
+            var target = (Number(val) / 1000) * p.duration;
+            var c = document.getElementById("prs-mw-cur");
+            if (c) c.textContent = A.formatTime(target);
+        },
+
+        onSeekCommit: function (val) {
+            var A = this._A();
+            this._seeking = false;
+            if (!A || !A.getPlaybackProgress || !A.seekTo) return;
+            var p = A.getPlaybackProgress();
+            if (!p.supported) return;
+            var target = (Number(val) / 1000) * p.duration;
+            A.seekTo(target);
+            this.refresh();
+        },
+
         _syncApp: function () {
             if (window.PRS_App) {
                 if (window.PRS_App.renderMusicPlaylistOptions) window.PRS_App.renderMusicPlaylistOptions();
@@ -123,6 +149,26 @@
             set("prs-mw-sfx", function (e) { if (document.activeElement !== e) e.value = sv; });
             set("prs-mw-bgm-l", function (e) { e.textContent = bv + "%"; });
             set("prs-mw-sfx-l", function (e) { e.textContent = sv + "%"; });
+
+            if (A.getPlaybackProgress && A.formatTime) {
+                var prog = A.getPlaybackProgress();
+                set("prs-mw-seek", function (e) {
+                    e.disabled = !prog.supported;
+                    if (!prog.supported) {
+                        e.value = 0;
+                    } else if (!this._seeking) {
+                        e.value = Math.round((prog.currentTime / prog.duration) * 1000);
+                    }
+                }.bind(this));
+                set("prs-mw-cur", function (e) {
+                    if (prog.isProcedural) e.textContent = "∞";
+                    else if (!this._seeking) e.textContent = A.formatTime(prog.currentTime);
+                }.bind(this));
+                set("prs-mw-dur", function (e) {
+                    if (prog.isProcedural) e.textContent = (window.PRS_I18n ? window.PRS_I18n.t("music_widget.live") : "Živě");
+                    else e.textContent = prog.supported ? A.formatTime(prog.duration) : "--:--";
+                });
+            }
         },
 
         _injectStyles: function () {
@@ -143,6 +189,10 @@
                 ".prs-mw-title{font-weight:700;font-size:.88rem;color:var(--gold-light,#fde68a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}" +
                 ".prs-mw-author{font-size:.72rem;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}" +
                 ".prs-mw-x{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;}" +
+                ".prs-mw-prog{margin-bottom:.55rem;}" +
+                ".prs-mw-prog input[type='range']{width:100%;accent-color:var(--gold,#d4af37);cursor:pointer;margin:0;}" +
+                ".prs-mw-prog input[type='range']:disabled{opacity:.4;cursor:not-allowed;}" +
+                ".prs-mw-times{display:flex;justify-content:space-between;font-size:.7rem;color:#cbd5e1;font-variant-numeric:tabular-nums;margin-top:2px;}" +
                 ".prs-mw-ctrl{display:flex;gap:.4rem;justify-content:center;margin-bottom:.6rem;}" +
                 ".prs-mw-btn{flex:1;height:38px;border-radius:9px;border:1px solid rgba(212,175,55,.45);background:rgba(255,255,255,.07);color:#fde68a;font-size:1.05rem;cursor:pointer;}" +
                 ".prs-mw-btn:hover{background:rgba(212,175,55,.2);}" +

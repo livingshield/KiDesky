@@ -148,6 +148,24 @@ window.PRS_App = {
 
     activeMobileSheet: null,
 
+    getPlayerDisplayName: function (player) {
+        if (!player) return "";
+        var name = (typeof player === "string") ? player : (player.name || "");
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        if (isEn) {
+            name = name.replace(/\s*\(Ty\)$/i, " (You)").replace(/\s*\(PC\)$/i, " (AI)");
+            name = name.replace(/^Černý Baron/i, "Black Baron")
+                       .replace(/^Zikmund z Chovu/i, "Sigismund the Breeder")
+                       .replace(/^Kněžna Eliška/i, "Princess Eliška");
+        } else {
+            name = name.replace(/\s*\(You\)$/i, " (Ty)").replace(/\s*\(AI\)$/i, " (PC)");
+            name = name.replace(/^Black Baron/i, "Černý Baron")
+                       .replace(/^Sigismund the Breeder/i, "Zikmund z Chovu")
+                       .replace(/^Princess Eliška/i, "Kněžna Eliška");
+        }
+        return name;
+    },
+
     init: function () {
 
         if (this._initialized) return;
@@ -199,6 +217,11 @@ window.PRS_App = {
                     self.saveActiveGameAutosave();
                 }
             }
+        });
+
+        // Reakce na změnu jazyka hry (i18n)
+        window.addEventListener("prs:lang-change", function (e) {
+            self.onLanguageChanged(e && e.detail ? e.detail.language : null);
         });
 
         if (window.PRS_Audio) {
@@ -568,7 +591,7 @@ window.PRS_App = {
         var platform = this.detectPlatformForPwa();
         if (platform === 'pc' || platform === 'android') {
             if (this.showToast) {
-                this.showToast('⏳ Otevírám instalaci aplikace pro tvůj prohlížeč...', 'info');
+                this.showToast((window.PRS_I18n ? window.PRS_I18n.t("pwa.opening") : "⏳ Otevírám instalaci aplikace pro tvůj prohlížeč..."), 'info');
             }
             window._pwaInstallRequested = true;
 
@@ -620,7 +643,7 @@ window.PRS_App = {
         if (modal) {
             modal.style.display = 'flex';
         } else if (this.showToast) {
-            this.showToast('ℹ️ Pro instalaci na mobilu použij volbu „Přidat na plochu“ v nabídce prohlížeče.', 'info');
+            this.showToast((window.PRS_I18n ? window.PRS_I18n.t("pwa.mobile_hint") : "ℹ️ Pro instalaci na mobilu použij volbu „Přidat na plochu“ v nabídce prohlížeče."), 'info');
         }
     },
 
@@ -897,6 +920,82 @@ window.PRS_App = {
 
     },
 
+    onLanguageChanged: function (lang) {
+        if (window.PRS_I18n) {
+            window.PRS_I18n.translateDOM();
+            window.PRS_I18n.syncUi();
+        }
+
+        if (typeof this.renderAnnouncement === "function") {
+            try { this.renderAnnouncement(); } catch (raErr) {}
+        }
+        if (typeof this.refreshLobbySettingsSelects === "function") {
+            try { this.refreshLobbySettingsSelects(); } catch (lselErr) {}
+        }
+        if (typeof this.updateSavedGamesUI === "function") {
+            try { this.updateSavedGamesUI(); } catch (sErr) {}
+        }
+        if (typeof this.renderHeroVideosSection === "function") {
+            try { this.renderHeroVideosSection(); } catch (hvsErr) {}
+        }
+
+        if (typeof this.refreshBoardTemplateSelects === "function") {
+            try { this.refreshBoardTemplateSelects(); } catch (selErr) {}
+        }
+
+        // Pokud existuje renderer desky, překreslíme dominanty a nápisy
+        if (typeof this.renderBoard === "function") {
+            try { this.renderBoard(); } catch (bErr) {}
+        } else if (this.boardRenderer && typeof this.boardRenderer.renderBoard === "function") {
+            try { this.boardRenderer.renderBoard(); } catch (bErr) {}
+        } else if (window.PRS_Board && typeof window.PRS_Board.renderBoard === "function") {
+            try { window.PRS_Board.renderBoard(); } catch (bErr) {}
+        }
+
+        // Překreslíme lobby hráče a aktivní banner
+        if (typeof this.renderLobbyPlayers === "function") {
+            try { this.renderLobbyPlayers(); } catch (lErr) {}
+        }
+        var activeRound = document.getElementById("gamehall-active-round-info");
+        if (activeRound && this.state) {
+            var roundTxt = window.PRS_I18n ? window.PRS_I18n.t("lobby.active_game_info", { round: this.state.roundNumber || 1, count: this.state.players ? this.state.players.length : 4 }) : ("Kolo " + (this.state.roundNumber || 1) + " • " + (this.state.players ? this.state.players.length : 4) + " Rytířů");
+            activeRound.textContent = roundTxt;
+        }
+
+        // Okamžitě překreslíme herní HUD, detail pole a spodní dashboard
+        if (this.state) {
+            try {
+                if (typeof this.renderTopPlayersHud === "function") this.renderTopPlayersHud();
+                if (typeof this.renderHeartTrack === "function") this.renderHeartTrack();
+                if (typeof this.renderLowerKnightDetail === "function") this.renderLowerKnightDetail();
+                if (typeof this.updateHudTurnInfo === "function") this.updateHudTurnInfo();
+                if (typeof this.renderStandingTileDetail === "function") this.renderStandingTileDetail();
+                if (typeof this.renderActivePlayerPanel === "function") this.renderActivePlayerPanel();
+                if (typeof this.renderActionPanel === "function") this.renderActionPanel();
+                if (typeof this.renderStandingNodeCard === "function") this.renderStandingNodeCard();
+                if (typeof this.updateMobileDock === "function") this.updateMobileDock();
+                if (typeof this.renderKnightEmotesHud === "function") this.renderKnightEmotesHud();
+                if (typeof this.renderCardDecksRow === "function") this.renderCardDecksRow();
+                if (typeof this.syncSettingsSoundLabel === "function") this.syncSettingsSoundLabel();
+                if (typeof this.syncSettingsDeviceLabel === "function") this.syncSettingsDeviceLabel();
+            } catch (e) {
+                console.warn("[PRS_App] Chyba při přerenderování HUDu po změně jazyka:", e);
+            }
+        }
+
+        // Pokud je k dispozici katalog/pravidla, přerenderujeme tabulky a galerie
+        if (window.PRS_Catalog) {
+            try {
+                if (typeof window.PRS_Catalog.renderRulesItemsTable === "function") window.PRS_Catalog.renderRulesItemsTable();
+                if (typeof window.PRS_Catalog.renderBestiary === "function") window.PRS_Catalog.renderBestiary();
+                if (typeof window.PRS_Catalog.renderCastlesGallery === "function") window.PRS_Catalog.renderCastlesGallery();
+                if (typeof window.PRS_Catalog.renderTrophiesHall === "function") window.PRS_Catalog.renderTrophiesHall();
+            } catch (catErr) {
+                console.warn("[PRS_App] Chyba při přerenderování katalogu po změně jazyka:", catErr);
+            }
+        }
+    },
+
     // --- HUDEBNÍ PŘEHRÁVAČ & BGM KONTROLER ---,
 
     toggleMusicPopup: function () {
@@ -931,6 +1030,20 @@ window.PRS_App = {
 
         this.updateMusicUI();
 
+        if (this._musicModalTimer) clearInterval(this._musicModalTimer);
+
+        var self = this;
+
+        this._musicModalTimer = setInterval(function () {
+
+            var m = document.getElementById("prs-music-modal");
+
+            if (m && m.style.display === "flex") self.updateMusicProgressUI();
+
+            else { clearInterval(self._musicModalTimer); self._musicModalTimer = null; }
+
+        }, 500);
+
     },
 
     closeMusicPopup: function () {
@@ -938,6 +1051,14 @@ window.PRS_App = {
         var modal = document.getElementById("prs-music-modal");
 
         if (modal) modal.style.display = "none";
+
+        if (this._musicModalTimer) {
+
+            clearInterval(this._musicModalTimer);
+
+            this._musicModalTimer = null;
+
+        }
 
     },
 
@@ -1134,6 +1255,94 @@ window.PRS_App = {
         if (sfxSlider) sfxSlider.value = Math.round(window.PRS_Audio.sfxVolume * 100);
 
         if (sfxLbl) sfxLbl.textContent = Math.round(window.PRS_Audio.sfxVolume * 100) + "%";
+
+        this.updateMusicProgressUI();
+
+    },
+
+    _musicSeeking: false,
+
+    handleMusicSeekInput: function (val) {
+
+        if (!window.PRS_Audio || !window.PRS_Audio.getPlaybackProgress) return;
+
+        var prog = window.PRS_Audio.getPlaybackProgress();
+
+        if (!prog.supported) return;
+
+        this._musicSeeking = true;
+
+        var target = (Number(val) / 1000) * prog.duration;
+
+        var curEl = document.getElementById("music-time-cur");
+
+        if (curEl) curEl.textContent = window.PRS_Audio.formatTime(target);
+
+    },
+
+    handleMusicSeekCommit: function (val) {
+
+        this._musicSeeking = false;
+
+        if (!window.PRS_Audio || !window.PRS_Audio.getPlaybackProgress || !window.PRS_Audio.seekTo) return;
+
+        var prog = window.PRS_Audio.getPlaybackProgress();
+
+        if (!prog.supported) return;
+
+        var target = (Number(val) / 1000) * prog.duration;
+
+        window.PRS_Audio.seekTo(target);
+
+        this.updateMusicProgressUI();
+
+        if (window.PRS_MusicWidget && window.PRS_MusicWidget.refresh) window.PRS_MusicWidget.refresh();
+
+    },
+
+    updateMusicProgressUI: function () {
+
+        if (!window.PRS_Audio || !window.PRS_Audio.getPlaybackProgress) return;
+
+        var prog = window.PRS_Audio.getPlaybackProgress();
+
+        var slider = document.getElementById("music-seek-slider");
+
+        var curEl = document.getElementById("music-time-cur");
+
+        var durEl = document.getElementById("music-time-dur");
+
+        if (slider) {
+
+            slider.disabled = !prog.supported;
+
+            if (!prog.supported) {
+
+                slider.value = 0;
+
+            } else if (!this._musicSeeking) {
+
+                slider.value = Math.round((prog.currentTime / prog.duration) * 1000);
+
+            }
+
+        }
+
+        if (curEl) {
+
+            if (prog.isProcedural) curEl.textContent = "∞";
+
+            else if (!this._musicSeeking) curEl.textContent = window.PRS_Audio.formatTime(prog.currentTime);
+
+        }
+
+        if (durEl) {
+
+            if (prog.isProcedural) durEl.textContent = "Živě";
+
+            else durEl.textContent = prog.supported ? window.PRS_Audio.formatTime(prog.duration) : "--:--";
+
+        }
 
     },
 
@@ -1654,7 +1863,8 @@ window.PRS_App = {
             }
 
             var isLiked = !!(this._likedVideoIds && this._likedVideoIds[v.id]);
-            var badgeText = (i === 0) ? "🎬 Příběhové intro" : "⚔️ Hratelnost & Pravidla";
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var badgeText = (i === 0) ? (isEn ? "🎬 Story Intro" : "🎬 Příběhové intro") : (isEn ? "⚔️ Gameplay & Rules" : "⚔️ Hratelnost & Pravidla");
 
             html.push('<div class="lp-video-cinema-card">');
             html.push('  <div class="lp-video-card-header">');
@@ -1682,8 +1892,9 @@ window.PRS_App = {
             html.push('    </button>');
 
             if (isYt && ytid) {
-                html.push('    <a href="https://www.youtube.com/watch?v=' + ytid + '" target="_blank" rel="noopener noreferrer" class="lp-video-btn-action" title="Přehrát video na YouTube">');
-                html.push('      <span>📺 Přehrát na YouTube</span>');
+                html.push('    <a href="https://www.youtube.com/watch?v=' + ytid + '" target="_blank" rel="noopener noreferrer" class="lp-video-btn-action" title="' + (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en" ? "Play video on YouTube" : "Přehrát video na YouTube") + '">');
+                var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+                html.push('      <span>📺 ' + (isEn ? "Play on YouTube" : "Přehrát na YouTube") + '</span>');
                 html.push('    </a>');
             }
             html.push('  </div>');
@@ -1732,32 +1943,46 @@ window.PRS_App = {
     },
 
     loadAnnouncement: function () {
+        var self = this;
         fetch("api.ashx?action=get-announcement")
             .then(function (r) { return r.json(); })
             .then(function (res) {
                 if (res && res.ok && res.announcement && res.announcement.message) {
-                    var banner = document.getElementById("topbar-announcement-banner");
-                    var txt = document.getElementById("announcement-message-text");
-                    var lnk = document.getElementById("announcement-link-btn");
-                    if (banner && txt) {
-                        txt.textContent = res.announcement.message;
-                        if (res.announcement.linkUrl) {
-                            lnk.href = res.announcement.linkUrl;
-                            lnk.style.display = "inline-flex";
-                        } else {
-                            lnk.style.display = "none";
-                        }
-                        banner.dataset.hasMessage = "true";
-                        // Královský posel nesmí být ve hře vůbec
-                        if (self.activeTab !== "board") {
-                            banner.style.display = "flex";
-                        } else {
-                            banner.style.display = "none";
-                        }
-                    }
+                    self._lastAnnouncement = res.announcement;
+                    self.renderAnnouncement();
                 }
             })
             .catch(function () { });
+    },
+
+    renderAnnouncement: function () {
+        if (!this._lastAnnouncement) return;
+        var banner = document.getElementById("topbar-announcement-banner");
+        var txt = document.getElementById("announcement-message-text");
+        var lnk = document.getElementById("announcement-link-btn");
+        if (banner && txt) {
+            var msg = this._lastAnnouncement.message;
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            if (isEn && (msg.indexOf("Vítejte v království KiDesky") !== -1 || msg.indexOf("Otestujte své rytířské ctnosti") !== -1)) {
+                msg = window.PRS_I18n ? window.PRS_I18n.t("announcement.text") : "Welcome to the realm of KiDesky: The Princess's Heart! Test your knightly virtues in royal tournaments.";
+                if (this._lastAnnouncement.linkUrl) {
+                    msg = msg.replace(/\s*(Learn more|More info|Více informací)\s*(&rarr;|→)?\s*$/i, "");
+                }
+            }
+            txt.textContent = msg;
+            if (this._lastAnnouncement.linkUrl) {
+                lnk.href = this._lastAnnouncement.linkUrl;
+                lnk.style.display = "inline-flex";
+            } else {
+                lnk.style.display = "none";
+            }
+            banner.dataset.hasMessage = "true";
+            if (this.activeTab !== "board") {
+                banner.style.display = "flex";
+            } else {
+                banner.style.display = "none";
+            }
+        }
     },
 
     dismissAnnouncement: function () {
@@ -1829,11 +2054,11 @@ window.PRS_App = {
 
         // 4. Harmonická pětice medailonků na královské pouti
         var questTiles = [
-            { rx: 0.12, ry: 0.58, label: "Start", color: "#10b981", icon: "🚩", src: "assets/tiles/start.png", story: "🚩 1. Startovní rozcestí: Rytíř vyráží s 10 000 zlaťáky do světa" },
-            { rx: 0.31, ry: 0.40, label: "Chov koní", color: "#f59e0b", icon: "🐎", src: "assets/tiles/kun.jpg", story: "🐎 2. Chov koní & stáje: Budování panství, zvířata a výběr nájmů" },
-            { rx: 0.50, ry: 0.58, label: "Hrad & Turnaj", color: "#0ea5e9", icon: "🏰", src: "assets/tiles/castle.png", story: "🏰 3. Královský turnaj: Klání mistrů ve 4 královských ctnostech" },
-            { rx: 0.69, ry: 0.40, label: "Dračí sluj", color: "#ef4444", icon: "🐉", src: "assets/tiles/u3_drak.jpg", story: "🐉 4. Dračí sluj: Epický souboj s ohnivým drakem o slavný poklad" },
-            { rx: 0.88, ry: 0.58, label: "Slavnosti 💖", color: "#ec4899", icon: "💖", src: "assets/tiles/festival.jpg", story: "💖 5. Královské slavnosti: Zisk 30 Princezniných srdcí a vítězství!" }
+            { rx: 0.12, ry: 0.58, label: "Start", labelEn: "Start", color: "#10b981", icon: "🚩", src: "assets/tiles/start.png", story: "🚩 1. Startovní rozcestí: Rytíř vyráží s 10 000 zlaťáky do světa", storyEn: "🚩 1. Crossroads Start: Knight departs with 10,000 gold into the realm" },
+            { rx: 0.31, ry: 0.40, label: "Chov koní", labelEn: "Horse Breeding", color: "#f59e0b", icon: "🐎", src: "assets/tiles/kun.jpg", story: "🐎 2. Chov koní & stáje: Budování panství, zvířata a výběr nájmů", storyEn: "🐎 2. Horse Breeding & Stables: Estate building, animals & rent collection" },
+            { rx: 0.50, ry: 0.58, label: "Hrad & Turnaj", labelEn: "Castle & Joust", color: "#0ea5e9", icon: "🏰", src: "assets/tiles/castle.png", story: "🏰 3. Královský turnaj: Klání mistrů ve 4 královských ctnostech", storyEn: "🏰 3. Royal Tournament: Clash of masters in the 4 knightly virtues" },
+            { rx: 0.69, ry: 0.40, label: "Dračí sluj", labelEn: "Dragon Lair", color: "#ef4444", icon: "🐉", src: "assets/tiles/u3_drak.jpg", story: "🐉 4. Dračí sluj: Epický souboj s ohnivým drakem o slavný poklad", storyEn: "🐉 4. Dragon's Lair: Epic battle with the fire dragon for legendary loot" },
+            { rx: 0.88, ry: 0.58, label: "Slavnosti 💖", labelEn: "Celebrations 💖", color: "#ec4899", icon: "💖", src: "assets/tiles/festival.jpg", story: "💖 5. Královské slavnosti: Zisk 30 Princezniných srdcí a vítězství!", storyEn: "💖 5. Royal Celebrations: Claiming 30 Princess Hearts and victory!" }
         ];
 
         for (var i = 0; i < questTiles.length; i++) {
@@ -2110,7 +2335,8 @@ window.PRS_App = {
                     ctx.font = "600 11px Outfit, sans-serif";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
-                    ctx.fillText(tile.label, tx, labelY + labelH * 0.5);
+                    var canvasTileLbl = (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en") ? (tile.labelEn || tile.label) : tile.label;
+                ctx.fillText(canvasTileLbl, tx, labelY + labelH * 0.5);
                     ctx.restore();
                 }
 
@@ -2122,7 +2348,8 @@ window.PRS_App = {
                 if (currSeg !== lastStoryIdx && questTiles[currSeg]) {
                     lastStoryIdx = currSeg;
                     if (tickerEl) {
-                        tickerEl.textContent = questTiles[currSeg].story;
+                        var isEnStory = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+                        tickerEl.textContent = isEnStory ? (questTiles[currSeg].storyEn || questTiles[currSeg].story) : questTiles[currSeg].story;
                     }
                 }
 
@@ -2745,6 +2972,7 @@ window.PRS_App = {
     },
 
     enterGameHall: function () {
+        if (this.refreshLobbySettingsSelects) this.refreshLobbySettingsSelects();
         this.switchTab("lobby");
         this.switchGameHallRoom("custom");
         try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { }
@@ -2905,24 +3133,174 @@ window.PRS_App = {
             var hasActiveGame = (this.hasGameStarted === true && this.state !== null);
             activeBanner.style.display = hasActiveGame ? "flex" : "none";
             if (activeRound && this.state) {
-                activeRound.textContent = "Kolo " + (this.state.roundNumber || 1) + " • " + (this.state.players ? this.state.players.length : 4) + " Rytířů";
+                var roundTxt = window.PRS_I18n ? window.PRS_I18n.t("lobby.active_game_info", { round: this.state.roundNumber || 1, count: this.state.players ? this.state.players.length : 4 }) : ("Kolo " + (this.state.roundNumber || 1) + " • " + (this.state.players ? this.state.players.length : 4) + " Rytířů");
+                activeRound.textContent = roundTxt;
             }
         }
 
         // 6. Tlačítko pro založení online místnosti (Host se může připojit, ale nemůže ji založit)
         var createRoomBtn = document.getElementById("btn-create-online-room");
         if (createRoomBtn) {
+            var isEnNow = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             if (isGuest) {
-                createRoomBtn.innerHTML = "🔒 Založit novou Online místnost (vyžaduje přihlášení)";
+                createRoomBtn.innerHTML = isEnNow ? "🔒 Create New Online Room (Sign-in required)" : "🔒 Založit novou Online místnost (vyžaduje přihlášení)";
                 createRoomBtn.style.borderColor = "rgba(212,175,55,0.45)";
                 createRoomBtn.style.color = "var(--gold-light)";
-                createRoomBtn.title = "Jako Host se můžeš připojit ke stolu kamaráda přes 6místný kód. Pro založení nového stolu se přihlas.";
+                createRoomBtn.title = isEnNow ? "As a Guest you can join a friend's table via 6-digit code. Sign in to host a table." : "Jako Host se můžeš připojit ke stolu kamaráda přes 6místný kód. Pro založení nového stolu se přihlas.";
             } else {
-                createRoomBtn.innerHTML = "☁️ Založit novou Online místnost a získat kód pro přátele";
+                createRoomBtn.innerHTML = isEnNow ? "☁️ Create New Online Room & get friend invite code" : "☁️ Založit novou Online místnost a získat kód pro přátele";
                 createRoomBtn.style.borderColor = "#38bdf8";
                 createRoomBtn.style.color = "#bae6fd";
-                createRoomBtn.title = "Založí novou online hru a vygeneruje 6místný kód pro přátele";
+                createRoomBtn.title = isEnNow ? "Creates a new online game and generates a 6-digit invite code" : "Založí novou online hru a vygeneruje 6místný kód pro přátele";
             }
+        }
+
+        // 7. Rodový erb rytíře v herně
+        this.updateGameHallCrestUI();
+
+        // 8. Aktualizace posledních rozehraných / uložených výprav
+        if (typeof this.updateSavedGamesUI === "function") {
+            this.updateSavedGamesUI();
+        }
+        if (this.activeGameHallRoom === "saves" && typeof this.renderSavedGamesList === "function") {
+            this.renderSavedGamesList();
+        }
+    },
+
+    updateGameHallCrestUI: function () {
+        var crestInfo = this.getPlayerCrest();
+        var crestWrap = document.getElementById("gamehall-crest-wrap");
+        if (crestWrap && window.PRS_renderCrestBadgeHTML) {
+            crestWrap.innerHTML = window.PRS_renderCrestBadgeHTML(crestInfo.crestId, crestInfo.tincture, 34);
+        }
+        var setCrestPreview = document.getElementById("settings-crest-preview");
+        if (setCrestPreview && window.PRS_renderCrestBadgeHTML) {
+            var cObj = window.PRS_getCrestById(crestInfo.crestId);
+            var tObj = window.PRS_getTinctureByKey(crestInfo.tincture);
+            setCrestPreview.innerHTML = window.PRS_renderCrestBadgeHTML(crestInfo.crestId, crestInfo.tincture, 44) +
+                '<div style="margin-left:0.5rem;"><div style="font-weight:700; color:' + tObj.text + '; font-size:0.92rem;">' + this.escapeHtml(cObj.name) + '</div>' +
+                '<div style="font-size:0.75rem; color:#cbd5e1; font-style:italic;">„' + this.escapeHtml(cObj.motto) + '“</div></div>';
+        }
+    },
+
+    getPlayerCrest: function () {
+        var crestId = "lion";
+        var tincture = "gold";
+        try {
+            crestId = localStorage.getItem("kidesky_player_crest_id") || "lion";
+            tincture = localStorage.getItem("kidesky_player_crest_tincture") || "gold";
+        } catch (e) { }
+        return { crestId: crestId, tincture: tincture };
+    },
+
+    setPlayerCrest: function (crestId, tincture) {
+        crestId = crestId || "lion";
+        tincture = tincture || "gold";
+        try {
+            localStorage.setItem("kidesky_player_crest_id", crestId);
+            localStorage.setItem("kidesky_player_crest_tincture", tincture);
+        } catch (e) { }
+        this.updateGameHallCrestUI();
+        if (this.state && this.state.players) {
+            var myIdx = (typeof this.myOnlinePlayerIndex === "number") ? this.myOnlinePlayerIndex : 0;
+            if (this.state.players[myIdx]) {
+                this.state.players[myIdx].crestId = crestId;
+                this.state.players[myIdx].crestColor = tincture;
+            }
+        }
+        if (this.lobbyPlayers && this.lobbyPlayers[0]) {
+            this.lobbyPlayers[0].crestId = crestId;
+            this.lobbyPlayers[0].crestColor = tincture;
+        }
+    },
+
+    openCrestPickerModal: function () {
+        var modal = document.getElementById("crest-picker-modal");
+        if (!modal) return;
+        var cur = this.getPlayerCrest();
+        this._pickerSelectedCrest = cur.crestId;
+        this._pickerSelectedTincture = cur.tincture;
+        this.renderCrestPickerModal();
+        modal.style.display = "flex";
+        this.updateBodyModalClass();
+    },
+
+    closeCrestPickerModal: function () {
+        var modal = document.getElementById("crest-picker-modal");
+        if (modal) modal.style.display = "none";
+        this.updateBodyModalClass();
+    },
+
+    selectCrestInPicker: function (crestId) {
+        this._pickerSelectedCrest = crestId;
+        this.renderCrestPickerModal();
+    },
+
+    selectTinctureInPicker: function (tKey) {
+        this._pickerSelectedTincture = tKey;
+        this.renderCrestPickerModal();
+    },
+
+    confirmCrestSelection: function () {
+        var cId = this._pickerSelectedCrest || "lion";
+        var tKey = this._pickerSelectedTincture || "gold";
+        this.setPlayerCrest(cId, tKey);
+        this.closeCrestPickerModal();
+        if (window.PRS_Audio && typeof window.PRS_Audio.playItem === "function") {
+            window.PRS_Audio.playItem();
+        }
+    },
+
+    renderCrestPickerModal: function () {
+        var grid = document.getElementById("crest-picker-grid");
+        var tincturesWrap = document.getElementById("crest-tinctures-strip");
+        var previewWrap = document.getElementById("crest-live-preview-box");
+        if (!grid || !window.PRS_HERALDRY_CATALOG) return;
+
+        var curCrest = this._pickerSelectedCrest || "lion";
+        var curTincture = this._pickerSelectedTincture || "gold";
+
+        // 1. Grid of crests
+        var htmlGrid = [];
+        for (var i = 0; i < window.PRS_HERALDRY_CATALOG.length; i++) {
+            var cr = window.PRS_HERALDRY_CATALOG[i];
+            var isSel = (cr.id === curCrest);
+            htmlGrid.push(
+                '<div class="crest-card-opt ' + (isSel ? 'selected' : '') + '" onclick="PRS_App.selectCrestInPicker(\'' + cr.id + '\')">' +
+                '  <div style="font-size:2rem; margin-bottom:2px;">' + cr.icon + '</div>' +
+                '  <div style="font-family:\'Cinzel\',serif; font-size:0.82rem; font-weight:700; color:' + (isSel ? '#fef08a' : '#e2e8f0') + ';">' + this.escapeHtml(cr.name) + '</div>' +
+                '  <div style="font-size:0.68rem; color:#94a3b8; line-height:1.2;">' + this.escapeHtml(cr.motto) + '</div>' +
+                '</div>'
+            );
+        }
+        grid.innerHTML = htmlGrid.join("\n");
+
+        // 2. Tinctures
+        if (tincturesWrap && window.PRS_HERALDRY_TINCTURES) {
+            var htmlTinc = [];
+            for (var t = 0; t < window.PRS_HERALDRY_TINCTURES.length; t++) {
+                var tc = window.PRS_HERALDRY_TINCTURES[t];
+                var isTSel = (tc.key === curTincture);
+                htmlTinc.push(
+                    '<div class="crest-tincture-swatch ' + (isTSel ? 'selected' : '') + '" style="background:' + tc.bg + '; border-color:' + (isTSel ? '#fff' : tc.border) + ';" onclick="PRS_App.selectTinctureInPicker(\'' + tc.key + '\')" title="' + this.escapeHtml(tc.name) + '"></div>'
+                );
+            }
+            tincturesWrap.innerHTML = htmlTinc.join("\n");
+        }
+
+        // 3. Live preview
+        if (previewWrap && window.PRS_renderCrestBadgeHTML) {
+            var cObj = window.PRS_getCrestById(curCrest);
+            var tObj = window.PRS_getTinctureByKey(curTincture);
+            previewWrap.innerHTML =
+                '<div style="display:flex; align-items:center; gap:1.1rem; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.3); border-radius:10px; padding:0.75rem 1.15rem;">' +
+                '  ' + window.PRS_renderCrestBadgeHTML(curCrest, curTincture, 52) +
+                '  <div>' +
+                '    <div style="font-family:\'Cinzel\',serif; font-size:1.1rem; font-weight:700; color:' + tObj.text + ';">' + this.escapeHtml(cObj.name) + '</div>' +
+                '    <div style="font-size:0.8rem; color:#fde68a; font-style:italic; margin-top:2px;">„' + this.escapeHtml(cObj.motto) + '“</div>' +
+                '    <div style="font-size:0.72rem; color:#94a3b8; margin-top:3px;">Heraldická tinktura: <strong>' + this.escapeHtml(tObj.name) + '</strong></div>' +
+                '  </div>' +
+                '</div>';
         }
     },
 
@@ -2931,7 +3309,7 @@ window.PRS_App = {
         if (window.PRS_Audio && window.PRS_Audio.playNotice) window.PRS_Audio.playNotice();
         this.closeAuthModal();
         this.updateUserUI();
-        alert("Byl jsi úspěšně odhlášen. Nyní pokračuješ volně v režimu Hosta.");
+        var outMsg = window.PRS_I18n ? window.PRS_I18n.t("auth.logout_success") : "Byl jsi úspěšně odhlášen. Nyní pokračuješ volně v režimu Hosta."; if (window.KiDeskyToast) { KiDeskyToast.show(outMsg, "info"); } else { alert(outMsg); }
     },
 
     showAuthLoginForm: function () {
@@ -2987,7 +3365,18 @@ window.PRS_App = {
             var pawnImg = pawnObj ? pawnObj.img : "assets/pawns/pawn_knight_valiant.png";
             var pawnTitle = pawnObj ? pawnObj.name : "Zvolit figurku";
 
-            var placeholder = (i === 0) ? ' placeholder="Tvoje rytířská přezdívka (např. Sir Gawain)" title="Zadej svou herní přezdívku (jméno rytíře u stolu)"' : ' placeholder="Jméno hráče / PC bota"';
+            var optHuman = window.PRS_I18n ? window.PRS_I18n.t("lobby.player_types.human") : "👤 Člověk (u stolu)";
+            var optAggressive = window.PRS_I18n ? window.PRS_I18n.t("lobby.player_types.bot_aggressive") : "⚔️ PC Válečník (Lovec draků)";
+            var optBreeder = window.PRS_I18n ? window.PRS_I18n.t("lobby.player_types.bot_breeder") : "🐎 PC Chovatel (Sady zvířat)";
+            var optNoble = window.PRS_I18n ? window.PRS_I18n.t("lobby.player_types.bot_noble") : "👑 PC Dvořan (Diplomacie & Ples)";
+            var optBalanced = window.PRS_I18n ? window.PRS_I18n.t("lobby.player_types.bot_balanced") : "⚖️ PC Rytíř (Vyvážený)";
+            var optEasy = window.PRS_I18n ? window.PRS_I18n.t("lobby.player_types.bot_easy") : "🌱 PC Panoš (Opatrný)";
+
+            var pDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p) : p.name;
+
+            var placeholder = (i === 0) 
+                ? (' placeholder="' + (window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en' ? 'Your knight nickname (e.g. Sir Gawain)' : 'Tvoje rytířská přezdívka (např. Sir Gawain)') + '" title="' + (window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en' ? 'Enter your knight name at the table' : 'Zadej svou herní přezdívku (jméno rytíře u stolu)') + '"')
+                : (' placeholder="' + (window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en' ? 'Player name / AI bot' : 'Jméno hráče / PC bota') + '"');
 
             html += '<div class="lobby-player-row">' +
 
@@ -2996,21 +3385,21 @@ window.PRS_App = {
                 '  <span style="position:absolute; bottom:-3px; right:-3px; background:#1e130c; border:1px solid #ffd86b; border-radius:50%; width:14px; height:14px; font-size:8px; display:flex; align-items:center; justify-content:center; color:#ffd86b;">🎭</span>' +
                 '</button>' +
 
-                '<input type="text" class="prs-input" value="' + this.escapeHtml(p.name) + '"' + placeholder + ' oninput="PRS_App.updateLobbyPlayerName(' + i + ', this.value)" onchange="PRS_App.updateLobbyPlayerName(' + i + ', this.value)" />' +
+                '<input type="text" class="prs-input" value="' + this.escapeHtml(pDisplayName) + '"' + placeholder + ' oninput="PRS_App.updateLobbyPlayerName(' + i + ', this.value)" onchange="PRS_App.updateLobbyPlayerName(' + i + ', this.value)" />' +
 
                 '<select class="prs-select" onchange="PRS_App.updateLobbyPlayerType(' + i + ', this.value)">' +
 
-                '  <option value="Human" ' + (p.type === "Human" ? "selected" : "") + '>👤 Člověk (u stolu)</option>' +
+                '  <option value="Human" ' + (p.type === "Human" ? "selected" : "") + '>' + optHuman + '</option>' +
 
-                '  <option value="Bot_Aggressive" ' + (p.type === "Bot_Aggressive" ? "selected" : "") + '>⚔️ PC Válečník (Lovec draků)</option>' +
+                '  <option value="Bot_Aggressive" ' + (p.type === "Bot_Aggressive" ? "selected" : "") + '>' + optAggressive + '</option>' +
 
-                '  <option value="Bot_Breeder" ' + (p.type === "Bot_Breeder" ? "selected" : "") + '>🐎 PC Chovatel (Sady zvířat)</option>' +
+                '  <option value="Bot_Breeder" ' + (p.type === "Bot_Breeder" ? "selected" : "") + '>' + optBreeder + '</option>' +
 
-                '  <option value="Bot_Noble" ' + (p.type === "Bot_Noble" ? "selected" : "") + '>👑 PC Dvořan (Diplomacie & Ples)</option>' +
+                '  <option value="Bot_Noble" ' + (p.type === "Bot_Noble" ? "selected" : "") + '>' + optNoble + '</option>' +
 
-                '  <option value="Bot_Balanced" ' + (p.type === "Bot_Balanced" ? "selected" : "") + '>⚖️ PC Rytíř (Vyvážený)</option>' +
+                '  <option value="Bot_Balanced" ' + (p.type === "Bot_Balanced" ? "selected" : "") + '>' + optBalanced + '</option>' +
 
-                '  <option value="Bot_Easy" ' + (p.type === "Bot_Easy" ? "selected" : "") + '>🌱 PC Panoš (Opatrný)</option>' +
+                '  <option value="Bot_Easy" ' + (p.type === "Bot_Easy" ? "selected" : "") + '>' + optEasy + '</option>' +
 
                 '</select>' +
 
@@ -3477,6 +3866,160 @@ window.PRS_App = {
         if (m) m.style.display = "none";
     },
 
+    
+    getItemDisplayName: function (it) {
+        if (!it) return "";
+        var id = (typeof it === "string") ? it : (it.id || it.code || "");
+        if (window.PRS_I18n) {
+            if (id) {
+                var trItem = window.PRS_I18n.t("items." + id + ".name");
+                if (trItem && trItem !== ("items." + id + ".name")) return trItem;
+                var trTrophy = window.PRS_I18n.t("trophies." + id + ".name");
+                if (trTrophy && trTrophy !== ("trophies." + id + ".name")) return trTrophy;
+            }
+        }
+        return (typeof it === "object" && it.name) ? it.name : id;
+    },
+
+    getNodeDisplayName: function (node) {
+        if (!node) return "";
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        if (!isEn) return node.name || "";
+
+        var type = node.type;
+        var name = node.name || "";
+        var code = node.code || "";
+
+        if (type === "START" || code === "START") {
+            return "Royal Castle Start";
+        }
+
+        if (type === "ANIMAL") {
+            var setId = node.setId || (code && code.match(/\d+/) ? parseInt(code.match(/\d+/)[0], 10) : 1);
+            var subtype = node.subtype || "";
+            var animalType = (subtype === "horse" || code.startsWith("K")) ? "Horse" : ((subtype === "dog" || code.startsWith("P")) ? "Dog" : "Falcon");
+            var breedsEn = {
+                1: { horse: "Dapple Gray", falcon: "Kestrel", dog: "Pointer" },
+                2: { horse: "Bay Horse", falcon: "Sparrowhawk", dog: "Beagle" },
+                3: { horse: "Black Steed", falcon: "Hobby", dog: "Greyhound" },
+                4: { horse: "Chestnut", falcon: "Saker", dog: "Bloodhound" },
+                5: { horse: "White Steed", falcon: "Royal Hobby", dog: "Tracker" },
+                6: { horse: "Dun Horse", falcon: "Peregrine Falcon", dog: "Wolfhound" },
+                7: { horse: "Dappled Gray", falcon: "Kite", dog: "Great Dane" },
+                8: { horse: "Friesian", falcon: "Osprey", dog: "Hound King" },
+                9: { horse: "Andalusian", falcon: "Goshawk", dog: "Hunting Hound" },
+                10: { horse: "Warhorse", falcon: "Royal Falcon", dog: "Royal Hound" },
+                11: { horse: "Star Stallion", falcon: "White Saker", dog: "Silver Pointer" },
+                12: { horse: "Sovereign Steed", falcon: "Phoenix Falcon", dog: "Golden Hound" },
+                13: { horse: "Golden Palomino", falcon: "Golden Eagle", dog: "Northern Wolfhound" },
+                14: { horse: "Shadow Steed", falcon: "Night Falcon", dog: "Castle Gargoyle" }
+            };
+            var bInfo = breedsEn[setId] || breedsEn[1];
+            var breedStr = (subtype === "horse" || code.startsWith("K")) ? bInfo.horse : ((subtype === "dog" || code.startsWith("P")) ? bInfo.dog : bInfo.falcon);
+            return animalType + " " + setId + " (" + breedStr + ")";
+        }
+
+        if (type === "VILLAGE") {
+            var vMap = {
+                "Králova Lhota": "King's Lhota", "Lhotka": "Little Lhota", "Březová": "Birchwood", "Dubina": "Oak Vale",
+                "Skalice": "Rockford", "Meziříčí": "Riverbend", "Slunečná": "Sunny", "Podhradí": "Castlefold",
+                "Větrná": "Windy", "Zlatá Olešnice": "Golden Alder", "Rovensko": "Flatland", "Chlumec": "Hillcrest",
+                "Lipnice": "Lindendale", "Studánka": "Springfield", "Osek": "Ashwood", "Hvozd": "Deep Forest",
+                "Kamenice": "Stoney", "Jabloňov": "Applegrove", "Borová": "Pinewood", "Blatná": "Marshfield",
+                "Dobříš": "Goodhaven", "Rožmitál": "Rosendale", "Třeboňsko": "Lakehurst", "Bystřička": "Brookside"
+            };
+            var match = name.match(/Vesnice\s+(\d+)\s*\(([^)]+)\)/);
+            if (match) {
+                var num = match[1];
+                var czName = match[2];
+                var enName = vMap[czName] || czName;
+                return "Village " + num + " (" + enName + ")";
+            }
+            return name.replace(/^Vesnice/i, "Village");
+        }
+
+        if (type === "TOWN") {
+            var tMap = {
+                "Královo Pole": "King's Field", "Stříbratec": "Silverton", "Zlatov": "Goldtown", "Mečov": "Swordhaven",
+                "Železný Brod": "Ironford", "Korunní Město": "Crown City", "Sokolov": "Falconreach", "Hvězdomír": "Starwatch",
+                "Lví Brod": "Lionford", "Sluneční Hradec": "Sun Keep", "Velehrad": "Grand Stronghold", "Křišťálov": "Crystaltown",
+                "Jantarové Město": "Amber City", "Bílý Kámen": "Whitestone"
+            };
+            var matchT = name.match(/Město\s+(\d+)\s*\(([^)]+)\)/);
+            if (matchT) {
+                var numT = matchT[1];
+                var czNameT = matchT[2];
+                var enNameT = tMap[czNameT] || czNameT;
+                return "Town " + numT + " (" + enNameT + ")";
+            }
+            return name.replace(/^Město/i, "Town");
+        }
+
+        if (type === "CASTLE") {
+            var cMap = {
+                "Doubrava": "Doubrava Castle",
+                "Věčného mrazu": "Eternal Frost",
+                "Lávový chřtán": "Lava Maw",
+                "Ametyst": "Amethyst",
+                "Boreas": "Boreas",
+                "Oceán": "Ocean",
+                "Pískovcový": "Sandstone",
+                "Černá tůň": "Black Mere",
+                "Erebus": "Erebus",
+                "Královský hrad": "Royal Castle",
+                "Královská citadela": "Royal Citadel"
+            };
+            var matchC = name.match(/Hrad\s+(\d+)\s*\(([^)]+)\)/);
+            if (matchC) {
+                var numC = matchC[1];
+                var czC = matchC[2];
+                for (var ck in cMap) {
+                    if (czC.indexOf(ck) !== -1) return "Castle " + numC + " (" + cMap[ck] + ")";
+                }
+                return "Castle " + numC + " (" + czC + ")";
+            }
+            return name.replace(/^Hrad/i, "Castle");
+        }
+
+        if (type === "MASTER") {
+            if (name.indexOf("Boje") !== -1) return "Master of Combat";
+            if (name.indexOf("Jízdy") !== -1) return "Master of Riding";
+            if (name.indexOf("Tance") !== -1) return "Master of Dance";
+            if (name.indexOf("Charismatu") !== -1) return "Master of Charisma";
+            if (name.indexOf("Velmistr") !== -1) return "Grandmaster";
+            return name;
+        }
+
+        if (type === "BUILDING") {
+            if (name.indexOf("stáje") !== -1) return "Royal Stables";
+            if (name.indexOf("kovárna") !== -1) return "Guild Forge";
+            if (name.indexOf("sokolník") !== -1) return "Royal Falconer";
+            if (name.indexOf("Psovod") !== -1) return "Dog Handler & Pack";
+            if (name.indexOf("krejčí") !== -1) return "Court Tailor";
+            return name;
+        }
+
+        if (type === "FESTIVAL") {
+            if (name.indexOf("Turnaj") !== -1) return "FESTIVAL: Royal Tournament ♡";
+            if (name.indexOf("Ples") !== -1) return "FESTIVAL: Castle Ball ♡";
+            if (name.indexOf("Závod") !== -1) return "FESTIVAL: Grand Race ♡";
+            return name;
+        }
+
+        if (type === "JESTER") {
+            return name.replace(/^Kejklíř/i, "Jester");
+        }
+
+        if (type === "TAX") return "Tax Collector";
+        if (type === "MERCHANT") return "Royal Market";
+        if (type === "CHANCE") return "Card of Chance";
+        if (type === "PRISON") return "Royal Dungeon";
+        if (type === "HOSPITAL") return "Royal Infirmary";
+        if (type === "TAVERN") return "Golden Tankard Tavern";
+
+        return name;
+    },
+
     renderAchievementsModalContent: function () {
         var body = document.getElementById("achievements-modal-body");
         if (!body) return;
@@ -3571,7 +4114,7 @@ window.PRS_App = {
                     '  <div style="flex:1;">' +
                     '    <div class="ach-badge-title">' + b.title + '</div>' +
                     '    <div class="ach-badge-desc">' + b.desc + '</div>' +
-                    '    <div class="ach-badge-status ' + (isUnl ? 'unlocked-tag' : 'locked-tag') + '">' + (isUnl ? '✨ Odemčeno' : '🔒 Zamčeno') + '</div>' +
+                    '    <div class="ach-badge-status ' + (isUnl ? 'unlocked-tag' : 'locked-tag') + '">' + (isUnl ? (isEn ? '✨ Unlocked' : '✨ Odemčeno') : (isEn ? '🔒 Locked' : '🔒 Zamčeno')) + '</div>' +
                     '  </div>' +
                     '</div>';
             }
@@ -3756,21 +4299,22 @@ window.PRS_App = {
         }
     },
 
-    renderKnightEmotesHud: function () {
+        renderKnightEmotesHud: function () {
         var el = document.getElementById("knight-emotes-hud");
         if (!el) return;
         if (!this.state || this.state.phase === "GAME_OVER") {
             el.innerHTML = "";
             return;
         }
+        var t = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
         el.innerHTML = '<div class="knight-emotes-bar">' +
-            '  <span class="emotes-label">💬 Reakce:</span>' +
-            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'⚔️\', \'Do zbraně!\')" title="Do zbraně!">⚔️</button>' +
-            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'👑\', \'Sláva králi!\')" title="Sláva králi!">👑</button>' +
-            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'🛡️\', \'Držím stráž!\')" title="Držím stráž!">🛡️</button>' +
-            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'🍷\', \'Na zdraví!\')" title="Na zdraví!">🍷</button>' +
-            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'🐉\', \'Pozor na draka!\')" title="Pozor na draka!">🐉</button>' +
-            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'👏\', \'Skvělý tah!\')" title="Skvělý tah!">👏</button>' +
+            '  <span class="emotes-label">' + t("reactions.label", "💬 Reakce:") + '</span>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'⚔️\', \'' + t("reactions.to_arms", "Do zbraně!") + '\')" title="' + t("reactions.to_arms", "Do zbraně!") + '">⚔️</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'👑\', \'' + t("reactions.hail_king", "Sláva králi!") + '\')" title="' + t("reactions.hail_king", "Sláva králi!") + '">👑</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'🛡️\', \'' + t("reactions.on_guard", "Držím stráž!") + '\')" title="' + t("reactions.on_guard", "Držím stráž!") + '">🛡️</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'🍷\', \'' + t("reactions.cheers", "Na zdraví!") + '\')" title="' + t("reactions.cheers", "Na zdraví!") + '">🍷</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'🐉\', \'' + t("reactions.beware_dragon", "Pozor na draka!") + '\')" title="' + t("reactions.beware_dragon", "Pozor na draka!") + '">🐉</button>' +
+            '  <button type="button" class="emote-btn" onclick="PRS_App.sendKnightEmote(\'👏\', \'' + t("reactions.great_move", "Skvělý tah!") + '\')" title="' + t("reactions.great_move", "Skvělý tah!") + '">👏</button>' +
             '</div>';
     },
 
@@ -3855,11 +4399,23 @@ window.PRS_App = {
     },
 
     refreshBoardTemplateSelects: function () {
-        var list = (window.PRS_BoardBuilder && window.PRS_BoardBuilder.getActiveTemplatesList) ? window.PRS_BoardBuilder.getActiveTemplatesList() : [
-            { templateCode: "classic_96", name: "Klasická výprava", nodeCount: 96 },
-            { templateCode: "dragon_4598", name: "Dračí země", nodeCount: 104 },
-            { templateCode: "compact_48", name: "Rychlý sprint", nodeCount: 48 }
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var tilesWord = isEn ? "tiles" : "polí";
+
+        var defaultTemplates = isEn ? [
+            { templateCode: "classic_96", name: "Royal Wilderness 96 (Grand Map)", nodeCount: 96 },
+            { templateCode: "dragon_4598", name: "Dragon Trail (Medium Map – 64 tiles)", nodeCount: 64 },
+            { templateCode: "delta_84", name: "Royal Delta & Islands (Map – 84 tiles)", nodeCount: 84 },
+            { templateCode: "compact_48", name: "Knight's Jousting Grounds (Fast Game – 48 tiles)", nodeCount: 48 }
+        ] : [
+            { templateCode: "classic_96", name: "Královská divočina 96 (Velký plán)", nodeCount: 96 },
+            { templateCode: "dragon_4598", name: "Dračí stezka (Střední plán – 64 polí)", nodeCount: 64 },
+            { templateCode: "delta_84", name: "Královská delta & Ostrovy (Plán – 84 polí)", nodeCount: 84 },
+            { templateCode: "compact_48", name: "Rytířské kolbiště (Rychlá hra – 48 polí)", nodeCount: 48 }
         ];
+
+        var list = (window.PRS_BoardBuilder && window.PRS_BoardBuilder.getActiveTemplatesList) ? window.PRS_BoardBuilder.getActiveTemplatesList() : defaultTemplates;
         var lobbySel = document.getElementById("lobby-board-select");
         var boardSel = document.getElementById("board-template-select");
         var simSel = document.getElementById("sim-board-select");
@@ -3874,30 +4430,39 @@ window.PRS_App = {
             var html = "";
 
             // 1. Předdefinované / systémové plány
-            html += '<optgroup label="👑 Předdefinované herní plány:">';
+            html += '<optgroup label="' + self.escapeHtml(t("ui.board_bar.preset_group", null, "👑 Předdefinované herní plány:")) + '">';
             for (var i = 0; i < list.length; i++) {
-                var t = list[i];
-                var label = (prefix ? (prefix + t.name) : t.name) + (t.nodeCount ? (" (" + t.nodeCount + " polí)") : "");
-                html += '<option value="' + self.escapeHtml(t.templateCode) + '">' + self.escapeHtml(label) + '</option>';
+                var tmpl = list[i];
+                var tName = tmpl.name;
+                if (isEn) {
+                    if (tmpl.templateCode === "classic_96") tName = "Royal Wilderness 96 (Grand Map)";
+                    else if (tmpl.templateCode === "dragon_4598") tName = "Dragon Trail (Medium Map – 64 tiles)";
+                    else if (tmpl.templateCode === "delta_84") tName = "Royal Delta & Islands (Map – 84 tiles)";
+                    else if (tmpl.templateCode === "compact_48") tName = "Knight's Jousting Grounds (Fast Game – 48 tiles)";
+                }
+                var label = (prefix ? (prefix + tName) : tName) + (tmpl.nodeCount ? (" (" + tmpl.nodeCount + " " + tilesWord + ")") : "");
+                html += '<option value="' + self.escapeHtml(tmpl.templateCode) + '">' + self.escapeHtml(label) + '</option>';
             }
             html += '</optgroup>';
 
             // 2. Moje uložené dynamické plány z Map Studia
             if (savedMaps.length > 0) {
-                html += '<optgroup label="⭐ Moje uložené dynamické plány:">';
+                html += '<optgroup label="' + self.escapeHtml(t("ui.board_bar.saved_group", null, "⭐ Moje uložené dynamické plány:")) + '">';
                 for (var s = 0; s < savedMaps.length; s++) {
                     var sm = savedMaps[s];
-                    var smName = sm.name || ("Vlastní plán #" + (sm.seed || s + 1));
-                    var smLabel = (prefix ? prefix : "") + "⭐ " + smName + " (" + (sm.nodeCount || 96) + " polí)";
+                    var smName = sm.name || ((isEn ? "Custom Map #" : "Vlastní plán #") + (sm.seed || s + 1));
+                    var smLabel = (prefix ? prefix : "") + "⭐ " + smName + " (" + (sm.nodeCount || 96) + " " + tilesWord + ")";
                     html += '<option value="saved_map_' + s + '">' + self.escapeHtml(smLabel) + '</option>';
                 }
                 html += '</optgroup>';
             }
 
             // 3. Tvůrce & Generátor
-            html += '<optgroup label="🛠️ Tvůrce & Generátor:">';
-            html += '<option value="custom_dynamic">' + (prefix ? (prefix + "Vlastní dynamický (Map Studio)") : "🛠️ Vlastní dynamický plán (Map Studio)") + '</option>';
-            html += '<option value="procedural">' + (prefix ? (prefix + "Náhodné království") : "🎲 Náhodné království (Procedurální)") + '</option>';
+            html += '<optgroup label="' + self.escapeHtml(t("ui.board_bar.studio_group", null, "🛠️ Tvůrce & Generátor:")) + '">';
+            var dynName = t("ui.board_bar.custom_dynamic", null, "🛠️ Vlastní dynamický plán (Map Studio)");
+            var rndName = t("ui.board_bar.random_realm", null, "🎲 Náhodné království (Procedurální)");
+            html += '<option value="custom_dynamic">' + (prefix ? (prefix + (isEn ? "Custom Dynamic (Map Studio)" : "Vlastní dynamický (Map Studio)")) : dynName) + '</option>';
+            html += '<option value="procedural">' + (prefix ? (prefix + (isEn ? "Random Realm" : "Náhodné království")) : rndName) + '</option>';
             html += '</optgroup>';
 
             sel.innerHTML = html;
@@ -3908,9 +4473,10 @@ window.PRS_App = {
             sel.value = exists ? curVal : (sel.options[0] ? sel.options[0].value : "classic_96");
         }
 
+        var mapPfx = t("ui.board_bar.map_prefix", null, "Plán: ");
         populateSelect(lobbySel, "");
-        populateSelect(boardSel, "Plán: ");
-        populateSelect(simSel, "🗺️ Plán: ");
+        populateSelect(boardSel, mapPfx);
+        populateSelect(simSel, "🗺️ " + mapPfx);
     },
 
     changeBoardTemplateLive: async function (boardCode) {
@@ -4021,6 +4587,9 @@ window.PRS_App = {
 
         if (this.lobbyPlayers && this.lobbyPlayers[0]) {
             this.lobbyPlayers[0].pawnId = this.selectedPawnId || this.lobbyPlayers[0].pawnId || "knight_valiant";
+            var myCrest = (typeof this.getPlayerCrest === "function") ? this.getPlayerCrest() : { crestId: "lion", tincture: "gold" };
+            this.lobbyPlayers[0].crestId = myCrest.crestId;
+            this.lobbyPlayers[0].crestColor = myCrest.tincture;
         }
 
         var isDynamicOrProc = (boardCode === "procedural" || boardCode === "custom_dynamic" || (boardCode && String(boardCode).indexOf("saved_map_") === 0));
@@ -4101,6 +4670,7 @@ window.PRS_App = {
             this.hasGameStarted = true;
             this.updateUserUI();
             if (this.saveActiveGameAutosave) this.saveActiveGameAutosave();
+            if (this.updateSavedGamesUI) this.updateSavedGamesUI();
 
             if (window.PRS_Audio) window.PRS_Audio.playNotice();
 
@@ -4227,6 +4797,17 @@ window.PRS_App = {
 
             }
 
+            // 1b. T / t -> Otevřít / Zavřít Rychlý tahák do kapsy
+            if (e.key === "t" || e.key === "T") {
+                var csM = document.getElementById("cheatsheet-modal");
+                if (csM && csM.style.display !== "none") {
+                    if (self.closeCheatSheetModal) self.closeCheatSheetModal();
+                } else {
+                    if (self.openCheatSheetModal) self.openCheatSheetModal();
+                }
+                return;
+            }
+
             // 2. MEZERNÍK -> Primární akce
 
             if (e.key === " " || e.code === "Space") {
@@ -4343,6 +4924,8 @@ window.PRS_App = {
 
         this.closeImageModal();
 
+        if (this.closeCheatSheetModal) this.closeCheatSheetModal();
+
         var authModal = document.getElementById("auth-modal");
 
         if (authModal) authModal.style.display = "none";
@@ -4386,45 +4969,76 @@ window.PRS_App = {
     },
 
     handleDifficultyChange: function (mode) {
-
         this.selectedDifficultyMode = mode;
-
         var infoEl = document.getElementById("lobby-difficulty-info");
-
         var btn = document.getElementById("lobby-start-game-btn");
+        var mKey = (mode === "easy" || mode === "hard" || mode === "ultimate") ? mode : "standard";
+        if (infoEl) {
+            infoEl.innerHTML = window.PRS_I18n ? window.PRS_I18n.t("lobby.difficulty_info." + mKey) : "";
+        }
+        if (btn) {
+            btn.innerHTML = window.PRS_I18n ? window.PRS_I18n.t("lobby.start_btn." + mKey) : "🎲 Rozdat 10 000 zl. a zahájit partii!";
+        }
+        if (window.PRS_Audio) window.PRS_Audio.playStep();
+    },
 
-        var text = "";
+    refreshLobbySettingsSelects: function () {
+        if (!window.PRS_I18n) return;
+        var t = function (k, d) { return window.PRS_I18n.t(k, null, d); };
 
-        if (mode === "easy") {
-
-            text = "🌿 <strong>Pohádkový mód (Easy):</strong> 12 000 zl. do startu • žold 3 500 / 5 500 zl. • 70 % pozitivních karet • mírumilovný režim bez útočných duelů a intrik • výkup bance za 75 % • královská milost při bankrotu.";
-
-            if (btn) btn.innerHTML = "🎲 Rozdat 12 000 zl. a zahájit partii! (Pohádkový)";
-
-        } else if (mode === "hard") {
-
-            text = "⚔️ <strong>Rytířská výzva (Hard):</strong> 8 000 zl. do startu • žold 2 500 / 4 500 zl. • tvrdší karty osudu • plné sazby duelů i ztráta srdcí (-0,5 💖) • výkup bance za 50 % • královská milost při bankrotu.";
-
-            if (btn) btn.innerHTML = "🎲 Rozdat 8 000 zl. a zahájit partii! (Rytířská výzva)";
-
-        } else if (mode === "ultimate") {
-
-            text = "💀 <strong>Na život a smrt (Ultimate):</strong> 8 000 zl. do startu • žold 2 500 / 4 000 zl. • karty 35 % poz. / 35 % neg. • duely posílají poraženého do špitálu! • špitál i kauce 2× dražší (1 600 zl. / 2 000 zl.) • <strong>ELIMINACE při bankrotu!</strong>";
-
-            if (btn) btn.innerHTML = "🎲 Rozdat 8 000 zl. a zahájit partii! (Na život a smrt 💀)";
-
-        } else {
-
-            text = "👑 <strong>Standardní mód:</strong> 10 000 zl. do startu • žold 3 000 / 5 000 zl. • vyvážené karty Náhody • 50% sazby duelů a intrik • královská milost při dluhu.";
-
-            if (btn) btn.innerHTML = "🎲 Rozdat 10 000 zl. a zahájit partii!";
-
+        var scenEl = document.getElementById("lobby-game-scenario");
+        if (scenEl) {
+            var curScen = scenEl.value;
+            scenEl.innerHTML = 
+                '<option value="sprint">' + t("lobby.scenarios.sprint", "⚡ Rychlovka (15 💖)") + '</option>' +
+                '<option value="classic">' + t("lobby.scenarios.classic", "💖 Klasika (30 💖)") + '</option>' +
+                '<option value="slayer">' + t("lobby.scenarios.slayer", "🐉 Lovci draků (2 draci)") + '</option>' +
+                '<option value="tycoon">' + t("lobby.scenarios.tycoon", "🏰 Magnát (3 města+hrad)") + '</option>' +
+                '<option value="epic">' + t("lobby.scenarios.epic", "👑 Epické (45 💖)") + '</option>';
+            if (curScen) scenEl.value = curScen;
         }
 
-        if (infoEl) infoEl.innerHTML = text;
+        var diffEl = document.getElementById("lobby-difficulty-mode");
+        if (diffEl) {
+            var curDiff = diffEl.value || this.selectedDifficultyMode || "standard";
+            diffEl.innerHTML =
+                '<option value="easy">' + t("lobby.difficulties.easy", "🌿 Pohádkový (Easy)") + '</option>' +
+                '<option value="standard">' + t("lobby.difficulties.standard", "👑 Standardní (50% sazby)") + '</option>' +
+                '<option value="hard">' + t("lobby.difficulties.hard", "⚔️ Rytířská výzva (Hard)") + '</option>' +
+                '<option value="ultimate">' + t("lobby.difficulties.ultimate", "💀 Na život a smrt (Ultimate)") + '</option>';
+            diffEl.value = curDiff;
+        }
 
-        if (window.PRS_Audio) window.PRS_Audio.playStep();
+        var timerEl = document.getElementById("lobby-turn-timer");
+        if (timerEl) {
+            var curTimer = timerEl.value;
+            timerEl.innerHTML =
+                '<option value="0">' + t("lobby.timers.unlimited", "♾️ Bez limitu (volné tempo)") + '</option>' +
+                '<option value="60">' + t("lobby.timers.fast_60", "⏱️ Rychlý tah (60 vteřin)") + '</option>' +
+                '<option value="90">' + t("lobby.timers.standard_90", "⏳ Standardní (90 vteřin)") + '</option>' +
+                '<option value="45">' + t("lobby.timers.blitz_45", "⚡ Bleskový (45 vteřin)") + '</option>';
+            if (curTimer) timerEl.value = curTimer;
+        }
 
+        var castleEl = document.getElementById("lobby-royal-castle");
+        if (castleEl) {
+            var curCastle = castleEl.value;
+            castleEl.innerHTML =
+                '<option value="auto">' + t("lobby.castles.auto", "🎲 Pestré (při každé hře jiné)") + '</option>' +
+                '<option value="castle_royal">' + t("lobby.castles.castle_royal", "👑 Královský hrad (Sídlo koruny)") + '</option>' +
+                '<option value="castle_forest">' + t("lobby.castles.castle_forest", "🌲 Lesní hrad Doubrava") + '</option>' +
+                '<option value="castle_ice">' + t("lobby.castles.castle_ice", "❄️ Ledový palác Věčného mrazu") + '</option>' +
+                '<option value="castle_lava">' + t("lobby.castles.castle_lava", "🌋 Sopečná pevnost Lávový chřtán") + '</option>' +
+                '<option value="castle_crystal">' + t("lobby.castles.castle_crystal", "💎 Křišťálový zámek Ametyst") + '</option>' +
+                '<option value="castle_wind">' + t("lobby.castles.castle_wind", "☁️ Větrný vzdušný zámek Boreas") + '</option>' +
+                '<option value="castle_water">' + t("lobby.castles.castle_water", "🌊 Vodní citadela Oceán") + '</option>' +
+                '<option value="castle_desert">' + t("lobby.castles.castle_desert", "🏜️ Pouštní pískovcový palác") + '</option>' +
+                '<option value="castle_swamp">' + t("lobby.castles.castle_swamp", "🌫️ Bažinná tvrz Černá tůň") + '</option>' +
+                '<option value="castle_dark">' + t("lobby.castles.castle_dark", "🌑 Temný podzemní hrad Erebus") + '</option>';
+            if (curCastle) castleEl.value = curCastle;
+        }
+
+        this.handleDifficultyChange(this.selectedDifficultyMode || "standard");
     },
 
     toggleEmotePicker: function () {
@@ -4469,6 +5083,8 @@ window.PRS_App = {
 
         this.syncSettingsDeviceLabel();
 
+        if (window.PRS_I18n) window.PRS_I18n.syncUi();
+
         var fastChk = document.getElementById("settings-fast-anim-chk");
 
         if (fastChk) fastChk.checked = Boolean(this.fastAnimations);
@@ -4508,33 +5124,26 @@ window.PRS_App = {
     },
 
     syncSettingsSoundLabel: function () {
-
         var btn = document.getElementById("settings-audio-btn");
-
         if (btn && window.PRS_Audio) {
-
-            btn.innerHTML = window.PRS_Audio.muted ? "🔇 Zvuk: Vyp" : "🔊 Zvuk: Zap";
-
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            btn.innerHTML = window.PRS_Audio.muted 
+                ? (isEn ? "🔇 Sound: Off" : "🔇 Zvuk: Vyp")
+                : (isEn ? "🔊 Sound: On" : "🔊 Zvuk: Zap");
         }
-
     },
 
     syncSettingsDeviceLabel: function () {
-
         var btn = document.getElementById("settings-device-btn");
-
         if (btn && this.deviceProfile) {
-
             var cur = this.deviceProfile.override;
-
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var icon = (this.deviceProfile.device === "mobile") ? "📱" : ((this.deviceProfile.device === "tablet") ? "📟" : "💻");
-
-            var devLabel = (this.deviceProfile.device === "mobile" ? "Mobil" : (this.deviceProfile.device === "tablet" ? "Tablet" : "PC"));
-
-            btn.textContent = (!cur) ? (icon + " Režim: Auto (" + devLabel + ")") : (icon + " Režim: " + (cur === "mobile" ? "Mobil" : "PC"));
-
+            var devLabel = (this.deviceProfile.device === "mobile" ? (isEn ? "Mobile" : "Mobil") : (this.deviceProfile.device === "tablet" ? "Tablet" : "PC"));
+            var modeAuto = isEn ? "Mode: Auto (" : "Režim: Auto (";
+            var modePrefix = isEn ? "Mode: " : "Režim: ";
+            btn.textContent = (!cur) ? (icon + " " + modeAuto + devLabel + ")") : (icon + " " + modePrefix + (cur === "mobile" ? (isEn ? "Mobile" : "Mobil") : "PC"));
         }
-
     },
 
     // ========================================================================
@@ -4691,6 +5300,7 @@ window.PRS_App = {
         var r = this.customBoardRecipe;
         if (!r) return;
 
+        var elShape = document.getElementById("ms-route-shape");
         var elBranches = document.getElementById("ms-branches");
         var elTier = document.getElementById("ms-master-tier");
         var elRiver = document.getElementById("ms-river-mode");
@@ -4699,6 +5309,7 @@ window.PRS_App = {
         var elName = document.getElementById("ms-custom-name");
         var elSeed = document.getElementById("ms-seed-input");
 
+        if (elShape) elShape.value = r.routeShape || "auto";
         if (elBranches) elBranches.value = String(r.branches !== undefined ? r.branches : 3);
         if (elTier) elTier.value = String(r.masterTier || 2);
         if (elRiver) elRiver.value = r.riverMode || "single";
@@ -4745,7 +5356,7 @@ window.PRS_App = {
 
         var sumBadge = document.getElementById("ms-animal-summary-badge");
         if (sumBadge) {
-            sumBadge.textContent = activeLevels.length + " trojic = " + (activeLevels.length * 3) + " polí";
+            var isEnA = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en"; sumBadge.textContent = isEnA ? (activeLevels.length + " trios = " + (activeLevels.length * 3) + " tiles") : (activeLevels.length + " trojic = " + (activeLevels.length * 3) + " polí");
         }
     },
 
@@ -4759,7 +5370,7 @@ window.PRS_App = {
             var d = defs[i];
             var val = (r[d.key] !== undefined) ? r[d.key] : 0;
             html += '<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:rgba(15,23,42,0.55); border:1px solid rgba(212,175,55,0.18); border-radius:6px; padding:3px 6px;">' +
-                '<span style="font-size:0.71rem; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + this.escapeHtml(d.label) + '">' + d.label + '</span>' +
+                '<span style="font-size:0.71rem; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + this.escapeHtml(dLabel) + '">' + dLabel + '</span>' +
                 '<div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">' +
                     '<button type="button" class="btn-zoom" style="padding:1px 6px; font-size:0.72rem; line-height:1.1;" onclick="PRS_App.changeMapStudioCount(\'' + d.key + '\', -1)">−</button>' +
                     '<input type="number" min="' + d.min + '" max="' + d.max + '" value="' + val + '" onchange="PRS_App.setMapStudioCount(\'' + d.key + '\', this.value)" style="width:36px; text-align:center; background:rgba(0,0,0,0.6); color:#fef08a; border:1px solid rgba(212,175,55,0.3); border-radius:4px; font-size:0.73rem; font-weight:700; padding:1px 2px;" />' +
@@ -4832,6 +5443,7 @@ window.PRS_App = {
 
     onMapStudioTopOptionChange: function () {
         this.ensureMapStudioRecipe();
+        var elShape = document.getElementById("ms-route-shape");
         var elBranches = document.getElementById("ms-branches");
         var elTier = document.getElementById("ms-master-tier");
         var elRiver = document.getElementById("ms-river-mode");
@@ -4839,6 +5451,7 @@ window.PRS_App = {
         var elRoyal = document.getElementById("ms-royal-castle");
         var elName = document.getElementById("ms-custom-name");
 
+        if (elShape) this.customBoardRecipe.routeShape = elShape.value;
         if (elBranches) this.customBoardRecipe.branches = parseInt(elBranches.value, 10);
         if (elTier) this.customBoardRecipe.masterTier = parseInt(elTier.value, 10);
         if (elRiver) this.customBoardRecipe.riverMode = elRiver.value;
@@ -5114,7 +5727,9 @@ window.PRS_App = {
         if (elTitle) elTitle.textContent = board.name || ("Vlastní království #" + this.mapStudioSeed);
         if (elBadge) {
             var aCnt = (this.customBoardRecipe.animalLevels || []).length;
-            elBadge.textContent = board.nodes.length + " polí • " + aCnt + " trojic zvířat (" + (aCnt * 3) + ") • " + (this.customBoardRecipe.branches || 0) + " větví";
+            var shapeObj = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES[board.routeShape]);
+            var shapeName = shapeObj ? shapeObj.name : "Procedurální trasa";
+            elBadge.textContent = board.nodes.length + " polí • " + aCnt + " trojic zvířat • " + (this.customBoardRecipe.branches || 0) + " větví • " + shapeName;
         }
         if (elInput && document.activeElement !== elInput) {
             elInput.value = String(this.mapStudioSeed);

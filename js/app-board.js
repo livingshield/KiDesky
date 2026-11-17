@@ -746,69 +746,162 @@
 
     getBoardDefsSVG: function () {
 
-        var th = this.currentTheme || "light";
+        var th = this.currentTheme ||
+                 (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
+                 (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
 
         var themePalettes = {
-
-            light: { c0: "#fef08a", c1: "#d4af37", c2: "#854d0e", stroke: "#d4af37", glow: "rgba(250,204,21,0.55)" },
-
-            fire:  { c0: "#fed7aa", c1: "#f97316", c2: "#9a3412", stroke: "#ea580c", glow: "rgba(239,68,68,0.65)" },
-
-            water: { c0: "#bae6fd", c1: "#38bdf8", c2: "#0369a1", stroke: "#0284c7", glow: "rgba(14,165,233,0.65)" },
-
-            earth: { c0: "#a7f3d0", c1: "#10b981", c2: "#065f46", stroke: "#059669", glow: "rgba(34,197,94,0.65)" },
-
-            air:   { c0: "#ede9fe", c1: "#c084fc", c2: "#6b21a8", stroke: "#9333ea", glow: "rgba(168,85,247,0.65)" }
-
+            light: {
+                c0: "#fef08a", c1: "#d4af37", c2: "#854d0e", stroke: "#d4af37", glow: "rgba(250,204,21,0.55)",
+                parchment: ["#3d3423", "#31291b", "#251e14", "#17120c"],
+                heartland: { c0: "#4d7c0f", c1: "#3f6212", c2: "#365314" },
+                forest:    { c0: "#14532d", c1: "#166534", c2: "#15803d" },
+                mountain:  { c0: "#57534e", c1: "#44403c", c2: "#292524" },
+                meadows:   { c0: "#a16207", c1: "#65a30d", c2: "#4d7c0f" },
+                water:     { c0: "#0f766e", c1: "#0369a1", c2: "#155e75" },
+                groundMoss:  "rgba(34,84,42,0.64)",
+                groundEarth: "rgba(120,82,40,0.58)",
+                groundStone: "rgba(87,83,78,0.62)",
+                groundWater: "rgba(14,116,144,0.58)",
+                groundMagic: "rgba(52,105,68,0.60)"
+            },
+            fire: {
+                c0: "#fed7aa", c1: "#f97316", c2: "#9a3412", stroke: "#ea580c", glow: "rgba(239,68,68,0.65)",
+                parchment: ["#2d120a", "#220c06", "#170703", "#0d0402"],
+                heartland: { c0: "#7c2d12", c1: "#431407", c2: "#290d05" },
+                forest:    { c0: "#451a03", c1: "#290e02", c2: "#1c0901" },
+                mountain:  { c0: "#44403c", c1: "#292524", c2: "#1c1917" },
+                meadows:   { c0: "#c2410c", c1: "#9a3412", c2: "#7c2d12" },
+                water:     { c0: "#ea580c", c1: "#b91c1c", c2: "#7f1d1d" },
+                groundMoss:  "rgba(154,52,18,0.64)",
+                groundEarth: "rgba(124,45,18,0.58)",
+                groundStone: "rgba(68,64,60,0.72)",
+                groundWater: "rgba(234,88,12,0.65)",
+                groundMagic: "rgba(220,38,38,0.60)"
+            },
+            water: {
+                c0: "#bae6fd", c1: "#38bdf8", c2: "#0369a1", stroke: "#0284c7", glow: "rgba(14,165,233,0.65)",
+                parchment: ["#0e2a47", "#091d33", "#061322", "#030a13"],
+                heartland: { c0: "#075985", c1: "#0c4a6e", c2: "#082f49" },
+                forest:    { c0: "#0f766e", c1: "#115e59", c2: "#134e4a" },
+                mountain:  { c0: "#64748b", c1: "#475569", c2: "#334155" },
+                meadows:   { c0: "#0284c7", c1: "#0369a1", c2: "#075985" },
+                water:     { c0: "#38bdf8", c1: "#0284c7", c2: "#0369a1" },
+                groundMoss:  "rgba(15,118,110,0.64)",
+                groundEarth: "rgba(12,74,110,0.58)",
+                groundStone: "rgba(71,85,105,0.65)",
+                groundWater: "rgba(14,165,233,0.62)",
+                groundMagic: "rgba(56,189,248,0.60)"
+            },
+            earth: {
+                c0: "#a7f3d0", c1: "#10b981", c2: "#065f46", stroke: "#059669", glow: "rgba(34,197,94,0.65)",
+                parchment: ["#1f331b", "#162613", "#0e1a0c", "#070e06"],
+                heartland: { c0: "#15803d", c1: "#166534", c2: "#14532d" },
+                forest:    { c0: "#064e3b", c1: "#065f46", c2: "#047857" },
+                mountain:  { c0: "#44403c", c1: "#3f3f46", c2: "#27272a" },
+                meadows:   { c0: "#4d7c0f", c1: "#3f6212", c2: "#365314" },
+                water:     { c0: "#047857", c1: "#065f46", c2: "#064e3b" },
+                groundMoss:  "rgba(22,101,52,0.68)",
+                groundEarth: "rgba(113,63,18,0.58)",
+                groundStone: "rgba(63,63,70,0.65)",
+                groundWater: "rgba(5,150,105,0.60)",
+                groundMagic: "rgba(16,185,129,0.60)"
+            },
+            air: {
+                c0: "#ede9fe", c1: "#c084fc", c2: "#6b21a8", stroke: "#9333ea", glow: "rgba(168,85,247,0.65)",
+                parchment: ["#241b4b", "#1a1338", "#120d26", "#090615"],
+                heartland: { c0: "#5b21b6", c1: "#4c1d95", c2: "#3b0764" },
+                forest:    { c0: "#4338ca", c1: "#3730a3", c2: "#312e81" },
+                mountain:  { c0: "#6b7280", c1: "#4b5563", c2: "#374151" },
+                meadows:   { c0: "#7c3aed", c1: "#6d28d9", c2: "#5b21b6" },
+                water:     { c0: "#a855f7", c1: "#9333ea", c2: "#7e22ce" },
+                groundMoss:  "rgba(76,29,149,0.64)",
+                groundEarth: "rgba(67,56,202,0.58)",
+                groundStone: "rgba(75,85,99,0.65)",
+                groundWater: "rgba(168,85,247,0.62)",
+                groundMagic: "rgba(192,132,252,0.60)"
+            }
         };
 
         var activePalette = themePalettes[th] || themePalettes.light;
 
         return '<defs>' +
-            '<filter id="biomeBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28" /></filter>' +
+            '<filter id="biomeBlur" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="34" /></filter>' +
             '<filter id="mistBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="32" /></filter>' +
             '<filter id="riverBankBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4" /></filter>' +
             '<filter id="riverSoft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.6" /></filter>' +
+            '<filter id="groundCushionBlur" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="4.5" /></filter>' +
             '<filter id="riverWobble" x="-4%" y="-4%" width="108%" height="108%"><feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="7" result="rn"/><feDisplacementMap in="SourceGraphic" in2="rn" scale="3.4" xChannelSelector="R" yChannelSelector="G"/></filter>' +
             '<filter id="riverGlow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+            '<radialGradient id="heartlandBiomeGrad" cx="50%" cy="48%" r="58%">' +
+            '  <stop offset="0%" stop-color="' + activePalette.heartland.c0 + '" stop-opacity="0.58" />' +
+            '  <stop offset="55%" stop-color="' + activePalette.heartland.c1 + '" stop-opacity="0.46" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.heartland.c2 + '" stop-opacity="0.18" />' +
+            '</radialGradient>' +
             '<linearGradient id="forestBiomeGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
-            '  <stop offset="0%" stop-color="#14532d" stop-opacity="0.65" />' +
-            '  <stop offset="60%" stop-color="#15803d" stop-opacity="0.55" />' +
-            '  <stop offset="100%" stop-color="#166534" stop-opacity="0.45" />' +
+            '  <stop offset="0%" stop-color="' + activePalette.forest.c0 + '" stop-opacity="0.76" />' +
+            '  <stop offset="55%" stop-color="' + activePalette.forest.c1 + '" stop-opacity="0.64" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.forest.c2 + '" stop-opacity="0.48" />' +
             '</linearGradient>' +
             '<linearGradient id="mountainBiomeGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
-            '  <stop offset="0%" stop-color="#44403c" stop-opacity="0.75" />' +
-            '  <stop offset="50%" stop-color="#292524" stop-opacity="0.65" />' +
-            '  <stop offset="100%" stop-color="#1c1917" stop-opacity="0.55" />' +
+            '  <stop offset="0%" stop-color="' + activePalette.mountain.c0 + '" stop-opacity="0.82" />' +
+            '  <stop offset="50%" stop-color="' + activePalette.mountain.c1 + '" stop-opacity="0.72" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.mountain.c2 + '" stop-opacity="0.58" />' +
             '</linearGradient>' +
             '<linearGradient id="meadowsBiomeGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
-            '  <stop offset="0%" stop-color="#ca8a04" stop-opacity="0.50" />' +
-            '  <stop offset="60%" stop-color="#65a30d" stop-opacity="0.45" />' +
-            '  <stop offset="100%" stop-color="#4d7c0f" stop-opacity="0.38" />' +
+            '  <stop offset="0%" stop-color="' + activePalette.meadows.c0 + '" stop-opacity="0.58" />' +
+            '  <stop offset="55%" stop-color="' + activePalette.meadows.c1 + '" stop-opacity="0.52" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.meadows.c2 + '" stop-opacity="0.42" />' +
             '</linearGradient>' +
             '<linearGradient id="waterBiomeGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
-            '  <stop offset="0%" stop-color="#0284c7" stop-opacity="0.55" />' +
-            '  <stop offset="50%" stop-color="#0ea5e9" stop-opacity="0.48" />' +
-            '  <stop offset="100%" stop-color="#0369a1" stop-opacity="0.40" />' +
+            '  <stop offset="0%" stop-color="' + activePalette.water.c0 + '" stop-opacity="0.52" />' +
+            '  <stop offset="50%" stop-color="' + activePalette.water.c1 + '" stop-opacity="0.46" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.water.c2 + '" stop-opacity="0.36" />' +
             '</linearGradient>' +
+            '<radialGradient id="decorShadowGrad" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="rgba(8,6,4,0.68)" />' +
+            '  <stop offset="58%" stop-color="rgba(12,9,6,0.36)" />' +
+            '  <stop offset="100%" stop-color="rgba(12,9,6,0)" />' +
+            '</radialGradient>' +
+            '<radialGradient id="groundMossGrad" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="' + activePalette.groundMoss + '" />' +
+            '  <stop offset="65%" stop-color="' + activePalette.groundMoss.replace(/[\d\.]+\)$/, '0.34)') + '" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.groundMoss.replace(/[\d\.]+\)$/, '0)') + '" />' +
+            '</radialGradient>' +
+            '<radialGradient id="groundEarthGrad" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="' + activePalette.groundEarth + '" />' +
+            '  <stop offset="65%" stop-color="' + activePalette.groundEarth.replace(/[\d\.]+\)$/, '0.30)') + '" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.groundEarth.replace(/[\d\.]+\)$/, '0)') + '" />' +
+            '</radialGradient>' +
+            '<radialGradient id="groundStoneGrad" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="' + activePalette.groundStone + '" />' +
+            '  <stop offset="65%" stop-color="' + activePalette.groundStone.replace(/[\d\.]+\)$/, '0.32)') + '" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.groundStone.replace(/[\d\.]+\)$/, '0)') + '" />' +
+            '</radialGradient>' +
+            '<radialGradient id="groundWaterGrad" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="' + activePalette.groundWater + '" />' +
+            '  <stop offset="65%" stop-color="' + activePalette.groundWater.replace(/[\d\.]+\)$/, '0.32)') + '" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.groundWater.replace(/[\d\.]+\)$/, '0)') + '" />' +
+            '</radialGradient>' +
+            '<radialGradient id="groundMagicGrad" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="' + activePalette.groundMagic + '" />' +
+            '  <stop offset="65%" stop-color="' + activePalette.groundMagic.replace(/[\d\.]+\)$/, '0.28)') + '" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.groundMagic.replace(/[\d\.]+\)$/, '0)') + '" />' +
+            '</radialGradient>' +
             '<radialGradient id="mistSoftGrad" cx="50%" cy="50%" r="50%">' +
-            '  <stop offset="0%" stop-color="rgba(224,242,254,0.35)" />' +
-            '  <stop offset="60%" stop-color="rgba(186,230,253,0.18)" />' +
-            '  <stop offset="100%" stop-color="rgba(186,230,253,0)" />' +
+            '  <stop offset="0%" stop-color="' + (th === "fire" ? "rgba(254,215,170,0.22)" : (th === "water" ? "rgba(186,230,253,0.35)" : (th === "earth" ? "rgba(167,243,208,0.25)" : (th === "air" ? "rgba(237,233,254,0.30)" : "rgba(224,242,254,0.32)")))) + '" />' +
+            '  <stop offset="60%" stop-color="' + (th === "fire" ? "rgba(249,115,22,0.10)" : (th === "water" ? "rgba(56,189,248,0.14)" : (th === "earth" ? "rgba(34,197,94,0.12)" : (th === "air" ? "rgba(192,132,252,0.14)" : "rgba(186,230,253,0.15)")))) + '" />' +
+            '  <stop offset="100%" stop-color="rgba(0,0,0,0)" />' +
             '</radialGradient>' +
             '<linearGradient id="cardParchmentGrad" x1="0%" y1="0%" x2="0%" y2="100%">' +
             '  <stop offset="0%" stop-color="rgba(34,25,18,0.85)" />' +
             '  <stop offset="100%" stop-color="rgba(18,12,8,0.92)" />' +
             '</linearGradient>' +
-
-            '<radialGradient id="parchmentGrad" cx="50%" cy="48%" r="72%">' +
-
-            '  <stop offset="0%" stop-color="#32261b" />' +
-
-            '  <stop offset="65%" stop-color="#221a12" />' +
-
-            '  <stop offset="100%" stop-color="#140f0a" />' +
-
+            '<radialGradient id="parchmentGrad" cx="50%" cy="46%" r="74%">' +
+            '  <stop offset="0%" stop-color="' + activePalette.parchment[0] + '" />' +
+            '  <stop offset="45%" stop-color="' + activePalette.parchment[1] + '" />' +
+            '  <stop offset="78%" stop-color="' + activePalette.parchment[2] + '" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.parchment[3] + '" />' +
             '</radialGradient>' +
 
             '<linearGradient id="goldRimGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
@@ -953,20 +1046,121 @@
     renderBoardBiomesHTML: function (board) {
         if (!board || !board.biomes || board.biomes.length === 0) return "";
         var out = [];
-        out.push('  <g id="prs-biomes-layer">');
+        out.push('  <g id="prs-biomes-layer" pointer-events="none">');
+        // Celkový teplý podkladový akvarelový přeliv krajiny
+        out.push('    <ellipse cx="690" cy="430" rx="640" ry="380" fill="url(#heartlandBiomeGrad)" opacity="0.55" filter="url(#biomeBlur)"/>');
         for (var b = 0; b < board.biomes.length; b++) {
             var bm = board.biomes[b];
             var fillVal = bm.fillGrad ? ("url(#" + bm.fillGrad + ")") : bm.fill;
             out.push('    <g class="biome-region" data-biome-id="' + bm.id + '">');
-            out.push('      <path d="' + bm.path + '" fill="' + fillVal + '" opacity="' + (bm.opacity || 0.72) + '" filter="url(#biomeBlur)"/>');
+            out.push('      <path d="' + bm.path + '" fill="' + fillVal + '" opacity="' + (bm.opacity || 0.78) + '" filter="url(#biomeBlur)"/>');
             if (bm.contours && bm.contours.length > 0) {
                 for (var c = 0; c < bm.contours.length; c++) {
-                    out.push('      <path d="' + bm.contours[c] + '" fill="none" stroke="' + (bm.contourStroke || 'rgba(251,191,36,0.36)') + '" stroke-width="1.15" stroke-dasharray="' + (bm.contourDash || '7,5') + '"/>');
+                    out.push('      <path d="' + bm.contours[c] + '" fill="none" stroke="' + (bm.contourStroke || 'rgba(251,191,36,0.32)') + '" stroke-width="1.15" stroke-dasharray="' + (bm.contourDash || '7,5') + '"/>');
                 }
             }
             out.push('    </g>');
         }
+        out.push(this.renderNaturalTerrainDetailsHTML(board));
         out.push('  </g>');
+        return out.join("\n");
+    },
+
+    renderNaturalTerrainDetailsHTML: function (board) {
+        var seed = (board && board.seed) || 4599;
+        var activeTheme = this.currentTheme ||
+                          (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
+                          (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
+        var out = [];
+        out.push('    <g id="prs-micro-terrain" opacity="0.78">');
+        function hVal(idx) {
+            var v = Math.sin((seed + idx * 17) * 12.9898) * 43758.5453;
+            return v - Math.floor(v);
+        }
+        // Trsy trávy, kamínky, kvítky, uhlíky či sníh rozprostřené po mapě podle zvoleného živlu
+        var k = 1;
+        for (var gx = 70; gx <= 1330; gx += 68) {
+            for (var gy = 70; gy <= 790; gy += 64) {
+                k++;
+                var tx = Math.round(gx + (hVal(k) - 0.5) * 48);
+                var ty = Math.round(gy + (hVal(k + 100) - 0.5) * 44);
+                if (tx < 45 || tx > 1355 || ty < 45 || ty > 815) continue;
+
+                var kind = hVal(k + 200);
+
+                if (activeTheme === "fire") {
+                    if (tx > 970) {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + ty + '" rx="4.5" ry="2.2" fill="rgba(28,25,23,0.7)"/>');
+                        out.push('      <line x1="' + (tx - 3) + '" y1="' + ty + '" x2="' + (tx + 3) + '" y2="' + (ty + 1) + '" stroke="#ea580c" stroke-width="0.8"/>');
+                        if (kind > 0.5) {
+                            out.push('      <circle cx="' + (tx + 3) + '" cy="' + (ty - 1) + '" r="1.3" fill="rgba(249,115,22,0.85)"/>');
+                        }
+                    } else if (tx < 560 && ty < 450) {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + (ty + 1.5) + '" rx="8.5" ry="3.8" fill="rgba(41,13,5,0.45)"/>');
+                        out.push('      <circle cx="' + (tx - 2) + '" cy="' + (ty - 2) + '" r="1.4" fill="rgba(254,240,138,0.85)"/>');
+                        out.push('      <circle cx="' + (tx + 3) + '" cy="' + (ty - 1) + '" r="1.1" fill="rgba(249,115,22,0.8)"/>');
+                    } else {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + (ty + 1.2) + '" rx="7.0" ry="3.0" fill="rgba(67,20,7,0.35)"/>');
+                        if (kind > 0.45) {
+                            var emberCol = (kind > 0.75) ? "rgba(254,240,138,0.9)" : "rgba(249,115,22,0.85)";
+                            out.push('      <circle cx="' + tx + '" cy="' + (ty - 3) + '" r="1.2" fill="' + emberCol + '"/>');
+                        }
+                    }
+                } else if (activeTheme === "water") {
+                    if (tx > 970) {
+                        out.push('      <polygon points="' + tx + ',' + (ty - 3) + ' ' + (tx + 3) + ',' + (ty + 1) + ' ' + (tx - 3) + ',' + (ty + 1) + '" fill="rgba(186,230,253,0.7)"/>');
+                        if (kind > 0.5) {
+                            out.push('      <circle cx="' + (tx + 4) + '" cy="' + ty + '" r="1.2" fill="rgba(224,242,254,0.8)"/>');
+                        }
+                    } else if (tx < 560 && ty < 450) {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + (ty + 1.5) + '" rx="8.5" ry="4.0" fill="rgba(15,118,110,0.3)"/>');
+                        out.push('      <path d="M ' + (tx - 3) + ' ' + ty + ' L ' + (tx - 6) + ' ' + (ty - 5) + ' M ' + tx + ' ' + ty + ' L ' + tx + ' ' + (ty - 7) + ' M ' + (tx + 3) + ' ' + ty + ' L ' + (tx + 6) + ' ' + (ty - 5) + '" stroke="rgba(186,230,253,0.6)" stroke-width="1.1" stroke-linecap="round"/>');
+                    } else {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + (ty + 1.2) + '" rx="7.5" ry="3.0" fill="rgba(14,165,233,0.2)"/>');
+                        if (kind > 0.5) {
+                            out.push('      <circle cx="' + (tx - 2) + '" cy="' + (ty - 3) + '" r="1.3" fill="rgba(255,255,255,0.85)"/>');
+                            out.push('      <circle cx="' + (tx + 3) + '" cy="' + (ty - 2) + '" r="1.0" fill="rgba(186,230,253,0.75)"/>');
+                        }
+                    }
+                } else if (activeTheme === "air") {
+                    if (tx > 970) {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + ty + '" rx="4.0" ry="2.0" fill="rgba(107,33,168,0.5)"/>');
+                        if (kind > 0.5) {
+                            out.push('      <circle cx="' + (tx + 3) + '" cy="' + (ty - 2) + '" r="1.3" fill="rgba(237,233,254,0.85)"/>');
+                        }
+                    } else if (tx < 560 && ty < 450) {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + (ty + 1.5) + '" rx="8.5" ry="4.0" fill="rgba(67,56,202,0.3)"/>');
+                        out.push('      <path d="M ' + (tx - 3) + ' ' + ty + ' Q ' + (tx - 5) + ' ' + (ty - 5) + ' ' + (tx - 7) + ' ' + (ty - 6) + ' M ' + tx + ' ' + ty + ' Q ' + tx + ' ' + (ty - 6) + ' ' + (tx + 1) + ' ' + (ty - 8) + ' M ' + (tx + 3) + ' ' + ty + ' Q ' + (tx + 5) + ' ' + (ty - 5) + ' ' + (tx + 7) + ' ' + (ty - 6) + '" stroke="rgba(192,132,252,0.5)" stroke-width="1.1" stroke-linecap="round" fill="none"/>');
+                    } else {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + (ty + 1.2) + '" rx="7.0" ry="3.0" fill="rgba(124,58,237,0.2)"/>');
+                        if (kind > 0.5) {
+                            var starCol = (kind > 0.78) ? "rgba(237,233,254,0.9)" : "rgba(192,132,252,0.75)";
+                            out.push('      <circle cx="' + (tx - 2) + '" cy="' + (ty - 3) + '" r="1.3" fill="' + starCol + '"/>');
+                        }
+                    }
+                } else {
+                    if (tx > 970) {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + ty + '" rx="4.2" ry="2.2" fill="rgba(41,37,36,0.45)"/>');
+                        out.push('      <ellipse cx="' + (tx - 1.2) + '" cy="' + (ty - 0.6) + '" rx="2.6" ry="1.4" fill="rgba(168,162,158,0.42)"/>');
+                        if (kind > 0.5) {
+                            out.push('      <circle cx="' + (tx + 4) + '" cy="' + (ty + 1.2) + '" r="1.3" fill="rgba(120,113,108,0.48)"/>');
+                        }
+                    } else if (tx < 560 && ty < 450) {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + (ty + 1.5) + '" rx="9" ry="4.2" fill="rgba(20,83,45,0.28)"/>');
+                        out.push('      <path d="M ' + (tx - 3) + ' ' + ty + ' Q ' + (tx - 5) + ' ' + (ty - 5) + ' ' + (tx - 7) + ' ' + (ty - 6) + ' M ' + tx + ' ' + ty + ' Q ' + tx + ' ' + (ty - 6) + ' ' + (tx + 1) + ' ' + (ty - 8) + ' M ' + (tx + 3) + ' ' + ty + ' Q ' + (tx + 5) + ' ' + (ty - 5) + ' ' + (tx + 7) + ' ' + (ty - 6) + '" stroke="rgba(74,222,128,0.38)" stroke-width="1.15" stroke-linecap="round" fill="none"/>');
+                    } else {
+                        out.push('      <ellipse cx="' + tx + '" cy="' + (ty + 1.2) + '" rx="7.5" ry="3.2" fill="rgba(63,98,18,0.24)"/>');
+                        out.push('      <path d="M ' + (tx - 2.5) + ' ' + ty + ' L ' + (tx - 4.5) + ' ' + (ty - 5) + ' M ' + tx + ' ' + ty + ' L ' + tx + ' ' + (ty - 6.5) + ' M ' + (tx + 2.5) + ' ' + ty + ' L ' + (tx + 4.8) + ' ' + (ty - 4.8) + '" stroke="rgba(163,230,53,0.40)" stroke-width="1.1" stroke-linecap="round"/>');
+                        if (kind > 0.62) {
+                            var flCol = (kind > 0.82) ? "rgba(253,224,71,0.65)" : "rgba(244,114,182,0.58)";
+                            out.push('      <circle cx="' + (tx - 3.5) + '" cy="' + (ty - 4.5) + '" r="1.3" fill="' + flCol + '"/>');
+                            out.push('      <circle cx="' + (tx + 3.8) + '" cy="' + (ty - 3.5) + '" r="1.1" fill="rgba(254,240,138,0.65)"/>');
+                        }
+                    }
+                }
+            }
+        }
+        out.push('    </g>');
         return out.join("\n");
     },
 
@@ -1111,8 +1305,8 @@
         var rptsList = this._cachedRiverPoints;
         if (!rptsList || rptsList.length === 0) return false;
         var radius = dec.clearance || Math.max(dec.w || 50, dec.h || 50) * 0.35;
-        // Budovy a dominanty nesmí stát na korytu řeky ani přesahovat břeh
-        var isBuilding = Boolean(dec.catalogId && (
+        var isWatermill = Boolean(dec.catalogId && dec.catalogId.indexOf("watermill") !== -1);
+        var isBuilding = Boolean(dec.catalogId && !isWatermill && (
             dec.catalogId.indexOf("tower") !== -1 ||
             dec.catalogId.indexOf("castle") !== -1 ||
             dec.catalogId.indexOf("hut") !== -1 ||
@@ -1120,7 +1314,7 @@
             dec.catalogId.indexOf("ruins") !== -1 ||
             dec.catalogId.indexOf("watchtower") !== -1
         ));
-        var extraClear = isBuilding ? 32 : 18;
+        var extraClear = isWatermill ? 8 : (isBuilding ? 28 : 14);
         for (var i = 0; i < rptsList.length; i++) {
             var rp = rptsList[i];
             var dx = rp.x - dec.x, dy = rp.y - dec.y;
@@ -1831,25 +2025,41 @@
             out.push('      <ellipse cx="' + (lrx * 0.25).toFixed(1) + '" cy="' + (-lry * 0.2).toFixed(1) + '" rx="' + (lrx * 0.35).toFixed(1) + '" ry="' + (lry * 0.25).toFixed(1) + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.7)") + '" stroke-width="0.9" stroke-dasharray="8,5" opacity="0.8"/>');
             out.push('      <circle cx="' + (-lrx * 0.3).toFixed(1) + '" cy="' + (lry * 0.15).toFixed(1) + '" r="2.2" fill="none" stroke="' + (rTheme.streamColor2 || "rgba(255,255,255,0.5)") + '" stroke-width="0.7"/>');
 
-            // 6. Přírodní detaily: Lekníny, rákosí a rybářská pramička
-            out.push('      <ellipse cx="' + (-lrx * 0.45).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" rx="4.5" ry="3.0" fill="#2d6a4f" stroke="' + ink + '" stroke-width="0.5"/>');
-            out.push('      <ellipse cx="' + (-lrx * 0.35).toFixed(1) + '" cy="' + (-lry * 0.55).toFixed(1) + '" rx="3.6" ry="2.4" fill="#40916c"/>');
-            out.push('      <circle cx="' + (-lrx * 0.45).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" r="1.3" fill="#fbcfe8"/>');
+            // 6. Přírodní detaily podle vybraného živlu
+            if (activeTheme === "fire") {
+                out.push('      <ellipse cx="' + (-lrx * 0.45).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" rx="5.5" ry="3.2" fill="#1c1917" stroke="' + ink + '" stroke-width="0.7"/>');
+                out.push('      <circle cx="' + (-lrx * 0.45).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" r="2.2" fill="#ea580c"/>');
+                out.push('      <circle cx="' + (-lrx * 0.45).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" r="1.1" fill="#fef08a"/>');
+                out.push('      <polygon points="' + (lrx * 0.4).toFixed(1) + ',' + (lry * 0.3).toFixed(1) + ' ' + (lrx * 0.52).toFixed(1) + ',' + (-lry * 0.6).toFixed(1) + ' ' + (lrx * 0.62).toFixed(1) + ',' + (lry * 0.35).toFixed(1) + '" fill="#f97316"/>');
+                out.push('      <circle cx="' + (lrx * 0.52).toFixed(1) + '" cy="' + (-lry * 0.6).toFixed(1) + '" r="1.4" fill="#fef08a"/>');
+            } else if (activeTheme === "water") {
+                out.push('      <polygon points="' + (-lrx * 0.5).toFixed(1) + ',' + (-lry * 0.2).toFixed(1) + ' ' + (-lrx * 0.3).toFixed(1) + ',' + (-lry * 0.55).toFixed(1) + ' ' + (-lrx * 0.1).toFixed(1) + ',' + (-lry * 0.3).toFixed(1) + ' ' + (-lrx * 0.25).toFixed(1) + ',0" fill="#e0f2fe" stroke="#38bdf8" stroke-width="0.8"/>');
+                out.push('      <circle cx="' + (-lrx * 0.3).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" r="1.2" fill="#fff"/>');
+                out.push('      <polygon points="' + (lrx * 0.35).toFixed(1) + ',' + (lry * 0.2).toFixed(1) + ' ' + (lrx * 0.55).toFixed(1) + ',' + (-lry * 0.3).toFixed(1) + ' ' + (lrx * 0.68).toFixed(1) + ',' + (lry * 0.25).toFixed(1) + '" fill="#bae6fd" stroke="#0284c7" stroke-width="0.6"/>');
+            } else if (activeTheme === "air") {
+                out.push('      <polygon points="' + (-lrx * 0.35).toFixed(1) + ',' + (-lry * 0.6).toFixed(1) + ' ' + (-lrx * 0.25).toFixed(1) + ',' + (-lry * 0.35).toFixed(1) + ' ' + (-lrx * 0.35).toFixed(1) + ',-' + (-lry * 0.1).toFixed(1) + ' ' + (-lrx * 0.45).toFixed(1) + ',' + (-lry * 0.35).toFixed(1) + '" fill="#c084fc" stroke="#f3e8ff" stroke-width="0.7"/>');
+                out.push('      <circle cx="' + (-lrx * 0.35).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" r="1.2" fill="#ffffff"/>');
+                out.push('      <circle cx="' + (lrx * 0.45).toFixed(1) + '" cy="' + (lry * 0.15).toFixed(1) + '" r="2.0" fill="#ede9fe" opacity="0.8"/>');
+            } else {
+                out.push('      <ellipse cx="' + (-lrx * 0.45).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" rx="4.5" ry="3.0" fill="#2d6a4f" stroke="' + ink + '" stroke-width="0.5"/>');
+                out.push('      <ellipse cx="' + (-lrx * 0.35).toFixed(1) + '" cy="' + (-lry * 0.55).toFixed(1) + '" rx="3.6" ry="2.4" fill="#40916c"/>');
+                out.push('      <circle cx="' + (-lrx * 0.45).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" r="1.3" fill="#fbcfe8"/>');
 
-            out.push('      <path d="M ' + (lrx * 0.55).toFixed(1) + ' ' + (lry * 0.3).toFixed(1) + ' L ' + (lrx * 0.62).toFixed(1) + ' ' + (-lry * 0.7).toFixed(1) + ' M ' + (lrx * 0.70).toFixed(1) + ' ' + (lry * 0.4).toFixed(1) + ' L ' + (lrx * 0.78).toFixed(1) + ' ' + (-lry * 0.85).toFixed(1) + '" stroke="#606c38" stroke-width="1.3" stroke-linecap="round"/>');
-            out.push('      <ellipse cx="' + (lrx * 0.62).toFixed(1) + '" cy="' + (-lry * 0.7).toFixed(1) + '" rx="1.2" ry="2.6" fill="#4a2810" stroke="' + ink + '" stroke-width="0.4"/>');
-            out.push('      <ellipse cx="' + (lrx * 0.78).toFixed(1) + '" cy="' + (-lry * 0.85).toFixed(1) + '" rx="1.1" ry="2.3" fill="#4a2810" stroke="' + ink + '" stroke-width="0.4"/>');
+                out.push('      <path d="M ' + (lrx * 0.55).toFixed(1) + ' ' + (lry * 0.3).toFixed(1) + ' L ' + (lrx * 0.62).toFixed(1) + ' ' + (-lry * 0.7).toFixed(1) + ' M ' + (lrx * 0.70).toFixed(1) + ' ' + (lry * 0.4).toFixed(1) + ' L ' + (lrx * 0.78).toFixed(1) + ' ' + (-lry * 0.85).toFixed(1) + '" stroke="#606c38" stroke-width="1.3" stroke-linecap="round"/>');
+                out.push('      <ellipse cx="' + (lrx * 0.62).toFixed(1) + '" cy="' + (-lry * 0.7).toFixed(1) + '" rx="1.2" ry="2.6" fill="#4a2810" stroke="' + ink + '" stroke-width="0.4"/>');
+                out.push('      <ellipse cx="' + (lrx * 0.78).toFixed(1) + '" cy="' + (-lry * 0.85).toFixed(1) + '" rx="1.1" ry="2.3" fill="#4a2810" stroke="' + ink + '" stroke-width="0.4"/>');
 
-            var boatX = (lrx * 0.30).toFixed(1);
-            var boatY = (lry * 0.45).toFixed(1);
-            out.push('      <g transform="translate(' + boatX + ',' + boatY + ') rotate(-22)">');
-            out.push('        <ellipse cx="0" cy="1" rx="6.5" ry="2.6" fill="rgba(0,0,0,0.28)"/>');
-            out.push('        <path d="M -6.5 0 Q 0 -2.4 6.5 0 Q 0 2.4 -6.5 0 Z" fill="#854d0e" stroke="' + ink + '" stroke-width="0.8"/>');
-            out.push('        <line x1="-3" y1="0" x2="3" y2="0" stroke="#ca8a04" stroke-width="0.6"/>');
-            out.push('        <line x1="0" y1="-2" x2="0" y2="2" stroke="#713f12" stroke-width="0.7"/>');
-            out.push('        <circle cx="7.2" cy="0.6" r="0.9" fill="#78350f"/>');
-            out.push('        <line x1="6" y1="0" x2="7.2" y2="0.6" stroke="#fef08a" stroke-width="0.5"/>');
-            out.push('      </g>');
+                var boatX = (lrx * 0.30).toFixed(1);
+                var boatY = (lry * 0.45).toFixed(1);
+                out.push('      <g transform="translate(' + boatX + ',' + boatY + ') rotate(-22)">');
+                out.push('        <ellipse cx="0" cy="1" rx="6.5" ry="2.6" fill="rgba(0,0,0,0.28)"/>');
+                out.push('        <path d="M -6.5 0 Q 0 -2.4 6.5 0 Q 0 2.4 -6.5 0 Z" fill="#854d0e" stroke="' + ink + '" stroke-width="0.8"/>');
+                out.push('        <line x1="-3" y1="0" x2="3" y2="0" stroke="#ca8a04" stroke-width="0.6"/>');
+                out.push('        <line x1="0" y1="-2" x2="0" y2="2" stroke="#713f12" stroke-width="0.7"/>');
+                out.push('        <circle cx="7.2" cy="0.6" r="0.9" fill="#78350f"/>');
+                out.push('        <line x1="6" y1="0" x2="7.2" y2="0.6" stroke="#fef08a" stroke-width="0.5"/>');
+                out.push('      </g>');
+            }
 
             out.push('    </g>');
         }
@@ -2251,13 +2461,9 @@
 
         }
 
-        // Skládací přehyby trojdílného plánu
-
-        out.push('  <line x1="466" y1="16" x2="466" y2="844" stroke="rgba(212,175,55,0.14)" stroke-width="1.5" stroke-dasharray="8,8" />');
-
-        out.push('  <line x1="933" y1="16" x2="933" y2="844" stroke="rgba(212,175,55,0.14)" stroke-width="1.5" stroke-dasharray="8,8" />');
-
-        out.push('  <rect x="14" y="14" width="1372" height="832" rx="16" fill="none" stroke="rgba(212,175,55,0.25)" stroke-width="1.5"/>');
+        // Kartografický dvojitý rám královské mapy (bez umělých čárkovaných přehybů)
+        out.push('  <rect x="10" y="10" width="1380" height="840" rx="18" fill="none" stroke="rgba(212,175,55,0.34)" stroke-width="1.3"/>');
+        out.push('  <rect x="16" y="16" width="1368" height="828" rx="14" fill="none" stroke="rgba(212,175,55,0.22)" stroke-width="1.0" stroke-dasharray="14,6,3,6"/>');
 
         // 1b. Sémantické akvarelové biomy a vrstevnice
         if (this.state.board && this.state.board.biomes && this.state.board.biomes.length > 0) {
@@ -2324,9 +2530,12 @@
             out.push('  <g class="board-landmark" transform="translate(' + (lmk.x - lmk.w / 2) + ',' + (lmk.y - lmk.h / 2) + ')">');
 
             if (customLmUrl) {
+                // Přirozené terénní lůžko a kontaktní stín pod dominantou (hrad, citadela, dračí sluj)
+                var lmBaseGrad = (lmk.id === "dragonLair" || customLmUrl.indexOf("dragon") !== -1) ? "groundStoneGrad" : "groundMossGrad";
+                out.push('    <ellipse cx="' + (lmk.w / 2) + '" cy="' + (lmk.h - 24) + '" rx="' + Math.round(lmk.w * 0.48) + '" ry="' + Math.round(lmk.h * 0.24) + '" fill="url(#' + lmBaseGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
+                out.push('    <ellipse cx="' + (lmk.w / 2) + '" cy="' + (lmk.h - 20) + '" rx="' + Math.round(lmk.w * 0.39) + '" ry="' + Math.round(lmk.h * 0.16) + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
 
-                // Průsvitná 3D izometrická ilustrace hradu nebo draka (přirozeně posazená na mapě bez plovoucího stínu)
-
+                // Průsvitná 3D izometrická ilustrace hradu nebo draka
                 out.push('    <image href="' + this.escapeHtml(customLmUrl) + '" x="0" y="0" width="' + lmk.w + '" height="' + (lmk.h - 10) + '" preserveAspectRatio="xMidYMid meet"/>');
 
                 if (lmk.id === "royalCastle") {
@@ -2378,7 +2587,7 @@
 
                 out.push('    <text x="' + (lmk.w / 2) + '" y="76" text-anchor="middle" font-size="36">🏰</text>');
 
-                out.push('    <text x="' + (lmk.w / 2) + '" y="102" text-anchor="middle" fill="#f3e5ab" font-family="Cinzel, serif" font-size="14" font-weight="bold">KRÁLOVSKÝ HRAD</text>');
+                out.push('    <text x="' + (lmk.w / 2) + '" y="102" text-anchor="middle" fill="#f3e5ab" font-family="Cinzel, serif" font-size="14" font-weight="bold">' + this.escapeHtml((window.PRS_I18n ? window.PRS_I18n.t("castles.royal.name", null, "KRÁLOVSKÝ HRAD") : "KRÁLOVSKÝ HRAD").toUpperCase()) + '</text>');
 
                 var scn = (this.state.config && this.state.config.scenario) || "CLASSIC";
                 var scnTitle = "♡ PRINCEZNINO SRDCE (" + this.state.config.targetHearts + " 💖) ♡";
@@ -2628,27 +2837,45 @@
                 }
 
                 var cat = window.PRS_DECOR_CATALOG ? window.PRS_DECOR_CATALOG[dec.catalogId] : null;
+                var catType = (cat && cat.category) || "vegetation";
+                var cushionGrad = "groundMossGrad";
+                if (catType === "settlement" || catType === "agriculture") cushionGrad = "groundEarthGrad";
+                else if (catType === "terrain" || catType === "quest_lair" || catType === "civilization") cushionGrad = "groundStoneGrad";
+                else if (catType === "water") cushionGrad = "groundWaterGrad";
+                else if (catType === "magic") cushionGrad = "groundMagicGrad";
+
+                var footY = Math.round(dec.h * 0.28);
+                var cushRx = Math.round(dec.w * 0.48);
+                var cushRy = Math.max(8, Math.round(dec.h * 0.21));
+                var shadRx = Math.round(dec.w * 0.36);
+                var shadRy = Math.max(5, Math.round(dec.h * 0.13));
 
                 var decorUrl = (this.graphicsConfig && this.graphicsConfig.decorBitmaps && this.graphicsConfig.decorBitmaps[dec.catalogId])
-
                     ? this.graphicsConfig.decorBitmaps[dec.catalogId]
-
                     : (cat ? (dec.isFlipped && cat.imgFlip ? cat.imgFlip : cat.img) : "");
 
-                if (decorUrl) {
-
-                    if (dec.isFlipped && decorUrl.indexOf("_flip") === -1 && cat && cat.imgFlip) {
-
+                if (decorUrl && dec.isFlipped) {
+                    if (cat && cat.imgFlip) {
                         decorUrl = cat.imgFlip;
-
+                    } else if (decorUrl.indexOf("_flip") === -1) {
+                        decorUrl = decorUrl.replace(/(\.png)(\?.*)?$/i, "_flip$1$2");
                     }
+                }
+
+                if (decorUrl) {
 
                     var sc = dec.scale || 1;
 
                     out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')" onclick="PRS_App.handleDecorClick(\'' + dec.catalogId + '\', ' + dec.x + ', ' + dec.y + ', event)" style="cursor:pointer;">');
-
+                    // Přirozené terénní lůžko a kontaktní stín ukotvující prvek do krajiny
+                    out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
+                    out.push('      <ellipse cx="0" cy="' + (footY + 2) + '" rx="' + shadRx + '" ry="' + shadRy + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
                     out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid meet"/>');
-
+                    if (catType === "vegetation" || catType === "settlement" || catType === "agriculture") {
+                        var tuftY = footY + Math.round(shadRy * 0.45);
+                        var tuftX = Math.round(shadRx * 0.52);
+                        out.push('      <path d="M ' + (-tuftX - 2) + ' ' + tuftY + ' L ' + (-tuftX - 4) + ' ' + (tuftY - 4.5) + ' M ' + (-tuftX) + ' ' + tuftY + ' L ' + (-tuftX) + ' ' + (tuftY - 5.5) + ' M ' + (tuftX - 1) + ' ' + (tuftY + 1) + ' L ' + (tuftX + 1) + ' ' + (tuftY - 4) + ' M ' + (tuftX + 1.5) + ' ' + (tuftY + 1) + ' L ' + (tuftX + 3.5) + ' ' + (tuftY - 3.5) + '" stroke="rgba(132,204,22,0.46)" stroke-width="1.15" stroke-linecap="round" pointer-events="none"/>');
+                    }
                     out.push('    </g>');
 
                 } else if (cat && cat.renderSVG) {
@@ -2656,7 +2883,8 @@
                     var sc = dec.scale || 1;
 
                     out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')">');
-
+                    out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
+                    out.push('      <ellipse cx="0" cy="' + (footY + 2) + '" rx="' + shadRx + '" ry="' + shadRy + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
                     out.push(cat.renderSVG());
 
                     out.push('    </g>');
@@ -3602,29 +3830,39 @@
 
         var ownerText = "";
 
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var currStr = isEn ? "g." : "zl.";
+
         if (nd.owner !== null && this.state.players[nd.owner]) {
 
             var ownerP = this.state.players[nd.owner];
 
             var curRent = window.PRS_GameEngine.calculateNodeRent(this.state, nd, activePlayer);
 
-            ownerText = '<div class="prs-tooltip-meta">👑 Vlastník: <strong style="color:' + ownerP.color + '">' + this.escapeHtml(ownerP.name) + '</strong></div>' +
+            var rentFormatted = curRent.toLocaleString(isEn ? "en-US" : "cs-CZ") + " " + currStr;
 
-                        '<div class="prs-tooltip-rent">🛑 Vstupné / Nájem: <strong style="color:#f87171">' + curRent.toLocaleString("cs-CZ") + ' zl.</strong></div>';
+            ownerText = '<div class="prs-tooltip-meta">' + t("tooltips.owner", { color: ownerP.color, name: this.escapeHtml(ownerP.name) }, '👑 Vlastník: <strong style="color:' + ownerP.color + '">' + this.escapeHtml(ownerP.name) + '</strong>') + '</div>' +
+
+                        '<div class="prs-tooltip-rent">' + t("tooltips.rent", { rent: rentFormatted }, '🛑 Vstupné / Nájem: <strong style="color:#f87171">' + rentFormatted + '</strong>') + '</div>';
 
         } else if (nd.price) {
 
-            var priceRent = '💰 Cena: <strong>' + nd.price.toLocaleString("cs-CZ") + ' zl.</strong>';
+            var priceFormatted = nd.price.toLocaleString(isEn ? "en-US" : "cs-CZ") + " " + currStr;
 
             if (nd.rent) {
 
                 var rentVal = Array.isArray(nd.rent) ? (nd.rent[nd.villageLevel || 1] || nd.rent[0]) : (typeof nd.rent === "object" ? nd.rent[nd.villageLevel || 1] : nd.rent);
 
-                priceRent += ' | Základní nájem: <strong>' + (rentVal || 0) + ' zl.</strong>';
+                var rFormatted = (rentVal || 0).toLocaleString(isEn ? "en-US" : "cs-CZ") + " " + currStr;
+
+                ownerText = '<div class="prs-tooltip-meta">' + t("tooltips.price_rent", { price: priceFormatted, rent: rFormatted }, '💰 Cena: <strong>' + priceFormatted + '</strong> | Základní nájem: <strong>' + rFormatted + '</strong>') + '</div>';
+
+            } else {
+
+                ownerText = '<div class="prs-tooltip-meta">' + t("tooltips.price_only", { price: priceFormatted }, '💰 Cena: <strong>' + priceFormatted + '</strong>') + '</div>';
 
             }
-
-            ownerText = '<div class="prs-tooltip-meta">' + priceRent + '</div>';
 
         }
 
@@ -3658,17 +3896,17 @@
 
             if (myAnimals.length === 3) {
 
-                extraInfoHtml = '<div class="prs-tooltip-set prs-set-complete">✨ Vlastníš celou sadu č. ' + setNum + ' (3/3)! Nájem 80 % &amp; bonus +1,0 💖</div>';
+                extraInfoHtml = '<div class="prs-tooltip-set prs-set-complete">' + t("tooltips.set_complete", { set: setNum }, '✨ Vlastníš celou sadu č. ' + setNum + ' (3/3)! Nájem 80 % &amp; bonus +1,0 💖') + '</div>';
 
             } else if (myAnimals.length > 0) {
 
-                var myKinds = myAnimals.map(function(a){ return a.subtype === "horse" ? "Kůň" : (a.subtype === "dog" ? "Pes" : "Sokol"); }).join(", ");
+                var myKinds = myAnimals.map(function(a){ return a.subtype === "horse" ? t("animals.horse", null, "Kůň") : (a.subtype === "dog" ? t("animals.dog", null, "Pes") : t("animals.falcon", null, "Sokol")); }).join(", ");
 
-                extraInfoHtml = '<div class="prs-tooltip-set prs-set-partial">🐾 V sadě č. ' + setNum + ' vlastníš: <strong>' + myAnimals.length + '/3 (' + myKinds + ')</strong></div>';
+                extraInfoHtml = '<div class="prs-tooltip-set prs-set-partial">' + t("tooltips.set_partial", { set: setNum, count: myAnimals.length, kinds: myKinds }, '🐾 V sadě č. ' + setNum + ' vlastníš: <strong>' + myAnimals.length + '/3 (' + myKinds + ')</strong>') + '</div>';
 
             } else {
 
-                extraInfoHtml = '<div class="prs-tooltip-set">🐾 Sada č. ' + setNum + ' (Kůň, Pes, Sokol) – zatím z ní nic nevlastníš</div>';
+                extraInfoHtml = '<div class="prs-tooltip-set">' + t("tooltips.set_none", { set: setNum }, '🐾 Sada č. ' + setNum + ' (Kůň, Pes, Sokol) – zatím z ní nic nevlastníš') + '</div>';
 
             }
 
@@ -3680,41 +3918,41 @@
 
             var taxYield = (vLvl === 1 ? 500 : (vLvl === 2 ? 900 : 1400));
 
-            var upgInfo = (vLvl < 3) ? '<div class="prs-tooltip-meta" style="color:#86efac">🔨 Vylepšení na ' + (vLvl + 1) + '★ stojí 1 500 zl.</div>' : '<div class="prs-tooltip-meta" style="color:#cbd5e1">🏰 Plně opevněná tvrz (3★)</div>';
+            var upgInfo = (vLvl < 3) ? '<div class="prs-tooltip-meta" style="color:#86efac">' + t("tooltips.village_upgrade", { stars: (vLvl + 1) + "★" }, '🔨 Vylepšení na ' + (vLvl + 1) + '★ stojí 1 500 zl.') + '</div>' : '<div class="prs-tooltip-meta" style="color:#cbd5e1">' + t("tooltips.village_max", null, '🏰 Plně opevněná tvrz (3★)') + '</div>';
 
-            extraInfoHtml = '<div class="prs-tooltip-meta">🏛️ Úroveň: <strong style="color:#fde047">' + vStars + ' (' + vLvl + '. st.)</strong> | Daň VD: <strong>+' + taxYield + ' zl.</strong></div>' + upgInfo;
+            extraInfoHtml = '<div class="prs-tooltip-meta">' + t("tooltips.village_tier", { stars: vStars, lvl: vLvl, tax: (taxYield + " " + currStr) }, '🏛️ Úroveň: <strong style="color:#fde047">' + vStars + ' (' + vLvl + '. st.)</strong> | Daň VD: <strong>+' + taxYield + ' zl.</strong>') + '</div>' + upgInfo;
 
         } else if (nd.type === "CASTLE") {
 
-            extraInfoHtml = '<div class="prs-tooltip-meta" style="color:#e9d5ff">👑 Šlechtické sídlo | Daň VD: <strong>+2 500 zl.</strong> | Trvale <strong>+1 Charisma</strong> &amp; audience u krále!</div>';
+            extraInfoHtml = '<div class="prs-tooltip-meta" style="color:#e9d5ff">' + t("tooltips.castle_perk", null, '👑 Šlechtické sídlo | Daň VD: <strong>+2 500 zl.</strong> | Trvale <strong>+1 Charisma</strong> &amp; audience u krále!') + '</div>';
 
         } else if (nd.type === "TOWN") {
 
-            extraInfoHtml = '<div class="prs-tooltip-meta" style="color:#93c5fd">🏙️ Bohaté město | Daň VD: <strong>+1 200 zl.</strong> | Zajišťuje šlechtický titul a audienci!</div>';
+            extraInfoHtml = '<div class="prs-tooltip-meta" style="color:#93c5fd">' + t("tooltips.town_perk", null, '🏙️ Bohaté město | Daň VD: <strong>+1 200 zl.</strong> | Zajišťuje šlechtický titul a audienci!') + '</div>';
 
         } else if (nd.type === "QUEST") {
 
             if (nd.subtype === "U3") {
 
-                extraInfoHtml = '<div class="prs-tooltip-set prs-set-complete" style="background:rgba(220,38,38,0.25);border-color:#ef4444;color:#fca5a5;">🐉 Dračí sluj! Výhra: 8 000 – 12 000 zl., Věci 3 a <strong>+4 až +6 💖</strong>!</div>';
+                extraInfoHtml = '<div class="prs-tooltip-set prs-set-complete" style="background:rgba(220,38,38,0.25);border-color:#ef4444;color:#fca5a5;">' + t("tooltips.quest_u3", null, '🐉 Dračí sluj! Výhra: 8 000 – 12 000 zl., Věci 3 a <strong>+4 až +6 💖</strong>!') + '</div>';
 
             } else if (nd.subtype === "U2") {
 
-                extraInfoHtml = '<div class="prs-tooltip-set" style="color:#fdba74;">👹 Monstrum: Výhra 3 500 – 5 000 zl., Věci 1 a <strong>+1 💖</strong>.</div>';
+                extraInfoHtml = '<div class="prs-tooltip-set" style="color:#fdba74;">' + t("tooltips.quest_u2", null, '👹 Monstrum: Výhra 3 500 – 5 000 zl., Věci 1 a <strong>+1 💖</strong>.') + '</div>';
 
             } else {
 
-                extraInfoHtml = '<div class="prs-tooltip-set">🐗 Lov zvěře: Výhra 1 500 – 2 500 zl.</div>';
+                extraInfoHtml = '<div class="prs-tooltip-set">' + t("tooltips.quest_u1", null, '🐗 Lov zvěře: Výhra 1 500 – 2 500 zl.') + '</div>';
 
             }
 
         } else if (nd.type === "START") {
 
-            extraInfoHtml = '<div class="prs-tooltip-set" style="color:#93c5fd;">🏁 Žold: <strong>+3 000 zl.</strong> (+5 000 zl. pro bezzemky) | Audience: +0,5 až +1,0 💖 (vyžaduje Hrad/Město)</div>';
+            extraInfoHtml = '<div class="prs-tooltip-set" style="color:#93c5fd;">' + t("tooltips.start_perk", null, '🏁 Žold: <strong>+3 000 zl.</strong> (+5 000 zl. pro bezzemky) | Audience: +0,5 až +1,0 💖 (vyžaduje Hrad/Město)') + '</div>';
 
         }
 
-        tip.innerHTML = '<div class="prs-tooltip-header"><span>' + (nd.icon || '📍') + '</span> <span>' + this.escapeHtml(nd.name || nd.code) + '</span></div>' +
+        tip.innerHTML = '<div class="prs-tooltip-header"><span>' + (nd.icon || '📍') + '</span> <span>' + this.escapeHtml(this.getNodeDisplayName(nd)) + '</span></div>' +
 
             '<div class="prs-tooltip-meta">' + typeLabel + (nd.code ? ' (' + nd.code + ')' : '') + '</div>' +
 
@@ -3762,94 +4000,157 @@
 
     },
 
-    getNodeCategoryLabel: function (nd) {
 
-        switch (nd.type) {
-
-            case "START": return "Královská audience (Cíl &amp; Start)";
-
-            case "FESTIVAL": return "Královský turnaj a ples";
-
-            case "VILLAGE": return "Panství - Vesnice (Úroveň " + (nd.villageLevel || 1) + "/3)";
-
-            case "TOWN": return "Panství - Opevněné Město";
-
-            case "CASTLE": return "Panství - Rytířský Hrad";
-
-            case "ANIMAL":
-
-                var animalKind = nd.subtype === "horse" ? "Kůň" : (nd.subtype === "dog" ? "Pes" : "Sokol");
-
-                var setN = nd.setId || (nd.code && nd.code.match(/\d+/) ? nd.code.match(/\d+/)[0] : "");
-
-                return "Chovné zvíře - " + animalKind + " (Sada " + setN + ")";
-
-            case "QUEST": return "Výprava &amp; Boj (" + (nd.subtype || "Běžný") + ")";
-
-            case "MERCHANT": return "Královský trh a obchodník";
-
-            case "MASTER": return "Mistr řemesel (Trénink dovedností)";
-
-            case "CHANCE": return "Karta osudu a náhody";
-
-            case "JESTER": return "Královský šašek";
-
-            case "TAVERN": return "Hostinec U Zlatého kance";
-
-            case "PRISON": return "Královská šatlava";
-
-            case "HOSPITAL": return "Špitál sv. Lazara";
-
-            case "TAX": return "Královská berně (Daň)";
-
-            case "BONUS": return "Pokladnice a odměna";
-
-            default: return "Herní pole";
-
+    getLandmarkDisplayName: function (lmk) {
+        if (!lmk) return "";
+        if (lmk.id === "royalCastle") {
+            return window.PRS_I18n ? window.PRS_I18n.t("castles.royal.name", null, lmk.name || "Královský Hrad") : (lmk.name || "Královský Hrad");
         }
+        var cKey = "";
+        if (lmk.castleKey) {
+            cKey = lmk.castleKey;
+        } else if (lmk.image) {
+            var m = lmk.image.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpg)/i);
+            if (m) cKey = m[1];
+        } else if (lmk.id && lmk.id.indexOf("castle_") === 0) {
+            cKey = lmk.id.replace("castle_", "");
+        }
+        if (cKey && window.PRS_I18n) {
+            var trans = window.PRS_I18n.t("castles." + cKey + ".name");
+            if (trans && trans !== ("castles." + cKey + ".name")) {
+                return trans;
+            }
+        }
+        var raw = (lmk.name || "").trim();
+        if (raw && window.PRS_I18n) {
+            var cList = ["ice", "lava", "crystal", "forest", "desert", "wind", "water", "swamp", "dark", "royal"];
+            for (var i = 0; i < cList.length; i++) {
+                var k = cList[i];
+                var defCs = (window.PRS_I18N && window.PRS_I18N.cs && window.PRS_I18N.cs.castles && window.PRS_I18N.cs.castles[k]) ? window.PRS_I18N.cs.castles[k].name : "";
+                var defEn = (window.PRS_I18N && window.PRS_I18N.en && window.PRS_I18N.en.castles && window.PRS_I18N.en.castles[k]) ? window.PRS_I18N.en.castles[k].name : "";
+                if ((defCs && raw.indexOf(defCs) !== -1) || (defEn && raw.indexOf(defEn) !== -1) || raw.toLowerCase().indexOf(k) !== -1) {
+                    return window.PRS_I18n.t("castles." + k + ".name", null, raw);
+                }
+            }
+        }
+        return raw;
+    },
 
+    getNodeDisplayName: function (nd) {
+        if (!nd) return "";
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        if (nd.type === "CASTLE") {
+            var cKey = nd.castleKey || "";
+            if (!cKey && nd.castleImg) {
+                var m = nd.castleImg.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpg)/i);
+                if (m) cKey = m[1];
+            }
+            if (!cKey && nd.estateId && nd.estateId.indexOf("H") === 0) {
+                cKey = "H" + nd.estateId.replace("H", "");
+            }
+            var cName = (cKey && window.PRS_I18n) ? window.PRS_I18n.t("castles." + cKey + ".name") : "";
+            if (cName && cName !== ("castles." + cKey + ".name")) {
+                var prefix = isEn ? "Castle " : "Hrad ";
+                var num = nd.estateId ? nd.estateId.replace("H", "") : (nd.code ? nd.code.replace("H", "") : "");
+                return prefix + (num ? (num + " ") : "") + "(" + cName + ")";
+            }
+        }
+        if (nd.type === "START") {
+            return isEn ? "START (+3,000 g.)" : "START (+3 000 zl.)";
+        }
+        if (nd.type === "ANIMAL" && isEn) {
+            var aName = nd.name || "";
+            aName = aName.replace(/^Kůň\b/i, "Horse").replace(/^Pes\b/i, "Dog").replace(/^Sokol\b/i, "Falcon");
+            var breedDict = {
+                "Grošák": "Dapple Grey", "Hnědák": "Bay Horse", "Vraník": "Black Steed", "Ryzák": "Chestnut",
+                "Bělouš": "White Steed", "Plavák": "Dun Horse", "Šiml": "Grey Horse", "Fríský oř": "Friesian Steed",
+                "Andaluský hřebec": "Andalusian Stallion", "Válečný oř": "Warhorse", "Hvězdný hřebec": "Astral Stallion",
+                "Královský oř": "Royal Steed", "Zlatý palomino": "Golden Palomino", "Stínový oř": "Shadow Steed",
+                "Poštolka": "Kestrel", "Krahujec": "Sparrowhawk", "Ostříž": "Hobby", "Raroh": "Saker Falcon",
+                "Královský ostříž": "Royal Hobby", "Sokol stěhovavý": "Peregrine Falcon", "Luňák": "Red Kite", "Lunák": "Red Kite",
+                "Orlovec": "Osprey", "Jestřáb": "Goshawk", "Sokol královský": "King Falcon", "Bílý raroh": "White Saker",
+                "Fénixův sokol": "Phoenix Falcon", "Skalní orel": "Golden Eagle", "Noční raroh": "Night Falcon",
+                "Ohař": "Pointer", "Bígl": "Beagle", "Chrt": "Greyhound", "Barvář": "Bloodhound",
+                "Slídič": "Tracker", "Vlkodav": "Wolfhound", "Doga": "Great Dane", "Chrtí král": "King Greyhound",
+                "Lovecký chrt": "Hunting Hound", "Královský chrt": "Royal Greyhound", "Stříbrný ohař": "Silver Hound",
+                "Zlatý chrt": "Golden Greyhound", "Severní vlkodav": "Northern Wolfhound", "Hradní chrlič": "Castle Gargoyle"
+            };
+            for (var bKey in breedDict) {
+                var re = new RegExp("\\b" + bKey + "\\b", "i");
+                if (re.test(aName)) {
+                    aName = aName.replace(re, breedDict[bKey]);
+                    break;
+                }
+            }
+            return aName;
+        }
+        if (isEn && nd.name) {
+            var nameEn = nd.name;
+            if (nd.type === "VILLAGE") nameEn = nameEn.replace(/^Vesnice\b/i, "Village");
+            else if (nd.type === "TOWN") nameEn = nameEn.replace(/^Město\b/i, "Town");
+            else if (nd.type === "TAX") nameEn = "Royal Tax Collector";
+            else if (nd.type === "MERCHANT") nameEn = "Royal Market";
+            else if (nd.type === "HOSPITAL") nameEn = "Royal Infirmary";
+            else if (nd.type === "MASTER") nameEn = nameEn.replace(/^Sídlo Mistra\b/i, "Master's Guild");
+            else if (nd.type === "JESTER") nameEn = nameEn.replace(/^Kejklíř\b/i, "Jester");
+            else if (nd.type === "CHANCE") nameEn = "Tile of Fate (Chance)";
+            else if (nd.type === "PRISON") nameEn = "Royal Dungeon";
+            else if (nd.type === "TAVERN") nameEn = "Golden Tankard Tavern";
+            else if (nd.type === "FESTIVAL") nameEn = "Royal Festival";
+            return nameEn;
+        }
+        return nd.name || nd.code || "";
+    },
+
+    getNodeCategoryLabel: function (nd) {
+        if (!nd) return "Herní pole";
+        var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        switch (nd.type) {
+            case "START": return t("tooltips.types.START", null, "Královská audience (Cíl &amp; Start)");
+            case "FESTIVAL": return t("tooltips.types.FESTIVAL", null, "Královský turnaj a ples");
+            case "VILLAGE": return t("tooltips.types.VILLAGE", { lvl: nd.villageLevel || 1 }, "Panství - Vesnice (Úroveň " + (nd.villageLevel || 1) + "/3)");
+            case "TOWN": return t("tooltips.types.TOWN", null, "Panství - Opevněné Město");
+            case "CASTLE": return t("tooltips.types.CASTLE", null, "Panství - Rytířský Hrad");
+            case "ANIMAL":
+                var animalKind = nd.subtype === "horse" ? t("animals.horse", null, "Kůň") : (nd.subtype === "dog" ? t("animals.dog", null, "Pes") : t("animals.falcon", null, "Sokol"));
+                var setN = nd.setId || (nd.code && nd.code.match(/\d+/) ? nd.code.match(/\d+/)[0] : "");
+                return t("tooltips.types.ANIMAL", { kind: animalKind, set: setN }, "Chovné zvíře - " + animalKind + " (Sada " + setN + ")");
+            case "QUEST": return t("tooltips.types.QUEST", { subtype: nd.subtype || "Běžný" }, "Výprava &amp; Boj (" + (nd.subtype || "Běžný") + ")");
+            case "MERCHANT": return t("tooltips.types.MERCHANT", null, "Královský trh a obchodník");
+            case "MASTER": return t("tooltips.types.MASTER", null, "Mistr řemesel (Trénink dovedností)");
+            case "CHANCE": return t("tooltips.types.CHANCE", null, "Karta osudu a náhody");
+            case "JESTER": return t("tooltips.types.JESTER", null, "Královský šašek");
+            case "TAVERN": return t("tooltips.types.TAVERN", null, "Hostinec U Zlatého kance");
+            case "PRISON": return t("tooltips.types.PRISON", null, "Královská šatlava");
+            case "HOSPITAL": return t("tooltips.types.HOSPITAL", null, "Špitál sv. Lazara");
+            case "TAX": return t("tooltips.types.TAX", null, "Královská berně (Daň)");
+            case "BONUS": return t("tooltips.types.BONUS", null, "Pokladnice a odměna");
+            default: return t("tooltips.types.DEFAULT", null, "Herní pole");
+        }
     },
 
     getNodeTooltipSummary: function (nd) {
-
+        if (!nd) return "";
+        var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         switch (nd.type) {
-
-            case "START": return "Zde začíná pouť. Při průchodu či zastavení možnost audience u krále (+1 💖 za Charisma, vyžaduje šlechtický titul - vlastnictví Města či Hradu).";
-
-            case "FESTIVAL": return "Soutěž v tanci a jezdeckém umění. Vítěz získává srdce dvorních dam (+1 až +2 💖) a turnajovou slávu.";
-
-            case "VILLAGE": return "Základní venkovské panství. Výnosný nájem pro majitele, možnost vylepšení na kamenný statek a tvrz.";
-
-            case "TOWN": return "Bohaté opevněné obchodní centrum. Přináší vysoké nájmy a opravňuje k audienci u krále.";
-
-            case "CASTLE": return "Nedobytné panské sídlo. Symbol moci, obrovský nájem a šlechtický titul pro audienci.";
-
-            case "ANIMAL": return "Zvíře do chovu. Komplet trojice Kůň + Pes + Sokol stejné sady přináší trvalý chovný bonus +1 💖 a body pro vítězství!";
-
-            case "QUEST": return (nd.subtype === "U3") ? "Legendární tříhlavá saň či drak! Výhra: až 12 000 zl. a 6 💖 princeznina srdce! Vyžaduje vysoký Boj a zbraně." : "Výprava za zvěří či monstrem. Zisk zlaťáků, srdcí a slávy.";
-
-            case "MERCHANT": return "Nákup zbraní, brnění a ořů za zvýhodněné ceny. Prodej za 70 % hodnoty.";
-
-            case "MASTER": return "Trénink Boje, Jízdy, Tance a Charismatu za zlaťáky.";
-
-            case "CHANCE": return "Vytáhni si kartu štěstěny. Může přinést nečekané bohatství i nástrahy.";
-
-            case "JESTER": return "Rozvesel krále vtipem či obratností a získej odměnu.";
-
-            case "TAVERN": return "Odpočinek, hazardní kostky a doplnění sil.";
-
-            case "PRISON": return "Uvržen do žaláře! Vykup se kaucí nebo hoď 6 na kostce.";
-
-            case "HOSPITAL": return "Léčení zranění z neúspěšných bojů za mírný poplatek.";
-
-            case "TAX": return "Odevzdej královskou berni do státní pokladnice.";
-
-            case "BONUS": return "Nečekaný nález zlaťáků na cestě.";
-
-            default: return "Políčko království.";
-
+            case "START": return t("tooltips.summary.START", null, "Zde začíná pouť. Při průchodu či zastavení možnost audience u krále (+1 💖 za Charisma, vyžaduje šlechtický titul - vlastnictví Města či Hradu).");
+            case "FESTIVAL": return t("tooltips.summary.FESTIVAL", null, "Soutěž v tanci a jezdeckém umění. Vítěz získává srdce dvorních dam (+1 až +2 💖) a turnajovou slávu.");
+            case "VILLAGE": return t("tooltips.summary.VILLAGE", null, "Základní venkovské panství. Výnosný nájem pro majitele, možnost vylepšení na kamenný statek a tvrz.");
+            case "TOWN": return t("tooltips.summary.TOWN", null, "Bohaté opevněné obchodní centrum. Přináší vysoké nájmy a opravňuje k audienci u krále.");
+            case "CASTLE": return t("tooltips.summary.CASTLE", null, "Nedobytné panské sídlo. Symbol moci, obrovský nájem a šlechtický titul pro audienci.");
+            case "ANIMAL": return t("tooltips.summary.ANIMAL", null, "Zvíře do chovu. Komplet trojice Kůň + Pes + Sokol stejné sady přináší trvalý chovný bonus +1 💖 a body pro vítězství!");
+            case "QUEST": return (nd.subtype === "U3") ? t("tooltips.summary.QUEST_U3", null, "Legendární tříhlavá saň či drak! Výhra: až 12 000 zl. a 6 💖 princeznina srdce! Vyžaduje vysoký Boj a zbraně.") : t("tooltips.summary.QUEST_U1_U2", null, "Výprava za zvěří či monstrem. Zisk zlaťáků, srdcí a slávy.");
+            case "MERCHANT": return t("tooltips.summary.MERCHANT", null, "Nákup zbraní, brnění a ořů za zvýhodněné ceny. Prodej za 70 % hodnoty.");
+            case "MASTER": return t("tooltips.summary.MASTER", null, "Trénink Boje, Jízdy, Tance a Charismatu za zlaťáky.");
+            case "CHANCE": return t("tooltips.summary.CHANCE", null, "Vytáhni si kartu štěstěny. Může přinést nečekané bohatství i nástrahy.");
+            case "JESTER": return t("tooltips.summary.JESTER", null, "Rozvesel krále vtipem či obratností a získej odměnu.");
+            case "TAVERN": return t("tooltips.summary.TAVERN", null, "Odpočinek, hazardní kostky a doplnění sil.");
+            case "PRISON": return t("tooltips.summary.PRISON", null, "Uvržen do žaláře! Vykup se kaucí nebo hoď 6 na kostce.");
+            case "HOSPITAL": return t("tooltips.summary.HOSPITAL", null, "Léčení zranění z neúspěšných bojů za mírný poplatek.");
+            case "TAX": return t("tooltips.summary.TAX", null, "Odevzdej královskou berni do státní pokladnice.");
+            case "BONUS": return t("tooltips.summary.BONUS", null, "Nečekaný nález zlaťáků na cestě.");
+            default: return t("tooltips.summary.DEFAULT", null, "Políčko království.");
         }
-
     },
 
     resizeAmbientCanvas: function () {

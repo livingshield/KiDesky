@@ -35,6 +35,19 @@
         },
 
         // Otevře modální okno pro uložení aktuální hry
+        formatBoardDisplayName: function (name) {
+            if (!name) return "";
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            if (!isEn) return name;
+            return name.replace(/Dračí království/gi, "Dragon Realm")
+                       .replace(/Královská divočina/gi, "Royal Wilderness")
+                       .replace(/Královská delta/gi, "Royal Delta")
+                       .replace(/Rytířské kolbiště/gi, "Knight's Arena")
+                       .replace(/Vlastní plán/gi, "Custom Map")
+                       .replace(/Náhodné království/gi, "Procedural Realm")
+                       .replace(/polí/gi, "tiles");
+        },
+
         openSaveGameModal: function () {
             if (!this.state || !this.hasGameStarted) {
                 alert("Zatím nebyla rozehrána žádná partie k uložení.");
@@ -55,7 +68,8 @@
             var turnNum = this.state.turnNumber || 0;
             var activeP = (this.state.players && this.state.players[this.state.currentPlayerIndex]) ? this.state.players[this.state.currentPlayerIndex].name : "Neznámý";
 
-            var defaultTitle = modeName + " – Kolo " + roundNum + " (" + new Date().toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" }) + ")";
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var defaultTitle = modeName + (isEn ? " – Round " : " – Kolo ") + roundNum + " (" + new Date().toLocaleTimeString(isEn ? "en-US" : "cs-CZ", { hour: "2-digit", minute: "2-digit" }) + ")";
             if (titleInput) {
                 titleInput.value = defaultTitle;
                 setTimeout(function () { titleInput.select(); }, 100);
@@ -73,7 +87,7 @@
                     var pl = this.state.players[i];
                     playersHtml.push(
                         '<span class="save-game-player-chip" style="border-left:3px solid ' + (pl.color || '#d4af37') + ';">' +
-                        this.escapeHtml(pl.name) + ' (' + (pl.totalHearts || 0) + ' 💖, ' + (pl.gold || 0).toLocaleString("cs-CZ") + ' zl.)' +
+                        this.escapeHtml(this.getPlayerDisplayName ? this.getPlayerDisplayName(pl) : pl.name) + ' (' + (pl.totalHearts || 0) + ' 💖, ' + (pl.gold || 0).toLocaleString(isEn ? 'en-US' : 'cs-CZ') + ' ' + (isEn ? 'g.' : 'zl.') + ')' +
                         '</span>'
                     );
                 }
@@ -295,6 +309,53 @@
                     window.PRS_BoardBuilder.computeRiverBridges(restoredState.board);
                 }
             }
+            if (restoredState.board && restoredState.board.nodes && restoredState.board.decorationsVersion !== 3) {
+                if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
+                    window.PRS_BoardBuilder.generateBoardDecorations(restoredState.board, restoredState.board.seed || 1000);
+                }
+            }
+        },
+
+        // Pomocný objekt metadat pro poslední aktivní / automaticky uloženou hru
+        getActiveAutosaveMeta: function () {
+            try {
+                var raw = localStorage.getItem("prs_active_autosave");
+                var data = raw ? JSON.parse(raw) : null;
+                var st = null;
+                var ts = (data && typeof data.timestamp === "number") ? data.timestamp : 0;
+
+                if (this.hasGameStarted && this.state && this.state.players && this.state.phase !== "GAME_OVER") {
+                    st = this.state;
+                    if (!ts) ts = Date.now();
+                } else if (data && data.stateJson) {
+                    st = JSON.parse(data.stateJson);
+                }
+
+                if (!st || !Array.isArray(st.players) || st.phase === "GAME_OVER") return null;
+
+                var isOnline = Boolean(st.roomCode);
+                var humanCount = 0;
+                for (var i = 0; i < st.players.length; i++) {
+                    if (st.players[i] && st.players[i].type === "Human") humanCount++;
+                }
+                var mode = isOnline ? "Online" : (humanCount > 1 ? "HotSeat" : "Solo AI");
+                var curP = st.players[st.currentPlayerIndex || 0];
+
+                return {
+                    timestamp: ts,
+                    savedAtFormatted: ts ? new Date(ts).toLocaleString("cs-CZ") : "Právě teď",
+                    roundNumber: st.roundNumber || 1,
+                    turnNumber: st.turnNumber || 0,
+                    targetHearts: (st.config && st.config.targetHearts) || 30,
+                    mode: mode,
+                    roomCode: st.roomCode || null,
+                    boardName: (st.board && st.board.name) ? st.board.name : ((st.board && st.board.code) || "Královský plán"),
+                    currentPlayerName: curP ? (this.getPlayerDisplayName ? this.getPlayerDisplayName(curP) : curP.name) : "Rytíř",
+                    players: st.players
+                };
+            } catch (e) {
+                return null;
+            }
         },
 
         // Uloží aktuální rozehranou hru do automatického autosavu (pro zachování při F5, Ctrl+F5)
@@ -315,8 +376,11 @@
                     stateJson: JSON.stringify(this.state)
                 };
                 localStorage.setItem("prs_active_autosave", JSON.stringify(payload));
-                sessionStorage.setItem("prs_active_tab", "board");
+                if (!this.activeTab || this.activeTab === "board") {
+                    sessionStorage.setItem("prs_active_tab", "board");
+                }
                 this.updateResumeGameButtonUI();
+                if (this.updateSavedGamesUI) this.updateSavedGamesUI();
             } catch (e) {
                 console.warn("[Autosave] Nelze zapsat autosave:", e);
             }
@@ -369,8 +433,19 @@
             }
         },
 
-        // Obnoví a vstoupí do rozehrané hry z tlačítka na Landing Page
+        // Obnoví a vstoupí do rozehrané hry z tlačítka na Landing Page nebo v Rytířské herně
         resumeActiveAutosavedGame: function () {
+            if (this.hasGameStarted && this.state && this.state.players && this.state.phase !== "GAME_OVER") {
+                this.switchTab("board");
+                this.renderGameScreen();
+                this.updateUserUI();
+                if (this.centerOnActivePlayer) this.centerOnActivePlayer();
+                if (this.scheduleBotTurnIfNeeded) this.scheduleBotTurnIfNeeded();
+                if (window.KiDeskyToast) {
+                    window.KiDeskyToast.show("⚔️ Návrat ke stolu aktuální rozehrané výpravy!", "good");
+                }
+                return;
+            }
             if (this.tryRestoreActiveGameAutosave()) {
                 this.switchTab("board");
                 this.renderGameScreen();
@@ -790,6 +865,52 @@
             var html = [];
             var saveCards = [];
 
+            // 1b. Karta právě rozehrané výpravy z automatického uložení (vždy na 1. místě)
+            var activeMeta = (typeof this.getActiveAutosaveMeta === "function") ? this.getActiveAutosaveMeta() : null;
+            if (activeMeta) {
+                var activeModeMatch = (filter === "all") ||
+                    (filter === "solo" && activeMeta.mode !== "Online") ||
+                    (filter === "online" && activeMeta.mode === "Online");
+                if (activeModeMatch) {
+                    var aOnline = (activeMeta.mode === "Online");
+                    var aBadgeLabel = aOnline ? "🌐 Online (Kód: " + (activeMeta.roomCode || "—") + ")" : (activeMeta.mode === "HotSeat" ? "🛋️ Hot-Seat" : "⚡ Solo AI");
+                    var aBadgeClass = aOnline ? "lp-mode-badge" : "user-pill";
+                    var aPills = [];
+                    for (var ap = 0; ap < activeMeta.players.length; ap++) {
+                        var apl = activeMeta.players[ap];
+                        var aIsBot = (apl.type !== "Human");
+                        var aGold = (typeof apl.gold === "number" && !isNaN(apl.gold)) ? apl.gold : 0;
+                        aPills.push(
+                            '<span class="save-game-player-chip" style="border-left:3px solid ' + (apl.color || "#d4af37") + ';">' +
+                            (aIsBot ? "🤖 " : "👤 ") + this.escapeHtml(apl.name) + " (" + (apl.totalHearts || 0) + " 💖, " + aGold.toLocaleString("cs-CZ") + " zl.)" +
+                            "</span>"
+                        );
+                    }
+                    saveCards.push(
+                        '<div class="save-game-card" style="border:1.5px solid #4ade80; background:rgba(34,197,94,0.08);">' +
+                        '  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; gap:0.5rem; flex-wrap:wrap;">' +
+                        '    <div>' +
+                        '      <h4 style="font-family:\'Cinzel\',serif; color:#86efac; font-size:1.05rem; margin:0 0 0.25rem;">🟢 Poslední rozehraná výprava (Automatické uložení)</h4>' +
+                        '      <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; font-size:0.76rem; color:var(--text-muted);">' +
+                        '        <span class="' + aBadgeClass + '" style="font-size:0.7rem; padding:1px 6px;">' + aBadgeLabel + '</span>' +
+                        '        <span style="font-size:0.7rem; background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.4); color:#e9d5ff; padding:1px 6px; border-radius:4px;">🗺️ ' + this.escapeHtml(activeMeta.boardName) + '</span>' +
+                        '        <span>🕒 ' + this.escapeHtml(activeMeta.savedAtFormatted) + '</span>' +
+                        '        <span>🏆 Kolo ' + activeMeta.roundNumber + ' (Tah #' + activeMeta.turnNumber + ')</span>' +
+                        '        <span>🎯 Cíl: ' + activeMeta.targetHearts + ' 💖</span>' +
+                        '      </div>' +
+                        '    </div>' +
+                        '    <div style="display:flex; gap:0.4rem;">' +
+                        '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="PRS_App.resumeActiveAutosavedGame()">▶️ Pokračovat ve hře</button>' +
+                        '    </div>' +
+                        '  </div>' +
+                        '  <div style="display:flex; gap:0.35rem; flex-wrap:wrap; margin-top:0.4rem; padding-top:0.45rem; border-top:1px solid rgba(74,222,128,0.22);">' +
+                        aPills.join("") +
+                        '  </div>' +
+                        '</div>'
+                    );
+                }
+            }
+
             // 2. HLAVIČKA ŠABLON PLÁNŮ PŘI ZOBRAZENÍ VŠECH ("all")
             if (filter === "all" && savedMaps.length > 0) {
                 var mapChips = [];
@@ -816,7 +937,7 @@
                 );
             }
 
-            if (saves.length === 0) {
+            if (saves.length === 0 && saveCards.length === 0) {
                 if (filter === "all" && savedMaps.length > 0) {
                     html.push(
                         '<div class="empty-note" style="padding:1.5rem 1rem; text-align:center;">' +
@@ -895,51 +1016,108 @@
             var saves = this.getSavedGames();
             var savedMaps = [];
             try { savedMaps = JSON.parse(localStorage.getItem("prs_saved_maps") || "[]"); } catch (e) { savedMaps = []; }
-            var totalCount = saves.length + savedMaps.length;
+            var activeMeta = (typeof this.getActiveAutosaveMeta === "function") ? this.getActiveAutosaveMeta() : null;
+            var totalCount = saves.length + savedMaps.length + (activeMeta ? 1 : 0);
 
             var countEl = document.getElementById("gh-saved-count");
             if (countEl) countEl.textContent = String(totalCount);
 
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var recentBox = document.getElementById("gamehall-recent-save-box");
             if (recentBox) {
-                if (saves.length > 0) {
-                    var latest = saves[0];
-                    var bLabel = latest.boardName || latest.boardCode || "Královský plán";
+                var latestManual = (saves.length > 0) ? saves[0] : null;
+                var latestManualTs = (latestManual && latestManual.savedAt) ? (new Date(latestManual.savedAt).getTime() || 0) : 0;
+                var hasLiveActive = Boolean(this.hasGameStarted && this.state && this.state.players && this.state.phase !== "GAME_OVER");
+                var useAutosave = Boolean(activeMeta && (hasLiveActive || !latestManual || activeMeta.timestamp >= latestManualTs));
+
+                if (useAutosave) {
+                    var curPlayerName = activeMeta.currentPlayerName || "";
+                    if (isEn && curPlayerName.indexOf("(Ty)") !== -1) {
+                        curPlayerName = curPlayerName.replace(/\s*\(Ty\)/gi, " (You)");
+                    }
+                    var headerTxt = isEn ? "⚔️ Last Played Game" : "⚔️ Poslední rozehraná hra";
+                    var questTxt = isEn
+                        ? ("Active Quest – Round " + activeMeta.roundNumber + " (Turn #" + activeMeta.turnNumber + ")")
+                        : ("Rozehraná výprava – Kolo " + activeMeta.roundNumber + " (Tah #" + activeMeta.turnNumber + ")");
+                    var mapTxt = isEn
+                        ? ("🗺️ Map: " + this.escapeHtml(activeMeta.boardName) + " • Active: " + this.escapeHtml(curPlayerName))
+                        : ("🗺️ Plán: " + this.escapeHtml(activeMeta.boardName) + " • Na tahu: " + this.escapeHtml(curPlayerName));
+                    var btnContinueTxt = isEn
+                        ? ("▶️ Continue Game (Round " + activeMeta.roundNumber + ")")
+                        : ("▶️ Pokračovat ve hře (Kolo " + activeMeta.roundNumber + ")");
+                    var btnAllTxt = isEn
+                        ? ("Show all quests (" + totalCount + ") →")
+                        : ("Zobrazit všechny výpravy (" + totalCount + ") →");
+
+                    recentBox.style.display = "block";
+                    recentBox.innerHTML =
+                        '<div style="background:rgba(34,197,94,0.1); border:1px solid #4ade80; border-radius:10px; padding:0.6rem 0.8rem; margin-top:0.75rem;">' +
+                        '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">' +
+                        '    <span style="font-size:0.74rem; color:#86efac; font-weight:700; text-transform:uppercase;">' + headerTxt + '</span>' +
+                        '    <span style="font-size:0.72rem; color:var(--text-muted);">' + this.escapeHtml(activeMeta.savedAtFormatted) + '</span>' +
+                        '  </div>' +
+                        '  <div style="font-size:0.84rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:0.2rem;">' +
+                        questTxt +
+                        '  </div>' +
+                        '  <div style="font-size:0.72rem; color:#fde68a; margin-bottom:0.45rem;">' + mapTxt + '</div>' +
+                        '  <button class="btn-gold-lg" style="width:100%; font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.resumeActiveAutosavedGame()">' +
+                        btnContinueTxt +
+                        '  </button>' +
+                        '  <div style="text-align:right; margin-top:0.35rem;">' +
+                        '    <button type="button" style="background:none; border:none; color:var(--gold-light); font-size:0.73rem; cursor:pointer; text-decoration:underline;" onclick="PRS_App.switchGameHallRoom(\'saves\')">' + btnAllTxt + '</button>' +
+                        '  </div>' +
+                        '</div>';
+                } else if (latestManual) {
+                    var bLabel = latestManual.boardName || latestManual.boardCode || (isEn ? "Royal Map" : "Královský plán");
+                    var mHeader = isEn ? "💾 Last Saved Game" : "💾 Poslední uložená hra";
+                    var mBtnContinue = isEn
+                        ? ("▶️ Continue Game (Round " + (latestManual.roundNumber || 1) + ")")
+                        : ("▶️ Pokračovat ve hře (Kolo " + (latestManual.roundNumber || 1) + ")");
+                    var mBtnAll = isEn
+                        ? ("Show all quests (" + totalCount + ") →")
+                        : ("Zobrazit všechny výpravy (" + totalCount + ") →");
+
                     recentBox.style.display = "block";
                     recentBox.innerHTML =
                         '<div style="background:rgba(212,175,55,0.08); border:1px solid var(--gold); border-radius:10px; padding:0.6rem 0.8rem; margin-top:0.75rem;">' +
                         '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">' +
-                        '    <span style="font-size:0.74rem; color:var(--gold-light); font-weight:700; text-transform:uppercase;">💾 Poslední uložená hra</span>' +
-                        '    <span style="font-size:0.72rem; color:var(--text-muted);">' + (latest.savedAtFormatted || "") + '</span>' +
+                        '    <span style="font-size:0.74rem; color:var(--gold-light); font-weight:700; text-transform:uppercase;">' + mHeader + '</span>' +
+                        '    <span style="font-size:0.72rem; color:var(--text-muted);">' + (latestManual.savedAtFormatted || "") + '</span>' +
                         '  </div>' +
                         '  <div style="font-size:0.84rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:0.2rem;">' +
-                        this.escapeHtml(latest.title) +
+                        this.escapeHtml(latestManual.title) +
                         '  </div>' +
-                        '  <div style="font-size:0.72rem; color:#fde68a; margin-bottom:0.45rem;">🗺️ Plán: ' + this.escapeHtml(bLabel) + '</div>' +
-                        '  <button class="btn-gold-lg" style="width:100%; font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.loadSavedGame(\'' + latest.id + '\')">' +
-                        '    ▶️ Pokračovat ve hře (Kolo ' + (latest.roundNumber || 1) + ')' +
+                        '  <div style="font-size:0.72rem; color:#fde68a; margin-bottom:0.45rem;">🗺️ ' + (isEn ? "Map: " : "Plán: ") + this.escapeHtml(bLabel) + '</div>' +
+                        '  <button class="btn-gold-lg" style="width:100%; font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.loadSavedGame(\'' + latestManual.id + '\')">' +
+                        mBtnContinue +
                         '  </button>' +
                         '  <div style="text-align:right; margin-top:0.35rem;">' +
-                        '    <button type="button" style="background:none; border:none; color:var(--gold-light); font-size:0.73rem; cursor:pointer; text-decoration:underline;" onclick="PRS_App.switchGameHallRoom(\'saves\')">Zobrazit všechny výpravy (' + totalCount + ') →</button>' +
+                        '    <button type="button" style="background:none; border:none; color:var(--gold-light); font-size:0.73rem; cursor:pointer; text-decoration:underline;" onclick="PRS_App.switchGameHallRoom(\'saves\')">' + mBtnAll + '</button>' +
                         '  </div>' +
                         '</div>';
                 } else if (savedMaps.length > 0) {
                     var latestMap = savedMaps[0];
+                    var tHeader = isEn ? "⭐ Saved Map Template" : "⭐ Uložená šablona plánu";
+                    var tPlay = isEn ? "⚔️ Play on this Map" : "⚔️ Hrát na tomto plánu";
+                    var tAll = isEn ? ("Show templates (" + totalCount + ") →") : ("Zobrazit šablony (" + totalCount + ") →");
+                    var tName = latestMap.name || (isEn ? "Custom Map" : "Vlastní plán");
+                    var tNodes = isEn ? " tiles)" : " polí)";
+
                     recentBox.style.display = "block";
                     recentBox.innerHTML =
                         '<div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.4); border-radius:10px; padding:0.6rem 0.8rem; margin-top:0.75rem;">' +
                         '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">' +
-                        '    <span style="font-size:0.74rem; color:#e9d5ff; font-weight:700; text-transform:uppercase;">⭐ Uložená šablona plánu</span>' +
+                        '    <span style="font-size:0.74rem; color:#e9d5ff; font-weight:700; text-transform:uppercase;">' + tHeader + '</span>' +
                         '    <span style="font-size:0.72rem; color:var(--text-muted);">' + (latestMap.savedAt || "") + '</span>' +
                         '  </div>' +
                         '  <div style="font-size:0.84rem; font-weight:600; color:#fef08a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:0.45rem;">' +
-                        this.escapeHtml(latestMap.name || "Vlastní plán") + ' (' + (latestMap.nodeCount || 96) + ' polí)' +
+                        this.escapeHtml(tName) + ' (' + (latestMap.nodeCount || 96) + tNodes +
                         '  </div>' +
                         '  <button class="btn-gold-lg" style="width:100%; font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.playOnSavedFavoriteMap(0)">' +
-                        '    ⚔️ Hrát na tomto plánu' +
+                        tPlay +
                         '  </button>' +
                         '  <div style="text-align:right; margin-top:0.35rem;">' +
-                        '    <button type="button" style="background:none; border:none; color:#e9d5ff; font-size:0.73rem; cursor:pointer; text-decoration:underline;" onclick="PRS_App.switchGameHallRoom(\'saves\')">Zobrazit šablony (' + totalCount + ') →</button>' +
+                        '    <button type="button" style="background:none; border:none; color:#e9d5ff; font-size:0.73rem; cursor:pointer; text-decoration:underline;" onclick="PRS_App.switchGameHallRoom(\'saves\')">' + tAll + '</button>' +
                         '  </div>' +
                         '</div>';
                 } else {
