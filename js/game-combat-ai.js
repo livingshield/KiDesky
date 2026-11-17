@@ -813,7 +813,14 @@
 
             pa.summary = rewardMsg;
 
-            this.addLog(state, rewardMsg, "quest_win");
+            this.addLog(state, rewardMsg, "quest_win", {
+                key: "engine.quest_win_log",
+                params: {
+                    badge: player.badge,
+                    player: player.name,
+                    monster: q.icon + " " + q.name
+                }
+            });
 
         } else {
 
@@ -845,7 +852,14 @@
 
                 pa.summary = defLossMsg;
 
-                this.addLog(state, defLossMsg, "quest_loss");
+                this.addLog(state, defLossMsg, "quest_loss", {
+                    key: "engine.quest_loss_log",
+                    params: {
+                        badge: player.badge,
+                        player: player.name,
+                        monster: q.icon + " " + q.name
+                    }
+                });
 
             } else if (tactics.elixir || player.hasElixirToken) {
 
@@ -1267,7 +1281,7 @@
 
             if (state.config.difficultyMode !== "easy" && state.config.difficultyMode !== "standard") {
 
-                target.permanentHearts = Math.max(0, target.permanentHearts - heartStake);
+                target.permanentHearts = Math.round((target.permanentHearts - heartStake) * 10) / 10;
 
             }
 
@@ -1303,7 +1317,15 @@
 
             result.message = winMsg;
 
-            this.addLog(state, winMsg, "victory");
+            this.addLog(state, winMsg, "victory", {
+                key: "engine.duel_win_log",
+                params: {
+                    badge: player.badge,
+                    player: player.name,
+                    opponentBadge: target.badge,
+                    opponent: target.name
+                }
+            });
 
         } else if (power2 > power1) {
 
@@ -1323,7 +1345,7 @@
 
             if (state.config.difficultyMode !== "easy" && state.config.difficultyMode !== "standard") {
 
-                player.permanentHearts = Math.max(0, player.permanentHearts - heartStake);
+                player.permanentHearts = Math.round((player.permanentHearts - heartStake) * 10) / 10;
 
             }
 
@@ -1361,7 +1383,15 @@
 
             result.message = loseMsg;
 
-            this.addLog(state, loseMsg, "danger");
+            this.addLog(state, loseMsg, "danger", {
+                key: "engine.duel_loss_log",
+                params: {
+                    badge: player.badge,
+                    player: player.name,
+                    opponentBadge: target.badge,
+                    opponent: target.name
+                }
+            });
 
         } else {
 
@@ -1472,6 +1502,9 @@
         if (!Array.isArray(player.ownedNodes)) player.ownedNodes = [];
         if (player.ownedNodes.indexOf(targetNode.id) === -1) {
             player.ownedNodes.push(targetNode.id);
+            if (window.PRS_GameEngine && window.PRS_GameEngine.sortPlayerOwnedNodes) {
+                window.PRS_GameEngine.sortPlayerOwnedNodes(player, state);
+            }
         }
         targetNode.owner = player.index;
 
@@ -1520,7 +1553,7 @@
 
         if (type === "ballad") {
 
-            var cost = Math.round(1500 * (rate > 0 ? rate : 0.5));
+            var cost = (state.pendingAction && state.pendingAction.intrigueBalladCost) || Math.round(1500 * (rate > 0 ? rate : 0.5));
 
             if (player.gold < cost) return null;
 
@@ -1534,43 +1567,67 @@
 
             var r2 = Math.floor(Math.random() * 6) + 1;
 
-            var ch1 = p1Stats.charisma + r1;
+            var ch1 = (p1Stats.charisma || 0) + r1;
 
-            var ch2 = p2Stats.charisma + r2;
+            var ch2 = (p2Stats.charisma || 0) + r2;
 
-            if (ch1 > ch2) {
+            var isHard = Boolean(state.config && (state.config.difficultyMode === "hard" || state.config.difficultyMode === "ultimate"));
+            var penalty = isHard ? 1.0 : 0.5;
 
-                var penalty = (state.config.difficultyMode === "hard" || state.config.difficultyMode === "ultimate") ? 1.0 : 0.5;
+            var isSuccess = (ch1 > ch2);
 
-                target.permanentHearts = Math.max(0, target.permanentHearts - penalty);
+            var msg = "";
 
-                player.permanentHearts += 0.5;
+            if (isSuccess) {
 
-                var msg = "🃏 POSMĚŠNÁ BALADA USPĚLA! Kejklíř složil jízlivou píseň o " + target.badge + " " + target.name + ". Soupeř ztrácí -" + penalty + " 💖 a " + player.badge + " " + player.name + " získává +0,5 💖 dvorské přízně!";
+                target.permanentHearts = Math.round((target.permanentHearts - penalty) * 10) / 10;
+
+                player.permanentHearts = Math.round((player.permanentHearts + 0.5) * 10) / 10;
+
+                msg = "🃏 POSMĚŠNÁ BALADA USPĚLA! Kejklíř složil jízlivou píseň o " + target.badge + " " + target.name + " (" + ch1 + " vs " + ch2 + "). Soupeř ztrácí -" + penalty + " 💖 a " + player.badge + " " + player.name + " získává +0,5 💖 dvorské přízně!";
 
                 this.addLog(state, msg, "gold");
 
-                this.recalculateBreedingAndVictory(state);
-
-                return { success: true, diff: ch1 - ch2 };
-
             } else {
 
-                target.permanentHearts += 0.25;
+                target.permanentHearts = Math.round((target.permanentHearts + 0.25) * 10) / 10;
 
-                var failMsg = "🃏 POSMĚŠNÁ BALADA SELHALA! " + target.badge + " " + target.name + " prokázal neochvějnou pověst a získává +0,25 💖 za dvorskou ctnost. " + player.badge + " " + player.name + " přišel o " + cost + " zl.";
+                msg = "🃏 POSMĚŠNÁ BALADA SELHALA! " + target.badge + " " + target.name + " prokázal neochvějnou pověst (" + ch2 + " vs " + ch1 + ") a získává +0,25 💖 za dvorskou ctnost. " + player.badge + " " + player.name + " přišel o " + cost + " zl.";
 
-                this.addLog(state, failMsg, "danger");
-
-                this.recalculateBreedingAndVictory(state);
-
-                return { success: false, diff: ch2 - ch1 };
+                this.addLog(state, msg, "danger");
 
             }
 
+            this.recalculateBreedingAndVictory(state);
+
+            if (state.pendingAction) {
+                state.pendingAction.canPlotIntrigue = false;
+                state.pendingAction.intriguePlotted = true;
+                state.pendingAction.intrigueSummary = isSuccess
+                    ? ("Posměšná balada uspěla! Soupeř " + target.name + " ztratil -" + penalty + " 💖.")
+                    : ("Posměšná balada selhala. Soupeř " + target.name + " získal +0,25 💖.");
+            }
+
+            return {
+                type: "ballad",
+                success: isSuccess,
+                cost: cost,
+                player: player,
+                target: target,
+                r1: r1,
+                r2: r2,
+                stat1: p1Stats.charisma || 0,
+                stat2: p2Stats.charisma || 0,
+                ch1: ch1,
+                ch2: ch2,
+                diff: Math.abs(ch1 - ch2),
+                penalty: penalty,
+                msg: msg
+            };
+
         } else if (type === "customs") {
 
-            var cCost = Math.round(1200 * (rate > 0 ? rate : 0.5));
+            var cCost = (state.pendingAction && state.pendingAction.intrigueCustomsCost) || Math.round(1200 * (rate > 0 ? rate : 0.5));
 
             if (player.gold < cCost) return null;
 
@@ -1582,7 +1639,20 @@
 
             this.addLog(state, cMsg, "gold");
 
-            return { success: true };
+            if (state.pendingAction) {
+                state.pendingAction.canPlotIntrigue = false;
+                state.pendingAction.intriguePlotted = true;
+                state.pendingAction.intrigueSummary = "Celní kontrola uvalena na " + target.name + " (1 kolo bez nájmu).";
+            }
+
+            return {
+                type: "customs",
+                success: true,
+                cost: cCost,
+                player: player,
+                target: target,
+                msg: cMsg
+            };
 
         }
 
@@ -1658,7 +1728,8 @@
 
         this.breakTradePact(state, player.index, rival.index, "osobní výzva na slavnosti");
 
-        var discKey = discipline || "combat";
+        var rawDisc = discipline || "combat";
+        var discKey = (window.PRS_SKILLS && window.PRS_SKILLS.normalizeKey) ? window.PRS_SKILLS.normalizeKey(rawDisc) : rawDisc;
 
         var s1 = player.skills[discKey] || 0;
 
@@ -1696,6 +1767,8 @@
 
         };
 
+        var discName = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(discKey, true) : discKey;
+
         if (tot1 > tot2) {
 
             var actual = this.transferGold(state, rival, player, stake);
@@ -1706,11 +1779,19 @@
 
             result.actualGold = actual;
 
-            var winMsg = "🏆 OSOBNÍ VÝZVA NA SLAVNOSTI! " + player.badge + " " + player.name + " zvítězil nad " + rival.badge + " " + rival.name + " v disciplíně " + discKey.toUpperCase() + " (" + tot1 + " vs " + tot2 + ")! Získává +" + actual + " zl. a +0,5 💖!";
+            var winMsg = "🏆 OSOBNÍ VÝZVA NA SLAVNOSTI! " + player.badge + " " + player.name + " zvítězil nad " + rival.badge + " " + rival.name + " v disciplíně " + discName + " (" + tot1 + " vs " + tot2 + ")! Získává +" + actual + " zl. a +0,5 💖!";
 
             result.message = winMsg;
 
-            this.addLog(state, winMsg, "victory");
+            this.addLog(state, winMsg, "victory", {
+                key: "engine.duel_win_log",
+                params: {
+                    badge: player.badge,
+                    player: player.name,
+                    opponentBadge: target.badge,
+                    opponent: target.name
+                }
+            });
 
         } else if (tot2 > tot1) {
 
@@ -1722,11 +1803,19 @@
 
             result.actualGold = actual2;
 
-            var loseMsg = "🏆 OSOBNÍ VÝZVA NA SLAVNOSTI! " + rival.badge + " " + rival.name + " odrazil výzvu a zvítězil nad " + player.badge + " " + player.name + " v disciplíně " + discKey.toUpperCase() + " (" + tot2 + " vs " + tot1 + ")! Poražený platí " + actual2 + " zl.!";
+            var loseMsg = "🏆 OSOBNÍ VÝZVA NA SLAVNOSTI! " + rival.badge + " " + rival.name + " odrazil výzvu a zvítězil nad " + player.badge + " " + player.name + " v disciplíně " + discName + " (" + tot2 + " vs " + tot1 + ")! Poražený platí " + actual2 + " zl.!";
 
             result.message = loseMsg;
 
-            this.addLog(state, loseMsg, "danger");
+            this.addLog(state, loseMsg, "danger", {
+                key: "engine.duel_loss_log",
+                params: {
+                    badge: player.badge,
+                    player: player.name,
+                    opponentBadge: target.badge,
+                    opponent: target.name
+                }
+            });
 
         } else {
 

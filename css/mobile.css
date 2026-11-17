@@ -120,10 +120,26 @@
                 flex-shrink: 0 !important;
             }
 
+            .topbar #topbar-lang-btn {
+                padding: 0.22rem 0.45rem !important;
+                font-size: 0.82rem !important;
+                font-weight: 700 !important;
+                flex-shrink: 0 !important;
+                display: inline-flex !important;
+                align-items: center !important;
+            }
+
             .topbar #topbar-achievements-btn {
                 padding: 0.22rem 0.45rem !important;
                 font-size: 0.74rem !important;
                 flex-shrink: 0 !important;
+            }
+
+            @media (max-width: 560px) {
+                .topbar #topbar-cheatsheet-btn,
+                .topbar #topbar-achievements-btn {
+                    display: none !important;
+                }
             }
 
             /* Řádek 2: Plnohodnotná navigační lišta záložek */
@@ -521,11 +537,15 @@
         .mobile-dock-icon-group {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 4px;
+            width: 100%;
         }
         .mobile-dock-icon-btn {
             position: relative;
-            width: 44px;
+            min-width: 36px;
+            max-width: 48px;
+            flex: 1 1 0;
             height: 48px;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.07);

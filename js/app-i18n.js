@@ -265,6 +265,18 @@
                 }
             }
 
+            // 1b. Tlačítko na plovoucí liště herního plánu
+            var boardLabel = document.getElementById('board-bar-lang-label');
+            var boardBtn = document.getElementById('board-bar-lang-btn');
+            if (boardLabel) boardLabel.textContent = (lang === 'cs' ? 'CZ' : 'EN');
+            if (boardBtn) boardBtn.title = (lang === 'cs' ? 'Přepnout jazyk (Čeština / English)' : 'Toggle language (English / Čeština)');
+
+            // 1c. Tlačítko ve spodní mobilní liště (Mobile Dock)
+            var dockLabel = document.getElementById('mobile-dock-lang-label');
+            var dockBtn = document.getElementById('mobile-dock-lang-btn');
+            if (dockLabel) dockLabel.textContent = (lang === 'cs' ? 'CZ' : 'EN');
+            if (dockBtn) dockBtn.title = (lang === 'cs' ? 'Přepnout jazyk (Čeština / English)' : 'Toggle language (English / Čeština)');
+
             // 2. Tlačítka v nastavení
             var csBtn = document.getElementById('settings-lang-cs-btn');
             var enBtn = document.getElementById('settings-lang-en-btn');

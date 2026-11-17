@@ -696,6 +696,7 @@ window.KiDeskyMapGenerator = {
         riverMode: "single",
         biomeTheme: "balanced",
         royalCastle: "auto",
+        routeShape: "auto",
         seed: 4598,
         customName: ""
     },
@@ -713,12 +714,13 @@ window.KiDeskyMapGenerator = {
             riverMode: "single",
             dangerLevel: "standard",
             biomeTheme: "balanced",
+            routeShape: "auto",
             recipe: {
                 animalLevels: [1, 2, 3, 4, 5, 6, 7, 8],
                 villages: 8, towns: 4, castles: 2, jesters: 3, buildings: 5,
                 questsU1: 4, questsU2: 3, questsU3: 2, masters: 6, merchants: 3,
                 festivals: 3, chances: 5, taxes: 2, prisons: 1, hospitals: 1, taverns: 1,
-                branches: 3, masterTier: 5, riverMode: "single", biomeTheme: "balanced"
+                branches: 3, masterTier: 5, riverMode: "single", biomeTheme: "balanced", routeShape: "auto"
             }
         },
         dragon_chasm: {
@@ -732,12 +734,13 @@ window.KiDeskyMapGenerator = {
             riverMode: "dual",
             dangerLevel: "high",
             biomeTheme: "dragon_peaks",
+            routeShape: "twin_valleys",
             recipe: {
                 animalLevels: [1, 2, 4, 6, 8, 10, 12, 14],
                 villages: 7, towns: 4, castles: 3, jesters: 3, buildings: 5,
                 questsU1: 4, questsU2: 5, questsU3: 4, masters: 7, merchants: 3,
                 festivals: 3, chances: 6, taxes: 2, prisons: 1, hospitals: 2, taverns: 1,
-                branches: 2, masterTier: 3, riverMode: "dual", biomeTheme: "dragon_peaks"
+                branches: 2, masterTier: 3, riverMode: "dual", biomeTheme: "dragon_peaks", routeShape: "twin_valleys"
             }
         },
         lightning_sprint: {
@@ -751,6 +754,7 @@ window.KiDeskyMapGenerator = {
             riverMode: "single",
             dangerLevel: "low",
             biomeTheme: "golden_plains",
+            routeShape: "classic_ring",
             recipe: {
                 animalLevels: [1, 2, 3, 4, 5],
                 villages: 5, towns: 3, castles: 2, jesters: 2, buildings: 3,
@@ -770,6 +774,7 @@ window.KiDeskyMapGenerator = {
             riverMode: "island",
             dangerLevel: "high",
             biomeTheme: "balanced",
+            routeShape: "figure_eight",
             recipe: {
                 animalLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                 villages: 10, towns: 6, castles: 4, jesters: 4, buildings: 5,
@@ -789,14 +794,27 @@ window.KiDeskyMapGenerator = {
             riverMode: "dual",
             dangerLevel: "standard",
             biomeTheme: "forest_realm",
+            routeShape: "serpentine",
             recipe: {
                 animalLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
                 villages: 9, towns: 5, castles: 3, jesters: 4, buildings: 6,
                 questsU1: 3, questsU2: 2, questsU3: 2, masters: 6, merchants: 3,
                 festivals: 3, chances: 5, taxes: 1, prisons: 1, hospitals: 1, taverns: 1,
-                branches: 3, masterTier: 5, riverMode: "dual", biomeTheme: "forest_realm"
+                branches: 3, masterTier: 5, riverMode: "dual", biomeTheme: "forest_realm", routeShape: "serpentine"
             }
         }
+    },
+
+    // 7 Procedurálních archetypů tvaru trasy (Map Studio & WYSIWYG editor)
+    ROUTE_ARCHETYPES: {
+        auto: { id: "auto", name: "🎲 Podle seedu (Automatický mix)", desc: "Dynamický výběr tvaru trasy podle seedu mapy", icon: "🎲" },
+        organic_meander: { id: "organic_meander", name: "🌿 Organický meandr", desc: "Plynulé přírodní vlnění krajinou s malebnými zátočinami a výběžky", icon: "🌿" },
+        figure_eight: { id: "figure_eight", name: "♾️ Osmička (Křížený okruh)", desc: "Dva ladné okruhy protínající se uprostřed království", icon: "♾️" },
+        spiral_citadel: { id: "spiral_citadel", name: "🌀 Spirálová citadela", desc: "Vnější okruh spirálovitě obtéká vnitřní citadelu královského hradu", icon: "🌀" },
+        twin_valleys: { id: "twin_valleys", name: "🏔️ Dvojí údolí", desc: "Západní a východní kotlina propojená horským hřebenem", icon: "🏔️" },
+        serpentine: { id: "serpentine", name: "🐍 Hadovitá magistrála", desc: "Táhlé esovité zákruty kopírující říční tok napříč celou říší", icon: "🐍" },
+        star_crossroads: { id: "star_crossroads", name: "⭐ Hvězdicová křižovatka", desc: "Dynamický okruh s výběžky a radiálními průrvami", icon: "⭐" },
+        classic_ring: { id: "classic_ring", name: "⭕ Klasický ovál", desc: "Tradiční obvodový prstenec po okrajích království", icon: "⭕" }
     },
 
     // Katalog 14 ušlechtilých chovných sad (Kůň, Sokol, Pes)
@@ -817,12 +835,34 @@ window.KiDeskyMapGenerator = {
         { setId: 14, horse: "Kůň 14 (Stínový oř)", falcon: "Sokol 14 (Noční raroh)", dog: "Pes 14 (Hradní chrlič)" }
     ],
 
-    // Převod textového seed kódu např. KID-78-3B-M2-A6-R1-D2-T0-S4598 nebo KID-78-3B-M2-S4598 zpět na parametry
+    // Převod textového seed kódu např. KID-78-3B-M2-A6-R1-D2-T0-X1-S4598 nebo KID-78-3B-M2-S4598 zpět na parametry
     parseSeedCode: function (code) {
         if (!code || typeof code !== "string") return null;
         var clean = code.trim().toUpperCase();
 
-        // Rozšířený formát: KID-78-3B-M2-A6-R1-D2-T0-S4598
+        var shapeMap = { "0": "auto", "1": "organic_meander", "2": "figure_eight", "3": "spiral_citadel", "4": "twin_valleys", "5": "serpentine", "6": "star_crossroads", "7": "classic_ring" };
+
+        // 1. Nejnovější plný formát s tvarem trasy (-X): KID-78-3B-M2-A6-R1-D2-T0-X1-S4598
+        var mShape = clean.match(/^KID-(\d+)-(\d+)B-M(\d+)-A(\d+)-R([01234])-D([123])-T([01234])-X([0-7])-S(\d+)$/);
+        if (mShape) {
+            var rMapS = { "0": "none", "1": "single", "2": "dual", "3": "island", "4": "delta" };
+            var dMapS = { "1": "low", "2": "standard", "3": "high" };
+            var tMapS = { "0": "balanced", "1": "dragon_peaks", "2": "forest_realm", "3": "river_delta", "4": "golden_plains" };
+            return {
+                nodeCount: parseInt(mShape[1], 10),
+                branches: parseInt(mShape[2], 10),
+                masterTier: parseInt(mShape[3], 10),
+                animalSetCount: parseInt(mShape[4], 10),
+                riverMode: rMapS[mShape[5]] || "single",
+                dangerLevel: dMapS[mShape[6]] || "standard",
+                biomeTheme: tMapS[mShape[7]] || "balanced",
+                routeShape: shapeMap[mShape[8]] || "auto",
+                seed: parseInt(mShape[9], 10),
+                valid: true
+            };
+        }
+
+        // 2. Rozšířený formát: KID-78-3B-M2-A6-R1-D2-T0-S4598
         var mExt = clean.match(/^KID-(\d+)-(\d+)B-M(\d+)-A(\d+)-R([01234])-D([123])-T([01234])-S(\d+)$/);
         if (mExt) {
             var rMap = { "0": "none", "1": "single", "2": "dual", "3": "island", "4": "delta" };
@@ -836,12 +876,13 @@ window.KiDeskyMapGenerator = {
                 riverMode: rMap[mExt[5]] || "single",
                 dangerLevel: dMap[mExt[6]] || "standard",
                 biomeTheme: tMap[mExt[7]] || "balanced",
+                routeShape: "auto",
                 seed: parseInt(mExt[8], 10),
                 valid: true
             };
         }
 
-        // Střední formát: KID-78-3B-M2-A6-S4598
+        // 3. Střední formát: KID-78-3B-M2-A6-S4598
         var mMid = clean.match(/^KID-(\d+)-(\d+)B-M(\d+)-A(\d+)-S(\d+)$/);
         if (mMid) {
             return {
@@ -849,18 +890,20 @@ window.KiDeskyMapGenerator = {
                 branches: parseInt(mMid[2], 10),
                 masterTier: parseInt(mMid[3], 10),
                 animalSetCount: parseInt(mMid[4], 10),
+                routeShape: "auto",
                 seed: parseInt(mMid[5], 10),
                 valid: true
             };
         }
 
-        // Krátký zpětně kompatibilní formát: KID-78-3B-M2-S4598
+        // 4. Krátký zpětně kompatibilní formát: KID-78-3B-M2-S4598
         var match = clean.match(/^KID-(\d+)-(\d+)B-M(\d+)-S(\d+)$/);
         if (match) {
             return {
                 nodeCount: parseInt(match[1], 10),
                 branches: parseInt(match[2], 10),
                 masterTier: parseInt(match[3], 10),
+                routeShape: "auto",
                 seed: parseInt(match[4], 10),
                 valid: true
             };
@@ -884,8 +927,10 @@ window.KiDeskyMapGenerator = {
         var dCode = options.dangerLevel === "low" ? "1" : (options.dangerLevel === "high" ? "3" : "2");
         var tMap = { balanced: "0", dragon_peaks: "1", forest_realm: "2", river_delta: "3", golden_plains: "4" };
         var tCode = tMap[options.biomeTheme || "balanced"] || "0";
+        var shapeRevMap = { auto: "0", organic_meander: "1", figure_eight: "2", spiral_citadel: "3", twin_valleys: "4", serpentine: "5", star_crossroads: "6", classic_ring: "7" };
+        var xCode = shapeRevMap[options.routeShape || "auto"] || "0";
         var s = Math.abs(Number(seed) || 12345) % 1000000;
-        return "KID-" + n + "-" + b + "B-M" + m + "-A" + a + "-R" + rCode + "-D" + dCode + "-T" + tCode + "-S" + s;
+        return "KID-" + n + "-" + b + "B-M" + m + "-A" + a + "-R" + rCode + "-D" + dCode + "-T" + tCode + "-X" + xCode + "-S" + s;
     },
 
     // Rychlý SVG minináhled pro Map Studio
@@ -1054,6 +1099,475 @@ window.KiDeskyMapGenerator = {
         return pts;
     },
 
+    // Vzorkování uzavřené Catmull-Rom spline křivky
+    sampleCatmullRomLoop: function (pts, segSamples) {
+        var out = [];
+        if (!pts || pts.length === 0) return out;
+        segSamples = segSamples || 50;
+        var K = pts.length;
+        for (var i = 0; i < K; i++) {
+            var p0 = pts[(i - 1 + K) % K];
+            var p1 = pts[i];
+            var p2 = pts[(i + 1) % K];
+            var p3 = pts[(i + 2) % K];
+            for (var s = 0; s < segSamples; s++) {
+                var t = s / segSamples;
+                var t2 = t * t;
+                var t3 = t2 * t;
+                var x = 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3);
+                var y = 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3);
+                out.push({ x: x, y: y });
+            }
+        }
+        return out;
+    },
+
+    // Ekvidistantní reparametrizace křivky podle délky oblouku (Arc-length reparameterization)
+    reparameterizeByArcLength: function (curvePts, count) {
+        if (!curvePts || curvePts.length === 0 || count <= 0) return [];
+        var dists = [0];
+        var totalLen = 0;
+        for (var i = 1; i < curvePts.length; i++) {
+            var dx = curvePts[i].x - curvePts[i - 1].x;
+            var dy = curvePts[i].y - curvePts[i - 1].y;
+            totalLen += Math.sqrt(dx * dx + dy * dy);
+            dists.push(totalLen);
+        }
+        var dx0 = curvePts[0].x - curvePts[curvePts.length - 1].x;
+        var dy0 = curvePts[0].y - curvePts[curvePts.length - 1].y;
+        var loopCloseDist = Math.sqrt(dx0 * dx0 + dy0 * dy0);
+        totalLen += loopCloseDist;
+        dists.push(totalLen);
+        var extendedCurve = curvePts.concat([curvePts[0]]);
+
+        var step = totalLen / count;
+        var outNodes = [];
+        var searchIdx = 0;
+
+        for (var n = 0; n < count; n++) {
+            var targetDist = n * step;
+            while (searchIdx < dists.length - 1 && dists[searchIdx + 1] < targetDist) {
+                searchIdx++;
+            }
+            var segStartDist = dists[searchIdx];
+            var segEndDist = dists[searchIdx + 1] || totalLen;
+            var segSpan = segEndDist - segStartDist;
+            var factor = segSpan > 0.0001 ? (targetDist - segStartDist) / segSpan : 0;
+            var pA = extendedCurve[searchIdx];
+            var pB = extendedCurve[searchIdx + 1] || extendedCurve[0];
+            outNodes.push({
+                x: Math.round(pA.x + (pB.x - pA.x) * factor),
+                y: Math.round(pA.y + (pB.y - pA.y) * factor)
+            });
+        }
+        return outNodes;
+    },
+
+    // 7 Řídících polygonů tras se seed-based mikrovariací
+    getArchetypeControlPoints: function (shapeKey, rnd) {
+        rnd = rnd || Math.random;
+        var jx = function (scale) { return (rnd() - 0.5) * (scale || 26); };
+        var jy = function (scale) { return (rnd() - 0.5) * (scale || 22); };
+
+        switch (shapeKey) {
+            case "figure_eight":
+                return [
+                    { x: 420 + jx(), y: 95 + jy() },
+                    { x: 740 + jx(), y: 350 + jy() },
+                    { x: 1080 + jx(), y: 690 + jy() },
+                    { x: 1260 + jx(), y: 440 + jy() },
+                    { x: 1040 + jx(), y: 110 + jy() },
+                    { x: 660 + jx(), y: 490 + jy() },
+                    { x: 300 + jx(), y: 730 + jy() },
+                    { x: 130 + jx(), y: 430 + jy() }
+                ];
+
+            case "spiral_citadel":
+                return [
+                    { x: 500 + jx(), y: 85 + jy() },
+                    { x: 1080 + jx(), y: 100 + jy() },
+                    { x: 1280 + jx(), y: 380 + jy() },
+                    { x: 1240 + jx(), y: 720 + jy() },
+                    { x: 720 + jx(), y: 780 + jy() },
+                    { x: 180 + jx(), y: 730 + jy() },
+                    { x: 120 + jx(), y: 380 + jy() },
+                    { x: 260 + jx(), y: 160 + jy() },
+                    { x: 620 + jx(), y: 220 + jy() },
+                    { x: 920 + jx(), y: 280 + jy() },
+                    { x: 980 + jx(), y: 560 + jy() },
+                    { x: 480 + jx(), y: 610 + jy() },
+                    { x: 340 + jx(), y: 400 + jy() }
+                ];
+
+            case "twin_valleys":
+                return [
+                    { x: 700 + jx(), y: 190 + jy() },
+                    { x: 1040 + jx(), y: 95 + jy() },
+                    { x: 1285 + jx(), y: 340 + jy() },
+                    { x: 1100 + jx(), y: 480 + jy() },
+                    { x: 1260 + jx(), y: 690 + jy() },
+                    { x: 960 + jx(), y: 775 + jy() },
+                    { x: 700 + jx(), y: 640 + jy() },
+                    { x: 440 + jx(), y: 775 + jy() },
+                    { x: 140 + jx(), y: 690 + jy() },
+                    { x: 300 + jx(), y: 480 + jy() },
+                    { x: 115 + jx(), y: 340 + jy() },
+                    { x: 360 + jx(), y: 95 + jy() }
+                ];
+
+            case "serpentine":
+                return [
+                    { x: 250 + jx(), y: 100 + jy() },
+                    { x: 720 + jx(), y: 90 + jy() },
+                    { x: 1160 + jx(), y: 110 + jy() },
+                    { x: 1290 + jx(), y: 310 + jy() },
+                    { x: 920 + jx(), y: 380 + jy() },
+                    { x: 460 + jx(), y: 430 + jy() },
+                    { x: 130 + jx(), y: 550 + jy() },
+                    { x: 360 + jx(), y: 765 + jy() },
+                    { x: 800 + jx(), y: 775 + jy() },
+                    { x: 1250 + jx(), y: 720 + jy() },
+                    { x: 1280 + jx(), y: 540 + jy() },
+                    { x: 1000 + jx(), y: 220 + jy() },
+                    { x: 130 + jx(), y: 280 + jy() }
+                ];
+
+            case "star_crossroads":
+                return [
+                    { x: 700 + jx(), y: 80 + jy() },
+                    { x: 960 + jx(), y: 210 + jy() },
+                    { x: 1280 + jx(), y: 190 + jy() },
+                    { x: 1120 + jx(), y: 440 + jy() },
+                    { x: 1280 + jx(), y: 700 + jy() },
+                    { x: 950 + jx(), y: 660 + jy() },
+                    { x: 700 + jx(), y: 785 + jy() },
+                    { x: 450 + jx(), y: 660 + jy() },
+                    { x: 120 + jx(), y: 700 + jy() },
+                    { x: 280 + jx(), y: 440 + jy() },
+                    { x: 120 + jx(), y: 190 + jy() },
+                    { x: 440 + jx(), y: 210 + jy() }
+                ];
+
+            case "organic_meander":
+                return [
+                    { x: 480 + jx(), y: 80 + jy() },
+                    { x: 860 + jx(), y: 105 + jy() },
+                    { x: 1220 + jx(), y: 125 + jy() },
+                    { x: 1290 + jx(), y: 450 + jy() },
+                    { x: 1060 + jx(), y: 540 + jy() },
+                    { x: 1160 + jx(), y: 745 + jy() },
+                    { x: 720 + jx(), y: 775 + jy() },
+                    { x: 560 + jx(), y: 590 + jy() },
+                    { x: 360 + jx(), y: 760 + jy() },
+                    { x: 125 + jx(), y: 670 + jy() },
+                    { x: 110 + jx(), y: 310 + jy() },
+                    { x: 280 + jx(), y: 340 + jy() },
+                    { x: 240 + jx(), y: 115 + jy() }
+                ];
+
+            case "classic_ring":
+            default:
+                return [
+                    { x: 500 + jx(), y: 78 + jy() },
+                    { x: 860 + jx(), y: 72 + jy() },
+                    { x: 1160 + jx(), y: 108 + jy() },
+                    { x: 1315 + jx(), y: 380 + jy() },
+                    { x: 1250 + jx(), y: 660 + jy() },
+                    { x: 1050 + jx(), y: 775 + jy() },
+                    { x: 680 + jx(), y: 785 + jy() },
+                    { x: 320 + jx(), y: 775 + jy() },
+                    { x: 115 + jx(), y: 660 + jy() },
+                    { x: 90 + jx(), y: 380 + jy() },
+                    { x: 160 + jx(), y: 130 + jy() },
+                    { x: 300 + jx(), y: 82 + jy() }
+                ];
+        }
+    },
+
+    // Fyzikální relaxace a kolizní model (Force-directed relaxation)
+    relaxNodePositions: function (nodes, edges, options) {
+        options = options || {};
+        var minClearance = options.minClearance || 55;
+        var iterations = options.iterations || 45;
+        var minX = (options.bounds && options.bounds.minX) || 82;
+        var maxX = (options.bounds && options.bounds.maxX) || 1318;
+        var minY = (options.bounds && options.bounds.minY) || 74;
+        var maxY = (options.bounds && options.bounds.maxY) || 786;
+        var fixedIndices = options.fixedIndices || {};
+
+        var N = nodes.length;
+        var pos = nodes.map(function (n) { return { x: n.x, y: n.y }; });
+
+        var sumEdgeDist = 0;
+        var edgeCount = 0;
+        edges = edges || [];
+        for (var e = 0; e < edges.length; e++) {
+            var u0 = edges[e][0], v0 = edges[e][1];
+            if (u0 < N && v0 < N) {
+                sumEdgeDist += Math.hypot(pos[u0].x - pos[v0].x, pos[u0].y - pos[v0].y);
+                edgeCount++;
+            }
+        }
+        var targetDist = Math.max(52, options.targetDist || (edgeCount > 0 ? sumEdgeDist / edgeCount : 55));
+
+        for (var iter = 0; iter < iterations; iter++) {
+            var forces = pos.map(function () { return { fx: 0, fy: 0 }; });
+
+            // 1. Všichni proti všem: Repulze při nedodržení minimální světlosti
+            for (var i = 0; i < N; i++) {
+                for (var j = i + 1; j < N; j++) {
+                    var dx = pos[i].x - pos[j].x;
+                    var dy = pos[i].y - pos[j].y;
+                    var distSq = dx * dx + dy * dy;
+                    if (distSq < minClearance * minClearance && distSq > 0.0001) {
+                        var d = Math.sqrt(distSq);
+                        var overlap = (minClearance - d);
+                        var f = (overlap / d) * 0.75;
+                        forces[i].fx += dx * f;
+                        forces[i].fy += dy * f;
+                        forces[j].fx -= dx * f;
+                        forces[j].fy -= dy * f;
+                    }
+                }
+            }
+
+            // 2. Pružinové tahy podél hran cesty
+            for (var ed = 0; ed < edges.length; ed++) {
+                var u = edges[ed][0];
+                var v = edges[ed][1];
+                if (u >= N || v >= N) continue;
+                var edx = pos[v].x - pos[u].x;
+                var edy = pos[v].y - pos[u].y;
+                var edist = Math.sqrt(edx * edx + edy * edy);
+                if (edist > 0.0001) {
+                    var diff = edist - targetDist;
+                    var sf = (diff / edist) * 0.12;
+                    forces[u].fx += edx * sf;
+                    forces[u].fy += edy * sf;
+                    forces[v].fx -= edx * sf;
+                    forces[v].fy -= edy * sf;
+                }
+            }
+
+            // Tlumení a posun
+            var damping = 1.0 - (iter / iterations) * 0.35;
+            for (var k = 0; k < N; k++) {
+                if (fixedIndices[k]) continue;
+                var mx = forces[k].fx * damping;
+                var my = forces[k].fy * damping;
+                var maxStep = 18;
+                var stepLen = Math.hypot(mx, my);
+                if (stepLen > maxStep) {
+                    mx = (mx / stepLen) * maxStep;
+                    my = (my / stepLen) * maxStep;
+                }
+                pos[k].x = Math.max(minX, Math.min(maxX, pos[k].x + mx));
+                pos[k].y = Math.max(minY, Math.min(maxY, pos[k].y + my));
+            }
+        }
+
+                // Garantovaný doběh světlosti: přímý posun všech párů pod 48px
+        for (var pass = 0; pass < 3; pass++) {
+            for (var pi = 0; pi < N; pi++) {
+                for (var pj = pi + 1; pj < N; pj++) {
+                    var pdx = pos[pi].x - pos[pj].x;
+                    var pdy = pos[pi].y - pos[pj].y;
+                    var pd = Math.hypot(pdx, pdy);
+                    if (pd < 48 && pd > 0.0001) {
+                        var push = (48 - pd) / 2;
+                        var pnx = pdx / pd;
+                        var pny = pdy / pd;
+                        pos[pi].x = Math.max(minX, Math.min(maxX, pos[pi].x + pnx * push));
+                        pos[pi].y = Math.max(minY, Math.min(maxY, pos[pi].y + pny * push));
+                        pos[pj].x = Math.max(minX, Math.min(maxX, pos[pj].x - pnx * push));
+                        pos[pj].y = Math.max(minY, Math.min(maxY, pos[pj].y - pny * push));
+                    }
+                }
+            }
+        }
+        return pos.map(function (p) { return { x: Math.round(p.x), y: Math.round(p.y) }; });
+    },
+
+    // Hledání největší volné kapsy pro Královský hrad
+    findLargestOpenPocket: function (nodes, rivers, w, h) {
+        w = w || 220;
+        h = h || 180;
+        var r = Math.min(w, h) * 0.38;
+        var sRPS = (this.sampleRiverPathSimple || (window.PRS_BoardBuilder && window.PRS_BoardBuilder.sampleRiverPathSimple));
+        var riverPolys = [];
+        if (rivers && rivers.length > 0 && sRPS) {
+            for (var ri = 0; ri < rivers.length; ri++) {
+                var rp = sRPS(rivers[ri].path);
+                if (rp && rp.length > 0) riverPolys.push({ pts: rp, width: rivers[ri].width || 28 });
+            }
+        }
+
+        var bestCandidate = null;
+        var bestScore = -999999;
+
+        for (var gx = 320; gx <= 1080; gx += 35) {
+            for (var gy = 200; gy <= 680; gy += 35) {
+                var minNodeDist = 9999;
+                for (var n = 0; n < nodes.length; n++) {
+                    var nd = nodes[n];
+                    var d = Math.hypot(nd.x - gx, nd.y - gy);
+                    if (d < minNodeDist) minNodeDist = d;
+                }
+                if (minNodeDist < r + 22) continue;
+
+                var hitRiver = false;
+                for (var rIdx = 0; rIdx < riverPolys.length; rIdx++) {
+                    var rObj = riverPolys[rIdx];
+                    var rHalf = (rObj.width || 28) / 2;
+                    for (var pi = 0; pi < rObj.pts.length; pi++) {
+                        var rd = Math.hypot(rObj.pts[pi].x - gx, rObj.pts[pi].y - gy);
+                        if (rd < r + rHalf + 10) {
+                            hitRiver = true;
+                            break;
+                        }
+                    }
+                    if (hitRiver) break;
+                }
+                if (hitRiver) continue;
+
+                var centerDist = Math.hypot(gx - 700, gy - 430);
+                var score = minNodeDist - centerDist * 0.15;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestCandidate = { x: gx, y: gy, w: w, h: h, clearance: minNodeDist };
+                }
+            }
+        }
+
+        return bestCandidate;
+    },
+
+    // Procedurální přegenerování geometrie existujícího plánu (např. pro WYSIWYG editor se zachováním definic polí)
+    regenerateBoardGeometry: function (board, shapeKey, seed) {
+        if (!board || !board.nodes || board.nodes.length === 0) return board;
+        shapeKey = shapeKey || board.routeShape || "auto";
+        if (shapeKey === "auto") {
+            var autoList = ["organic_meander", "figure_eight", "spiral_citadel", "twin_valleys", "serpentine", "star_crossroads", "classic_ring"];
+            var sNum = (typeof seed === "number" && !isNaN(seed)) ? Math.abs(seed) : Math.floor(Math.random() * 1000);
+            shapeKey = autoList[sNum % autoList.length];
+        }
+
+        var rnd = this.createRNG(seed || board.seed || 12345);
+
+        // 1. Rozdělení na hlavní okruh a větve
+        var mainNodes = [];
+        var branchGroups = {};
+
+        for (var i = 0; i < board.nodes.length; i++) {
+            var n = board.nodes[i];
+            var tag = n.branchTag || "main";
+            if (tag === "main") {
+                mainNodes.push(n);
+            } else {
+                if (!branchGroups[tag]) branchGroups[tag] = [];
+                branchGroups[tag].push(n);
+            }
+        }
+
+        if (mainNodes.length < 24) {
+            mainNodes = board.nodes.slice(0, Math.min(board.nodes.length, 60));
+        }
+
+        var mainLen = mainNodes.length;
+
+        // 2. Spline a reparametrizace hlavní trasy
+        var ctrlPts = this.getArchetypeControlPoints(shapeKey, rnd);
+        var denseCurve = this.sampleCatmullRomLoop(ctrlPts, 60);
+        var mainPts = this.reparameterizeByArcLength(denseCurve, mainLen);
+
+        for (var m = 0; m < mainLen; m++) {
+            mainNodes[m].x = mainPts[m].x;
+            mainNodes[m].y = mainPts[m].y;
+        }
+
+        var cx = 0, cy = 0;
+        for (var ci = 0; ci < mainLen; ci++) { cx += mainNodes[ci].x; cy += mainNodes[ci].y; }
+        cx /= mainLen; cy /= mainLen;
+
+        // 3. Spojnice a pozicování větví
+        var edges = [];
+        for (var me = 0; me < mainLen; me++) {
+            edges.push([mainNodes[me].id, mainNodes[(me + 1) % mainLen].id]);
+        }
+
+        var branchKeys = Object.keys(branchGroups);
+        for (var bk = 0; bk < branchKeys.length; bk++) {
+            var bTag = branchKeys[bk];
+            var bNodes = branchGroups[bTag];
+            if (bNodes.length === 0) continue;
+
+            var startNode = null;
+            for (var si = 0; si < board.nodes.length; si++) {
+                if (board.nodes[si].isJunction && board.nodes[si].branchHigh === bNodes[0].id) {
+                    startNode = board.nodes[si];
+                    break;
+                }
+            }
+            if (!startNode) startNode = mainNodes[Math.floor(mainLen * (0.2 + bk * 0.25)) % mainLen];
+
+            var lastBNode = bNodes[bNodes.length - 1];
+            var endId = (lastBNode.next && lastBNode.next[0] !== undefined) ? lastBNode.next[0] : (startNode.id + 6) % mainLen;
+            var endNode = board.nodes[endId] || mainNodes[(startNode.id + 6) % mainLen];
+
+            var chordX = endNode.x - startNode.x;
+            var chordY = endNode.y - startNode.y;
+            var chordLen = Math.hypot(chordX, chordY) || 1;
+            var nx = -chordY / chordLen;
+            var ny = chordX / chordLen;
+
+            var midX = (startNode.x + endNode.x) / 2;
+            var midY = (startNode.y + endNode.y) / 2;
+            var dot = nx * (cx - midX) + ny * (cy - midY);
+            var sign = (dot >= 0) ? 1 : -1;
+            if (bTag === "dragon" && Math.abs(midX - 700) > 180) sign = -sign;
+
+            var bulge = Math.min(180, Math.max(80, chordLen * 0.42)) * sign;
+            var cp1 = { x: startNode.x + chordX * 0.3 + nx * bulge, y: startNode.y + chordY * 0.3 + ny * bulge };
+            var cp2 = { x: startNode.x + chordX * 0.7 + nx * bulge, y: startNode.y + chordY * 0.7 + ny * bulge };
+
+            for (var bi = 0; bi < bNodes.length; bi++) {
+                var t = (bi + 1) / (bNodes.length + 1);
+                var it = 1 - t;
+                var bx = it * it * it * startNode.x + 3 * it * it * t * cp1.x + 3 * it * t * t * cp2.x + t * t * t * endNode.x;
+                var by = it * it * it * startNode.y + 3 * it * it * t * cp1.y + 3 * it * t * t * cp2.y + t * t * t * endNode.y;
+                bNodes[bi].x = Math.round(bx);
+                bNodes[bi].y = Math.round(by);
+
+                if (bi === 0) {
+                    edges.push([startNode.id, bNodes[0].id]);
+                } else {
+                    edges.push([bNodes[bi - 1].id, bNodes[bi].id]);
+                }
+            }
+            edges.push([lastBNode.id, endNode.id]);
+        }
+
+        // 4. Fyzikální relaxace celého grafu
+        var relaxed = this.relaxNodePositions(board.nodes, edges, { minClearance: 52, iterations: 35 });
+        for (var ri = 0; ri < board.nodes.length; ri++) {
+            board.nodes[ri].x = relaxed[ri].x;
+            board.nodes[ri].y = relaxed[ri].y;
+        }
+
+        board.routeShape = shapeKey;
+        if (board.recipe) board.recipe.routeShape = shapeKey;
+
+        // 5. Aktualizace mostů a dominant
+        if (typeof this.sanitizeAndAnchorLandmarks === "function") {
+            this.sanitizeAndAnchorLandmarks(board);
+        }
+        if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
+            window.PRS_BoardBuilder.computeRiverBridges(board);
+        }
+
+        return board;
+    },
+
     // Kompletní katalog 10 královských a feudálních hradů
     ALL_CASTLES: [
         { id: "castle_royal", name: "Královský hrad (Sídlo koruny)", icon: "👑", img: "assets/castles/castle_royal.png", biome: "golden_plains", element: "light" },
@@ -1170,6 +1684,7 @@ window.KiDeskyMapGenerator = {
             riverMode: r.riverMode || def.riverMode || "single",
             biomeTheme: r.biomeTheme || def.biomeTheme || "balanced",
             royalCastle: r.royalCastle || def.royalCastle || "auto",
+            routeShape: (r.routeShape && this.ROUTE_ARCHETYPES && this.ROUTE_ARCHETYPES[r.routeShape]) ? r.routeShape : (def.routeShape || "auto"),
             seed: Math.abs(Number(customSeed || r.seed || def.seed || 4598)) % 1000000 || 4598,
             customName: (r.customName || "").trim()
         };
@@ -1472,24 +1987,21 @@ window.KiDeskyMapGenerator = {
         var topWarp = (rnd() - 0.5) * 52;
         var rightWarp = (rnd() - 0.5) * 44;
         var bottomWarp = (rnd() - 0.5) * 50;
-        var leftWarp = (rnd() - 0.5) * 44;
+        // 5. Procedurální geometrie trasy (7 Archetypů + Catmull-Rom spline + Arc-length reparametrizace)
+        var shapeKey = r.routeShape || "auto";
+        if (shapeKey === "auto") {
+            var autoShapes = ["organic_meander", "figure_eight", "spiral_citadel", "twin_valleys", "serpentine", "star_crossroads", "classic_ring"];
+            var autoIdx = Math.abs(Number(seed) || 12345) % autoShapes.length;
+            shapeKey = autoShapes[autoIdx];
+        }
 
-        var pStart = { x: 500, y: Math.round(74 + topWarp * 0.2) };
-        var pTopRight = { x: Math.round(1150 + rightWarp * 0.3), y: Math.round(108 + topWarp * 0.3) };
-        var pBottomRight = { x: Math.round(1145 + rightWarp * 0.4), y: Math.round(772 + bottomWarp * 0.3) };
-        var pBottomLeft = { x: Math.round(250 - leftWarp * 0.3), y: Math.round(782 + bottomWarp * 0.2) };
-        var pTopLeft = { x: Math.round(98 - leftWarp * 0.4), y: 340 };
-        var pBackToStart = { x: 445, y: Math.round(74 + topWarp * 0.2) };
-
-        var segTopPts = this.sampleBezier(pStart, { x: 740, y: Math.round(68 + topWarp) }, { x: 970, y: Math.round(72 + topWarp) }, pTopRight, sTop, false);
-        var segRightPts = this.sampleBezier(pTopRight, { x: Math.round(1345 + rightWarp), y: 310 }, { x: Math.round(1340 + rightWarp), y: 615 }, pBottomRight, sRight, false);
-        var segBottomPts = this.sampleBezier(pBottomRight, { x: 840, y: Math.round(802 + bottomWarp) }, { x: 540, y: Math.round(802 + bottomWarp) }, pBottomLeft, sBottom, false);
-        var segLeft1Pts = this.sampleBezier(pBottomLeft, { x: Math.round(68 - leftWarp), y: 730 }, { x: Math.round(68 - leftWarp), y: 500 }, pTopLeft, sLeft1, false);
-        var segLeft2Pts = this.sampleBezier(pTopLeft, { x: 120, y: 105 }, { x: 285, y: 72 }, pBackToStart, sLeft2, true);
-
-        var mainPts = segTopPts.concat(segRightPts).concat(segBottomPts).concat(segLeft1Pts).concat(segLeft2Pts);
+        var ctrlPts = this.getArchetypeControlPoints(shapeKey, rnd);
+        var denseCurve = this.sampleCatmullRomLoop(ctrlPts, 60);
+        var mainPts = this.reparameterizeByArcLength(denseCurve, outerLen);
 
         var nodes = [];
+        var edges = [];
+
         for (var i = 0; i < outerLen; i++) {
             var d = outerDefs[i];
             var pt = mainPts[i] || { x: 500, y: 74 };
@@ -1518,23 +2030,44 @@ window.KiDeskyMapGenerator = {
                 branchLow: null,
                 branchHigh: null
             });
+            edges.push([i, (i + 1) % outerLen]);
         }
 
-        // 6. Připojení větví
+        // 6. Dynamické připojení odboček a větví podle geometrie archetypu
         var self = this;
-        function attachBranch(jStartIdx, jEndIdx, cp1, cp2, bDefs, tag) {
+        var cx = 0, cy = 0;
+        for (var ci = 0; ci < outerLen; ci++) { cx += nodes[ci].x; cy += nodes[ci].y; }
+        cx /= outerLen; cy /= outerLen;
+
+        function attachBranchProcedural(jStartIdx, jEndIdx, bDefs, tag, outward) {
             if (!bDefs || bDefs.length === 0) return;
             var nStart = nodes[jStartIdx];
             var nEnd = nodes[jEndIdx];
             if (!nStart || !nEnd) return;
-            var p0 = { x: Math.round(nStart.x * 0.85 + cp1.x * 0.15), y: Math.round(nStart.y * 0.85 + cp1.y * 0.15) };
-            var p3 = { x: Math.round(nEnd.x * 0.85 + cp2.x * 0.15), y: Math.round(nEnd.y * 0.85 + cp2.y * 0.15) };
-            var pts = self.sampleBezier(p0, cp1, cp2, p3, bDefs.length, true);
+
+            var chordX = nEnd.x - nStart.x;
+            var chordY = nEnd.y - nStart.y;
+            var chordLen = Math.hypot(chordX, chordY) || 1;
+            var nx = -chordY / chordLen;
+            var ny = chordX / chordLen;
+
+            var midX = (nStart.x + nEnd.x) / 2;
+            var midY = (nStart.y + nEnd.y) / 2;
+            var outX = midX - cx, outY = midY - cy;
+            var dot = nx * outX + ny * outY;
+            var sign = (dot >= 0) ? (outward ? 1 : -1) : (outward ? -1 : 1);
+
+            var bulge = Math.min(220, Math.max(120, chordLen * 0.50)) * sign;
+            var cp1 = { x: Math.round(nStart.x + chordX * 0.3 + nx * bulge), y: Math.round(nStart.y + chordY * 0.3 + ny * bulge) };
+            var cp2 = { x: Math.round(nStart.x + chordX * 0.7 + nx * bulge), y: Math.round(nStart.y + chordY * 0.7 + ny * bulge) };
 
             var firstId = nodes.length;
             for (var k = 0; k < bDefs.length; k++) {
                 var bd = bDefs[k];
-                var bpt = pts[k];
+                var t = (k + 1) / (bDefs.length + 1);
+                var it = 1 - t;
+                var bx = it * it * it * nStart.x + 3 * it * it * t * cp1.x + 3 * it * t * t * cp2.x + t * t * t * nEnd.x;
+                var by = it * it * it * nStart.y + 3 * it * it * t * cp1.y + 3 * it * t * t * cp2.y + t * t * t * nEnd.y;
                 var nid = nodes.length;
                 var mTierVal = (bd.type === "MASTER") ? resolveMasterNodeTier(0.75, bd.skill === "any") : null;
                 nodes.push({
@@ -1554,43 +2087,59 @@ window.KiDeskyMapGenerator = {
                     branchTag: tag,
                     name: bd.name,
                     icon: bd.icon,
-                    x: bpt.x,
-                    y: bpt.y,
+                    x: Math.round(bx),
+                    y: Math.round(by),
                     next: [k < bDefs.length - 1 ? nid + 1 : jEndIdx],
                     branchLow: null,
                     branchHigh: null
                 });
+
+                if (k === 0) {
+                    edges.push([jStartIdx, nid]);
+                } else {
+                    edges.push([nid - 1, nid]);
+                }
             }
+            edges.push([nodes.length - 1, jEndIdx]);
+
             nStart.isJunction = true;
             nStart.branchLow = (jStartIdx + 1) % outerLen;
             nStart.branchHigh = firstId;
+            nStart.next = [nStart.branchLow, nStart.branchHigh];
         }
 
-        var j1Start = Math.max(4, Math.min(outerLen - 6, Math.round(outerLen * 0.47)));
-        var j1End = Math.max(j1Start + 3, Math.min(outerLen - 3, Math.round(outerLen * 0.66)));
-        var j2Start = Math.max(2, Math.min(j1Start - 2, Math.round(outerLen * 0.17)));
-        var j2End = Math.max(j2Start + 3, Math.min(j1Start - 1, Math.round(outerLen * 0.40)));
-        var j3Start = Math.max(j1End + 3, Math.min(outerLen - 2, Math.round(outerLen * 0.93)));
-        var j3End = Math.max(j1End + 2, Math.min(j3Start - 2, Math.round(outerLen * 0.81)));
-        var j4Start = Math.max(2, Math.min(j2Start - 2, Math.round(outerLen * 0.06)));
-        var j4End = Math.max(j2Start + 2, Math.min(j2End - 2, Math.round(outerLen * 0.27)));
+        var j1Start = Math.max(3, Math.min(outerLen - 6, Math.round(outerLen * 0.46)));
+        var j1End = Math.max(j1Start + 3, Math.min(outerLen - 3, Math.round(outerLen * 0.65)));
+        var j2Start = Math.max(2, Math.min(j1Start - 2, Math.round(outerLen * 0.16)));
+        var j2End = Math.max(j2Start + 3, Math.min(j1Start - 1, Math.round(outerLen * 0.38)));
+        var j3Start = Math.max(j1End + 3, Math.min(outerLen - 2, Math.round(outerLen * 0.92)));
+        var j3End = Math.max(j1End + 2, Math.min(j3Start - 2, Math.round(outerLen * 0.78)));
+        var j4Start = Math.max(2, Math.min(j2Start - 2, Math.round(outerLen * 0.05)));
+        var j4End = Math.max(j2Start + 2, Math.min(j2End - 2, Math.round(outerLen * 0.25)));
 
         var activeBranchCount = 0;
         if (b1Defs.length > 0) {
-            attachBranch(j1Start, j1End, { x: Math.round(740 + (rnd() - 0.5) * 45), y: 545 }, { x: Math.round(450 + (rnd() - 0.5) * 45), y: 545 }, b1Defs, "festival");
+            attachBranchProcedural(j1Start, j1End, b1Defs, "festival", false);
             activeBranchCount++;
         }
         if (b2Defs.length > 0) {
-            attachBranch(j2Start, j2End, { x: Math.round(1045 + (rnd() - 0.5) * 40), y: 315 }, { x: Math.round(1155 + (rnd() - 0.5) * 40), y: 525 }, b2Defs, "dragon");
+            attachBranchProcedural(j2Start, j2End, b2Defs, "dragon", true);
             activeBranchCount++;
         }
         if (b3Defs.length > 0) {
-            attachBranch(j3Start, j3End, { x: Math.round(350 + (rnd() - 0.5) * 35), y: 225 }, { x: Math.round(235 + (rnd() - 0.5) * 35), y: 310 }, b3Defs, "forest");
+            attachBranchProcedural(j3Start, j3End, b3Defs, "forest", false);
             activeBranchCount++;
         }
         if (b4Defs.length > 0) {
-            attachBranch(j4Start, j4End, { x: Math.round(620 + (rnd() - 0.5) * 40), y: 185 }, { x: Math.round(920 + (rnd() - 0.5) * 40), y: 215 }, b4Defs, "ridge");
+            attachBranchProcedural(j4Start, j4End, b4Defs, "ridge", true);
             activeBranchCount++;
+        }
+
+        // 6b. Fyzikální relaxace celého grafu (35 iterací repulze & pružin pro garanci min. rozestupu 52px)
+        var relaxed = this.relaxNodePositions(nodes, edges, { minClearance: 52, iterations: 35 });
+        for (var rk = 0; rk < nodes.length; rk++) {
+            nodes[rk].x = relaxed[rk].x;
+            nodes[rk].y = relaxed[rk].y;
         }
 
         // 7. Řeky a mosty
@@ -1738,9 +2287,11 @@ window.KiDeskyMapGenerator = {
         var boardSeedCode = this.formatSeedCode(seed, normalizedOpts);
         var displayName = r.customName || ("Dynamické království #" + seed + " (" + nodes.length + " polí)");
 
+        normalizedOpts.routeShape = shapeKey;
         var boardObj = {
             code: "custom_dynamic",
             seedCode: boardSeedCode,
+            routeShape: shapeKey,
             masterTier: (chosenMasterTier === 5 ? 2 : chosenMasterTier),
             graduatedMasters: (chosenMasterTier === 5),
             recipe: r,
@@ -3264,6 +3815,24 @@ window.PRS_BoardBuilder = {
                     break;
                 }
             }
+            if (!hasCastle) {
+                var pocket = (window.KiDeskyMapGenerator && typeof window.KiDeskyMapGenerator.findLargestOpenPocket === "function")
+                    ? window.KiDeskyMapGenerator.findLargestOpenPocket(nodes, board.rivers, 220, 180)
+                    : null;
+                if (pocket) {
+                    validLandmarks.unshift({
+                        id: "royalCastle",
+                        name: royalDef.name || "Královský Hrad",
+                        icon: royalDef.icon || "👑",
+                        image: royalDef.image || royalDef.img || "assets/castles/castle_royal.png",
+                        x: pocket.x,
+                        y: pocket.y,
+                        w: pocket.w || 220,
+                        h: pocket.h || 180
+                    });
+                    hasCastle = true;
+                }
+            }
         }
 
         var hasDragon = false;
@@ -3402,8 +3971,18 @@ window.PRS_BoardBuilder = {
                 if (bestCSpot && maxCClearance > 45) break;
             }
             if (bestCSpot && maxCClearance > 45) {
+                var detectedCastleKey = "";
+                if (cImg) {
+                    var mKey = cImg.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpg)/i);
+                    if (mKey) detectedCastleKey = mKey[1];
+                }
+                if (!detectedCastleKey && cKey) {
+                    detectedCastleKey = cKey.toLowerCase().replace("castle_", "");
+                }
+                cNode.castleKey = detectedCastleKey;
                 validLandmarks.push({
                     id: cId,
+                    castleKey: detectedCastleKey,
                     name: cNode.name || ("Hrad " + (ci + 1)),
                     icon: cNode.icon || "🏯",
                     image: cImg,
@@ -4059,3 +4638,32 @@ window.PRS_BoardBuilder.sampleRiverPathSimple = function (p) {
 window.KiDeskyMapGenerator.sanitizeAndAnchorLandmarks = function (b) {
     return window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks(b);
 };
+
+// Helper pro dynamickou lokalizaci názvů hradů v katalozích game-boards
+(function () {
+    function wrapCastleList(list) {
+        if (!list || !Array.isArray(list)) return;
+        for (var i = 0; i < list.length; i++) {
+            (function (c) {
+                if (!c || c._i18nWrapped) return;
+                var defName = c.name;
+                var cKey = c.id ? c.id.replace("castle_", "") : "";
+                Object.defineProperty(c, "name", {
+                    get: function () {
+                        return (window.PRS_I18n ? window.PRS_I18n.t("castles." + cKey + ".name", null, defName) : defName);
+                    },
+                    set: function (val) {
+                        defName = val;
+                    },
+                    configurable: true,
+                    enumerable: true
+                });
+                c._i18nWrapped = true;
+            })(list[i]);
+        }
+    }
+    if (window.PRS_GameBoardBuilder) {
+        wrapCastleList(window.PRS_GameBoardBuilder.ALL_CASTLES);
+        wrapCastleList(window.PRS_GameBoardBuilder.THEMATIC_CASTLES);
+    }
+})();

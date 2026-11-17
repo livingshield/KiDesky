@@ -62,6 +62,21 @@ public class KiDeskyApiHandler : IHttpHandler
     private static readonly Dictionary<string, List<RoomEmoteItem>> _roomEmotes = new Dictionary<string, List<RoomEmoteItem>>(StringComparer.OrdinalIgnoreCase);
     private static readonly object _emoteLock = new object();
 
+    public class RoomChatMessage
+    {
+        public string id;
+        public string code;
+        public int playerIndex;
+        public string author;
+        public string crestId;
+        public string crestColor;
+        public string text;
+        public long timestamp;
+        public bool isSystem;
+    }
+    private static readonly Dictionary<string, List<RoomChatMessage>> _roomChat = new Dictionary<string, List<RoomChatMessage>>(StringComparer.OrdinalIgnoreCase);
+    private static readonly object _chatLock = new object();
+
     private static string _resolvedConnStr = null;
 
 
@@ -902,6 +917,12 @@ public class KiDeskyApiHandler : IHttpHandler
                 case "send-emote":
                     HandleSendEmote(context);
                     break;
+                case "send-chat":
+                    HandleSendChat(context);
+                    break;
+                case "get-chat":
+                    HandleGetChat(context);
+                    break;
                 case "record-game-stats":
                     HandleRecordGameStats(context);
                     break;
@@ -1536,30 +1557,56 @@ BEGIN
     INSERT INTO [prs].[prs_BoardTemplates] ([TemplateCode], [Name], [Description], [NodeCount], [GraphJson], [RecipeJson], [Seed], [IsBuiltIn], [IsActive], [SortOrder], [CreatedBy])
     VALUES (N'classic_96', @n1, @d1, 96, N'{}', @r1, 4598, 1, 1, 10, N'system');
 END
+ELSE
+BEGIN
+    UPDATE [prs].[prs_BoardTemplates] SET [Description] = @d1, [RecipeJson] = @r1, [UpdatedAt] = SYSUTCDATETIME() WHERE [TemplateCode] = N'classic_96' AND [IsBuiltIn] = 1;
+END
 
 IF NOT EXISTS (SELECT 1 FROM [prs].[prs_BoardTemplates] WHERE [TemplateCode] = N'dragon_4598')
 BEGIN
     INSERT INTO [prs].[prs_BoardTemplates] ([TemplateCode], [Name], [Description], [NodeCount], [GraphJson], [RecipeJson], [Seed], [IsBuiltIn], [IsActive], [SortOrder], [CreatedBy])
     VALUES (N'dragon_4598', @n2, @d2, 64, N'{}', @r2, 4598, 1, 1, 20, N'system');
 END
+ELSE
+BEGIN
+    UPDATE [prs].[prs_BoardTemplates] SET [Description] = @d2, [RecipeJson] = @r2, [NodeCount] = 64, [UpdatedAt] = SYSUTCDATETIME() WHERE [TemplateCode] = N'dragon_4598' AND [IsBuiltIn] = 1;
+END
 
 IF NOT EXISTS (SELECT 1 FROM [prs].[prs_BoardTemplates] WHERE [TemplateCode] = N'compact_48')
 BEGIN
     INSERT INTO [prs].[prs_BoardTemplates] ([TemplateCode], [Name], [Description], [NodeCount], [GraphJson], [RecipeJson], [Seed], [IsBuiltIn], [IsActive], [SortOrder], [CreatedBy])
-    VALUES (N'compact_48', @n3, @d3, 48, N'{}', @r3, 4598, 1, 1, 30, N'system');
+    VALUES (N'compact_48', @n3, @d3, 48, N'{}', @r3, 4848, 1, 1, 30, N'system');
+END
+ELSE
+BEGIN
+    UPDATE [prs].[prs_BoardTemplates] SET [Description] = @d3, [RecipeJson] = @r3, [NodeCount] = 48, [Seed] = 4848, [UpdatedAt] = SYSUTCDATETIME() WHERE [TemplateCode] = N'compact_48' AND [IsBuiltIn] = 1;
+END
+
+IF NOT EXISTS (SELECT 1 FROM [prs].[prs_BoardTemplates] WHERE [TemplateCode] = N'delta_84')
+BEGIN
+    INSERT INTO [prs].[prs_BoardTemplates] ([TemplateCode], [Name], [Description], [NodeCount], [GraphJson], [RecipeJson], [Seed], [IsBuiltIn], [IsActive], [SortOrder], [CreatedBy])
+    VALUES (N'delta_84', @n4, @d4, 84, N'{}', @r4, 8484, 1, 1, 25, N'system');
+END
+ELSE
+BEGIN
+    UPDATE [prs].[prs_BoardTemplates] SET [Description] = @d4, [RecipeJson] = @r4, [NodeCount] = 84, [Seed] = 8484, [UpdatedAt] = SYSUTCDATETIME() WHERE [TemplateCode] = N'delta_84' AND [IsBuiltIn] = 1;
 END", conn))
                 {
                     tplSeedCmd.Parameters.Add("@n1", SqlDbType.NVarChar, 100).Value = "Královská divočina 96 (Velký plán)";
-                    tplSeedCmd.Parameters.Add("@d1", SqlDbType.NVarChar, 500).Value = "Klasická velká herní deska s 96 poli, 4 vnitřními větvemi a 12 chovnými sadami zvířat.";
-                    tplSeedCmd.Parameters.Add("@r1", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5,6,7,8,9,10,11,12],\"villages\":10,\"towns\":5,\"castles\":3,\"jesters\":4,\"buildings\":5,\"questsU1\":4,\"questsU2\":3,\"questsU3\":2,\"masters\":7,\"merchants\":3,\"festivals\":3,\"chances\":6,\"taxes\":2,\"prisons\":1,\"hospitals\":1,\"taverns\":0,\"branches\":4}";
+                    tplSeedCmd.Parameters.Add("@d1", SqlDbType.NVarChar, 500).Value = "Klasická velká herní deska s 96+ poli, 4 vnitřními větvemi, horským přítokem, říční deltou a 12 sadami zvířat.";
+                    tplSeedCmd.Parameters.Add("@r1", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5,6,7,8,9,10,11,12],\"villages\":10,\"towns\":5,\"castles\":3,\"jesters\":4,\"buildings\":5,\"questsU1\":4,\"questsU2\":3,\"questsU3\":2,\"masters\":7,\"merchants\":3,\"festivals\":3,\"chances\":5,\"taxes\":2,\"prisons\":1,\"hospitals\":1,\"taverns\":1,\"branches\":4,\"masterTier\":5,\"riverMode\":\"delta\",\"biomeTheme\":\"balanced\",\"royalCastle\":\"castle_royal\"}";
 
                     tplSeedCmd.Parameters.Add("@n2", SqlDbType.NVarChar, 100).Value = "Dračí stezka (Střední plán – 64 polí)";
-                    tplSeedCmd.Parameters.Add("@d2", SqlDbType.NVarChar, 500).Value = "Středně velký královský plán se 64 poli, řekou Doubravkou a 8 sadami zvířat.";
-                    tplSeedCmd.Parameters.Add("@r2", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5,6,7,8],\"villages\":7,\"towns\":4,\"castles\":2,\"jesters\":3,\"buildings\":4,\"questsU1\":3,\"questsU2\":2,\"questsU3\":2,\"masters\":5,\"merchants\":2,\"festivals\":2,\"chances\":4,\"taxes\":1,\"prisons\":1,\"hospitals\":1,\"taverns\":0,\"branches\":2}";
+                    tplSeedCmd.Parameters.Add("@d2", SqlDbType.NVarChar, 500).Value = "Středně velký královský plán se 64 poli, dvojitým říčním soutokem, dračím pohořím a 8 sadami zvířat.";
+                    tplSeedCmd.Parameters.Add("@r2", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5,6,7,8],\"villages\":5,\"towns\":3,\"castles\":2,\"jesters\":2,\"buildings\":4,\"questsU1\":3,\"questsU2\":2,\"questsU3\":2,\"masters\":5,\"merchants\":2,\"festivals\":3,\"chances\":2,\"taxes\":1,\"prisons\":1,\"hospitals\":1,\"taverns\":1,\"branches\":2,\"masterTier\":5,\"riverMode\":\"dual\",\"biomeTheme\":\"dragon_peaks\",\"royalCastle\":\"castle_lava\"}";
 
                     tplSeedCmd.Parameters.Add("@n3", SqlDbType.NVarChar, 100).Value = "Rytířské kolbiště (Rychlá hra – 48 polí)";
-                    tplSeedCmd.Parameters.Add("@d3", SqlDbType.NVarChar, 500).Value = "Kompaktní herní plán s 48 poli pro svižnější partie plné přímých střetů.";
-                    tplSeedCmd.Parameters.Add("@r3", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5,6],\"villages\":5,\"towns\":3,\"castles\":2,\"jesters\":2,\"buildings\":3,\"questsU1\":2,\"questsU2\":2,\"questsU3\":1,\"masters\":4,\"merchants\":2,\"festivals\":2,\"chances\":3,\"taxes\":1,\"prisons\":1,\"hospitals\":1,\"taverns\":0,\"branches\":1}";
+                    tplSeedCmd.Parameters.Add("@d3", SqlDbType.NVarChar, 500).Value = "Kompaktní herní plán se 48 poli, říční deltou a 5 sadami zvířat pro svižné partie plné přímých střetů.";
+                    tplSeedCmd.Parameters.Add("@r3", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5],\"villages\":4,\"towns\":2,\"castles\":2,\"jesters\":2,\"buildings\":3,\"questsU1\":2,\"questsU2\":1,\"questsU3\":1,\"masters\":4,\"merchants\":2,\"festivals\":3,\"chances\":2,\"taxes\":1,\"prisons\":1,\"hospitals\":1,\"taverns\":1,\"branches\":1,\"masterTier\":2,\"riverMode\":\"delta\",\"biomeTheme\":\"golden_plains\",\"royalCastle\":\"castle_wind\"}";
+
+                    tplSeedCmd.Parameters.Add("@n4", SqlDbType.NVarChar, 100).Value = "Královská delta & Ostrovy (Plán – 84 polí)";
+                    tplSeedCmd.Parameters.Add("@d4", SqlDbType.NVarChar, 500).Value = "Rozlehlá říční delta se 3 větvemi, 10 sadami zvířat, 3 hrady a bohatou vodní sítí.";
+                    tplSeedCmd.Parameters.Add("@r4", SqlDbType.NVarChar, -1).Value = "{\"animalLevels\":[1,2,3,4,5,6,7,8,9,10],\"villages\":7,\"towns\":5,\"castles\":3,\"jesters\":3,\"buildings\":5,\"questsU1\":4,\"questsU2\":3,\"questsU3\":3,\"masters\":6,\"merchants\":3,\"festivals\":3,\"chances\":3,\"taxes\":2,\"prisons\":1,\"hospitals\":1,\"taverns\":1,\"branches\":3,\"masterTier\":5,\"riverMode\":\"delta\",\"biomeTheme\":\"river_delta\",\"royalCastle\":\"castle_water\"}";
 
                     tplSeedCmd.ExecuteNonQuery();
                 }
@@ -3351,6 +3398,100 @@ END";
         context.Response.Write(_json.Serialize(new { ok = true, emote = item }));
     }
 
+    private void HandleSendChat(HttpContext context)
+    {
+        string code = (context.Request.QueryString["code"] ?? "").Trim().ToUpperInvariant();
+        string playerIdxStr = context.Request.QueryString["playerIdx"] ?? "0";
+        int playerIdx = 0;
+        int.TryParse(playerIdxStr, out playerIdx);
+        string author = (context.Request.QueryString["author"] ?? "").Trim();
+        string crestId = (context.Request.QueryString["crestId"] ?? "lion").Trim();
+        string crestColor = (context.Request.QueryString["crestColor"] ?? "gold").Trim();
+        string text = "";
+
+        if (context.Request.HttpMethod == "POST")
+        {
+            var body = ReadJsonBody(context);
+            if (body != null)
+            {
+                if (string.IsNullOrEmpty(code)) code = GetStr(body, "code").Trim().ToUpperInvariant();
+                if (string.IsNullOrEmpty(author)) author = GetStr(body, "author").Trim();
+                if (body.ContainsKey("playerIndex")) int.TryParse(body["playerIndex"].ToString(), out playerIdx);
+                string cId = GetStr(body, "crestId");
+                if (!string.IsNullOrEmpty(cId)) crestId = cId;
+                string cCol = GetStr(body, "crestColor");
+                if (!string.IsNullOrEmpty(cCol)) crestColor = cCol;
+                text = GetStr(body, "text");
+            }
+        }
+        if (string.IsNullOrEmpty(text))
+        {
+            text = (context.Request.QueryString["text"] ?? "").Trim();
+        }
+
+        if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(text))
+        {
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Missing code or text" }));
+            return;
+        }
+
+        if (text.Length > 280) text = text.Substring(0, 280);
+        text = text.Replace("<", "&lt;").Replace(">", "&gt;");
+        if (string.IsNullOrEmpty(author)) author = "Rytíř";
+        if (string.IsNullOrEmpty(crestId)) crestId = "lion";
+        if (string.IsNullOrEmpty(crestColor)) crestColor = "gold";
+
+        long nowMs = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+        var msg = new RoomChatMessage
+        {
+            id = Guid.NewGuid().ToString("N").Substring(0, 10),
+            code = code,
+            playerIndex = playerIdx,
+            author = author,
+            crestId = crestId,
+            crestColor = crestColor,
+            text = text,
+            timestamp = nowMs,
+            isSystem = false
+        };
+
+        lock (_chatLock)
+        {
+            if (!_roomChat.ContainsKey(code)) _roomChat[code] = new List<RoomChatMessage>();
+            var list = _roomChat[code];
+            list.Add(msg);
+            if (list.Count > 60) list.RemoveRange(0, list.Count - 60);
+        }
+
+        context.Response.Write(_json.Serialize(new { ok = true, message = msg }));
+    }
+
+    private void HandleGetChat(HttpContext context)
+    {
+        string code = (context.Request.QueryString["code"] ?? "").Trim().ToUpperInvariant();
+        string sinceStr = context.Request.QueryString["since"] ?? "0";
+        long sinceTs = 0;
+        long.TryParse(sinceStr, out sinceTs);
+
+        List<RoomChatMessage> res = new List<RoomChatMessage>();
+        lock (_chatLock)
+        {
+            if (!string.IsNullOrEmpty(code) && _roomChat.ContainsKey(code))
+            {
+                var list = _roomChat[code];
+                if (sinceTs > 0)
+                {
+                    res = list.FindAll(m => m.timestamp > sinceTs);
+                }
+                else
+                {
+                    res = new List<RoomChatMessage>(list);
+                }
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, messages = res }));
+    }
+
     private void HandleRecordGameStats(HttpContext context)
     {
         var body = ReadJsonBody(context);
@@ -4753,6 +4894,7 @@ END";
 
 
                         List<RoomEmoteItem> recentEmotes = new List<RoomEmoteItem>();
+                        List<RoomChatMessage> recentChat = new List<RoomChatMessage>();
                         lock (_emoteLock)
                         {
                             string lookupCode = !string.IsNullOrEmpty(room) ? room : guid;
@@ -4760,6 +4902,15 @@ END";
                             {
                                 long nowMs = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
                                 recentEmotes = _roomEmotes[lookupCode].FindAll(e => (nowMs - e.timestamp) < 25000);
+                            }
+                        }
+                        lock (_chatLock)
+                        {
+                            string lookupCode = !string.IsNullOrEmpty(room) ? room : guid;
+                            if (!string.IsNullOrEmpty(lookupCode) && _roomChat.ContainsKey(lookupCode))
+                            {
+                                long nowMs = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+                                recentChat = _roomChat[lookupCode].FindAll(c => (nowMs - c.timestamp) < 3600000);
                             }
                         }
 
@@ -4774,7 +4925,8 @@ END";
                             gameStatus = r["Status"].ToString(),
                             winnerName = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString(),
                             updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o"),
-                            emotes = recentEmotes
+                            emotes = recentEmotes,
+                            chat = recentChat
                         };
 
 
@@ -4949,32 +5101,23 @@ END";
 
                         };
 
-
+                        List<RoomChatMessage> recentChat = new List<RoomChatMessage>();
+                        lock (_chatLock)
+                        {
+                            string lookupCode = sessObj.roomCode;
+                            if (!string.IsNullOrEmpty(lookupCode) && _roomChat.ContainsKey(lookupCode))
+                            {
+                                recentChat = new List<RoomChatMessage>(_roomChat[lookupCode]);
+                            }
+                        }
 
                         context.Response.Write(_json.Serialize(new
-
-
-
                         {
-
-
-
                             ok = true,
-
-
-
                             status = "success",
-
-
-
                             session = sessObj,
-
-
-
-                            stateJson = sessObj.stateJson
-
-
-
+                            stateJson = sessObj.stateJson,
+                            chat = recentChat
                         }));
 
 

@@ -183,6 +183,10 @@ window.PRS_GameEngine = {
 
                 pawnId: window.PRS_getDefaultPawnIdForPlayer ? window.PRS_getDefaultPawnIdForPlayer(pDef, i) : (pDef.pawnId || "knight_valiant"),
 
+                crestId: pDef.crestId || (window.PRS_HERALDRY_CATALOG ? window.PRS_HERALDRY_CATALOG[i % window.PRS_HERALDRY_CATALOG.length].id : "lion"),
+
+                crestColor: pDef.crestColor || (window.PRS_HERALDRY_TINCTURES ? window.PRS_HERALDRY_TINCTURES[i % window.PRS_HERALDRY_TINCTURES.length].key : "gold"),
+
                 color: pDef.color || col.hex,
 
                 badge: col.badge,
@@ -316,13 +320,14 @@ window.PRS_GameEngine = {
 
         };
 
-        var startGoalMsg = "Cílem je získat " + cfg.targetHearts + " 💖.";
+        var startGoalMsg = window.PRS_I18n ? window.PRS_I18n.t("engine.start_goal_hearts", { target: cfg.targetHearts }, "Cílem je získat " + cfg.targetHearts + " 💖.") : ("Cílem je získat " + cfg.targetHearts + " 💖.");
         if (cfg.scenario === "slayer") {
-            startGoalMsg = "Cílem scénáře 🐉 LOVCI DRAKŮ je ulovit 2 obávané draky v Dračích slujích (U3)!";
+            startGoalMsg = window.PRS_I18n ? window.PRS_I18n.t("engine.start_goal_slayer", null, "Cílem scénáře 🐉 LOVCI DRAKŮ je ulovit 2 obávané draky v Dračích slujích (U3)!") : "Cílem scénáře 🐉 LOVCI DRAKŮ je ulovit 2 obávané draky v Dračích slujích (U3)!";
         } else if (cfg.scenario === "tycoon") {
-            startGoalMsg = "Cílem scénáře 🏰 FEUDÁLNÍ MAGNÁT je vybudovat panství o 3 městech a 1 hradu!";
+            startGoalMsg = window.PRS_I18n ? window.PRS_I18n.t("engine.start_goal_tycoon", null, "Cílem scénáře 🏰 FEUDÁLNÍ MAGNÁT je vybudovat panství o 3 městech a 1 hradu!") : "Cílem scénáře 🏰 FEUDÁLNÍ MAGNÁT je vybudovat panství o 3 městech a 1 hradu!";
         }
-        this.addLog(state, "👑 Královská trubačská fanfára! Hra „Princeznino srdce“ začíná. " + startGoalMsg);
+        var startTitle = window.PRS_I18n ? window.PRS_I18n.t("engine.start_title", null, "👑 Královská trubačská fanfára! Hra „Princeznino srdce“ začíná.") : "👑 Královská trubačská fanfára! Hra „Princeznino srdce“ začíná.";
+        this.addLog(state, startTitle + " " + startGoalMsg, "info");
 
         this.recalculateBreedingAndVictory(state);
 
@@ -330,26 +335,17 @@ window.PRS_GameEngine = {
 
     },
 
-    addLog: function (state, text, type) {
-
+    addLog: function (state, text, type, meta) {
         state.logs.unshift({
-
             turn: state.turnNumber,
-
             round: state.roundNumber,
-
             type: type || "info",
-
-            text: text
-
+            text: text,
+            meta: meta || null
         });
-
         if (state.logs.length > 120) {
-
             state.logs.pop();
-
         }
-
     },
 
     // Cena políčka podle typu a sady,
@@ -456,6 +452,96 @@ window.PRS_GameEngine = {
 
     },
 
+    getNodeCategoryRank: function (node) {
+        if (!node) return 99;
+        var t = node.type;
+        if (t === "ANIMAL") return 1;
+        if (t === "MASTER") return 2;
+        if (t === "VILLAGE") return 3;
+        if (t === "TOWN") return 4;
+        if (t === "CASTLE") return 5;
+        return 6;
+    },
+
+    extractNumberFromCodeOrName: function (str) {
+        if (!str) return 0;
+        var m = String(str).match(/\d+/);
+        return m ? parseInt(m[0], 10) : 0;
+    },
+
+    getAnimalSubtypeRank: function (sub) {
+        if (sub === "falcon") return 1;
+        if (sub === "dog") return 2;
+        if (sub === "horse") return 3;
+        return 4;
+    },
+
+    comparePropertyNodes: function (a, b) {
+        if (!a && !b) return 0;
+        if (!a) return 1;
+        if (!b) return -1;
+
+        var catA = this.getNodeCategoryRank(a);
+        var catB = this.getNodeCategoryRank(b);
+        if (catA !== catB) return catA - catB;
+
+        // 1. Zvířata: podle levelu (1, 2, 3...) a v rámci levelu: sokol -> pes -> kůň
+        if (catA === 1) {
+            var lvlA = a.setId || a.animalLevel || this.extractNumberFromCodeOrName(a.code) || 0;
+            var lvlB = b.setId || b.animalLevel || this.extractNumberFromCodeOrName(b.code) || 0;
+            if (lvlA !== lvlB) return lvlA - lvlB;
+            var subA = this.getAnimalSubtypeRank(a.subtype);
+            var subB = this.getAnimalSubtypeRank(b.subtype);
+            if (subA !== subB) return subA - subB;
+            return (a.name || "").localeCompare(b.name || "", "cs");
+        }
+
+        // 2. Mistři: podle dovednosti (boj -> jízda -> tanec -> charisma -> velmistr) a čísla
+        if (catA === 2) {
+            var skOrder = { boj: 1, jizda: 2, tanec: 3, charisma: 4, any: 5 };
+            var skA = skOrder[a.skill] || 6;
+            var skB = skOrder[b.skill] || 6;
+            if (skA !== skB) return skA - skB;
+            var numA = this.extractNumberFromCodeOrName(a.code) || this.extractNumberFromCodeOrName(a.name) || 0;
+            var numB = this.extractNumberFromCodeOrName(b.code) || this.extractNumberFromCodeOrName(b.name) || 0;
+            if (numA !== numB) return numA - numB;
+            return (a.name || "").localeCompare(b.name || "", "cs");
+        }
+
+        // 3. Vesnice, 4. Města, 5. Hrady: podle čísla (1, 2, 3, 4...)
+        if (catA === 3 || catA === 4 || catA === 5) {
+            var numA = this.extractNumberFromCodeOrName(a.code) || this.extractNumberFromCodeOrName(a.name) || 0;
+            var numB = this.extractNumberFromCodeOrName(b.code) || this.extractNumberFromCodeOrName(b.name) || 0;
+            if (numA !== numB) return numA - numB;
+            return (a.name || "").localeCompare(b.name || "", "cs");
+        }
+
+        // 6. Ostatní stavby a živnosti
+        return (a.name || "").localeCompare(b.name || "", "cs");
+    },
+
+    sortPlayerOwnedNodes: function (player, state) {
+        if (!player || !Array.isArray(player.ownedNodes) || player.ownedNodes.length <= 1) return;
+        var nodes = (state && state.board && state.board.nodes) || null;
+        if (!nodes) return;
+        var self = this;
+        player.ownedNodes.sort(function (idA, idB) {
+            return self.comparePropertyNodes(nodes[idA], nodes[idB]);
+        });
+    },
+
+    getSortedOwnedNodes: function (player, state) {
+        if (!player || !Array.isArray(player.ownedNodes)) return [];
+        var list = player.ownedNodes.slice();
+        var nodes = (state && state.board && state.board.nodes) || null;
+        if (!nodes || list.length <= 1) return list;
+        var self = this;
+        list.sort(function (idA, idB) {
+            return self.comparePropertyNodes(nodes[idA], nodes[idB]);
+        });
+        return list;
+    },
+
     // Zjistí nasazené předměty hráče (respektuje přepínání Batoh / Nasazeno),
 
     getEquippedItems: function (player) {
@@ -483,8 +569,10 @@ window.PRS_GameEngine = {
         for (var i = 0; i < player.items.length; i++) {
 
             var it = player.items[i];
+            var baseDef = (window.PRS_ITEMS && window.PRS_ITEMS.find(function(x) { return x.id === it.id; })) ||
+                          (window.PRS_TROPHIES && window.PRS_TROPHIES[it.id]);
 
-            var slot = it.slot || "weapon";
+            var slot = it.slot || (baseDef ? baseDef.slot : "weapon");
 
             if (it.isEquipped === true) {
 
@@ -511,16 +599,22 @@ window.PRS_GameEngine = {
             if (!equippedBySlot[s]) {
 
                 var bestCandidate = null;
+                var bestPrice = -1;
 
                 for (var j = 0; j < player.items.length; j++) {
 
                     var cand = player.items[j];
+                    var candBase = (window.PRS_ITEMS && window.PRS_ITEMS.find(function(x) { return x.id === cand.id; })) ||
+                                   (window.PRS_TROPHIES && window.PRS_TROPHIES[cand.id]);
+                    var candSlot = cand.slot || (candBase ? candBase.slot : "weapon");
+                    var candPrice = (cand.price !== undefined && cand.price !== null) ? cand.price : (candBase && candBase.price ? candBase.price : 0);
 
-                    if (cand.slot === s && cand.isEquipped !== false) {
+                    if (candSlot === s && cand.isEquipped !== false) {
 
-                        if (!bestCandidate || cand.price > bestCandidate.price) {
+                        if (!bestCandidate || candPrice > bestPrice) {
 
                             bestCandidate = cand;
+                            bestPrice = candPrice;
 
                         }
 
@@ -610,7 +704,11 @@ window.PRS_GameEngine = {
 
         if (!target) return { ok: false, message: "Předmět nebyl nalezen." };
 
-        var slot = target.slot || "weapon";
+        var targetBase = (window.PRS_ITEMS && window.PRS_ITEMS.find(function(x) { return x.id === target.id; })) ||
+                         (window.PRS_TROPHIES && window.PRS_TROPHIES[target.id]);
+        var slot = target.slot || (targetBase ? targetBase.slot : "weapon");
+        var targetName = target.name || (targetBase ? targetBase.name : "předmět");
+        var targetIcon = target.icon || (targetBase ? targetBase.icon : "📦");
 
         var isCurrentlyEquipped = (target.isEquipped === true);
 
@@ -620,7 +718,7 @@ window.PRS_GameEngine = {
 
             target.isEquipped = false;
 
-            msg = "🎒 " + player.badge + " " + player.name + " uložil předmět " + (target.icon || "📦") + " " + target.name + " do batohu.";
+            msg = "🎒 " + player.badge + " " + player.name + " uložil předmět " + targetIcon + " " + targetName + " do batohu.";
 
         } else {
 
@@ -628,9 +726,14 @@ window.PRS_GameEngine = {
 
             for (var k = 0; k < player.items.length; k++) {
 
-                if (player.items[k].slot === slot && player.items[k] !== target) {
+                var kItem = player.items[k];
+                var kBase = (window.PRS_ITEMS && window.PRS_ITEMS.find(function(x) { return x.id === kItem.id; })) ||
+                            (window.PRS_TROPHIES && window.PRS_TROPHIES[kItem.id]);
+                var kSlot = kItem.slot || (kBase ? kBase.slot : "weapon");
 
-                    player.items[k].isEquipped = false;
+                if (kSlot === slot && kItem !== target) {
+
+                    kItem.isEquipped = false;
 
                 }
 
@@ -638,7 +741,7 @@ window.PRS_GameEngine = {
 
             target.isEquipped = true;
 
-            msg = "⚔️ " + player.badge + " " + player.name + " nasadil " + (target.icon || "📦") + " " + target.name + " do aktivní výstroje!";
+            msg = "⚔️ " + player.badge + " " + player.name + " nasadil " + targetIcon + " " + targetName + " do aktivní výstroje!";
 
         }
 
@@ -672,13 +775,21 @@ window.PRS_GameEngine = {
 
             if (item) {
 
-                combat += (item.combat || 0);
+                var baseDef = (window.PRS_ITEMS && window.PRS_ITEMS.find(function(x) { return x.id === item.id; })) ||
+                              (window.PRS_TROPHIES && window.PRS_TROPHIES[item.id]);
 
-                riding += (item.riding || 0);
+                var c = (item.combat !== undefined && item.combat !== null) ? item.combat : (baseDef && baseDef.combat !== undefined ? baseDef.combat : (item.boj || 0));
+                var r = (item.riding !== undefined && item.riding !== null) ? item.riding : (baseDef && baseDef.riding !== undefined ? baseDef.riding : (item.jizda || 0));
+                var d = (item.dance !== undefined && item.dance !== null) ? item.dance : (baseDef && baseDef.dance !== undefined ? baseDef.dance : (item.tanec || 0));
+                var ch = (item.charisma !== undefined && item.charisma !== null) ? item.charisma : (baseDef && baseDef.charisma !== undefined ? baseDef.charisma : 0);
 
-                dance += (item.dance || 0);
+                combat += Number(c) || 0;
 
-                charisma += (item.charisma || 0);
+                riding += Number(r) || 0;
+
+                dance += Number(d) || 0;
+
+                charisma += Number(ch) || 0;
 
             }
 
@@ -1108,6 +1219,7 @@ window.PRS_GameEngine = {
             var p = state.players[i];
             if (!p) continue;
             if (!Array.isArray(p.ownedNodes)) p.ownedNodes = [];
+            this.sortPlayerOwnedNodes(p, state);
             var val = 0;
             if (hasBoardNodes) {
                 for (var j = 0; j < p.ownedNodes.length; j++) {
@@ -1199,7 +1311,7 @@ window.PRS_GameEngine = {
             if (typeof pl.speciesHeartsBonus === "number") pl.speciesHeartsBonus = Math.round(pl.speciesHeartsBonus * 10) / 10;
             if (typeof pl.estateHeartsBonus === "number") pl.estateHeartsBonus = Math.round(pl.estateHeartsBonus * 10) / 10;
 
-            pl.totalHearts = Math.round((pl.permanentHearts + pl.breedingHearts + (pl.setHeartsBonus || 0) + (pl.speciesHeartsBonus || 0) + (pl.estateHeartsBonus || 0)) * 10) / 10;
+            pl.totalHearts = Math.max(0, Math.round((pl.permanentHearts + pl.breedingHearts + (pl.setHeartsBonus || 0) + (pl.speciesHeartsBonus || 0) + (pl.estateHeartsBonus || 0)) * 10) / 10);
 
             var isWin = false;
             var winReason = "";
@@ -1449,11 +1561,13 @@ window.PRS_GameEngine = {
 
                     player.stats.heartsFromFestivals += courtHearts;
 
-                    this.addLog(state, "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + " a +" + courtHearts + " 💖 při královské audienci (díky šlechtickému titulu)!", "gold");
+                    var stLog1 = "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + " a +" + courtHearts + " 💖 při královské audienci (díky šlechtickému titulu)!";
+                    this.addLog(state, stLog1, "gold", { key: "engine.pass_start_log", params: { badge: player.badge, player: player.name, stipend: stipendDesc + " a +" + courtHearts + " 💖" } });
 
                 } else {
 
-                    this.addLog(state, "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + ".", "gold");
+                    var stLog2 = "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + ".";
+                    this.addLog(state, stLog2, "gold", { key: "engine.pass_start_log", params: { badge: player.badge, player: player.name, stipend: stipendDesc } });
 
                 }
 
@@ -1729,15 +1843,18 @@ window.PRS_GameEngine = {
 
                     player.stats.heartsFromFestivals += courtHearts;
 
-                    this.addLog(state, "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + " a +" + courtHearts + " 💖 při královské audienci (díky šlechtickému titulu)!", "gold");
+                    var stLogA = "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + " a +" + courtHearts + " 💖 při královské audienci (díky šlechtickému titulu)!";
+                    this.addLog(state, stLogA, "gold", { key: "engine.pass_start_log", params: { badge: player.badge, player: player.name, stipend: stipendDesc + " a +" + courtHearts + " 💖" } });
 
                 } else if (stNow.charisma >= 2 && !hasNobleStatus) {
 
-                    this.addLog(state, "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + " (pro audienci u krále a zisk Srdce z Charismatu je však nutné vlastnit Město či Hrad).", "gold");
+                    var stLogB = "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + " (pro audienci u krále a zisk Srdce z Charismatu je však nutné vlastnit Město či Hrad).";
+                    this.addLog(state, stLogB, "gold", { key: "engine.pass_start_log", params: { badge: player.badge, player: player.name, stipend: stipendDesc } });
 
                 } else {
 
-                    this.addLog(state, "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + ".", "gold");
+                    var stLogC = "🏰 " + player.badge + " " + player.name + " prošel STARTem a získává " + stipendDesc + ".";
+                    this.addLog(state, stLogC, "gold", { key: "engine.pass_start_log", params: { badge: player.badge, player: player.name, stipend: stipendDesc } });
 
                 }
 
@@ -2104,9 +2221,29 @@ window.PRS_GameEngine = {
 
                 if (remainingDebt <= 0) {
 
-                    var msg = "💸 " + player.badge + " " + player.name + " platí poplatek **" + actualPaid + " zl.** hráči " + owner.badge + " " + owner.name + " (" + node.name + ").";
+                    var currSuffixRent = window.PRS_I18n ? window.PRS_I18n.t("ui.common.gold_short", null, "zl.") : "zl.";
+                    var msg = window.PRS_I18n ? window.PRS_I18n.t("engine.paid_rent_log", {
+                        badge: player.badge,
+                        player: player.name,
+                        rent: actualPaid,
+                        currency: currSuffixRent,
+                        ownerBadge: owner.badge,
+                        owner: owner.name,
+                        estate: node.name
+                    }) : ("💸 " + player.badge + " " + player.name + " platí poplatek **" + actualPaid + " zl.** hráči " + owner.badge + " " + owner.name + " (" + node.name + ").");
 
-                    this.addLog(state, msg, "rent");
+                    this.addLog(state, msg, "rent", {
+                        key: "engine.paid_rent_log",
+                        params: {
+                            badge: player.badge,
+                            player: player.name,
+                            rent: actualPaid,
+                            currency: currSuffixRent,
+                            ownerBadge: owner.badge,
+                            owner: owner.name,
+                            estate: node.name
+                        }
+                    });
 
                     state.pendingAction.summary = msg;
 
@@ -2177,16 +2314,17 @@ window.PRS_GameEngine = {
             var mRoll = Math.floor(Math.random() * 6) + 1;
             state.pendingAction.masterRoll = mRoll;
             state.pendingAction.masterTier = tier;
-            state.pendingAction.skill = node.skill;
+            var normSkill = this.normalizeSkillKey ? this.normalizeSkillKey(node.skill) : (node.skill || "charisma");
+            state.pendingAction.skill = normSkill;
 
             var threshold = (tier === 3) ? 3 : (state.config.masterMinRoll || 4);
-            var curSkillVal = (player.skills && node.skill && player.skills[node.skill] !== undefined) ? player.skills[node.skill] : 0;
+            var curSkillVal = (player.skills && player.skills[normSkill] !== undefined) ? player.skills[normSkill] : 0;
             var maxTrainLevel = (state.board && state.board.graduatedMasters) ? ((tier === 1) ? 2 : (tier === 2 ? 3 : (tier === 3 ? 4 : 5))) : 5;
 
             if (mRoll >= threshold) {
                 state.pendingAction.canTrainMaster = (curSkillVal < maxTrainLevel);
                 state.pendingAction.maxTrainLevel = maxTrainLevel;
-                if (tier === 4 && player.skills[node.skill || "charisma"] >= 3) {
+                if (tier === 4 && player.skills[normSkill] >= 3) {
                     state.pendingAction.isMasterDuel = true;
                     state.pendingAction.summary = "Mistr " + node.name + " tě vyzývá k rytířskému turnaji o Srdce princezny! (Hod " + mRoll + " ≥ " + threshold + ")";
                     this.addLog(state, "⚔️ " + player.name + " vstoupil do výzvy mistra u " + node.name + "!");
@@ -3009,7 +3147,8 @@ window.PRS_GameEngine = {
 
                 player.skills[chosen]++;
 
-                msg += " (Zvýšena vlastnost **" + chosen.toUpperCase() + "** na stupeň " + player.skills[chosen] + "!)";
+                var skName = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(chosen, false) : (chosen === "riding" ? "Jízda" : (chosen === "combat" ? "Boj" : (chosen === "dance" ? "Tanec" : "Charisma")));
+                msg += " (Zvýšena vlastnost **" + skName + "** na stupeň " + player.skills[chosen] + "!)";
 
             }
 
@@ -3093,7 +3232,8 @@ window.PRS_GameEngine = {
 
                 if (player.skills[chosenSk] < 5) player.skills[chosenSk]++;
 
-                msg += "Tinktura zabrala! Získáno +1 k " + chosenSk.toUpperCase() + "!";
+                var skName = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(chosenSk, false) : (chosenSk === "riding" ? "Jízda" : (chosenSk === "combat" ? "Boj" : (chosenSk === "dance" ? "Tanec" : "Charisma")));
+                msg += "Tinktura zabrala! Získáno +1 k vlastnosti " + skName + "!";
 
             } else {
 
@@ -3191,7 +3331,8 @@ window.PRS_GameEngine = {
 
             if (player.skills[chSk] < 5) player.skills[chSk]++;
 
-            msg += "Získáno +1 k " + chSk.toUpperCase() + "!";
+            var skName = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(chSk, false) : (chSk === "riding" ? "Jízda" : (chSk === "combat" ? "Boj" : (chSk === "dance" ? "Tanec" : "Charisma")));
+            msg += "Získáno +1 k vlastnosti " + skName + "!";
 
         } else if (opt.effect === "trade_caravan") {
 
@@ -3309,15 +3450,23 @@ window.PRS_GameEngine = {
         if (node.type === "VILLAGE") node.villageLevel = 1;
 
         player.ownedNodes.push(node.id);
+        this.sortPlayerOwnedNodes(player, state);
 
         pa.canBuyNode = false;
 
-        pa.summary = "Zakoupil jsi **" + node.name + "** za " + price + " zl.";
+        var currSuffix = window.PRS_I18n ? window.PRS_I18n.t("ui.common.gold_short", null, "zl.") : "zl.";
+        if (window.PRS_I18n) {
+            pa.summary = window.PRS_I18n.t("engine.bought_estate_summary", { estate: node.name, cost: price, currency: currSuffix }, "Zakoupil jsi **" + node.name + "** za " + price + " zl.");
+        } else {
+            pa.summary = "Zakoupil jsi **" + node.name + "** za " + price + " zl.";
+        }
 
         if (node.type === "CASTLE") {
-            this.addLog(state, "👑 " + player.badge + " " + player.name + " se stává svrchovaným pánem velkolepé pevnosti **" + node.name + "** a získává královský šlechtický titul!", "win");
+            var cTitle = window.PRS_I18n ? window.PRS_I18n.t("engine.castle_bought_log", { badge: player.badge, player: player.name, castle: node.name }) : ("👑 " + player.badge + " " + player.name + " se stává svrchovaným pánem velkolepé pevnosti **" + node.name + "** a získává královský šlechtický titul!");
+            this.addLog(state, cTitle, "win", { key: "engine.castle_bought_log", params: { badge: player.badge, player: player.name, castle: node.name } });
         } else {
-            this.addLog(state, "📜 " + player.badge + " " + player.name + " zakoupil **" + node.name + "** za " + price + " zl.", "buy");
+            var bLog = window.PRS_I18n ? window.PRS_I18n.t("engine.estate_bought_log", { badge: player.badge, player: player.name, estate: node.name, cost: price, currency: currSuffix }) : ("📜 " + player.badge + " " + player.name + " zakoupil **" + node.name + "** za " + price + " zl.");
+            this.addLog(state, bLog, "buy", { key: "engine.estate_bought_log", params: { badge: player.badge, player: player.name, estate: node.name, cost: price, currency: currSuffix } });
         }
 
         this.recalculateBreedingAndVictory(state);
@@ -3346,11 +3495,27 @@ window.PRS_GameEngine = {
 
         node.villageLevel++;
 
-        var levelNames = ["Malá vesnice", "Střední městečko", "Velká osada"];
+        var currSuffixUpg = window.PRS_I18n ? window.PRS_I18n.t("ui.common.gold_short", null, "zl.") : "zl.";
+        var msg = window.PRS_I18n ? window.PRS_I18n.t("engine.upgrade_village_log", {
+            badge: player.badge,
+            player: player.name,
+            village: node.name,
+            level: node.villageLevel,
+            cost: cost,
+            currency: currSuffixUpg
+        }) : ("🏘️ " + player.badge + " " + player.name + " povýšil **" + node.name + "** na stupeň " + node.villageLevel + " za " + cost + " zl.");
 
-        var msg = "🏘️ " + player.badge + " " + player.name + " povýšil **" + node.name + "** na stupeň " + node.villageLevel + " (" + levelNames[node.villageLevel - 1] + ") za " + cost + " zl.";
-
-        this.addLog(state, msg, "buy");
+        this.addLog(state, msg, "buy", {
+            key: "engine.upgrade_village_log",
+            params: {
+                badge: player.badge,
+                player: player.name,
+                village: node.name,
+                level: node.villageLevel,
+                cost: cost,
+                currency: currSuffixUpg
+            }
+        });
 
         if (state.pendingAction && state.pendingAction.nodeId === node.id) {
             state.pendingAction.canUpgradeVillage = (node.villageLevel < 3);
@@ -3379,7 +3544,9 @@ window.PRS_GameEngine = {
 
         var player = state.players[state.currentPlayerIndex];
 
-        var skill = (pa.skill === "any") ? (chosenSkill || "charisma") : pa.skill;
+        var rawSkill = (pa.skill === "any") ? (chosenSkill || "charisma") : pa.skill;
+        var skill = (window.PRS_SKILLS && window.PRS_SKILLS.normalizeKey) ? window.PRS_SKILLS.normalizeKey(rawSkill) : (rawSkill || "charisma");
+        if (skill === "any") skill = "charisma";
 
         var currentLevel = player.skills[skill] || 0;
 
@@ -3409,11 +3576,28 @@ window.PRS_GameEngine = {
 
         pa.canTrainMaster = false;
 
-        var msg = "🎓 " + player.badge + " " + player.name + " vycvičil vlastnost **" + skill.toUpperCase() + "** na stupeň **" + player.skills[skill] + "/5** za " + cost + " zl.!";
+        var skName = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(skill, false) : (skill === "riding" ? "Jízda" : (skill === "combat" ? "Boj" : (skill === "dance" ? "Tanec" : "Charisma")));
+        var currSuffix = window.PRS_I18n ? window.PRS_I18n.t("ui.common.gold_short", null, "zl.") : "zl.";
+        var msg = window.PRS_I18n ? window.PRS_I18n.t("log.trained_skill", {
+            player: player.badge + " " + player.name,
+            skill: "**" + skName + "**",
+            level: player.skills[skill],
+            cost: cost.toLocaleString("cs-CZ"),
+            currency: currSuffix
+        }) : ("🎓 " + player.badge + " " + player.name + " vycvičil vlastnost **" + skName + "** na stupeň **" + player.skills[skill] + "/5** za " + cost.toLocaleString("cs-CZ") + " zl.!");
 
         pa.summary = msg;
 
-        this.addLog(state, msg, "skill");
+        this.addLog(state, msg, "skill", {
+            key: "log.trained_skill",
+            params: {
+                player: player.badge + " " + player.name,
+                skill: "**" + skName + "**",
+                level: player.skills[skill],
+                cost: cost.toLocaleString("cs-CZ"),
+                currency: currSuffix
+            }
+        });
 
         return true;
 
@@ -3430,7 +3614,9 @@ window.PRS_GameEngine = {
         if (!player) return false;
 
         var node = state.board && state.board.nodes ? state.board.nodes[player.nodeId] : null;
-        var skill = (pa.skill && pa.skill !== "any") ? pa.skill : ((node && node.skill && node.skill !== "any") ? node.skill : "charisma");
+        var rawSkill = (pa.skill && pa.skill !== "any") ? pa.skill : ((node && node.skill && node.skill !== "any") ? node.skill : "charisma");
+        var skill = (window.PRS_SKILLS && window.PRS_SKILLS.normalizeKey) ? window.PRS_SKILLS.normalizeKey(rawSkill) : (rawSkill || "charisma");
+        if (skill === "any") skill = "charisma";
         var eff = this.getEffectiveStats ? this.getEffectiveStats(state, player) : player.skills;
         var skillBonus = (eff && eff[skill] !== undefined) ? eff[skill] : ((player.skills && player.skills[skill]) || 3);
 
@@ -3441,6 +3627,8 @@ window.PRS_GameEngine = {
         pa.isMasterDuel = false;
         pa.canTrainMaster = false;
 
+        var skName = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(skill, false) : skill;
+
         if (total >= target) {
             player.permanentHearts = Math.round(((player.permanentHearts || 0) + 1.5) * 10) / 10;
             player.gold += 1500;
@@ -3448,7 +3636,7 @@ window.PRS_GameEngine = {
                 player.stats.questsWon = (player.stats.questsWon || 0) + 1;
                 player.stats.heartsFromQuests = Math.round(((player.stats.heartsFromQuests || 0) + 1.5) * 10) / 10;
             }
-            var winMsg = "⚔️ VÍTĚZSTVÍ V DUELU MISTRA! " + player.badge + " " + player.name + " hodil " + roll + " + " + skillBonus + " (" + skill.toUpperCase() + ") = " + total + " (cíl " + target + ") a získává **+1,5 💖** a **+1 500 zl.**!";
+            var winMsg = "⚔️ VÍTĚZSTVÍ V DUELU MISTRA! " + player.badge + " " + player.name + " hodil " + roll + " + " + skillBonus + " (" + skName + ") = " + total + " (cíl " + target + ") a získává **+1,5 💖** a **+1 500 zl.**!";
             pa.summary = winMsg;
             this.addLog(state, winMsg, "good");
         } else {
@@ -3587,16 +3775,20 @@ window.PRS_GameEngine = {
             if (idx === -1) return false;
 
             var it = player.items[idx];
+            var baseDef = (window.PRS_ITEMS && window.PRS_ITEMS.find(function(x) { return x.id === it.id; })) ||
+                          (window.PRS_TROPHIES && window.PRS_TROPHIES[it.id]);
+            var itPrice = (it.price !== undefined && it.price !== null) ? it.price : (baseDef && baseDef.price ? baseDef.price : 1000);
+            var itName = it.name || (baseDef ? baseDef.name : "předmět");
 
             var ratio = atMerchant ? rates.merchantItem : rates.anywhereItem;
 
-            var sellPrice = Math.round(it.price * ratio);
+            var sellPrice = Math.round(itPrice * ratio);
 
             player.items.splice(idx, 1);
 
             player.gold += sellPrice;
 
-            this.addLog(state, "💰 " + player.badge + " " + player.name + " prodal předmět **" + it.name + "** za " + sellPrice + " zl. (" + Math.round(ratio * 100) + "% ceny).");
+            this.addLog(state, "💰 " + player.badge + " " + player.name + " prodal předmět **" + itName + "** za " + sellPrice + " zl. (" + Math.round(ratio * 100) + "% ceny).");
 
             return true;
 
@@ -3666,17 +3858,22 @@ window.PRS_GameEngine = {
 
             for (var i = 0; i < player.items.length; i++) {
 
-                if (player.items[i].id === assetId) { idx = i; break; }
+                if (player.items[i].uid === assetId || player.items[i].id === assetId) { idx = i; break; }
 
             }
 
             if (idx === -1) return { ok: false, message: "Předmět nenalezen." };
 
             var it = player.items.splice(idx, 1)[0];
+            var baseDef = (window.PRS_ITEMS && window.PRS_ITEMS.find(function(x) { return x.id === it.id; })) ||
+                          (window.PRS_TROPHIES && window.PRS_TROPHIES[it.id]);
+            var itPrice = (it.price !== undefined && it.price !== null) ? it.price : (baseDef && baseDef.price ? baseDef.price : 1000);
+            var itName = it.name || (baseDef ? baseDef.name : "předmět");
+            var itIcon = it.icon || (baseDef ? baseDef.icon : "📦");
 
-            yieldVal = Math.round(it.price * rate);
+            yieldVal = Math.round(itPrice * rate);
 
-            assetName = it.icon + " " + it.name;
+            assetName = itIcon + " " + itName;
 
         } else if (assetType === "village_downgrade") {
 

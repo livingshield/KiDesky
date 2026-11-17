@@ -29,6 +29,7 @@ window.PRS_Audio = {
             if (savedSfxVol !== null) this.sfxVolume = Math.max(0, Math.min(1, parseFloat(savedSfxVol)));
         }
         this._ensureBgmAudio();
+        this._preloadCurrentMetadata();
         this.loadServerTracks();
     },
 
@@ -44,10 +45,19 @@ window.PRS_Audio = {
                 document.body.appendChild(this.bgmAudio);
             }
             this.bgmAudio.loop = false;
+            this.bgmAudio.preload = "metadata";
             this.bgmAudio.volume = this.muted ? 0 : this.bgmVolume;
             var self = this;
             this.bgmAudio.addEventListener("ended", function () {
                 self.nextTrack();
+            });
+            this.bgmAudio.addEventListener("loadedmetadata", function () {
+                if (window.PRS_App && window.PRS_App.updateMusicProgressUI) window.PRS_App.updateMusicProgressUI();
+                if (window.PRS_MusicWidget && window.PRS_MusicWidget.refresh) window.PRS_MusicWidget.refresh();
+            });
+            this.bgmAudio.addEventListener("durationchange", function () {
+                if (window.PRS_App && window.PRS_App.updateMusicProgressUI) window.PRS_App.updateMusicProgressUI();
+                if (window.PRS_MusicWidget && window.PRS_MusicWidget.refresh) window.PRS_MusicWidget.refresh();
             });
             this.bgmAudio.addEventListener("error", function () {
                 if (self.isMusicPlaying) {
@@ -55,6 +65,17 @@ window.PRS_Audio = {
                     self.startProceduralLute();
                 }
             });
+        }
+    },
+
+    _preloadCurrentMetadata: function () {
+        var tr = this.getCurrentTrack();
+        if (tr && tr.src && this.bgmAudio && !this.isMusicPlaying) {
+            if (this.bgmAudio.getAttribute("data-track-id") !== tr.id) {
+                this.bgmAudio.preload = "metadata";
+                this.bgmAudio.src = tr.src;
+                this.bgmAudio.setAttribute("data-track-id", tr.id || "");
+            }
         }
     },
 
@@ -109,7 +130,11 @@ window.PRS_Audio = {
             this._playYoutubeTrack(tr);
         } else if (tr.src && this.bgmAudio) {
             this._stopYoutube();
-            this.bgmAudio.src = tr.src;
+            var sameTrack = (this.bgmAudio.getAttribute("data-track-id") === (tr.id || "")) && !!this.bgmAudio.src;
+            if (!sameTrack) {
+                this.bgmAudio.src = tr.src;
+                this.bgmAudio.setAttribute("data-track-id", tr.id || "");
+            }
             this.bgmAudio.volume = this.muted ? 0 : this.bgmVolume;
             this.isMusicPlaying = true;
             var playProm = this.bgmAudio.play();
@@ -204,6 +229,7 @@ window.PRS_Audio = {
                     for (var f = 0; f < self.playlist.length; f++) {
                         if (self.playlist[f].isServer) { self.currentTrackIndex = f; break; }
                     }
+                    self._preloadCurrentMetadata();
                 }
                 if (window.PRS_App && window.PRS_App.renderMusicPlaylistOptions) window.PRS_App.renderMusicPlaylistOptions();
                 if (done) done();
@@ -219,6 +245,7 @@ window.PRS_Audio = {
     _ytReady: false,
     _ytPlayer: null,
     _ytPending: null,
+    _ytLoadedId: null,
 
     _ensureYoutubeApi: function () {
         var self = this;
@@ -265,11 +292,75 @@ window.PRS_Audio = {
     _playYoutubeTrack: function (tr) {
         this._ensureYoutubeApi();
         if (this._ytReady && this._ytPlayer) {
-            this._ytPlayer.loadVideoById(tr.youtubeId);
+            if (this._ytLoadedId === tr.youtubeId && typeof this._ytPlayer.playVideo === "function") {
+                this._ytPlayer.playVideo();
+            } else {
+                this._ytLoadedId = tr.youtubeId;
+                this._ytPlayer.loadVideoById(tr.youtubeId);
+            }
             this._applyYoutubeVolume();
         } else {
+            this._ytLoadedId = tr.youtubeId;
             this._ytPending = tr.youtubeId;
         }
+    },
+
+    getPlaybackProgress: function () {
+        var tr = this.getCurrentTrack();
+        if (!tr || tr.isProcedural) {
+            return { supported: false, isProcedural: !!(tr && tr.isProcedural), currentTime: 0, duration: 0 };
+        }
+        if (tr.isYoutube) {
+            if (this._ytReady && this._ytPlayer && typeof this._ytPlayer.getCurrentTime === "function") {
+                var yCur = Number(this._ytPlayer.getCurrentTime()) || 0;
+                var yDur = Number(this._ytPlayer.getDuration && this._ytPlayer.getDuration()) || 0;
+                return { supported: yDur > 0, isProcedural: false, currentTime: Math.min(yCur, yDur || yCur), duration: yDur };
+            }
+            return { supported: false, isProcedural: false, currentTime: 0, duration: 0 };
+        }
+        if (tr.src && this.bgmAudio) {
+            var aDur = (isFinite(this.bgmAudio.duration) && this.bgmAudio.duration > 0) ? this.bgmAudio.duration : 0;
+            var aCur = (isFinite(this.bgmAudio.currentTime) && this.bgmAudio.currentTime >= 0) ? this.bgmAudio.currentTime : 0;
+            return { supported: aDur > 0, isProcedural: false, currentTime: Math.min(aCur, aDur || aCur), duration: aDur };
+        }
+        return { supported: false, isProcedural: false, currentTime: 0, duration: 0 };
+    },
+
+    seekTo: function (seconds) {
+        var tr = this.getCurrentTrack();
+        if (!tr || tr.isProcedural) return false;
+        var sec = Math.max(0, Number(seconds) || 0);
+        if (tr.isYoutube) {
+            if (this._ytReady && this._ytPlayer && typeof this._ytPlayer.seekTo === "function") {
+                var yDur = Number(this._ytPlayer.getDuration && this._ytPlayer.getDuration()) || 0;
+                if (yDur > 0) sec = Math.min(sec, yDur);
+                try { this._ytPlayer.seekTo(sec, true); } catch (e) { }
+                return true;
+            }
+            return false;
+        }
+        if (tr.src && this.bgmAudio) {
+            if (!this.bgmAudio.src || this.bgmAudio.getAttribute("data-track-id") !== (tr.id || "")) {
+                this.bgmAudio.src = tr.src;
+                this.bgmAudio.setAttribute("data-track-id", tr.id || "");
+            }
+            var aDur = (isFinite(this.bgmAudio.duration) && this.bgmAudio.duration > 0) ? this.bgmAudio.duration : 0;
+            if (aDur > 0) sec = Math.min(sec, aDur);
+            try { this.bgmAudio.currentTime = sec; } catch (e) { }
+            return true;
+        }
+        return false;
+    },
+
+    formatTime: function (sec) {
+        if (!isFinite(sec) || sec < 0) return "0:00";
+        var total = Math.floor(sec);
+        var h = Math.floor(total / 3600);
+        var m = Math.floor((total % 3600) / 60);
+        var s = total % 60;
+        var sStr = (s < 10 ? "0" : "") + s;
+        if (h > 0) return h + ":" + (m < 10 ? "0" : "") + m + ":" + sStr;
+        return m + ":" + sStr;
     },
 
     _stopYoutube: function () {

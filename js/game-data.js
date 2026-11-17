@@ -286,6 +286,40 @@ window.PRS_CASTLES = {
     }
 };
 
+// Definice rytířských vlastností a ctností (Boj, Jízda, Tanec, Charisma)
+window.PRS_SKILLS = {
+    combat:   { id: "combat",   name: "Boj",      accusative: "Boj",      icon: "⚔️", label: "⚔️ Boj" },
+    riding:   { id: "riding",   name: "Jízda",    accusative: "Jízdu",    icon: "🏇", label: "🏇 Jízda" },
+    dance:    { id: "dance",    name: "Tanec",    accusative: "Tanec",    icon: "💃", label: "💃 Tanec" },
+    charisma: { id: "charisma", name: "Charisma", accusative: "Charisma", icon: "✨", label: "✨ Charisma" },
+    any:      { id: "any",      name: "Libovolná vlastnost", accusative: "Libovolnou vlastnost", icon: "🧙‍♂️", label: "🧙‍♂️ Libovolná vlastnost" }
+};
+
+window.PRS_SKILLS.normalizeKey = function (key) {
+    if (!key) return "charisma";
+    var k = String(key).toLowerCase().trim();
+    if (k === "combat" || k === "boj" || k === "mb") return "combat";
+    if (k === "riding" || k === "jizda" || k === "jízda" || k === "mj") return "riding";
+    if (k === "dance" || k === "tanec" || k === "mt") return "dance";
+    if (k === "charisma" || k === "mch") return "charisma";
+    if (k === "any" || k === "vm") return "any";
+    return k;
+};
+
+window.PRS_SKILLS.getName = function (key, withIcon, accusative) {
+    var norm = window.PRS_SKILLS.normalizeKey(key);
+    var def = window.PRS_SKILLS[norm];
+    if (!def) return String(key || "");
+    var txt;
+    if (window.PRS_I18n) {
+        var i18nKey = "skills." + norm + (accusative ? "_acc" : "");
+        txt = window.PRS_I18n.t(i18nKey, null, accusative ? def.accusative : def.name);
+    } else {
+        txt = accusative ? def.accusative : def.name;
+    }
+    return withIcon ? (def.icon + " " + txt) : txt;
+};
+
 // Katalog předmětů: VĚCI 1, VĚCI 2, VĚCI 3
 // Cena = počet plusů * 1000 - počet mínusů * 500
 window.PRS_ITEMS = [
@@ -1422,3 +1456,286 @@ window.PRS_getDefaultPawnIdForPlayer = function (pDef, index) {
     var basicIds = ["knight_valiant", "knight_tourney", "lady_huntress", "lord_diplomat", "knight_warden", "lady_sorceress"];
     return basicIds[(index || 0) % basicIds.length];
 };
+
+// ============================================================================
+// HERALDIKA: Šlechtické rody, erby a rodové tinktury (pro profil, stůl a chat)
+// ============================================================================
+
+window.PRS_HERALDRY_CATALOG = [
+    { id: "lion", name: "Zlatý lev", icon: "🦁", motto: "Odvaha & Vznešenost", title: "Lev královského rodu" },
+    { id: "griffin", name: "Královský gryf", icon: "🦅", motto: "Rychlost & Bdělost", title: "Gryf skalních výšin" },
+    { id: "wolf", name: "Stříbrný vlk", icon: "🐺", motto: "Vytrvalost & Síla rodu", title: "Vlk severních hvozdů" },
+    { id: "dragon", name: "Rudý drak", icon: "🐉", motto: "Plamen & Válečná moc", title: "Drak dračího pohoří" },
+    { id: "stag", name: "Bílý jelen", icon: "🦌", motto: "Moudrost & Čest", title: "Jelen posvátného háje" },
+    { id: "phoenix", name: "Ohnivý fénix", icon: "🔥", motto: "Znovuzrození & Magie", title: "Fénix věčného plamene" },
+    { id: "crown", name: "Královská koruna", icon: "👑", motto: "Vladařská autorita", title: "Koruna koruny království" },
+    { id: "helm", name: "Rytířský helmíř", icon: "🛡️", motto: "Věrnost přísaze & Obrana", title: "Štít neohrožených" },
+    { id: "swords", name: "Zkřížené meče", icon: "⚔️", motto: "Mistr duelů & turnajů", title: "Čepel turnajového vítěze" },
+    { id: "falcon", name: "Sokolí peruť", icon: "🪶", motto: "Bystrý zrak & Lov", title: "Křídlo větrného pána" },
+    { id: "tower", name: "Kamenná bašta", icon: "🏰", motto: "Nezlomnost & Pevnost", title: "Tvrz nezdolného kamene" },
+    { id: "oak", name: "Posvátný dub", icon: "🌳", motto: "Život & Starobylé kořeny", title: "Dub starých věků" }
+];
+
+window.PRS_HERALDRY_TINCTURES = [
+    { key: "gold", name: "Královské zlato", bg: "linear-gradient(135deg, #f59e0b, #b45309)", border: "#fef08a", text: "#fef08a" },
+    { key: "ruby", name: "Rubínová červeň", bg: "linear-gradient(135deg, #dc2626, #7f1d1d)", border: "#fca5a5", text: "#fca5a5" },
+    { key: "emerald", name: "Smaragdová zeleň", bg: "linear-gradient(135deg, #059669, #064e3b)", border: "#a7f3d0", text: "#a7f3d0" },
+    { key: "sapphire", name: "Safírová modř", bg: "linear-gradient(135deg, #2563eb, #1e3a8a)", border: "#93c5fd", text: "#93c5fd" },
+    { key: "amethyst", name: "Ametystová purpura", bg: "linear-gradient(135deg, #9333ea, #581c87)", border: "#d8b4fe", text: "#d8b4fe" },
+    { key: "ebony", name: "Ebenová čerň", bg: "linear-gradient(135deg, #374151, #111827)", border: "#e5e7eb", text: "#e5e7eb" }
+];
+
+window.PRS_HERALDRY_BY_ID = {};
+for (var _hi = 0; _hi < window.PRS_HERALDRY_CATALOG.length; _hi++) {
+    var _hItem = window.PRS_HERALDRY_CATALOG[_hi];
+    window.PRS_HERALDRY_BY_ID[_hItem.id] = _hItem;
+}
+
+window.PRS_getCrestById = function (crestId) {
+    if (crestId && window.PRS_HERALDRY_BY_ID[crestId]) {
+        return window.PRS_HERALDRY_BY_ID[crestId];
+    }
+    return window.PRS_HERALDRY_CATALOG[0];
+};
+
+window.PRS_getTinctureByKey = function (tKey) {
+    if (tKey) {
+        for (var _ti = 0; _ti < window.PRS_HERALDRY_TINCTURES.length; _ti++) {
+            if (window.PRS_HERALDRY_TINCTURES[_ti].key === tKey) return window.PRS_HERALDRY_TINCTURES[_ti];
+        }
+    }
+    return window.PRS_HERALDRY_TINCTURES[0];
+};
+
+// Vykreslení gotického heraldického štítu s erbem
+window.PRS_renderCrestBadgeHTML = function (crestId, tinctureKey, size) {
+    size = size || 32;
+    var crest = window.PRS_getCrestById(crestId);
+    var tinc = window.PRS_getTinctureByKey(tinctureKey);
+    var fontSize = Math.round(size * 0.54);
+    var h = Math.round(size * 1.18);
+    var bRadius = Math.round(size * 0.52);
+    return '<span class="prs-crest-badge" style="display:inline-flex; align-items:center; justify-content:center; width:' + size + 'px; height:' + h + 'px; background:' + tinc.bg + '; border:1.6px solid ' + tinc.border + '; border-radius:3px 3px ' + bRadius + 'px ' + bRadius + 'px; box-shadow:0 3px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.35); font-size:' + fontSize + 'px; line-height:1; flex-shrink:0;" title="' + crest.name + ' (' + crest.motto + ')">' + crest.icon + '</span>';
+};
+
+// ============================================================================
+// BILINGVÁLNÍ DYNAMICKÉ PŘEKLADY KATALOGŮ (i18n Getters pro KiDesky)
+// ============================================================================
+function makeTranslatableItem(item) {
+    if (!item || !item.id) return item;
+    var rawName = item.name;
+    var rawDesc = item.desc || "";
+    var id = item.id;
+    var isTrophy = item.slot === "trophy" || (typeof id === "string" && id.indexOf("trophy_") === 0);
+
+    Object.defineProperty(item, 'name', {
+        get: function () {
+            if (window.PRS_I18n) {
+                if (isTrophy) {
+                    var trVal = window.PRS_I18n.t('trophies.' + id + '.name');
+                    if (trVal && trVal !== ('trophies.' + id + '.name')) return trVal;
+                }
+                var itVal = window.PRS_I18n.t('items.' + id + '.name');
+                if (itVal && itVal !== ('items.' + id + '.name')) return itVal;
+            }
+            return rawName;
+        },
+        set: function (v) { rawName = v; },
+        configurable: true,
+        enumerable: true
+    });
+
+    Object.defineProperty(item, 'desc', {
+        get: function () {
+            if (window.PRS_I18n) {
+                if (isTrophy) {
+                    var trDesc = window.PRS_I18n.t('trophies.' + id + '.desc');
+                    if (trDesc && trDesc !== ('trophies.' + id + '.desc')) return trDesc;
+                }
+                var itDesc = window.PRS_I18n.t('items.' + id + '.desc');
+                if (itDesc && itDesc !== ('items.' + id + '.desc')) return itDesc;
+            }
+            return rawDesc;
+        },
+        set: function (v) { rawDesc = v; },
+        configurable: true,
+        enumerable: true
+    });
+
+    return item;
+}
+
+function makeTranslatableQuest(quest) {
+    if (!quest || !quest.id) return quest;
+    var rawName = quest.name;
+    var rawDesc = quest.desc || "";
+    var id = quest.id;
+
+    Object.defineProperty(quest, 'name', {
+        get: function () {
+            if (window.PRS_I18n) {
+                var val = window.PRS_I18n.t('quests.' + id + '.name');
+                if (val && val !== ('quests.' + id + '.name')) return val;
+            }
+            return rawName;
+        },
+        set: function (v) { rawName = v; },
+        configurable: true,
+        enumerable: true
+    });
+
+    Object.defineProperty(quest, 'desc', {
+        get: function () {
+            if (window.PRS_I18n) {
+                var val = window.PRS_I18n.t('quests.' + id + '.desc');
+                if (val && val !== ('quests.' + id + '.desc')) return val;
+            }
+            return rawDesc;
+        },
+        set: function (v) { rawDesc = v; },
+        configurable: true,
+        enumerable: true
+    });
+
+    return quest;
+}
+
+function makeTranslatableCard(card) {
+    if (!card || !card.id) return card;
+    var rawTitle = card.title;
+    var rawText = card.text || "";
+    var id = card.id;
+
+    Object.defineProperty(card, 'title', {
+        get: function () {
+            if (window.PRS_I18n) {
+                var val = window.PRS_I18n.t('cards.' + id + '.title');
+                if (val && val !== ('cards.' + id + '.title')) return val;
+            }
+            return rawTitle;
+        },
+        set: function (v) { rawTitle = v; },
+        configurable: true,
+        enumerable: true
+    });
+
+    Object.defineProperty(card, 'text', {
+        get: function () {
+            if (window.PRS_I18n) {
+                var val = window.PRS_I18n.t('cards.' + id + '.text');
+                if (val && val !== ('cards.' + id + '.text')) return val;
+            }
+            return rawText;
+        },
+        set: function (v) { rawText = v; },
+        configurable: true,
+        enumerable: true
+    });
+
+    if (card.options && card.options.length) {
+        card.options.forEach(function (opt, idx) {
+            var rawOptTitle = opt.title;
+            var rawOptDesc = opt.desc || "";
+
+            Object.defineProperty(opt, 'title', {
+                get: function () {
+                    if (window.PRS_I18n) {
+                        var val = window.PRS_I18n.t('cards.' + id + '.options.' + idx + '.title');
+                        if (val && val !== ('cards.' + id + '.options.' + idx + '.title')) return val;
+                    }
+                    return rawOptTitle;
+                },
+                set: function (v) { rawOptTitle = v; },
+                configurable: true,
+                enumerable: true
+            });
+
+            Object.defineProperty(opt, 'desc', {
+                get: function () {
+                    if (window.PRS_I18n) {
+                        var val = window.PRS_I18n.t('cards.' + id + '.options.' + idx + '.desc');
+                        if (val && val !== ('cards.' + id + '.options.' + idx + '.desc')) return val;
+                    }
+                    return rawOptDesc;
+                },
+                set: function (v) { rawOptDesc = v; },
+                configurable: true,
+                enumerable: true
+            });
+        });
+    }
+
+    return card;
+}
+
+function makeTranslatableCastle(c, k) {
+    if (!c) return c;
+    var rawName = c.name;
+    var rawDesc = c.desc || "";
+    var key = k || c.id;
+
+    Object.defineProperty(c, 'name', {
+        get: function () {
+            if (window.PRS_I18n) {
+                var val = window.PRS_I18n.t('castles.' + key + '.name');
+                if (val && val !== ('castles.' + key + '.name')) return val;
+            }
+            return rawName;
+        },
+        set: function (v) { rawName = v; },
+        configurable: true,
+        enumerable: true
+    });
+
+    Object.defineProperty(c, 'desc', {
+        get: function () {
+            if (window.PRS_I18n) {
+                var val = window.PRS_I18n.t('castles.' + key + '.desc');
+                if (val && val !== ('castles.' + key + '.desc')) return val;
+            }
+            return rawDesc;
+        },
+        set: function (v) { rawDesc = v; },
+        configurable: true,
+        enumerable: true
+    });
+
+    return c;
+}
+
+window.PRS_makeTranslatableItem = makeTranslatableItem;
+window.PRS_makeTranslatableQuest = makeTranslatableQuest;
+window.PRS_makeTranslatableCard = makeTranslatableCard;
+window.PRS_makeTranslatableCastle = makeTranslatableCastle;
+
+// Inicializace translatable obálek pro existující katalogy
+(function setupI18nCatalogs() {
+    if (window.PRS_ITEMS && window.PRS_ITEMS.length) {
+        window.PRS_ITEMS.forEach(makeTranslatableItem);
+    }
+    if (window.PRS_TROPHIES) {
+        for (var k in window.PRS_TROPHIES) {
+            if (window.PRS_TROPHIES.hasOwnProperty(k)) {
+                makeTranslatableItem(window.PRS_TROPHIES[k]);
+            }
+        }
+    }
+    if (window.PRS_QUESTS) {
+        ['U1', 'U2', 'U3'].forEach(function (tier) {
+            if (window.PRS_QUESTS[tier]) {
+                window.PRS_QUESTS[tier].forEach(makeTranslatableQuest);
+            }
+        });
+    }
+    if (window.PRS_CHANCE_CARDS && window.PRS_CHANCE_CARDS.length) {
+        window.PRS_CHANCE_CARDS.forEach(makeTranslatableCard);
+    }
+    if (window.PRS_CASTLES) {
+        for (var ck in window.PRS_CASTLES) {
+            if (window.PRS_CASTLES.hasOwnProperty(ck)) {
+                makeTranslatableCastle(window.PRS_CASTLES[ck], ck);
+            }
+        }
+    }
+})();
+
