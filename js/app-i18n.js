@@ -126,6 +126,13 @@
         },
 
         /**
+         * Vrátí aktuální překladový slovník pro aktuální jazyk
+         */
+        getDict: function () {
+            return (window.PRS_I18N && window.PRS_I18N[this._lang]) || {};
+        },
+
+        /**
          * Překladový helper.
          * @param {string} key - tečková cesta ke klíči (např. 'ui.buttons.settings')
          * @param {Object} [params] - hodnoty k dosazení do řetězce {key: val}

@@ -1672,6 +1672,21 @@
             var catalog = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ALL_CASTLES) || [];
             var rawName = rc.name || "";
             if (isEn) {
+                var cEnMap = {
+                    "Královský hrad": "Royal Castle (Seat of the Crown)",
+                    "Lesní hrad Doubrava": "Forest Castle Doubrava",
+                    "Ledový palác Věčného mrazu": "Ice Palace of Eternal Frost",
+                    "Sopečná pevnost Lávový chřtán": "Volcanic Stronghold Lava Maw",
+                    "Křišťálový zámek Ametyst": "Crystal Castle Amethyst",
+                    "Větrný vzdušný zámek Boreas": "Wind Citadel Boreas",
+                    "Vodní citadela Oceán": "Water Citadel Ocean",
+                    "Pouštní pískovcový palác": "Desert Sandstone Palace",
+                    "Bažinná tvrz Černá tůň": "Swamp Fortress Black Mere",
+                    "Temný hrad Erebus": "Dark Nether Keep Erebus"
+                };
+                for (var k in cEnMap) {
+                    if (rawName.indexOf(k) !== -1) return cEnMap[k];
+                }
                 for (var i = 0; i < catalog.length; i++) {
                     var c = catalog[i];
                     if (c.id === rc.skinId || c.id === rc.selectedKey || c.name === rawName || (c.img && (rc.image === c.img || rc.img === c.img))) {

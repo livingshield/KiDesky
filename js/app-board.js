@@ -4054,68 +4054,16 @@
 
     getNodeDisplayName: function (nd) {
         if (!nd) return "";
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        if (nd.type === "CASTLE") {
-            var cKey = nd.castleKey || "";
-            if (!cKey && nd.castleImg) {
-                var m = nd.castleImg.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpg)/i);
-                if (m) cKey = m[1];
+        if (this._inGetNodeDisplayName) return nd.name || nd.code || "";
+        this._inGetNodeDisplayName = true;
+        try {
+            if (window.PRS_App && typeof window.PRS_App.getUnifiedNodeDisplayName === "function") {
+                return window.PRS_App.getUnifiedNodeDisplayName(nd);
             }
-            if (!cKey && nd.estateId && nd.estateId.indexOf("H") === 0) {
-                cKey = "H" + nd.estateId.replace("H", "");
-            }
-            var cName = (cKey && window.PRS_I18n) ? window.PRS_I18n.t("castles." + cKey + ".name") : "";
-            if (cName && cName !== ("castles." + cKey + ".name")) {
-                var prefix = isEn ? "Castle " : "Hrad ";
-                var num = nd.estateId ? nd.estateId.replace("H", "") : (nd.code ? nd.code.replace("H", "") : "");
-                return prefix + (num ? (num + " ") : "") + "(" + cName + ")";
-            }
+            return nd.name || nd.code || "";
+        } finally {
+            this._inGetNodeDisplayName = false;
         }
-        if (nd.type === "START") {
-            return isEn ? "START (+3,000 g.)" : "START (+3 000 zl.)";
-        }
-        if (nd.type === "ANIMAL" && isEn) {
-            var aName = nd.name || "";
-            aName = aName.replace(/^Kůň\b/i, "Horse").replace(/^Pes\b/i, "Dog").replace(/^Sokol\b/i, "Falcon");
-            var breedDict = {
-                "Grošák": "Dapple Grey", "Hnědák": "Bay Horse", "Vraník": "Black Steed", "Ryzák": "Chestnut",
-                "Bělouš": "White Steed", "Plavák": "Dun Horse", "Šiml": "Grey Horse", "Fríský oř": "Friesian Steed",
-                "Andaluský hřebec": "Andalusian Stallion", "Válečný oř": "Warhorse", "Hvězdný hřebec": "Astral Stallion",
-                "Královský oř": "Royal Steed", "Zlatý palomino": "Golden Palomino", "Stínový oř": "Shadow Steed",
-                "Poštolka": "Kestrel", "Krahujec": "Sparrowhawk", "Ostříž": "Hobby", "Raroh": "Saker Falcon",
-                "Královský ostříž": "Royal Hobby", "Sokol stěhovavý": "Peregrine Falcon", "Luňák": "Red Kite", "Lunák": "Red Kite",
-                "Orlovec": "Osprey", "Jestřáb": "Goshawk", "Sokol královský": "King Falcon", "Bílý raroh": "White Saker",
-                "Fénixův sokol": "Phoenix Falcon", "Skalní orel": "Golden Eagle", "Noční raroh": "Night Falcon",
-                "Ohař": "Pointer", "Bígl": "Beagle", "Chrt": "Greyhound", "Barvář": "Bloodhound",
-                "Slídič": "Tracker", "Vlkodav": "Wolfhound", "Doga": "Great Dane", "Chrtí král": "King Greyhound",
-                "Lovecký chrt": "Hunting Hound", "Královský chrt": "Royal Greyhound", "Stříbrný ohař": "Silver Hound",
-                "Zlatý chrt": "Golden Greyhound", "Severní vlkodav": "Northern Wolfhound", "Hradní chrlič": "Castle Gargoyle"
-            };
-            for (var bKey in breedDict) {
-                var re = new RegExp("\\b" + bKey + "\\b", "i");
-                if (re.test(aName)) {
-                    aName = aName.replace(re, breedDict[bKey]);
-                    break;
-                }
-            }
-            return aName;
-        }
-        if (isEn && nd.name) {
-            var nameEn = nd.name;
-            if (nd.type === "VILLAGE") nameEn = nameEn.replace(/^Vesnice\b/i, "Village");
-            else if (nd.type === "TOWN") nameEn = nameEn.replace(/^Město\b/i, "Town");
-            else if (nd.type === "TAX") nameEn = "Royal Tax Collector";
-            else if (nd.type === "MERCHANT") nameEn = "Royal Market";
-            else if (nd.type === "HOSPITAL") nameEn = "Royal Infirmary";
-            else if (nd.type === "MASTER") nameEn = nameEn.replace(/^Sídlo Mistra\b/i, "Master's Guild");
-            else if (nd.type === "JESTER") nameEn = nameEn.replace(/^Kejklíř\b/i, "Jester");
-            else if (nd.type === "CHANCE") nameEn = "Tile of Fate (Chance)";
-            else if (nd.type === "PRISON") nameEn = "Royal Dungeon";
-            else if (nd.type === "TAVERN") nameEn = "Golden Tankard Tavern";
-            else if (nd.type === "FESTIVAL") nameEn = "Royal Festival";
-            return nameEn;
-        }
-        return nd.name || nd.code || "";
     },
 
     getNodeCategoryLabel: function (nd) {

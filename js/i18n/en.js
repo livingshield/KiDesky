@@ -6,7 +6,7 @@ window.PRS_I18N.en = {
         "flag": "🇬🇧",
         "short": "EN"
     },
-        "rules_guide": {
+    "rules_guide": {
         "intro_text": "Click a chapter to expand or collapse it. All rules are fully synchronized with the game engine.",
         "expand_all": "Expand All",
         "collapse_all": "Collapse All"
@@ -15,7 +15,15 @@ window.PRS_I18N.en = {
         "title": "🔤 Glossary of Terms, Abbreviations and Icon Legend",
         "search_placeholder": "Search term (e.g. rent, dungeon, stance)..."
     },
-
+    "wardrobe": {
+        "title": "<span>🎭</span> <span>Royal Wardrobe &amp; Collectible Pawns</span>",
+        "credits": "credits",
+        "tab_all": "✨ All Pawns (17)",
+        "tab_basic": "🛡️ Basic Knights (6)",
+        "tab_premium": "💎 Premium with Aura (6)",
+        "tab_bot": "🤖 PC Bot Pawns (5)",
+        "multiplayer_tip": "💡 <strong>Multiplayer Tip:</strong> When you join an online table in place of a PC bot, the bot pawn on the board will automatically switch to your chosen pawn!"
+    },
     "ui": {
         "brand_subtitle": "The Princess's Heart",
         "back_to_kikiai": "← Back to KikiAI",
@@ -266,7 +274,15 @@ window.PRS_I18N.en = {
         "stance_cautious_title": "Cautious step 1–4 for precise maneuvering",
         "stance_gallop_locked_title": "Requires at least 1 horse in your stable",
         "use_scroll": "⚡ Use",
-        "dice_click_hint": "Click dice to roll!"
+        "dice_click_hint": "Click dice to roll!",
+        "mobile_dock": {
+            "roll_dice": "🎲 ROLL DICE (1–6)",
+            "tile": "Tile",
+            "inventory": "Backpack",
+            "estates": "Estates",
+            "chronicle": "Chronicle",
+            "chat": "Chat"
+        }
     },
     "modals": {
         "armory_tab_weapon": "🗡️ Weapons",
@@ -300,7 +316,26 @@ window.PRS_I18N.en = {
         "cs_btn_1page": "📄 Pocket (1 page)",
         "cs_btn_2page": "📑 Complete (2 pages)",
         "cs_print": "🖨️ Print A4",
-        "cs_copy": "📋 Copy"
+        "cs_copy": "📋 Copy",
+        "endgame": {
+            "continue_endless": "♾️ Continue in Endless Mode",
+            "royal_diploma": "📜 Royal Diploma",
+            "save_hall_of_fame": "🏆 Record in Hall of Fame",
+            "new_game": "🔄 Start New Game"
+        },
+        "diploma": {
+            "download": "💾 Download Diploma (PNG)",
+            "close": "Close Scroll"
+        },
+        "online_role": {
+            "free_play": "🛋️ Play without lock (All Players / Hot-Seat)"
+        },
+        "armory": {
+            "close": "Close Armory"
+        },
+        "graphics": {
+            "save": "💾 Apply & Save Graphics"
+        }
     },
     "engine": {
         "start_title": "👑 Royal heraldic fanfare! The game \"The Princess's Heart\" begins.",
@@ -1340,7 +1375,8 @@ window.PRS_I18N.en = {
         "scroll_fortune": {
             "title": "Astra Conjunction of Fortune",
             "text": "The stars align favorably, guaranteeing maximum luck on your upcoming rolls and choices."
-        }
+        },
+        "btn_back_to_deck": "← Back to Deck"
     },
     "castles": {
         "royal": {
@@ -1391,7 +1427,12 @@ window.PRS_I18N.en = {
         "hearts": "💖",
         "refresh": "🔄 Refresh",
         "close": "✕ Close",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "done": "Done",
+        "prev": "← Previous",
+        "next": "Next →",
+        "understand": "Understood",
+        "close_short": "Close"
     },
     "animals": {
         "horse": "Horse",
@@ -1556,6 +1597,7 @@ window.PRS_I18N.en = {
         "user_credits_suffix": "in your treasury and your pawns await."
     },
     "lobby": {
+        "room_code_placeholder": "E.g. K7M4P9",
         "active_game_banner": "🎲 You have an active game on the table!",
         "active_game_info": "Round {round} • {count} Knights",
         "btn_to_table": "Go to table →",
@@ -1920,7 +1962,10 @@ window.PRS_I18N.en = {
             "th_type": "Type",
             "th_url": "Source URL",
             "th_active": "Active",
-            "th_actions": "Actions"
+            "th_actions": "Actions",
+            "btn_choose_file": "📁 Choose Audio File...",
+            "btn_from_youtube": "✨ From YouTube",
+            "btn_save": "💾 Save Track"
         },
         "users": {
             "title": "User Account Management (prs_Users)",
@@ -1932,7 +1977,8 @@ window.PRS_I18N.en = {
             "th_role": "Role",
             "th_status": "Account Status",
             "th_games_wins": "Games / Wins",
-            "th_actions": "Actions"
+            "th_actions": "Actions",
+            "btn_save_changes": "💾 Save Changes"
         },
         "sessions": {
             "title": "Online Game Rooms & Sessions (prs_GameSessions)",
@@ -1959,7 +2005,8 @@ window.PRS_I18N.en = {
             "th_tiles_seed": "Tile Count / Seed",
             "th_order": "Order",
             "th_status": "Status",
-            "th_actions": "Actions"
+            "th_actions": "Actions",
+            "btn_save": "💾 Save Predefined Board"
         },
         "announcements": {
             "title": "📢 Royal Herald Message (Global Announcement Bar)",
@@ -1977,7 +2024,7 @@ window.PRS_I18N.en = {
         "balance": {
             "title": "⚖️ Balance Studio & New Economy Simulator",
             "subtitle": "Tune kingdom macroeconomics, estate yields, livestock prices, animal sets, and dragon rewards. The simulator instantly simulates dozens of full games across all 5 maps and 4 scenarios.",
-            "btn_reset": "↺ Reset to Defaults",
+            "btn_reset": "↺ Reset Defaults",
             "btn_save_db": "💾 Save Balance to DB (prs_GameConfigs)",
             "sec1_title": "👑 1. Core Macroeconomics, Start & Landless",
             "sec1_target_hearts": "💖 Target Hearts (Standard):",
@@ -2047,6 +2094,15 @@ window.PRS_I18N.en = {
             "board_order": "Dropdown Sort Order (SortOrder):",
             "board_active": "Map is active (display in board maps menu to all players)",
             "save_board": "💾 Save Predefined Map"
+        },
+        "video": {
+            "btn_choose_file": "📁 Choose MP4 File...",
+            "btn_from_youtube": "✨ From YouTube",
+            "btn_upload_poster": "🖼️ Upload Poster",
+            "btn_save": "💾 Save Video"
+        },
+        "announcement": {
+            "btn_publish": "📢 Publish Herald Announcement"
         }
     },
     "auth": {
@@ -2057,7 +2113,7 @@ window.PRS_I18N.en = {
         "email": "E-mail:",
         "treasury": "Treasury Balance:",
         "btn_logout": "🚪 Sign Out",
-        "btn_switch_account": "Sign In Another Account",
+        "btn_switch_account": "🔄 Switch Account",
         "btn_close": "✕ Close",
         "guest_title": "🛡️ Knight Account & Sign In",
         "guest_subtitle": "Sign in with your Google account, classic profile, or play freely as a Guest.",
@@ -2065,7 +2121,10 @@ window.PRS_I18N.en = {
         "google_placeholder": "Enter name (e.g. Lord Kikin)",
         "logout_success": "You have been successfully signed out. You now continue freely as a Guest.",
         "btn_classic_toggle": "🔒 Sign in with password / Register new account ▼",
-        "btn_play_guest": "👤 Play freely as Guest"
+        "btn_play_guest": "👤 Play freely as Guest",
+        "btn_resend_code": "🔁 Resend Code",
+        "btn_login": "🔑 Sign In",
+        "btn_register": "✨ Register"
     },
     "online_lobby": {
         "badge": "Mode 3 • Online Multiplayer & Cloud",
@@ -2091,12 +2150,12 @@ window.PRS_I18N.en = {
         "tab_maps": "⭐ Board Templates"
     },
     "map_studio": {
-    "royal_castle_label": "🏰 Royal Seat of the Crown (central landmark):",
-    "preview_default_title": "Custom Royal Board",
-    "reroll_seed_title": "Reroll tile layout (new Seed)",
-    "seed_label": "🎲 Layout Seed:",
-    "custom_name_placeholder": "e.g. Realm of Five Dragons...",
-    "custom_name_label": "🏷️ Custom Board Name:",
+        "royal_castle_label": "🏰 Royal Seat of the Crown (central landmark):",
+        "preview_default_title": "Custom Royal Board",
+        "reroll_seed_title": "Reroll tile layout (new Seed)",
+        "seed_label": "🎲 Layout Seed:",
+        "custom_name_placeholder": "e.g. Realm of Five Dragons...",
+        "custom_name_label": "🏷️ Custom Board Name:",
         "title": "🗺️ Royal Map Studio",
         "subtitle_badge": "Dynamic Board Builder 2.0",
         "desc": "Choose tile distribution with a parametric recipe or switch to WYSIWYG editor to adjust tiles directly on the board.",
@@ -2737,5 +2796,18 @@ window.PRS_I18N.en = {
             "toast_undo": "↩️ Step reverted",
             "toast_node_changed": "✨ Tile #{id} changed to: {name}"
         }
+    },
+    "crest": {
+        "title": "Royal Heraldic Chamber",
+        "subtitle": "Choose your family sigil and heraldic shield color",
+        "tincture_label": "1. Heraldic Tincture (Shield Color):",
+        "charge_label": "2. Noble Family Sigil:",
+        "btn_confirm": "🛡️ Confirm & Accept Crest"
+    },
+    "online": {
+        "btn_copy_invite_link": "📋 Copy Invite Link",
+        "btn_play_offline_bots": "🤖 Play Offline vs Bots",
+        "btn_enter_table_resume": "⚔️ Enter Table & Resume Game →",
+        "btn_load": "▶️ Load"
     }
 };

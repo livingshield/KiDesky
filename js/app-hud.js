@@ -18,7 +18,8 @@
 
         if (!shouldShow || !this.state) return;
 
-        var player = this.state.players[this.state.currentPlayerIndex];
+        var player = this.state.players ? this.state.players[this.state.currentPlayerIndex] : null;
+        if (!player) return;
 
         if (!player) return;
 
@@ -1116,7 +1117,7 @@
 
         var el = document.getElementById("sidebar-player-property-panel");
 
-        if (!el || !this.state) return;
+        if (!el || !this.state || !this.state.players || !this.state.players[this.state.currentPlayerIndex]) return;
 
         var inspIdx = (this.inspectedPlayerIndex !== null && this.inspectedPlayerIndex !== undefined) ? this.inspectedPlayerIndex : this.state.currentPlayerIndex;
 
@@ -1442,6 +1443,7 @@
         var logs = this.state.log || [];
 
         var recent = logs.slice(Math.max(0, logs.length - 8)).reverse();
+        var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
 
         var html = [];
 
@@ -1449,15 +1451,15 @@
 
         html.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; padding-bottom:0.4rem; border-bottom:1px solid rgba(212,175,55,0.25);">');
 
-        html.push('    <div style="font-family:\'Cinzel\',serif; font-size:0.98rem; font-weight:700; color:#fef08a;">📜 Královská kronika</div>');
+        html.push('    <div style="font-family:\'Cinzel\',serif; font-size:0.98rem; font-weight:700; color:#fef08a;">' + (isEn ? '📜 Royal Chronicle' : '📜 Královská kronika') + '</div>');
 
-        html.push('    <a href="#board-lower-dashboard" onclick="event.preventDefault(); document.getElementById(\\\'board-lower-dashboard\\\').scrollIntoView({behavior:\\\'smooth\\\'});" style="font-size:0.75rem; color:#38bdf8; text-decoration:none;">Všechny záznamy ↓</a>');
+        html.push('    <a href="#board-lower-dashboard" onclick="event.preventDefault(); document.getElementById(\\\'board-lower-dashboard\\\').scrollIntoView({behavior:\\\'smooth\\\'});" style="font-size:0.75rem; color:#38bdf8; text-decoration:none;">' + (isEn ? "All records ↓" : "Všechny záznamy ↓") + '</a>');
 
         html.push('  </div>');
 
         if (recent.length === 0) {
 
-            html.push('  <div style="font-size:0.8rem; color:#94a3b8; font-style:italic; padding:0.6rem 0; text-align:center;">Kronika zatím mlčí. Hodem kostkou začne dobrodružství!</div>');
+            html.push('  <div style="font-size:0.8rem; color:#94a3b8; font-style:italic; padding:0.6rem 0; text-align:center;">' + (isEn ? 'The chronicle is silent for now. Roll the dice to begin the adventure!' : 'Kronika zatím mlčí. Hodem kostkou začne dobrodružství!') + '</div>');
 
         } else {
 

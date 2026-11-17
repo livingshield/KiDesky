@@ -1511,6 +1511,7 @@ openAuthModal: function () {
 
                 if (res && res.ok && res.sessions) {
 
+                    self.lastSavedSessions = res.sessions;
                     self.renderSavedSessionsList(res.sessions);
 
                 }
@@ -1527,13 +1528,20 @@ openAuthModal: function () {
 
         if (!box) return;
 
+        var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
+
         if (!sessions || sessions.length === 0) {
 
-            box.innerHTML = '<div class="empty-note">Zatím žádné uložené rozehrané partie na serveru.</div>';
+            box.innerHTML = '<div class="empty-note">' + (isEn ? 'No saved active games on the server yet.' : 'Zatím žádné uložené rozehrané partie na serveru.') + '</div>';
 
             return;
 
         }
+
+        var codeLabel = isEn ? "Code: " : "Kód: ";
+        var turnLabel = isEn ? "Turn " : "Tah ";
+        var targetLabel = isEn ? "Target: " : "Cíl: ";
+        var loadBtn = window.PRS_I18n ? window.PRS_I18n.t("online.btn_load") : (isEn ? "▶️ Load" : "▶️ Načíst");
 
         var html = "";
 
@@ -1543,9 +1551,9 @@ openAuthModal: function () {
 
             html += '<div class="saved-session-row">' +
 
-                '<div><strong>' + this.escapeHtml(s.title) + '</strong> <span class="room-code-pill">Kód: ' + s.roomCode + '</span><br/><small>Tah ' + s.turnNumber + ' | Cíl: ' + s.targetHearts + ' 💖 | ' + s.updatedAt + '</small></div>' +
+                '<div><strong>' + this.escapeHtml(s.title) + '</strong> <span class="room-code-pill">' + codeLabel + s.roomCode + '</span><br/><small>' + turnLabel + s.turnNumber + ' | ' + targetLabel + s.targetHearts + ' 💖 | ' + s.updatedAt + '</small></div>' +
 
-                '<button class="btn-action-buy" onclick="PRS_App.loadSessionFromCloud(\'' + s.roomCode + '\')">▶️ Načíst</button>' +
+                '<button class="btn-action-buy" onclick="PRS_App.loadSessionFromCloud(\'' + s.roomCode + '\')">' + loadBtn + '</button>' +
 
                 '</div>';
 

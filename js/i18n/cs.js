@@ -6,7 +6,7 @@ window.PRS_I18N.cs = {
         "flag": "🇨🇿",
         "short": "CZ"
     },
-        "rules_guide": {
+    "rules_guide": {
         "intro_text": "Kliknutím na kapitolu ji rozbalíš nebo sbalíš. Všechna pravidla jsou plně synchronizována s herním enginem.",
         "expand_all": "Rozbalit vše",
         "collapse_all": "Sbalit vše"
@@ -15,7 +15,15 @@ window.PRS_I18N.cs = {
         "title": "🔤 Slovníček pojmů, zkratek a legenda symbolů",
         "search_placeholder": "Hledat pojem (např. renta, šatlava, postoj)..."
     },
-
+    "wardrobe": {
+        "title": "<span>🎭</span> <span>Královská šatna &amp; Sběratelské figurky</span>",
+        "credits": "kreditů",
+        "tab_all": "✨ Všechny figurky (17)",
+        "tab_basic": "🛡️ Základní rytíři (6)",
+        "tab_premium": "💎 Prémiové s aurou (6)",
+        "tab_bot": "🤖 Figurky PC Botů (5)",
+        "multiplayer_tip": "💡 <strong>Multiplayer Tip:</strong> Když se připojíš k online stolu na místo PC bota, botova figurka na herním plánu se automaticky vymění za tvou zvolenou figurku!"
+    },
     "ui": {
         "brand_subtitle": "Princeznino srdce",
         "back_to_kikiai": "← Zpět na KikiAI",
@@ -266,7 +274,15 @@ window.PRS_I18N.cs = {
         "stance_cautious_title": "Opatrný krok 1–4 pro přesné manévrování",
         "stance_gallop_locked_title": "Vyžaduje alespoň 1 koně ve stáji",
         "use_scroll": "⚡ Použít",
-        "dice_click_hint": "Klepni na kostku pro hod!"
+        "dice_click_hint": "Klepni na kostku pro hod!",
+        "mobile_dock": {
+            "roll_dice": "🎲 HODIT KOSTKOU (1–6)",
+            "tile": "Pole",
+            "inventory": "Batoh",
+            "estates": "Sídla",
+            "chronicle": "Kronika",
+            "chat": "Chat"
+        }
     },
     "modals": {
         "armory_tab_weapon": "🗡️ Zbraně",
@@ -300,7 +316,26 @@ window.PRS_I18N.cs = {
         "cs_btn_1page": "📄 Do kapsy (1 strana)",
         "cs_btn_2page": "📑 Kompletní (2 strany)",
         "cs_print": "🖨️ Vytisknout A4",
-        "cs_copy": "📋 Kopírovat"
+        "cs_copy": "📋 Kopírovat",
+        "endgame": {
+            "continue_endless": "♾️ Pokračovat v nekonečné hře",
+            "royal_diploma": "📜 Královský diplom",
+            "save_hall_of_fame": "🏆 Zapsat do Síně slávy",
+            "new_game": "🔄 Spustit novou partii"
+        },
+        "diploma": {
+            "download": "💾 Stáhnout diplom (PNG)",
+            "close": "Zavřít listinu"
+        },
+        "online_role": {
+            "free_play": "🛋️ Hrát bez zámku (Všichni hráči / Hot-Seat)"
+        },
+        "armory": {
+            "close": "Zavřít zbrojnici"
+        },
+        "graphics": {
+            "save": "💾 Použít a uložit grafiku"
+        }
     },
     "engine": {
         "start_title": "👑 Královská trubačská fanfára! Hra „Princeznino srdce“ začíná.",
@@ -1340,7 +1375,8 @@ window.PRS_I18N.cs = {
         "scroll_fortune": {
             "title": "Hvězdná konjunkce štěstěny",
             "text": "Astrologický svitek. Ulož do brašny: zaručí hod 6 na kostce a ochrání před lapky na celou 1 cestu."
-        }
+        },
+        "btn_back_to_deck": "← Zpět na balíček"
     },
     "castles": {
         "royal": {
@@ -1391,7 +1427,12 @@ window.PRS_I18N.cs = {
         "hearts": "💖",
         "refresh": "🔄 Obnovit",
         "close": "✕ Zavřít",
-        "cancel": "Zrušit"
+        "cancel": "Zrušit",
+        "done": "Hotovo",
+        "prev": "← Předchozí",
+        "next": "Další →",
+        "understand": "Rozumím",
+        "close_short": "Zavřít"
     },
     "animals": {
         "horse": "Kůň",
@@ -1556,6 +1597,7 @@ window.PRS_I18N.cs = {
         "user_credits_suffix": "v pokladnici a tvé figurky čekají."
     },
     "lobby": {
+        "room_code_placeholder": "Např. K7M4P9",
         "active_game_banner": "🎲 Máš rozehranou partii na stole!",
         "active_game_info": "Kolo {round} • {count} Rytířů",
         "btn_to_table": "Přejít ke stolu →",
@@ -1920,7 +1962,10 @@ window.PRS_I18N.cs = {
             "th_type": "Typ",
             "th_url": "URL zdroje",
             "th_active": "Aktivní",
-            "th_actions": "Akce"
+            "th_actions": "Akce",
+            "btn_choose_file": "📁 Vybrat audio soubor...",
+            "btn_from_youtube": "✨ Z YouTube",
+            "btn_save": "💾 Uložit skladbu"
         },
         "users": {
             "title": "Správa uživatelských účtů (prs_Users)",
@@ -1932,7 +1977,8 @@ window.PRS_I18N.cs = {
             "th_role": "Role",
             "th_status": "Stav účtu",
             "th_games_wins": "Hry / Výhry",
-            "th_actions": "Akce"
+            "th_actions": "Akce",
+            "btn_save_changes": "💾 Uložit změny"
         },
         "sessions": {
             "title": "Online herní místnosti & Relace (prs_GameSessions)",
@@ -1959,7 +2005,8 @@ window.PRS_I18N.cs = {
             "th_tiles_seed": "Počet polí / Seed",
             "th_order": "Pořadí",
             "th_status": "Stav",
-            "th_actions": "Akce"
+            "th_actions": "Akce",
+            "btn_save": "💾 Uložit předdefinovaný plán"
         },
         "announcements": {
             "title": "📢 Zpráva královského posla (Globální oznamovací lišta)",
@@ -2047,6 +2094,15 @@ window.PRS_I18N.cs = {
             "board_order": "Pořadí v roletce (SortOrder):",
             "board_active": "Plán je aktivní (zobrazovat v nabídce herních plánů všem hráčům)",
             "save_board": "💾 Uložit předdefinovaný plán"
+        },
+        "video": {
+            "btn_choose_file": "📁 Vybrat MP4 soubor...",
+            "btn_from_youtube": "✨ Z YouTube",
+            "btn_upload_poster": "🖼️ Nahrát plakát",
+            "btn_save": "💾 Uložit video"
+        },
+        "announcement": {
+            "btn_publish": "📢 Zveřejnit zprávu posla"
         }
     },
     "auth": {
@@ -2057,7 +2113,7 @@ window.PRS_I18N.cs = {
         "email": "E-mail:",
         "treasury": "Zůstatek pokladnice:",
         "btn_logout": "🚪 Odhlásit se",
-        "btn_switch_account": "Přihlásit jiný účet",
+        "btn_switch_account": "🔄 Přihlásit jiný účet",
         "btn_close": "✕ Zavřít",
         "guest_title": "🛡️ Rytířský účet & Vstup",
         "guest_subtitle": "Přihlas se svým Google účtem, klasickým profilem nebo hraj volně jako Host.",
@@ -2065,7 +2121,10 @@ window.PRS_I18N.cs = {
         "google_placeholder": "Zadej jméno (např. Lord Kikin)",
         "logout_success": "Byl jsi úspěšně odhlášen. Nyní pokračuješ volně v režimu Hosta.",
         "btn_classic_toggle": "🔒 Přihlásit se heslem / Registrace nového e-mailu ▼",
-        "btn_play_guest": "👤 Hrát volně jako Host"
+        "btn_play_guest": "👤 Hrát volně jako Host",
+        "btn_resend_code": "🔁 Znovu poslat",
+        "btn_login": "🔑 Přihlásit se",
+        "btn_register": "✨ Registrovat"
     },
     "online_lobby": {
         "badge": "Režim 3 • Online Multiplayer & Cloud",
@@ -2091,12 +2150,12 @@ window.PRS_I18N.cs = {
         "tab_maps": "⭐ Šablony plánů"
     },
     "map_studio": {
-    "royal_castle_label": "🏰 Hlavní královské sídlo (středová dominanta):",
-    "preview_default_title": "Vlastní královský plán",
-    "reroll_seed_title": "Přeskupit rozmístění polí (nový Seed)",
-    "seed_label": "🎲 Seed rozložení:",
-    "custom_name_placeholder": "Např. Království pěti draků...",
-    "custom_name_label": "🏷️ Vlastní název herního plánu:",
+        "royal_castle_label": "🏰 Hlavní královské sídlo (středová dominanta):",
+        "preview_default_title": "Vlastní královský plán",
+        "reroll_seed_title": "Přeskupit rozmístění polí (nový Seed)",
+        "seed_label": "🎲 Seed rozložení:",
+        "custom_name_placeholder": "Např. Království pěti draků...",
+        "custom_name_label": "🏷️ Vlastní název herního plánu:",
         "title": "🗺️ Královské Map Studio",
         "subtitle_badge": "Dynamický sestavovač plánu 2.0",
         "desc": "Zvol skladbu polí parametrickým receptem nebo přepni do WYSIWYG editoru a upravuj pole přímo na plánu.",
@@ -2737,5 +2796,18 @@ window.PRS_I18N.cs = {
             "toast_undo": "↩️ Krok vrácen zpět",
             "toast_node_changed": "✨ Pole #{id} změněno na: {name}"
         }
+    },
+    "crest": {
+        "title": "Královská heraldická komora",
+        "subtitle": "Zvol si rodové znamení a barvu heraldického štítu",
+        "tincture_label": "1. Heraldická tinktura (Barva štítu):",
+        "charge_label": "2. Šlechtické znamení rodu:",
+        "btn_confirm": "🛡️ Potvrdit a přijmout erb"
+    },
+    "online": {
+        "btn_copy_invite_link": "📋 Kopírovat odkaz se zvacím kódem",
+        "btn_play_offline_bots": "🤖 Hrát offline proti botům",
+        "btn_enter_table_resume": "⚔️ Vstoupit ke stolu a pokračovat ve hře →",
+        "btn_load": "▶️ Načíst"
     }
 };

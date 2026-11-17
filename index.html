@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611171650">
+    <link rel="stylesheet" href="css/main.css?v=202611171840">
 
-    <link rel="stylesheet" href="css/board.css?v=202611171650">
+    <link rel="stylesheet" href="css/board.css?v=202611171840">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611171650">
+    <link rel="stylesheet" href="css/modals.css?v=202611171840">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611171650">
+    <link rel="stylesheet" href="css/mobile.css?v=202611171840">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -755,25 +755,25 @@
 
                                     <option value="auto" selected>🎲 Pestré (při každé hře jiné)</option>
 
-                                    <option value="castle_royal">👑 Královský hrad (Sídlo koruny)</option>
+                                    <option value="castle_royal" data-i18n="lobby.castles.castle_royal">👑 Královský hrad (Sídlo koruny)</option>
 
-                                    <option value="castle_forest">🌲 Lesní hrad Doubrava</option>
+                                    <option value="castle_forest" data-i18n="lobby.castles.castle_forest">🌲 Lesní hrad Doubrava</option>
 
-                                    <option value="castle_ice">❄️ Ledový palác Věčného mrazu</option>
+                                    <option value="castle_ice" data-i18n="lobby.castles.castle_ice">❄️ Ledový palác Věčného mrazu</option>
 
-                                    <option value="castle_lava">🌋 Sopečná pevnost Lávový chřtán</option>
+                                    <option value="castle_lava" data-i18n="lobby.castles.castle_lava">🌋 Sopečná pevnost Lávový chřtán</option>
 
-                                    <option value="castle_crystal">💎 Křišťálový zámek Ametyst</option>
+                                    <option value="castle_crystal" data-i18n="lobby.castles.castle_crystal">💎 Křišťálový zámek Ametyst</option>
 
-                                    <option value="castle_wind">☁️ Větrný vzdušný zámek Boreas</option>
+                                    <option value="castle_wind" data-i18n="lobby.castles.castle_wind">☁️ Větrný vzdušný zámek Boreas</option>
 
-                                    <option value="castle_water">🌊 Vodní citadela Oceán</option>
+                                    <option value="castle_water" data-i18n="lobby.castles.castle_water">🌊 Vodní citadela Oceán</option>
 
-                                    <option value="castle_desert">🏜️ Pouštní pískovcový palác</option>
+                                    <option value="castle_desert" data-i18n="lobby.castles.castle_desert">🏜️ Pouštní pískovcový palác</option>
 
-                                    <option value="castle_swamp">🌫️ Bažinná tvrz Černá tůň</option>
+                                    <option value="castle_swamp" data-i18n="lobby.castles.castle_swamp">🌫️ Bažinná tvrz Černá tůň</option>
 
-                                    <option value="castle_dark">🌑 Temný podzemní hrad Erebus</option>
+                                    <option value="castle_dark" data-i18n="lobby.castles.castle_dark">🌑 Temný podzemní hrad Erebus</option>
 
                                 </select>
 
@@ -833,7 +833,7 @@
 
                             <div style="display:flex; gap:0.45rem;">
 
-                                <input type="text" id="join-room-code-input" name="prs_room_code_table_key" autocomplete="new-password" autocorrect="off" autocapitalize="characters" spellcheck="false" class="prs-input" style="text-transform:uppercase; font-weight:700; letter-spacing:1px;" placeholder="Např. K7M4P9" maxlength="12" value="" />
+                                <input type="text" id="join-room-code-input" name="prs_room_code_table_key" autocomplete="new-password" autocorrect="off" autocapitalize="characters" spellcheck="false" class="prs-input" style="text-transform:uppercase; font-weight:700; letter-spacing:1px;" placeholder="Např. K7M4P9" data-i18n-placeholder="lobby.room_code_placeholder" maxlength="12" value="" />
 
                                 <button class="btn-gold-lg" style="white-space:nowrap; padding:0.45rem 0.9rem; font-size:0.86rem;" onclick="PRS_App.loadSessionFromCloud()" data-i18n="online_lobby.join_btn">
 
@@ -1937,7 +1937,7 @@
                                 <label for="admin-ann-active" style="font-size:0.85rem; cursor:pointer;">Oznámení je aktivní (zobrazovat návštěvníkům)</label>
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <button class="btn-primary" onclick="PRS_App.saveAdminAnnouncement()">📢 Zveřejnit zprávu posla</button>
+                                <button class="btn-primary" onclick="PRS_App.saveAdminAnnouncement()" data-i18n="admin.announcement.btn_publish">📢 Zveřejnit zprávu posla</button>
                                 <span id="admin-ann-feedback" style="font-size:0.85rem;"></span>
                             </div>
                         </div>
@@ -1953,8 +1953,8 @@
                                 </div>
                             </div>
                             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                <button type="button" class="btn-secondary" style="font-size:0.8rem;" onclick="PRS_App.resetBalanceToDefaults()">↺ Obnovit výchozí hodnoty</button>
-                                <button type="button" class="btn-action-buy" style="font-size:0.8rem;" onclick="PRS_App.saveConfigToServer()">💾 Uložit balanc do DB (prs_GameConfigs)</button>
+                                <button type="button" class="btn-secondary" style="font-size:0.8rem;" onclick="PRS_App.resetBalanceToDefaults()" data-i18n="admin.balance.btn_reset">↺ Obnovit výchozí hodnoty</button>
+                                <button type="button" class="btn-action-buy" style="font-size:0.8rem;" onclick="PRS_App.saveConfigToServer()" data-i18n="admin.balance.btn_save_db">💾 Uložit balanc do DB (prs_GameConfigs)</button>
                             </div>
                         </div>
 
@@ -2153,8 +2153,8 @@
                                     <option value="5">👥 5 rytířů u stolu</option>
                                     <option value="6">👥 6 rytířů u stolu</option>
                                 </select>
-                                <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.45rem 0.95rem;" onclick="PRS_App.runEconomySimulation(30)">⚡ Odsimulovat 30 her</button>
-                                <button class="btn-secondary" style="font-size:0.84rem; padding:0.45rem 0.95rem;" onclick="PRS_App.runEconomySimulation(100)">📊 Hloubkový test (100 her)</button>
+                                <button data-i18n="admin.balance.btn_sim_30" class="btn-gold-lg" style="font-size:0.84rem; padding:0.45rem 0.95rem;" onclick="PRS_App.runEconomySimulation(30)">⚡ Odsimulovat 30 her</button>
+                                <button data-i18n="admin.balance.btn_sim_100" class="btn-secondary" style="font-size:0.84rem; padding:0.45rem 0.95rem;" onclick="PRS_App.runEconomySimulation(100)">📊 Hloubkový test (100 her)</button>
                                 <span id="save-config-feedback" style="font-size:0.83rem; color:#4ade80; font-weight:600;"></span>
                             </div>
                         </div>
@@ -2271,7 +2271,7 @@
 
             <div id="mobile-dock-primary-btn-wrap" class="mobile-dock-btn-main-wrap">
 
-                <button id="mobile-dock-primary-btn" class="mobile-btn-primary" onclick="PRS_App.handleMobilePrimaryAction()">
+                <button data-i18n="hud.mobile_dock.roll_dice" id="mobile-dock-primary-btn" class="mobile-btn-primary" onclick="PRS_App.handleMobilePrimaryAction()">
 
                     🎲 HODIT KOSTKOU (1–6)
 
@@ -2285,7 +2285,7 @@
 
                     <span class="dock-btn-icon">ℹ️</span>
 
-                    <span class="dock-btn-label">Pole</span>
+                    <span class="dock-btn-label" data-i18n="hud.mobile_dock.tile">Pole</span>
 
                 </button>
 
@@ -2313,7 +2313,7 @@
 
                     <span class="dock-btn-icon">📜</span>
 
-                    <span class="dock-btn-label">Kronika</span>
+                    <span class="dock-btn-label" data-i18n="hud.mobile_dock.chronicle">Kronika</span>
 
                 </button>
 
@@ -2321,7 +2321,7 @@
 
                     <span class="dock-btn-icon">💬</span>
 
-                    <span class="dock-btn-label">Chat</span>
+                    <span class="dock-btn-label" data-i18n="hud.mobile_dock.chat">Chat</span>
 
                 </button>
 
@@ -2445,10 +2445,10 @@
             <!-- Akční tlačítka -->
 
             <div class="victory-actions-bar">
-                <button class="btn-gold-lg" onclick="PRS_App.continueInEndlessMode()" title="Pokračovat ve volné nekonečné hře na herním plánu se vším vybudovaným panstvím">♾️ Pokračovat v nekonečné hře</button>
-                <button class="btn-secondary" id="btn-show-diploma" onclick="PRS_App.openWinnerDiplomaModal()" title="Zobrazit a stáhnout iluminovaný Královský diplom vítěze">📜 Královský diplom</button>
-                <button class="btn-secondary" id="btn-save-hall-of-fame" onclick="PRS_App.saveVictoryToCloud()">🏆 Zapsat do Síně slávy</button>
-                <button class="btn-secondary" onclick="PRS_App.startNewGame(true)">🔄 Spustit novou partii</button>
+                <button data-i18n="modals.endgame.continue_endless" class="btn-gold-lg" onclick="PRS_App.continueInEndlessMode()" title="Pokračovat ve volné nekonečné hře na herním plánu se vším vybudovaným panstvím">♾️ Pokračovat v nekonečné hře</button>
+                <button data-i18n="modals.endgame.royal_diploma" class="btn-secondary" id="btn-show-diploma" onclick="PRS_App.openWinnerDiplomaModal()" title="Zobrazit a stáhnout iluminovaný Královský diplom vítěze">📜 Královský diplom</button>
+                <button data-i18n="modals.endgame.save_hall_of_fame" class="btn-secondary" id="btn-save-hall-of-fame" onclick="PRS_App.saveVictoryToCloud()">🏆 Zapsat do Síně slávy</button>
+                <button class="btn-secondary" onclick="PRS_App.startNewGame(true)" data-i18n="modals.endgame.new_game">🔄 Spustit novou partii</button>
             </div>
 
             <div id="victory-cloud-feedback" style="text-align:center; margin-top:0.5rem; font-size:0.83rem; color:var(--gold-light);"></div>
@@ -2476,8 +2476,8 @@
                     <canvas id="diploma-canvas" width="800" height="560" style="display:block; max-width:100%; height:auto; border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.6);"></canvas>
                 </div>
                 <div style="display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:center; width:100%;">
-                    <button class="btn-gold-lg" onclick="PRS_App.downloadWinnerDiploma()" style="padding:0.5rem 1.4rem; font-size:0.9rem; display:inline-flex; align-items:center; gap:0.4rem;">💾 Stáhnout diplom (PNG)</button>
-                    <button class="btn-secondary" onclick="PRS_App.closeWinnerDiplomaModal()" style="padding:0.5rem 1.2rem;">Zavřít listinu</button>
+                    <button data-i18n="modals.diploma.download" class="btn-gold-lg" onclick="PRS_App.downloadWinnerDiploma()" style="padding:0.5rem 1.4rem; font-size:0.9rem; display:inline-flex; align-items:center; gap:0.4rem;">💾 Stáhnout diplom (PNG)</button>
+                    <button class="btn-secondary" onclick="PRS_App.closeWinnerDiplomaModal()" style="padding:0.5rem 1.2rem;" data-i18n="modals.diploma.close">Zavřít listinu</button>
                 </div>
             </div>
         </div>
@@ -2549,7 +2549,7 @@
 
                 <small style="color:var(--text-muted); font-size:0.78rem;">💡 Tip: Předměty dávají trvalé bonusy do bojů i na královských slavnostech.</small>
 
-                <button class="btn-secondary" onclick="PRS_App.closeArmoryModal()">Zavřít zbrojnici</button>
+                <button class="btn-secondary" onclick="PRS_App.closeArmoryModal()" data-i18n="modals.armory.close">Zavřít zbrojnici</button>
 
             </div>
 
@@ -2695,9 +2695,9 @@
 
             <div style="display:flex; justify-content:space-between; gap:0.5rem;">
 
-                <button class="btn-gold-lg" onclick="PRS_App.saveGraphicsSettings()">💾 Použít a uložit grafiku</button>
+                <button class="btn-gold-lg" onclick="PRS_App.saveGraphicsSettings()" data-i18n="modals.graphics.save">💾 Použít a uložit grafiku</button>
 
-                <button class="btn-secondary" onclick="PRS_App.closeGraphicsModal()">Zavřít</button>
+                <button class="btn-secondary" onclick="PRS_App.closeGraphicsModal()" data-i18n="common.close_short">Zavřít</button>
 
             </div>
 
@@ -2743,13 +2743,13 @@
                     <button type="button" class="btn-secondary" style="flex:1; border-color:rgba(239,68,68,0.5); color:#fca5a5;" onclick="PRS_App.logoutUser()">
                         <span data-i18n-html="auth.btn_logout">🚪 Odhlásit se</span>
                     </button>
-                    <button type="button" class="btn-secondary" style="flex:1;" onclick="PRS_App.showAuthLoginForm()">
+                    <button type="button" class="btn-secondary" style="flex:1;" onclick="PRS_App.showAuthLoginForm()" data-i18n="auth.btn_switch_account">
                         🔄 Přihlásit jiný účet
                     </button>
                 </div>
 
                 <div style="text-align:right; border-top:1px solid rgba(212,175,55,0.2); padding-top:0.65rem;">
-                    <button type="button" class="btn-gold-lg" style="padding:0.4rem 1rem; font-size:0.85rem;" onclick="PRS_App.closeAuthModal()">✕ Zavřít</button>
+                    <button type="button" class="btn-gold-lg" style="padding:0.4rem 1rem; font-size:0.85rem;" onclick="PRS_App.closeAuthModal()" data-i18n="auth.btn_close">✕ Zavřít</button>
                 </div>
             </div>
 
@@ -2817,8 +2817,8 @@
                     </div>
 
                     <div style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:space-between;">
-                        <button class="btn-gold-lg" onclick="PRS_App.submitAuth('login')" style="flex:1;">🔑 Přihlásit se</button>
-                        <button class="btn-secondary" onclick="PRS_App.submitAuth('register')" style="flex:1;">✨ Registrovat</button>
+                        <button class="btn-gold-lg" onclick="PRS_App.submitAuth('login')" style="flex:1;" data-i18n="auth.btn_login">🔑 Přihlásit se</button>
+                        <button data-i18n="auth.btn_register" class="btn-secondary" onclick="PRS_App.submitAuth('register')" style="flex:1;">✨ Registrovat</button>
                     </div>
                 </div>
 
@@ -2956,25 +2956,25 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/cs.js?v=202611171650" defer></script>
-    <script src="js/i18n/en.js?v=202611171650" defer></script>
-    <script src="js/app-i18n.js?v=202611171650" defer></script>
-    <script src="js/game-data.js?v=202611171650" defer></script>
-    <script src="js/game-boards.js?v=202611171650" defer></script>
-    <script src="js/game-engine.js?v=202611171650" defer></script>
-    <script src="js/game-combat-ai.js?v=202611171650" defer></script>
-    <script src="js/app-audio.js?v=202611171650" defer></script>
-    <script src="js/app-dialog.js?v=202611171650" defer></script>
-    <script src="js/app.js?v=202611171650" defer></script>
-    <script src="js/app-board.js?v=202611171650" defer></script>
-    <script src="js/app-hud.js?v=202611171650" defer></script>
-    <script src="js/app-modals.js?v=202611171650" defer></script>
-    <script src="js/app-online.js?v=202611171650" defer></script>
-    <script src="js/app-saves.js?v=202611171650" defer></script>
-    <script src="js/app-map-editor.js?v=202611171650" defer></script>
-    <script src="js/app-catalog.js?v=202611171650" defer></script>
-    <script src="js/app-admin.js?v=202611171650" defer></script>
-    <script src="js/app-musicwidget.js?v=202611171650" defer></script>
+    <script src="js/i18n/cs.js?v=202611171840" defer></script>
+    <script src="js/i18n/en.js?v=202611171840" defer></script>
+    <script src="js/app-i18n.js?v=202611171840" defer></script>
+    <script src="js/game-data.js?v=202611171840" defer></script>
+    <script src="js/game-boards.js?v=202611171840" defer></script>
+    <script src="js/game-engine.js?v=202611171840" defer></script>
+    <script src="js/game-combat-ai.js?v=202611171840" defer></script>
+    <script src="js/app-audio.js?v=202611171840" defer></script>
+    <script src="js/app-dialog.js?v=202611171840" defer></script>
+    <script src="js/app.js?v=202611171840" defer></script>
+    <script src="js/app-board.js?v=202611171840" defer></script>
+    <script src="js/app-hud.js?v=202611171840" defer></script>
+    <script src="js/app-modals.js?v=202611171840" defer></script>
+    <script src="js/app-online.js?v=202611171840" defer></script>
+    <script src="js/app-saves.js?v=202611171840" defer></script>
+    <script src="js/app-map-editor.js?v=202611171840" defer></script>
+    <script src="js/app-catalog.js?v=202611171840" defer></script>
+    <script src="js/app-admin.js?v=202611171840" defer></script>
+    <script src="js/app-musicwidget.js?v=202611171840" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3156,7 +3156,7 @@
 
                 <h3 id="card-deck-modal-title" style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; display:flex; align-items:center; gap:0.5rem;"></h3>
 
-                <button class="btn-icon-danger" onclick="PRS_App.closeDeckModal()">✕</button>
+                <button data-i18n="common.understand" class="btn-icon-danger" onclick="PRS_App.closeDeckModal()">✕</button>
 
             </div>
 
@@ -3164,7 +3164,7 @@
 
             <div style="margin-top:1rem; text-align:right;">
 
-                <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal()" style="padding:0.4rem 1.25rem; cursor:pointer;">Rozumím</button>
+                <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal()" style="padding:0.4rem 1.25rem; cursor:pointer;" data-i18n="common.understand">Rozumím</button>
 
             </div>
 
@@ -3181,7 +3181,7 @@
             </div>
             <div id="card-detail-preview-body" style="max-height:68vh; overflow-y:auto; line-height:1.45; font-size:0.9rem; color:#e2e8f0;"></div>
             <div style="margin-top:0.9rem; display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(212,175,55,0.2); padding-top:0.6rem;">
-                <button class="btn-secondary" onclick="PRS_App.closeCardPreviewModal()" style="font-size:0.85rem; padding:0.35rem 0.9rem; cursor:pointer;">← Zpět na balíček</button>
+                <button class="btn-secondary" onclick="PRS_App.closeCardPreviewModal()" style="font-size:0.85rem; padding:0.35rem 0.9rem; cursor:pointer;" data-i18n="cards.btn_back_to_deck">← Zpět na balíček</button>
                 <button class="rules-subnav-btn active" onclick="PRS_App.closeCardPreviewModal()" style="padding:0.35rem 1.1rem; cursor:pointer; font-size:0.85rem;">Zavřít</button>
             </div>
         </div>
@@ -3427,8 +3427,8 @@
                 <div style="display:flex; align-items:center; gap:0.6rem;">
                     <span style="font-size:1.6rem;">🛡️</span>
                     <div>
-                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.2rem;">Královská heraldická komora</h3>
-                        <div style="font-size:0.8rem; color:var(--text-muted);">Zvol si rodové znamení a barvu heraldického štítu</div>
+                        <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.2rem;" data-i18n="crest.title">Královská heraldická komora</h3>
+                        <div style="font-size:0.8rem; color:var(--text-muted);" data-i18n="crest.subtitle">Zvol si rodové znamení a barvu heraldického štítu</div>
                     </div>
                 </div>
                 <button class="btn-icon-danger" onclick="PRS_App.closeCrestPickerModal()" title="Zavřít komoru">✕</button>
@@ -3440,20 +3440,20 @@
 
                 <!-- Výběr tinktury -->
                 <div>
-                    <div style="font-size:0.82rem; font-weight:700; color:var(--gold-light); margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.5px;">1. Heraldická tinktura (Barva štítu):</div>
+                    <div style="font-size:0.82rem; font-weight:700; color:var(--gold-light); margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.5px;" data-i18n="crest.tincture_label">1. Heraldická tinktura (Barva štítu):</div>
                     <div id="crest-tinctures-strip" class="crest-tincture-row"></div>
                 </div>
 
                 <!-- Výběr erbu -->
                 <div>
-                    <div style="font-size:0.82rem; font-weight:700; color:var(--gold-light); margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.5px;">2. Šlechtické znamení rodu:</div>
+                    <div style="font-size:0.82rem; font-weight:700; color:var(--gold-light); margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.5px;" data-i18n="crest.charge_label">2. Šlechtické znamení rodu:</div>
                     <div id="crest-picker-grid" class="crest-picker-grid"></div>
                 </div>
             </div>
 
             <div style="padding:0.75rem 1.25rem; background:rgba(0,0,0,0.45); border-top:1px solid rgba(212,175,55,0.2); display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
-                <button class="btn-secondary" onclick="PRS_App.closeCrestPickerModal()">Zrušit</button>
-                <button class="btn-primary" onclick="PRS_App.confirmCrestSelection()" style="padding:0.45rem 1.4rem;">🛡️ Potvrdit a přijmout erb</button>
+                <button class="btn-secondary" onclick="PRS_App.closeCrestPickerModal()" data-i18n="common.cancel">Zrušit</button>
+                <button class="btn-primary" onclick="PRS_App.confirmCrestSelection()" style="padding:0.45rem 1.4rem;" data-i18n="crest.btn_confirm">🛡️ Potvrdit a přijmout erb</button>
             </div>
         </div>
     </div>
@@ -3581,8 +3581,8 @@
                 <div id="admin-vid-feedback" style="color:#ef4444; font-size:0.8rem; min-height:0;"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="PRS_App.closeAdminVideoModal()" style="padding:0.45rem 1rem;">Zrušit</button>
-                <button class="btn-primary" onclick="PRS_App.saveAdminVideo()" style="padding:0.45rem 1.15rem;">💾 Uložit video</button>
+                <button class="btn-secondary" onclick="PRS_App.closeAdminVideoModal()" style="padding:0.45rem 1rem;" data-i18n="common.cancel">Zrušit</button>
+                <button class="btn-primary" onclick="PRS_App.saveAdminVideo()" style="padding:0.45rem 1.15rem;" data-i18n="admin.video.btn_save">💾 Uložit video</button>
             </div>
         </div>
     </div>
@@ -3621,8 +3621,8 @@
                 <div id="admin-user-feedback" style="color:#ef4444; font-size:0.8rem; min-height:0;"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="PRS_App.closeAdminUserModal()" style="padding:0.45rem 1rem;">Zrušit</button>
-                <button class="btn-primary" onclick="PRS_App.saveAdminUser()" style="padding:0.45rem 1.15rem;">💾 Uložit změny</button>
+                <button class="btn-secondary" onclick="PRS_App.closeAdminUserModal()" style="padding:0.45rem 1rem;" data-i18n="common.cancel">Zrušit</button>
+                <button class="btn-primary" onclick="PRS_App.saveAdminUser()" style="padding:0.45rem 1.15rem;" data-i18n="admin.users.btn_save_changes">💾 Uložit změny</button>
             </div>
         </div>
     </div>
@@ -3686,8 +3686,8 @@
                 <div id="admin-aud-feedback" style="color:#ef4444; font-size:0.8rem; min-height:0;"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="PRS_App.closeAdminAudioModal()" style="padding:0.45rem 1rem;">Zrušit</button>
-                <button class="btn-primary" onclick="PRS_App.saveAdminAudio()" style="padding:0.45rem 1.15rem;">💾 Uložit skladbu</button>
+                <button class="btn-secondary" onclick="PRS_App.closeAdminAudioModal()" style="padding:0.45rem 1rem;" data-i18n="common.cancel">Zrušit</button>
+                <button class="btn-primary" onclick="PRS_App.saveAdminAudio()" style="padding:0.45rem 1.15rem;" data-i18n="admin.audio.btn_save">💾 Uložit skladbu</button>
             </div>
         </div>
     </div>
@@ -3706,17 +3706,17 @@
                 </div>
                 <div style="display:flex; align-items:center; gap:0.65rem;">
                     <div class="pawn-credits-pill" title="Tvůj zůstatek královských kreditů pro odemykání prémiových figurek">
-                        <span>💎</span> <strong id="pawn-shop-credits-val">250</strong> <small>kreditů</small>
+                        <span>💎</span> <strong id="pawn-shop-credits-val">250</strong> <small data-i18n="wardrobe.credits">kreditů</small>
                     </div>
                     <button class="btn-icon-danger" onclick="PRS_App.closePawnShopModal()" title="Zavřít šatnu">✕</button>
                 </div>
             </div>
 
             <div class="pawn-shop-tabs">
-                <button type="button" id="pawn-tab-all" class="armory-tab-btn active" onclick="PRS_App.setPawnShopCategory('all')">✨ Všechny figurky (17)</button>
-                <button type="button" id="pawn-tab-basic" class="armory-tab-btn" onclick="PRS_App.setPawnShopCategory('basic')">🛡️ Základní rytíři (6)</button>
-                <button type="button" id="pawn-tab-premium" class="armory-tab-btn" onclick="PRS_App.setPawnShopCategory('premium')">💎 Prémiové s aurou (6)</button>
-                <button type="button" id="pawn-tab-bot" class="armory-tab-btn" onclick="PRS_App.setPawnShopCategory('bot')">🤖 Figurky PC Botů (5)</button>
+                <button type="button" id="pawn-tab-all" class="armory-tab-btn active" onclick="PRS_App.setPawnShopCategory('all')" data-i18n="wardrobe.tab_all">✨ Všechny figurky (17)</button>
+                <button type="button" id="pawn-tab-basic" class="armory-tab-btn" onclick="PRS_App.setPawnShopCategory('basic')" data-i18n="wardrobe.tab_basic">🛡️ Základní rytíři (6)</button>
+                <button type="button" id="pawn-tab-premium" class="armory-tab-btn" onclick="PRS_App.setPawnShopCategory('premium')" data-i18n="wardrobe.tab_premium">💎 Prémiové s aurou (6)</button>
+                <button type="button" id="pawn-tab-bot" class="armory-tab-btn" onclick="PRS_App.setPawnShopCategory('bot')" data-i18n="wardrobe.tab_bot">🤖 Figurky PC Botů (5)</button>
             </div>
 
             <div id="pawn-shop-grid" class="pawn-shop-grid"></div>
@@ -3725,7 +3725,7 @@
                 <div style="font-size:0.78rem; color:var(--text-muted);">
                     💡 <strong>Multiplayer Tip:</strong> Když se připojíš k online stolu na místo PC bota, botova figurka na herním plánu se automaticky vymění za tvou zvolenou figurku!
                 </div>
-                <button type="button" class="btn-primary" onclick="PRS_App.closePawnShopModal()" style="padding:0.42rem 1.2rem;">Hotovo</button>
+                <button type="button" class="btn-primary" onclick="PRS_App.closePawnShopModal()" style="padding:0.42rem 1.2rem;" data-i18n="common.done">Hotovo</button>
             </div>
         </div>
     </div>
@@ -3779,7 +3779,7 @@
                 <!-- Generováno JS -->
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-top:1px solid rgba(212,175,55,0.2); padding-top:0.75rem;">
-                <button class="btn-secondary" onclick="PRS_App.closeOnlineSeatsModal()">Zavřít</button>
+                <button class="btn-secondary" onclick="PRS_App.closeOnlineSeatsModal()" data-i18n="common.close_short">Zavřít</button>
                 <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
                     <button type="button" class="btn-secondary" style="border-color:#f59e0b; color:#fde68a; font-size:0.82rem; padding:0.45rem 0.75rem;" onclick="PRS_App.convertEntireGameToOfflineBots()" title="Odpojit hru ze sítě a pokračovat sólo offline proti PC botům">
                         🤖 Hrát offline proti botům
@@ -3936,24 +3936,24 @@
                             <div>
                                 <label for="ms-route-shape" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;"><span data-i18n-html="map_studio.route_shape_label">🧭 Tvar &amp; geometrie trasy:</span></label>
                                 <select id="ms-route-shape" class="prs-select" style="width:100%; font-size:0.76rem; padding:0.28rem;" onchange="PRS_App.onMapStudioTopOptionChange()">
-                                    <option value="auto" selected>🎲 Podle seedu (Automatický mix)</option>
-                                    <option value="organic_meander">🌿 Organický meandr (Vlnění)</option>
-                                    <option value="figure_eight">♾️ Osmička (Křížený okruh)</option>
-                                    <option value="spiral_citadel">🌀 Spirálová citadela (Ochranný pás)</option>
-                                    <option value="twin_valleys">🏔️ Dvojí údolí (Západ &amp; Východ)</option>
-                                    <option value="serpentine">🐍 Hadovitá magistrála (Plynulé esíčko)</option>
-                                    <option value="star_crossroads">⭐ Hvězdicová křižovatka (Výběžky)</option>
-                                    <option value="classic_ring">⭕ Klasický ovál (Tradiční kruh)</option>
+                                    <option value="auto" selected data-i18n="map_studio.select_options.shape_auto">🎲 Podle seedu (Automatický mix)</option>
+                                    <option value="organic_meander" data-i18n="map_studio.select_options.shape_organic_meander">🌿 Organický meandr (Vlnění)</option>
+                                    <option value="figure_eight" data-i18n="map_studio.select_options.shape_figure_eight">♾️ Osmička (Křížený okruh)</option>
+                                    <option value="spiral_citadel" data-i18n="map_studio.select_options.shape_spiral_citadel">🌀 Spirálová citadela (Ochranný pás)</option>
+                                    <option value="twin_valleys" data-i18n="map_studio.select_options.shape_twin_valleys">🏔️ Dvojí údolí (Západ &amp; Východ)</option>
+                                    <option value="serpentine" data-i18n="map_studio.select_options.shape_serpentine">🐍 Hadovitá magistrála (Plynulé esíčko)</option>
+                                    <option value="star_crossroads" data-i18n="map_studio.select_options.shape_star_crossroads">⭐ Hvězdicová křižovatka (Výběžky)</option>
+                                    <option value="classic_ring" data-i18n="map_studio.select_options.shape_classic_ring">⭕ Klasický ovál (Tradiční kruh)</option>
                                 </select>
                             </div>
                             <div>
                                 <label for="ms-branches" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;"><span data-i18n="map_studio.branches_label">🌿 Větve a odbočky:</span></label>
                                 <select id="ms-branches" class="prs-select" style="width:100%; font-size:0.76rem; padding:0.28rem;" onchange="PRS_App.onMapStudioTopOptionChange()">
-                                    <option value="0">0 větví (Čistý okruh)</option>
-                                    <option value="1">1 větev (Most Slavností)</option>
-                                    <option value="2">2 větve (+ Dračí stezka)</option>
-                                    <option value="3" selected>3 větve (+ Lesní smyčka)</option>
-                                    <option value="4">4 větve (+ Hřebenovka)</option>
+                                    <option value="0" data-i18n="map_studio.select_options.branches_0">0 větví (Čistý okruh)</option>
+                                    <option value="1" data-i18n="map_studio.select_options.branches_1">1 větev (Most Slavností)</option>
+                                    <option value="2" data-i18n="map_studio.select_options.branches_2">2 větve (+ Dračí stezka)</option>
+                                    <option value="3" selected data-i18n="map_studio.select_options.branches_3">3 větve (+ Lesní smyčka)</option>
+                                    <option value="4" data-i18n="map_studio.select_options.branches_4">4 větve (+ Hřebenovka)</option>
                                 </select>
                             </div>
                         </div>
@@ -3961,11 +3961,11 @@
                             <div>
                                 <label for="ms-river-mode" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;"><span data-i18n-html="map_studio.river_label">🌊 Vodní síť &amp; mosty:</span></label>
                                 <select id="ms-river-mode" class="prs-select" style="width:100%; font-size:0.76rem; padding:0.28rem;" onchange="PRS_App.onMapStudioTopOptionChange()">
-                                    <option value="none">Bez řeky (Suché lány)</option>
-                                    <option value="single" selected>Královská řeka (1 tok)</option>
-                                    <option value="dual">Dvojí soutok (2 řeky)</option>
-                                    <option value="island">Říční ostrov (Meandr)</option>
-                                    <option value="delta">Říční delta (Rozvětvené ústí)</option>
+                                    <option value="none" data-i18n="map_studio.select_options.river_none">Bez řeky (Suché lány)</option>
+                                    <option value="single" selected data-i18n="map_studio.select_options.river_single">Královská řeka (1 tok)</option>
+                                    <option value="dual" data-i18n="map_studio.select_options.river_dual">Dvojí soutok (2 řeky)</option>
+                                    <option value="island" data-i18n="map_studio.select_options.river_island">Říční ostrov (Meandr)</option>
+                                    <option value="delta" data-i18n="map_studio.select_options.river_delta">Říční delta (Rozvětvené ústí)</option>
                                 </select>
                             </div>
                         </div>
@@ -3973,38 +3973,38 @@
                             <div>
                                 <label for="ms-master-tier" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;"><span data-i18n="map_studio.master_tier_label">🎓 Stupeň Mistrů ctností:</span></label>
                                 <select id="ms-master-tier" class="prs-select" style="width:100%; font-size:0.76rem; padding:0.28rem;" onchange="PRS_App.onMapStudioTopOptionChange()">
-                                    <option value="1">Stupeň I: Základní (+1)</option>
-                                    <option value="2" selected>Stupeň II: Pokročilý (+2)</option>
-                                    <option value="3">Stupeň III: Pečetě &amp; Záštita</option>
-                                    <option value="4">Stupeň IV: Duely o 1.5 💖</option>
-                                    <option value="5">🌟 Stupňovaný RPG (I→IV)</option>
+                                    <option value="1" data-i18n="map_studio.select_options.tier_1">Stupeň I: Základní (+1)</option>
+                                    <option value="2" selected data-i18n="map_studio.select_options.tier_2">Stupeň II: Pokročilý (+2)</option>
+                                    <option value="3" data-i18n="map_studio.select_options.tier_3">Stupeň III: Pečetě &amp; Záštita</option>
+                                    <option value="4" data-i18n="map_studio.select_options.tier_4">Stupeň IV: Duely o 1.5 💖</option>
+                                    <option value="5" data-i18n="map_studio.select_options.tier_5">🌟 Stupňovaný RPG (I→IV)</option>
                                 </select>
                             </div>
                             <div>
                                 <label for="ms-biome-theme" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;"><span data-i18n="map_studio.biome_theme_label">🏔️ Ráz krajiny (Biom):</span></label>
                                 <select id="ms-biome-theme" class="prs-select" style="width:100%; font-size:0.76rem; padding:0.28rem;" onchange="PRS_App.onMapStudioTopOptionChange()">
-                                    <option value="balanced" selected>👑 Vyvážená říše</option>
-                                    <option value="dragon_peaks">🌋 Dračí velehorstvo</option>
-                                    <option value="forest_realm">🌲 Hluboký hvozd</option>
-                                    <option value="river_delta">🌊 Říční delta</option>
-                                    <option value="golden_plains">🌾 Zlaté lány</option>
+                                    <option value="balanced" selected data-i18n="map_studio.select_options.biome_balanced">👑 Vyvážená říše</option>
+                                    <option value="dragon_peaks" data-i18n="map_studio.select_options.biome_dragon_peaks">🌋 Dračí velehorstvo</option>
+                                    <option value="forest_realm" data-i18n="map_studio.select_options.biome_forest_realm">🌲 Hluboký hvozd</option>
+                                    <option value="river_delta" data-i18n="map_studio.select_options.biome_river_delta">🌊 Říční delta</option>
+                                    <option value="golden_plains" data-i18n="map_studio.select_options.biome_golden_plains">🌾 Zlaté lány</option>
                                 </select>
                             </div>
                         </div>
                         <div style="margin-bottom:0.4rem;">
                             <label for="ms-royal-castle" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;"><span data-i18n="map_studio.royal_castle_label">🏰 Hlavní královské sídlo (středová dominanta):</span></label>
                             <select id="ms-royal-castle" class="prs-select" style="width:100%; font-size:0.76rem; padding:0.28rem;" onchange="PRS_App.onMapStudioTopOptionChange()">
-                                <option value="auto" selected>🎲 Podle prostředí / živlu (automaticky)</option>
-                                <option value="castle_royal">👑 Královský hrad (Sídlo koruny)</option>
-                                <option value="castle_forest">🌲 Lesní hrad Doubrava</option>
-                                <option value="castle_ice">❄️ Ledový palác Věčného mrazu</option>
-                                <option value="castle_lava">🌋 Sopečná pevnost Lávový chřtán</option>
-                                <option value="castle_crystal">💎 Křišťálový zámek Ametyst</option>
-                                <option value="castle_wind">☁️ Větrný vzdušný zámek Boreas</option>
-                                <option value="castle_water">🌊 Vodní citadela Oceán</option>
-                                <option value="castle_desert">🏜️ Pouštní pískovcový palác</option>
-                                <option value="castle_swamp">🌫️ Bažinná tvrz Černá tůň</option>
-                                <option value="castle_dark">🌑 Temný podzemní hrad Erebus</option>
+                                <option value="auto" selected data-i18n="lobby.castles.auto">🎲 Podle prostředí / živlu (automaticky)</option>
+                                <option value="castle_royal" data-i18n="lobby.castles.castle_royal">👑 Královský hrad (Sídlo koruny)</option>
+                                <option value="castle_forest" data-i18n="lobby.castles.castle_forest">🌲 Lesní hrad Doubrava</option>
+                                <option value="castle_ice" data-i18n="lobby.castles.castle_ice">❄️ Ledový palác Věčného mrazu</option>
+                                <option value="castle_lava" data-i18n="lobby.castles.castle_lava">🌋 Sopečná pevnost Lávový chřtán</option>
+                                <option value="castle_crystal" data-i18n="lobby.castles.castle_crystal">💎 Křišťálový zámek Ametyst</option>
+                                <option value="castle_wind" data-i18n="lobby.castles.castle_wind">☁️ Větrný vzdušný zámek Boreas</option>
+                                <option value="castle_water" data-i18n="lobby.castles.castle_water">🌊 Vodní citadela Oceán</option>
+                                <option value="castle_desert" data-i18n="lobby.castles.castle_desert">🏜️ Pouštní pískovcový palác</option>
+                                <option value="castle_swamp" data-i18n="lobby.castles.castle_swamp">🌫️ Bažinná tvrz Černá tůň</option>
+                                <option value="castle_dark" data-i18n="lobby.castles.castle_dark">🌑 Temný podzemní hrad Erebus</option>
                             </select>
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 140px; gap:0.45rem;">
@@ -4104,8 +4104,8 @@
                 <div id="admin-brd-feedback" style="color:#ef4444; font-size:0.8rem; min-height:0;"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="PRS_App.closeAdminBoardModal()" style="padding:0.45rem 1rem;">Zrušit</button>
-                <button class="btn-primary" onclick="PRS_App.submitAdminBoardModal()" style="padding:0.45rem 1.2rem;">💾 Uložit předdefinovaný plán</button>
+                <button class="btn-secondary" onclick="PRS_App.closeAdminBoardModal()" style="padding:0.45rem 1rem;" data-i18n="common.cancel">Zrušit</button>
+                <button class="btn-primary" onclick="PRS_App.submitAdminBoardModal()" style="padding:0.45rem 1.2rem;" data-i18n="admin.boards.btn_save">💾 Uložit předdefinovaný plán</button>
             </div>
         </div>
     </div>

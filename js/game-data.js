@@ -1220,7 +1220,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_knight_valiant.png",
         auraType: null,
         accentColor: "#3b82f6",
-        desc: "Ušlechtilý královský paladin v zářivé zlatostříbrné zbroji se lvím erbem na rameni."
+        desc: "Ušlechtilý královský paladin v zářivé zlatostříbrné zbroji se lvím erbem na rameni.",
+        nameEn: "Sir Roland",
+        titleEn: "Knight of the Royal Crown",
+        descEn: "Noble royal paladin in radiant gold-and-silver armor bearing the lion crest upon his shoulder."
     },
     {
         id: "knight_tourney",
@@ -1232,7 +1235,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_knight_tourney.png",
         auraType: null,
         accentColor: "#ef4444",
-        desc: "Neporažený mistr klání na dřevce s chocholem z rudých růží a zdobenou přilbicí."
+        desc: "Neporažený mistr klání na dřevce s chocholem z rudých růží a zdobenou přilbicí.",
+        nameEn: "Baron of the Rose",
+        titleEn: "Tournament Champion",
+        descEn: "Undefeated master of jousting with a plume of red roses and an ornate tournament helm."
     },
     {
         id: "lady_huntress",
@@ -1244,7 +1250,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_lady_huntress.png",
         auraType: null,
         accentColor: "#10b981",
-        desc: "Vznešená paní hvozdů v zeleném sametu s loveckým sokolem na rameni a lukem."
+        desc: "Vznešená paní hvozdů v zeleném sametu s loveckým sokolem na rameni a lukem.",
+        nameEn: "Lady Sylva",
+        titleEn: "Royal Huntress",
+        descEn: "Noble mistress of the deep woods in green velvet with a hunting falcon upon her shoulder and bow."
     },
     {
         id: "lord_diplomat",
@@ -1256,7 +1265,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_lord_diplomat.png",
         auraType: null,
         accentColor: "#a855f7",
-        desc: "Charismatický dvořan a diplomat v purpurovém plášti se zlatým řetězem a kordem."
+        desc: "Charismatický dvořan a diplomat v purpurovém plášti se zlatým řetězem a kordem.",
+        nameEn: "Duke Armand",
+        titleEn: "Master of the Royal Court",
+        descEn: "Charismatic courtier and diplomat in a purple cloak with golden chain and ceremonial rapier."
     },
     {
         id: "knight_warden",
@@ -1268,7 +1280,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_knight_warden.png",
         auraType: null,
         accentColor: "#22c55e",
-        desc: "Prastarý ochránce královských lesů s korunou z jeleního paroží a dubovým pláštěm."
+        desc: "Prastarý ochránce královských lesů s korunou z jeleního paroží a dubovým pláštěm.",
+        nameEn: "Warden of the Wilds",
+        titleEn: "Emerald Knight",
+        descEn: "Vigilant guardian of frontier forests clad in hardened moss-green scale armor."
     },
     {
         id: "lady_sorceress",
@@ -1280,7 +1295,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_lady_sorceress.png",
         auraType: null,
         accentColor: "#6366f1",
-        desc: "Tajemná šlechtična a hvězdopravkyně s diadémem souhvězdí a zářícím křišťálem."
+        desc: "Tajemná šlechtična a hvězdopravkyně s diadémem souhvězdí a zářícím křišťálem.",
+        nameEn: "Astrida the Sorceress",
+        titleEn: "Star Lady",
+        descEn: "Mystic astronomer reading celestial signs, weaving starlight into defensive charms."
     },
 
     // --- B) FIGURKY PRO PC BOTY (Automatické pro AI soupeře - 5 archetypů) ---
@@ -1295,7 +1313,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_bot_aggressive.png",
         auraType: null,
         accentColor: "#dc2626",
-        desc: "Obávaný železný baron v rohaté černé přilbici s rudě žhnoucím hledím."
+        desc: "Obávaný železný baron v rohaté černé přilbici s rudě žhnoucím hledím.",
+        nameEn: "Black Baron",
+        titleEn: "AI Warrior (Dragon Slayer)",
+        descEn: "Ferocious armored warlord hunting beasts and dragons with ruthless precision."
     },
     {
         id: "bot_breeder",
@@ -1308,7 +1329,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_bot_breeder.png",
         auraType: null,
         accentColor: "#d97706",
-        desc: "Bohatý správce královských obor v kožešinovém plášti se zlatým loveckým rohem."
+        desc: "Bohatý správce královských obor v kožešinovém plášti se zlatým loveckým rohem.",
+        nameEn: "Sigismund the Breeder",
+        titleEn: "AI Breeder (Lord of Stables)",
+        descEn: "Master equestrian amassing noble studs, falcons, and hound kennels for passive rent dominance."
     },
     {
         id: "bot_noble",
@@ -1321,7 +1345,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_bot_noble.png",
         auraType: null,
         accentColor: "#ec4899",
-        desc: "Hrdá vévodkyně s vysokou zlatou korunou, perlami a krajkovým dvorním vějířem."
+        desc: "Hrdá vévodkyně s vysokou zlatou korunou, perlami a krajkovým dvorním vějířem.",
+        nameEn: "Princess Eliška",
+        titleEn: "AI Courtier (Diplomacy & Ball)",
+        descEn: "Court lady focusing on grand balls, audiences, and social graces to gather Princess's Hearts."
     },
     {
         id: "bot_balanced",
@@ -1334,7 +1361,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_bot_balanced.png",
         auraType: null,
         accentColor: "#94a3b8",
-        desc: "Mechanický rytířský golem z tepané mosazi a oceli poháněný královskými runami."
+        desc: "Mechanický rytířský golem z tepané mosazi a oceli poháněný královskými runami.",
+        nameEn: "Iron Sentinel",
+        titleEn: "AI Knight (Royal Automaton)",
+        descEn: "Balanced tactical knight building steady estate holdings and adapting to dice outcomes."
     },
     {
         id: "bot_easy",
@@ -1347,7 +1377,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_bot_easy.png",
         auraType: null,
         accentColor: "#84cc16",
-        desc: "Mladý usměvavý panoš v prošívanici s dřevěným štítem a železným kloboukem nakřivo."
+        desc: "Mladý usměvavý panoš v prošívanici s dřevěným štítem a železným kloboukem nakřivo.",
+        nameEn: "Squire Vítek",
+        titleEn: "AI Squire (Cautious Novice)",
+        descEn: "Cautious beginner knight focusing on simple village trades and safe movement."
     },
 
     // --- C) PRÉMIOVÉ A LEGENDÁRNÍ FIGURKY ZA KREDITY 💎 (6 exkluzivních figurek s aurou) ---
@@ -1361,7 +1394,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_prem_dragon_lord.png",
         auraType: "fire",
         accentColor: "#f97316",
-        desc: "Epický vojevůdce v dračí šupinové zbroji s ohnivými křídly a planoucí aurou na herním plánu."
+        desc: "Epický vojevůdce v dračí šupinové zbroji s ohnivými křídly a planoucí aurou na herním plánu.",
+        nameEn: "Dragon Warlord",
+        titleEn: "Legendary Flame Master",
+        descEn: "Ancient warlord bonded with primordial fire, radiating molten ember aura."
     },
     {
         id: "prem_ice_queen",
@@ -1373,7 +1409,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_prem_ice_queen.png",
         auraType: "ice",
         accentColor: "#38bdf8",
-        desc: "Majestátní královna s korunou z ledových krystalů, obklopená mrazivou krystalovou září."
+        desc: "Majestátní královna s korunou z ledových krystalů, obklopená mrazivou krystalovou září.",
+        nameEn: "Frost Queen",
+        titleEn: "Sovereign of the Northern Peaks",
+        descEn: "Majestic monarch of eternal ice adorned in glacier crystal crown and glacial aura."
     },
     {
         id: "prem_shadow_assassin",
@@ -1385,7 +1424,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_prem_shadow_assassin.png",
         auraType: "shadow",
         accentColor: "#c084fc",
-        desc: "Tajemný bojovník zahalený v temné kápi s fialovou přízračnou mlhou a runovými dýkami."
+        desc: "Tajemný bojovník zahalený v temné kápi s fialovou přízračnou mlhou a runovými dýkami.",
+        nameEn: "Shadow Knight",
+        titleEn: "Phantom Master of Night",
+        descEn: "Silent prowler enveloped in swirling obsidian mist and phantom daggers."
     },
     {
         id: "prem_golden_king",
@@ -1397,7 +1439,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_prem_golden_king.png",
         auraType: "sun",
         accentColor: "#fbbf24",
-        desc: "Oslnivý panovník v celozlaté zbroji se svatozáří slunečních paprsků a zlatým třpytem."
+        desc: "Oslnivý panovník v celozlaté zbroji se svatozáří slunečních paprsků a zlatým třpytem.",
+        nameEn: "Golden Sun King",
+        titleEn: "Sovereign Monarch",
+        descEn: "Radiant ruler in pure polished solar gold, surrounded by blinding divine corona."
     },
     {
         id: "prem_unicorn_rider",
@@ -1409,7 +1454,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_prem_unicorn_rider.png",
         auraType: "star",
         accentColor: "#f472b6",
-        desc: "Stříbrný paladin doprovázený bájným jednorožcem s duhovou hvězdnou aurou."
+        desc: "Stříbrný paladin doprovázený bájným jednorožcem s duhovou hvězdnou aurou.",
+        nameEn: "Unicorn Cavalier",
+        titleEn: "Celestial Champion",
+        descEn: "Pure-hearted champion atop a blessed unicorn radiating prismatic starlight."
     },
     {
         id: "prem_phoenix_paladin",
@@ -1421,7 +1469,10 @@ window.PRS_PAWNS_CATALOG = [
         img: "assets/pawns/pawn_prem_phoenix_paladin.png",
         auraType: "phoenix",
         accentColor: "#facc15",
-        desc: "Nejvyšší prémiová figurka se zlatými křídly ohnivého fénixe a královskou jiskřící korónou."
+        desc: "Nejvyšší prémiová figurka se zlatými křídly ohnivého fénixe a královskou jiskřící korónou.",
+        nameEn: "Phoenix Paladin",
+        titleEn: "Immortal Heart Guardian",
+        descEn: "Holy crusader imbued with rebirth flames, sporting glorious incandescent wings."
     }
 ];
 

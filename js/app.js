@@ -822,7 +822,7 @@ window.PRS_App = {
 
         this.updateMobileDock();
 
-        if (this.activeTab === "board" && typeof this.renderActionPanel === "function") {
+        if (this.activeTab === "board" && typeof this.renderActionPanel === "function" && this.hasGameStarted && this.state && this.state.players && this.state.players[this.state.currentPlayerIndex]) {
 
             this.renderActionPanel();
 
@@ -935,6 +935,21 @@ window.PRS_App = {
         if (typeof this.renderAnnouncement === "function") {
             try { this.renderAnnouncement(); } catch (raErr) {}
         }
+        if (typeof this.renderCurrentUserCard === "function") {
+            try { this.renderCurrentUserCard(); } catch (uErr) {}
+        }
+        if (typeof this.refreshMapStudioSelectOptions === "function") {
+            try { this.refreshMapStudioSelectOptions(); } catch (msoErr) {}
+        }
+        if (typeof this.syncMapStudioInputsFromRecipe === "function") {
+            try { this.syncMapStudioInputsFromRecipe(); } catch (smrErr) {}
+        }
+        if (typeof this.updateMapStudioPreview === "function") {
+            try { this.updateMapStudioPreview(); } catch (umpErr) {}
+        }
+        if (typeof this.renderCardDecksRow === "function") {
+            try { this.renderCardDecksRow(); } catch (cdrErr) {}
+        }
         if (typeof this.refreshLobbySettingsSelects === "function") {
             try { this.refreshLobbySettingsSelects(); } catch (lselErr) {}
         }
@@ -949,6 +964,18 @@ window.PRS_App = {
         }
         if (typeof this.renderTilesAtlas === "function") {
             try { this.renderTilesAtlas(); } catch (taErr) {}
+        }
+        if (typeof this.renderSidebarQuickLogPanel === "function") {
+            try { this.renderSidebarQuickLogPanel(); } catch (qlpErr) {}
+        }
+        if (this.lastSavedSessions && typeof this.renderSavedSessionsList === "function") {
+            try { this.renderSavedSessionsList(this.lastSavedSessions); } catch (slErr) {}
+        }
+        if (typeof this.renderPawnShopModal === "function") {
+            var pawnModal = document.getElementById("pawn-shop-modal");
+            if (pawnModal && pawnModal.style.display !== "none") {
+                try { this.renderPawnShopModal(); } catch (psmErr) {}
+            }
         }
         if (typeof this.renderHeroVideosSection === "function") {
             try { this.renderHeroVideosSection(); } catch (hvsErr) {}
@@ -3564,6 +3591,8 @@ window.PRS_App = {
         var slotInfoEl = document.getElementById("pawn-shop-slot-info");
         if (!grid) return;
 
+        var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
+
         var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
         if (isGuest) {
             this.userCredits = 0;
@@ -3577,11 +3606,16 @@ window.PRS_App = {
 
         if (slotInfoEl) {
             if (isGuest) {
-                slotInfoEl.innerHTML = '👤 Hraješ jako <strong>Host</strong>: máš zdarma k dispozici <strong>6 základních rytířů</strong>. Prémiové figurky a krystaly 💎 jsou pro přihlášené účty.';
+                slotInfoEl.innerHTML = isEn
+                    ? '👤 Playing as <strong>Guest</strong>: <strong>6 basic knights</strong> are available for free. Premium figures and crystals 💎 are for registered accounts.'
+                    : '👤 Hraješ jako <strong>Host</strong>: máš zdarma k dispozici <strong>6 základních rytířů</strong>. Prémiové figurky a krystaly 💎 jsou pro přihlášené účty.';
             } else if (targetPlayer) {
-                slotInfoEl.innerHTML = 'Vybíráš figurku pro slot <strong>#' + (slotIdx + 1) + ': ' + this.escapeHtml(targetPlayer.name) + '</strong>';
+                var pName = this.getPlayerDisplayName ? this.getPlayerDisplayName(targetPlayer) : targetPlayer.name;
+                slotInfoEl.innerHTML = isEn
+                    ? ('Selecting pawn for slot <strong>#' + (slotIdx + 1) + ': ' + this.escapeHtml(pName) + '</strong>')
+                    : ('Vybíráš figurku pro slot <strong>#' + (slotIdx + 1) + ': ' + this.escapeHtml(pName) + '</strong>');
             } else {
-                slotInfoEl.innerHTML = 'Vybíráš svou hlavní osobní figurku';
+                slotInfoEl.innerHTML = isEn ? 'Selecting your primary personal pawn' : 'Vybíráš svou hlavní osobní figurku';
             }
         }
 
@@ -3608,43 +3642,47 @@ window.PRS_App = {
 
             var catBadge = "";
             if (isPrem) {
-                catBadge = '<span class="pawn-card-badge premium">💎 Prémiová</span>';
+                catBadge = '<span class="pawn-card-badge premium">' + (isEn ? '💎 Premium' : '💎 Prémiová') + '</span>';
             } else if (isBot) {
                 catBadge = '<span class="pawn-card-badge bot">🤖 PC Bot</span>';
             } else {
-                catBadge = '<span class="pawn-card-badge basic">🛡️ Základní</span>';
+                catBadge = '<span class="pawn-card-badge basic">' + (isEn ? '🛡️ Basic' : '🛡️ Základní') + '</span>';
             }
 
             var actionBtn = "";
             if (isSelected) {
-                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; border-color:#86efac;">✅ Právě zvoleno</button>';
+                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; border-color:#86efac;">' + (isEn ? '✅ Currently Selected' : '✅ Právě zvoleno') + '</button>';
             } else if (unlocked) {
-                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.selectPawnForSlot(&quot;' + pw.id + '&quot;)">🎭 Zvolit figurku</button>';
+                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.selectPawnForSlot(&quot;' + pw.id + '&quot;)">' + (isEn ? '🎭 Select Pawn' : '🎭 Zvolit figurku') + '</button>';
             } else if (isGuest) {
-                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; opacity:0.85; border-color:rgba(212,175,55,0.4);" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">🔒 Pro přihlášené</button>';
+                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; opacity:0.85; border-color:rgba(212,175,55,0.4);" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">' + (isEn ? '🔒 For Registered' : '🔒 Pro přihlášené') + '</button>';
             } else {
                 var canAfford = (this.userCredits >= pw.priceCredits);
-                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; ' + (!canAfford ? 'opacity:0.65;' : '') + '" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">🔓 Odemknout (' + pw.priceCredits + ' 💎)</button>';
+                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; ' + (!canAfford ? 'opacity:0.65;' : '') + '" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">' + (isEn ? ('🔓 Unlock (' + pw.priceCredits + ' 💎)') : ('🔓 Odemknout (' + pw.priceCredits + ' 💎)')) + '</button>';
             }
 
             var statusBadge = "";
             if (unlocked) {
-                statusBadge = '<span style="font-size:0.72rem; color:#86efac;">✓ Odemčeno</span>';
+                statusBadge = '<span style="font-size:0.72rem; color:#86efac;">' + (isEn ? '✓ Unlocked' : '✓ Odemčeno') + '</span>';
             } else if (isBot) {
-                statusBadge = '<span style="font-size:0.72rem; color:#9ca3af;">🔒 Pouze pro PC</span>';
+                statusBadge = '<span style="font-size:0.72rem; color:#9ca3af;">' + (isEn ? '🔒 PC Only' : '🔒 Pouze pro PC') + '</span>';
             } else {
                 statusBadge = '<span style="font-size:0.74rem; color:#fde047; font-weight:700;">🔒 ' + (pw.priceCredits || 150) + ' 💎</span>';
             }
+
+            var pName = (isEn && pw.nameEn) ? pw.nameEn : pw.name;
+            var pTitle = (isEn && pw.titleEn) ? pw.titleEn : (pw.title || "");
+            var pDesc = (isEn && pw.descEn) ? pw.descEn : (pw.desc || "");
 
             html.push('<div class="pawn-shop-card ' + (isSelected ? 'selected' : '') + ' ' + (isPrem ? 'premium-card' : '') + '" style="border-color:' + (isSelected ? '#22c55e' : (isPrem ? pw.accentColor : 'rgba(212,175,55,0.3)')) + ';">');
             html.push('  <div class="pawn-card-top">' + catBadge + statusBadge + '</div>');
             html.push('  <div class="pawn-card-figure-wrap" onclick="PRS_App.selectPawnOrUnlock(&quot;' + pw.id + '&quot;)">');
             html.push('    <div class="pawn-card-aura" style="background:radial-gradient(circle, ' + (pw.accentColor || '#d4af37') + ' 0%, transparent 70%);"></div>');
-            html.push('    <img src="' + pw.img + '" alt="' + this.escapeHtml(pw.name) + '" class="pawn-card-img"/>');
+            html.push('    <img src="' + pw.img + '" alt="' + this.escapeHtml(pName) + '" class="pawn-card-img"/>');
             html.push('  </div>');
-            html.push('  <div class="pawn-card-name">' + this.escapeHtml(pw.name) + '</div>');
-            html.push('  <div class="pawn-card-title">' + this.escapeHtml(pw.title || "") + '</div>');
-            html.push('  <div class="pawn-card-desc">' + this.escapeHtml(pw.desc || "") + '</div>');
+            html.push('  <div class="pawn-card-name">' + this.escapeHtml(pName) + '</div>');
+            html.push('  <div class="pawn-card-title">' + this.escapeHtml(pTitle) + '</div>');
+            html.push('  <div class="pawn-card-desc">' + this.escapeHtml(pDesc) + '</div>');
             html.push('  <div class="pawn-card-action">' + actionBtn + '</div>');
             html.push('</div>');
         }
@@ -3904,8 +3942,19 @@ window.PRS_App = {
 
     getNodeDisplayName: function (node) {
         if (!node) return "";
+        if (this._inGetNodeDisplayName) return node.name || node.code || "";
+        this._inGetNodeDisplayName = true;
+        try {
+            return this.getUnifiedNodeDisplayName(node);
+        } finally {
+            this._inGetNodeDisplayName = false;
+        }
+    },
+
+    getUnifiedNodeDisplayName: function (node) {
+        if (!node) return "";
         var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        if (!isEn) return node.name || "";
+        if (!isEn) return node.name || node.code || "";
 
         var type = node.type;
         var name = node.name || "";
@@ -3977,6 +4026,21 @@ window.PRS_App = {
         }
 
         if (type === "CASTLE") {
+            var cKey = node.castleKey || "";
+            if (!cKey && node.castleImg) {
+                var m = node.castleImg.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpg)/i);
+                if (m) cKey = m[1];
+            }
+            if (!cKey && node.estateId && node.estateId.indexOf("H") === 0) {
+                cKey = "H" + node.estateId.replace("H", "");
+            }
+            var cName = (cKey && window.PRS_I18n) ? window.PRS_I18n.t("castles." + cKey + ".name") : "";
+            if (cName && cName !== ("castles." + cKey + ".name")) {
+                var prefix = isEn ? "Castle " : "Hrad ";
+                var num = node.estateId ? node.estateId.replace("H", "") : (node.code ? node.code.replace("H", "") : "");
+                return prefix + (num ? (num + " ") : "") + "(" + cName + ")";
+            }
+
             var cMap = {
                 "Doubrava": "Doubrava Castle",
                 "Věčného mrazu": "Eternal Frost",
@@ -4000,6 +4064,13 @@ window.PRS_App = {
                 return "Castle " + numC + " (" + czC + ")";
             }
             return name.replace(/^Hrad/i, "Castle");
+        }
+
+        if (type === "QUEST") {
+            if (node.subtype === "U3") return "Dragon's Lair (U3)";
+            if (node.subtype === "U2") return "Monster Den (U2)";
+            if (node.subtype === "U1") return "Wild Beast Hunt (U1)";
+            return name.replace(/^Úkol\b/i, "Quest");
         }
 
         if (type === "MASTER") {
@@ -4375,14 +4446,12 @@ window.PRS_App = {
 
         if (this.state && this.state.turnNumber > 0) {
             var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var msg = isEn
-                ? ("Generating a new world requires starting a new quest.\nDo you wish to generate a new realm (Seed #" + newSeed + ") and start a new game?")
-                : ("Generování nového světa vyžaduje novou partii.\nPřeješ si vygenerovat nové království (Seed #" + newSeed + ") a začít novou hru?");
+            var msg = window.PRS_I18n ? window.PRS_I18n.t("dialogs.new_realm.msg", { seed: newSeed }) : ("Generování nového světa vyžaduje novou partii.\nPřeješ si vygenerovat nové království (Seed #" + newSeed + ") a začít novou hru?");
             var conf = await KiDeskyDialog.confirm(msg, {
-                title: isEn ? "New Realm" : "Nové království",
+                title: window.PRS_I18n ? window.PRS_I18n.t("dialogs.new_realm.title") : "Nové království",
                 icon: "🎲",
-                confirmText: isEn ? "🎲 Generate & Start" : "🎲 Vygenerovat a začít",
-                cancelText: isEn ? "Back to Quest" : "Zpět k partii"
+                confirmText: window.PRS_I18n ? window.PRS_I18n.t("dialogs.new_realm.confirm") : "🎲 Vygenerovat a začít",
+                cancelText: window.PRS_I18n ? window.PRS_I18n.t("dialogs.new_realm.cancel") : "Zpět k partii"
             });
             if (!conf) return;
         }
@@ -4476,7 +4545,12 @@ window.PRS_App = {
                 for (var s = 0; s < savedMaps.length; s++) {
                     var sm = savedMaps[s];
                     var smName = sm.name || ((isEn ? "Custom Map #" : "Vlastní plán #") + (sm.seed || s + 1));
-                    var smLabel = (prefix ? prefix : "") + "⭐ " + smName + " (" + (sm.nodeCount || 96) + " " + tilesWord + ")";
+                    var cleanSmName = smName.replace(/\s*\(\d+\s*(?:polí|tiles)?\)/gi, "");
+                    if (isEn) {
+                        cleanSmName = cleanSmName.replace(/Dračí království\s*#/gi, "Dragon Realm #")
+                                                 .replace(/Vlastní království\s*#/gi, "Custom Realm #");
+                    }
+                    var smLabel = (prefix ? prefix : "") + "⭐ " + cleanSmName + " (" + (sm.nodeCount || 96) + " " + tilesWord + ")";
                     html += '<option value="saved_map_' + s + '">' + self.escapeHtml(smLabel) + '</option>';
                 }
                 html += '</optgroup>';
@@ -5300,18 +5374,22 @@ window.PRS_App = {
 
     refreshMapStudioSelectOptions: function () {
         var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var dict = (window.PRS_I18n && window.PRS_I18n.getDict && window.PRS_I18n.getDict()) || {};
-        var opts = (dict.map_studio && dict.map_studio.select_options) || {};
 
         var updateSelect = function (id, mapping) {
             var sel = document.getElementById(id);
-            if (!sel) return;
+            if (!sel || !window.PRS_I18n) return;
             var curVal = sel.value;
             for (var i = 0; i < sel.options.length; i++) {
                 var opt = sel.options[i];
                 var key = mapping[opt.value];
-                if (key && opts[key]) {
-                    opt.textContent = opts[key];
+                if (key) {
+                    var tr = window.PRS_I18n.t("map_studio.select_options." + key);
+                    if (!tr || tr === ("map_studio.select_options." + key)) {
+                        tr = window.PRS_I18n.t("lobby.castles." + opt.value);
+                    }
+                    if (tr && tr !== ("lobby.castles." + opt.value) && tr !== ("map_studio.select_options." + key)) {
+                        opt.textContent = tr;
+                    }
                 }
             }
             sel.value = curVal;
@@ -5857,10 +5935,12 @@ window.PRS_App = {
             var rawName = board.name || ("Vlastní království #" + this.mapStudioSeed);
             if (isEn && board.nameEn) {
                 elTitle.textContent = board.nameEn;
-            } else if (isEn && rawName.startsWith("Dračí království #")) {
-                elTitle.textContent = rawName.replace("Dračí království #", "Dragon Realm #").replace(" polí)", " tiles)");
-            } else if (isEn && rawName.startsWith("Vlastní království #")) {
-                elTitle.textContent = rawName.replace("Vlastní království #", "Custom Realm #");
+            } else if (isEn && /Dračí království\s*#/i.test(rawName)) {
+                elTitle.textContent = rawName.replace(/Dračí království\s*#/i, "Dragon Realm #")
+                                             .replace(/(\d+)\s*polí\b/gi, "$1 tiles");
+            } else if (isEn && /Vlastní království\s*#/i.test(rawName)) {
+                elTitle.textContent = rawName.replace(/Vlastní království\s*#/i, "Custom Realm #")
+                                             .replace(/(\d+)\s*polí\b/gi, "$1 tiles");
             } else {
                 elTitle.textContent = rawName;
             }
