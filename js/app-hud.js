@@ -3378,15 +3378,15 @@
 
                     afkHostControls = '<div style="margin:0.65rem 0; padding:0.5rem 0.65rem; background:rgba(0,0,0,0.35); border:1px solid ' + (isAfk ? '#ef4444' : 'rgba(212,175,55,0.25)') + '; border-radius:8px;">' +
                         '<div style="font-size:0.75rem; color:' + (isAfk ? '#fca5a5' : '#cbd5e1') + '; margin-bottom:' + (isAfk ? '0.45rem' : '0.15rem') + '; display:flex; justify-content:space-between; align-items:center;">' +
-                        '  <span>⏱️ Čas rytíře na tahu:</span>' +
-                        '  <strong style="font-family:monospace; font-size:0.82rem; color:' + (isAfk ? '#ef4444' : '#fef08a') + ';">' + timeStr + (isAfk ? ' (Neaktivní!)' : '') + '</strong>' +
+                        '  <span>' + (window.PRS_I18n ? window.PRS_I18n.t("online.waiting_timer_label") : "⏱️ Čas rytíře na tahu:") + '</span>' +
+                        '  <strong style="font-family:monospace; font-size:0.82rem; color:' + (isAfk ? '#ef4444' : '#fef08a') + ';">' + timeStr + (isAfk ? (window.PRS_I18n ? window.PRS_I18n.t("online.waiting_inactive_badge") : " (Neaktivní!)") : '') + '</strong>' +
                         '</div>' +
                         (isAfk
                             ? '<div style="display:flex; gap:0.4rem; justify-content:center; flex-wrap:wrap;">' +
-                              '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_App.stepAfkPlayerOnce()">⚡ Odehrát 1 tah botem</button>' +
+                              '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_App.stepAfkPlayerOnce()">' + (window.PRS_I18n ? window.PRS_I18n.t("online.btn_step_bot_once") : "⚡ Odehrát 1 tah botem") + '</button>' +
                               '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.5rem; border-color:#ef4444; color:#fca5a5;" onclick="PRS_App.convertSeatToBot(' + this.state.currentPlayerIndex + ')">🤖 Převést na PC</button>' +
                               '</div>'
-                            : '<div style="font-size:0.7rem; color:var(--text-muted); text-align:center;">Při neaktivitě > 2 min můžeš tah odehrát rádcem.</div>'
+                            : '<div style="font-size:0.7rem; color:var(--text-muted); text-align:center;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.waiting_advisor_takeover_hint") : "Při neaktivitě > 2 min můžeš tah odehrát rádcem.") + '</div>'
                         ) +
                         '</div>';
                 }
@@ -3628,7 +3628,16 @@
             var canAfford = (player.gold || 0) >= bPrice;
             var remGold = (player.gold || 0) - bPrice;
             var isProc = this.isActionProcessing || this.isSavingSession;
-            var buyLabel = isProc ? "⏳ Kupuji pole..." : ("📜 Koupit toto pole (" + bPrice.toLocaleString("cs-CZ") + " zl.)" + (canAfford ? (" • Zbyde: " + remGold.toLocaleString("cs-CZ") + " zl.") : " • ❌ Chybí zlato!"));
+            var isEnBuy = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var currGBuy = isEnBuy ? "g." : "zl.";
+            var priceFmt = bPrice.toLocaleString(isEnBuy ? "en-US" : "cs-CZ") + " " + currGBuy;
+            var remFmt = remGold.toLocaleString(isEnBuy ? "en-US" : "cs-CZ") + " " + currGBuy;
+            var buyLabel = isProc
+                ? (window.PRS_I18n ? window.PRS_I18n.t("hud.buying_tile_proc") : "⏳ Kupuji pole...")
+                : ((window.PRS_I18n ? window.PRS_I18n.t("hud.buy_tile_label", { price: priceFmt }) : ("📜 Koupit toto pole (" + priceFmt + ")")) +
+                   (canAfford
+                       ? (" • " + (window.PRS_I18n ? window.PRS_I18n.t("hud.buy_remaining_gold", { rem: remFmt }) : ("Zbyde: " + remFmt)))
+                       : (" • " + (window.PRS_I18n ? window.PRS_I18n.t("hud.buy_need_gold") : "❌ Chybí zlato!"))));
             btns.push('<button class="btn-action-buy" id="btn-buy-current-node" style="' + (isProc ? 'opacity:0.5; pointer-events:none;' : '') + '" ' + (!canAfford || isProc ? 'disabled' : '') + ' onclick="PRS_App.handleBuyNode()">' + buyLabel + '</button>');
         }
 
@@ -4123,15 +4132,21 @@
 
             specialCardHtml += '<div class="encounter-interaction-card" style="border:1.5px solid #38bdf8; background:linear-gradient(180deg, rgba(12,74,110,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
 
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">🤺 Setkání rytířů: ' + enc.badge + ' ' + this.escapeHtml(enc.name) + '</div>' +
+                var isEnEnc = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var encCurrG = isEnEnc ? "g." : "zl.";
+        var encTitle = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_title", { badge: enc.badge, name: this.escapeHtml(enc.name) }) : ("🤺 Setkání rytířů: " + enc.badge + " " + this.escapeHtml(enc.name));
+        var encDesc = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_desc") : "Na tomto poli stojí soupeř. Zvol rytířský duel cti, nebo ukaž dvorskou noblesu přátelským přípitkem:";
+        var duelLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_duel", { stake: enc.duelStake + " " + encCurrG }) : ("⚔️ Rytířský duel cti (Sázka " + enc.duelStake + " zl. & 0.5 💖)");
+        var toastLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_toast", { cost: enc.toastCost + " " + encCurrG }) : ("🍷 Přátelský přípitek (" + enc.toastCost + " zl. ➔ Zisk +0,5 💖)");
+        html.push('<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">' + encTitle + '</div>');
 
-                '<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">Na tomto poli stojí soupeř. Zvol rytířský duel cti, nebo ukaž dvorskou noblesu přátelským přípitkem:</p>' +
+                html.push('<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">' + encDesc + '</p>');
 
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
 
-                (canDuel ? '  <button class="btn-action-duel" style="padding:0.55rem; background:linear-gradient(135deg, #ef4444, #991b1b); color:#fff; border:1px solid #fca5a5; border-radius:7px; font-weight:700; cursor:pointer;" onclick="PRS_App.handlePlayerDuel(' + enc.index + ')">⚔️ Rytířský duel cti (Sázka ' + enc.duelStake + ' zl. &amp; 0.5 💖)</button>' : '') +
+                (canDuel ? '  <button class="btn-action-duel" style="padding:0.55rem; background:linear-gradient(135deg, #ef4444, #991b1b); color:#fff; border:1px solid #fca5a5; border-radius:7px; font-weight:700; cursor:pointer;" onclick="PRS_App.handlePlayerDuel(' + enc.index + ')">' + duelLabel + '</button>' : '') +
 
-                (canToast ? '  <button class="btn-action-toast" style="padding:0.55rem; background:linear-gradient(135deg, #f59e0b, #b45309); color:#fff; border:1px solid #fde68a; border-radius:7px; font-weight:700; cursor:pointer;" onclick="PRS_App.handlePlayerToast(' + enc.index + ')">🍷 Přátelský přípitek (' + enc.toastCost + ' zl. ➔ Zisk +0,5 💖)</button>' : '') +
+                (canToast ? '  <button class="btn-action-toast" style="padding:0.55rem; background:linear-gradient(135deg, #f59e0b, #b45309); color:#fff; border:1px solid #fde68a; border-radius:7px; font-weight:700; cursor:pointer;" onclick="PRS_App.handlePlayerToast(' + enc.index + ')">' + toastLabel + '</button>' : '') +
 
                 '</div>' +
 
@@ -4405,7 +4420,8 @@
 
             landedLocHtml = '<div class="dice-landed-loc">' +
 
-                '<span class="loc-name">' + (landedNode.icon ? '<span style="font-size:1.15rem; margin-right:3px;">' + landedNode.icon + '</span> ' : '📍 ') + '<strong>' + this.escapeHtml(landedNode.name) + '</strong></span>' +
+                '<span class="loc-name">' + (landedNode.icon ? '<span style="font-size:1.15rem; margin-right:3px;">' + landedNode.icon + '</span> ' : '📍 ') + var landedNodeDisplay = (typeof this.getUnifiedNodeDisplayName === "function") ? this.getUnifiedNodeDisplayName(landedNode) : (landedNode ? landedNode.name : "");
+        html.push('<strong>' + this.escapeHtml(landedNodeDisplay) + '</strong></span>');
 
                 (landedNode.code ? ' <span class="loc-code">' + this.escapeHtml(landedNode.code) + '</span>' : '') +
 
@@ -4413,7 +4429,11 @@
 
         }
 
-        var encounterHtml = this.parseTurnEncounter(pa.summary || "");
+        var summaryRaw = pa.summary || "";
+        if (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en" && summaryRaw) {
+            summaryRaw = summaryRaw.replace(/Pole je volné ke koupi za\s*(\d+)\s*zl\./gi, "Tile is available for purchase for $1 g.");
+        }
+        var encounterHtml = this.parseTurnEncounter(summaryRaw);
 
         var targetHeartsAction = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30;
 
@@ -4427,7 +4447,7 @@
 
             '    <div>' +
 
-            '      <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Rytíř na tahu</div>' +
+            '      <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.active_knight") : "Rytíř na tahu") + '</div>' +
 
             '      <strong style="color:' + player.color + '; font-size:0.95rem;">' + this.escapeHtml(player.name) + '</strong>' +
 
@@ -4437,7 +4457,9 @@
 
             '  <div style="text-align:right;">' +
 
-            '    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + player.gold.toLocaleString("cs-CZ") + ' zl.</div>' +
+            var isEnActPanel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var actGoldStr = player.gold.toLocaleString(isEnActPanel ? "en-US" : "cs-CZ") + " " + (isEnActPanel ? "g." : "zl.");
+        html.push('    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + actGoldStr + '</div>');
 
             '    <div style="font-size:0.76rem; font-weight:bold;">' + (this.state.config && this.state.config.scenario === "slayer" ? ('<span style="color:#ef4444;">🐉 ' + ((player.stats && player.stats.dragonsSlain) ? player.stats.dragonsSlain : 0) + ' / 2 draků</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : (this.state.config && this.state.config.scenario === "tycoon" ? ('<span style="color:#f59e0b;">🏰 ' + (player.ownedNodes ? player.ownedNodes.length : 0) + ' sídel</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : ('<span style="color:#f472b6;">💖 ' + player.totalHearts + ' / ' + targetHeartsAction + '</span>'))) + '</div>' +
 
@@ -4459,7 +4481,8 @@
 
             '  <div class="dice-badge-content">' +
 
-            '    <div class="dice-roll-badge">🎲 Hod kostkou: <strong>' + rollVal + '</strong></div>' +
+            var diceBadgeText = window.PRS_I18n ? window.PRS_I18n.t("hud.dice_roll_prefix", { roll: rollVal }) : ("🎲 Hod kostkou: <strong>" + rollVal + "</strong>");
+        html.push('    <div class="dice-roll-badge">' + diceBadgeText + '</div>');
 
             landedLocHtml +
 

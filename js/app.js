@@ -1274,7 +1274,10 @@ window.PRS_App = {
 
         if (modPlayBtn) {
 
-            modPlayBtn.innerHTML = isPlaying ? "⏸️ Pozastavit" : "▶️ Přehrát";
+            var isEnMusic = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            modPlayBtn.innerHTML = isPlaying
+                ? (window.PRS_I18n ? window.PRS_I18n.t("music.pause_btn") : (isEnMusic ? "⏸️ Pause" : "⏸️ Pozastavit"))
+                : (window.PRS_I18n ? window.PRS_I18n.t("music.play_btn") : (isEnMusic ? "▶️ Play" : "▶️ Přehrát"));
 
             modPlayBtn.className = isPlaying ? "btn-secondary" : "btn-primary";
 

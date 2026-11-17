@@ -1338,7 +1338,7 @@ openAuthModal: function () {
 
                         }
 
-                        if (statusEl) statusEl.innerHTML = "✅ Uloženo! Kód místnosti: <strong>" + res.roomCode + "</strong>";
+                        if (statusEl) statusEl.innerHTML = (window.PRS_I18n ? window.PRS_I18n.t("online.save_room_code_success", { code: res.roomCode }) : ("✅ Uloženo! Kód místnosti: <strong>" + res.roomCode + "</strong>"));
 
                         self.renderOnlineRoomBar();
 
@@ -1348,7 +1348,7 @@ openAuthModal: function () {
 
                     } else {
 
-                        if (statusEl) statusEl.textContent = "⚠️ Uloženo lokálně v prohlížeči.";
+                        if (statusEl) statusEl.textContent = (window.PRS_I18n ? window.PRS_I18n.t("online.save_local_browser") : "⚠️ Uloženo lokálně v prohlížeči.");
 
                         localStorage.setItem("prs_saved_game", JSON.stringify(self.state));
 
@@ -1362,7 +1362,7 @@ openAuthModal: function () {
 
                 localStorage.setItem("prs_saved_game", JSON.stringify(self.state));
 
-                if (statusEl) statusEl.textContent = "💾 Uloženo do lokální paměti prohlížeče.";
+                if (statusEl) statusEl.textContent = (window.PRS_I18n ? window.PRS_I18n.t("online.save_local_storage") : "💾 Uloženo do lokální paměti prohlížeče.");
 
                 KiDeskyDialog.alert("Nepodařilo se synchronizovat online místnost se serverem (" + (err && err.message ? self.escapeHtml(err.message) : err) + "). Hra je uložena lokálně v prohlížeči.", {
                     title: "Offline režim",

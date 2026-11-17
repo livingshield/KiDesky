@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611171850">
+    <link rel="stylesheet" href="css/main.css?v=202611171900">
 
-    <link rel="stylesheet" href="css/board.css?v=202611171850">
+    <link rel="stylesheet" href="css/board.css?v=202611171900">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611171850">
+    <link rel="stylesheet" href="css/modals.css?v=202611171900">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611171850">
+    <link rel="stylesheet" href="css/mobile.css?v=202611171900">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -2400,9 +2400,9 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-top:1px solid rgba(255,255,255,0.1); padding-top:0.85rem;">
 
-                <button class="btn-secondary" style="font-size:0.82rem;" onclick="PRS_App.claimOnlineRole(-1)">🛋️ Hrát bez zámku (Všichni hráči / Hot-Seat)</button>
+                <button class="btn-secondary" style="font-size:0.82rem;" onclick="PRS_App.claimOnlineRole(-1)" data-i18n="online.role_modal_btn_free_play">🛋️ Hrát bez zámku (Všichni hráči / Hot-Seat)</button>
 
-                <button class="btn-secondary" style="font-size:0.82rem;" onclick="PRS_App.closeOnlineRoleModal()">✕ Zavřít</button>
+                <button class="btn-secondary" style="font-size:0.82rem;" onclick="PRS_App.closeOnlineRoleModal()" data-i18n="common.close">✕ Zavřít</button>
 
             </div>
 
@@ -2842,7 +2842,7 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
 
-                <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0;">🎵 Královský hudební přehrávač</h3>
+                <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0;" data-i18n="music.modal_title">🎵 Královský hudební přehrávač</h3>
 
                 <button class="btn-icon-danger" onclick="PRS_App.closeMusicPopup()">✕</button>
 
@@ -2880,7 +2880,7 @@
 
                 <button class="btn-secondary" onclick="PRS_App.prevMusicTrack()" title="Předchozí skladba" style="padding:0.45rem 0.8rem;">⏮️</button>
 
-                <button class="btn-primary" id="music-modal-play-btn" onclick="PRS_App.toggleMusic()" style="min-width:130px; font-weight:bold;">▶️ Přehrát</button>
+                <button class="btn-primary" id="music-modal-play-btn" onclick="PRS_App.toggleMusic()" style="min-width:130px; font-weight:bold;" data-i18n="music.play_btn">▶️ Přehrát</button>
 
                 <button class="btn-secondary" onclick="PRS_App.nextMusicTrack()" title="Další skladba" style="padding:0.45rem 0.8rem;">⏭️</button>
 
@@ -2888,7 +2888,7 @@
 
             <div class="music-playlist-group">
 
-                <label class="music-label">📜 Královský repertoár skladeb:</label>
+                <label class="music-label" data-i18n="music.repertoire_label">📜 Královský repertoár skladeb:</label>
 
                 <select id="music-playlist-select" class="prs-select" onchange="PRS_App.selectMusicTrack(this.value)"></select>
 
@@ -2900,7 +2900,7 @@
 
                     <div style="display:flex; justify-content:space-between;">
 
-                        <span>🎵 Hlasitost hudby</span>
+                        <span data-i18n="music.bgm_volume_label">🎵 Hlasitost hudby</span>
 
                         <strong id="music-vol-label" style="color:var(--gold-light);">35%</strong>
 
@@ -2914,7 +2914,7 @@
 
                     <div style="display:flex; justify-content:space-between;">
 
-                        <span>🔊 Hlasitost zvukových efektů</span>
+                        <span data-i18n="music.sfx_volume_label">🔊 Hlasitost zvukových efektů</span>
 
                         <strong id="music-sfx-label" style="color:var(--gold-light);">70%</strong>
 
@@ -2932,13 +2932,13 @@
 
                 <button class="btn-secondary" onclick="document.getElementById('custom-mp3-input').click()" style="width:100%; border:1.5px dashed var(--gold); padding:0.6rem; color:var(--gold-light);">
 
-                    📁 Nahrát vlastní MP3 skladbu z disku
+                    <span data-i18n="music.btn_upload_custom">📁 Nahrát vlastní MP3 skladbu z disku</span>
 
                 </button>
 
                 <p style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:0.4rem; margin-bottom:0;">
 
-                    Nahraná skladba se ihned zařadí do tvého playlistu a začne hrát.
+                    <span data-i18n="music.upload_hint">Nahraná skladba se ihned zařadí do tvého playlistu a začne hrát.</span>
 
                 </p>
 
@@ -2952,25 +2952,25 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/cs.js?v=202611171850" defer></script>
-    <script src="js/i18n/en.js?v=202611171850" defer></script>
-    <script src="js/app-i18n.js?v=202611171850" defer></script>
-    <script src="js/game-data.js?v=202611171850" defer></script>
-    <script src="js/game-boards.js?v=202611171850" defer></script>
-    <script src="js/game-engine.js?v=202611171850" defer></script>
-    <script src="js/game-combat-ai.js?v=202611171850" defer></script>
-    <script src="js/app-audio.js?v=202611171850" defer></script>
-    <script src="js/app-dialog.js?v=202611171850" defer></script>
-    <script src="js/app.js?v=202611171850" defer></script>
-    <script src="js/app-board.js?v=202611171850" defer></script>
-    <script src="js/app-hud.js?v=202611171850" defer></script>
-    <script src="js/app-modals.js?v=202611171850" defer></script>
-    <script src="js/app-online.js?v=202611171850" defer></script>
-    <script src="js/app-saves.js?v=202611171850" defer></script>
-    <script src="js/app-map-editor.js?v=202611171850" defer></script>
-    <script src="js/app-catalog.js?v=202611171850" defer></script>
-    <script src="js/app-admin.js?v=202611171850" defer></script>
-    <script src="js/app-musicwidget.js?v=202611171850" defer></script>
+    <script src="js/i18n/cs.js?v=202611171900" defer></script>
+    <script src="js/i18n/en.js?v=202611171900" defer></script>
+    <script src="js/app-i18n.js?v=202611171900" defer></script>
+    <script src="js/game-data.js?v=202611171900" defer></script>
+    <script src="js/game-boards.js?v=202611171900" defer></script>
+    <script src="js/game-engine.js?v=202611171900" defer></script>
+    <script src="js/game-combat-ai.js?v=202611171900" defer></script>
+    <script src="js/app-audio.js?v=202611171900" defer></script>
+    <script src="js/app-dialog.js?v=202611171900" defer></script>
+    <script src="js/app.js?v=202611171900" defer></script>
+    <script src="js/app-board.js?v=202611171900" defer></script>
+    <script src="js/app-hud.js?v=202611171900" defer></script>
+    <script src="js/app-modals.js?v=202611171900" defer></script>
+    <script src="js/app-online.js?v=202611171900" defer></script>
+    <script src="js/app-saves.js?v=202611171900" defer></script>
+    <script src="js/app-map-editor.js?v=202611171900" defer></script>
+    <script src="js/app-catalog.js?v=202611171900" defer></script>
+    <script src="js/app-admin.js?v=202611171900" defer></script>
+    <script src="js/app-musicwidget.js?v=202611171900" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3694,7 +3694,7 @@
             <div class="pawn-shop-header">
                 <div>
                     <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.25rem; display:flex; align-items:center; gap:0.5rem;">
-                        <span>🎭</span> <span>Královská šatna &amp; Sběratelské figurky</span>
+                        <span>🎭</span> <span data-i18n="wardrobe.modal_title">Královská šatna &amp; Sběratelské figurky</span>
                     </h2>
                     <div id="pawn-shop-slot-info" style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">
                         Vyber figurku pro svého rytíře nebo odemkni unikátní prémiové šampiony s animovanou aurou!
@@ -3719,7 +3719,7 @@
 
             <div class="pawn-shop-footer">
                 <div style="font-size:0.78rem; color:var(--text-muted);">
-                    💡 <strong>Multiplayer Tip:</strong> Když se připojíš k online stolu na místo PC bota, botova figurka na herním plánu se automaticky vymění za tvou zvolenou figurku!
+                    <span data-i18n="wardrobe.multiplayer_tip">💡 <strong>Multiplayer Tip:</strong> Když se připojíš k online stolu na místo PC bota, botova figurka na herním plánu se automaticky vymění za tvou zvolenou figurku!</span>
                 </div>
                 <button type="button" class="btn-primary" onclick="PRS_App.closePawnShopModal()" style="padding:0.42rem 1.2rem;" data-i18n="common.done">Hotovo</button>
             </div>

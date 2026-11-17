@@ -22,7 +22,8 @@ window.PRS_I18N.cs = {
         "tab_basic": "🛡️ Základní rytíři (6)",
         "tab_premium": "💎 Prémiové s aurou (6)",
         "tab_bot": "🤖 Figurky PC Botů (5)",
-        "multiplayer_tip": "💡 <strong>Multiplayer Tip:</strong> Když se připojíš k online stolu na místo PC bota, botova figurka na herním plánu se automaticky vymění za tvou zvolenou figurku!"
+        "multiplayer_tip": "💡 <strong>Multiplayer Tip:</strong> Když se připojíš k online stolu na místo PC bota, botova figurka na herním plánu se automaticky vymění za tvou zvolenou figurku!",
+        "modal_title": "Královská šatna & Sběratelské figurky"
     },
     "ui": {
         "brand_subtitle": "Princeznino srdce",
@@ -282,7 +283,16 @@ window.PRS_I18N.cs = {
             "estates": "Sídla",
             "chronicle": "Kronika",
             "chat": "Chat"
-        }
+        },
+        "dice_roll_prefix": "🎲 Hod kostkou: <strong>{roll}</strong>",
+        "buying_tile_proc": "⏳ Kupuji pole...",
+        "buy_tile_label": "📜 Koupit toto pole ({price})",
+        "buy_remaining_gold": "Zbyde: {rem}",
+        "buy_need_gold": "❌ Chybí zlato!",
+        "knight_encounter_title": "🤺 Setkání rytířů: {badge} {name}",
+        "knight_encounter_desc": "Na tomto poli stojí soupeř. Zvol rytířský duel cti, nebo ukaž dvorskou noblesu přátelským přípitkem:",
+        "knight_encounter_duel": "⚔️ Rytířský duel cti (Sázka {stake} & 0.5 💖)",
+        "knight_encounter_toast": "🍷 Přátelský přípitek ({cost} ➔ Zisk +0,5 💖)"
     },
     "modals": {
         "armory_tab_weapon": "🗡️ Zbraně",
@@ -2908,6 +2918,29 @@ window.PRS_I18N.cs = {
         "seats_opt_warrior": "⚔️ Válečník",
         "seats_opt_breeder": "🐎 Chovatel",
         "seats_opt_courtier": "👑 Dvořan",
-        "seats_opt_balanced": "🛡️ Vyvážený"
+        "seats_opt_balanced": "🛡️ Vyvážený",
+        "role_modal_btn_free_play": "🛋️ Hrát bez zámku (Všichni hráči / Hot-Seat)",
+        "save_room_code_success": "✅ Uloženo! Kód místnosti: <strong>{code}</strong>",
+        "save_local_browser": "⚠️ Uloženo lokálně v prohlížeči.",
+        "save_local_storage": "💾 Uloženo do lokální paměti prohlížeče.",
+        "waiting_for_teammate": "Čeká se na tah spoluhráče: {badge} {name}",
+        "waiting_chosen_knight_info": "Tvůj zvolený rytíř u stolu je <strong>{name}</strong>. Herní plán se automaticky synchronizuje každé 3 sekundy.",
+        "waiting_timer_label": "⏱️ Čas rytíře na tahu:",
+        "waiting_inactive_badge": " (Neaktivní!)",
+        "waiting_advisor_takeover_hint": "Při neaktivitě > 2 min můžeš tah odehrát rádcem.",
+        "btn_step_bot_once": "⚡ Odehrát 1 tah botem",
+        "btn_convert_bot_permanent": "🤖 Převést na PC bota trvale",
+        "btn_check_turn_now": "🔄 Zkontrolovat tah hned",
+        "btn_unlock_hotseat": "🔓 Odemknout (hrát za všechny u 1 PC)"
+    },
+    "music": {
+        "modal_title": "🎵 Královský hudební přehrávač",
+        "play_btn": "▶️ Přehrát",
+        "pause_btn": "⏸️ Pozastavit",
+        "repertoire_label": "📜 Královský repertoár skladeb:",
+        "bgm_volume_label": "🎵 Hlasitost hudby",
+        "sfx_volume_label": "🔊 Hlasitost zvukových efektů",
+        "btn_upload_custom": "📁 Nahrát vlastní MP3 skladbu z disku",
+        "upload_hint": "Nahraná skladba se ihned zařadí do tvého playlistu a začne hrát."
     }
 };

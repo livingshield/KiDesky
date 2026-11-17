@@ -22,7 +22,8 @@ window.PRS_I18N.en = {
         "tab_basic": "🛡️ Basic Knights (6)",
         "tab_premium": "💎 Premium with Aura (6)",
         "tab_bot": "🤖 PC Bot Pawns (5)",
-        "multiplayer_tip": "💡 <strong>Multiplayer Tip:</strong> When you join an online table in place of a PC bot, the bot pawn on the board will automatically switch to your chosen pawn!"
+        "multiplayer_tip": "💡 <strong>Multiplayer Tip:</strong> When you join an online table in place of an AI bot, the bot's pawn on the board will automatically be replaced with your chosen pawn!",
+        "modal_title": "Royal Wardrobe & Collectible Pawns"
     },
     "ui": {
         "brand_subtitle": "The Princess's Heart",
@@ -282,7 +283,16 @@ window.PRS_I18N.en = {
             "estates": "Estates",
             "chronicle": "Chronicle",
             "chat": "Chat"
-        }
+        },
+        "dice_roll_prefix": "🎲 Dice roll: <strong>{roll}</strong>",
+        "buying_tile_proc": "⏳ Purchasing tile...",
+        "buy_tile_label": "📜 Buy this tile ({price})",
+        "buy_remaining_gold": "Remaining: {rem}",
+        "buy_need_gold": "❌ Need more gold!",
+        "knight_encounter_title": "🤺 Knight Encounter: {badge} {name}",
+        "knight_encounter_desc": "An opponent stands on this tile. Choose a knightly duel of honor, or show courtly nobility with a friendly toast:",
+        "knight_encounter_duel": "⚔️ Knightly duel of honor (Stake {stake} & 0.5 💖)",
+        "knight_encounter_toast": "🍷 Friendly toast ({cost} ➔ Gain +0.5 💖)"
     },
     "modals": {
         "armory_tab_weapon": "🗡️ Weapons",
@@ -2908,6 +2918,29 @@ window.PRS_I18N.en = {
         "seats_opt_warrior": "⚔️ Warrior",
         "seats_opt_breeder": "🐎 Breeder",
         "seats_opt_courtier": "👑 Courtier",
-        "seats_opt_balanced": "🛡️ Balanced"
+        "seats_opt_balanced": "🛡️ Balanced",
+        "role_modal_btn_free_play": "🛋️ Play without lock (All Players / Hot-Seat)",
+        "save_room_code_success": "✅ Saved! Room code: <strong>{code}</strong>",
+        "save_local_browser": "⚠️ Saved locally in browser.",
+        "save_local_storage": "💾 Saved to local browser storage.",
+        "waiting_for_teammate": "Waiting for teammate's turn: {badge} {name}",
+        "waiting_chosen_knight_info": "Your chosen knight at the table is <strong>{name}</strong>. The board automatically syncs every 3 seconds.",
+        "waiting_timer_label": "⏱️ Turn timer:",
+        "waiting_inactive_badge": " (Inactive!)",
+        "waiting_advisor_takeover_hint": "If inactive for > 2 min, you can have the advisor play the turn.",
+        "btn_step_bot_once": "⚡ Play 1 turn with bot",
+        "btn_convert_bot_permanent": "🤖 Convert to AI bot permanently",
+        "btn_check_turn_now": "🔄 Check turn now",
+        "btn_unlock_hotseat": "🔓 Unlock (play all on 1 PC)"
+    },
+    "music": {
+        "modal_title": "🎵 Royal Music Player",
+        "play_btn": "▶️ Play",
+        "pause_btn": "⏸️ Pause",
+        "repertoire_label": "📜 Royal Music Repertoire:",
+        "bgm_volume_label": "🎵 Music Volume",
+        "sfx_volume_label": "🔊 Sound Effects Volume",
+        "btn_upload_custom": "📁 Upload custom MP3 track from disk",
+        "upload_hint": "Uploaded track will immediately be added to your playlist and start playing."
     }
 };
