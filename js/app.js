@@ -1916,7 +1916,21 @@ window.PRS_App = {
 
             html.push('<div class="lp-video-cinema-card">');
             html.push('  <div class="lp-video-card-header">');
-            html.push('    <h3 class="lp-video-card-title">' + this.escapeHtml(v.title || ("Video " + (i + 1))) + '</h3>');
+            var isEnVid = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var vTitle = v.title || ("Video " + (i + 1));
+            var vDesc = v.description || "";
+            if (isEnVid) {
+                if (v.id === 4 || (v.url && v.url.includes("sO-MnlHy_O4"))) {
+                    vTitle = "The Princess's Heart – Official Intro";
+                    vDesc = "Official story trailer: rescue of the princess, dragon's lair, and royal festivals.";
+                } else if (v.id === 5 || (v.url && v.url.includes("fPyG8yeCHas"))) {
+                    vTitle = "The Princess's Heart – Board & Multiplayer Showcase";
+                    vDesc = "Showcase of board mechanics, kingdom estates, and online multiplayer quests.";
+                } else if (vTitle && vTitle.toLowerCase().includes("videopředstavení")) {
+                    vTitle = "Official video showcase of KiDesky & The Princess's Heart";
+                }
+            }
+            html.push('    <h3 class="lp-video-card-title">' + this.escapeHtml(vTitle) + '</h3>');
             html.push('    <span class="lp-video-card-badge">' + badgeText + '</span>');
             html.push('  </div>');
 
@@ -1931,7 +1945,7 @@ window.PRS_App = {
             html.push('  </div>');
 
             if (v.description) {
-                html.push('  <p class="lp-video-card-desc">' + this.escapeHtml(v.description) + '</p>');
+                html.push('  <p class="lp-video-card-desc">' + this.escapeHtml(vDesc || v.description) + '</p>');
             }
 
             html.push('  <div class="lp-video-card-footer">');
@@ -3307,17 +3321,30 @@ window.PRS_App = {
 
         var curCrest = this._pickerSelectedCrest || "lion";
         var curTincture = this._pickerSelectedTincture || "gold";
+        var isEnCrest = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+
+        var getCrestName = function (cr) {
+            return (window.PRS_I18n ? window.PRS_I18n.t("crest.names." + cr.id) : "") || cr.name;
+        };
+        var getCrestMotto = function (cr) {
+            return (window.PRS_I18n ? window.PRS_I18n.t("crest.mottos." + cr.id) : "") || cr.motto;
+        };
+        var getTinctureName = function (tc) {
+            return (window.PRS_I18n ? window.PRS_I18n.t("crest.tinctures." + tc.key) : "") || tc.name;
+        };
 
         // 1. Grid of crests
         var htmlGrid = [];
         for (var i = 0; i < window.PRS_HERALDRY_CATALOG.length; i++) {
             var cr = window.PRS_HERALDRY_CATALOG[i];
             var isSel = (cr.id === curCrest);
+            var crName = getCrestName(cr);
+            var crMotto = getCrestMotto(cr);
             htmlGrid.push(
                 '<div class="crest-card-opt ' + (isSel ? 'selected' : '') + '" onclick="PRS_App.selectCrestInPicker(\'' + cr.id + '\')">' +
                 '  <div style="font-size:2rem; margin-bottom:2px;">' + cr.icon + '</div>' +
-                '  <div style="font-family:\'Cinzel\',serif; font-size:0.82rem; font-weight:700; color:' + (isSel ? '#fef08a' : '#e2e8f0') + ';">' + this.escapeHtml(cr.name) + '</div>' +
-                '  <div style="font-size:0.68rem; color:#94a3b8; line-height:1.2;">' + this.escapeHtml(cr.motto) + '</div>' +
+                '  <div style="font-family:\'Cinzel\',serif; font-size:0.82rem; font-weight:700; color:' + (isSel ? '#fef08a' : '#e2e8f0') + ';">' + this.escapeHtml(crName) + '</div>' +
+                '  <div style="font-size:0.68rem; color:#94a3b8; line-height:1.2;">' + this.escapeHtml(crMotto) + '</div>' +
                 '</div>'
             );
         }
@@ -3330,7 +3357,7 @@ window.PRS_App = {
                 var tc = window.PRS_HERALDRY_TINCTURES[t];
                 var isTSel = (tc.key === curTincture);
                 htmlTinc.push(
-                    '<div class="crest-tincture-swatch ' + (isTSel ? 'selected' : '') + '" style="background:' + tc.bg + '; border-color:' + (isTSel ? '#fff' : tc.border) + ';" onclick="PRS_App.selectTinctureInPicker(\'' + tc.key + '\')" title="' + this.escapeHtml(tc.name) + '"></div>'
+                    '<div class="crest-tincture-swatch ' + (isTSel ? 'selected' : '') + '" style="background:' + tc.bg + '; border-color:' + (isTSel ? '#fff' : tc.border) + ';" onclick="PRS_App.selectTinctureInPicker(\'' + tc.key + '\')" title="' + this.escapeHtml(getTinctureName(tc)) + '"></div>'
                 );
             }
             tincturesWrap.innerHTML = htmlTinc.join("\n");

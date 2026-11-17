@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611171840">
+    <link rel="stylesheet" href="css/main.css?v=202611171850">
 
-    <link rel="stylesheet" href="css/board.css?v=202611171840">
+    <link rel="stylesheet" href="css/board.css?v=202611171850">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611171840">
+    <link rel="stylesheet" href="css/modals.css?v=202611171850">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611171840">
+    <link rel="stylesheet" href="css/mobile.css?v=202611171850">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -2366,7 +2366,7 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
 
-                <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.35rem;">🌐 Výběr tvé postavy pro Online stůl</h2>
+                <h2 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.35rem;" data-i18n="online.role_modal_title">🌐 Výběr tvé postavy pro Online stůl</h2>
 
                 <button class="btn-icon-danger" onclick="PRS_App.closeOnlineRoleModal()">✕</button>
 
@@ -2378,25 +2378,21 @@
 
                 <label style="font-size:0.83rem; font-weight:700; color:var(--gold-light); display:block; margin-bottom:0.35rem;">
 
-                    👤 Tvoje jméno u stolu (bude viditelné ostatním spoluhráčům):
+                    <span data-i18n="online.role_modal_name_label">👤 Tvoje jméno u stolu (bude viditelné ostatním spoluhráčům):</span>
 
                 </label>
 
-                <input type="text" id="online-player-custom-name" class="prs-input" placeholder="Zadej své jméno rytíře (např. Baron Jan)" maxlength="32" style="font-size:0.92rem; font-weight:bold; margin-bottom:0.65rem;" />
+                <input type="text" id="online-player-custom-name" class="prs-input" placeholder="Zadej své jméno rytíře (např. Baron Jan)" data-i18n-placeholder="online.role_modal_name_placeholder" maxlength="32" style="font-size:0.92rem; font-weight:bold; margin-bottom:0.65rem;" />
 
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.35rem;">
-                    <label style="font-size:0.82rem; font-weight:700; color:var(--gold-light);">🎭 Tvoje vlastní figurka (nahradí figurku PC bota na desce):</label>
-                    <button type="button" class="btn-secondary" style="font-size:0.74rem; padding:0.2rem 0.55rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.openPawnShopModal(0)">💎 Odemknout prémiové figurky</button>
+                    <label style="font-size:0.82rem; font-weight:700; color:var(--gold-light);" data-i18n="online.role_modal_pawn_label">🎭 Tvoje vlastní figurka (nahradí figurku PC bota na desce):</label>
+                    <button type="button" class="btn-secondary" style="font-size:0.74rem; padding:0.2rem 0.55rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.openPawnShopModal(0)" data-i18n="online.role_modal_btn_unlock_pawns">💎 Odemknout prémiové figurky</button>
                 </div>
                 <div id="online-role-pawn-picker" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; padding:0.25rem 0;"></div>
 
             </div>
 
-            <div style="font-size:0.9rem; font-weight:700; color:var(--gold-light); margin-bottom:0.65rem; text-align:left;">
-
-                Zvol si rytíře, kterého chceš ovládat:
-
-            </div>
+            <div style="font-size:0.9rem; font-weight:700; color:var(--gold-light); margin-bottom:0.65rem; text-align:left;" data-i18n="online.role_modal_choose_subtitle">Zvol si rytíře, kterého chceš ovládat:</div>
 
             <!-- Mřížka rytířů u stolu -->
 
@@ -2956,25 +2952,25 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/cs.js?v=202611171840" defer></script>
-    <script src="js/i18n/en.js?v=202611171840" defer></script>
-    <script src="js/app-i18n.js?v=202611171840" defer></script>
-    <script src="js/game-data.js?v=202611171840" defer></script>
-    <script src="js/game-boards.js?v=202611171840" defer></script>
-    <script src="js/game-engine.js?v=202611171840" defer></script>
-    <script src="js/game-combat-ai.js?v=202611171840" defer></script>
-    <script src="js/app-audio.js?v=202611171840" defer></script>
-    <script src="js/app-dialog.js?v=202611171840" defer></script>
-    <script src="js/app.js?v=202611171840" defer></script>
-    <script src="js/app-board.js?v=202611171840" defer></script>
-    <script src="js/app-hud.js?v=202611171840" defer></script>
-    <script src="js/app-modals.js?v=202611171840" defer></script>
-    <script src="js/app-online.js?v=202611171840" defer></script>
-    <script src="js/app-saves.js?v=202611171840" defer></script>
-    <script src="js/app-map-editor.js?v=202611171840" defer></script>
-    <script src="js/app-catalog.js?v=202611171840" defer></script>
-    <script src="js/app-admin.js?v=202611171840" defer></script>
-    <script src="js/app-musicwidget.js?v=202611171840" defer></script>
+    <script src="js/i18n/cs.js?v=202611171850" defer></script>
+    <script src="js/i18n/en.js?v=202611171850" defer></script>
+    <script src="js/app-i18n.js?v=202611171850" defer></script>
+    <script src="js/game-data.js?v=202611171850" defer></script>
+    <script src="js/game-boards.js?v=202611171850" defer></script>
+    <script src="js/game-engine.js?v=202611171850" defer></script>
+    <script src="js/game-combat-ai.js?v=202611171850" defer></script>
+    <script src="js/app-audio.js?v=202611171850" defer></script>
+    <script src="js/app-dialog.js?v=202611171850" defer></script>
+    <script src="js/app.js?v=202611171850" defer></script>
+    <script src="js/app-board.js?v=202611171850" defer></script>
+    <script src="js/app-hud.js?v=202611171850" defer></script>
+    <script src="js/app-modals.js?v=202611171850" defer></script>
+    <script src="js/app-online.js?v=202611171850" defer></script>
+    <script src="js/app-saves.js?v=202611171850" defer></script>
+    <script src="js/app-map-editor.js?v=202611171850" defer></script>
+    <script src="js/app-catalog.js?v=202611171850" defer></script>
+    <script src="js/app-admin.js?v=202611171850" defer></script>
+    <script src="js/app-musicwidget.js?v=202611171850" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3758,22 +3754,22 @@
         <div class="modal-box" style="max-width:680px; text-align:left; padding:1.4rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:0.5rem;">
                 <h3 style="font-family:'Cinzel',serif; color:var(--gold-light); margin:0; font-size:1.25rem;">
-                    🏰 Obnovená výprava – Křesla u stolu
+                    <span data-i18n="online.seats_modal_title">🏰 Obnovená výprava – Křesla u stolu</span>
                 </h3>
                 <button class="btn-icon-danger" onclick="PRS_App.closeOnlineSeatsModal()">✕</button>
             </div>
             <div style="background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.35); border-radius:10px; padding:0.75rem 0.95rem; margin-bottom:1rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem; flex-wrap:wrap; gap:0.4rem;">
-                    <span style="font-size:0.8rem; color:#bae6fd; font-weight:700;">🔑 Kód stolu: <span id="online-seats-room-code" style="font-size:1.05rem; letter-spacing:1px; color:#fff;">ONLINE</span></span>
+                    <span style="font-size:0.8rem; color:#bae6fd; font-weight:700;"><span data-i18n="online.seats_modal_code_label">🔑 Kód stolu:</span> <span id="online-seats-room-code" style="font-size:1.05rem; letter-spacing:1px; color:#fff;">ONLINE</span></span>
                     <button class="btn-secondary" style="font-size:0.74rem; padding:2px 8px; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.copyOnlineSeatsInviteLink()">📋 Kopírovat odkaz se zvacím kódem</button>
                 </div>
                 <input type="text" id="online-seats-share-link" class="prs-input" readonly style="font-size:0.76rem; padding:0.35rem; color:#94a3b8; width:100%;" onclick="this.select()" />
                 <div style="font-size:0.72rem; color:#94a3b8; margin-top:0.3rem;">
-                    💡 Pošli tento odkaz spoluhráčům. Pokud někdo nemůže pokračovat, níže ho jedním kliknutím <strong>nahraď PC botem</strong> s vybranou taktikou.
+                    <span data-i18n="online.seats_modal_hint">💡 Pošli tento odkaz spoluhráčům. Pokud někdo nemůže pokračovat, níže ho jedním kliknutím <strong>nahraď PC botem</strong> s vybranou taktikou.</span>
                 </div>
             </div>
             <div style="font-size:0.82rem; color:var(--gold-light); font-weight:700; margin-bottom:0.45rem;">
-                ⚔️ Rozdělení křesel u herního stolu:
+                <span data-i18n="online.seats_modal_distribution_label">⚔️ Rozdělení křesel u herního stolu:</span>
             </div>
             <div id="online-seats-list" style="max-height:260px; overflow-y:auto; margin-bottom:1.15rem;">
                 <!-- Generováno JS -->

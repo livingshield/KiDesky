@@ -427,9 +427,10 @@ openAuthModal: function () {
 
             : null;
 
+        var isEnBar = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var myRoleText = myPl
-            ? '🛡️ Hraješ za: <strong style="color:' + myPl.color + ';">' + myPl.badge + ' ' + this.escapeHtml(myPl.name) + '</strong>'
-            : '🛋️ Všichni hráči (Hot-Seat bez zámku)';
+            ? ((window.PRS_I18n ? window.PRS_I18n.t("online.role_playing_as") : "🛡️ Hraješ za:") + ' <strong style="color:' + myPl.color + ';">' + myPl.badge + ' ' + this.escapeHtml(myPl.name) + '</strong>')
+            : (window.PRS_I18n ? window.PRS_I18n.t("online.role_all_hotseat") : "🛋️ Všichni hráči (Hot-Seat bez zámku)");
 
         var restoreMyRoleBtn = '';
         if (this.myOnlinePlayerIndex === -1 && this.state.players) {
@@ -442,7 +443,7 @@ openAuthModal: function () {
             }
             if (myMatchingIdx >= 0) {
                 var myTargetP = this.state.players[myMatchingIdx];
-                restoreMyRoleBtn = '  <button class="btn-gold-lg" style="font-size:0.75rem; padding:0.22rem 0.55rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + myMatchingIdx + ')" title="Znovu uzamknout toto okno pouze pro tvou postavu">🔒 Hrát pouze za ' + this.escapeHtml(myTargetP.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "")) + '</button>';
+                restoreMyRoleBtn = '  <button class="btn-gold-lg" style="font-size:0.75rem; padding:0.22rem 0.55rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + myMatchingIdx + ')" title="' + (isEnBar ? "Lock this window only for your character" : "Znovu uzamknout toto okno pouze pro tvou postavu") + '">' + (window.PRS_I18n ? window.PRS_I18n.t("online.btn_lock_only_my_role", { name: this.escapeHtml(myTargetP.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "")) }) : ("🔒 Hrát pouze za " + this.escapeHtml(myTargetP.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "")))) + '</button>';
             }
         }
 
@@ -457,16 +458,16 @@ openAuthModal: function () {
         barEl.innerHTML = '<div class="online-room-banner">' +
             '<div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">' +
             '  <span class="online-pulse-dot" title="Online místnost je aktivní"></span>' +
-            '  <span style="font-size:0.88rem; color:#f0f9ff;">🌐 Online Stůl: <strong style="color:var(--gold-light); letter-spacing:1px; font-size:0.98rem;">' + this.escapeHtml(code) + '</strong></span>' +
-            '  <button class="btn-secondary" style="font-size:0.76rem; padding:0.22rem 0.55rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.copyRoomInviteLink()">📋 Kopírovat odkaz pro přátele</button>' +
+            '  <span style="font-size:0.88rem; color:#f0f9ff;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.table_bar_prefix") : "🌐 Online Stůl:") + ' <strong style="color:var(--gold-light); letter-spacing:1px; font-size:0.98rem;">' + this.escapeHtml(code) + '</strong></span>' +
+            '  <button class="btn-secondary" style="font-size:0.76rem; padding:0.22rem 0.55rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.copyRoomInviteLink()">' + (window.PRS_I18n ? window.PRS_I18n.t("online.btn_copy_invite_link") : "📋 Kopírovat odkaz pro přátele") + '</button>' +
             '  <span id="online-copy-feedback" style="font-size:0.76rem; color:#86efac;"></span>' +
             '</div>' +
             '<div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">' +
             '  <span style="font-size:0.82rem; background:rgba(0,0,0,0.3); border:1px solid rgba(56,189,248,0.3); border-radius:6px; padding:0.22rem 0.55rem;">' + myRoleText + '</span>' +
             restoreMyRoleBtn +
-            '  <button class="btn-gold-lg" style="font-size:0.76rem; padding:0.24rem 0.6rem;" onclick="PRS_App.openOnlineRoleModal()" title="Zvolit si rytíře pro tuto online partii">👤 Zvolit / změnit rytíře</button>' +
-            '  <button class="btn-secondary" style="font-size:0.76rem; padding:0.24rem 0.6rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.openOnlineSeatsModal()" title="Spravovat křesla u stolu a nahradit nepřítomné hráče boty">🏰 Křesla &amp; Boti</button>' +
-            '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.22rem 0.5rem;" onclick="PRS_App.pollOnlineSessionNow(true)" title="Okamžitě zkontrolovat tah ze serveru">🔄 Sync (Tah #' + (this.state.turnNumber || 1) + ')</button>' +
+            '  <button class="btn-gold-lg" style="font-size:0.76rem; padding:0.24rem 0.6rem;" onclick="PRS_App.openOnlineRoleModal()" title="' + (window.PRS_I18n ? window.PRS_I18n.t("online.btn_choose_change_knight_tooltip") : "Zvolit si rytíře pro tuto online partii") + '">' + (window.PRS_I18n ? window.PRS_I18n.t("online.btn_choose_change_knight") : "👤 Zvolit / změnit rytíře") + '</button>' +
+            '  <button class="btn-secondary" style="font-size:0.76rem; padding:0.24rem 0.6rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.openOnlineSeatsModal()" title="' + (window.PRS_I18n ? window.PRS_I18n.t("online.btn_seats_bots_tooltip") : "Spravovat křesla u stolu a nahradit nepřítomné hráče boty") + '">' + (window.PRS_I18n ? window.PRS_I18n.t("online.btn_seats_bots") : "🏰 Křesla & Boti") + '</button>' +
+            '  <button class="btn-secondary" style="font-size:0.75rem; padding:0.22rem 0.5rem;" onclick="PRS_App.pollOnlineSessionNow(true)" title="' + (window.PRS_I18n ? window.PRS_I18n.t("online.sync_tooltip") : "Okamžitě zkontrolovat tah ze serveru") + '">' + (window.PRS_I18n ? window.PRS_I18n.t("online.sync_turn_prefix", { turn: (this.state.turnNumber || 1) }) : ("🔄 Sync (Tah #" + (this.state.turnNumber || 1) + ")")) + '</button>' +
             '</div>' +
             '</div>';
     },
@@ -505,7 +506,8 @@ openAuthModal: function () {
 
             var diffLabel = { easy: "🌿 Easy", standard: "👑 Standard", hard: "⚔️ Hard", ultimate: "💀 Ultimate" }[(this.state.config && this.state.config.difficultyMode) || "standard"] || "👑 Standard";
 
-            infoEl.innerHTML = 'Kód místnosti: <strong style="color:var(--gold-light); letter-spacing:1px;">' + this.escapeHtml(this.state.roomCode || "") + '</strong> | Cíl: <strong>' + (this.state.config.targetHearts || 30) + ' 💖</strong> | Mód: <strong style="color:#fde68a;">' + diffLabel + '</strong> | Kolo: #' + this.state.roundNumber;
+            var isEnInf = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        infoEl.innerHTML = (isEnInf ? "Room Code: " : "Kód místnosti: ") + '<strong style="color:var(--gold-light); letter-spacing:1px;">' + this.escapeHtml(this.state.roomCode || "") + '</strong> | ' + (isEnInf ? "Goal: " : "Cíl: ") + '<strong>' + (this.state.config.targetHearts || 30) + ' 💖</strong> | ' + (isEnInf ? "Mode: " : "Mód: ") + '<strong style="color:#fde68a;">' + diffLabel + '</strong> | ' + (isEnInf ? "Round: #" : "Kolo: #") + this.state.roundNumber;
 
         }
 
@@ -593,18 +595,18 @@ openAuthModal: function () {
             var roleTag = '';
 
             if (isMyCurrentSlot && this.myOnlinePlayerIndex === i) {
-                roleTag = '<span style="background:#22c55e; color:#fff; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">✅ Tvoje role</span>';
+                roleTag = '<span style="background:#22c55e; color:#fff; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_tag_your_role") : "✅ Tvoje role") + '</span>';
             } else if (isMyAccount) {
-                roleTag = '<span style="background:rgba(234,179,8,0.25); color:#fef08a; border:1px solid #eab308; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">👑 Tvůj rytířský účet</span>';
+                roleTag = '<span style="background:rgba(234,179,8,0.25); color:#fef08a; border:1px solid #eab308; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_tag_your_account") : "👑 Tvůj rytířský účet") + '</span>';
             } else if (isOccupiedByOther) {
                 if (isHost) {
-                    roleTag = '<span style="background:rgba(234,179,8,0.2); color:#fbbf24; border:1px solid #fbbf24; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">👑 Hostitel (' + this.escapeHtml(pl.name) + ')</span>';
+                    roleTag = '<span style="background:rgba(234,179,8,0.2); color:#fbbf24; border:1px solid #fbbf24; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_tag_host", { name: this.escapeHtml(pl.name) }) : ("👑 Hostitel (" + this.escapeHtml(pl.name) + ")")) + '</span>';
                 } else {
-                    roleTag = '<span style="background:rgba(239,68,68,0.2); color:#fca5a5; border:1px solid #ef4444; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">🔒 Obsazeno (' + this.escapeHtml(pl.name) + ')</span>';
+                    roleTag = '<span style="background:rgba(239,68,68,0.2); color:#fca5a5; border:1px solid #ef4444; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_tag_occupied", { name: this.escapeHtml(pl.name) }) : ("🔒 Obsazeno (" + this.escapeHtml(pl.name) + ")")) + '</span>';
                 }
             } else {
                 availableCount++;
-                roleTag = '<span style="background:rgba(34,197,94,0.18); color:#86efac; border:1px solid #22c55e; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">✨ Volné k převzetí</span>';
+                roleTag = '<span style="background:rgba(34,197,94,0.18); color:#86efac; border:1px solid #22c55e; padding:2px 7px; border-radius:5px; font-size:0.72rem; font-weight:bold;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_tag_available") : "✨ Volné k převzetí") + '</span>';
             }
 
             html.push('<div class="podium-card" style="background:rgba(20,15,10,0.92); border:1.5px solid ' + (isMyCurrentSlot ? '#22c55e' : (isOccupiedByOther ? '#52525b' : pl.color)) + '; width:100%; box-sizing:border-box; padding:0.85rem; text-align:center; ' + (isOccupiedByOther ? 'opacity:0.65;' : '') + '">');
@@ -614,7 +616,9 @@ openAuthModal: function () {
             html.push('  </div>');
             html.push('  <div style="margin:0.25rem 0;">' + (this.getPlayerPawnAvatarHtml ? this.getPlayerPawnAvatarHtml(pl, 52) : ('<div style="font-size:1.8rem;">' + pl.badge + '</div>')) + '</div>');
             html.push('  <div style="font-size:1rem; font-weight:bold; color:' + pl.color + '; margin-bottom:0.2rem;">' + this.escapeHtml(pl.name) + '</div>');
-            html.push('  <div style="font-size:0.85rem; color:#f472b6; font-weight:bold; margin-bottom:0.5rem;">' + pl.totalHearts + ' 💖 • ' + pl.gold.toLocaleString("cs-CZ") + ' zl.</div>');
+            var currG = (window.PRS_I18n ? window.PRS_I18n.t("common.gold") : "zl.");
+        var isEnGrid = (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
+        html.push('  <div style="font-size:0.85rem; color:#f472b6; font-weight:bold; margin-bottom:0.5rem;">' + pl.totalHearts + ' 💖 • ' + pl.gold.toLocaleString(isEnGrid ? "en-US" : "cs-CZ") + ' ' + currG + '</div>');
             html.push('  <div style="display:flex; justify-content:center; gap:0.4rem; font-size:0.76rem; margin-bottom:0.75rem; color:var(--text-muted); background:rgba(0,0,0,0.3); border-radius:6px; padding:0.25rem;">');
             html.push('    <span>⚔️' + (st.combat || 0) + '</span>');
             html.push('    <span>🏇' + (st.riding || 0) + '</span>');
@@ -623,17 +627,17 @@ openAuthModal: function () {
             html.push('  </div>');
 
             if (isMyCurrentSlot && this.myOnlinePlayerIndex === i) {
-                html.push('  <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; opacity:0.9; cursor:default; background:rgba(34,197,94,0.25); border-color:#22c55e; color:#86efac;">✓ Hraješ za tohoto rytíře</button>');
+                html.push('  <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; opacity:0.9; cursor:default; background:rgba(34,197,94,0.25); border-color:#22c55e; color:#86efac;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_btn_current") : "✓ Hraješ za tohoto rytíře") + '</button>');
             } else if (isMyAccount) {
-                html.push('  <button class="btn-gold-lg" style="width:100%; font-size:0.84rem; padding:0.4rem 0.5rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + i + ')">👑 Převzít svého rytíře (' + this.escapeHtml(pl.name.replace(" (PC)", "").replace(" (Ty)", "")) + ')</button>');
+                html.push('  <button class="btn-gold-lg" style="width:100%; font-size:0.84rem; padding:0.4rem 0.5rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + i + ')">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_btn_claim_mine", { name: this.escapeHtml(pl.name.replace(" (PC)", "").replace(" (Ty)", "")) }) : ("👑 Převzít svého rytíře (" + this.escapeHtml(pl.name.replace(" (PC)", "").replace(" (Ty)", "")) + ")")) + '</button>');
             } else if (isOccupiedByOther) {
-                html.push('  <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; opacity:0.6; cursor:not-allowed; background:rgba(60,40,30,0.5); border:1px dashed #78350f; color:#fed7aa;" title="Tuto postavu již obsadil jiný hráč">🔒 Již obsazeno</button>');
+                html.push('  <button class="btn-secondary" disabled style="width:100%; font-size:0.82rem; opacity:0.6; cursor:not-allowed; background:rgba(60,40,30,0.5); border:1px dashed #78350f; color:#fed7aa;" title="' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_btn_occupied") : "Tuto postavu již obsadil jiný hráč") + '">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_btn_occupied") : "🔒 Již obsazeno") + '</button>');
                 var amIHost = (this.myOnlinePlayerIndex === 0 || (this.state.players[this.myOnlinePlayerIndex] && this.state.players[this.myOnlinePlayerIndex].isOnlineHost));
                 if (amIHost && !isHost) {
-                    html.push('  <button class="btn-secondary" style="width:100%; font-size:0.75rem; padding:0.22rem 0.4rem; margin-top:0.35rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_App.convertSeatToBot(' + i + ')" title="Převést odpojeného hráče zpět na počítačového bota">🤖 Převést na PC bota</button>');
+                    html.push('  <button class="btn-secondary" style="width:100%; font-size:0.75rem; padding:0.22rem 0.4rem; margin-top:0.35rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_App.convertSeatToBot(' + i + ')" title="' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_btn_convert_bot") : "Převést odpojeného hráče zpět na počítačového bota") + '">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_btn_convert_bot") : "🤖 Převést na PC bota") + '</button>');
                 }
             } else {
-                html.push('  <button class="btn-gold-lg" style="width:100%; font-size:0.84rem; padding:0.4rem 0.5rem;" onclick="PRS_App.claimOnlineRole(' + i + ')">⚔️ Hrát za ' + this.escapeHtml(pl.name.replace(" (PC)", "").replace(" (Ty)", "")) + '</button>');
+                html.push('  <button class="btn-gold-lg" style="width:100%; font-size:0.84rem; padding:0.4rem 0.5rem;" onclick="PRS_App.claimOnlineRole(' + i + ')">' + (window.PRS_I18n ? window.PRS_I18n.t("online.role_modal_btn_play_as", { name: this.escapeHtml(pl.name.replace(" (PC)", "").replace(" (Ty)", "")) }) : ("⚔️ Hrát za " + this.escapeHtml(pl.name.replace(" (PC)", "").replace(" (Ty)", "")))) + '</button>');
             }
             html.push('</div>');
         }
@@ -743,14 +747,14 @@ openAuthModal: function () {
 
                 if (fb) {
 
-                    fb.textContent = "✓ Odkaz zkopírován do schránky!";
+                    fb.textContent = (window.PRS_I18n ? window.PRS_I18n.t("online.link_copied_feedback") : "✓ Odkaz zkopírován do schránky!");
 
                     setTimeout(function () { fb.textContent = ""; }, 3500);
 
                 }
 
             }).catch(function () {
-                KiDeskyDialog.prompt("Zkopíruj tento odkaz a pošli ho spoluhráčům:", inviteUrl, {
+                KiDeskyDialog.prompt((window.PRS_I18n ? window.PRS_I18n.t("online.link_copy_prompt") : "Zkopíruj tento odkaz a pošli ho spoluhráčům:"), inviteUrl, {
                     title: "Odkaz ke stolu",
                     icon: "📋",
                     confirmText: "Hotovo",

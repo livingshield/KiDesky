@@ -1209,11 +1209,11 @@
                     '    <div>' +
                     '      <div style="display:flex; align-items:center; gap:0.4rem;">' +
                     '        <strong style="color:var(--gold-light); font-size:0.92rem;">' + this.escapeHtml(p.name) + '</strong>' +
-                    (isMe ? ' <span class="lp-mode-badge" style="font-size:0.68rem; padding:1px 5px; margin:0;">Ty (Hostitel)</span>' : '') +
+                    (isMe ? (' <span class="lp-mode-badge" style="font-size:0.68rem; padding:1px 5px; margin:0;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.seats_you_host_badge") : "Ty (Hostitel)") + '</span>') : '') +
                     '      </div>' +
                     '      <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">' +
-                    '        ' + (isBot ? ('<span style="color:#fde047;">' + botRoleLabel + '</span>') : '<span style="color:#86efac;">👤 Živý hráč u stolu</span>') +
-                    '        • 💖 ' + (p.totalHearts || 0) + ' srdcí • 🪙 ' + (p.gold || 0).toLocaleString("cs-CZ") + ' zl.' +
+                    '        ' + (isBot ? ('<span style="color:#fde047;">' + botRoleLabel + '</span>') : ('<span style="color:#86efac;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.seats_live_human") : "👤 Živý hráč u stolu") + '</span>')) +
+                    '        • 💖 ' + (p.totalHearts || 0) + ' ' + (isEnSeats ? "hearts" : "srdcí") + ' • 🪙 ' + (p.gold || 0).toLocaleString(isEnSeats ? "en-US" : "cs-CZ") + ' ' + (window.PRS_I18n ? window.PRS_I18n.t("common.gold") : "zl.") +
                     '      </div>' +
                     '    </div>' +
                     '  </div>' +
@@ -1232,11 +1232,11 @@
                             '    <option value="Bot_Balanced" selected>🛡️ Vyvážený</option>' +
                             '  </select>' +
                             '  <button class="btn-secondary" style="font-size:0.74rem; padding:0.25rem 0.6rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.convertSeatToBot(' + i + ')">' +
-                            '    🤖 Nahradit botem' +
+                            '    ' + (window.PRS_I18n ? window.PRS_I18n.t("online.seats_btn_replace_bot") : "🤖 Nahradit botem") +
                             '  </button>' +
                             '</div>'
                         )
-                    ) : '<span style="font-size:0.76rem; color:var(--gold-light); font-weight:600;">Tvůj slot</span>') +
+                    ) : ('<span style="font-size:0.76rem; color:var(--gold-light); font-weight:600;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.seats_your_slot") : "Tvůj slot") + '</span>')) +
                     '  </div>' +
                     '</div>'
                 );
