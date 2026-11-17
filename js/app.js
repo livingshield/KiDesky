@@ -5205,22 +5205,22 @@ window.PRS_App = {
     _currentMapStudioBoard: null,
 
     MAP_STUDIO_COUNTERS_DEF: [
-        { key: "villages", label: "🏘️ Vesnice (V)", min: 0, max: 24 },
-        { key: "towns", label: "🏙️ Města (M)", min: 0, max: 14 },
-        { key: "castles", label: "🏯 Hrady (H)", min: 0, max: 9 },
-        { key: "jesters", label: "🃏 Kejklíři (KE)", min: 0, max: 12 },
-        { key: "buildings", label: "⚒️ Cechovní živnosti", min: 0, max: 12 },
-        { key: "questsU1", label: "🐗 Zvěř (U1)", min: 0, max: 16 },
-        { key: "questsU2", label: "👹 Monstra (U2)", min: 0, max: 14 },
-        { key: "questsU3", label: "🐲 Dračí sluje (U3)", min: 0, max: 10 },
-        { key: "masters", label: "🧙‍♂️ Mistři ctností", min: 0, max: 20 },
-        { key: "merchants", label: "⚖️ Obchodníci", min: 0, max: 10 },
-        { key: "festivals", label: "💖 Slavnosti", min: 0, max: 12 },
-        { key: "chances", label: "❓ Pole Náhody (N)", min: 0, max: 24 },
-        { key: "taxes", label: "👑 Výběrčí daní", min: 0, max: 8 },
-        { key: "prisons", label: "⛓️ Šatlava", min: 0, max: 4 },
-        { key: "hospitals", label: "🏥 Lazaret", min: 0, max: 4 },
-        { key: "taverns", label: "🍺 Krčma", min: 0, max: 6 }
+        { key: "villages", label: "🏘️ Vesnice (V)", labelEn: "🏘️ Villages (V)", min: 0, max: 24 },
+        { key: "towns", label: "🏙️ Města (M)", labelEn: "🏙️ Towns (M)", min: 0, max: 14 },
+        { key: "castles", label: "🏯 Hrady (H)", labelEn: "🏯 Castles (C)", min: 0, max: 9 },
+        { key: "jesters", label: "🃏 Kejklíři (KE)", labelEn: "🃏 Jesters (J)", min: 0, max: 12 },
+        { key: "buildings", label: "⚒️ Cechovní živnosti", labelEn: "⚒️ Guild Crafts", min: 0, max: 12 },
+        { key: "questsU1", label: "🐗 Zvěř (U1)", labelEn: "🐗 Beasts (T1)", min: 0, max: 16 },
+        { key: "questsU2", label: "👹 Monstra (U2)", labelEn: "👹 Monsters (T2)", min: 0, max: 14 },
+        { key: "questsU3", label: "🐲 Dračí sluje (U3)", labelEn: "🐲 Dragon Lairs (T3)", min: 0, max: 10 },
+        { key: "masters", label: "🧙‍♂️ Mistři ctností", labelEn: "🧙‍♂️ Masters of Virtues", min: 0, max: 20 },
+        { key: "merchants", label: "⚖️ Obchodníci", labelEn: "⚖️ Royal Market / Shops", min: 0, max: 10 },
+        { key: "festivals", label: "💖 Slavnosti", labelEn: "💖 Royal Festivals", min: 0, max: 12 },
+        { key: "chances", label: "❓ Pole Náhody (N)", labelEn: "❓ Chance Tiles (N)", min: 0, max: 24 },
+        { key: "taxes", label: "👑 Výběrčí daní", labelEn: "👑 Tax Collector", min: 0, max: 8 },
+        { key: "prisons", label: "⛓️ Šatlava", labelEn: "⛓️ Royal Dungeon", min: 0, max: 4 },
+        { key: "hospitals", label: "🏥 Lazaret", labelEn: "🏥 Royal Infirmary", min: 0, max: 4 },
+        { key: "taverns", label: "🍺 Krčma", labelEn: "🍺 Golden Tavern", min: 0, max: 6 }
     ],
 
     ensureMapStudioRecipe: function () {
@@ -5283,7 +5283,85 @@ window.PRS_App = {
         }
     },
 
+    refreshMapStudioSelectOptions: function () {
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var dict = (window.PRS_I18n && window.PRS_I18n.getDict && window.PRS_I18n.getDict()) || {};
+        var opts = (dict.map_studio && dict.map_studio.select_options) || {};
+
+        var updateSelect = function (id, mapping) {
+            var sel = document.getElementById(id);
+            if (!sel) return;
+            var curVal = sel.value;
+            for (var i = 0; i < sel.options.length; i++) {
+                var opt = sel.options[i];
+                var key = mapping[opt.value];
+                if (key && opts[key]) {
+                    opt.textContent = opts[key];
+                }
+            }
+            sel.value = curVal;
+        };
+
+        updateSelect("ms-route-shape", {
+            auto: "shape_auto",
+            organic_meander: "shape_organic_meander",
+            figure_eight: "shape_figure_eight",
+            spiral_citadel: "shape_spiral_citadel",
+            twin_valleys: "shape_twin_valleys",
+            serpentine: "shape_serpentine",
+            star_crossroads: "shape_star_crossroads",
+            classic_ring: "shape_classic_ring"
+        });
+
+        updateSelect("ms-branches", {
+            "0": "branches_0",
+            "1": "branches_1",
+            "2": "branches_2",
+            "3": "branches_3",
+            "4": "branches_4"
+        });
+
+        updateSelect("ms-river-mode", {
+            none: "river_none",
+            single: "river_single",
+            dual: "river_dual",
+            island: "river_island",
+            delta: "river_delta"
+        });
+
+        updateSelect("ms-master-tier", {
+            "1": "tier_1",
+            "2": "tier_2",
+            "3": "tier_3",
+            "4": "tier_4",
+            "5": "tier_5"
+        });
+
+        updateSelect("ms-biome-theme", {
+            balanced: "biome_balanced",
+            dragon_peaks: "biome_dragon_peaks",
+            forest_realm: "biome_forest_realm",
+            river_delta: "biome_river_delta",
+            golden_plains: "biome_golden_plains"
+        });
+
+        updateSelect("ms-royal-castle", {
+            auto: "castle_auto",
+            castle_royal: "castle_royal",
+            castle_forest: "castle_forest",
+            castle_ice: "castle_ice",
+            castle_lava: "castle_lava",
+            castle_crystal: "castle_crystal",
+            castle_wind: "castle_wind",
+            castle_water: "castle_water",
+            castle_desert: "castle_desert",
+            castle_swamp: "castle_swamp",
+            castle_dark: "castle_dark"
+        });
+    },
+
     openMapStudioModal: function (initialSeed, initialRecipe) {
+        this.refreshMapStudioSelectOptions();
         this.mapStudioSeed = initialSeed || this.currentBoardSeed || Math.floor(Math.random() * 899999 + 100000);
         if (initialRecipe && window.KiDeskyMapGenerator) {
             this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(initialRecipe, this.mapStudioSeed);
@@ -5340,27 +5418,40 @@ window.PRS_App = {
         var grid = document.getElementById("ms-animal-levels-grid");
         if (!grid || !this.customBoardRecipe) return;
         var activeLevels = this.customBoardRecipe.animalLevels || [1, 2, 3, 4, 5, 6];
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var trioHint = isEn ? "(+F+D)" : "(+S+P)";
         var ribbonColors = {
             1: "#2563eb", 2: "#059669", 3: "#d97706", 4: "#7c3aed",
             5: "#dc2626", 6: "#0891b2", 7: "#ea580c", 8: "#4f46e5",
             9: "#16a34a", 10: "#db2777", 11: "#ca8a04", 12: "#0d9488",
             13: "#9333ea", 14: "#475569"
         };
-        var setsCatalog = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ANIMAL_SETS) ? window.KiDeskyMapGenerator.ANIMAL_SETS : [];
+        var setsCatalog = (window.KiDeskyMapGenerator && (window.KiDeskyMapGenerator.ANIMAL_SETS_CATALOG || window.KiDeskyMapGenerator.ANIMAL_SETS))
+            ? (window.KiDeskyMapGenerator.ANIMAL_SETS_CATALOG || window.KiDeskyMapGenerator.ANIMAL_SETS)
+            : [];
         var html = "";
         for (var lvl = 1; lvl <= 14; lvl++) {
             var isSelected = activeLevels.indexOf(lvl) !== -1;
-            var sDef = setsCatalog[lvl - 1] || { horse: "Kůň " + lvl, falcon: "Sokol " + lvl, dog: "Pes " + lvl };
+            var sDef = setsCatalog[lvl - 1] || {
+                horse: "Kůň " + lvl, falcon: "Sokol " + lvl, dog: "Pes " + lvl,
+                horseEn: "Horse " + lvl, falconEn: "Falcon " + lvl, dogEn: "Dog " + lvl
+            };
+            var horseName = isEn ? (sDef.horseEn || sDef.horse) : sDef.horse;
+            var falconName = isEn ? (sDef.falconEn || sDef.falcon) : sDef.falcon;
+            var dogName = isEn ? (sDef.dogEn || sDef.dog) : sDef.dog;
+            var priceText = isEn
+                ? ("Price " + (lvl * 400) + "/" + (lvl * 500) + "/" + (lvl * 600) + " g.")
+                : ("Cena " + (lvl * 400) + "/" + (lvl * 500) + "/" + (lvl * 600) + " zl.");
             var col = ribbonColors[lvl] || "#2563eb";
             var bg = isSelected ? "rgba(16,185,129,0.18)" : "rgba(15,23,42,0.55)";
             var border = isSelected ? "#34d399" : "rgba(255,255,255,0.12)";
             var textCol = isSelected ? "#f8fafc" : "#94a3b8";
 
-            html += '<div onclick="PRS_App.toggleMapStudioAnimalLevel(' + lvl + ')" style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:' + bg + '; border:1px solid ' + border + '; border-radius:6px; padding:4px 6px; cursor:pointer; user-select:none; transition:all 0.15s;" title="Level ' + lvl + ': ' + this.escapeHtml(sDef.horse + ' • ' + sDef.falcon + ' • ' + sDef.dog) + ' (Cena ' + (lvl * 400) + '/' + (lvl * 500) + '/' + (lvl * 600) + ' zl.)">' +
+            html += '<div onclick="PRS_App.toggleMapStudioAnimalLevel(' + lvl + ')" style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:' + bg + '; border:1px solid ' + border + '; border-radius:6px; padding:4px 6px; cursor:pointer; user-select:none; transition:all 0.15s;" title="Level ' + lvl + ': ' + this.escapeHtml(horseName + ' • ' + falconName + ' • ' + dogName) + ' (' + priceText + ')">' +
                 '<div style="display:flex; align-items:center; gap:5px; min-width:0;">' +
                     '<span style="width:14px; height:14px; border-radius:50%; background:' + col + '; color:#fff; font-size:0.62rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid rgba(255,255,255,0.5);">' + lvl + '</span>' +
                     '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.7rem; color:' + textCol + '; font-weight:' + (isSelected ? '700' : '500') + ';">' +
-                        this.escapeHtml(sDef.horse) + ' <span style="opacity:0.7; font-size:0.64rem;">(+S+P)</span>' +
+                        this.escapeHtml(horseName) + ' <span style="opacity:0.7; font-size:0.64rem;">' + trioHint + '</span>' +
                     '</div>' +
                 '</div>' +
                 '<span style="font-size:0.74rem; color:' + (isSelected ? '#4ade80' : '#475569') + '; font-weight:bold; flex-shrink:0;">' + (isSelected ? '✓ 3' : '○') + '</span>' +
@@ -5370,7 +5461,7 @@ window.PRS_App = {
 
         var sumBadge = document.getElementById("ms-animal-summary-badge");
         if (sumBadge) {
-            var isEnA = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en"; sumBadge.textContent = isEnA ? (activeLevels.length + " trios = " + (activeLevels.length * 3) + " tiles") : (activeLevels.length + " trojic = " + (activeLevels.length * 3) + " polí");
+            sumBadge.textContent = isEn ? (activeLevels.length + " trios = " + (activeLevels.length * 3) + " tiles") : (activeLevels.length + " trojic = " + (activeLevels.length * 3) + " polí");
         }
     },
 
@@ -5379,10 +5470,12 @@ window.PRS_App = {
         if (!grid || !this.customBoardRecipe) return;
         var r = this.customBoardRecipe;
         var defs = this.MAP_STUDIO_COUNTERS_DEF;
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var html = "";
         for (var i = 0; i < defs.length; i++) {
             var d = defs[i];
             var val = (r[d.key] !== undefined) ? r[d.key] : 0;
+            var dLabel = isEn ? (d.labelEn || d.label) : d.label;
             html += '<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:rgba(15,23,42,0.55); border:1px solid rgba(212,175,55,0.18); border-radius:6px; padding:3px 6px;">' +
                 '<span style="font-size:0.71rem; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + this.escapeHtml(dLabel) + '">' + dLabel + '</span>' +
                 '<div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">' +
@@ -5737,18 +5830,35 @@ window.PRS_App = {
             container.innerHTML = window.KiDeskyMapGenerator.renderMiniPreviewSVG(board, 580, 360);
         }
 
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+
         // Titulek a odznaky
         var elTitle = document.getElementById("ms-preview-title");
         var elBadge = document.getElementById("ms-preview-badge");
         var elStats = document.getElementById("ms-preview-stats");
         var elInput = document.getElementById("ms-seed-input");
 
-        if (elTitle) elTitle.textContent = board.name || ("Vlastní království #" + this.mapStudioSeed);
+        if (elTitle) {
+            var rawName = board.name || ("Vlastní království #" + this.mapStudioSeed);
+            if (isEn && board.nameEn) {
+                elTitle.textContent = board.nameEn;
+            } else if (isEn && rawName.startsWith("Dračí království #")) {
+                elTitle.textContent = rawName.replace("Dračí království #", "Dragon Realm #").replace(" polí)", " tiles)");
+            } else if (isEn && rawName.startsWith("Vlastní království #")) {
+                elTitle.textContent = rawName.replace("Vlastní království #", "Custom Realm #");
+            } else {
+                elTitle.textContent = rawName;
+            }
+        }
         if (elBadge) {
             var aCnt = (this.customBoardRecipe.animalLevels || []).length;
             var shapeObj = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES[board.routeShape]);
-            var shapeName = shapeObj ? shapeObj.name : "Procedurální trasa";
-            elBadge.textContent = board.nodes.length + " polí • " + aCnt + " trojic zvířat • " + (this.customBoardRecipe.branches || 0) + " větví • " + shapeName;
+            var shapeName = shapeObj ? (isEn ? (shapeObj.nameEn || shapeObj.name) : shapeObj.name) : (isEn ? "Procedural Route" : "Procedurální trasa");
+            if (isEn) {
+                elBadge.textContent = board.nodes.length + " tiles • " + aCnt + " animal trios • " + (this.customBoardRecipe.branches || 0) + " branches • " + shapeName;
+            } else {
+                elBadge.textContent = board.nodes.length + " polí • " + aCnt + " trojic zvířat • " + (this.customBoardRecipe.branches || 0) + " větví • " + shapeName;
+            }
         }
         if (elInput && document.activeElement !== elInput) {
             elInput.value = String(this.mapStudioSeed);
@@ -5760,26 +5870,43 @@ window.PRS_App = {
             var tTierLabel = (r.masterTier === 5) ? "RPG I→IV" : ("Stupeň " + (["I", "II", "III", "IV"][(r.masterTier || 2) - 1] || "II"));
 
             var warnings = [];
-            if (r.questsU3 < 2) warnings.push("Pro scénář Lovci draků doporučeno alespoň 2× Drak U3");
-            if (r.towns < 3 || r.castles < 1) warnings.push("Pro scénář Magnát doporučeno 3× Město + 1× Hrad");
+            if (r.questsU3 < 2) warnings.push(isEn ? "At least 2x Dragon U3 recommended for Dragon Slayers scenario" : "Pro scénář Lovci draků doporučeno alespoň 2× Drak U3");
+            if (r.towns < 3 || r.castles < 1) warnings.push(isEn ? "3x Town + 1x Castle recommended for Tycoon scenario" : "Pro scénář Magnát doporučeno 3× Město + 1× Hrad");
 
             var validHtml = warnings.length === 0
-                ? ' • <span style="color:#4ade80; font-weight:700;">✓ Všechny scénáře splnitelné</span>'
-                : ' • <span style="color:#fbbf24; font-weight:600;" title="' + this.escapeHtml(warnings.join(" | ")) + '">⚠️ ' + this.escapeHtml(warnings[0]) + '</span>';
+                ? (isEn ? ' • <span style="color:#4ade80; font-weight:700;">✓ All scenarios achievable</span>' : ' • <span style="color:#4ade80; font-weight:700;">✓ Všechny scénáře splnitelné</span>')
+                : (' • <span style="color:#f87171;" title="' + this.escapeHtml(warnings.join(" | ")) + '">⚠️ ' + (isEn ? 'Scenario warning' : 'Upozornění ke scénářům') + '</span>');
 
-            elStats.innerHTML =
-                "🏯 <strong>" + r.castles + "</strong> Hrady • " +
-                "🏙️ <strong>" + r.towns + "</strong> Města • " +
-                "🏘️ <strong>" + r.villages + "</strong> Vesnice • " +
-                "🃏 <strong>" + r.jesters + "</strong> Kejklíři • " +
-                "⚒️ <strong>" + r.buildings + "</strong> Živnosti • " +
-                "🐗 <strong>" + r.questsU1 + "</strong> U1 • " +
-                "👹 <strong>" + r.questsU2 + "</strong> U2 • " +
-                "🐲 <strong>" + r.questsU3 + "</strong> Draci U3 • " +
-                "🧙‍♂️ <strong>" + r.masters + "</strong> Mistři (" + tTierLabel + ") • " +
-                "💖 <strong>" + r.festivals + "</strong> Slavnosti • " +
-                "🌊 <strong>" + brCnt + "</strong> mostů" +
-                validHtml;
+            if (isEn) {
+                var tTierLabelEn = (r.masterTier === 5) ? "RPG I→IV" : ("Tier " + (["I", "II", "III", "IV"][(r.masterTier || 2) - 1] || "II"));
+                elStats.innerHTML =
+                    '<span>🏯 ' + r.castles + ' Castles</span> • ' +
+                    '<span>🏙️ ' + r.towns + ' Towns</span> • ' +
+                    '<span>🏘️ ' + r.villages + ' Villages</span> • ' +
+                    '<span>🃏 ' + r.jesters + ' Jesters</span> • ' +
+                    '<span>⚒️ ' + r.buildings + ' Trades</span> • ' +
+                    '<span>🐗 ' + r.questsU1 + ' U1</span> • ' +
+                    '<span>👹 ' + r.questsU2 + ' U2</span> • ' +
+                    '<span>🐲 ' + r.questsU3 + ' Dragons U3</span> • ' +
+                    '<span>🧙‍♂️ ' + r.masters + ' Masters (' + tTierLabelEn + ')</span> • ' +
+                    '<span>💖 ' + r.festivals + ' Festivals</span> • ' +
+                    '<span>🌉 ' + brCnt + ' bridges</span>' +
+                    validHtml;
+            } else {
+                elStats.innerHTML =
+                    '<span>🏯 ' + r.castles + ' Hrady</span> • ' +
+                    '<span>🏙️ ' + r.towns + ' Města</span> • ' +
+                    '<span>🏘️ ' + r.villages + ' Vesnice</span> • ' +
+                    '<span>🃏 ' + r.jesters + ' Kejklíři</span> • ' +
+                    '<span>⚒️ ' + r.buildings + ' Živnosti</span> • ' +
+                    '<span>🐗 ' + r.questsU1 + ' U1</span> • ' +
+                    '<span>👹 ' + r.questsU2 + ' U2</span> • ' +
+                    '<span>🐲 ' + r.questsU3 + ' Draci U3</span> • ' +
+                    '<span>🧙‍♂️ ' + r.masters + ' Mistři (' + tTierLabel + ')</span> • ' +
+                    '<span>💖 ' + r.festivals + ' Slavnosti</span> • ' +
+                    '<span>🌉 ' + brCnt + ' mostů</span>' +
+                    validHtml;
+            }
         }
     },
 

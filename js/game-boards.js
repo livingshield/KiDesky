@@ -807,32 +807,32 @@ window.KiDeskyMapGenerator = {
 
     // 7 Procedurálních archetypů tvaru trasy (Map Studio & WYSIWYG editor)
     ROUTE_ARCHETYPES: {
-        auto: { id: "auto", name: "🎲 Podle seedu (Automatický mix)", desc: "Dynamický výběr tvaru trasy podle seedu mapy", icon: "🎲" },
-        organic_meander: { id: "organic_meander", name: "🌿 Organický meandr", desc: "Plynulé přírodní vlnění krajinou s malebnými zátočinami a výběžky", icon: "🌿" },
-        figure_eight: { id: "figure_eight", name: "♾️ Osmička (Křížený okruh)", desc: "Dva ladné okruhy protínající se uprostřed království", icon: "♾️" },
-        spiral_citadel: { id: "spiral_citadel", name: "🌀 Spirálová citadela", desc: "Vnější okruh spirálovitě obtéká vnitřní citadelu královského hradu", icon: "🌀" },
-        twin_valleys: { id: "twin_valleys", name: "🏔️ Dvojí údolí", desc: "Západní a východní kotlina propojená horským hřebenem", icon: "🏔️" },
-        serpentine: { id: "serpentine", name: "🐍 Hadovitá magistrála", desc: "Táhlé esovité zákruty kopírující říční tok napříč celou říší", icon: "🐍" },
-        star_crossroads: { id: "star_crossroads", name: "⭐ Hvězdicová křižovatka", desc: "Dynamický okruh s výběžky a radiálními průrvami", icon: "⭐" },
-        classic_ring: { id: "classic_ring", name: "⭕ Klasický ovál", desc: "Tradiční obvodový prstenec po okrajích království", icon: "⭕" }
+        auto: { id: "auto", name: "🎲 Podle seedu (Automatický mix)", nameEn: "🎲 By seed (Automatic mix)", desc: "Dynamický výběr tvaru trasy podle seedu mapy", descEn: "Dynamic route shape selection based on map seed", icon: "🎲" },
+        organic_meander: { id: "organic_meander", name: "🌿 Organický meandr", nameEn: "🌿 Organic Meander", desc: "Plynulé přírodní vlnění krajinou s malebnými zátočinami a výběžky", descEn: "Smooth natural winding through the landscape with picturesque bays", icon: "🌿" },
+        figure_eight: { id: "figure_eight", name: "♾️ Osmička (Křížený okruh)", nameEn: "♾️ Figure Eight (Cross loop)", desc: "Dva ladné okruhy protínající se uprostřed království", descEn: "Two graceful loops intersecting in the center of the kingdom", icon: "♾️" },
+        spiral_citadel: { id: "spiral_citadel", name: "🌀 Spirálová citadela", nameEn: "🌀 Spiral Citadel", desc: "Vnější okruh spirálovitě obtéká vnitřní citadelu královského hradu", descEn: "Outer loop spirals around the inner royal castle citadel", icon: "🌀" },
+        twin_valleys: { id: "twin_valleys", name: "🏔️ Dvojí údolí", nameEn: "🏔️ Twin Valleys", desc: "Západní a východní kotlina propojená horským hřebenem", descEn: "Western and eastern basins connected by a mountain ridge", icon: "🏔️" },
+        serpentine: { id: "serpentine", name: "🐍 Hadovitá magistrála", nameEn: "🐍 Serpentine Highway", desc: "Táhlé esovité zákruty kopírující říční tok napříč celou říší", descEn: "Sweeping S-curves following the river flow across the entire realm", icon: "🐍" },
+        star_crossroads: { id: "star_crossroads", name: "⭐ Hvězdicová křižovatka", nameEn: "⭐ Star Crossroads", desc: "Dynamický okruh s výběžky a radiálními průrvami", descEn: "Dynamic ring with promontories and radial gaps", icon: "⭐" },
+        classic_ring: { id: "classic_ring", name: "⭕ Klasický ovál", nameEn: "⭕ Classic Oval", desc: "Tradiční obvodový prstenec po okrajích království", descEn: "Traditional perimeter ring along the edges of the realm", icon: "⭕" }
     },
 
     // Katalog 14 ušlechtilých chovných sad (Kůň, Sokol, Pes)
     ANIMAL_SETS_CATALOG: [
-        { setId: 1, horse: "Kůň 1 (Grošák)", falcon: "Sokol 1 (Poštolka)", dog: "Pes 1 (Ohař)" },
-        { setId: 2, horse: "Kůň 2 (Hnědák)", falcon: "Sokol 2 (Krahujec)", dog: "Pes 2 (Bígl)" },
-        { setId: 3, horse: "Kůň 3 (Vraník)", falcon: "Sokol 3 (Ostříž)", dog: "Pes 3 (Chrt)" },
-        { setId: 4, horse: "Kůň 4 (Ryzák)", falcon: "Sokol 4 (Raroh)", dog: "Pes 4 (Barvář)" },
-        { setId: 5, horse: "Kůň 5 (Bělouš)", falcon: "Sokol 5 (Královský ostříž)", dog: "Pes 5 (Slídič)" },
-        { setId: 6, horse: "Kůň 6 (Plavák)", falcon: "Sokol 6 (Sokol stěhovavý)", dog: "Pes 6 (Vlkodav)" },
-        { setId: 7, horse: "Kůň 7 (Šiml)", falcon: "Sokol 7 (Luňák)", dog: "Pes 7 (Doga)" },
-        { setId: 8, horse: "Kůň 8 (Fríský oř)", falcon: "Sokol 8 (Orlovec)", dog: "Pes 8 (Chrtí král)" },
-        { setId: 9, horse: "Kůň 9 (Andaluský hřebec)", falcon: "Sokol 9 (Jestřáb)", dog: "Pes 9 (Lovecký chrt)" },
-        { setId: 10, horse: "Kůň 10 (Válečný oř)", falcon: "Sokol 10 (Sokol královský)", dog: "Pes 10 (Královský chrt)" },
-        { setId: 11, horse: "Kůň 11 (Hvězdný hřebec)", falcon: "Sokol 11 (Bílý raroh)", dog: "Pes 11 (Stříbrný ohař)" },
-        { setId: 12, horse: "Kůň 12 (Královský oř)", falcon: "Sokol 12 (Fénixův sokol)", dog: "Pes 12 (Zlatý chrt)" },
-        { setId: 13, horse: "Kůň 13 (Zlatý palomino)", falcon: "Sokol 13 (Skalní orel)", dog: "Pes 13 (Severní vlkodav)" },
-        { setId: 14, horse: "Kůň 14 (Stínový oř)", falcon: "Sokol 14 (Noční raroh)", dog: "Pes 14 (Hradní chrlič)" }
+        { setId: 1, horse: "Kůň 1 (Grošák)", horseEn: "Horse 1 (Dapple Grey)", falcon: "Sokol 1 (Poštolka)", falconEn: "Falcon 1 (Kestrel)", dog: "Pes 1 (Ohař)", dogEn: "Dog 1 (Pointer)" },
+        { setId: 2, horse: "Kůň 2 (Hnědák)", horseEn: "Horse 2 (Bay Horse)", falcon: "Sokol 2 (Krahujec)", falconEn: "Falcon 2 (Sparrowhawk)", dog: "Pes 2 (Bígl)", dogEn: "Dog 2 (Beagle)" },
+        { setId: 3, horse: "Kůň 3 (Vraník)", horseEn: "Horse 3 (Black Steed)", falcon: "Sokol 3 (Ostříž)", falconEn: "Falcon 3 (Hobby)", dog: "Pes 3 (Chrt)", dogEn: "Dog 3 (Greyhound)" },
+        { setId: 4, horse: "Kůň 4 (Ryzák)", horseEn: "Horse 4 (Chestnut)", falcon: "Sokol 4 (Raroh)", falconEn: "Falcon 4 (Saker Falcon)", dog: "Pes 4 (Barvář)", dogEn: "Dog 4 (Bloodhound)" },
+        { setId: 5, horse: "Kůň 5 (Bělouš)", horseEn: "Horse 5 (White Steed)", falcon: "Sokol 5 (Královský ostříž)", falconEn: "Falcon 5 (Royal Hobby)", dog: "Pes 5 (Slídič)", dogEn: "Dog 5 (Tracker)" },
+        { setId: 6, horse: "Kůň 6 (Plavák)", horseEn: "Horse 6 (Dun Horse)", falcon: "Sokol 6 (Sokol stěhovavý)", falconEn: "Falcon 6 (Peregrine Falcon)", dog: "Pes 6 (Vlkodav)", dogEn: "Dog 6 (Wolfhound)" },
+        { setId: 7, horse: "Kůň 7 (Šiml)", horseEn: "Horse 7 (Grey Horse)", falcon: "Sokol 7 (Luňák)", falconEn: "Falcon 7 (Red Kite)", dog: "Pes 7 (Doga)", dogEn: "Dog 7 (Great Dane)" },
+        { setId: 8, horse: "Kůň 8 (Fríský oř)", horseEn: "Horse 8 (Friesian Steed)", falcon: "Sokol 8 (Orlovec)", falconEn: "Falcon 8 (Osprey)", dog: "Pes 8 (Chrtí král)", dogEn: "Dog 8 (King Greyhound)" },
+        { setId: 9, horse: "Kůň 9 (Andaluský hřebec)", horseEn: "Horse 9 (Andalusian Stallion)", falcon: "Sokol 9 (Jestřáb)", falconEn: "Falcon 9 (Goshawk)", dog: "Pes 9 (Lovecký chrt)", dogEn: "Dog 9 (Hunting Hound)" },
+        { setId: 10, horse: "Kůň 10 (Válečný oř)", horseEn: "Horse 10 (Warhorse)", falcon: "Sokol 10 (Sokol královský)", falconEn: "Falcon 10 (King Falcon)", dog: "Pes 10 (Královský chrt)", dogEn: "Dog 10 (Royal Greyhound)" },
+        { setId: 11, horse: "Kůň 11 (Hvězdný hřebec)", horseEn: "Horse 11 (Astral Stallion)", falcon: "Sokol 11 (Bílý raroh)", falconEn: "Falcon 11 (White Saker)", dog: "Pes 11 (Stříbrný ohař)", dogEn: "Dog 11 (Silver Hound)" },
+        { setId: 12, horse: "Kůň 12 (Královský oř)", horseEn: "Horse 12 (Royal Steed)", falcon: "Sokol 12 (Fénixův sokol)", falconEn: "Falcon 12 (Phoenix Falcon)", dog: "Pes 12 (Zlatý chrt)", dogEn: "Dog 12 (Golden Greyhound)" },
+        { setId: 13, horse: "Kůň 13 (Zlatý palomino)", horseEn: "Horse 13 (Golden Palomino)", falcon: "Sokol 13 (Skalní orel)", falconEn: "Falcon 13 (Golden Eagle)", dog: "Pes 13 (Severní vlkodav)", dogEn: "Dog 13 (Northern Wolfhound)" },
+        { setId: 14, horse: "Kůň 14 (Stínový oř)", horseEn: "Horse 14 (Shadow Steed)", falcon: "Sokol 14 (Noční raroh)", falconEn: "Falcon 14 (Night Falcon)", dog: "Pes 14 (Hradní chrlič)", dogEn: "Dog 14 (Castle Gargoyle)" }
     ],
 
     // Převod textového seed kódu např. KID-78-3B-M2-A6-R1-D2-T0-X1-S4598 nebo KID-78-3B-M2-S4598 zpět na parametry

@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611171325">
+    <link rel="stylesheet" href="css/main.css?v=202611171545">
 
-    <link rel="stylesheet" href="css/board.css?v=202611171325">
+    <link rel="stylesheet" href="css/board.css?v=202611171545">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611171325">
+    <link rel="stylesheet" href="css/modals.css?v=202611171545">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611171325">
+    <link rel="stylesheet" href="css/mobile.css?v=202611171545">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -3481,25 +3481,25 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/cs.js?v=202611171325" defer></script>
-    <script src="js/i18n/en.js?v=202611171325" defer></script>
-    <script src="js/app-i18n.js?v=202611171325" defer></script>
-    <script src="js/game-data.js?v=202611171325" defer></script>
-    <script src="js/game-boards.js?v=202611171325" defer></script>
-    <script src="js/game-engine.js?v=202611171325" defer></script>
-    <script src="js/game-combat-ai.js?v=202611171325" defer></script>
-    <script src="js/app-audio.js?v=202611171325" defer></script>
-    <script src="js/app-dialog.js?v=202611171325" defer></script>
-    <script src="js/app.js?v=202611171325" defer></script>
-    <script src="js/app-board.js?v=202611171325" defer></script>
-    <script src="js/app-hud.js?v=202611171325" defer></script>
-    <script src="js/app-modals.js?v=202611171325" defer></script>
-    <script src="js/app-online.js?v=202611171325" defer></script>
-    <script src="js/app-saves.js?v=202611171325" defer></script>
-    <script src="js/app-map-editor.js?v=202611171325" defer></script>
-    <script src="js/app-catalog.js?v=202611171325" defer></script>
-    <script src="js/app-admin.js?v=202611171325" defer></script>
-    <script src="js/app-musicwidget.js?v=202611171325" defer></script>
+    <script src="js/i18n/cs.js?v=202611171545" defer></script>
+    <script src="js/i18n/en.js?v=202611171545" defer></script>
+    <script src="js/app-i18n.js?v=202611171545" defer></script>
+    <script src="js/game-data.js?v=202611171545" defer></script>
+    <script src="js/game-boards.js?v=202611171545" defer></script>
+    <script src="js/game-engine.js?v=202611171545" defer></script>
+    <script src="js/game-combat-ai.js?v=202611171545" defer></script>
+    <script src="js/app-audio.js?v=202611171545" defer></script>
+    <script src="js/app-dialog.js?v=202611171545" defer></script>
+    <script src="js/app.js?v=202611171545" defer></script>
+    <script src="js/app-board.js?v=202611171545" defer></script>
+    <script src="js/app-hud.js?v=202611171545" defer></script>
+    <script src="js/app-modals.js?v=202611171545" defer></script>
+    <script src="js/app-online.js?v=202611171545" defer></script>
+    <script src="js/app-saves.js?v=202611171545" defer></script>
+    <script src="js/app-map-editor.js?v=202611171545" defer></script>
+    <script src="js/app-catalog.js?v=202611171545" defer></script>
+    <script src="js/app-admin.js?v=202611171545" defer></script>
+    <script src="js/app-musicwidget.js?v=202611171545" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -4517,7 +4517,7 @@
                             </div>
                         </div>
                         <div style="margin-bottom:0.4rem;">
-                            <label for="ms-royal-castle" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;">🏰 Hlavní královské sídlo (středová dominanta):</label>
+                            <label for="ms-royal-castle" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;"><span data-i18n="map_studio.royal_castle_label">🏰 Hlavní královské sídlo (středová dominanta):</span></label>
                             <select id="ms-royal-castle" class="prs-select" style="width:100%; font-size:0.76rem; padding:0.28rem;" onchange="PRS_App.onMapStudioTopOptionChange()">
                                 <option value="auto" selected>🎲 Podle prostředí / živlu (automaticky)</option>
                                 <option value="castle_royal">👑 Královský hrad (Sídlo koruny)</option>
@@ -4534,14 +4534,14 @@
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 140px; gap:0.45rem;">
                             <div>
-                                <label for="ms-custom-name" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;">🏷️ Vlastní název herního plánu:</label>
-                                <input type="text" id="ms-custom-name" class="prs-input" style="width:100%; font-size:0.76rem; padding:0.28rem 0.45rem;" placeholder="Např. Království pěti draků..." oninput="PRS_App.onMapStudioTopOptionChange()" />
+                                <label for="ms-custom-name" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;"><span data-i18n="map_studio.custom_name_label">🏷️ Vlastní název herního plánu:</span></label>
+                                <input type="text" id="ms-custom-name" class="prs-input" style="width:100%; font-size:0.76rem; padding:0.28rem 0.45rem;" placeholder="Např. Království pěti draků..." oninput="PRS_App.onMapStudioTopOptionChange()" data-i18n-placeholder="map_studio.custom_name_placeholder" />
                             </div>
                             <div>
-                                <label for="ms-seed-input" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;">🎲 Seed rozložení:</label>
+                                <label for="ms-seed-input" style="font-size:0.72rem; color:#cbd5e1; display:block; margin-bottom:2px;"><span data-i18n="map_studio.seed_label">🎲 Seed rozložení:</span></label>
                                 <div style="display:flex; gap:0.25rem;">
                                     <input type="text" id="ms-seed-input" class="prs-input" style="flex:1; font-family:monospace; font-size:0.74rem; padding:0.28rem 0.35rem;" onchange="PRS_App.loadMapStudioFromInputSeed()" />
-                                    <button type="button" class="btn-zoom" onclick="PRS_App.rerollMapStudioSeed()" title="Přeskupit rozmístění polí (nový Seed)">🎲</button>
+                                    <button type="button" class="btn-zoom" onclick="PRS_App.rerollMapStudioSeed()" title="Přeskupit rozmístění polí (nový Seed)" data-i18n-title="map_studio.reroll_seed_title">🎲</button>
                                 </div>
                             </div>
                         </div>
@@ -4579,13 +4579,13 @@
 
             <!-- PATIČKA MODALU (pouze pro recept) -->
             <div id="ms-modal-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-top:0.85rem; border-top:1px solid rgba(212,175,55,0.25); padding-top:0.7rem;">
-                <button type="button" class="btn-secondary" onclick="PRS_App.closeMapStudioModal()">Zrušit</button>
+                <button type="button" class="btn-secondary" onclick="PRS_App.closeMapStudioModal()" data-i18n="common.cancel">Zrušit</button>
                 <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-                    <button type="button" id="btn-ms-admin-save-template" class="btn-secondary" style="display:none; border-color:#f59e0b; color:#fde68a; font-weight:700;" onclick="PRS_App.openSaveToPredefinedModal()">
+                    <button type="button" id="btn-ms-admin-save-template" class="btn-secondary" style="display:none; border-color:#f59e0b; color:#fde68a; font-weight:700;" onclick="PRS_App.openSaveToPredefinedModal()" data-i18n="map_studio.btn_admin_save_db">
                         🛡️ Uložit do předdefinovaných plánů (Admin DB)
                     </button>
-                    <button type="button" class="btn-secondary" onclick="PRS_App.copyMapStudioSeed()" style="border-color:#38bdf8; color:#bae6fd;">📋 Kopírovat kód</button>
-                    <button type="button" class="btn-gold-lg" style="padding:0.45rem 1.25rem; font-size:0.92rem;" onclick="PRS_App.applyMapStudioBoardAndStart()">⚔️ Hrát na tomto dynamickém plánu →</button>
+                    <button type="button" class="btn-secondary" onclick="PRS_App.copyMapStudioSeed()" style="border-color:#38bdf8; color:#bae6fd;" data-i18n="map_studio.btn_copy_code">📋 Kopírovat kód</button>
+                    <button type="button" class="btn-gold-lg" style="padding:0.45rem 1.25rem; font-size:0.92rem;" onclick="PRS_App.applyMapStudioBoardAndStart()" data-i18n="map_studio.btn_play_dynamic">⚔️ Hrát na tomto dynamickém plánu →</button>
                 </div>
             </div>
         </div>

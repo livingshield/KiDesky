@@ -246,31 +246,52 @@
         updateStatusHelp: function () {
             var helpEl = document.getElementById("me-status-help");
             if (!helpEl) return;
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var text = "";
             if (this.activeTool === "select") {
-                text = "👆 <strong>Inspektor &amp; Přesun:</strong> Klikni na políčko, <strong>cestu</strong> nebo <strong>Hlavní hrad</strong> pro úpravu parametrů a směrů, případně prvek <strong>tažením přemísti</strong>.";
+                text = isEn
+                    ? "👆 <strong>Inspector &amp; Move:</strong> Click on a tile, <strong>path</strong>, or <strong>Royal Castle</strong> to edit parameters and directions, or <strong>drag to move</strong> elements."
+                    : "👆 <strong>Inspektor &amp; Přesun:</strong> Klikni na políčko, <strong>cestu</strong> nebo <strong>Hlavní hrad</strong> pro úpravu parametrů a směrů, případně prvek <strong>tažením přemísti</strong>.";
             } else if (this.activeTool === "pan") {
-                text = "🧭 <strong>Posun mapy:</strong> Chytni plátno myší/prstem kdekoliv a tažením posouvej celou herní desku. Kolečkem myši přibližuj a oddaluj.";
+                text = isEn
+                    ? "🧭 <strong>Pan Map:</strong> Drag canvas anywhere to pan the board. Use mouse wheel to zoom in and out."
+                    : "🧭 <strong>Posun mapy:</strong> Chytni plátno myší/prstem kdekoliv a tažením posouvej celou herní desku. Kolečkem myši přibližuj a oddaluj.";
             } else if (this.activeTool === "move") {
-                text = "📍 <strong>Režim přesunu:</strong> Chytni kterékoliv políčko nebo Hlavní hrad a tažením ho přemísti na požadovanou pozici. Cesty i mosty se přizpůsobí.";
+                text = isEn
+                    ? "📍 <strong>Move Mode:</strong> Grab any tile or the Royal Castle and drag it to desired position. Paths and bridges will adapt automatically."
+                    : "📍 <strong>Režim přesunu:</strong> Chytni kterékoliv políčko nebo Hlavní hrad a tažením ho přemísti na požadovanou pozici. Cesty i mosty se přizpůsobí.";
             } else if (this.activeTool === "add") {
-                text = "➕ <strong>Přidat pole:</strong> Klikni kamkoliv na mapu pro umístění nového políčka. Pokud je vybráno předchozí pole, automaticky se propojí.";
+                text = isEn
+                    ? "➕ <strong>Add Tile:</strong> Click anywhere on the map to place a new tile. If a previous tile is selected, it connects automatically."
+                    : "➕ <strong>Přidat pole:</strong> Klikni kamkoliv na mapu pro umístění nového políčka. Pokud je vybráno předchozí pole, automaticky se propojí.";
             } else if (this.activeTool === "swap") {
                 if (this.swapSourceNodeId === null) {
-                    text = "🔄 <strong>Prohození:</strong> Krok 1/2 – Klikni na PRVNÍ políčko, které chceš prohodit.";
+                    text = isEn
+                        ? "🔄 <strong>Swap:</strong> Step 1/2 – Click on the FIRST tile to swap."
+                        : "🔄 <strong>Prohození:</strong> Krok 1/2 – Klikni na PRVNÍ políčko, které chceš prohodit.";
                 } else {
-                    text = "🔄 <strong>Prohození:</strong> Krok 2/2 – Nyní klikni na DRUHÉ políčko pro vzájemné prohození obsahu.";
+                    text = isEn
+                        ? "🔄 <strong>Swap:</strong> Step 2/2 – Now click on the SECOND tile to swap contents."
+                        : "🔄 <strong>Prohození:</strong> Krok 2/2 – Nyní klikni na DRUHÉ políčko pro vzájemné prohození obsahu.";
                 }
             } else if (this.activeTool === "link") {
                 if (this.linkSourceNodeId === null) {
-                    text = "🔗 <strong>Cesty &amp; Směry:</strong> Klikni na <strong>existující čáru cesty</strong> pro otočení směru či smazání, NEBO klikni postupně na 2 políčka pro vytvoření/zrušení spojení.";
+                    text = isEn
+                        ? "🔗 <strong>Paths &amp; Directions:</strong> Click on an <strong>existing path line</strong> to reverse direction or delete, OR click 2 tiles sequentially to create/remove connection."
+                        : "🔗 <strong>Cesty &amp; Směry:</strong> Klikni na <strong>existující čáru cesty</strong> pro otočení směru či smazání, NEBO klikni postupně na 2 políčka pro vytvoření/zrušení spojení.";
                 } else {
-                    text = "🔗 <strong>Cesty &amp; Směry:</strong> Krok 2/2 – Nyní klikni na cílové políčko pro vytvoření cesty z #" + this.linkSourceNodeId + " (nebo zrušení existující).";
+                    text = isEn
+                        ? ("🔗 <strong>Paths &amp; Directions:</strong> Step 2/2 – Now click on the target tile to create a path from #" + this.linkSourceNodeId + " (or remove existing).")
+                        : ("🔗 <strong>Cesty &amp; Směry:</strong> Krok 2/2 – Nyní klikni na cílové políčko pro vytvoření cesty z #" + this.linkSourceNodeId + " (nebo zrušení existující).");
                 }
             } else if (this.activeTool === "river") {
-                text = "🌊 <strong>Editor řeky:</strong> Chytni a táhni <strong style='color:#38bdf8;'>modré uzly</strong> (meandry) nebo <strong style='color:#facc15;'>žlutá táhla</strong> křivek. Podržením <kbd>Alt</kbd> posuneš uzel bez jeho táhel; mosty se po puštění přepočítají.";
+                text = isEn
+                    ? "🌊 <strong>River Editor:</strong> Drag <strong style='color:#38bdf8;'>blue nodes</strong> (meanders) or <strong style='color:#facc15;'>yellow curve handles</strong>. Hold <kbd>Alt</kbd> to move node independently; bridges will recalculate upon release."
+                    : "🌊 <strong>Editor řeky:</strong> Chytni a táhni <strong style='color:#38bdf8;'>modré uzly</strong> (meandry) nebo <strong style='color:#facc15;'>žlutá táhla</strong> křivek. Podržením <kbd>Alt</kbd> posuneš uzel bez jeho táhel; mosty se po puštění přepočítají.";
             } else if (this.activeTool === "castle") {
-                text = "🏰 <strong>Hlavní hrad:</strong> Tažením myší přesuň dominantu Královského hradu na libovolné místo mapy a v panelu vpravo dole uprav jeho vzhled, velikost i otočení.";
+                text = isEn
+                    ? "🏰 <strong>Royal Castle:</strong> Drag the Royal Castle landmark to any spot on the map and adjust its appearance, scale, and rotation in the bottom-right panel."
+                    : "🏰 <strong>Hlavní hrad:</strong> Tažením myší přesuň dominantu Královského hradu na libovolné místo mapy a v panelu vpravo dole uprav jeho vzhled, velikost i otočení.";
             }
             helpEl.innerHTML = text;
         },
@@ -2141,6 +2162,7 @@
             var bodyRiver = document.getElementById("me-insp-body-river");
             var titleEl = document.getElementById("me-insp-title");
             var idEl = document.getElementById("me-insp-id");
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
 
             var hideAll = function () {
                 if (bodyNode) bodyNode.style.display = "none";
@@ -2175,28 +2197,32 @@
                 box.style.display = "block";
                 hideAll();
                 if (bodyEdge) bodyEdge.style.display = "block";
-                if (titleEl) titleEl.textContent = "🔗 Inspektor cesty";
+                if (titleEl) titleEl.textContent = isEn ? "🔗 Path Inspector" : "🔗 Inspektor cesty";
                 if (idEl) idEl.textContent = "#" + nFrom.id + " ➔ #" + nTo.id;
 
                 if (bodyEdge) {
                     var idxInNext = nFrom.next.indexOf(nTo.id);
                     var isJunc = nFrom.next.length >= 2;
                     var roleTxt = isJunc
-                        ? (idxInNext === 0 ? "🔵 Hlavní směr (kostka 1–3)" : (idxInNext === 1 ? "🟠 Boční větev (kostka 4–6)" : "⚪ Vedlejší propojení"))
-                        : "Jediná výstupní cesta";
+                        ? (idxInNext === 0
+                            ? (isEn ? "🔵 Primary direction (dice 1–3)" : "🔵 Hlavní směr (kostka 1–3)")
+                            : (idxInNext === 1
+                                ? (isEn ? "🟠 Side branch (dice 4–6)" : "🟠 Boční větev (kostka 4–6)")
+                                : (isEn ? "⚪ Secondary link" : "⚪ Vedlejší propojení")))
+                        : (isEn ? "Single outgoing path" : "Jediná výstupní cesta");
                     var html = [];
                     html.push('<div style="font-size:0.74rem; color:#e2e8f0; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.25); border-radius:6px; padding:0.45rem; margin-bottom:0.45rem;">');
-                    html.push('  <div style="margin-bottom:3px;"><strong>Od:</strong> #' + nFrom.id + ' ' + this.escapeXml(nFrom.name || nFrom.code || "") + '</div>');
-                    html.push('  <div style="margin-bottom:4px;"><strong>Do:</strong> #' + nTo.id + ' ' + this.escapeXml(nTo.name || nTo.code || "") + '</div>');
+                    html.push('  <div style="margin-bottom:3px;"><strong>' + (isEn ? 'From:' : 'Od:') + '</strong> #' + nFrom.id + ' ' + this.escapeXml(nFrom.name || nFrom.code || "") + '</div>');
+                    html.push('  <div style="margin-bottom:4px;"><strong>' + (isEn ? 'To:' : 'Do:') + '</strong> #' + nTo.id + ' ' + this.escapeXml(nTo.name || nTo.code || "") + '</div>');
                     html.push('  <div style="font-size:0.7rem; color:#fde68a;">' + roleTxt + '</div>');
                     html.push('</div>');
                     html.push('<div style="display:flex; flex-direction:column; gap:0.35rem;">');
-                    html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.reverseEdgeDirection(' + nFrom.id + ', ' + nTo.id + ')">🔄 Obrátit směr (#' + nTo.id + ' ➔ #' + nFrom.id + ')</button>');
+                    html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.reverseEdgeDirection(' + nFrom.id + ', ' + nTo.id + ')">' + (isEn ? ('🔄 Reverse direction (#' + nTo.id + ' ➔ #' + nFrom.id + ')') : ('🔄 Obrátit směr (#' + nTo.id + ' ➔ #' + nFrom.id + ')')) + '</button>');
                     if (isJunc) {
-                        html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + nFrom.id + ')">🔀 Prohodit prioritu rozcestí (1–3 ⇄ 4–6)</button>');
+                        html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + nFrom.id + ')">' + (isEn ? '🔀 Swap junction priority (1–3 ⇄ 4–6)' : '🔀 Prohodit prioritu rozcestí (1–3 ⇄ 4–6)') + '</button>');
                     }
-                    html.push('  <button type="button" class="btn-icon-danger" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.removeEdge(' + nFrom.id + ', ' + nTo.id + ')">✂️ Odebrat cestu (Delete)</button>');
-                    html.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.5rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()">🧭 Automaticky srovnat větve</button>');
+                    html.push('  <button type="button" class="btn-icon-danger" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.removeEdge(' + nFrom.id + ', ' + nTo.id + ')">' + (isEn ? '✂️ Remove path (Delete)' : '✂️ Odebrat cestu (Delete)') + '</button>');
+                    html.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.5rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()">' + (isEn ? '🧭 Auto-orient branches' : '🧭 Automaticky srovnat větve') + '</button>');
                     html.push('</div>');
                     bodyEdge.innerHTML = html.join("\n");
                 }
@@ -2213,8 +2239,8 @@
                 box.style.display = "block";
                 hideAll();
                 if (bodyCastle) bodyCastle.style.display = "block";
-                if (titleEl) titleEl.textContent = "🏰 Hlavní hrad";
-                if (idEl) idEl.textContent = "Královský";
+                if (titleEl) titleEl.textContent = isEn ? "🏰 Royal Castle" : "🏰 Hlavní hrad";
+                if (idEl) idEl.textContent = isEn ? "Royal" : "Královský";
 
                 if (bodyCastle) {
                     var catalog = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ALL_CASTLES) || [];
@@ -2222,31 +2248,32 @@
                     for (var ci = 0; ci < catalog.length; ci++) {
                         var c = catalog[ci];
                         var isSelSkin = (rc.skinId === c.id || rc.selectedKey === c.id || rc.image === c.img || rc.img === c.img);
-                        opts.push('<option value="' + c.id + '"' + (isSelSkin ? ' selected' : '') + '>' + this.escapeXml((c.icon || "🏰") + " " + c.name) + '</option>');
+                        var cName = isEn ? (c.nameEn || c.name) : c.name;
+                        opts.push('<option value="' + c.id + '"' + (isSelSkin ? ' selected' : '') + '>' + this.escapeXml((c.icon || "🏰") + " " + cName) + '</option>');
                     }
                     var scalePct = Math.round((rc.scale || 1) * 100);
                     var cHtml = [];
                     cHtml.push('<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#cbd5e1; background:rgba(0,0,0,0.4); border-radius:6px; padding:4px 8px; margin-bottom:0.4rem;">');
-                    cHtml.push('  <span>Souřadnice na mapě:</span>');
+                    cHtml.push('  <span>' + (isEn ? 'Map coordinates:' : 'Souřadnice na mapě:') + '</span>');
                     cHtml.push('  <strong id="me-insp-castle-coords" style="color:#fde68a; font-family:monospace;">[' + Math.round(rc.x) + ', ' + Math.round(rc.y) + ']</strong>');
                     cHtml.push('</div>');
                     cHtml.push('<div style="margin-bottom:0.35rem;">');
-                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Podoba (skin) hradu:</label>');
+                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Castle appearance (skin):' : 'Podoba (skin) hradu:') + '</label>');
                     cHtml.push('  <select class="prs-select" style="width:100%; font-size:0.74rem; padding:0.25rem;" onchange="PRS_MapEditor.applyRoyalCastleSkin(this.value)">' + opts.join("") + '</select>');
                     cHtml.push('</div>');
                     cHtml.push('<div style="margin-bottom:0.35rem;">');
-                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Název hradu:</label>');
-                    cHtml.push('  <input type="text" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" value="' + this.escapeXml(rc.name || "Královský hrad") + '" onchange="PRS_MapEditor.applyRoyalCastleName(this.value)" />');
+                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Castle name:' : 'Název hradu:') + '</label>');
+                    cHtml.push('  <input type="text" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" value="' + this.escapeXml(rc.name || (isEn ? "Royal Castle" : "Královský hrad")) + '" onchange="PRS_MapEditor.applyRoyalCastleName(this.value)" />');
                     cHtml.push('</div>');
                     cHtml.push('<div style="margin-bottom:0.45rem;">');
-                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>Velikost hradu:</span><strong id="me-insp-castle-scale-val" style="color:#fef08a;">' + scalePct + '%</strong></label>');
+                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>' + (isEn ? 'Castle scale:' : 'Velikost hradu:') + '</span><strong id="me-insp-castle-scale-val" style="color:#fef08a;">' + scalePct + '%</strong></label>');
                     cHtml.push('  <input type="range" min="0.75" max="1.30" step="0.05" value="' + (rc.scale || 1) + '" style="width:100%;" oninput="var el=document.getElementById(\'me-insp-castle-scale-val\'); if(el) el.textContent=Math.round(this.value*100)+\'%\';" onchange="PRS_MapEditor.applyRoyalCastleScale(this.value)" />');
                     cHtml.push('</div>');
                     cHtml.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem; margin-bottom:0.35rem;">');
-                    cHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.toggleRoyalCastleFlip()">↔️ Zrcadlit ' + (rc.isFlipped ? '(✓)' : '') + '</button>');
-                    cHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.resetRoyalCastlePosition()">🎯 Střed mapy</button>');
+                    cHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.toggleRoyalCastleFlip()">' + (isEn ? ('↔️ Flip ' + (rc.isFlipped ? '(✓)' : '')) : ('↔️ Zrcadlit ' + (rc.isFlipped ? '(✓)' : ''))) + '</button>');
+                    cHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.resetRoyalCastlePosition()">' + (isEn ? '🎯 Map center' : '🎯 Střed mapy') + '</button>');
                     cHtml.push('</div>');
-                    cHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">🌿 Přepočítat mosty &amp; dekorace</button>');
+                    cHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">' + (isEn ? '🌿 Recalculate Bridges & Decors' : '🌿 Přepočítat mosty & dekorace') + '</button>');
                     bodyCastle.innerHTML = cHtml.join("\n");
                 }
                 return;
@@ -2257,51 +2284,51 @@
                 box.style.display = "block";
                 hideAll();
                 if (bodyRiver) bodyRiver.style.display = "block";
-                if (titleEl) titleEl.textContent = "🌊 Editor řeky";
+                if (titleEl) titleEl.textContent = isEn ? "🌊 River Editor" : "🌊 Editor řeky";
                 var rivers = (this.board && Array.isArray(this.board.rivers)) ? this.board.rivers : [];
-                if (idEl) idEl.textContent = rivers.length > 0 ? ("Větev " + (this.selectedRiverIdx + 1) + "/" + rivers.length) : "Bez řeky";
+                if (idEl) idEl.textContent = rivers.length > 0 ? ((isEn ? "Branch " : "Větev ") + (this.selectedRiverIdx + 1) + "/" + rivers.length) : (isEn ? "No river" : "Bez řeky");
 
                 if (bodyRiver) {
                     var rHtml = [];
                     rHtml.push('<div style="margin-bottom:0.4rem;">');
-                    rHtml.push('  <div style="font-size:0.68rem; color:#cbd5e1; margin-bottom:3px;">Rychlé šablony toku:</div>');
+                    rHtml.push('  <div style="font-size:0.68rem; color:#cbd5e1; margin-bottom:3px;">' + (isEn ? 'Quick course presets:' : 'Rychlé šablony toku:') + '</div>');
                     rHtml.push('  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'standard\')">🌊 Hlavní</button>');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'dual\')">🌿 Soutok</button>');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'island\')">🏝️ Ostrov</button>');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'delta\')">🔱 Delta</button>');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:3px 4px; grid-column:span 2; border-color:#64748b;" onclick="PRS_MapEditor.applyRiverPreset(\'none\')">🏜️ Bez řeky</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'single\')">' + (isEn ? '🌊 Main' : '🌊 Hlavní') + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'dual\')">' + (isEn ? '🌿 Confluence' : '🌿 Soutok') + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'island\')">' + (isEn ? '🏝️ Island' : '🏝️ Ostrov') + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'delta\')">' + (isEn ? '🔻 Delta' : '🔻 Delta') + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px; border-color:#64748b; color:#94a3b8;" onclick="PRS_MapEditor.applyRiverPreset(\'none\')">' + (isEn ? '🏜️ No River' : '🏜️ Bez řeky') + '</button>');
                     rHtml.push('  </div>');
                     rHtml.push('</div>');
 
                     if (rivers.length > 0) {
-                        if (this.selectedRiverIdx >= rivers.length) this.selectedRiverIdx = 0;
-                        var curRiv = rivers[this.selectedRiverIdx];
-                        var curW = (curRiv.width && curRiv.width >= 28) ? curRiv.width : (curRiv.isTributary ? 28 : 38);
+                        var curRiv = rivers[this.selectedRiverIdx] || rivers[0];
+                        var curW = curRiv ? (curRiv.width || 38) : 38;
 
-                        rHtml.push('<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:0.4rem;">');
+                        rHtml.push('<div style="display:flex; gap:3px; margin-bottom:0.4rem; overflow-x:auto;">');
                         for (var ri = 0; ri < rivers.length; ri++) {
                             var isActiveRiv = (ri === this.selectedRiverIdx);
-                            rHtml.push('<button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;' + (isActiveRiv ? ' border-color:#facc15; background:rgba(250,204,21,0.18); color:#fef08a;' : '') + '" onclick="PRS_MapEditor.selectRiverIndex(' + ri + ')">' + (rivers[ri].isTributary ? 'Přítok ' : 'Řeka ') + (ri + 1) + '</button>');
+                            var bName = (rivers[ri].isTributary ? (isEn ? 'Tributary ' : 'Přítok ') : (isEn ? 'River ' : 'Řeka ')) + (ri + 1);
+                            rHtml.push('<button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 6px;' + (isActiveRiv ? ' border-color:#facc15; background:rgba(250,204,21,0.18); color:#fef08a;' : '') + '" onclick="PRS_MapEditor.selectRiverIndex(' + ri + ')">' + bName + '</button>');
                         }
                         rHtml.push('</div>');
 
-                        rHtml.push('<div id="me-insp-river-pt-info" style="font-size:0.68rem; color:#bae6fd; background:rgba(14,165,233,0.12); border-radius:5px; padding:3px 6px; margin-bottom:0.35rem;">Táhni modré kotvy (s Alt bez táhel) nebo žluté úchyty.</div>');
+                        rHtml.push('<div id="me-insp-river-pt-info" style="font-size:0.68rem; color:#bae6fd; background:rgba(14,165,233,0.12); border-radius:5px; padding:3px 6px; margin-bottom:0.35rem;">' + (isEn ? 'Drag blue anchors (with Alt without handles) or yellow curve handles.' : 'Táhni modré kotvy (s Alt bez táhel) nebo žluté úchyty.') + '</div>');
                         rHtml.push('<div style="margin-bottom:0.4rem;">');
-                        rHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>Šířka vybraného toku:</span><strong id="me-insp-river-w-val" style="color:#38bdf8;">' + curW + ' px</strong></label>');
+                        rHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>' + (isEn ? 'Selected course width:' : 'Šířka vybraného toku:') + '</span><strong id="me-insp-river-w-val" style="color:#38bdf8;">' + curW + ' px</strong></label>');
                         rHtml.push('  <input type="range" min="24" max="54" step="2" value="' + Math.max(24, Math.min(54, curW)) + '" style="width:100%;" oninput="var el=document.getElementById(\'me-insp-river-w-val\'); if(el) el.textContent=this.value+\' px\';" onchange="PRS_MapEditor.applyRiverWidth(this.value)" />');
                         rHtml.push('</div>');
 
                         rHtml.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem; margin-bottom:0.35rem;">');
-                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverMeander()">〰️ Přidat zákrut</button>');
-                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverTributary()">➕ Přidat přítok</button>');
-                        rHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.flipSelectedRiverHorizontally()">↔️ Překlopit X</button>');
-                        rHtml.push('  <button type="button" class="btn-icon-danger" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedRiver()">🗑️ Smazat větev</button>');
+                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverMeander()">' + (isEn ? '〰️ Add Meander' : '〰️ Přidat zákrut') + '</button>');
+                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverTributary()">' + (isEn ? '➕ Add Tributary' : '➕ Přidat přítok') + '</button>');
+                        rHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.flipSelectedRiverHorizontally()">' + (isEn ? '↔️ Flip X' : '↔️ Překlopit X') + '</button>');
+                        rHtml.push('  <button type="button" class="btn-icon-danger" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedRiver()">' + (isEn ? '🗑️ Delete Branch' : '🗑️ Smazat větev') + '</button>');
                         rHtml.push('</div>');
                     } else {
-                        rHtml.push('<button type="button" class="btn-secondary" style="width:100%; font-size:0.72rem; padding:0.3rem; margin-bottom:0.35rem;" onclick="PRS_MapEditor.addRiverTributary()">➕ Založit nové koryto řeky</button>');
+                        rHtml.push('<button type="button" class="btn-secondary" style="width:100%; font-size:0.72rem; padding:0.3rem; margin-bottom:0.35rem;" onclick="PRS_MapEditor.addRiverTributary()">' + (isEn ? '➕ Create New River Bed' : '➕ Založit nové koryto řeky') + '</button>');
                     }
-                    rHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">🌿 Přepočítat mosty &amp; dekorace</button>');
+                    rHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">' + (isEn ? '🌿 Recalculate Bridges & Decors' : '🌿 Přepočítat mosty & dekorace') + '</button>');
                     bodyRiver.innerHTML = rHtml.join("\n");
                 }
                 return;
@@ -2322,7 +2349,7 @@
             box.style.display = "block";
             hideAll();
             if (bodyNode) bodyNode.style.display = "block";
-            if (titleEl) titleEl.textContent = "⚙️ Inspektor políčka";
+            if (titleEl) titleEl.textContent = isEn ? "⚙️ Tile Inspector" : "⚙️ Inspektor políčka";
 
             var coordsEl = document.getElementById("me-insp-coords");
             var typeSel = document.getElementById("me-insp-type");
@@ -2352,14 +2379,14 @@
                     tierWrap.style.display = "block";
                     tierSel.innerHTML = "";
                     for (var a = 1; a <= 14; a++) {
-                        tierSel.innerHTML += '<option value="' + a + '"' + ((node.animalLevel || 1) === a ? ' selected' : '') + '>Úroveň ' + a + '</option>';
+                        tierSel.innerHTML += '<option value="' + a + '"' + ((node.animalLevel || 1) === a ? ' selected' : '') + '>' + (isEn ? ('Level ' + a) : ('Úroveň ' + a)) + '</option>';
                     }
                 } else if (isMaster) {
                     tierWrap.style.display = "block";
-                    tierSel.innerHTML = '<option value="1"' + ((node.masterTier || 1) === 1 ? ' selected' : '') + '>Stupeň I (Základní +1)</option>' +
-                                        '<option value="2"' + ((node.masterTier || 1) === 2 ? ' selected' : '') + '>Stupeň II (Pokročilý +2)</option>' +
-                                        '<option value="3"' + ((node.masterTier || 1) === 3 ? ' selected' : '') + '>Stupeň III (Pečetě & Záštita)</option>' +
-                                        '<option value="4"' + ((node.masterTier || 1) === 4 ? ' selected' : '') + '>Stupeň IV (Duely o 1.5 💖)</option>';
+                    tierSel.innerHTML = '<option value="1"' + ((node.masterTier || 1) === 1 ? ' selected' : '') + '>' + (isEn ? 'Tier I (Basic +1)' : 'Stupeň I (Základní +1)') + '</option>' +
+                                        '<option value="2"' + ((node.masterTier || 1) === 2 ? ' selected' : '') + '>' + (isEn ? 'Tier II (Advanced +2)' : 'Stupeň II (Pokročilý +2)') + '</option>' +
+                                        '<option value="3"' + ((node.masterTier || 1) === 3 ? ' selected' : '') + '>' + (isEn ? 'Tier III (Seals & Aegis)' : 'Stupeň III (Pečetě & Záštita)') + '</option>' +
+                                        '<option value="4"' + ((node.masterTier || 1) === 4 ? ' selected' : '') + '>' + (isEn ? 'Tier IV (Duels for 1.5 💖)' : 'Stupeň IV (Duely o 1.5 💖)') + '</option>';
                 } else {
                     tierWrap.style.display = "none";
                 }
@@ -2380,12 +2407,12 @@
 
                 eHtml.push('<div style="border-top:1px solid rgba(212,175,55,0.2); padding-top:0.35rem; margin-bottom:0.4rem;">');
                 eHtml.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">');
-                eHtml.push('    <span style="font-size:0.7rem; color:#fde68a; font-weight:bold;">🛤️ Cesty a směry uzlu</span>');
-                eHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 5px; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()" title="Automaticky srovnat boční větve a rozcestí">🧭 Srovnat</button>');
+                eHtml.push('    <span style="font-size:0.7rem; color:#fde68a; font-weight:bold;">' + (isEn ? '🛤️ Node Paths & Directions' : '🛤️ Cesty a směry uzlu') + '</span>');
+                eHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 5px; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()" title="' + (isEn ? 'Automatically align side branches and junctions' : 'Automaticky srovnat boční větve a rozcestí') + '">' + (isEn ? '🧭 Align' : '🧭 Srovnat') + '</button>');
                 eHtml.push('  </div>');
 
                 if (outList.length === 0) {
-                    eHtml.push('  <div style="font-size:0.68rem; color:#fca5a5; background:rgba(153,27,27,0.35); border:1px solid rgba(248,113,113,0.5); border-radius:5px; padding:3px 6px; margin-bottom:4px;">⚠️ Slepá cesta — pole nemá žádný výstupní směr!</div>');
+                    eHtml.push('  <div style="font-size:0.68rem; color:#fca5a5; background:rgba(153,27,27,0.35); border:1px solid rgba(248,113,113,0.5); border-radius:5px; padding:3px 6px; margin-bottom:4px;">' + (isEn ? '⚠️ Dead end — tile has no outgoing direction!' : '⚠️ Slepá cesta — pole nemá žádný výstupní směr!') + '</div>');
                 } else {
                     var isNodeJunc = outList.length >= 2;
                     for (var oi = 0; oi < outList.length; oi++) {
@@ -2397,28 +2424,28 @@
                         eHtml.push('  <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; font-size:0.68rem; color:#e2e8f0; background:rgba(0,0,0,0.38); padding:2px 5px; border-radius:4px; margin-bottom:3px;">');
                         eHtml.push('    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + jBadge + '➔ #' + tgt.id + ' ' + this.escapeXml(tgt.name || tgt.code || "") + '</span>');
                         eHtml.push('    <span style="display:flex; gap:3px; flex-shrink:0;">');
-                        eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + node.id + ', ' + tgt.id + ')" title="Obrátit směr">🔄</button>');
-                        eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + node.id + ', ' + tgt.id + ')" title="Odebrat cestu">🗑️</button>');
+                        eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + node.id + ', ' + tgt.id + ')" title="' + (isEn ? 'Reverse direction' : 'Obrátit směr') + '">🔄</button>');
+                        eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + node.id + ', ' + tgt.id + ')" title="' + (isEn ? 'Remove path' : 'Odebrat cestu') + '">🗑️</button>');
                         eHtml.push('    </span>');
                         eHtml.push('  </div>');
                     }
                     if (isNodeJunc) {
-                        eHtml.push('  <button type="button" class="btn-secondary" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem; margin-bottom:4px; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + node.id + ')">🔀 Prohodit 1–3 ⇄ 4–6</button>');
+                        eHtml.push('  <button type="button" class="btn-secondary" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem; margin-bottom:4px; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + node.id + ')">' + (isEn ? '🔀 Swap 1–3 ⇄ 4–6' : '🔀 Prohodit 1–3 ⇄ 4–6') + '</button>');
                     }
                 }
 
                 for (var ii = 0; ii < inList.length; ii++) {
                     var inc = inList[ii];
                     eHtml.push('  <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; font-size:0.67rem; color:#94a3b8; background:rgba(0,0,0,0.25); padding:2px 5px; border-radius:4px; margin-bottom:3px;">');
-                    eHtml.push('    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">⬅️ z #' + inc.id + ' ' + this.escapeXml(inc.name || inc.code || "") + '</span>');
+                    eHtml.push('    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + (isEn ? '⬅️ from #' : '⬅️ z #') + inc.id + ' ' + this.escapeXml(inc.name || inc.code || "") + '</span>');
                     eHtml.push('    <span style="display:flex; gap:3px; flex-shrink:0;">');
-                    eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + inc.id + ', ' + node.id + ')" title="Obrátit směr">🔄</button>');
-                    eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + inc.id + ', ' + node.id + ')" title="Odebrat cestu">🗑️</button>');
+                    eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + inc.id + ', ' + node.id + ')" title="' + (isEn ? 'Reverse direction' : 'Obrátit směr') + '">🔄</button>');
+                    eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + inc.id + ', ' + node.id + ')" title="' + (isEn ? 'Remove path' : 'Odebrat cestu') + '">🗑️</button>');
                     eHtml.push('    </span>');
                     eHtml.push('  </div>');
                 }
 
-                eHtml.push('  <button type="button" class="btn-zoom" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem;" onclick="PRS_MapEditor.setTool(\'link\'); PRS_MapEditor.linkSourceNodeId = ' + node.id + '; PRS_MapEditor.updateStatusHelp(); PRS_MapEditor.renderCanvas();">🔗 Přidat / odebrat cestu z #' + node.id + '</button>');
+                eHtml.push('  <button type="button" class="btn-zoom" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem;" onclick="PRS_MapEditor.setTool(\'link\'); PRS_MapEditor.linkSourceNodeId = ' + node.id + '; PRS_MapEditor.updateStatusHelp(); PRS_MapEditor.renderCanvas();">' + (isEn ? ('🔗 Add / remove path from #' + node.id) : ('🔗 Přidat / odebrat cestu z #' + node.id)) + '</button>');
                 eHtml.push('</div>');
                 edgesWrap.innerHTML = eHtml.join("\n");
             }
@@ -2908,15 +2935,18 @@
 
         saveToMyTemplates: function () {
             if (!this.board) return;
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             this.refreshBoardDerivedLayers(this.board);
             this.normalizeBoardForEngine(this.board);
-            var customName = prompt("Zadej název této upravené šablony plánu:", this.board.name || "Můj ručně upravený plán");
+            var customName = prompt(isEn ? "Enter a name for this custom board template:" : "Zadej název této upravené šablony plánu:", this.board.name || (isEn ? "My Custom Board" : "Můj ručně upravený plán"));
             if (!customName || !customName.trim()) return;
 
             this.board.name = customName.trim();
             if (window.PRS_App && typeof window.PRS_App.saveBoardAsTemplate === "function") {
                 window.PRS_App.saveBoardAsTemplate(this.board, customName.trim());
-                if (window.KiDeskyToast) window.KiDeskyToast.show("⭐ Šablona „" + customName.trim() + "“ byla uložena do Tvých plánů!", "good");
+                if (window.KiDeskyToast) {
+                    window.KiDeskyToast.show(isEn ? ("⭐ Template „" + customName.trim() + "“ saved to Your Boards!") : ("⭐ Šablona „" + customName.trim() + "“ byla uložena do Tvých plánů!"), "good");
+                }
             }
         },
 
@@ -3131,33 +3161,35 @@
                 '  <!-- HORNÍ LIŠTA NÁSTROJŮ -->',
                 '  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; background:rgba(0,0,0,0.5); padding:0.45rem 0.75rem; border-radius:8px; border:1px solid rgba(212,175,55,0.25);">',
                 '    <div style="display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap;">',
-                '      <span style="font-size:0.75rem; color:#fde68a; font-weight:bold; margin-right:0.25rem;">Nástroje:</span>',
-                '      <button type="button" id="me-tool-select" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'select\')" title="Vybrat políčko a tažením přesouvat">👆 Inspektor &amp; Přesun</button>',
-                '      <button type="button" id="me-tool-add" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'add\')" title="Kliknutím kamkoliv do mapy přidáš nové políčko">➕ Přidat pole</button>',
-                '      <button type="button" id="me-tool-swap" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'swap\')" title="Vzájemné prohození obsahu dvou polí">🔄 Prohodit 2 pole</button>',
-                '      <button type="button" id="me-tool-link" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'link\')" title="Vytvořit / odebrat cestu mezi dvěma poli nebo upravit směry">🔗 Cesty &amp; Směry</button>',
-                '      <button type="button" id="me-tool-river" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'river\')" title="Upravit tok řeky, meandry, přítoky a mosty">🌊 Řeka</button>',
-                '      <button type="button" id="me-tool-castle" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'castle\')" title="Přemístit Hlavní hrad a zvolit jeho vzhled">🏰 Hlavní hrad</button>',
-                '      <button type="button" id="me-btn-route-shape" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.openRouteShapeModal()" title="Procedurálně přegenerovat trasu podle 7 archetypů (s historií Undo)">🧭 Tvar trasy</button>',
-                '      <button type="button" id="me-tool-pan" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'pan\')" title="Posouvat celou mapu (tažením myši / prstem)">🧭 Posun mapy</button>',
-                '      <button type="button" id="me-btn-undo" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem; border-color:#64748b;" onclick="PRS_MapEditor.undo()" title="Vrátit poslední změnu zpět (Ctrl+Z)" disabled>↩️ Zpět</button>',
+                '      <span style="font-size:0.75rem; color:#fde68a; font-weight:bold; margin-right:0.25rem;">' + (isEn ? 'Tools:' : 'Nástroje:') + '</span>',
+                '      <button type="button" id="me-tool-select" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'select\')" title="' + (isEn ? 'Select tile and drag to move' : 'Vybrat políčko a tažením přesouvat') + '">' + (isEn ? '👆 Inspector &amp; Move' : '👆 Inspektor &amp; Přesun') + '</button>',
+                '      <button type="button" id="me-tool-add" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'add\')" title="' + (isEn ? 'Click anywhere on map to add a new tile' : 'Kliknutím kamkoliv do mapy přidáš nové políčko') + '">' + (isEn ? '➕ Add Tile' : '➕ Přidat pole') + '</button>',
+                '      <button type="button" id="me-tool-swap" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'swap\')" title="' + (isEn ? 'Swap contents of two tiles' : 'Vzájemné prohození obsahu dvou polí') + '">' + (isEn ? '🔄 Swap 2 Tiles' : '🔄 Prohodit 2 pole') + '</button>',
+                '      <button type="button" id="me-tool-link" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'link\')" title="' + (isEn ? 'Create/remove paths between tiles or adjust directions' : 'Vytvořit / odebrat cestu mezi dvěma poli nebo upravit směry') + '">' + (isEn ? '🔗 Paths &amp; Directions' : '🔗 Cesty &amp; Směry') + '</button>',
+                '      <button type="button" id="me-tool-river" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'river\')" title="' + (isEn ? 'Adjust river path, meanders, tributaries, and bridges' : 'Upravit tok řeky, meandry, přítoky a mosty') + '">' + (isEn ? '🌊 River' : '🌊 Řeka') + '</button>',
+                '      <button type="button" id="me-tool-castle" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'castle\')" title="' + (isEn ? 'Move Royal Castle and pick appearance' : 'Přemístit Hlavní hrad a zvolit jeho vzhled') + '">' + (isEn ? '🏰 Royal Castle' : '🏰 Hlavní hrad') + '</button>',
+                '      <button type="button" id="me-btn-route-shape" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.openRouteShapeModal()" title="' + (isEn ? 'Procedurally regenerate route by 7 archetypes (with Undo history)' : 'Procedurálně přegenerovat trasu podle 7 archetypů (s historií Undo)') + '">' + (isEn ? '🧭 Route Shape' : '🧭 Tvar trasy') + '</button>',
+                '      <button type="button" id="me-tool-pan" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'pan\')" title="' + (isEn ? 'Pan entire map (mouse drag / touch)' : 'Posouvat celou mapu (tažením myši / prstem)') + '">' + (isEn ? '🧭 Pan Map' : '🧭 Posun mapy') + '</button>',
+                '      <button type="button" id="me-btn-undo" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem; border-color:#64748b;" onclick="PRS_MapEditor.undo()" title="' + (isEn ? 'Undo last change (Ctrl+Z)' : 'Vrátit poslední změnu zpět (Ctrl+Z)') + '" disabled>' + (isEn ? '↩️ Undo' : '↩️ Zpět') + '</button>',
                 '    </div>',
                 '    <div style="display:flex; gap:0.45rem; align-items:center; flex-wrap:wrap;">',
                 '      <!-- ZOOM OVLÁDÁNÍ -->',
                 '      <div style="display:flex; align-items:center; gap:2px; background:rgba(0,0,0,0.55); border:1px solid rgba(212,175,55,0.3); border-radius:6px; padding:2px 4px;">',
-                '        <button type="button" class="btn-zoom" style="padding:2px 7px; font-size:0.78rem; font-weight:bold;" onclick="PRS_MapEditor.zoomBy(0.82)" title="Oddálit (−)">−</button>',
-                '        <span id="me-zoom-label" style="font-family:monospace; font-size:0.75rem; color:#fef08a; min-width:44px; text-align:center; cursor:pointer;" onclick="PRS_MapEditor.resetZoom()" title="Resetovat na 100%">100%</span>',
-                '        <button type="button" class="btn-zoom" style="padding:2px 7px; font-size:0.78rem; font-weight:bold;" onclick="PRS_MapEditor.zoomBy(1.22)" title="Přiblížit (+)">+</button>',
-                '        <button type="button" class="btn-zoom" style="padding:2px 7px; font-size:0.72rem;" onclick="PRS_MapEditor.fitToScreen()" title="Resetovat pohled na střed">🎯 Celá</button>',
+                '        <button type="button" class="btn-zoom" style="padding:2px 7px; font-size:0.78rem; font-weight:bold;" onclick="PRS_MapEditor.zoomBy(0.82)" title="' + (isEn ? 'Zoom Out (−)' : 'Oddálit (−)') + '">−</button>',
+                '        <span id="me-zoom-label" style="font-family:monospace; font-size:0.75rem; color:#fef08a; min-width:44px; text-align:center; cursor:pointer;" onclick="PRS_MapEditor.resetZoom()" title="' + (isEn ? 'Reset to 100%' : 'Resetovat na 100%') + '">100%</span>',
+                '        <button type="button" class="btn-zoom" style="padding:2px 7px; font-size:0.78rem; font-weight:bold;" onclick="PRS_MapEditor.zoomBy(1.22)" title="' + (isEn ? 'Zoom In (+)' : 'Přiblížit (+)') + '">+</button>',
+                '        <button type="button" class="btn-zoom" style="padding:2px 7px; font-size:0.72rem;" onclick="PRS_MapEditor.fitToScreen()" title="' + (isEn ? 'Reset view to center' : 'Resetovat pohled na střed') + '">' + (isEn ? '🎯 Full' : '🎯 Celá') + '</button>',
                 '      </div>',
-                '      <button type="button" class="btn-secondary" style="font-size:0.76rem; padding:0.25rem 0.75rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.saveToMyTemplates()">⭐ Uložit šablonu</button>',
-                '      <button type="button" class="btn-gold-lg" style="font-size:0.76rem; padding:0.25rem 0.85rem;" onclick="PRS_MapEditor.playOnThisBoard()">⚔️ Hrát upravenou mapu →</button>',
+                '      <button type="button" class="btn-secondary" style="font-size:0.76rem; padding:0.25rem 0.75rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.saveToMyTemplates()">' + (isEn ? '⭐ Save Template' : '⭐ Uložit šablonu') + '</button>',
+                '      <button type="button" class="btn-gold-lg" style="font-size:0.76rem; padding:0.25rem 0.85rem;" onclick="PRS_MapEditor.playOnThisBoard()">' + (isEn ? '⚔️ Play Edited Map →' : '⚔️ Hrát upravenou mapu →') + '</button>',
                 '    </div>',
                 '  </div>',
                 '',
                 '  <!-- STAVOVÁ NÁPOVĚDA -->',
-                '  <div id="me-status-help" style="font-size:0.76rem; color:#cbd5e1; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.2); padding:0.3rem 0.75rem; border-radius:6px;">',
-                '    👆 <strong>Inspektor &amp; Přesun:</strong> Klikni na políčko pro zobrazení detailu a změnu parametrů, nebo ho <strong>tažením přemísti</strong> na nové místo.',
+                '  <div id="me-status-help" style="font-size:0.76rem; color:#cbd5e1; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.2); padding:0.3rem 0.75rem; border-radius:6px;">' +
+                (isEn
+                    ? '👆 <strong>Inspector &amp; Move:</strong> Click on a tile to view details and change parameters, or <strong>drag to move</strong> to a new location.'
+                    : '👆 <strong>Inspektor &amp; Přesun:</strong> Klikni na políčko pro zobrazení detailu a změnu parametrů, nebo ho <strong>tažením přemísti</strong> na nové místo.') +
                 '  </div>',
                 '',
                 '  <!-- HLAVNÍ PLOCHA S PLÁTNEM A PLOVOUCÍM INSPEKTOREM -->',
@@ -3165,85 +3197,85 @@
                 '    <div id="me-canvas-container" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; touch-action:none;"></div>',
                 '',
                 '    <!-- PLOVOUCÍ INSPEKTOR POLÍČKA -->',
-                '    <div id="me-inspector-panel" style="display:none; position:absolute; bottom:12px; right:12px; width:295px; max-width:calc(100% - 24px); max-height:calc(100% - 24px); overflow-y:auto; overscroll-behavior:contain; box-sizing:border-box; background:rgba(18,12,8,0.97); border:1.5px solid #d4af37; border-radius:10px; padding:0.5rem 0.75rem; box-shadow:0 8px 24px rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:25; scrollbar-width:thin; scrollbar-color:#d4af37 rgba(0,0,0,0.5);">',
-                '      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.25rem;">',
-                '        <div style="font-size:0.82rem; font-weight:bold; color:#fef08a; display:flex; align-items:center; gap:0.35rem;">',
-                '          <span id="me-insp-title">⚙️ Inspektor políčka</span>',
-                '          <span id="me-insp-id" style="font-family:monospace; color:#38bdf8; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.4); padding:1px 6px; border-radius:4px;">#0</span>',
+                '    <div id="me-inspector-panel" style="display:none; position:absolute; bottom:12px; right:12px; width:295px; max-width:calc(100% - 24px); max-height:calc(100% - 24px); overflow-y:auto; background:rgba(15,23,42,0.95); border:1px solid rgba(212,175,55,0.5); border-radius:10px; padding:0.65rem; box-shadow:0 8px 24px rgba(0,0,0,0.7); backdrop-filter:blur(6px); z-index:20;">',
+                '      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.45rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.35rem;">',
+                '        <div style="display:flex; align-items:center; gap:6px;">',
+                '          <span id="me-insp-title" style="font-size:0.8rem; font-weight:bold; color:var(--gold-light); font-family:\'Cinzel\',serif;">' + (isEn ? '⚙️ Inspector' : '⚙️ Inspektor') + '</span>',
+                '          <span id="me-insp-id" style="font-size:0.7rem; color:#94a3b8; font-family:monospace;">#0</span>',
                 '        </div>',
-                '        <div style="display:flex; gap:4px; align-items:center;">',
-                '          <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:1px 5px; line-height:1;" onclick="PRS_MapEditor.toggleInspectorPosition()" title="Přepnout roh panelu (vpravo dole / nahoře / vlevo)">↕️ Roh</button>',
-                '          <button type="button" class="btn-icon-danger" style="font-size:0.68rem; padding:1px 6px;" onclick="PRS_MapEditor.closeInspector()" title="Zavřít inspektor">✕</button>',
+                '        <div style="display:flex; gap:3px;">',
+                '          <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:1px 6px;" onclick="PRS_MapEditor.toggleInspectorCorner()" title="' + (isEn ? 'Toggle panel corner (bottom-right / top / left)' : 'Přepnout roh panelu (vpravo dole / nahoře / vlevo)') + '">' + (isEn ? '↕️ Corner' : '↕️ Roh') + '</button>',
+                '          <button type="button" class="btn-icon-danger" style="font-size:0.68rem; padding:1px 6px;" onclick="PRS_MapEditor.closeInspector()" title="' + (isEn ? 'Close inspector' : 'Zavřít inspektor') + '">✕</button>',
                 '        </div>',
                 '      </div>',
                 '',
                 '      <div id="me-insp-body-node">',
                 '        <!-- Rychlá navigace mezi uzly trasy -->',
                 '        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem; background:rgba(0,0,0,0.4); border-radius:6px; padding:2px 4px;">',
-                '          <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;" onclick="PRS_MapEditor.selectNextNode(-1)" title="Předchozí pole">⬅️ Předchozí</button>',
-                '          <span style="font-size:0.68rem; color:#94a3b8;">Pozice: <strong id="me-insp-coords" style="color:#e2e8f0;">[0, 0]</strong></span>',
-                '          <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;" onclick="PRS_MapEditor.selectNextNode(1)" title="Následující pole">➡️ Další</button>',
+                '          <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;" onclick="PRS_MapEditor.selectNextNode(-1)" title="' + (isEn ? 'Previous tile' : 'Předchozí pole') + '">' + (isEn ? '⬅️ Prev' : '⬅️ Předchozí') + '</button>',
+                '          <span style="font-size:0.68rem; color:#94a3b8;">' + (isEn ? 'Position:' : 'Pozice:') + ' <strong id="me-insp-coords" style="color:#e2e8f0;">[0, 0]</strong></span>',
+                '          <button type="button" class="btn-zoom" style="font-size:0.68rem; padding:2px 6px;" onclick="PRS_MapEditor.selectNextNode(1)" title="' + (isEn ? 'Next tile' : 'Následující pole') + '">' + (isEn ? 'Next ➡️' : '➡️ Další') + '</button>',
                 '        </div>',
                 '',
                 '        <div style="margin-bottom:0.35rem;">',
-                '          <label for="me-insp-type" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Druh a typ pole:</label>',
+                '          <label for="me-insp-type" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Tile Kind &amp; Type:' : 'Druh a typ pole:') + '</label>',
                 '          <select id="me-insp-type" class="prs-select" style="width:100%; font-size:0.74rem; padding:0.25rem;" onchange="PRS_MapEditor.applyNodeTypeChange(this.value)">',
-                '            <optgroup label="Sídla a Dominanty">',
-                '              <option value="castle">🏰 Hrad (Feudální panství)</option>',
-                '              <option value="town">🏙️ Město</option>',
-                '              <option value="village">🏘️ Vesnice</option>',
-                '              <option value="start">🚩 Startovní hradní rozcestí</option>',
+                '            <optgroup label="' + (isEn ? 'Settlements &amp; Landmarks' : 'Sídla a Dominanty') + '">',
+                '              <option value="castle">' + (isEn ? '🏰 Castle (Feudal Estate)' : '🏰 Hrad (Feudální panství)') + '</option>',
+                '              <option value="town">' + (isEn ? '🏙️ Town' : '🏙️ Město') + '</option>',
+                '              <option value="village">' + (isEn ? '🏘️ Village' : '🏘️ Vesnice') + '</option>',
+                '              <option value="start">' + (isEn ? '🚩 Royal Start Crossroads' : '🚩 Startovní hradní rozcestí') + '</option>',
                 '            </optgroup>',
-                '            <optgroup label="Zvířata (Chovné sady)">',
-                '              <option value="animal_horse">🐎 Kůň (Jezdecký chov)</option>',
-                '              <option value="animal_dog">🐕 Pes (Lovecký chov)</option>',
-                '              <option value="animal_falcon">🦅 Sokol (Sokolnický chov)</option>',
+                '            <optgroup label="' + (isEn ? 'Animals (Breeding Sets)' : 'Zvířata (Chovné sady)') + '">',
+                '              <option value="animal_horse">' + (isEn ? '🐎 Horse (Equestrian)' : '🐎 Kůň (Jezdecký chov)') + '</option>',
+                '              <option value="animal_dog">' + (isEn ? '🐕 Dog (Hunting Hound)' : '🐕 Pes (Lovecký chov)') + '</option>',
+                '              <option value="animal_falcon">' + (isEn ? '🦅 Falcon (Falconry)' : '🦅 Sokol (Sokolnický chov)') + '</option>',
                 '            </optgroup>',
-                '            <optgroup label="Dračí arény & Bestie">',
-                '              <option value="dragon">🐲 Dračí sluj (Obávaný drak U3)</option>',
-                '              <option value="monster_u2">🐺 Jeskynní nestvůra (U2)</option>',
-                '              <option value="monster_u1">🐗 Divoká lesní zvěř (U1)</option>',
+                '            <optgroup label="' + (isEn ? 'Dragon Arenas &amp; Beasts' : 'Dračí arény &amp; Bestie') + '">',
+                '              <option value="dragon">' + (isEn ? '🐲 Dragon Lair (Dreaded Dragon T3)' : '🐲 Dračí sluj (Obávaný drak U3)') + '</option>',
+                '              <option value="monster_u2">' + (isEn ? '🐺 Cave Monster (T2)' : '🐺 Jeskynní nestvůra (U2)') + '</option>',
+                '              <option value="monster_u1">' + (isEn ? '🐗 Wild Forest Beast (T1)' : '🐗 Divoká lesní zvěř (U1)') + '</option>',
                 '            </optgroup>',
-                '            <optgroup label="Mistři ctností">',
-                '              <option value="master_combat">⚔️ Mistr Boje (MB)</option>',
-                '              <option value="master_ride">🏇 Mistr Jízdy (MJ)</option>',
-                '              <option value="master_dance">💃 Mistr Tance (MT)</option>',
-                '              <option value="master_charisma">👑 Mistr Charismatu (MCH)</option>',
-                '              <option value="master_grand">🧙‍♂️ Královský Velmistr (VM)</option>',
+                '            <optgroup label="' + (isEn ? 'Virtue Masters' : 'Mistři ctností') + '">',
+                '              <option value="master_combat">' + (isEn ? '⚔️ Master of Combat (MC)' : '⚔️ Mistr Boje (MB)') + '</option>',
+                '              <option value="master_ride">' + (isEn ? '🏇 Master of Riding (MR)' : '🏇 Mistr Jízdy (MJ)') + '</option>',
+                '              <option value="master_dance">' + (isEn ? '💃 Master of Dance (MD)' : '💃 Mistr Tance (MT)') + '</option>',
+                '              <option value="master_charisma">' + (isEn ? '👑 Master of Charisma (MCH)' : '👑 Mistr Charismatu (MCH)') + '</option>',
+                '              <option value="master_grand">' + (isEn ? '🧙‍♂️ Royal Grandmaster (GM)' : '🧙‍♂️ Královský Velmistr (VM)') + '</option>',
                 '            </optgroup>',
-                '            <optgroup label="Služby a Místa království">',
-                '              <option value="festival">🎪 Královská slavnost / Turnaj</option>',
-                '              <option value="tavern">🍺 Krčma</option>',
-                '              <option value="trade">⚖️ Obchodník & Dobytčí trh</option>',
-                '              <option value="craft">⚒️ Kovárna & Zbrojírna</option>',
-                '              <option value="jester">🃏 Královský Šašek</option>',
-                '              <option value="tax">💰 Výběrčí daní</option>',
-                '              <option value="prison">⛓️ Královská Šatlava</option>',
-                '              <option value="hospital">🏥 Lazaret</option>',
-                '              <option value="chance">📜 Královská náhoda</option>',
-                '              <option value="bonus">💎 Zapomenutý poklad</option>',
+                '            <optgroup label="' + (isEn ? 'Services &amp; Kingdom Sites' : 'Služby a Místa království') + '">',
+                '              <option value="festival">' + (isEn ? '🎪 Royal Festival / Tournament' : '🎪 Královská slavnost / Turnaj') + '</option>',
+                '              <option value="tavern">' + (isEn ? '🍺 Tavern' : '🍺 Krčma') + '</option>',
+                '              <option value="trade">' + (isEn ? '⚖️ Merchant &amp; Cattle Market' : '⚖️ Obchodník &amp; Dobytčí trh') + '</option>',
+                '              <option value="craft">' + (isEn ? '⚒️ Blacksmith &amp; Armory' : '⚒️ Kovárna &amp; Zbrojírna') + '</option>',
+                '              <option value="jester">' + (isEn ? '🃏 Royal Jester' : '🃏 Královský Šašek') + '</option>',
+                '              <option value="tax">' + (isEn ? '💰 Tax Collector' : '💰 Výběrčí daní') + '</option>',
+                '              <option value="prison">' + (isEn ? '⛓️ Royal Dungeon' : '⛓️ Královská Šatlava') + '</option>',
+                '              <option value="hospital">' + (isEn ? '🏥 Royal Infirmary' : '🏥 Lazaret') + '</option>',
+                '              <option value="chance">' + (isEn ? '📜 Royal Chance' : '📜 Královská náhoda') + '</option>',
+                '              <option value="bonus">' + (isEn ? '💎 Forgotten Treasure' : '💎 Zapomenutý poklad') + '</option>',
                 '            </optgroup>',
                 '          </select>',
                 '        </div>',
                 '',
                 '        <!-- Úroveň zvířete / Stupeň mistra (podmíněně) -->',
                 '        <div id="me-insp-tier-wrap" style="display:none; margin-bottom:0.35rem;">',
-                '          <label for="me-insp-tier" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Úroveň / Stupeň:</label>',
+                '          <label for="me-insp-tier" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Level / Tier:' : 'Úroveň / Stupeň:') + '</label>',
                 '          <select id="me-insp-tier" class="prs-select" style="width:100%; font-size:0.74rem; padding:0.25rem;" onchange="PRS_MapEditor.applyNodeTierChange(this.value)"></select>',
                 '        </div>',
                 '',
                 '        <div style="margin-bottom:0.35rem;">',
-                '          <label for="me-insp-name" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Vlastní název pole:</label>',
-                '          <input type="text" id="me-insp-name" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" oninput="PRS_MapEditor.applyNodeNameChange(this.value)" placeholder="Např. Hrad Bezděz" />',
+                '          <label for="me-insp-name" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Custom Tile Name:' : 'Vlastní název pole:') + '</label>',
+                '          <input type="text" id="me-insp-name" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" oninput="PRS_MapEditor.applyNodeNameChange(this.value)" placeholder="' + (isEn ? 'e.g. Highpeak Castle' : 'Např. Hrad Bezděz') + '" />',
                 '        </div>',
                 '',
                 '        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-bottom:0.5rem;">',
                 '          <div>',
-                '            <label for="me-insp-price" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Cena (zl.):</label>',
+                '            <label for="me-insp-price" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Price (g.):' : 'Cena (zl.):') + '</label>',
                 '            <input type="number" id="me-insp-price" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.35rem;" oninput="PRS_MapEditor.applyNodePriceChange(this.value)" step="100" min="0" />',
                 '          </div>',
                 '          <div>',
-                '            <label for="me-insp-rent" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">Nájem (zl.):</label>',
+                '            <label for="me-insp-rent" style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Rent (g.):' : 'Nájem (zl.):') + '</label>',
                 '            <input type="number" id="me-insp-rent" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.35rem;" oninput="PRS_MapEditor.applyNodeRentChange(this.value)" step="50" min="0" />',
                 '          </div>',
                 '        </div>',
@@ -3253,8 +3285,8 @@
                 '',
                 '        <!-- Akční tlačítka pro uzel -->',
                 '        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem;">',
-                '          <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.setTool(\'swap\'); PRS_MapEditor.swapSourceNodeId = PRS_MapEditor.selectedNodeId; PRS_MapEditor.updateStatusHelp(); PRS_MapEditor.renderCanvas();" title="Prohodit obsah s jiným polem">🔄 Prohodit</button>',
-                '          <button type="button" class="btn-icon-danger" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedNode()" title="Smazat toto pole a přemostit trasu">🗑️ Smazat</button>',
+                '          <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.setTool(\'swap\'); PRS_MapEditor.swapSourceNodeId = PRS_MapEditor.selectedNodeId; PRS_MapEditor.updateStatusHelp(); PRS_MapEditor.renderCanvas();" title="' + (isEn ? 'Swap content with another tile' : 'Prohodit obsah s jiným polem') + '">' + (isEn ? '🔄 Swap' : '🔄 Prohodit') + '</button>',
+                '          <button type="button" class="btn-icon-danger" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedNode()" title="' + (isEn ? 'Delete this tile and bypass route' : 'Smazat toto pole a přemostit trasu') + '">' + (isEn ? '🗑️ Delete' : '🗑️ Smazat') + '</button>',
                 '        </div>',
                 '      </div>',
                 '',
@@ -3269,9 +3301,9 @@
             container.innerHTML = html.join("\n");
         },
 
-        // Otevření dialogu pro volbu procedurálního tvaru trasy
         openRouteShapeModal: function () {
             var self = this;
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var archetypes = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES)
                 ? window.KiDeskyMapGenerator.ROUTE_ARCHETYPES
                 : {};
@@ -3281,9 +3313,11 @@
             for (var i = 0; i < keys.length; i++) {
                 var k = keys[i];
                 var a = archetypes[k];
+                var aName = isEn ? (a.nameEn || a.name) : a.name;
+                var aDesc = isEn ? (a.descEn || a.desc) : a.desc;
                 optionsHtml += '<button type="button" class="btn-gold-lg" style="text-align:left; padding:0.5rem 0.8rem; display:flex; flex-direction:column; gap:2px;" onclick="PRS_MapEditor.applyProceduralShape(\'' + k + '\')">' +
-                    '<div style="font-weight:700; color:#fef08a;">' + a.name + '</div>' +
-                    '<div style="font-size:0.72rem; color:#cbd5e1; opacity:0.85;">' + a.desc + '</div>' +
+                    '<div style="font-weight:700; color:#fef08a;">' + aName + '</div>' +
+                    '<div style="font-size:0.72rem; color:#cbd5e1; opacity:0.85;">' + aDesc + '</div>' +
                     '</button>';
             }
 
@@ -3292,13 +3326,13 @@
 
             modal.innerHTML = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:480px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
                 '<div style="font-size:1.8rem; text-align:center; margin-bottom:0.3rem;">🧭 🎲</div>' +
-                '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.4rem 0; text-align:center;">Procedurální generátor trasy</h3>' +
-                '<div style="font-size:0.82rem; color:#cbd5e1; text-align:center; margin-bottom:1rem;">Vyber si archetyp křivky pro tento herní plán. Všechny stávající vlastnosti, názvy a ceny polí zůstanou zachovány, políčka se plynule rozmístí s garantovaným rozestupem. Krok lze kdykoliv vrátit pomocí ↩️ Zpět (Ctrl+Z).</div>' +
+                '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.4rem 0; text-align:center;">' + (isEn ? 'Procedural Route Generator' : 'Procedurální generátor trasy') + '</h3>' +
+                '<div style="font-size:0.82rem; color:#cbd5e1; text-align:center; margin-bottom:1rem;">' + (isEn ? 'Choose a curve archetype for this game board. All existing tile properties, names, and prices are preserved, and tiles are smoothly arranged with guaranteed spacing. This step can be undone anytime with ↩️ Undo (Ctrl+Z).' : 'Vyber si archetyp křivky pro tento herní plán. Všechny stávající vlastnosti, názvy a ceny polí zůstanou zachovány, políčka se plynule rozmístí s garantovaným rozestupem. Krok lze kdykoliv vrátit pomocí ↩️ Zpět (Ctrl+Z).') + '</div>' +
                 '<div style="display:flex; flex-direction:column; gap:0.45rem; max-height:360px; overflow-y:auto; padding-right:4px;">' +
                 optionsHtml +
                 '</div>' +
                 '<div style="display:flex; justify-content:flex-end; margin-top:1rem;">' +
-                '  <button type="button" class="btn-secondary" onclick="document.getElementById(\'generic-modal\').style.display=\'none\'">Zavřít</button>' +
+                '  <button type="button" class="btn-secondary" onclick="document.getElementById(\'generic-modal\').style.display=\'none\'">' + (isEn ? 'Close' : 'Zavřít') + '</button>' +
                 '</div>' +
                 '</div>';
             modal.style.display = "flex";
@@ -3308,20 +3342,38 @@
         applyProceduralShape: function (shapeKey) {
             var modal = (window.PRS_App && window.PRS_App.getGenericModal) ? window.PRS_App.getGenericModal() : document.getElementById("generic-modal");
             if (modal) modal.style.display = "none";
+            if (!this.board || !this.board.nodes || this.board.nodes.length < 3) return;
+            if (!window.KiDeskyMapGenerator || typeof window.KiDeskyMapGenerator.applyArchetypeToNodes !== "function") return;
 
-            if (!this.board || !window.KiDeskyMapGenerator || typeof window.KiDeskyMapGenerator.regenerateBoardGeometry !== "function") return;
-
-            this.pushUndo();
-            var seed = Math.floor(Math.random() * 900000) + 100000;
-            window.KiDeskyMapGenerator.regenerateBoardGeometry(this.board, shapeKey, seed);
-
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            this.pushUndoState("Změna tvaru trasy na " + shapeKey);
+            window.KiDeskyMapGenerator.applyArchetypeToNodes(this.board, shapeKey);
+            this.board.routeShape = shapeKey;
+            this.refreshBoardDerivedLayers(this.board);
             this.renderCanvas();
-            this.updateInspectorUI();
 
-            var aObj = window.KiDeskyMapGenerator.ROUTE_ARCHETYPES && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES[this.board.routeShape];
-            var aName = aObj ? aObj.name : shapeKey;
+            var aObj = (window.KiDeskyMapGenerator.ROUTE_ARCHETYPES && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES[shapeKey]) || {};
+            var aName = isEn ? (aObj.nameEn || aObj.name || shapeKey) : (aObj.name || shapeKey);
             if (window.KiDeskyToast) {
-                window.KiDeskyToast.show("✨ Nová trasa (" + aName + ") vygenerována! Lze vrátit pomocí ↩️ Zpět (Ctrl+Z)", "success");
+                window.KiDeskyToast.show(isEn ? ("✨ New route (" + aName + ") generated! Can be reverted via ↩️ Undo (Ctrl+Z)") : ("✨ Nová trasa (" + aName + ") vygenerována! Lze vrátit pomocí ↩️ Zpět (Ctrl+Z)"), "good");
+            }
+        },
+
+        undo: function () {
+            if (this.undoStack.length === 0) return;
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var snap = this.undoStack.pop();
+            this.board = JSON.parse(snap.boardJson);
+            this.selectedNodeId = null;
+            this.selectedEdge = null;
+            this.selectedRiverIdx = 0;
+            this.selectedRiverPtIdx = null;
+            this.refreshBoardDerivedLayers(this.board);
+            this.renderCanvas();
+            this.updateUndoButton();
+            this.updateInspectorUI();
+            if (window.KiDeskyToast) {
+                window.KiDeskyToast.show(isEn ? "↩️ Step reverted" : "↩️ Krok vrácen zpět", "good");
             }
         }
     };

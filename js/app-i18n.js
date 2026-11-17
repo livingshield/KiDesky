@@ -297,6 +297,29 @@
                     csBtn.style.background = 'rgba(0,0,0,0.3)';
                 }
             }
+
+            // 7. Map Studio a Editor živá synchronizace při otevřeném modálu
+            if (window.PRS_App && typeof window.PRS_App.refreshMapStudioSelectOptions === 'function') {
+                try { window.PRS_App.refreshMapStudioSelectOptions(); } catch (e) { }
+            }
+            if (window.PRS_App && typeof window.PRS_App.renderMapStudioCounters === 'function' && document.getElementById('ms-counters-grid')) {
+                try {
+                    window.PRS_App.renderMapStudioCounters();
+                    window.PRS_App.renderMapStudioAnimalLevels();
+                    window.PRS_App.updateMapStudioPreview();
+                } catch (e) { }
+            }
+            if (window.PRS_MapEditor && typeof window.PRS_MapEditor.renderEditorUI === 'function') {
+                var edView = document.getElementById('ms-editor-view');
+                if (edView && edView.style.display !== 'none') {
+                    try {
+                        window.PRS_MapEditor.renderEditorUI();
+                        window.PRS_MapEditor.updateStatusHelp();
+                        window.PRS_MapEditor.updateInspectorUI();
+                        window.PRS_MapEditor.renderCanvas();
+                    } catch (e) { }
+                }
+            }
         },
 
         /**
