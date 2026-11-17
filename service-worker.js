@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kidesky-cache-v1.9.13';
+const CACHE_NAME = 'kidesky-cache-v1.9.15';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -26,6 +26,7 @@ const CORE_ASSETS = [
   './js/app-map-editor.js',
   './js/app-dialog.js',
   './js/app-catalog.js',
+  './js/app-rules-guide.js',
   './js/app-musicwidget.js',
   './js/app.js'
 ];

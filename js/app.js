@@ -302,6 +302,12 @@ window.PRS_App = {
 
             self.fetchServerStatusAndSessions();
             if (self.updateSavedGamesUI) self.updateSavedGamesUI();
+            if (typeof self.renderRuleGuide === "function") self.renderRuleGuide();
+            if (typeof self.renderGlossary === "function") self.renderGlossary();
+            if (typeof self.renderTilesAtlas === "function") self.renderTilesAtlas();
+            if (window.PRS_I18n) {
+                self.onLanguageChanged(window.PRS_I18n.getLanguage());
+            }
             if (self.refreshBoardTemplateSelects) self.refreshBoardTemplateSelects();
 
             self.checkUrlRoomParam();
@@ -934,6 +940,15 @@ window.PRS_App = {
         }
         if (typeof this.updateSavedGamesUI === "function") {
             try { this.updateSavedGamesUI(); } catch (sErr) {}
+        }
+        if (typeof this.renderRuleGuide === "function") {
+            try { this.renderRuleGuide(); } catch (rgErr) {}
+        }
+        if (typeof this.renderGlossary === "function") {
+            try { this.renderGlossary(); } catch (glErr) {}
+        }
+        if (typeof this.renderTilesAtlas === "function") {
+            try { this.renderTilesAtlas(); } catch (taErr) {}
         }
         if (typeof this.renderHeroVideosSection === "function") {
             try { this.renderHeroVideosSection(); } catch (hvsErr) {}

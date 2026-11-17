@@ -49,7 +49,13 @@
                 else btnEl.classList.remove("active");
             }
         }
-        if (viewId === "atlas") {
+        if (viewId === "guide" && typeof this.renderRuleGuide === "function") {
+            this.renderRuleGuide();
+        }
+        if (viewId === "glossary" && typeof this.renderGlossary === "function") {
+            this.renderGlossary();
+        }
+        if (viewId === "atlas" && typeof this.renderTilesAtlas === "function") {
             this.renderTilesAtlas();
         }
     },
@@ -126,7 +132,230 @@
         var container = document.getElementById("rules-atlas-grid-container");
         if (!container) return;
 
-        var tileDefinitions = [
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+
+        var tileDefinitions = isEn ? [
+            {
+                code: "START",
+                name: "Royal START",
+                cat: "Special",
+                img: "assets/tiles/start.png",
+                art: "assets/tiles/castle.jpg",
+                cost: "—",
+                action: "Grant <strong>+3,000 g.</strong> (landless knights <strong>+5,000 g.</strong>). Nobles, owners of Towns/Castles or skilled dancers (Dance ≥ 2 and court attire) also receive <strong>audience with the King (+0.5 to +1.0 💖)</strong>.",
+                tip: "Acquire court attire early to harvest royal favors on each circuit."
+            },
+            {
+                code: "VESNICE",
+                name: "Peasant Village (V1–V12)",
+                cat: "Estate",
+                img: "assets/tiles/village.png",
+                art: "assets/tiles/village.jpg",
+                cost: "1,500 g.",
+                action: "Purchase estate and collect rent (100–300 g.) from passing knights. Upgrades: 1★ Village → 2★ Small Town (+1,500 g.) → 3★ Large Settlement (+1,500 g.). Fully developed villages grant permanent <strong>+0.5 💖</strong> and host livestock.",
+                tip: "Villages form the backbone of steady income. At 3★ they generate high rent and automatic herds."
+            },
+            {
+                code: "MĚSTO",
+                name: "Royal Town (M1–M4)",
+                cat: "Estate",
+                img: "assets/tiles/town.png",
+                art: "assets/tiles/town.jpg",
+                cost: "4,000 g.",
+                action: "Wealthy settlement with 500 g. rent and high prestige: grants owner permanent <strong>+0.5 💖</strong> and yields <strong>+1,200 g.</strong> at Tax Collection.",
+                tip: "Town expands herd capacity by +2 and guarantees an audience at START."
+            },
+            {
+                code: "HRAD",
+                name: "Noble Castle (C1–C4)",
+                cat: "Estate",
+                img: "assets/tiles/castle.png",
+                art: "assets/tiles/castle.jpg",
+                cost: "7,000 g.",
+                action: "Pinnacle of feudal power: permanent <strong>+1.0 💖</strong> and <strong>+1 Charisma</strong> for the owner! Rent 1,000 g., tax payout is a massive <strong>+2,500 g.</strong>",
+                tip: "Fastest way to permanently secure hearts and courtly dominance."
+            },
+            {
+                code: "KŮŇ",
+                name: "Horse Breeding (H1–H12)",
+                cat: "Animals",
+                img: "assets/tiles/kun.png",
+                art: "assets/tiles/kun.jpg",
+                cost: "600 × level g.",
+                action: "Purchase horse. Unlocks <strong>equestrian movement (trot, canter, gallop)</strong>, allows agility defense in duels, and is required for the <strong>Grand Race</strong>.",
+                tip: "Horses are key to rapid travel. Combine with Hound and Falcon for a Breeding Set (+1.5 💖)."
+            },
+            {
+                code: "PES",
+                name: "Hunting Hound (D1–D12)",
+                cat: "Animals",
+                img: "assets/tiles/pes.png",
+                art: "assets/tiles/pes.jpg",
+                cost: "500 × level g.",
+                action: "Purchase hunting dog. Loyal companion provides tactical advantage in dragon arenas – close loss by 1–2 points grants a free <strong>🎲 Tactical Reroll of 1 die</strong>!",
+                tip: "Hounds save your life in dragon lairs and protect against the Infirmary."
+            },
+            {
+                code: "SOKOL",
+                name: "Hunting Falcon (F1–F12)",
+                cat: "Animals",
+                img: "assets/tiles/sokol.png",
+                art: "assets/tiles/sokol.jpg",
+                cost: "400 × level g.",
+                action: "Purchase bird of prey. Enables <strong>Falcon Navigation (±1 tile)</strong> during foot maneuvers, landing precisely on targets or dodging traps.",
+                tip: "Falcon navigation is inactive during full horse canter/gallop due to excessive speed."
+            },
+            {
+                code: "STAJE",
+                name: "Royal Stables & Livestock Market",
+                cat: "Economy",
+                img: "assets/tiles/kun.png",
+                art: "assets/tiles/kun.jpg",
+                cost: "By livestock",
+                action: "Purchase livestock: <strong>🐑 Sheep (500 g.)</strong>, <strong>🐖 Pig (600 g.)</strong>, and <strong>🐄 Cattle (800 g.)</strong>. Herds increase village rents and yield passive income at Tax Collection.",
+                tip: "Herd capacity scales with your villages and towns. Stables add +4 capacity."
+            },
+            {
+                code: "MISTR",
+                name: "Master's Guild (MC, MR, MD, MCH, GM)",
+                cat: "Training",
+                img: "assets/tiles/master.png",
+                art: "assets/tiles/master.jpg",
+                cost: "1,000–5,000 g.",
+                action: "Train virtues (Combat, Riding, Dance, Charisma). Roll: 1–3 = rejected, 4–6 = accepted. Successful training grants <strong>Master's Seal</strong>. 3 seals = <strong>Knightly Patronage</strong>!",
+                tip: "Grandmaster (GM) trains any virtue of your choice. Invest in your primary virtue early."
+            },
+            {
+                code: "FESTIVAL",
+                name: "Royal Festival (♡ ♡ ♡)",
+                cat: "Contest",
+                img: "assets/tiles/festival.png",
+                art: "assets/tiles/festival.jpg",
+                cost: "—",
+                action: "Tournament (Combat + Riding), Castle Ball (Dance + Charisma), or Grand Race (Riding + horses). Primary source of hearts in the game! Winner earns <strong>up to +5 💖 and 1,200 g.</strong>",
+                tip: "If fewer than 2 knights participate, the event is cancelled, but the host receives +800 g. and +0.5 💖 consolation."
+            },
+            {
+                code: "U1",
+                name: "Common Beast (Forest Predators)",
+                cat: "Hunting",
+                img: "assets/tiles/u1_zver.png",
+                art: "assets/tiles/u1_zver.jpg",
+                cost: "—",
+                action: "Hunt wolves, bears, and boars. Victory yields <strong>1,000–2,500 g.</strong> and <strong>+0.5 to +1.5 💖</strong>. Safe early training for aspiring warriors.",
+                tip: "Use Tactical Stance: Cautious defense protects you from wounds even on defeat."
+            },
+            {
+                code: "U2",
+                name: "Mighty Monster (Mythical Fiends)",
+                cat: "Hunting",
+                img: "assets/tiles/u2_monstrum.png",
+                art: "assets/tiles/u2_monstrum.jpg",
+                cost: "—",
+                action: "Battle Chimeras, Trolls, and Golems. Reward: <strong>2,600 g.</strong>, <strong>+1.5 to +2.5 💖</strong>, and 65% trophy drop chance. Tactical retreat available for 400 g.",
+                tip: "Check monster weaknesses in the Bestiary for an automatic +2 power bonus."
+            },
+            {
+                code: "U3",
+                name: "Dragon Lair (Legendary Dragons)",
+                cat: "Dragon Slayers",
+                img: "assets/tiles/u3_drak.png",
+                art: "assets/tiles/u3_drak.jpg",
+                cost: "—",
+                action: "Duel for honor against one of 20 unique dragons! Reward: <strong>6,000 g.</strong>, <strong>+2.5 to +5.0 💖</strong>, and guaranteed dragon trophy. <strong>Slaying 2 dragons = instant game triumph!</strong>",
+                tip: "Tactical retreat costs 800 g. Retreat if your Combat power and weapons are insufficient."
+            },
+            {
+                code: "MERCHANT",
+                name: "Royal Market",
+                cat: "Market",
+                img: "assets/tiles/merchant.png",
+                art: "assets/tiles/merchant.jpg",
+                cost: "By purchase",
+                action: "Buy equipment packages (weapons, armor, gowns, jewels). Voluntarily sell possessions to the Crown (items for 50% value, estates for 100%).",
+                tip: "Prioritize gear aligned with your chosen victory strategy."
+            },
+            {
+                code: "KOVARNA",
+                name: "Guild Forge",
+                cat: "Market",
+                img: "assets/tiles/kovarna.png",
+                art: "assets/tiles/kovarna.jpg",
+                cost: "By weapon",
+                action: "Craft and purchase swords, axes, lances, and plate armor. Weapons boost Combat and give tactical advantages against specific dragons.",
+                tip: "Lances counter Water dragons; heavy armor protects against flame."
+            },
+            {
+                code: "KREJCI",
+                name: "Court Tailor",
+                cat: "Market",
+                img: "assets/tiles/krejci.png",
+                art: "assets/tiles/krejci.jpg",
+                cost: "By garment",
+                action: "Tailor courtly gowns and brocade robes. Boosts Dance and Charisma, vital for triumph at the Castle Ball.",
+                tip: "Attire grants an automatic +2 score bonus at the Castle Ball."
+            },
+            {
+                code: "TAVERN",
+                name: "Golden Tankard Tavern",
+                cat: "Services",
+                img: "assets/tiles/tavern.png",
+                art: "assets/tiles/tavern.jpg",
+                cost: "500 g.",
+                action: "Rest and hospitality. Round of mead for 500 g. Skilled dancers (Dance ≥ 2) earn court admiration and <strong>+1.0 💖</strong> for charming entertainment.",
+                tip: "Diplomats and courtiers convert modest coins into precious hearts here."
+            },
+            {
+                code: "TAX",
+                name: "Royal Tax Collector",
+                cat: "Economy",
+                img: "assets/tiles/tax.png",
+                art: "assets/tiles/tax.jpg",
+                cost: "—",
+                action: "Collect feudal rents: Villages (500/900/1,400 g.), Towns (1,200 g.), Castles (2,500 g.), and livestock (sheep +120, pig +150, cow +200 g.).",
+                tip: "Knights holding Knightly Patronage (3 master seals) are exempt from all royal tithes."
+            },
+            {
+                code: "PRISON",
+                name: "Castle Dungeon",
+                cat: "Penalty",
+                img: "assets/tiles/prison.png",
+                art: "assets/tiles/prison.jpg",
+                cost: "1,000 g. bail",
+                action: "Imprisoned for 1 round. Escape options: pay 1,000 g. bail, roll a 6, or immediately play <strong>Royal Amnesty</strong> scroll from your pouch.",
+                tip: "A Royal Amnesty scroll frees you immediately without losing a turn or gold."
+            },
+            {
+                code: "HOSPITAL",
+                name: "Royal Infirmary",
+                cat: "Healing",
+                img: "assets/tiles/hospital.png",
+                art: "assets/tiles/hospital.jpg",
+                cost: "1,000 g.",
+                action: "Recover from critical wounds. Healing elixir for 1,000 g. permanently increases Combat by +1 (if Combat < 2), grants <strong>+0.5 💖 for bravery</strong>, and a protective ward!",
+                tip: "Holders of Knightly Patronage (3 master seals) receive free medical care."
+            },
+            {
+                code: "JESTER",
+                name: "Court Jester & Fool",
+                cat: "Special",
+                img: "assets/tiles/jester.png",
+                art: "assets/tiles/jester.jpg",
+                cost: "2,000 g. (Jester)",
+                action: "Courtly entertainment. Jester composes satirical ballads against rivals; Fool rewards skilled dancers with <strong>+200 g. × Dance rank</strong>.",
+                tip: "High Dance skill turns a Fool's visit into a handsome royal stipend."
+            },
+            {
+                code: "CHANCE",
+                name: "Chance & Royal Boon",
+                cat: "Fate",
+                img: "assets/tiles/chance.png",
+                art: "assets/tiles/chance.jpg",
+                cost: "—",
+                action: "Draw a fate card from the realm deck: royal grants, tournament challenges, brigands, riding tests, or <strong>tactical scrolls for your pouch</strong>.",
+                tip: "Pouch holds up to 3 tactical scrolls to play anytime on your turn."
+            }
+        ] : [
             {
                 code: "START",
                 name: "Královský START",
@@ -351,10 +580,13 @@
 
         this.atlasTileDefinitions = tileDefinitions;
 
+        var cardTitleHint = isEn ? "Click to inspect large tile illustration and full rules" : "Kliknutím otevřeš velký detail s ilustrací a přesnými pravidly";
+        var priceLabel = isEn ? "Cost: " : "Cena: ";
+
         var html = '<div class="atlas-tiles-grid">';
         for (var i = 0; i < tileDefinitions.length; i++) {
             var t = tileDefinitions[i];
-            html += '<div class="atlas-tile-card" onclick="PRS_App.openTileAtlasModal(\'' + t.code + '\')" style="cursor:pointer;" title="Kliknutím otevřeš velký detail s ilustrací a přesnými pravidly">' +
+            html += '<div class="atlas-tile-card" onclick="PRS_App.openTileAtlasModal(\'' + t.code + '\')" style="cursor:pointer;" title="' + cardTitleHint + '">' +
                 '<div style="display:flex; align-items:center; gap:0.75rem;">' +
                 '  <img src="' + t.img + '" alt="' + t.name + '" class="atlas-tile-thumb" onerror="this.src=\'assets/tiles/castle.png\';" />' +
                 '  <div style="flex:1;">' +
@@ -363,17 +595,15 @@
                 '      <span style="font-size:0.75rem; color:#94a3b8;">' + t.cat + '</span>' +
                 '    </div>' +
                 '    <div style="font-weight:700; font-size:0.92rem; color:var(--gold-light); margin-top:2px;">' + t.name + '</div>' +
-                '    <div style="font-size:0.76rem; color:#cbd5e1;">Cena: <strong style="color:#fde68a;">' + t.cost + '</strong></div>' +
+                '    <div style="font-size:0.76rem; color:#cbd5e1;">' + priceLabel + '<strong style="color:#fde68a;">' + t.cost + '</strong></div>' +
                 '  </div>' +
                 '</div>' +
                 '<div style="font-size:0.82rem; color:#e2e8f0; line-height:1.45; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.45rem;">' + t.action + '</div>' +
                 '<div style="font-size:0.78rem; color:#93c5fd; background:rgba(59,130,246,0.1); border-left:3px solid #60a5fa; padding:0.35rem 0.55rem; border-radius:0 4px 4px 0;"><strong>💡 Tip:</strong> ' + t.tip + '</div>' +
-                '<div style="text-align:right; margin-top:0.4rem;">' +
-                '  <button type="button" class="btn-secondary" style="font-size:0.75rem; padding:0.25rem 0.65rem; color:var(--gold-light); border-color:var(--gold); cursor:pointer; font-weight:600;" onclick="PRS_App.openTileAtlasModal(\'' + t.code + '\'); event.stopPropagation();">🔍 Zvětšit detail →</button>' +
-                '</div>' +
                 '</div>';
         }
         html += '</div>';
+
         container.innerHTML = html;
     },
 
@@ -399,25 +629,33 @@
         }
         if (!t) return;
 
+        var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
+        var codeLabel = isEn ? "Code: " : "Kód: ";
+        var catLabel = isEn ? "Category: " : "Kategorie: ";
+        var costLabel = isEn ? "Acquisition Cost / Value: " : "Pořizovací hodnota / Náklad: ";
+        var tipLabel = isEn ? "<strong>👑 Royal Advisor's Tip:</strong> " : "<strong>👑 Doporučení Královského rádce:</strong> ";
+        var guideBtn = isEn ? "📖 Open Guide Chapter" : "📖 Otevřít kapitolu v Průvodci";
+        var closeBtn = isEn ? "✕ Close" : "✕ Zavřít";
+
         if (content) {
             content.innerHTML = '<div class="tile-atlas-modal-box">' +
                 '  <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; flex-shrink:0;">' +
                 '    <img src="' + t.img + '" alt="' + t.name + '" class="tile-atlas-modal-img" onerror="this.src=\'assets/tiles/castle.png\';" />' +
-                '    <span style="font-size:0.75rem; font-weight:700; color:var(--gold); background:rgba(212,175,55,0.18); border:1px solid rgba(212,175,55,0.45); border-radius:6px; padding:2px 10px;">Kód: ' + t.code + '</span>' +
+                '    <span style="font-size:0.75rem; font-weight:700; color:var(--gold); background:rgba(212,175,55,0.18); border:1px solid rgba(212,175,55,0.45); border-radius:6px; padding:2px 10px;">' + codeLabel + t.code + '</span>' +
                 '  </div>' +
                 '  <div style="flex:1; min-width:0;">' +
-                '    <div style="font-size:0.78rem; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">Kategorie: ' + t.cat + '</div>' +
+                '    <div style="font-size:0.78rem; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">' + catLabel + t.cat + '</div>' +
                 '    <h3 style="margin:0 0 0.35rem; color:var(--gold-light); font-family:\'Cinzel\',serif; font-size:1.25rem;">' + t.name + '</h3>' +
-                '    <div style="font-size:0.86rem; color:#fde68a; margin-bottom:0.75rem;">Pořizovací hodnota / Náklad: <strong>' + t.cost + '</strong></div>' +
+                '    <div style="font-size:0.86rem; color:#fde68a; margin-bottom:0.75rem;">' + costLabel + '<strong>' + t.cost + '</strong></div>' +
                 '    <div style="background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.85rem 1rem; font-size:0.88rem; line-height:1.55; color:#e2e8f0; margin-bottom:0.75rem;">' +
                 '      ' + t.action +
                 '    </div>' +
                 '    <div style="font-size:0.83rem; color:#93c5fd; background:rgba(59,130,246,0.12); border-left:4px solid #60a5fa; padding:0.55rem 0.8rem; border-radius:0 6px 6px 0; margin-bottom:0.85rem; line-height:1.45;">' +
-                '      <strong>👑 Doporučení Královského rádce:</strong> ' + t.tip +
+                '      ' + tipLabel + t.tip +
                 '    </div>' +
                 '    <div style="display:flex; gap:0.5rem; justify-content:flex-end; flex-wrap:wrap;">' +
-                '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="PRS_App.closeTileAtlasModal(); PRS_App.openRulesHelpForTile(\'' + t.code + '\', \'' + t.code + '\');">📖 Otevřít kapitolu v Průvodci</button>' +
-                '      <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="PRS_App.closeTileAtlasModal();">✕ Zavřít</button>' +
+                '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="PRS_App.closeTileAtlasModal(); PRS_App.openRulesHelpForTile(\'' + t.code + '\', \'' + t.code + '\');">' + guideBtn + '</button>' +
+                '      <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="PRS_App.closeTileAtlasModal();">' + closeBtn + '</button>' +
                 '    </div>' +
                 '  </div>' +
                 '</div>';

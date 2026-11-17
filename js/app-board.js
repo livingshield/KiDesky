@@ -2558,7 +2558,7 @@
 
                     out.push('      <rect x="-115" y="-13" width="230" height="26" rx="13" fill="rgba(18,12,8,0.92)" stroke="' + activePalette.stroke + '" stroke-width="1.6" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.7))"/>');
 
-                    var rcName = lmk.name || "Královský Hrad";
+                    var rcName = (this.getLandmarkDisplayName ? this.getLandmarkDisplayName(lmk) : lmk.name) || "Královský Hrad";
                     out.push('      <text x="0" y="5" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="bold">♡ ' + this.escapeHtml(rcName) + ' (' + this.state.config.targetHearts + ' 💖) ♡</text>');
 
                     out.push('    </g>');
@@ -2569,7 +2569,8 @@
 
                     out.push('      <rect x="-85" y="-11" width="170" height="22" rx="11" fill="rgba(16,10,6,0.90)" stroke="' + activePalette.stroke + '" stroke-width="1.2" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.7))"/>');
 
-                    out.push('      <text x="0" y="4" text-anchor="middle" fill="#fef08a" font-family="Cinzel, serif" font-size="10" font-weight="bold">' + this.escapeHtml(lmk.name) + '</text>');
+                    var lmTitle = (this.getLandmarkDisplayName ? this.getLandmarkDisplayName(lmk) : lmk.name);
+                    out.push('      <text x="0" y="4" text-anchor="middle" fill="#fef08a" font-family="Cinzel, serif" font-size="10" font-weight="bold">' + this.escapeHtml(lmTitle) + '</text>');
 
                     out.push('    </g>');
 
@@ -3061,7 +3062,8 @@
 
                 out.push('      <rect x="-24" y="-12" width="48" height="15" rx="5" fill="#b45309" stroke="#fbbf24" stroke-width="1.2"/>');
 
-                out.push('      <text x="0" y="-1" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">ZDE STOJÍŠ</text>');
+                var isEnStanding = (window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en');
+                out.push('      <text x="0" y="-1" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">' + (isEnStanding ? 'HERE' : 'ZDE STOJÍŠ') + '</text>');
 
                 out.push('      <polygon points="-4,3 0,7 4,3" fill="#fbbf24"/>');
 
@@ -4003,6 +4005,7 @@
 
     getLandmarkDisplayName: function (lmk) {
         if (!lmk) return "";
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         if (lmk.id === "royalCastle") {
             return window.PRS_I18n ? window.PRS_I18n.t("castles.royal.name", null, lmk.name || "Královský Hrad") : (lmk.name || "Královský Hrad");
         }
@@ -4023,13 +4026,26 @@
         }
         var raw = (lmk.name || "").trim();
         if (raw && window.PRS_I18n) {
+            var rawClean = raw.replace(/^[★*\s()]+|[()\s]+$/g, "").toLowerCase();
             var cList = ["ice", "lava", "crystal", "forest", "desert", "wind", "water", "swamp", "dark", "royal"];
             for (var i = 0; i < cList.length; i++) {
                 var k = cList[i];
-                var defCs = (window.PRS_I18N && window.PRS_I18N.cs && window.PRS_I18N.cs.castles && window.PRS_I18N.cs.castles[k]) ? window.PRS_I18N.cs.castles[k].name : "";
-                var defEn = (window.PRS_I18N && window.PRS_I18N.en && window.PRS_I18N.en.castles && window.PRS_I18N.en.castles[k]) ? window.PRS_I18N.en.castles[k].name : "";
-                if ((defCs && raw.indexOf(defCs) !== -1) || (defEn && raw.indexOf(defEn) !== -1) || raw.toLowerCase().indexOf(k) !== -1) {
-                    return window.PRS_I18n.t("castles." + k + ".name", null, raw);
+                var defCs = (window.PRS_I18N && window.PRS_I18N.cs && window.PRS_I18N.cs.castles && window.PRS_I18N.cs.castles[k]) ? window.PRS_I18N.cs.castles[k].name.toLowerCase() : "";
+                var defEn = (window.PRS_I18N && window.PRS_I18N.en && window.PRS_I18N.en.castles && window.PRS_I18N.en.castles[k]) ? window.PRS_I18N.en.castles[k].name.toLowerCase() : "";
+                if ((defCs && rawClean.indexOf(defCs) !== -1) ||
+                    (defEn && rawClean.indexOf(defEn) !== -1) ||
+                    rawClean.indexOf(k) !== -1 ||
+                    (k === "ice" && (rawClean.indexOf("mrazu") !== -1 || rawClean.indexOf("frost") !== -1)) ||
+                    (k === "lava" && (rawClean.indexOf("chřtán") !== -1 || rawClean.indexOf("maw") !== -1)) ||
+                    (k === "crystal" && (rawClean.indexOf("ametyst") !== -1 || rawClean.indexOf("amethyst") !== -1)) ||
+                    (k === "forest" && rawClean.indexOf("doubrava") !== -1) ||
+                    (k === "wind" && rawClean.indexOf("boreas") !== -1) ||
+                    (k === "water" && (rawClean.indexOf("oceán") !== -1 || rawClean.indexOf("ocean") !== -1)) ||
+                    (k === "desert" && (rawClean.indexOf("pískovcový") !== -1 || rawClean.indexOf("sandstone") !== -1)) ||
+                    (k === "swamp" && (rawClean.indexOf("černá tůň") !== -1 || rawClean.indexOf("black mere") !== -1)) ||
+                    (k === "dark" && rawClean.indexOf("erebus") !== -1)) {
+                    var tVal = window.PRS_I18n.t("castles." + k + ".name", null, raw);
+                    return raw.indexOf("(") === 0 ? ("(" + tVal + ")") : tVal;
                 }
             }
         }

@@ -6,6 +6,16 @@ window.PRS_I18N.en = {
         "flag": "🇬🇧",
         "short": "EN"
     },
+        "rules_guide": {
+        "intro_text": "Click a chapter to expand or collapse it. All rules are fully synchronized with the game engine.",
+        "expand_all": "Expand All",
+        "collapse_all": "Collapse All"
+    },
+    "glossary": {
+        "title": "🔤 Glossary of Terms, Abbreviations and Icon Legend",
+        "search_placeholder": "Search term (e.g. rent, dungeon, stance)..."
+    },
+
     "ui": {
         "brand_subtitle": "The Princess's Heart",
         "back_to_kikiai": "← Back to KikiAI",
@@ -2081,6 +2091,7 @@ window.PRS_I18N.en = {
         "tab_maps": "⭐ Board Templates"
     },
     "map_studio": {
+    "royal_castle_label": "🏰 Royal Seat of the Crown (central landmark):",
     "preview_default_title": "Custom Royal Board",
     "reroll_seed_title": "Reroll tile layout (new Seed)",
     "seed_label": "🎲 Layout Seed:",
@@ -2360,6 +2371,7 @@ window.PRS_I18N.en = {
         }
     },
     "chat": {
+        "drawer_title": "<span>💬</span> Royal Chamber (Chat)",
         "title": "💬 Royal Council (Chat)",
         "empty": "💬 No messages at the table yet.<br/>Type a message or pick a quick shout above!",
         "placeholder": "Write a message to knights at the table...",

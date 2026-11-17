@@ -100,6 +100,7 @@ $codeFiles = @(
     "js/app-map-editor.js",
     "js/app-dialog.js",
     "js/app-catalog.js",
+    "js/app-rules-guide.js",
     "js/app-admin.js",
     "js/app-musicwidget.js",
     "assets/icons/icon-192.png",

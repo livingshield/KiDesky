@@ -498,7 +498,7 @@
                 out.push('    <circle class="me-royal-castle-aura" cx="0" cy="0" r="44" fill="rgba(212,175,55,0.16)" stroke="' + (isCastleSelected ? '#facc15' : 'rgba(212,175,55,0.65)') + '" stroke-width="' + (isCastleSelected ? '3' : '2') + '"' + (isCastleSelected ? ' stroke-dasharray="6,4"' : '') + '/>');
                 out.push('    <image href="' + rcImg + '" x="-42" y="-48" width="84" height="84" preserveAspectRatio="xMidYMid meet" pointer-events="none"/>');
                 out.push('    <rect x="-56" y="34" width="112" height="16" rx="5" fill="rgba(10,7,5,0.9)" stroke="' + (isCastleSelected ? '#facc15' : 'rgba(212,175,55,0.6)') + '" stroke-width="1" pointer-events="none"/>');
-                out.push('    <text x="0" y="45" text-anchor="middle" fill="#fde68a" font-size="9.5" font-weight="bold" font-family="sans-serif" pointer-events="none">' + this.escapeXml(rc.name || "Královský hrad") + '</text>');
+                out.push('    <text x="0" y="45" text-anchor="middle" fill="#fde68a" font-size="9.5" font-weight="bold" font-family="sans-serif" pointer-events="none">' + this.escapeXml(this.getCastleDisplayName(rc)) + '</text>');
                 out.push('    <circle class="me-royal-castle-hit" cx="0" cy="0" r="48" fill="transparent"/>');
                 out.push('  </g>');
             }
@@ -1666,6 +1666,23 @@
             window.addEventListener("pointercancel", onUp);
         },
 
+        getCastleDisplayName: function (rc) {
+            if (!rc) return "";
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var catalog = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ALL_CASTLES) || [];
+            var rawName = rc.name || "";
+            if (isEn) {
+                for (var i = 0; i < catalog.length; i++) {
+                    var c = catalog[i];
+                    if (c.id === rc.skinId || c.id === rc.selectedKey || c.name === rawName || (c.img && (rc.image === c.img || rc.img === c.img))) {
+                        return c.nameEn || c.name || "Royal Castle";
+                    }
+                }
+                return rawName.replace(/^Královský hrad/i, "Royal Castle");
+            }
+            return rawName || "Královský hrad";
+        },
+
         applyRoyalCastleSkin: function (castleId) {
             var rc = this.getRoyalCastleLandmark();
             if (!rc) return;
@@ -1685,7 +1702,8 @@
             rc.image = found.img;
             rc.img = found.img;
             rc.icon = found.icon || "👑";
-            if (!rc.customNameEdited) rc.name = found.name;
+            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            if (!rc.customNameEdited) rc.name = isEn ? (found.nameEn || found.name) : found.name;
             rc.customPositioned = true;
             if (this.board) this.board.royalCastle = found.id;
             this.renderCanvas();
@@ -2263,7 +2281,7 @@
                     cHtml.push('</div>');
                     cHtml.push('<div style="margin-bottom:0.35rem;">');
                     cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Castle name:' : 'Název hradu:') + '</label>');
-                    cHtml.push('  <input type="text" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" value="' + this.escapeXml(rc.name || (isEn ? "Royal Castle" : "Královský hrad")) + '" onchange="PRS_MapEditor.applyRoyalCastleName(this.value)" />');
+                    cHtml.push('  <input type="text" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" value="' + this.escapeXml(this.getCastleDisplayName(rc)) + '" onchange="PRS_MapEditor.applyRoyalCastleName(this.value)" />');
                     cHtml.push('</div>');
                     cHtml.push('<div style="margin-bottom:0.45rem;">');
                     cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>' + (isEn ? 'Castle scale:' : 'Velikost hradu:') + '</span><strong id="me-insp-castle-scale-val" style="color:#fef08a;">' + scalePct + '%</strong></label>');

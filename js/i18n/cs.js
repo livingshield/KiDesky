@@ -6,6 +6,16 @@ window.PRS_I18N.cs = {
         "flag": "🇨🇿",
         "short": "CZ"
     },
+        "rules_guide": {
+        "intro_text": "Kliknutím na kapitolu ji rozbalíš nebo sbalíš. Všechna pravidla jsou plně synchronizována s herním enginem.",
+        "expand_all": "Rozbalit vše",
+        "collapse_all": "Sbalit vše"
+    },
+    "glossary": {
+        "title": "🔤 Slovníček pojmů, zkratek a legenda symbolů",
+        "search_placeholder": "Hledat pojem (např. renta, šatlava, postoj)..."
+    },
+
     "ui": {
         "brand_subtitle": "Princeznino srdce",
         "back_to_kikiai": "← Zpět na KikiAI",
@@ -2081,6 +2091,7 @@ window.PRS_I18N.cs = {
         "tab_maps": "⭐ Šablony plánů"
     },
     "map_studio": {
+    "royal_castle_label": "🏰 Hlavní královské sídlo (středová dominanta):",
     "preview_default_title": "Vlastní královský plán",
     "reroll_seed_title": "Přeskupit rozmístění polí (nový Seed)",
     "seed_label": "🎲 Seed rozložení:",
@@ -2360,6 +2371,7 @@ window.PRS_I18N.cs = {
         }
     },
     "chat": {
+        "drawer_title": "<span>💬</span> Královská sněmovna (Chat)",
         "title": "💬 Královská sněmovna (Chat)",
         "empty": "💬 Žádné zprávy u stolu.<br/>Napiš zprávu nebo zvol rychlý pokřik výše!",
         "placeholder": "Napiš zprávu rytířům u stolu...",
