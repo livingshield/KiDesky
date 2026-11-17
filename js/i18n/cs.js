@@ -374,7 +374,12 @@ window.PRS_I18N.cs = {
             "hall_saving": "Zapisuji vítězství do Síně slávy na MSSQL databázi...",
             "hall_saved_ok": "✅ <strong>Skvělé! Vítězství bylo trvale zapsáno do Síně slávy na serveru (kód: {code}).</strong>",
             "hall_saved_db": "✅ Partie uložena do databáze.",
-            "hall_saved_local": "✅ Partie zaznamenána lokálně."
+            "hall_saved_local": "✅ Partie zaznamenána lokálně.",
+            "continue_endless_title": "Pokračovat ve volné nekonečné hře na herním plánu se vším vybudovaným panstvím",
+            "royal_diploma_title": "Zobrazit a stáhnout iluminovaný Královský diplom vítěze",
+            "save_hall_of_fame_title": "Zapsat vítězství a statistiky do Síně slávy na serveru",
+            "new_game_title": "Spustit novou partii od začátku",
+            "endless_toast": "♾️ Nekonečná hra zahájena! Oficiální vítěz: {name}. Můžeš dál volně hrát a rozvíjet panství."
         },
         "diploma": {
             "download": "💾 Stáhnout diplom (PNG)",

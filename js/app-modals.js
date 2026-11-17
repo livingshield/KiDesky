@@ -305,6 +305,10 @@
 
         this.updateBodyModalClass();
 
+        if (window.PRS_I18n && window.PRS_I18n.updateDOM) {
+            window.PRS_I18n.updateDOM(modal);
+        }
+
     },
 
     closeVictoryModal: function () {
@@ -343,7 +347,12 @@
         var winName = winP ? winP.name : "Vítěz";
 
         if (this.showToast) {
-            this.showToast("♾️ Nekonečná hra zahájena! Oficiální vítěz: " + winName + ". Můžeš dál volně hrát a rozvíjet panství.", "success");
+            var isEnEndlessToast = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var tToast = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+            var msgToast = tToast("modals.endgame.endless_toast", { name: winName }, isEnEndlessToast
+                ? ("♾️ Endless Mode started! Official winner: " + winName + ". You can continue freely playing and developing estates.")
+                : ("♾️ Nekonečná hra zahájena! Oficiální vítěz: " + winName + ". Můžeš dál volně hrát a rozvíjet panství."));
+            this.showToast(msgToast, "success");
         }
 
         if (this.renderGameScreen) {

@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611172145">
+    <link rel="stylesheet" href="css/main.css?v=202611172155">
 
-    <link rel="stylesheet" href="css/board.css?v=202611172145">
+    <link rel="stylesheet" href="css/board.css?v=202611172155">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611172145">
+    <link rel="stylesheet" href="css/modals.css?v=202611172155">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611172145">
+    <link rel="stylesheet" href="css/mobile.css?v=202611172155">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -2441,10 +2441,10 @@
             <!-- Akční tlačítka -->
 
             <div class="victory-actions-bar">
-                <button data-i18n="modals.endgame.continue_endless" class="btn-gold-lg" onclick="PRS_App.continueInEndlessMode()" title="Pokračovat ve volné nekonečné hře na herním plánu se vším vybudovaným panstvím">♾️ Pokračovat v nekonečné hře</button>
-                <button data-i18n="modals.endgame.royal_diploma" class="btn-secondary" id="btn-show-diploma" onclick="PRS_App.openWinnerDiplomaModal()" title="Zobrazit a stáhnout iluminovaný Královský diplom vítěze">📜 Královský diplom</button>
-                <button data-i18n="modals.endgame.save_hall_of_fame" class="btn-secondary" id="btn-save-hall-of-fame" onclick="PRS_App.saveVictoryToCloud()">🏆 Zapsat do Síně slávy</button>
-                <button class="btn-secondary" onclick="PRS_App.startNewGame(true)" data-i18n="modals.endgame.new_game">🔄 Spustit novou partii</button>
+                <button data-i18n="modals.endgame.continue_endless" data-i18n-title="modals.endgame.continue_endless_title" class="btn-gold-lg" onclick="PRS_App.continueInEndlessMode()" title="Pokračovat ve volné nekonečné hře na herním plánu se vším vybudovaným panstvím">♾️ Pokračovat v nekonečné hře</button>
+                <button data-i18n="modals.endgame.royal_diploma" data-i18n-title="modals.endgame.royal_diploma_title" class="btn-secondary" id="btn-show-diploma" onclick="PRS_App.openWinnerDiplomaModal()" title="Zobrazit a stáhnout iluminovaný Královský diplom vítěze">📜 Královský diplom</button>
+                <button data-i18n="modals.endgame.save_hall_of_fame" data-i18n-title="modals.endgame.save_hall_of_fame_title" class="btn-secondary" id="btn-save-hall-of-fame" onclick="PRS_App.saveVictoryToCloud()" title="Zapsat vítězství a statistiky do Síně slávy na serveru">🏆 Zapsat do Síně slávy</button>
+                <button class="btn-secondary" onclick="PRS_App.startNewGame(true)" data-i18n="modals.endgame.new_game" data-i18n-title="modals.endgame.new_game_title" title="Spustit novou partii od začátku">🔄 Spustit novou partii</button>
             </div>
 
             <div id="victory-cloud-feedback" style="text-align:center; margin-top:0.5rem; font-size:0.83rem; color:var(--gold-light);"></div>
@@ -2952,25 +2952,25 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/cs.js?v=202611172145" defer></script>
-    <script src="js/i18n/en.js?v=202611172145" defer></script>
-    <script src="js/app-i18n.js?v=202611172145" defer></script>
-    <script src="js/game-data.js?v=202611172145" defer></script>
-    <script src="js/game-boards.js?v=202611172145" defer></script>
-    <script src="js/game-engine.js?v=202611172145" defer></script>
-    <script src="js/game-combat-ai.js?v=202611172145" defer></script>
-    <script src="js/app-audio.js?v=202611172145" defer></script>
-    <script src="js/app-dialog.js?v=202611172145" defer></script>
-    <script src="js/app.js?v=202611172145" defer></script>
-    <script src="js/app-board.js?v=202611172145" defer></script>
-    <script src="js/app-hud.js?v=202611172145" defer></script>
-    <script src="js/app-modals.js?v=202611172145" defer></script>
-    <script src="js/app-online.js?v=202611172145" defer></script>
-    <script src="js/app-saves.js?v=202611172145" defer></script>
-    <script src="js/app-map-editor.js?v=202611172145" defer></script>
-    <script src="js/app-catalog.js?v=202611172145" defer></script>
-    <script src="js/app-admin.js?v=202611172145" defer></script>
-    <script src="js/app-musicwidget.js?v=202611172145" defer></script>
+    <script src="js/i18n/cs.js?v=202611172155" defer></script>
+    <script src="js/i18n/en.js?v=202611172155" defer></script>
+    <script src="js/app-i18n.js?v=202611172155" defer></script>
+    <script src="js/game-data.js?v=202611172155" defer></script>
+    <script src="js/game-boards.js?v=202611172155" defer></script>
+    <script src="js/game-engine.js?v=202611172155" defer></script>
+    <script src="js/game-combat-ai.js?v=202611172155" defer></script>
+    <script src="js/app-audio.js?v=202611172155" defer></script>
+    <script src="js/app-dialog.js?v=202611172155" defer></script>
+    <script src="js/app.js?v=202611172155" defer></script>
+    <script src="js/app-board.js?v=202611172155" defer></script>
+    <script src="js/app-hud.js?v=202611172155" defer></script>
+    <script src="js/app-modals.js?v=202611172155" defer></script>
+    <script src="js/app-online.js?v=202611172155" defer></script>
+    <script src="js/app-saves.js?v=202611172155" defer></script>
+    <script src="js/app-map-editor.js?v=202611172155" defer></script>
+    <script src="js/app-catalog.js?v=202611172155" defer></script>
+    <script src="js/app-admin.js?v=202611172155" defer></script>
+    <script src="js/app-musicwidget.js?v=202611172155" defer></script>
     <script>
         (function () {
             function bootApp() {

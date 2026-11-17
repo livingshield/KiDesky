@@ -374,7 +374,12 @@ window.PRS_I18N.en = {
             "hall_saving": "Recording victory in Hall of Fame on database...",
             "hall_saved_ok": "✅ <strong>Great! Victory was permanently recorded in the Hall of Fame on the server (code: {code}).</strong>",
             "hall_saved_db": "✅ Game saved to database.",
-            "hall_saved_local": "✅ Match recorded locally."
+            "hall_saved_local": "✅ Match recorded locally.",
+            "continue_endless_title": "Continue in free endless mode on the board with all built estates",
+            "royal_diploma_title": "View and download the illuminated Royal Victory Diploma",
+            "save_hall_of_fame_title": "Record victory and match statistics in the Hall of Fame on the server",
+            "new_game_title": "Start a new match from the beginning",
+            "endless_toast": "♾️ Endless Mode started! Official winner: {name}. You can continue playing freely and expanding your realm."
         },
         "diploma": {
             "download": "💾 Download Diploma (PNG)",
