@@ -19,36 +19,72 @@
         _lang: DEFAULT_LANG,
         _listeners: [],
         _initialized: false,
+        _switchSeq: 0,
+        _bootPromise: null,
 
         /**
-         * Dynamicky zjistí všechny dostupné jazyky ze zaregistrovaných slovníků v window.PRS_I18N.
-         * Každý slovník nese hlavičku meta: { code, name, flag, short }.
-         * Umožňuje přidat nový jazyk pouhým vložením nového souboru s překlady (např. de.js, pl.js).
+         * Dynamicky zjistí všechny dostupné jazyky z manifestu window.PRS_I18N_LANGUAGES
+         * i ze slovníků již načtených přímo ve window.PRS_I18N.
+         * Umožňuje přidat nový jazyk zápisem do languages.js a vložením souboru do js/i18n/.
          */
         getAvailableLanguages: function () {
             var langs = [];
+            var seen = {};
+            var pushEntry = function (code, meta) {
+                if (!code || seen[code]) return;
+                seen[code] = true;
+                meta = meta || {};
+                var flag = meta.flag || '🌐';
+                var name = meta.name || code.toUpperCase();
+                langs.push({
+                    code: code,
+                    name: name,
+                    flag: flag,
+                    short: meta.short || code.toUpperCase(),
+                    label: (flag ? flag + ' ' : '') + name
+                });
+            };
+
+            if (window.PRS_I18N_LANGUAGES && Array.isArray(window.PRS_I18N_LANGUAGES)) {
+                for (var i = 0; i < window.PRS_I18N_LANGUAGES.length; i++) {
+                    var item = window.PRS_I18N_LANGUAGES[i];
+                    if (item && item.code) {
+                        var loadedMeta = (window.PRS_I18N && window.PRS_I18N[item.code] && window.PRS_I18N[item.code].meta) || null;
+                        pushEntry(item.code, loadedMeta || item);
+                    }
+                }
+            }
+
             if (window.PRS_I18N && typeof window.PRS_I18N === 'object') {
                 for (var code in window.PRS_I18N) {
                     if (Object.prototype.hasOwnProperty.call(window.PRS_I18N, code)) {
-                        var item = window.PRS_I18N[code];
-                        if (item && typeof item === 'object') {
-                            var meta = item.meta || {};
-                            langs.push({
-                                code: code,
-                                name: meta.name || code.toUpperCase(),
-                                flag: meta.flag || '🌐',
-                                short: meta.short || code.toUpperCase(),
-                                label: (meta.flag ? meta.flag + ' ' : '') + (meta.name || code.toUpperCase())
-                            });
+                        var dictObj = window.PRS_I18N[code];
+                        if (dictObj && typeof dictObj === 'object') {
+                            pushEntry(code, dictObj.meta || {});
                         }
                     }
                 }
             }
+
             if (langs.length === 0) {
                 langs.push({ code: 'cs', name: 'Čeština', flag: '🇨🇿', short: 'CZ', label: '🇨🇿 Čeština' });
                 langs.push({ code: 'en', name: 'English', flag: '🇬🇧', short: 'EN', label: '🇬🇧 English' });
             }
             return langs;
+        },
+
+        /**
+         * Zajistí asynchronní načtení požadovaného jazykového slovníku
+         */
+        ensureLanguageLoaded: function (lang) {
+            var code = lang || this._lang || DEFAULT_LANG;
+            if (window.PRS_I18N && window.PRS_I18N[code]) {
+                return Promise.resolve(code);
+            }
+            if (window.PRS_ModuleLoader && typeof window.PRS_ModuleLoader.ensureLanguage === 'function') {
+                return window.PRS_ModuleLoader.ensureLanguage(code);
+            }
+            return Promise.resolve(code);
         },
 
         /**
@@ -94,15 +130,34 @@
             document.documentElement.lang = this._lang;
             this._initialized = true;
 
-            // Přeložit DOM po načtení dokumentu
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function () {
-                    PRS_I18n.translateDOM();
-                    PRS_I18n.syncUi();
+            var self = this;
+            var isSyncDict = !!(window.PRS_I18N && window.PRS_I18N[this._lang]);
+            this._bootPromise = isSyncDict
+                ? Promise.resolve(this._lang)
+                : this.ensureLanguageLoaded(this._lang).catch(function (err) {
+                    console.warn('[PRS_I18n] Initial language load failed for ' + self._lang + ':', err);
+                    return self._lang;
                 });
+
+            var runDomTranslation = function () {
+                self.translateDOM();
+                self.syncUi();
+            };
+
+            if (isSyncDict) {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', runDomTranslation);
+                } else {
+                    runDomTranslation();
+                }
             } else {
-                this.translateDOM();
-                this.syncUi();
+                this._bootPromise.then(function () {
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', runDomTranslation);
+                    } else {
+                        runDomTranslation();
+                    }
+                });
             }
         },
 
@@ -114,14 +169,9 @@
         },
 
         /**
-         * Nastaví nový jazyk hry a aktualizuje UI
+         * Interní aplikace již načteného jazyka do DOM a posluchačů
          */
-        setLanguage: function (lang) {
-            if (!this.isSupportedLanguage(lang)) {
-                console.warn('[PRS_I18n] Nepodporovaný jazyk:', lang);
-                return;
-            }
-
+        _applyLanguage: function (lang) {
             this._lang = lang;
             try {
                 localStorage.setItem(STORAGE_KEY, lang);
@@ -159,6 +209,48 @@
                     window.PRS_HUD.render();
                 } catch (e) { console.warn('[i18n] PRS_HUD.render failed:', e); }
             }
+        },
+
+        /**
+         * Nastaví nový jazyk hry (při prvním zvolení stáhne slovník dynamicky) a aktualizuje UI
+         */
+        setLanguage: function (lang) {
+            if (!this.isSupportedLanguage(lang)) {
+                console.warn('[PRS_I18n] Nepodporovaný jazyk:', lang);
+                return Promise.resolve(this._lang);
+            }
+
+            var dictReady = !!(window.PRS_I18N && window.PRS_I18N[lang]);
+            var rulesNeeded = !!(window.PRS_App && window.PRS_App._rulesBundleLoaded);
+            var rulesReady = !rulesNeeded || !!(window.PRS_I18N_RULES && window.PRS_I18N_RULES[lang]);
+
+            if (dictReady && rulesReady) {
+                this._switchSeq++;
+                this._applyLanguage(lang);
+                return Promise.resolve(lang);
+            }
+
+            var self = this;
+            var seq = ++this._switchSeq;
+            var tasks = [this.ensureLanguageLoaded(lang)];
+            if (rulesNeeded && !rulesReady && window.PRS_ModuleLoader && typeof window.PRS_ModuleLoader.ensureRulesLanguage === 'function') {
+                tasks.push(window.PRS_ModuleLoader.ensureRulesLanguage(lang));
+            }
+
+            return Promise.all(tasks).then(function () {
+                if (self._switchSeq !== seq) return self._lang;
+                self._applyLanguage(lang);
+                return lang;
+            }).catch(function (err) {
+                console.warn('[PRS_I18n] Failed to lazy-load language "' + lang + '":', err);
+                if (self._switchSeq === seq) {
+                    self.syncUi();
+                    if (window.KiDeskyToast && typeof window.KiDeskyToast.show === 'function') {
+                        window.KiDeskyToast.show(self.t('ui.loading_module_error', null, '⚠️ Nepodařilo se načíst modul.'), 'warning');
+                    }
+                }
+                return self._lang;
+            });
         },
 
         /**

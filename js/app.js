@@ -321,15 +321,8 @@ window.PRS_App = {
 
         setTimeout(function () {
 
-            self.renderRulesAndCatalog();
-
-            self.renderBalanceStudioInputs();
-
             self.fetchServerStatusAndSessions();
             if (self.updateSavedGamesUI) self.updateSavedGamesUI();
-            if (typeof self.renderRuleGuide === "function") self.renderRuleGuide();
-            if (typeof self.renderGlossary === "function") self.renderGlossary();
-            if (typeof self.renderTilesAtlas === "function") self.renderTilesAtlas();
             if (window.PRS_I18n) {
                 self.onLanguageChanged(window.PRS_I18n.getLanguage());
             }
@@ -357,7 +350,9 @@ window.PRS_App = {
                                     }
                                 }
                                 self.activeConfig = merged;
-                                self.renderBalanceStudioInputs();
+                                if (typeof self.renderBalanceStudioInputs === "function") {
+                                    self.renderBalanceStudioInputs();
+                                }
                             }
                         } catch (e) { console.warn("[KiDesky] get-config apply err:", e); }
                     }
@@ -997,6 +992,70 @@ window.PRS_App = {
         }
     },
 
+    ensureRulesLoaded: function () {
+        var lang = (window.PRS_I18n && window.PRS_I18n.getLanguage()) || "cs";
+        if (this._rulesBundleLoaded && window.PRS_I18N_RULES && window.PRS_I18N_RULES[lang]) {
+            return Promise.resolve();
+        }
+        if (window.PRS_ModuleLoader && typeof window.PRS_ModuleLoader.ensureRulesBundle === "function") {
+            return window.PRS_ModuleLoader.ensureRulesBundle(lang).catch(function (err) {
+                if (window.KiDeskyToast && window.PRS_I18n) {
+                    window.KiDeskyToast.show(window.PRS_I18n.t("ui.loading_module_error", null, "⚠️ Nepodařilo se načíst modul."), "warning");
+                }
+                throw err;
+            });
+        }
+        return Promise.resolve();
+    },
+
+    ensureAdminLoaded: function () {
+        if (this._adminModuleLoaded) {
+            return Promise.resolve();
+        }
+        if (window.PRS_ModuleLoader && typeof window.PRS_ModuleLoader.ensureAdminBundle === "function") {
+            return window.PRS_ModuleLoader.ensureAdminBundle().catch(function (err) {
+                if (window.KiDeskyToast && window.PRS_I18n) {
+                    window.KiDeskyToast.show(window.PRS_I18n.t("ui.loading_module_error", null, "⚠️ Nepodařilo se načíst modul."), "warning");
+                }
+                throw err;
+            });
+        }
+        return Promise.resolve();
+    },
+
+    ensureMapEditorLoaded: function () {
+        if (window.PRS_MapEditor) {
+            return Promise.resolve(window.PRS_MapEditor);
+        }
+        if (window.PRS_ModuleLoader && typeof window.PRS_ModuleLoader.ensureMapEditor === "function") {
+            return window.PRS_ModuleLoader.ensureMapEditor().catch(function (err) {
+                if (window.KiDeskyToast && window.PRS_I18n) {
+                    window.KiDeskyToast.show(window.PRS_I18n.t("ui.loading_module_error", null, "⚠️ Nepodařilo se načíst modul."), "warning");
+                }
+                throw err;
+            });
+        }
+        return Promise.resolve(window.PRS_MapEditor || null);
+    },
+
+    openTileHelp: function (tileType, tileCode) {
+        var self = this;
+        return this.ensureRulesLoaded().then(function () {
+            if (typeof self.openRulesHelpForTile === "function") {
+                self.openRulesHelpForTile(tileType, tileCode);
+            }
+        });
+    },
+
+    openAdminSaveBoardModal: function () {
+        var self = this;
+        return this.ensureAdminLoaded().then(function () {
+            if (typeof self.openSaveToPredefinedModal === "function") {
+                self.openSaveToPredefinedModal();
+            }
+        });
+    },
+
     onLanguageChanged: function (lang) {
         var self = this;
         if (window.PRS_I18n) {
@@ -1099,6 +1158,16 @@ window.PRS_App = {
             this._safeCall("renderOnlineSeatsModal", this.renderOnlineSeatsModal);
         }
         this._safeCall("renderChatMessagesList", this.renderChatMessagesList);
+        var deniedBox = document.getElementById("admin-guest-denied");
+        if (deniedBox && deniedBox.style.display !== "none" && this.activeTab === "admin") {
+            var tAdmLang = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
+            deniedBox.innerHTML = '<div style="text-align:center; padding:3rem 1rem; color:var(--text-muted);">' +
+                '<div style="font-size:3rem; margin-bottom:1rem;">🛡️🔒</div>' +
+                '<h2 style="color:var(--gold-light); font-family:\'Cinzel\',serif;">' + tAdmLang("admin.access_denied_title", "Přístup vyhrazen pro Administrátora") + '</h2>' +
+                '<p style="max-width:500px; margin:0.8rem auto 1.5rem;">' + tAdmLang("admin.access_denied_desc", "Pro správu videí, uživatelských účtů a herních relací se prosím přihlaste jako <strong>admin</strong>.") + '</p>' +
+                '<button class="btn-primary" onclick="PRS_App.openAuthModal()">' + tAdmLang("admin.access_denied_btn", "🔑 Přihlásit se jako Admin") + '</button>' +
+                '</div>';
+        }
     },
 
     // --- HUDEBNÍ PŘEHRÁVAČ & BGM KONTROLER ---,
@@ -1586,15 +1655,90 @@ window.PRS_App = {
         }
 
         if (tabId === "rules") {
-
-            this.renderRulesAndCatalog();
-
+            var self = this;
+            if (this._rulesBundleLoaded && typeof this.renderRulesAndCatalog === "function") {
+                this.renderRulesAndCatalog();
+            } else {
+                var rulesTab = document.getElementById("tab-rules");
+                var tLoad = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
+                if (rulesTab && !document.getElementById("rules-lazy-loading-banner")) {
+                    var rBanner = document.createElement("div");
+                    rBanner.id = "rules-lazy-loading-banner";
+                    rBanner.style.cssText = "padding:1rem; margin:0.5rem 0 1rem; text-align:center; background:rgba(15,23,42,0.85); border:1px solid rgba(212,175,55,0.4); border-radius:10px; color:var(--gold-light); font-size:0.95rem;";
+                    rBanner.textContent = tLoad("ui.loading_module", "⏳ Načítám modul...");
+                    rulesTab.insertBefore(rBanner, rulesTab.firstChild);
+                }
+                this.ensureRulesLoaded().then(function () {
+                    var b = document.getElementById("rules-lazy-loading-banner");
+                    if (b && b.parentNode) b.parentNode.removeChild(b);
+                    if (self.renderRulesAndCatalog) self.renderRulesAndCatalog();
+                    if (self.renderRuleGuide) self.renderRuleGuide();
+                    if (self.renderGlossary) self.renderGlossary();
+                    if (self.renderTilesAtlas) self.renderTilesAtlas();
+                    if (self.switchRulesView) self.switchRulesView(self.rulesCurrentView || "quick");
+                }).catch(function () {
+                    var b = document.getElementById("rules-lazy-loading-banner");
+                    if (b) {
+                        b.style.color = "#fca5a5";
+                        b.textContent = tLoad("ui.loading_module_error", "⚠️ Nepodařilo se načíst modul. Zkontroluj připojení a zkus to znovu.");
+                    }
+                });
+            }
         }
 
         if (tabId === "admin") {
+            var selfAdm = this;
+            var isAdmin = Boolean(this.currentUser && this.currentUser.role === "Admin");
+            var admTab = document.getElementById("tab-admin");
+            var navBar = admTab ? admTab.querySelector(".admin-nav-bar") : null;
+            var areaEl = document.getElementById("admin-content-area");
+            var deniedBox = document.getElementById("admin-guest-denied");
+            var tAdm = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
 
-            if (this.initAdminSection) this.initAdminSection();
-
+            if (!isAdmin) {
+                if (navBar) navBar.style.display = "none";
+                if (areaEl) areaEl.style.display = "none";
+                if (admTab) {
+                    if (!deniedBox) {
+                        deniedBox = document.createElement("div");
+                        deniedBox.id = "admin-guest-denied";
+                        admTab.appendChild(deniedBox);
+                    }
+                    deniedBox.style.display = "block";
+                    deniedBox.innerHTML = '<div style="text-align:center; padding:3rem 1rem; color:var(--text-muted);">' +
+                        '<div style="font-size:3rem; margin-bottom:1rem;">🛡️🔒</div>' +
+                        '<h2 style="color:var(--gold-light); font-family:\'Cinzel\',serif;">' + tAdm("admin.access_denied_title", "Přístup vyhrazen pro Administrátora") + '</h2>' +
+                        '<p style="max-width:500px; margin:0.8rem auto 1.5rem;">' + tAdm("admin.access_denied_desc", "Pro správu videí, uživatelských účtů a herních relací se prosím přihlaste jako <strong>admin</strong>.") + '</p>' +
+                        '<button class="btn-primary" onclick="PRS_App.openAuthModal()">' + tAdm("admin.access_denied_btn", "🔑 Přihlásit se jako Admin") + '</button>' +
+                        '</div>';
+                }
+            } else {
+                if (deniedBox) deniedBox.style.display = "none";
+                if (navBar) navBar.style.display = "flex";
+                if (areaEl) areaEl.style.display = "block";
+                if (this._adminModuleLoaded && typeof this.initAdminSection === "function") {
+                    this.initAdminSection();
+                } else {
+                    if (admTab && !document.getElementById("admin-lazy-loading-banner")) {
+                        var aBanner = document.createElement("div");
+                        aBanner.id = "admin-lazy-loading-banner";
+                        aBanner.style.cssText = "padding:1rem; margin:0.5rem 0 1rem; text-align:center; background:rgba(15,23,42,0.85); border:1px solid rgba(212,175,55,0.4); border-radius:10px; color:var(--gold-light); font-size:0.95rem;";
+                        aBanner.textContent = tAdm("ui.loading_module", "⏳ Načítám modul...");
+                        admTab.insertBefore(aBanner, navBar || admTab.firstChild);
+                    }
+                    this.ensureAdminLoaded().then(function () {
+                        var b = document.getElementById("admin-lazy-loading-banner");
+                        if (b && b.parentNode) b.parentNode.removeChild(b);
+                        if (selfAdm.initAdminSection) selfAdm.initAdminSection();
+                    }).catch(function () {
+                        var b = document.getElementById("admin-lazy-loading-banner");
+                        if (b) {
+                            b.style.color = "#fca5a5";
+                            b.textContent = tAdm("ui.loading_module_error", "⚠️ Nepodařilo se načíst modul. Zkontroluj připojení a zkus to znovu.");
+                        }
+                    });
+                }
+            }
         }
 
         if (tabId === "board") {
@@ -5482,6 +5626,18 @@ window.PRS_App = {
             if (window.PRS_MapEditor) {
                 var boardToEdit = this._currentMapStudioBoard || this.mapStudioBoard;
                 window.PRS_MapEditor.init(boardToEdit);
+            } else {
+                var selfMs = this;
+                var tEdLoad = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
+                eView.innerHTML = '<div style="padding:2rem; text-align:center; color:var(--gold-light); font-size:0.95rem;">' + tEdLoad("ui.loading_module", "⏳ Načítám modul...") + '</div>';
+                this.ensureMapEditorLoaded().then(function () {
+                    if (selfMs._mapStudioActiveTab === "editor" && window.PRS_MapEditor) {
+                        var bEdit = selfMs._currentMapStudioBoard || selfMs.mapStudioBoard;
+                        window.PRS_MapEditor.init(bEdit);
+                    }
+                }).catch(function () {
+                    eView.innerHTML = '<div style="padding:2rem; text-align:center; color:#fca5a5; font-size:0.9rem;">' + tEdLoad("ui.loading_module_error", "⚠️ Nepodařilo se načíst modul. Zkontroluj připojení a zkus to znovu.") + '</div>';
+                });
             }
         } else {
             eView.style.display = "none";

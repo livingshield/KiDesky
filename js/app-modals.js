@@ -4329,5 +4329,33 @@
         body.innerHTML = html;
     },
 
+    // --- UNIVERZÁLNÍ LIGHTBOX PRO OBRÁZKY (DRAKY, ZÁMKY, NÁKRESY) ---
+    openImageModal: function (imgSrc, title, desc) {
+        var m = document.getElementById("image-lightbox-modal");
+        var img = document.getElementById("image-lightbox-img");
+        var tEl = document.getElementById("image-lightbox-title");
+        var cEl = document.getElementById("image-lightbox-caption");
+        if (m && img) {
+            img.src = imgSrc || "";
+            if (tEl) tEl.textContent = title || "Královská ilustrace";
+            if (cEl) cEl.textContent = desc || "";
+            m.style.display = "flex";
+            if (this.updateBodyModalClass) this.updateBodyModalClass();
+        }
+    },
+
+    closeImageModal: function () {
+        var m = document.getElementById("image-lightbox-modal");
+        if (m) { m.style.display = "none"; if (this.updateBodyModalClass) this.updateBodyModalClass(); }
+    },
+
+    openSketchModal: function (imgSrc, caption) {
+        this.openImageModal(imgSrc, "Archivní ruční nákres z roku 2016", caption);
+    },
+
+    closeSketchModal: function () {
+        this.closeImageModal();
+    }
+
     });
 })();

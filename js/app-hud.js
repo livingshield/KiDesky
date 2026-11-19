@@ -1861,7 +1861,7 @@
             '    <div class="standing-tile-meta">' +
             '      <div style="display:flex; align-items:center; justify-content:space-between; gap:0.4rem; margin-bottom:2px;">' +
             '        ' + headerTag +
-            '        <button class="btn-help-bubble" onclick="PRS_App.openRulesHelpForTile(\'' + (node.type || '') + '\', \'' + (node.code || '') + '\')" title="' + (isEn ? "Read rules and tips for this tile in the Codex" : "Přečíst pravidla a tipy k tomuto poli v Kodexu") + '">' + (isEn ? "❓ Help" : "❓ Nápověda") + '</button>' +
+            '        <button class="btn-help-bubble" onclick="PRS_App.openTileHelp(\'' + (node.type || '') + '\', \'' + (node.code || '') + '\')" title="' + (isEn ? "Read rules and tips for this tile in the Codex" : "Přečíst pravidla a tipy k tomuto poli v Kodexu") + '">' + (isEn ? "❓ Help" : "❓ Nápověda") + '</button>' +
             '      </div>' +
             '      <div class="standing-tile-title">' + node.icon + ' ' + this.escapeHtml(renderedTitle) + '</div>' +
             '    </div>' +

@@ -245,7 +245,9 @@ window.PRS_I18N.cs = {
             "back_to_board_title": "Návrat k herní desce"
         },
         "currency": "zl.",
-        "brand_home_title": "Návrat na úvodní stránku a videa"
+        "brand_home_title": "Návrat na úvodní stránku a videa",
+        "loading_module": "⏳ Načítám modul...",
+        "loading_module_error": "⚠️ Nepodařilo se načíst modul. Zkontroluj připojení a zkus to znovu."
     },
     "slots": {
         "weapon": "Zbraň",
@@ -2598,7 +2600,10 @@ window.PRS_I18N.cs = {
         },
         "announcement": {
             "btn_publish": "📢 Zveřejnit zprávu posla"
-        }
+        },
+        "access_denied_title": "Přístup vyhrazen pro Administrátora",
+        "access_denied_desc": "Pro správu videí, uživatelských účtů a herních relací se prosím přihlaste jako <strong>admin</strong>.",
+        "access_denied_btn": "🔑 Přihlásit se jako Admin"
     },
     "auth": {
         "profile_title": "🛡️ Tvůj rytířský profil",

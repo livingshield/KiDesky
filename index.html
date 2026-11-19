@@ -62,13 +62,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611192046">
+    <link rel="stylesheet" href="css/main.css?v=202611192355">
 
-    <link rel="stylesheet" href="css/board.css?v=202611192046">
+    <link rel="stylesheet" href="css/board.css?v=202611192355">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611192046">
+    <link rel="stylesheet" href="css/modals.css?v=202611192355">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611192046">
+    <link rel="stylesheet" href="css/mobile.css?v=202611192355">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -3004,35 +3004,38 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/cs.js?v=202611192046" defer></script>
-    <script src="js/i18n/en.js?v=202611192046" defer></script>
-    <script src="js/i18n/rules-cs.js?v=202611192046" defer></script>
-    <script src="js/i18n/rules-en.js?v=202611192046" defer></script>
-    <script src="js/app-i18n.js?v=202611192046" defer></script>
-    <script src="js/game-data.js?v=202611192046" defer></script>
-    <script src="js/game-boards.js?v=202611192046" defer></script>
-    <script src="js/game-engine.js?v=202611192046" defer></script>
-    <script src="js/game-combat-ai.js?v=202611192046" defer></script>
-    <script src="js/app-audio.js?v=202611192046" defer></script>
-    <script src="js/app-dialog.js?v=202611192046" defer></script>
-    <script src="js/app-api.js?v=202611192046" defer></script>
-    <script src="js/app-modal-manager.js?v=202611192046" defer></script>
-    <script src="js/app.js?v=202611192046" defer></script>
-    <script src="js/app-board.js?v=202611192046" defer></script>
-    <script src="js/app-hud.js?v=202611192046" defer></script>
-    <script src="js/app-modals.js?v=202611192046" defer></script>
-    <script src="js/app-online.js?v=202611192046" defer></script>
-    <script src="js/app-saves.js?v=202611192046" defer></script>
-    <script src="js/app-map-editor.js?v=202611192046" defer></script>
-    <script src="js/app-catalog.js?v=202611192046" defer></script>
-    <script src="js/app-rules-guide.js?v=202611192046" defer></script>
-    <script src="js/app-admin.js?v=202611192046" defer></script>
-    <script src="js/app-musicwidget.js?v=202611192046" defer></script>
+    <script src="js/i18n/languages.js?v=202611192355" defer></script>
+    <script src="js/core/module-loader.js?v=202611192355" defer></script>
+    <script src="js/app-i18n.js?v=202611192355" defer></script>
+    <script src="js/game-data.js?v=202611192355" defer></script>
+    <script src="js/game-boards.js?v=202611192355" defer></script>
+    <script src="js/game-engine.js?v=202611192355" defer></script>
+    <script src="js/game-combat-ai.js?v=202611192355" defer></script>
+    <script src="js/app-audio.js?v=202611192355" defer></script>
+    <script src="js/app-dialog.js?v=202611192355" defer></script>
+    <script src="js/app-api.js?v=202611192355" defer></script>
+    <script src="js/app-modal-manager.js?v=202611192355" defer></script>
+    <script src="js/app.js?v=202611192355" defer></script>
+    <script src="js/app-board.js?v=202611192355" defer></script>
+    <script src="js/app-hud.js?v=202611192355" defer></script>
+    <script src="js/app-modals.js?v=202611192355" defer></script>
+    <script src="js/app-online.js?v=202611192355" defer></script>
+    <script src="js/app-saves.js?v=202611192355" defer></script>
+    <script src="js/app-musicwidget.js?v=202611192355" defer></script>
     <script>
         (function () {
             function bootApp() {
-                if (window.PRS_App && window.PRS_App.init && !window.PRS_App._initialized) {
-                    window.PRS_App.init();
+                var start = function () {
+                    if (window.PRS_App && window.PRS_App.init && !window.PRS_App._initialized) {
+                        window.PRS_App.init();
+                    }
+                };
+                if (window.PRS_I18n && typeof window.PRS_I18n.ensureLanguageLoaded === "function") {
+                    window.PRS_I18n.ensureLanguageLoaded(window.PRS_I18n.getLanguage())
+                        .catch(function (err) { console.warn("[Boot] i18n preload fallback:", err); })
+                        .then(start);
+                } else {
+                    start();
                 }
             }
             if (document.readyState === "loading") {
@@ -4107,7 +4110,7 @@
             <div id="ms-modal-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-top:0.85rem; border-top:1px solid rgba(212,175,55,0.25); padding-top:0.7rem;">
                 <button type="button" class="btn-secondary" onclick="PRS_App.closeMapStudioModal()" data-i18n="common.cancel">Zrušit</button>
                 <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-                    <button type="button" id="btn-ms-admin-save-template" class="btn-secondary" style="display:none; border-color:#f59e0b; color:#fde68a; font-weight:700;" onclick="PRS_App.openSaveToPredefinedModal()" data-i18n="map_studio.btn_admin_save_db">
+                    <button type="button" id="btn-ms-admin-save-template" class="btn-secondary" style="display:none; border-color:#f59e0b; color:#fde68a; font-weight:700;" onclick="PRS_App.openAdminSaveBoardModal()" data-i18n="map_studio.btn_admin_save_db">
                         🛡️ Uložit do předdefinovaných plánů (Admin DB)
                     </button>
                     <button type="button" class="btn-secondary" onclick="PRS_App.copyMapStudioSeed()" style="border-color:#38bdf8; color:#bae6fd;" data-i18n="map_studio.btn_copy_code">📋 Kopírovat kód</button>

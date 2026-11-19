@@ -245,7 +245,9 @@ window.PRS_I18N.en = {
             "back_to_board_title": "Return to game board"
         },
         "currency": "g.",
-        "brand_home_title": "Return to intro page and videos"
+        "brand_home_title": "Return to intro page and videos",
+        "loading_module": "⏳ Loading module...",
+        "loading_module_error": "⚠️ Failed to load module. Please check your connection and try again."
     },
     "slots": {
         "weapon": "Weapon",
@@ -2598,7 +2600,10 @@ window.PRS_I18N.en = {
         },
         "announcement": {
             "btn_publish": "📢 Publish Herald Announcement"
-        }
+        },
+        "access_denied_title": "Administrator Access Only",
+        "access_denied_desc": "Please sign in as <strong>admin</strong> to manage videos, user accounts, and game sessions.",
+        "access_denied_btn": "🔑 Sign In as Admin"
     },
     "auth": {
         "profile_title": "🛡️ Your Knight Profile",
