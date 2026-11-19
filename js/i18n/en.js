@@ -37,6 +37,7 @@ window.PRS_I18N.en = {
         },
         "theme": {
             "title": "Choose element & kingdom color design",
+            "lang_select_title": "Game language (English / Čeština / ...)",
             "aria": "Kingdom color design",
             "light": "👑 Gold",
             "fire": "🔥 Fire",
@@ -94,6 +95,7 @@ window.PRS_I18N.en = {
         },
         "common": {
             "gold": "g.",
+            "gold_short": "g.",
             "hearts": "Hearts",
             "hearts_single": "Heart",
             "points": "points",
@@ -232,6 +234,8 @@ window.PRS_I18N.en = {
         "back_cancel": "Back / Cancel"
     },
     "hud": {
+        "horse_gallop": "🏇 HORSE GALLOP (2d6)",
+        "cautious_step": "🚶 CAUTIOUS STEP (1–4)",
         "end_turn": "➡️ End Turn",
         "roll_dice": "🎲 ROLL DICE (1–6)",
         "stance_careful": "Cautious Step",
@@ -309,6 +313,7 @@ window.PRS_I18N.en = {
         "game_over_banner_ceremony": "👑 Open Ceremony & Hall of Fame"
     },
     "modals": {
+        "chance_destiny_scroll": "Royal Destiny Card",
         "armory_tab_weapon": "🗡️ Weapons",
         "armory_tab_armor": "🛡️ Armor & Shields",
         "armory_tab_dress": "👗 Dresses & Cloaks",
@@ -1784,7 +1789,7 @@ window.PRS_I18N.en = {
         },
         "labels": {
             "scenario": "🏆 Game Scenario:",
-            "difficulty": "⚖️ Difficulty & Mode:",
+            "difficulty": "⚖️ Difficulty &amp; Mode:",
             "timer": "⏱️ Turn Timer:",
             "royal_castle": "🏰 Royal Castle:"
         }

@@ -2221,31 +2221,46 @@ window.PRS_GameEngine = {
 
                 if (remainingDebt <= 0) {
 
-                    var currSuffixRent = window.PRS_I18n ? window.PRS_I18n.t("ui.common.gold_short", null, "zl.") : "zl.";
+                    var pName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(player) : player.name;
+                    var oName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(owner) : owner.name;
+                    var eName = (window.PRS_App && window.PRS_App.getNodeDisplayName) ? window.PRS_App.getNodeDisplayName(node) : node.name;
+                    var currSuffixRent = window.PRS_I18n ? (window.PRS_I18n.t("ui.common.gold") || window.PRS_I18n.t("ui.currency") || "zl.") : "zl.";
                     var msg = window.PRS_I18n ? window.PRS_I18n.t("engine.paid_rent_log", {
                         badge: player.badge,
-                        player: player.name,
+                        player: pName,
                         rent: actualPaid,
                         currency: currSuffixRent,
                         ownerBadge: owner.badge,
-                        owner: owner.name,
-                        estate: node.name
-                    }) : ("💸 " + player.badge + " " + player.name + " platí poplatek **" + actualPaid + " zl.** hráči " + owner.badge + " " + owner.name + " (" + node.name + ").");
+                        owner: oName,
+                        estate: eName
+                    }) : ("💸 " + player.badge + " " + pName + " platí poplatek **" + actualPaid + " " + currSuffixRent + "** hráči " + owner.badge + " " + oName + " (" + eName + ").");
 
                     this.addLog(state, msg, "rent", {
                         key: "engine.paid_rent_log",
                         params: {
                             badge: player.badge,
-                            player: player.name,
+                            player: pName,
                             rent: actualPaid,
                             currency: currSuffixRent,
                             ownerBadge: owner.badge,
-                            owner: owner.name,
-                            estate: node.name
+                            owner: oName,
+                            estate: eName
                         }
                     });
 
                     state.pendingAction.summary = msg;
+                    state.pendingAction.summaryMeta = {
+                        key: "engine.paid_rent_log",
+                        params: {
+                            badge: player.badge,
+                            player: pName,
+                            rent: actualPaid,
+                            currency: currSuffixRent,
+                            ownerBadge: owner.badge,
+                            owner: oName,
+                            estate: eName
+                        }
+                    };
 
                 } else {
 

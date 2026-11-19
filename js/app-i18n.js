@@ -14,12 +14,54 @@
 
     var STORAGE_KEY = 'prs_lang';
     var DEFAULT_LANG = 'cs';
-    var SUPPORTED_LANGS = ['cs', 'en'];
 
     var PRS_I18n = {
         _lang: DEFAULT_LANG,
         _listeners: [],
         _initialized: false,
+
+        /**
+         * Dynamicky zjistí všechny dostupné jazyky ze zaregistrovaných slovníků v window.PRS_I18N.
+         * Každý slovník nese hlavičku meta: { code, name, flag, short }.
+         * Umožňuje přidat nový jazyk pouhým vložením nového souboru s překlady (např. de.js, pl.js).
+         */
+        getAvailableLanguages: function () {
+            var langs = [];
+            if (window.PRS_I18N && typeof window.PRS_I18N === 'object') {
+                for (var code in window.PRS_I18N) {
+                    if (Object.prototype.hasOwnProperty.call(window.PRS_I18N, code)) {
+                        var item = window.PRS_I18N[code];
+                        if (item && typeof item === 'object') {
+                            var meta = item.meta || {};
+                            langs.push({
+                                code: code,
+                                name: meta.name || code.toUpperCase(),
+                                flag: meta.flag || '🌐',
+                                short: meta.short || code.toUpperCase(),
+                                label: (meta.flag ? meta.flag + ' ' : '') + (meta.name || code.toUpperCase())
+                            });
+                        }
+                    }
+                }
+            }
+            if (langs.length === 0) {
+                langs.push({ code: 'cs', name: 'Čeština', flag: '🇨🇿', short: 'CZ', label: '🇨🇿 Čeština' });
+                langs.push({ code: 'en', name: 'English', flag: '🇬🇧', short: 'EN', label: '🇬🇧 English' });
+            }
+            return langs;
+        },
+
+        /**
+         * Ověří, zda je daný jazyk podporován
+         */
+        isSupportedLanguage: function (lang) {
+            if (!lang || typeof lang !== 'string') return false;
+            var avail = this.getAvailableLanguages();
+            for (var i = 0; i < avail.length; i++) {
+                if (avail[i].code === lang) return true;
+            }
+            return false;
+        },
 
         /**
          * Inicializace i18n subsystému
@@ -34,12 +76,15 @@
                 console.warn('[PRS_I18n] Nelze číst z localStorage:', e);
             }
 
-            if (savedLang && SUPPORTED_LANGS.indexOf(savedLang) !== -1) {
+            if (savedLang && this.isSupportedLanguage(savedLang)) {
                 this._lang = savedLang;
             } else {
                 // Autodetekce z jazyka prohlížeče
                 var navLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
-                if (navLang.indexOf('en') === 0) {
+                var detectedCode = navLang.split('-')[0];
+                if (this.isSupportedLanguage(detectedCode)) {
+                    this._lang = detectedCode;
+                } else if (navLang.indexOf('en') === 0 && this.isSupportedLanguage('en')) {
                     this._lang = 'en';
                 } else {
                     this._lang = DEFAULT_LANG;
@@ -62,7 +107,7 @@
         },
 
         /**
-         * Vrátí aktuálně nastavený jazyk ('cs' | 'en')
+         * Vrátí aktuálně nastavený jazyk ('cs' | 'en' | ...)
          */
         getLanguage: function () {
             return this._lang || DEFAULT_LANG;
@@ -72,7 +117,7 @@
          * Nastaví nový jazyk hry a aktualizuje UI
          */
         setLanguage: function (lang) {
-            if (SUPPORTED_LANGS.indexOf(lang) === -1) {
+            if (!this.isSupportedLanguage(lang)) {
                 console.warn('[PRS_I18n] Nepodporovaný jazyk:', lang);
                 return;
             }
@@ -200,6 +245,13 @@
         },
 
         /**
+         * Alias pro translateDOM pro zpětnou kompatibilitu
+         */
+        updateDOM: function (root) {
+            return this.translateDOM(root);
+        },
+
+        /**
          * Automatický překlad DOM elementů s data-i18n atributy
          */
         translateDOM: function (root) {
@@ -260,7 +312,34 @@
         syncUi: function () {
             var lang = this._lang;
 
-            // 1. Tlačítko v horní liště
+            // 0. Dynamické naplnění a synchronizace všech dropdown výběrů jazyka (.prs-lang-select)
+            var selects = document.querySelectorAll('.prs-lang-select, #global-lang-select, #board-bar-lang-select, #settings-lang-select, #mobile-dock-lang-select');
+            var avail = this.getAvailableLanguages();
+            for (var s = 0; s < selects.length; s++) {
+                var sel = selects[s];
+                if (!sel || sel.tagName !== 'SELECT') continue;
+                var needsRebuild = (sel.options.length !== avail.length);
+                if (!needsRebuild) {
+                    for (var o = 0; o < avail.length; o++) {
+                        if (sel.options[o].value !== avail[o].code) {
+                            needsRebuild = true;
+                            break;
+                        }
+                    }
+                }
+                if (needsRebuild) {
+                    sel.innerHTML = '';
+                    for (var a = 0; a < avail.length; a++) {
+                        var opt = document.createElement('option');
+                        opt.value = avail[a].code;
+                        opt.textContent = avail[a].label;
+                        sel.appendChild(opt);
+                    }
+                }
+                sel.value = lang;
+            }
+
+            // 1. Tlačítko v horní liště (zpětná kompatibilita)
             var topBtn = document.getElementById('topbar-lang-btn');
             if (topBtn) {
                 if (lang === 'cs') {

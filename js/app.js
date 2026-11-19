@@ -156,12 +156,32 @@ window.PRS_App = {
             name = name.replace(/\s*\(Ty\)$/i, " (You)").replace(/\s*\(PC\)$/i, " (AI)");
             name = name.replace(/^Černý Baron/i, "Black Baron")
                        .replace(/^Zikmund z Chovu/i, "Sigismund the Breeder")
-                       .replace(/^Kněžna Eliška/i, "Princess Eliška");
+                       .replace(/^Kněžna Eliška/i, "Princess Eliška")
+                       .replace(/^Červený rytíř/i, "Red Knight")
+                       .replace(/^Modrý rytíř/i, "Blue Knight")
+                       .replace(/^Zelený rytíř/i, "Green Knight")
+                       .replace(/^Zlatý rytíř/i, "Golden Knight")
+                       .replace(/^Fialový rytíř/i, "Purple Knight")
+                       .replace(/^Stříbrný rytíř/i, "Silver Knight")
+                       .replace(/^Železný Strážce/i, "Iron Sentinel")
+                       .replace(/^Baron z Růže/i, "Baron of the Rose")
+                       .replace(/^Strážce Hvozdů/i, "Warden of the Wilds")
+                       .replace(/^Čarodějka Astrida/i, "Astrida the Sorceress");
         } else {
             name = name.replace(/\s*\(You\)$/i, " (Ty)").replace(/\s*\(AI\)$/i, " (PC)");
             name = name.replace(/^Black Baron/i, "Černý Baron")
                        .replace(/^Sigismund the Breeder/i, "Zikmund z Chovu")
-                       .replace(/^Princess Eliška/i, "Kněžna Eliška");
+                       .replace(/^Princess Eliška/i, "Kněžna Eliška")
+                       .replace(/^Red Knight/i, "Červený rytíř")
+                       .replace(/^Blue Knight/i, "Modrý rytíř")
+                       .replace(/^Green Knight/i, "Zelený rytíř")
+                       .replace(/^Golden Knight/i, "Zlatý rytíř")
+                       .replace(/^Purple Knight/i, "Fialový rytíř")
+                       .replace(/^Silver Knight/i, "Stříbrný rytíř")
+                       .replace(/^Iron Sentinel/i, "Železný Strážce")
+                       .replace(/^Baron of the Rose/i, "Baron z Růže")
+                       .replace(/^Warden of the Wilds/i, "Strážce Hvozdů")
+                       .replace(/^Astrida the Sorceress/i, "Čarodějka Astrida");
         }
         return name;
     },
@@ -174,79 +194,84 @@ window.PRS_App = {
 
         var self = this;
 
-        this.activeConfig = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG);
+        try {
+            this.activeConfig = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG);
+        } catch (e) {
+            console.warn("init activeConfig err:", e);
+        }
 
-        this.graphicsConfig = window.PRS_GameEngine.deepClone(window.PRS_GRAPHICS_CONFIG);
+        try {
+            this.graphicsConfig = window.PRS_GameEngine.deepClone(window.PRS_GRAPHICS_CONFIG);
+        } catch (e) {
+            console.warn("init graphicsConfig err:", e);
+        }
 
-        this.loadSavedGraphicsConfig();
+        try { this.loadSavedGraphicsConfig(); } catch (e) { console.warn("loadSavedGraphicsConfig err:", e); }
 
-        this.loadSavedUser();
+        try { this.loadSavedUser(); } catch (e) { console.warn("loadSavedUser err:", e); }
 
-        this.checkEmailConfirmationUrl();
+        try { this.checkEmailConfirmationUrl(); } catch (e) { console.warn("checkEmailConfirmationUrl err:", e); }
 
         this.isBoardStaticDirty = true;
 
-        this.initTheme();
+        try { this.initTheme(); } catch (e) { console.warn("initTheme err:", e); }
 
-        this.detectDeviceProfile();
+        try { this.detectDeviceProfile(); } catch (e) { console.warn("detectDeviceProfile err:", e); }
 
-        this.renderLobbyPlayers();
+        try { this.renderLobbyPlayers(); } catch (e) { console.warn("renderLobbyPlayers err:", e); }
 
-        this.initMapPanAndZoom();
+        try { this.initMapPanAndZoom(); } catch (e) { console.warn("initMapPanAndZoom err:", e); }
 
-        this.initKeyboardShortcuts();
+        try { this.initKeyboardShortcuts(); } catch (e) { console.warn("initKeyboardShortcuts err:", e); }
 
-        this.initAmbientCanvas();
+        try { this.initAmbientCanvas(); } catch (e) { console.warn("initAmbientCanvas err:", e); }
 
         window.addEventListener("resize", function () {
-
-            self.detectDeviceProfile();
-
+            try { self.detectDeviceProfile(); } catch (e) { }
         });
 
         window.addEventListener("orientationchange", function () {
-
-            setTimeout(function () { self.detectDeviceProfile(); }, 160);
-
+            setTimeout(function () {
+                try { self.detectDeviceProfile(); } catch (e) { }
+            }, 160);
         });
 
         // Automatické zachování stavu rozehrané hry před jakýmkoliv obnovením (F5, Ctrl+F5) nebo zavřením
         window.addEventListener("beforeunload", function () {
             if (self.hasGameStarted && self.state && self.state.phase !== "GAME_OVER") {
                 if (typeof self.saveActiveGameAutosave === "function") {
-                    self.saveActiveGameAutosave();
+                    try { self.saveActiveGameAutosave(); } catch (e) { }
                 }
             }
         });
 
         // Reakce na změnu jazyka hry (i18n)
         window.addEventListener("prs:lang-change", function (e) {
-            self.onLanguageChanged(e && e.detail ? e.detail.language : null);
+            try { self.onLanguageChanged(e && e.detail ? e.detail.language : null); } catch (e) { console.warn(e); }
         });
 
         if (window.PRS_Audio) {
-
-            window.PRS_Audio.init();
-
-            this.updateAudioButtonUI();
-
-            this.updateMusicUI();
-
+            try {
+                window.PRS_Audio.init();
+                this.updateAudioButtonUI();
+                this.updateMusicUI();
+            } catch (aErr) {
+                console.warn("Audio init err:", aErr);
+            }
         }
 
         // Spustíme výchozí ukázkovou partii (na pozadí pro okamžitý přechod ke stolu)
+        try { this.initLandingLiveCanvas(); } catch (cErr) { console.warn("initLandingLiveCanvas err:", cErr); }
+        try { this.renderHeroVideosSection(); } catch (vErr) { console.warn("renderHeroVideosSection err:", vErr); }
+        try { this.loadActiveHeroVideo(); } catch (avErr) { console.warn("loadActiveHeroVideo err:", avErr); }
 
-        this.initLandingLiveCanvas();
-        this.renderHeroVideosSection();
-        this.loadActiveHeroVideo();
+        try { this.loadAnnouncement(); } catch (e) { }
 
-        this.loadAnnouncement();
-
-        this.initPwa();
+        try { this.initPwa(); } catch (e) { }
 
         this.hasGameStarted = false;
 
-        this.startOnlinePollingLoop();
+        try { this.startOnlinePollingLoop(); } catch (e) { }
 
         // Automatická obnova rozehrané hry z autosavu při F5 / Ctrl+F5
         var curSearch = (window.location && window.location.search) ? window.location.search : "";
@@ -1006,41 +1031,86 @@ window.PRS_App = {
 
         // Okamžitě překreslíme herní HUD, detail pole a spodní dashboard
         if (this.state) {
-            try {
-                if (typeof this.renderTopPlayersHud === "function") this.renderTopPlayersHud();
-                if (typeof this.renderHeartTrack === "function") this.renderHeartTrack();
-                if (typeof this.renderLowerKnightDetail === "function") this.renderLowerKnightDetail();
-                if (typeof this.updateHudTurnInfo === "function") this.updateHudTurnInfo();
-                if (typeof this.renderStandingTileDetail === "function") this.renderStandingTileDetail();
-                if (typeof this.renderActivePlayerPanel === "function") this.renderActivePlayerPanel();
-                if (typeof this.renderActionPanel === "function") this.renderActionPanel();
-                if (typeof this.renderStandingNodeCard === "function") this.renderStandingNodeCard();
-                if (typeof this.updateMobileDock === "function") this.updateMobileDock();
-                if (typeof this.renderKnightEmotesHud === "function") this.renderKnightEmotesHud();
-                if (typeof this.renderCardDecksRow === "function") this.renderCardDecksRow();
-                if (typeof this.syncSettingsSoundLabel === "function") this.syncSettingsSoundLabel();
-                if (typeof this.syncSettingsDeviceLabel === "function") this.syncSettingsDeviceLabel();
-            } catch (e) {
-                console.warn("[PRS_App] Chyba při přerenderování HUDu po změně jazyka:", e);
+            if (typeof this.renderTopPlayersHud === "function") {
+                try { this.renderTopPlayersHud(); } catch (e) {}
+            }
+            if (typeof this.renderHeartTrack === "function") {
+                try { this.renderHeartTrack(); } catch (e) {}
+            }
+            if (typeof this.renderLowerKnightDetail === "function") {
+                try { this.renderLowerKnightDetail(); } catch (e) {}
+            }
+            if (typeof this.updateHudTurnInfo === "function") {
+                try { this.updateHudTurnInfo(); } catch (e) {}
+            }
+            if (typeof this.renderStandingTileDetail === "function") {
+                try { this.renderStandingTileDetail(); } catch (e) {}
+            }
+            if (typeof this.renderActivePlayerPanel === "function") {
+                try { this.renderActivePlayerPanel(); } catch (e) {}
+            }
+            if (typeof this.renderActionPanel === "function") {
+                try { this.renderActionPanel(); } catch (e) {}
+            }
+            if (typeof this.renderStandingNodeCard === "function") {
+                try { this.renderStandingNodeCard(); } catch (e) {}
+            }
+            if (typeof this.updateMobileDock === "function") {
+                try { this.updateMobileDock(); } catch (e) {}
+            }
+            if (typeof this.renderKnightEmotesHud === "function") {
+                try { this.renderKnightEmotesHud(); } catch (e) {}
+            }
+            if (typeof this.renderCardDecksRow === "function") {
+                try { this.renderCardDecksRow(); } catch (e) {}
+            }
+            if (typeof this.syncSettingsSoundLabel === "function") {
+                try { this.syncSettingsSoundLabel(); } catch (e) {}
+            }
+            if (typeof this.syncSettingsDeviceLabel === "function") {
+                try { this.syncSettingsDeviceLabel(); } catch (e) {}
             }
         }
 
-        // Pokud je k dispozici katalog/pravidla, přerenderujeme tabulky a galerie
-        if (window.PRS_Catalog) {
-            try {
-                if (typeof window.PRS_Catalog.renderRulesItemsTable === "function") window.PRS_Catalog.renderRulesItemsTable();
-                if (typeof window.PRS_Catalog.renderBestiary === "function") window.PRS_Catalog.renderBestiary();
-                if (typeof window.PRS_Catalog.renderCastlesGallery === "function") window.PRS_Catalog.renderCastlesGallery();
-                if (typeof window.PRS_Catalog.renderTrophiesHall === "function") window.PRS_Catalog.renderTrophiesHall();
-            } catch (catErr) {
-                console.warn("[PRS_App] Chyba při přerenderování katalogu po změně jazyka:", catErr);
-            }
+        // Zajištění reference pro PRS_Catalog
+        window.PRS_Catalog = this;
+
+        // Okamžité přerenderování všech podzáložek Pravidel a Katalogu
+        if (typeof this.renderRulesAndCatalog === "function") {
+            try { this.renderRulesAndCatalog(); } catch (catErr) {}
+        }
+        if (typeof this.renderCastlesGallery === "function") {
+            try { this.renderCastlesGallery(); } catch (cgErr) {}
+        }
+        if (typeof this.renderBestiary === "function") {
+            try { this.renderBestiary(); } catch (bErr) {}
+        }
+        if (typeof this.renderTrophiesHall === "function") {
+            try { this.renderTrophiesHall(); } catch (thErr) {}
         }
         if (typeof this.renderDecorationsGallery === "function") {
             try { this.renderDecorationsGallery(); } catch (decErr) {}
         }
+        if (typeof this.renderRulesItemsTable === "function") {
+            try { this.renderRulesItemsTable(); } catch (ritErr) {}
+        }
+        if (typeof this.switchRulesView === "function") {
+            try { this.switchRulesView(this.rulesCurrentView || "quick"); } catch (srvErr) {}
+        }
+        if (typeof this.renderCheatSheetContent === "function") {
+            try { this.renderCheatSheetContent(); } catch (csErr) {}
+        }
+        if (typeof this.renderWardrobeModal === "function") {
+            var wModal = document.getElementById("wardrobe-modal");
+            if (wModal && wModal.style.display !== "none") {
+                try { this.renderWardrobeModal(); } catch (wErr) {}
+            }
+        }
         if (typeof this.renderChatMessagesList === "function") {
             try { this.renderChatMessagesList(); } catch (chatErr) {}
+        }
+        if (typeof this.renderHeroVideosSection === "function") {
+            try { this.renderHeroVideosSection(); } catch (vhErr) {}
         }
     },
 
@@ -1073,6 +1143,10 @@ window.PRS_App = {
         if (!modal) return;
 
         modal.style.display = "flex";
+
+        if (window.PRS_I18n && window.PRS_I18n.translateDOM) {
+            window.PRS_I18n.translateDOM(modal);
+        }
 
         this.renderMusicPlaylistOptions();
 
@@ -1244,7 +1318,10 @@ window.PRS_App = {
 
         if (headBtnLabel) {
 
-            headBtnLabel.textContent = isPlaying ? "Hudba: " + tr.title : "Hudba: Vyp";
+            var isEnMusicLabel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            headBtnLabel.textContent = isPlaying
+                ? ((isEnMusicLabel ? "Music: " : "Hudba: ") + tr.title)
+                : (isEnMusicLabel ? "Music: Off" : "Hudba: Vyp");
 
         }
 
@@ -1456,7 +1533,7 @@ window.PRS_App = {
         if (annBanner) {
             if (tabId === "board") {
                 annBanner.style.display = "none";
-            } else if (annBanner.dataset.hasMessage === "true") {
+            } else if (annBanner.dataset && annBanner.dataset.hasMessage === "true") {
                 annBanner.style.display = "flex";
             }
         }
@@ -1507,6 +1584,15 @@ window.PRS_App = {
 
                 try { vid.pause(); } catch (e) { }
 
+            }
+
+        } else {
+
+            if (typeof this.renderHeroVideosSection === "function") {
+                try { this.renderHeroVideosSection(); } catch (vErr) { console.warn("switchTab renderHeroVideosSection err:", vErr); }
+            }
+            if (typeof this.initLandingLiveCanvas === "function") {
+                try { this.initLandingLiveCanvas(); } catch (cErr) { console.warn("switchTab initLandingLiveCanvas err:", cErr); }
             }
 
         }
@@ -4641,10 +4727,12 @@ window.PRS_App = {
 
             sel.innerHTML = html;
             var exists = false;
-            for (var j = 0; j < sel.options.length; j++) {
-                if (sel.options[j].value === curVal) { exists = true; break; }
+            if (sel.options) {
+                for (var j = 0; j < sel.options.length; j++) {
+                    if (sel.options[j].value === curVal) { exists = true; break; }
+                }
+                sel.value = exists ? curVal : (sel.options[0] ? sel.options[0].value : "classic_96");
             }
-            sel.value = exists ? curVal : (sel.options[0] ? sel.options[0].value : "classic_96");
         }
 
         var mapPfx = t("ui.board_bar.map_prefix", null, "Plán: ");
@@ -5890,11 +5978,41 @@ window.PRS_App = {
         if (!item) return;
         if (item.seed) this.mapStudioSeed = item.seed;
         this.currentBoardSeed = this.mapStudioSeed;
-        if (item.recipe && window.KiDeskyMapGenerator) {
+        if (item.customBoard) {
+            this._customProceduralBoard = JSON.parse(JSON.stringify(item.customBoard));
+            this._currentMapStudioBoard = this._customProceduralBoard;
+            if (window.PRS_BoardBuilder) {
+                if (typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
+                    window.PRS_BoardBuilder.computeRiverBridges(this._customProceduralBoard);
+                }
+                if ((!this._customProceduralBoard.decorations || this._customProceduralBoard.decorations.length === 0) && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
+                    window.PRS_BoardBuilder.generateBoardDecorations(this._customProceduralBoard, this.mapStudioSeed);
+                }
+            }
+            if (item.recipe && window.KiDeskyMapGenerator) {
+                this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(item.recipe, this.mapStudioSeed);
+                if (item.name) this.customBoardRecipe.customName = item.name;
+                this.syncMapStudioInputsFromRecipe();
+            }
+            if (window.PRS_MapEditor && typeof window.PRS_MapEditor.normalizeBoardForEngine === "function") {
+                window.PRS_MapEditor.normalizeBoardForEngine(this._customProceduralBoard);
+                window.PRS_MapEditor.normalizeBoardForEngine(this._currentMapStudioBoard);
+            }
+            this.updateMapStudioPreview();
+            KiDeskyToast.show("🗺️ Načtena vlastní šablona: " + (item.name || item.seedCode), "good");
+        } else if (item.recipe && window.KiDeskyMapGenerator) {
             this.customBoardRecipe = window.KiDeskyMapGenerator.normalizeRecipe(item.recipe, this.mapStudioSeed);
             if (item.name) this.customBoardRecipe.customName = item.name;
             this._currentMapStudioBoard = window.KiDeskyMapGenerator.compileDynamicRecipe(this.customBoardRecipe, this.mapStudioSeed);
             this._customProceduralBoard = this._currentMapStudioBoard;
+        if (window.PRS_BoardBuilder) {
+            if (typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
+                window.PRS_BoardBuilder.computeRiverBridges(this._customProceduralBoard);
+            }
+            if ((!this._customProceduralBoard.decorations || this._customProceduralBoard.decorations.length === 0) && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
+                window.PRS_BoardBuilder.generateBoardDecorations(this._customProceduralBoard, newSeed);
+            }
+        }
         if (window.PRS_MapEditor && typeof window.PRS_MapEditor.normalizeBoardForEngine === "function") {
             window.PRS_MapEditor.normalizeBoardForEngine(this._customProceduralBoard);
             window.PRS_MapEditor.normalizeBoardForEngine(this._currentMapStudioBoard);

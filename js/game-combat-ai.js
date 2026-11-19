@@ -1601,11 +1601,17 @@
             this.recalculateBreedingAndVictory(state);
 
             if (state.pendingAction) {
+                var isEnCombat = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+                var tName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(target) : target.name;
                 state.pendingAction.canPlotIntrigue = false;
                 state.pendingAction.intriguePlotted = true;
-                state.pendingAction.intrigueSummary = isSuccess
-                    ? ("Posměšná balada uspěla! Soupeř " + target.name + " ztratil -" + penalty + " 💖.")
-                    : ("Posměšná balada selhala. Soupeř " + target.name + " získal +0,25 💖.");
+                state.pendingAction.intrigueSummary = isEnCombat
+                    ? (isSuccess
+                        ? ("Mocking ballad succeeded! Rival " + tName + " lost -" + penalty + " 💖.")
+                        : ("Mocking ballad failed. Rival " + tName + " gained +0.25 💖."))
+                    : (isSuccess
+                        ? ("Posměšná balada uspěla! Soupeř " + tName + " ztratil -" + penalty + " 💖.")
+                        : ("Posměšná balada selhala. Soupeř " + tName + " získal +0,25 💖."));
             }
 
             return {
@@ -1640,9 +1646,13 @@
             this.addLog(state, cMsg, "gold");
 
             if (state.pendingAction) {
+                var isEnCustoms = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+                var tNameCust = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(target) : target.name;
                 state.pendingAction.canPlotIntrigue = false;
                 state.pendingAction.intriguePlotted = true;
-                state.pendingAction.intrigueSummary = "Celní kontrola uvalena na " + target.name + " (1 kolo bez nájmu).";
+                state.pendingAction.intrigueSummary = isEnCustoms
+                    ? ("Customs audit imposed on " + tNameCust + " (1 round without rent).")
+                    : ("Celní kontrola uvalena na " + tNameCust + " (1 kolo bez nájmu).");
             }
 
             return {

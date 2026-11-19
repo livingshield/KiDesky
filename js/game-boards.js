@@ -2331,6 +2331,12 @@ window.KiDeskyMapGenerator = {
         if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks === "function") {
             window.PRS_BoardBuilder.sanitizeAndAnchorLandmarks(boardObj);
         }
+        if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
+            window.PRS_BoardBuilder.computeRiverBridges(boardObj);
+        }
+        if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
+            window.PRS_BoardBuilder.generateBoardDecorations(boardObj, seed);
+        }
         return boardObj;
     },
 
@@ -3168,9 +3174,7 @@ window.PRS_BoardBuilder = {
         if (options.customBoard) {
             board = JSON.parse(JSON.stringify(options.customBoard));
             board.code = templateCode || "custom_dynamic";
-            return board;
         }
-
         // 1. Pokud je předán vlastní dynamický recept (custom_dynamic nebo options.customRecipe)
         if (templateCode === "custom_dynamic" || options.customRecipe) {
             var recipeObj = options.customRecipe || (window.PRS_App && window.PRS_App.customBoardRecipe) || window.KiDeskyMapGenerator.DEFAULT_RECIPE;
@@ -3258,7 +3262,7 @@ window.PRS_BoardBuilder = {
             this.computeRiverBridges(board);
         }
         // Generování procedurálních a ukotvených dekorací krajiny s ekosystémovými shluky
-        if (!board.decorations || board.decorations.length === 0) {
+        if (!board.decorations || board.decorations.length === 0 || board.decorationsVersion !== 4) {
             this.generateBoardDecorations(board, seed);
         }
         return board;
@@ -3351,357 +3355,508 @@ window.PRS_BoardBuilder = {
     // ========================================================================
     generateBoardDecorations: function (board, customSeed) {
         if (!board || !board.nodes) return [];
-        var seed = customSeed || board.seed || (board.code === "dragon_4598" ? 4598 : (board.code === "compact_48" ? 4848 : 4599));
-
-        var rnd = (function (s) {
-            var a = s;
-            return function () {
-                var t = a += 0x6D2B79F5;
-                t = Math.imul(t ^ t >>> 15, t | 1);
-                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-                return ((t ^ t >>> 14) >>> 0) / 4294967296;
-            };
-        })(seed);
-
-        var nodes = board.nodes;
-        var cardZones = board.cardZones || [];
-        var landmarks = board.landmarks || [];
-        var catalog = window.PRS_DECOR_CATALOG || {};
-        var decorList = [];
-
-        var riverClearancePoints = [];
-        if (board.rivers && board.rivers.length > 0) {
-            var sRPS = (this.sampleRiverPathSimple || (window.PRS_BoardBuilder && window.PRS_BoardBuilder.sampleRiverPathSimple));
-            if (sRPS) {
-                for (var ri = 0; ri < board.rivers.length; ri++) {
-                    var rObj = board.rivers[ri];
-                    var rWidth = rObj.width || 14;
-                    var smpPts = sRPS(rObj.path);
-                    for (var sp = 0; sp < smpPts.length; sp++) {
-                        riverClearancePoints.push({ x: smpPts[sp].x, y: smpPts[sp].y, halfW: rWidth / 2 });
+            var seed = customSeed || board.seed || (board.code === "dragon_4598" ? 4598 : (board.code === "compact_48" ? 4848 : 4599));
+        
+            var rnd = (function (s) {
+                var a = s;
+                return function () {
+                    var t = a += 0x6D2B79F5;
+                    t = Math.imul(t ^ t >>> 15, t | 1);
+                    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+                };
+            })(seed);
+        
+            var nodes = board.nodes;
+            var cardZones = board.cardZones || [];
+            var landmarks = board.landmarks || [];
+            var catalog = window.PRS_DECOR_CATALOG || {};
+            var decorList = [];
+        
+            var riverClearancePoints = [];
+            if (board.rivers && board.rivers.length > 0) {
+                var sRPS = (window.PRS_BoardBuilder && window.PRS_BoardBuilder.sampleRiverPathSimple) || (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.sampleRiverPathSimple);
+                if (sRPS) {
+                    for (var ri = 0; ri < board.rivers.length; ri++) {
+                        var rObj = board.rivers[ri];
+                        var rWidth = rObj.width || 14;
+                        var smpPts = sRPS(rObj.path);
+                        for (var sp = 0; sp < smpPts.length; sp++) {
+                            riverClearancePoints.push({ x: smpPts[sp].x, y: smpPts[sp].y, halfW: rWidth / 2 });
+                        }
                     }
                 }
             }
-        }
-
-        function isPositionClear(x, y, radius, allowClusterOverlap) {
-            if (x - radius < 35 || x + radius > 1365 || y - radius < 35 || y + radius > 825) return false;
-
-            for (var rp = 0; rp < riverClearancePoints.length; rp++) {
-                var rpt = riverClearancePoints[rp];
-                var rdx = rpt.x - x;
-                var rdy = rpt.y - y;
-                var minRDist = radius + rpt.halfW + 18;
-                if (rdx * rdx + rdy * rdy < minRDist * minRDist) {
-                    return false;
-                }
-            }
-
-            for (var i = 0; i < nodes.length; i++) {
-                var n = nodes[i];
-                var dx = n.x - x;
-                var dy = n.y - y;
-                var distSq = dx * dx + dy * dy;
-                var minDist = radius + 20;
-                if (distSq < minDist * minDist) return false;
-            }
-
-            for (var z = 0; z < cardZones.length; z++) {
-                var cz = cardZones[z];
-                if (x + radius > cz.x - 10 && x - radius < cz.x + cz.w + 10 &&
-                    y + radius > cz.y - 10 && y - radius < cz.y + cz.h + 10) {
-                    return false;
-                }
-            }
-
-            for (var l = 0; l < landmarks.length; l++) {
-                var lm = landmarks[l];
-                var lx1 = lm.x - lm.w / 2 - 14;
-                var lx2 = lm.x + lm.w / 2 + 14;
-                var ly1 = lm.y - lm.h / 2 - 14;
-                var ly2 = lm.y + lm.h / 2 + 14;
-                if (x + radius > lx1 && x - radius < lx2 && y + radius > ly1 && y - radius < ly2) {
-                    return false;
-                }
-            }
-
-            if (!allowClusterOverlap) {
-                for (var d = 0; d < decorList.length; d++) {
-                    var dec = decorList[d];
-                    var ddx = dec.x - x;
-                    var ddy = dec.y - y;
-                    var dDist = Math.sqrt(ddx * ddx + ddy * ddy);
-                    if (dDist < (radius + dec.clearance)) {
+        
+            function isPositionClear(x, y, radius, allowClusterOverlap, minDistFromDecor) {
+                if (x - radius < 35 || x + radius > 1365 || y - radius < 35 || y + radius > 825) return false;
+        
+                for (var rp = 0; rp < riverClearancePoints.length; rp++) {
+                    var rpt = riverClearancePoints[rp];
+                    var rdx = rpt.x - x;
+                    var rdy = rpt.y - y;
+                    var minRDist = radius + rpt.halfW + 16;
+                    if (rdx * rdx + rdy * rdy < minRDist * minRDist) {
                         return false;
                     }
                 }
-            }
-
-            return true;
-        }
-
-        function findClearSpot(cx, cy, radius) {
-            if (isPositionClear(cx, cy, radius, false)) return { x: cx, y: cy };
-            var offsets = [
-                { x: 35, y: 0 }, { x: -35, y: 0 }, { x: 0, y: 35 }, { x: 0, y: -35 },
-                { x: 30, y: 30 }, { x: -30, y: 30 }, { x: 30, y: -30 }, { x: -30, y: -30 },
-                { x: 55, y: 0 }, { x: -55, y: 0 }, { x: 0, y: 55 }, { x: 0, y: -55 }
-            ];
-            for (var o = 0; o < offsets.length; o++) {
-                var tx = cx + offsets[o].x;
-                var ty = cy + offsets[o].y;
-                if (isPositionClear(tx, ty, radius, false)) return { x: tx, y: ty };
-            }
-            return null;
-        }
-
-        // 1. Shlukové lesní hvozdy (Forest Thickets)
-        function spawnForestThicket(cx, cy, type) {
-            var groveKey = (type === "pine") ? "grove_pine" : "grove_oak";
-            var treeKeys = (type === "pine") ? ["tree_pine", "tree_pine", "tree_birch"] : ["tree_oak", "tree_birch", "tree_oak"];
-            if (!catalog[groveKey]) return;
-            var gItem = catalog[groveKey];
-            var spot = findClearSpot(cx, cy, gItem.clearance);
-            if (!spot) return;
-            cx = spot.x; cy = spot.y;
-
-            decorList.push({
-                id: "cluster_g_" + cx + "_" + cy,
-                catalogId: groveKey,
-                x: cx,
-                y: cy,
-                w: gItem.w,
-                h: gItem.h,
-                clearance: gItem.clearance,
-                scale: 1.0,
-                anchoredNodeId: null
-            });
-
-            var treeCount = 3 + Math.floor(rnd() * 3);
-            for (var t = 0; t < treeCount; t++) {
-                var ang = (t / treeCount) * Math.PI * 2 + (rnd() - 0.5) * 0.4;
-                var dist = 22 + rnd() * 20;
-                var tx = Math.round(cx + Math.cos(ang) * dist);
-                var ty = Math.round(cy + Math.sin(ang) * dist);
-                var tKey = treeKeys[Math.floor(rnd() * treeKeys.length)];
-                var tItem = catalog[tKey];
-                if (tItem && isPositionClear(tx, ty, 14, true)) {
-                    var sc = Math.round((0.8 + rnd() * 0.25) * 100) / 100;
-                    decorList.push({
-                        id: "cluster_t_" + tx + "_" + ty,
-                        catalogId: tKey,
-                        x: tx,
-                        y: ty,
-                        w: Math.round(tItem.w * sc),
-                        h: Math.round(tItem.h * sc),
-                        clearance: Math.round(tItem.clearance * 0.5),
-                        scale: sc,
-                        anchoredNodeId: null
-                    });
+        
+                for (var i = 0; i < nodes.length; i++) {
+                    var n = nodes[i];
+                    var dx = n.x - x;
+                    var dy = n.y - y;
+                    var distSq = dx * dx + dy * dy;
+                    var minDist = radius + 20;
+                    if (distSq < minDist * minDist) return false;
                 }
-            }
-
-            if (rnd() < 0.75 && catalog["bush"]) {
-                var bx = Math.round(cx + (rnd() - 0.5) * 44);
-                var by = Math.round(cy + 26 + rnd() * 14);
-                if (isPositionClear(bx, by, 10, true)) {
-                    decorList.push({
-                        id: "cluster_b_" + bx + "_" + by,
-                        catalogId: "bush",
-                        x: bx,
-                        y: by,
-                        w: 44,
-                        h: 38,
-                        clearance: 10,
-                        scale: 0.9,
-                        anchoredNodeId: null
-                    });
+        
+                for (var z = 0; z < cardZones.length; z++) {
+                    var cz = cardZones[z];
+                    if (x + radius > cz.x - 10 && x - radius < cz.x + cz.w + 10 &&
+                        y + radius > cz.y - 10 && y - radius < cz.y + cz.h + 10) {
+                        return false;
+                    }
                 }
+        
+                for (var l = 0; l < landmarks.length; l++) {
+                    var lm = landmarks[l];
+                    var lx1 = lm.x - lm.w / 2 - 14;
+                    var lx2 = lm.x + lm.w / 2 + 14;
+                    var ly1 = lm.y - lm.h / 2 - 14;
+                    var ly2 = lm.y + lm.h / 2 + 14;
+                    if (x + radius > lx1 && x - radius < lx2 && y + radius > ly1 && y - radius < ly2) {
+                        return false;
+                    }
+                }
+        
+                if (!allowClusterOverlap) {
+                    var reqDist = minDistFromDecor || radius;
+                    for (var d = 0; d < decorList.length; d++) {
+                        var dec = decorList[d];
+                        var ddx = dec.x - x;
+                        var ddy = dec.y - y;
+                        var dDist = Math.sqrt(ddx * ddx + ddy * ddy);
+                        var sep = minDistFromDecor ? (minDistFromDecor + (dec.clearance || 20) * 0.4) : (radius + dec.clearance);
+                        if (dDist < sep) {
+                            return false;
+                        }
+                    }
+                }
+        
+                return true;
             }
-        }
-
-        // 2. Horský hřeben (Mountain Ridge)
-        function spawnMountainRidge(cx, cy) {
-            if (!catalog["mountain_peaks"]) return;
-            var mItem = catalog["mountain_peaks"];
-            var spot = findClearSpot(cx, cy, mItem.clearance);
-            if (!spot) return;
-            cx = spot.x; cy = spot.y;
-
-            decorList.push({
-                id: "ridge_m1_" + cx + "_" + cy,
-                catalogId: "mountain_peaks",
-                x: cx,
-                y: cy,
-                w: mItem.w,
-                h: mItem.h,
-                clearance: mItem.clearance,
-                scale: 1.0,
-                anchoredNodeId: null
-            });
-
-            var ox = cx + 46;
-            var oy = cy - 8;
-            if (isPositionClear(ox, oy, 22, true)) {
+        
+            function findClearSpot(cx, cy, radius, maxOffsets) {
+                if (isPositionClear(cx, cy, radius, false)) return { x: cx, y: cy };
+                var offsets = [
+                    { x: 35, y: 0 }, { x: -35, y: 0 }, { x: 0, y: 35 }, { x: 0, y: -35 },
+                    { x: 30, y: 30 }, { x: -30, y: 30 }, { x: 30, y: -30 }, { x: -30, y: -30 },
+                    { x: 55, y: 0 }, { x: -55, y: 0 }, { x: 0, y: 55 }, { x: 0, y: -55 },
+                    { x: 65, y: 35 }, { x: -65, y: 35 }, { x: 65, y: -35 }, { x: -65, y: -35 },
+                    { x: 80, y: 0 }, { x: -80, y: 0 }, { x: 0, y: 80 }, { x: 0, y: -80 }
+                ];
+                var lim = maxOffsets || offsets.length;
+                for (var o = 0; o < lim; o++) {
+                    var tx = cx + offsets[o].x;
+                    var ty = cy + offsets[o].y;
+                    if (isPositionClear(tx, ty, radius, false)) return { x: tx, y: ty };
+                }
+                return null;
+            }
+        
+            // 1. Shlukové lesní hvozdy (Forest Thickets)
+            function spawnForestThicket(cx, cy, type) {
+                var groveKey = (type === "pine") ? "grove_pine" : (type === "birch" ? "grove_oak" : "grove_oak");
+                var treeKeys = (type === "pine") ? ["tree_pine", "tree_pine", "tree_birch"] : ["tree_oak", "tree_birch", "tree_oak"];
+                if (!catalog[groveKey]) return;
+                var gItem = catalog[groveKey];
+                var spot = findClearSpot(cx, cy, gItem.clearance);
+                if (!spot) return;
+                cx = spot.x; cy = spot.y;
+        
                 decorList.push({
-                    id: "ridge_m2_" + ox + "_" + oy,
-                    catalogId: "mountain_peaks",
-                    x: ox,
-                    y: oy,
-                    w: Math.round(mItem.w * 0.85),
-                    h: Math.round(mItem.h * 0.85),
-                    clearance: 22,
-                    scale: 0.85,
-                    isFlipped: true,
+                    id: "cluster_g_" + cx + "_" + cy,
+                    catalogId: groveKey,
+                    x: cx,
+                    y: cy,
+                    w: gItem.w,
+                    h: gItem.h,
+                    clearance: gItem.clearance,
+                    scale: 1.0,
+                    isFlipped: rnd() < 0.5,
                     anchoredNodeId: null
                 });
-            }
-
-            if (catalog["rock_boulder"]) {
-                var rx = cx - 22 + Math.round((rnd() - 0.5) * 25);
-                var ry = cy + 28;
-                if (isPositionClear(rx, ry, 12, true)) {
-                    decorList.push({
-                        id: "ridge_r_" + rx + "_" + ry,
-                        catalogId: "rock_boulder",
-                        x: rx,
-                        y: ry,
-                        w: 50,
-                        h: 38,
-                        clearance: 12,
-                        scale: 0.9,
-                        anchoredNodeId: null
-                    });
-                }
-            }
-        }
-
-        // Generování ekosystémových shluků v klíčových zónách
-        spawnMountainRidge(1210, 260);
-        spawnMountainRidge(1250, 490);
-        spawnMountainRidge(1180, 680);
-        spawnForestThicket(310, 160, "oak");
-        spawnForestThicket(200, 240, "oak");
-        spawnForestThicket(380, 290, "birch");
-        spawnForestThicket(180, 460, "oak");
-        spawnForestThicket(480, 710, "pine");
-        spawnForestThicket(890, 720, "pine");
-        spawnForestThicket(1040, 660, "pine");
-
-        // 3. Ukotvené rekvizity k políčkům (Node-Anchored Props)
-        for (var nIdx = 0; nIdx < nodes.length; nIdx++) {
-            var node = nodes[nIdx];
-            var propKey = null;
-
-            if (node.type === "VILLAGE") {
-                propKey = (nIdx % 3 === 0) ? "cottage_timber" : (nIdx % 3 === 1 ? "village_well" : "watermill");
-            } else if (node.type === "ANIMAL") {
-                if (node.setId === 1) propKey = "pasture_fence";
-                else if (node.setId === 2) propKey = "unicorn_grove";
-                else if (node.setId === 3) propKey = "pegasus_pond";
-                else if (node.setId === 4) propKey = "dryad_sacred_oak";
-                else propKey = "pasture_fence";
-            } else if (node.type === "MERCHANT" || node.type === "SHOP") {
-                propKey = "merchant_wagon";
-            } else if (node.type === "FESTIVAL") {
-                propKey = "tournament_tent";
-            } else if (node.type === "BUILDING" && node.subtype === "forge") {
-                propKey = "watermill";
-            } else if (node.type === "BUILDING" && (node.subtype === "stables" || node.subtype === "doghandler")) {
-                propKey = "pasture_fence";
-            } else if (node.type === "QUEST") {
-                var questProps = ["dragon_cave", "cave_bear_den", "bandit_cave", "basilisk_cave", "snow_troll_cave", "swamp_hydra", "swamp_troll", "griffin_nest", "phoenix_nest", "fire_salamander"];
-                propKey = questProps[nIdx % questProps.length];
-            } else if (node.type === "CHANCE" || node.type === "JESTER") {
-                var magicProps = ["fairy_ring_mushrooms", "druid_monoliths", "witch_hut", "ancient_ruins", "crystal_golem", "forest_ent", "ancient_tower_ruin"];
-                propKey = magicProps[nIdx % magicProps.length];
-            } else if (node.type === "TAX" || node.type === "HOSPITAL") {
-                propKey = (node.type === "TAX") ? "wooden_watchtower" : "ancient_graveyard";
-            } else if (node.isJunction && nIdx % 2 === 0) {
-                propKey = (nIdx % 4 === 0) ? "signpost" : "signpost2";
-            }
-
-            if (propKey && catalog[propKey]) {
-                var catItem = catalog[propKey];
-                var startAngle = (rnd() * Math.PI * 2);
-                for (var a = 0; a < 8; a++) {
-                    var ang = startAngle + (a * Math.PI / 4);
-                    var testDist = 66;
-                    var px = Math.round(node.x + Math.cos(ang) * testDist);
-                    var py = Math.round(node.y + Math.sin(ang) * testDist);
-                    if (isPositionClear(px, py, catItem.clearance, false)) {
+        
+                var treeCount = 3 + Math.floor(rnd() * 3);
+                for (var t = 0; t < treeCount; t++) {
+                    var ang = (t / treeCount) * Math.PI * 2 + (rnd() - 0.5) * 0.4;
+                    var dist = 22 + rnd() * 20;
+                    var tx = Math.round(cx + Math.cos(ang) * dist);
+                    var ty = Math.round(cy + Math.sin(ang) * dist);
+                    var tKey = treeKeys[Math.floor(rnd() * treeKeys.length)];
+                    var tItem = catalog[tKey];
+                    if (tItem && isPositionClear(tx, ty, 14, true)) {
+                        var sc = Math.round((0.8 + rnd() * 0.25) * 100) / 100;
                         decorList.push({
-                            id: "prop_" + nIdx + "_" + propKey,
-                            catalogId: propKey,
-                            x: px,
-                            y: py,
-                            w: catItem.w,
-                            h: catItem.h,
-                            clearance: catItem.clearance,
-                            scale: Math.round((0.9 + rnd() * 0.2) * 100) / 100,
-                            anchoredNodeId: nIdx
+                            id: "cluster_t_" + tx + "_" + ty,
+                            catalogId: tKey,
+                            x: tx,
+                            y: ty,
+                            w: Math.round(tItem.w * sc),
+                            h: Math.round(tItem.h * sc),
+                            clearance: Math.round(tItem.clearance * 0.5),
+                            scale: sc,
+                            isFlipped: rnd() < 0.5,
+                            anchoredNodeId: null
                         });
-                        break;
+                    }
+                }
+        
+                if (rnd() < 0.75 && catalog["bush"]) {
+                    var bx = Math.round(cx + (rnd() - 0.5) * 44);
+                    var by = Math.round(cy + 26 + rnd() * 14);
+                    if (isPositionClear(bx, by, 10, true)) {
+                        decorList.push({
+                            id: "cluster_b_" + bx + "_" + by,
+                            catalogId: "bush",
+                            x: bx,
+                            y: by,
+                            w: 44,
+                            h: 38,
+                            clearance: 10,
+                            scale: 0.9,
+                            isFlipped: rnd() < 0.5,
+                            anchoredNodeId: null
+                        });
                     }
                 }
             }
-        }
-
-        // 4. Rozptýlená krajina (Scatter Terrain)
-        var scatterPool = [
-            "tree_oak", "tree_oak", "tree_pine", "tree_pine", "tree_birch",
-            "grove_oak", "grove_pine", "grove_pine2", "rock_boulder", "rock_boulder",
-            "farm_field", "windmill", "lake_pond", "mountain_peaks",
-            "orchad_apple", "hruskovy_sad", "orchad_plum", "bush", "bush",
-            "watermill", "wooden_watchtower", "ancient_ruins", "ancient_tower_ruin",
-            "druid_monoliths", "fairy_ring_mushrooms", "swamp_bridge", "unicorn_grove",
-            "pegasus_pond", "dryad_sacred_oak", "forest_ent", "crystal_golem",
-            "lake_nymphs", "vodnik_pond"
-        ];
-
-        for (var gx = 75; gx <= 1325; gx += 60) {
-            for (var gy = 75; gy <= 785; gy += 60) {
-                var jx = Math.round(gx + (rnd() - 0.5) * 40);
-                var jy = Math.round(gy + (rnd() - 0.5) * 40);
-
-                var pickKey;
-                if (jy < 180 && (jx < 350 || jx > 1050) && rnd() < 0.45) {
-                    pickKey = "mountain_peaks";
-                } else if (rnd() < 0.08) {
-                    var waterPicks = ["lake_pond", "lake_nymphs", "vodnik_pond", "pegasus_pond"];
-                    pickKey = waterPicks[Math.floor(rnd() * waterPicks.length)];
-                } else if (rnd() < 0.12) {
-                    pickKey = "farm_field";
-                } else {
-                    pickKey = scatterPool[Math.floor(rnd() * scatterPool.length)];
-                }
-
-                var itemDef = catalog[pickKey];
-                if (itemDef && isPositionClear(jx, jy, itemDef.clearance, false)) {
-                    var sc = (pickKey === "mountain_peaks" || pickKey === "lake_pond" || pickKey === "farm_field")
-                        ? 1.0 : (Math.round((0.85 + rnd() * 0.3) * 100) / 100);
+        
+            // 2. Horský hřeben (Mountain Ridge)
+            function spawnMountainRidge(cx, cy) {
+                if (!catalog["mountain_peaks"]) return;
+                var mItem = catalog["mountain_peaks"];
+                var spot = findClearSpot(cx, cy, mItem.clearance);
+                if (!spot) return;
+                cx = spot.x; cy = spot.y;
+        
+                var mainFlipped = rnd() < 0.5;
+                decorList.push({
+                    id: "ridge_m1_" + cx + "_" + cy,
+                    catalogId: "mountain_peaks",
+                    x: cx,
+                    y: cy,
+                    w: mItem.w,
+                    h: mItem.h,
+                    clearance: mItem.clearance,
+                    scale: 1.0,
+                    isFlipped: mainFlipped,
+                    anchoredNodeId: null
+                });
+        
+                // Alternujeme směr bočního masivu (vlevo/vpravo s mírným náhodným posunem)
+                var ridgeDir = (rnd() < 0.5 ? 1 : -1);
+                var ox = cx + ridgeDir * (42 + Math.round(rnd() * 8));
+                var oy = cy + (rnd() < 0.5 ? -8 : 8);
+                if (isPositionClear(ox, oy, 22, true)) {
                     decorList.push({
-                        id: "scatter_" + jx + "_" + jy,
-                        catalogId: pickKey,
-                        x: jx,
-                        y: jy,
-                        w: Math.round(itemDef.w * sc),
-                        h: Math.round(itemDef.h * sc),
-                        clearance: Math.round(itemDef.clearance * sc),
-                        scale: sc,
+                        id: "ridge_m2_" + ox + "_" + oy,
+                        catalogId: "mountain_peaks",
+                        x: ox,
+                        y: oy,
+                        w: Math.round(mItem.w * 0.85),
+                        h: Math.round(mItem.h * 0.85),
+                        clearance: 22,
+                        scale: 0.85,
+                        isFlipped: !mainFlipped,
                         anchoredNodeId: null
                     });
                 }
+        
+                if (catalog["rock_boulder"]) {
+                    var rDir = (rnd() < 0.5 ? 1 : -1);
+                    var rx = cx + rDir * (20 + Math.round(rnd() * 15));
+                    var ry = cy + 28;
+                    if (isPositionClear(rx, ry, 12, true)) {
+                        decorList.push({
+                            id: "ridge_r_" + rx + "_" + ry,
+                            catalogId: "rock_boulder",
+                            x: rx,
+                            y: ry,
+                            w: 50,
+                            h: 38,
+                            clearance: 12,
+                            scale: 0.9,
+                            isFlipped: rnd() < 0.5,
+                            anchoredNodeId: null
+                        });
+                    }
+                }
             }
-        }
-
-        // Izometrické řazení dle souřadnice Y (Painter's algorithm)
-        decorList.sort(function (a, b) {
-            return a.y - b.y;
-        });
-
-        board.decorations = decorList;
-        return decorList;
+        
+            // 2b. Zemědělský / vesnický shluk (Farm / Meadow Cluster)
+            function spawnFarmCluster(cx, cy) {
+                if (!catalog["farm_field"]) return;
+                var fItem = catalog["farm_field"];
+                var spot = findClearSpot(cx, cy, fItem.clearance);
+                if (!spot) return;
+                cx = spot.x; cy = spot.y;
+        
+                decorList.push({
+                    id: "farm_c1_" + cx + "_" + cy,
+                    catalogId: "farm_field",
+                    x: cx,
+                    y: cy,
+                    w: fItem.w,
+                    h: fItem.h,
+                    clearance: fItem.clearance,
+                    scale: 1.0,
+                    isFlipped: rnd() < 0.5,
+                    anchoredNodeId: null
+                });
+        
+                // Přidáme větrný mlýn nebo chalupu poblíž - střídáme směr umístění i otočení
+                var prop = (rnd() < 0.5 && catalog["windmill"]) ? "windmill" : (catalog["cottage_timber"] ? "cottage_timber" : null);
+                if (prop) {
+                    var pItem = catalog[prop];
+                    var farmDir = (rnd() < 0.5 ? 1 : -1);
+                    var px = cx + farmDir * (40 + Math.round(rnd() * 10));
+                    var py = cy + (rnd() < 0.5 ? -20 : 20);
+                    if (isPositionClear(px, py, 20, true)) {
+                        decorList.push({
+                            id: "farm_p_" + px + "_" + py,
+                            catalogId: prop,
+                            x: px,
+                            y: py,
+                            w: pItem.w,
+                            h: pItem.h,
+                            clearance: 20,
+                            scale: 0.9,
+                            isFlipped: rnd() < 0.5,
+                            anchoredNodeId: null
+                        });
+                    }
+                }
+            }
+        
+            // DYNAMICKÁ ANALÝZA VOLNÉ PLOCHY PLÁNU:
+            // Najdeme všechny volné oblasti na mapě s dostatečným odstupem od cest a řek
+            function evaluateClearance(x, y) {
+                if (x < 65 || x > 1335 || y < 65 || y > 795) return 0;
+                var minD = 9999;
+                for (var ni = 0; ni < nodes.length; ni++) {
+                    var n = nodes[ni];
+                    var d = Math.hypot(n.x - x, n.y - y);
+                    if (d < minD) minD = d;
+                }
+                for (var li = 0; li < landmarks.length; li++) {
+                    var lm = landmarks[li];
+                    var ld = Math.hypot(lm.x - x, lm.y - y) - (lm.w || 90) * 0.5;
+                    if (ld < minD) minD = Math.max(0, ld);
+                }
+                for (var ri = 0; ri < riverClearancePoints.length; ri++) {
+                    var rp = riverClearancePoints[ri];
+                    var rd = Math.hypot(rp.x - x, rp.y - y) - rp.halfW;
+                    if (rd < minD) minD = Math.max(0, rd);
+                }
+                return minD;
+            }
+        
+            var openCells = [];
+            for (var sx = 90; sx <= 1310; sx += 50) {
+                for (var sy = 90; sy <= 770; sy += 50) {
+                    var clr = evaluateClearance(sx, sy);
+                    if (clr >= 60) {
+                        openCells.push({ x: sx, y: sy, clr: clr });
+                    }
+                }
+            }
+            // Setřídíme podle největšího volného prostoru
+            openCells.sort(function (a, b) { return b.clr - a.clr; });
+        
+            // Zkusíme klasické pozice (pro retro-kompatibilitu s classic_96)
+            var fixedMountains = [[1210, 260], [1250, 490], [1180, 680]];
+            var spawnedMtn = 0;
+            for (var fm = 0; fm < fixedMountains.length; fm++) {
+                var spot = findClearSpot(fixedMountains[fm][0], fixedMountains[fm][1], 55, 6);
+                if (spot) {
+                    spawnMountainRidge(spot.x, spot.y);
+                    spawnedMtn++;
+                }
+            }
+            // Pokud se nepodařilo umístit alespoň 2 horské masivy, umístíme je do nejlepších volných buněk u okrajů
+            for (var ci = 0; ci < openCells.length && spawnedMtn < 3; ci++) {
+                var cell = openCells[ci];
+                if (cell.y < 350 || cell.x > 1050 || cell.x < 350) {
+                    var mSpot = findClearSpot(cell.x, cell.y, 52);
+                    if (mSpot) {
+                        spawnMountainRidge(mSpot.x, mSpot.y);
+                        spawnedMtn++;
+                    }
+                }
+            }
+        
+            // Lesní hvozdy: zkusíme klasická místa, pak volné buňky
+            var fixedForests = [
+                [310, 160, "oak"], [200, 240, "oak"], [380, 290, "birch"],
+                [180, 460, "oak"], [480, 710, "pine"], [890, 720, "pine"], [1040, 660, "pine"]
+            ];
+            var spawnedForests = 0;
+            for (var ff = 0; ff < fixedForests.length; ff++) {
+                var fSpot = findClearSpot(fixedForests[ff][0], fixedForests[ff][1], 44, 6);
+                if (fSpot) {
+                    spawnForestThicket(fSpot.x, fSpot.y, fixedForests[ff][2]);
+                    spawnedForests++;
+                }
+            }
+            // Doplníme další lesy a farmy do největších volných buněk
+            var fTypes = ["pine", "oak", "birch", "pine"];
+            for (var ci2 = 0; ci2 < openCells.length && spawnedForests < 7; ci2++) {
+                var oCell = openCells[ci2];
+                if (oCell.clr >= 75) {
+                    var fSp = findClearSpot(oCell.x, oCell.y, 44);
+                    if (fSp) {
+                        if (spawnedForests % 3 === 0 && oCell.y > 300) {
+                            spawnFarmCluster(fSp.x, fSp.y);
+                        } else {
+                            var fType = fTypes[spawnedForests % fTypes.length];
+                            spawnForestThicket(fSp.x, fSp.y, fType);
+                        }
+                        spawnedForests++;
+                    }
+                }
+            }
+        
+            // 3. Ukotvené rekvizity k políčkům (Node-Anchored Props)
+            for (var nIdx = 0; nIdx < nodes.length; nIdx++) {
+                var node = nodes[nIdx];
+                var propKey = null;
+        
+                if (node.type === "VILLAGE") {
+                    propKey = (nIdx % 3 === 0) ? "cottage_timber" : (nIdx % 3 === 1 ? "village_well" : "watermill");
+                } else if (node.type === "ANIMAL") {
+                    if (node.setId === 1) propKey = "pasture_fence";
+                    else if (node.setId === 2) propKey = "unicorn_grove";
+                    else if (node.setId === 3) propKey = "pegasus_pond";
+                    else if (node.setId === 4) propKey = "dryad_sacred_oak";
+                    else propKey = "pasture_fence";
+                } else if (node.type === "MERCHANT" || node.type === "SHOP") {
+                    propKey = "merchant_wagon";
+                } else if (node.type === "FESTIVAL") {
+                    propKey = "tournament_tent";
+                } else if (node.type === "BUILDING" && node.subtype === "forge") {
+                    propKey = "watermill";
+                } else if (node.type === "BUILDING" && (node.subtype === "stables" || node.subtype === "doghandler")) {
+                    propKey = "pasture_fence";
+                } else if (node.type === "QUEST") {
+                    var questProps = ["dragon_cave", "cave_bear_den", "bandit_cave", "basilisk_cave", "snow_troll_cave", "swamp_hydra", "swamp_troll", "griffin_nest", "phoenix_nest", "fire_salamander"];
+                    propKey = questProps[nIdx % questProps.length];
+                } else if (node.type === "CHANCE" || node.type === "JESTER") {
+                    var magicProps = ["fairy_ring_mushrooms", "druid_monoliths", "witch_hut", "ancient_ruins", "crystal_golem", "forest_ent", "ancient_tower_ruin"];
+                    propKey = magicProps[nIdx % magicProps.length];
+                } else if (node.type === "TAX" || node.type === "HOSPITAL") {
+                    propKey = (node.type === "TAX") ? "wooden_watchtower" : "ancient_graveyard";
+                } else if (node.isJunction && nIdx % 2 === 0) {
+                    propKey = (nIdx % 4 === 0) ? "signpost" : "signpost2";
+                }
+        
+                if (propKey && catalog[propKey]) {
+                    var catItem = catalog[propKey];
+                    var placed = false;
+                    var testDistances = [58, 72, 86];
+                    for (var td = 0; td < testDistances.length && !placed; td++) {
+                        var testDist = testDistances[td];
+                        var startAngle = (rnd() * Math.PI * 2);
+                        for (var a = 0; a < 8; a++) {
+                            // Střídáme směr testování úhlů (po / proti směru ručiček)
+                            var stepDir = (nIdx % 2 === 0) ? 1 : -1;
+                            var ang = startAngle + stepDir * (a * Math.PI / 4);
+                            var px = Math.round(node.x + Math.cos(ang) * testDist);
+                            var py = Math.round(node.y + Math.sin(ang) * testDist);
+                            if (isPositionClear(px, py, catItem.clearance * 0.85, false, 28)) {
+                                decorList.push({
+                                    id: "prop_" + nIdx + "_" + propKey,
+                                    catalogId: propKey,
+                                    x: px,
+                                    y: py,
+                                    w: catItem.w,
+                                    h: catItem.h,
+                                    clearance: catItem.clearance,
+                                    scale: Math.round((0.9 + rnd() * 0.2) * 100) / 100,
+                                    isFlipped: rnd() < 0.5,
+                                    anchoredNodeId: nIdx
+                                });
+                                placed = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        
+            // 4. Rozptýlená krajina (Scatter Terrain)
+            var scatterPool = [
+                "tree_oak", "tree_oak", "tree_pine", "tree_pine", "tree_birch",
+                "grove_oak", "grove_pine", "grove_pine2", "rock_boulder", "rock_boulder",
+                "farm_field", "windmill", "lake_pond", "mountain_peaks",
+                "orchad_apple", "hruskovy_sad", "orchad_plum", "bush", "bush",
+                "watermill", "wooden_watchtower", "ancient_ruins", "ancient_tower_ruin",
+                "druid_monoliths", "fairy_ring_mushrooms", "swamp_bridge", "unicorn_grove",
+                "pegasus_pond", "dryad_sacred_oak", "forest_ent", "crystal_golem",
+                "lake_nymphs", "vodnik_pond"
+            ];
+        
+            // Použijeme jemnější krok mřížky (42px místo 60px) s přirozeným rozptylem
+            for (var gx = 70; gx <= 1330; gx += 42) {
+                for (var gy = 70; gy <= 790; gy += 42) {
+                    var jx = Math.round(gx + (rnd() - 0.5) * 32);
+                    var jy = Math.round(gy + (rnd() - 0.5) * 32);
+        
+                    var pickKey;
+                    if (jy < 180 && (jx < 350 || jx > 1050) && rnd() < 0.45) {
+                        pickKey = "mountain_peaks";
+                    } else if (rnd() < 0.08) {
+                        var waterPicks = ["lake_pond", "lake_nymphs", "vodnik_pond", "pegasus_pond"];
+                        pickKey = waterPicks[Math.floor(rnd() * waterPicks.length)];
+                    } else if (rnd() < 0.12) {
+                        pickKey = (rnd() < 0.5) ? "farm_field" : ((rnd() < 0.5) ? "orchad_apple" : "hruskovy_sad");
+                    } else {
+                        pickKey = scatterPool[Math.floor(rnd() * scatterPool.length)];
+                    }
+        
+                    var itemDef = catalog[pickKey];
+                    if (itemDef) {
+                        // Přirozená tolerance rozestupu pro lehkou vegetaci a stromy
+                        var isLightFlora = (pickKey.indexOf("tree_") === 0 || pickKey === "bush" || pickKey === "rock_boulder");
+                        var minDecorDist = isLightFlora ? 26 : (itemDef.clearance * 0.8);
+                        if (isPositionClear(jx, jy, Math.round(itemDef.clearance * 0.65), false, minDecorDist)) {
+                            var sc = (pickKey === "mountain_peaks" || pickKey === "lake_pond" || pickKey === "farm_field")
+                                ? 1.0 : (Math.round((0.82 + rnd() * 0.3) * 100) / 100);
+                            decorList.push({
+                                id: "scatter_" + jx + "_" + jy,
+                                catalogId: pickKey,
+                                x: jx,
+                                y: jy,
+                                w: Math.round(itemDef.w * sc),
+                                h: Math.round(itemDef.h * sc),
+                                clearance: Math.round(itemDef.clearance * sc),
+                                scale: sc,
+                                isFlipped: rnd() < 0.5,
+                                anchoredNodeId: null
+                            });
+                        }
+                    }
+                }
+            }
+        
+            // Izometrické řazení dle souřadnice Y (Painter's algorithm)
+            decorList.sort(function (a, b) {
+                return a.y - b.y;
+            });
+        
+            board.decorations = decorList;
+            board.decorationsVersion = 4;
+            return decorList;
     },
 
     sanitizeAndAnchorLandmarks: function (board) {

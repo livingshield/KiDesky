@@ -45,13 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611172205">
+    <link rel="stylesheet" href="css/main.css?v=202611191750">
 
-    <link rel="stylesheet" href="css/board.css?v=202611172205">
+    <link rel="stylesheet" href="css/board.css?v=202611191750">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611172205">
+    <link rel="stylesheet" href="css/modals.css?v=202611191750">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611172205">
+    <link rel="stylesheet" href="css/mobile.css?v=202611191750">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -144,8 +144,13 @@
             <!-- Tlačítko Odhlásit se (pro přihlášeného) -->
             <button id="topbar-logout-btn" type="button" class="btn-secondary" onclick="PRS_App.logoutUser()" title="Odhlásit se a přejít do režimu Hosta" data-i18n-title="ui.buttons.logout_title" style="display:none; border-color:rgba(239,68,68,0.5); color:#fca5a5; padding:0.3rem 0.65rem; font-size:0.82rem; white-space:nowrap;" data-i18n="ui.buttons.logout">🚪 Odhlásit</button>
 
-            <!-- Přepínač jazyka (CZ / EN) -->
-            <button id="topbar-lang-btn" type="button" class="btn-secondary" onclick="PRS_I18n.toggleLanguage()" title="Změnit jazyk hry (Čeština / English)" style="padding:0.32rem 0.55rem; font-weight:700; border-color:var(--gold); color:var(--gold-light); display:inline-flex; align-items:center; gap:0.25rem;">🇨🇿 <span class="hide-on-mobile">CZ</span></button>
+            <!-- Výběr jazyka hry (CZ / EN / další) -->
+            <div class="topbar-lang-wrap" title="Jazyk hry / Game language" data-i18n-title="ui.theme.lang_select_title">
+                <select id="global-lang-select" class="topbar-lang-select prs-lang-select" onchange="PRS_I18n.setLanguage(this.value)" aria-label="Jazyk hry / Game Language">
+                    <option value="cs">🇨🇿 Čeština</option>
+                    <option value="en">🇬🇧 English</option>
+                </select>
+            </div>
 
             <!-- Nastavení -->
             <button id="topbar-settings-btn" class="btn-secondary" onclick="PRS_App.openSettingsModal()" title="Nastavení hry, zvuku a grafiky" data-i18n-title="ui.buttons.settings_title" style="padding:0.32rem 0.65rem; font-weight:600; border-color:var(--gold); color:var(--gold-light);">⚙️</button>
@@ -302,7 +307,42 @@
                 </div>
 
                 <div id="lp-two-videos-grid" class="lp-two-videos-grid">
-                    <!-- Generováno dynamicky v JS z heroVideosList / fallback na 2 videa -->
+                    <div class="lp-video-cinema-card">
+                        <div class="lp-video-card-header">
+                            <h3 class="lp-video-card-title">Intro první princezna - youtube</h3>
+                            <span class="lp-video-card-badge">🎬 Příběhové intro</span>
+                        </div>
+                        <div class="lp-video-player-frame">
+                            <iframe src="https://www.youtube-nocookie.com/embed/sO-MnlHy_O4?rel=0&amp;enablejsapi=1&amp;playsinline=1" title="Intro první princezna - youtube" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                        <p class="lp-video-card-desc">Oficiální příběhová upoutávka: záchrana princezny, dračí sluj a královské slavnosti.</p>
+                        <div class="lp-video-card-footer">
+                            <button type="button" class="lp-video-btn-action" onclick="PRS_App.likeVideoById(4, this)" title="Dát videu to se mi líbí">
+                                <span class="like-heart">👍</span> <span class="like-num">14</span>
+                            </button>
+                            <a href="https://www.youtube.com/watch?v=sO-MnlHy_O4" target="_blank" rel="noopener noreferrer" class="lp-video-btn-action" title="Přehrát video na YouTube">
+                                <span>📺 Přehrát na YouTube</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="lp-video-cinema-card">
+                        <div class="lp-video-card-header">
+                            <h3 class="lp-video-card-title">Intro první princezna - youtube multi</h3>
+                            <span class="lp-video-card-badge">⚔️ Hratelnost &amp; Pravidla</span>
+                        </div>
+                        <div class="lp-video-player-frame">
+                            <iframe src="https://www.youtube-nocookie.com/embed/fPyG8yeCHas?rel=0&amp;enablejsapi=1&amp;playsinline=1" title="Intro první princezna - youtube multi" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                        <p class="lp-video-card-desc">Ukázka deskového plánu, herní mechaniky, budování panství a online výpravy.</p>
+                        <div class="lp-video-card-footer">
+                            <button type="button" class="lp-video-btn-action" onclick="PRS_App.likeVideoById(5, this)" title="Dát videu to se mi líbí">
+                                <span class="like-heart">👍</span> <span class="like-num">9</span>
+                            </button>
+                            <a href="https://www.youtube.com/watch?v=fPyG8yeCHas" target="_blank" rel="noopener noreferrer" class="lp-video-btn-action" title="Přehrát video na YouTube">
+                                <span>📺 Přehrát na YouTube</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -936,7 +976,7 @@
 
                         <div class="zoom-btn-group">
 
-                            <button class="btn-zoom" style="border-color:var(--gold); color:var(--gold-light); font-weight:600; margin-right:0.35rem;" onclick="PRS_App.switchTab('lobby')" data-i18n="ui.board_bar.back_landing" data-i18n-title="ui.board_bar.back_landing_title" title="Návrat na úvodní Landing Page a Hernu">🏰 ← Zpět na Landing Page</button>
+                            <button id="btn-board-back-landing" class="btn-zoom" style="border-color:var(--gold); color:var(--gold-light); font-weight:700; font-size:0.86rem; padding:0.35rem 1.15rem; min-width:185px; margin-right:0.5rem; background:linear-gradient(135deg, rgba(212,175,55,0.24), rgba(180,83,9,0.2)); border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.4); text-align:center;" onclick="PRS_App.switchTab('lobby')" data-i18n="ui.board_bar.back_landing" data-i18n-title="ui.board_bar.back_landing_title" title="Návrat na úvodní Landing Page a Hernu">🏰 ← Zpět na Landing Page</button>
 
                             <span style="color:var(--text-muted); margin-right:0.2rem;" data-i18n="ui.board_bar.map_label">🔍 Mapa:</span>
 
@@ -980,7 +1020,12 @@
                             <button id="btn-save-game" class="btn-zoom" style="border-color:var(--gold); color:var(--gold-light); font-weight:700;" onclick="PRS_App.openSaveGameModal()" data-i18n="ui.board_bar.save_game" data-i18n-title="ui.board_bar.save_game_title" title="Uložit rozehranou partii do paměti nebo cloudu">💾 Uložit hru</button>
                             <button id="btn-to-online" class="btn-zoom" style="border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.saveCurrentSessionToCloud()" data-i18n="ui.board_bar.to_online" data-i18n-title="ui.board_bar.to_online_title" title="Proměnit partii v online místnost a sdílet kód s přáteli">🌐 Do online</button>
                             <button class="btn-zoom" onclick="PRS_App.openSettingsModal()" data-i18n="ui.board_bar.settings" data-i18n-title="ui.board_bar.settings_title" title="Nastavení živlů, zvuku, tempa hry a grafiky">⚙️ Nastavení</button>
-                            <button id="board-bar-lang-btn" class="btn-zoom" onclick="PRS_I18n.toggleLanguage()" title="Přepnout jazyk / Toggle Language (CZ / EN)" style="font-weight:700; border-color:var(--gold); color:var(--gold-light);">🌐 <span id="board-bar-lang-label">CZ</span></button>
+                            <div class="board-bar-lang-wrap" title="Jazyk hry / Game language" data-i18n-title="ui.theme.lang_select_title">
+                                <select id="board-bar-lang-select" class="board-bar-lang-select prs-lang-select" onchange="PRS_I18n.setLanguage(this.value)" aria-label="Jazyk hry / Game Language">
+                                    <option value="cs">🇨🇿 Čeština</option>
+                                    <option value="en">🇬🇧 English</option>
+                                </select>
+                            </div>
 
                         </div>
 
@@ -2952,25 +2997,26 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/cs.js?v=202611172205" defer></script>
-    <script src="js/i18n/en.js?v=202611172205" defer></script>
-    <script src="js/app-i18n.js?v=202611172205" defer></script>
-    <script src="js/game-data.js?v=202611172205" defer></script>
-    <script src="js/game-boards.js?v=202611172205" defer></script>
-    <script src="js/game-engine.js?v=202611172205" defer></script>
-    <script src="js/game-combat-ai.js?v=202611172205" defer></script>
-    <script src="js/app-audio.js?v=202611172205" defer></script>
-    <script src="js/app-dialog.js?v=202611172205" defer></script>
-    <script src="js/app.js?v=202611172205" defer></script>
-    <script src="js/app-board.js?v=202611172205" defer></script>
-    <script src="js/app-hud.js?v=202611172205" defer></script>
-    <script src="js/app-modals.js?v=202611172205" defer></script>
-    <script src="js/app-online.js?v=202611172205" defer></script>
-    <script src="js/app-saves.js?v=202611172205" defer></script>
-    <script src="js/app-map-editor.js?v=202611172205" defer></script>
-    <script src="js/app-catalog.js?v=202611172205" defer></script>
-    <script src="js/app-admin.js?v=202611172205" defer></script>
-    <script src="js/app-musicwidget.js?v=202611172205" defer></script>
+    <script src="js/i18n/cs.js?v=202611191750" defer></script>
+    <script src="js/i18n/en.js?v=202611191750" defer></script>
+    <script src="js/app-i18n.js?v=202611191750" defer></script>
+    <script src="js/game-data.js?v=202611191750" defer></script>
+    <script src="js/game-boards.js?v=202611191750" defer></script>
+    <script src="js/game-engine.js?v=202611191750" defer></script>
+    <script src="js/game-combat-ai.js?v=202611191750" defer></script>
+    <script src="js/app-audio.js?v=202611191750" defer></script>
+    <script src="js/app-dialog.js?v=202611191750" defer></script>
+    <script src="js/app.js?v=202611191750" defer></script>
+    <script src="js/app-board.js?v=202611191750" defer></script>
+    <script src="js/app-hud.js?v=202611191750" defer></script>
+    <script src="js/app-modals.js?v=202611191750" defer></script>
+    <script src="js/app-online.js?v=202611191750" defer></script>
+    <script src="js/app-saves.js?v=202611191750" defer></script>
+    <script src="js/app-map-editor.js?v=202611191750" defer></script>
+    <script src="js/app-catalog.js?v=202611191750" defer></script>
+    <script src="js/app-rules-guide.js?v=202611191750" defer></script>
+    <script src="js/app-admin.js?v=202611191750" defer></script>
+    <script src="js/app-musicwidget.js?v=202611191750" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3228,13 +3274,11 @@
                         <span data-i18n="ui.settings.lang_section_title">🌐 Jazyk hry / Language</span>
                     </div>
                     <div data-i18n="ui.settings.lang_section_desc" style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.65rem;">Vyber jazyk uživatelského rozhraní, dialogů a textů:</div>
-                    <div style="display:flex; gap:0.65rem; flex-wrap:wrap;">
-                        <button type="button" id="settings-lang-cs-btn" class="btn-secondary active" onclick="PRS_I18n.setLanguage('cs')" style="padding:0.42rem 1rem; font-weight:700; border-color:var(--gold); background:rgba(212,175,55,0.25); display:inline-flex; align-items:center; gap:0.45rem;">
-                            🇨🇿 Čeština
-                        </button>
-                        <button type="button" id="settings-lang-en-btn" class="btn-secondary" onclick="PRS_I18n.setLanguage('en')" style="padding:0.42rem 1rem; font-weight:700; border-color:rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); display:inline-flex; align-items:center; gap:0.45rem;">
-                            🇬🇧 English
-                        </button>
+                    <div style="display:flex; gap:0.65rem; flex-wrap:wrap; align-items:center;">
+                        <select id="settings-lang-select" class="prs-lang-select settings-lang-select" onchange="PRS_I18n.setLanguage(this.value)" aria-label="Jazyk hry / Language" style="min-width:220px; padding:0.45rem 1rem; font-size:0.9rem; font-weight:700; border:1px solid var(--gold); border-radius:8px; background:rgba(15,23,42,0.95); color:var(--gold-light); cursor:pointer;">
+                            <option value="cs">🇨🇿 Čeština</option>
+                            <option value="en">🇬🇧 English</option>
+                        </select>
                     </div>
                 </div>
 

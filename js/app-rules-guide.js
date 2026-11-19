@@ -162,13 +162,16 @@
 ]
     };
 
-    if (window.PRS_App) {
+    function attachGuideMethods() {
+        if (typeof window === "undefined") return;
+        window.PRS_App = window.PRS_App || {};
+
         window.PRS_App.renderRuleGuide = function () {
             var container = document.getElementById("rules-guide-accordion-container");
             if (!container) return;
 
-            var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
-            var chapters = isEn ? window.PRS_RULES_GUIDE_DATA.en : window.PRS_RULES_GUIDE_DATA.cs;
+            var isEn = (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
+            var chapters = (window.PRS_RULES_GUIDE_DATA && isEn) ? window.PRS_RULES_GUIDE_DATA.en : (window.PRS_RULES_GUIDE_DATA ? window.PRS_RULES_GUIDE_DATA.cs : null);
             if (!chapters) return;
 
             // Remember which accordions were open
@@ -210,8 +213,8 @@
             var container = document.getElementById("glossary-cards-container");
             if (!container) return;
 
-            var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
-            var cards = isEn ? window.PRS_GLOSSARY_DATA.en : window.PRS_GLOSSARY_DATA.cs;
+            var isEn = (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
+            var cards = (window.PRS_GLOSSARY_DATA && isEn) ? window.PRS_GLOSSARY_DATA.en : (window.PRS_GLOSSARY_DATA ? window.PRS_GLOSSARY_DATA.cs : null);
             if (!cards) return;
 
             var html = "";
@@ -221,5 +224,22 @@
 
             container.innerHTML = html;
         };
+
+        // If the rules guide container exists in DOM, render immediately
+        var guideContainer = document.getElementById("rules-guide-accordion-container");
+        if (guideContainer && guideContainer.children && guideContainer.children.length === 0) {
+            window.PRS_App.renderRuleGuide();
+        }
+    }
+
+    attachGuideMethods();
+
+    // Also attach on DOMContentLoaded just in case
+    if (typeof document !== "undefined") {
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", attachGuideMethods);
+        } else {
+            attachGuideMethods();
+        }
     }
 })();

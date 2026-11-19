@@ -3791,6 +3791,11 @@ body[data-active-tab="board"] #topbar-announcement-banner {
         padding: 0.18rem 0.35rem !important;
         font-size: 0.72rem !important;
     }
+    .map-floating-toolbar #btn-board-back-landing {
+        padding: 0.28rem 0.8rem !important;
+        font-size: 0.78rem !important;
+        min-width: 150px !important;
+    }
 }
 
 /* ==========================================================================

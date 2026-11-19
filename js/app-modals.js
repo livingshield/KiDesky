@@ -3086,6 +3086,8 @@
 
     openIntrigueModal: function (type) {
         var self = this;
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var currG = isEn ? "g." : "zl.";
         var modal = this.getGenericModal();
         if (!modal) return;
         var p = self.state.players[self.state.currentPlayerIndex];
@@ -3098,35 +3100,50 @@
         var cost = isBallad ? ((self.state.pendingAction && self.state.pendingAction.intrigueBalladCost) || 750) : ((self.state.pendingAction && self.state.pendingAction.intrigueCustomsCost) || 600);
         var canAfford = (p.gold >= cost);
 
+        var modalTitle = isBallad
+            ? (isEn ? "Mocking Ballad Under Balcony" : "Posměšná balada pod balkónem")
+            : (isEn ? "Royal Customs Audit" : "Královská celní kontrola");
+        var modalDesc = isBallad
+            ? (isEn
+                ? ("A jester composes a biting ballad about the chosen rival (Charisma contest + 1d6). Success: rival loses 💖 and you gain court favor! Cost: <strong>" + cost.toLocaleString("en-US") + " " + currG + "</strong>")
+                : ("Kejklíř složí uštěpačnou píseň o vybraném soupeři (souboj Charisma + 1d6). Úspěch: soupeř ztrácí 💖 a ty získáváš dvorskou přízeň! Cena: <strong>" + cost.toLocaleString("cs-CZ") + " zl.</strong>"))
+            : (isEn
+                ? ("Select a rival whose estates will be frozen by customs audit for 1 round (no player pays them rent). Cost: <strong>" + cost.toLocaleString("en-US") + " " + currG + "</strong>")
+                : ("Zvol soupeře, jehož panství budou na 1 kolo zmrazena celní kontrolou (nikdo mu neplatí nájem). Cena: <strong>" + cost.toLocaleString("cs-CZ") + " zl.</strong>"));
+
         var costWarnHtml = "";
         if (!canAfford) {
-            costWarnHtml = '<div style="background:rgba(239,68,68,0.2); border:1px solid #ef4444; border-radius:8px; padding:0.45rem 0.65rem; color:#fca5a5; font-size:0.8rem; margin-bottom:0.75rem;">' +
-                '⚠️ <strong>Nedostatek zlata!</strong> Na tuto intriku potřebuješ <strong>' + cost.toLocaleString("cs-CZ") + ' zl.</strong>, ve váčku máš pouze <strong>' + p.gold.toLocaleString("cs-CZ") + ' zl.</strong>' +
-                '</div>';
+            costWarnHtml = isEn
+                ? ('<div style="background:rgba(239,68,68,0.2); border:1px solid #ef4444; border-radius:8px; padding:0.45rem 0.65rem; color:#fca5a5; font-size:0.8rem; margin-bottom:0.75rem;">' +
+                    '⚠️ <strong>Not enough gold!</strong> You need <strong>' + cost.toLocaleString("en-US") + ' ' + currG + '</strong> for this intrigue, but you only have <strong>' + p.gold.toLocaleString("en-US") + ' ' + currG + '</strong>' +
+                    '</div>')
+                : ('<div style="background:rgba(239,68,68,0.2); border:1px solid #ef4444; border-radius:8px; padding:0.45rem 0.65rem; color:#fca5a5; font-size:0.8rem; margin-bottom:0.75rem;">' +
+                    '⚠️ <strong>Nedostatek zlata!</strong> Na tuto intriku potřebuješ <strong>' + cost.toLocaleString("cs-CZ") + ' zl.</strong>, ve váčku máš pouze <strong>' + p.gold.toLocaleString("cs-CZ") + ' zl.</strong>' +
+                    '</div>');
         }
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid var(--gold); border-radius:14px; text-align:center;">' +
             '<div style="font-size:2rem; margin-bottom:0.25rem;">' + (isBallad ? '🎭 🃏' : '📜 ⚖️') + '</div>' +
-            '<h3 style="font-family:Cinzel,serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + (isBallad ? 'Posměšná balada pod balkónem' : 'Královská celní kontrola') + '</h3>' +
-            '<p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:0.8rem;">' +
-            (isBallad ? 'Kejklíř složí uštěpačnou píseň o vybraném soupeři (souboj Charisma + 1d6). Úspěch: soupeř ztrácí 💖 a ty získáváš dvorskou přízeň! Cena: <strong>' + cost.toLocaleString("cs-CZ") + ' zl.</strong>' : 'Zvol soupeře, jehož panství budou na 1 kolo zmrazena celní kontrolou (nikdo mu neplatí nájem). Cena: <strong>' + cost.toLocaleString("cs-CZ") + ' zl.</strong>') +
-            '</p>' +
+            '<h3 style="font-family:Cinzel,serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + modalTitle + '</h3>' +
+            '<p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:0.8rem;">' + modalDesc + '</p>' +
             costWarnHtml +
             '<div style="display:flex; flex-direction:column; gap:0.5rem;">';
         for (var t = 0; t < targets.length; t++) {
             var tgt = targets[t];
+            var tgtDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(tgt) : tgt.name;
             var chVal = (tgt.skills && tgt.skills.charisma !== undefined) ? tgt.skills.charisma : 1;
             var btnStyle = canAfford ? 'text-align:left; padding:0.6rem 0.85rem;' : 'text-align:left; padding:0.6rem 0.85rem; opacity:0.45; cursor:not-allowed;';
             var clickHandler = canAfford ? ('PRS_App.confirmPlotIntrigue(\'' + type + '\', ' + tgt.index + ')') : '';
             html += '<button class="btn-gold-lg" style="' + btnStyle + '" ' + (canAfford ? ('onclick="' + clickHandler + '"') : 'disabled') + '>' +
-                tgt.badge + ' <strong>' + self.escapeHtml(tgt.name) + '</strong> (' + tgt.totalHearts + ' 💖, Charisma ' + chVal + ')' +
+                tgt.badge + ' <strong>' + self.escapeHtml(tgtDisplayName) + '</strong> (' + tgt.totalHearts + ' 💖, Charisma ' + chVal + ')' +
                 '</button>';
         }
         if (targets.length === 0) {
-            html += '<p style="color:#fca5a5; font-size:0.85rem;">V království již nezbyl žádný aktivní soupeř.</p>';
+            html += '<p style="color:#fca5a5; font-size:0.85rem;">' + (isEn ? "No active rivals remain in the realm." : "V království již nezbyl žádný aktivní soupeř.") + '</p>';
         }
+        var cancelText = isEn ? "Cancel" : "Zrušit";
         html += '</div>' +
-            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">Zrušit</button>' +
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">' + cancelText + '</button>' +
             '</div>';
         modal.innerHTML = html;
         modal.style.display = "flex";
@@ -3186,24 +3203,51 @@
     showIntrigueResultModal: function (res) {
         var modal = this.getGenericModal();
         if (!modal) return;
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var currG = isEn ? "g." : "zl.";
         var p1 = res.player;
         var p2 = res.target;
         var isSuccess = res.success;
 
+        var p1DisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p1) : p1.name;
+        var p2DisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p2) : p2.name;
+
+        var modalTitle = isSuccess
+            ? (isEn ? "Mocking Ballad Succeeded!" : "Posměšná balada uspěla!")
+            : (isEn ? "Mocking Ballad Failed!" : "Posměšná balada selhala!");
+        var modalSub = isEn ? "Court intrigue under the balcony at the Jester" : "Dvorní intrika pod balkónem u Kejklíře";
+        var yourSingerText = isEn ? "Your singer" : "Tvůj pěvec";
+        var targetIntrigueText = isEn ? "Intrigue target" : "Cíl intriky";
+        var diceLabel = isEn ? "🎲 Die: " : "🎲 Kostka: ";
+        var okBtnText = isEn ? "Understood" : "Rozumím";
+
+        var outcomeHtml = isSuccess
+            ? ('<div style="color:#86efac; font-weight:700; margin-bottom:4px;">' +
+               (isEn ? "👑 The jester's ballad amused the court and shamed your rival!" : "👑 Kejklířova balada pobavila dvůr a zostudila soupeře!") + '</div>' +
+               '<div style="color:#e2e8f0;">' +
+               (isEn
+                   ? ("Courtiers laughed out loud at your rival's clumsy ways. " + this.escapeHtml(p2DisplayName) + " loses <strong style='color:#f87171;'>-" + res.penalty + " 💖</strong> and your knight earns the princess's favor (<strong style='color:#86efac;'>+0.5 💖</strong>)!")
+                   : ("Dvořané se soupeřově neobratnosti hlasitě vysmáli. " + this.escapeHtml(p2DisplayName) + " ztrácí <strong style='color:#f87171;'>-" + res.penalty + " 💖</strong> a tvůj rytíř si získává obdiv princezny (<strong style='color:#86efac;'>+0,5 💖</strong>)!")) + '</div>')
+            : ('<div style="color:#fca5a5; font-weight:700; margin-bottom:4px;">' +
+               (isEn ? "🛡️ The rival retained noble grace and turned the joke against you!" : "🛡️ Soupeř zachoval vznešenou noblesu a vtip obrátil proti tobě!") + '</div>' +
+               '<div style="color:#e2e8f0;">' +
+               (isEn
+                   ? ("The court condemned this cheap slander attempt. " + this.escapeHtml(p2DisplayName) + " gains <strong style='color:#86efac;'>+0.25 💖</strong> for courtly virtue and the jester refuses to refund your <strong>" + res.cost + " " + currG + "</strong>")
+                   : ("Dvůr odsoudil laciný pokus o pomluvu. " + this.escapeHtml(p2DisplayName) + " získává <strong style='color:#86efac;'>+0,25 💖</strong> za dvorskou ctnost a kejklíř ti odmítá vrátit zaplacených <strong>" + res.cost + " zl.</strong>")) + '</div>');
+
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:480px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid ' + (isSuccess ? '#10b981' : '#f59e0b') + '; border-radius:14px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.7);">' +
             '<div style="font-size:2.5rem; margin-bottom:0.25rem;">' + (isSuccess ? '🎭 🎶 👑' : '🛡️ 📜 🎭') + '</div>' +
-            '<h3 style="font-family:\'Cinzel\',serif; color:' + (isSuccess ? '#86efac' : '#fde047') + '; margin:0 0 0.35rem 0;">' +
-            (isSuccess ? 'Posměšná balada uspěla!' : 'Posměšná balada selhala!') + '</h3>' +
-            '<p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">Dvorní intrika pod balkónem u Kejklíře</p>' +
+            '<h3 style="font-family:\'Cinzel\',serif; color:' + (isSuccess ? '#86efac' : '#fde047') + '; margin:0 0 0.35rem 0;">' + modalTitle + '</h3>' +
+            '<p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">' + modalSub + '</p>' +
 
             '<div style="display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; background:rgba(0,0,0,0.35); padding:10px; border-radius:10px; margin-bottom:1rem; border:1px solid rgba(212,175,55,0.2);">' +
             '  <div style="background:' + (isSuccess ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)') + '; border:1.5px solid ' + (isSuccess ? '#10b981' : 'rgba(212,175,55,0.3)') + '; border-radius:8px; padding:8px 6px;">' +
             '    <div style="font-size:1.6rem;">' + p1.badge + '</div>' +
-            '    <div style="font-size:0.82rem; font-weight:700; color:' + (p1.color || '#fde047') + '; margin:2px 0;">' + this.escapeHtml(p1.name) + '</div>' +
-            '    <div style="font-size:0.75rem; color:#94a3b8;">Tvůj pěvec</div>' +
+            '    <div style="font-size:0.82rem; font-weight:700; color:' + (p1.color || '#fde047') + '; margin:2px 0;">' + this.escapeHtml(p1DisplayName) + '</div>' +
+            '    <div style="font-size:0.75rem; color:#94a3b8;">' + yourSingerText + '</div>' +
             '    <div style="margin-top:6px; font-size:0.78rem; line-height:1.4;">' +
             '      <div>✨ Charisma: <strong>' + res.stat1 + '</strong></div>' +
-            '      <div>🎲 Kostka: <strong>+' + res.r1 + '</strong></div>' +
+            '      <div>' + diceLabel + '<strong>+' + res.r1 + '</strong></div>' +
             '      <div style="margin-top:4px; font-weight:800; font-size:0.95rem; color:' + (isSuccess ? '#86efac' : '#cbd5e1') + ';">= ' + res.ch1 + '</div>' +
             '    </div>' +
             '  </div>' +
@@ -3212,25 +3256,21 @@
 
             '  <div style="background:' + (!isSuccess ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.04)') + '; border:1.5px solid ' + (!isSuccess ? '#f59e0b' : 'rgba(212,175,55,0.3)') + '; border-radius:8px; padding:8px 6px;">' +
             '    <div style="font-size:1.6rem;">' + p2.badge + '</div>' +
-            '    <div style="font-size:0.82rem; font-weight:700; color:' + (p2.color || '#fca5a5') + '; margin:2px 0;">' + this.escapeHtml(p2.name) + '</div>' +
-            '    <div style="font-size:0.75rem; color:#94a3b8;">Cíl intriky</div>' +
+            '    <div style="font-size:0.82rem; font-weight:700; color:' + (p2.color || '#fca5a5') + '; margin:2px 0;">' + this.escapeHtml(p2DisplayName) + '</div>' +
+            '    <div style="font-size:0.75rem; color:#94a3b8;">' + targetIntrigueText + '</div>' +
             '    <div style="margin-top:6px; font-size:0.78rem; line-height:1.4;">' +
             '      <div>✨ Charisma: <strong>' + res.stat2 + '</strong></div>' +
-            '      <div>🎲 Kostka: <strong>+' + res.r2 + '</strong></div>' +
+            '      <div>' + diceLabel + '<strong>+' + res.r2 + '</strong></div>' +
             '      <div style="margin-top:4px; font-weight:800; font-size:0.95rem; color:' + (!isSuccess ? '#fde047' : '#cbd5e1') + ';">= ' + res.ch2 + '</div>' +
             '    </div>' +
             '  </div>' +
             '</div>' +
 
             '<div style="background:' + (isSuccess ? 'rgba(16,185,129,0.18)' : 'rgba(239,68,68,0.18)') + '; border:1px solid ' + (isSuccess ? '#10b981' : '#f87171') + '; border-radius:8px; padding:10px; margin-bottom:1rem; font-size:0.84rem; text-align:left; line-height:1.45;">' +
-            (isSuccess
-                ? ('<div style="color:#86efac; font-weight:700; margin-bottom:4px;">👑 Kejklířova balada pobavila dvůr a zostudila soupeře!</div>' +
-                   '<div style="color:#e2e8f0;">Dvořané se soupeřově neobratnosti hlasitě vysmáli. ' + this.escapeHtml(p2.name) + ' ztrácí <strong style="color:#f87171;">-' + res.penalty + ' 💖</strong> a tvůj rytíř si získává obdiv princezny (<strong style="color:#86efac;">+0,5 💖</strong>)!</div>')
-                : ('<div style="color:#fca5a5; font-weight:700; margin-bottom:4px;">🛡️ Soupeř zachoval vznešenou noblesu a vtip obrátil proti tobě!</div>' +
-                   '<div style="color:#e2e8f0;">Dvůr odsoudil laciný pokus o pomluvu. ' + this.escapeHtml(p2.name) + ' získává <strong style="color:#86efac;">+0,25 💖</strong> za dvorskou ctnost a kejklíř ti odmítá vrátit zaplacených <strong>' + res.cost + ' zl.</strong></div>')) +
+            outcomeHtml +
             '</div>' +
 
-            '<button class="btn-gold-lg" style="width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\'; PRS_App.renderGameScreen();">Rozumím</button>' +
+            '<button class="btn-gold-lg" style="width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\'; PRS_App.renderGameScreen();">' + okBtnText + '</button>' +
             '</div>';
 
         modal.innerHTML = html;
@@ -3239,6 +3279,8 @@
 
     openTradePactModal: function () {
         var self = this;
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var currG = isEn ? "g." : "zl.";
         var modal = this.getGenericModal();
         if (!modal) return;
         var p = self.state.players[self.state.currentPlayerIndex];
@@ -3256,28 +3298,36 @@
                 partners.push({ player: pl, isLeaderAhead: isLeaderAhead });
             }
         }
+
+        var pactTitle = isEn ? "Form Trade Pact" : "Uzavření Obchodního paktu";
+        var pactDesc = isEn
+            ? ("Seal a duty-free alliance for <strong>8 full rounds</strong> for <strong>" + cost + " " + currG + "</strong> (half goes to the treasury, half to your partner as a gift). Code of chivalry: Pact cannot be formed with a realm leader ahead by 2+ 💖!")
+            : ("Zpečeť bezcelní alianci na <strong>8 celých kol</strong> za <strong>" + cost + " zl.</strong> (polovina jde do pokladny, polovina partnerovi jako dar). Pravidlo cti: Pakt nelze uzavřít s lídrem království, který vede o 2+ 💖!");
+
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; text-align:center;">' +
             '<div style="font-size:2rem; margin-bottom:0.25rem;">🤝 📜</div>' +
-            '<h3 style="font-family:Cinzel,serif; color:#7dd3fc; margin:0 0 0.5rem 0;">Uzavření Obchodního paktu</h3>' +
-            '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:1rem;">' +
-            'Zpečeť bezcelní alianci na <strong>8 celých kol</strong> za <strong>' + cost + ' zl.</strong> (polovina jde do pokladny, polovina partnerovi jako dar). ' +
-            'Pravidlo cti: Pakt nelze uzavřít s lídrem království, který vede o 2+ 💖!' +
-            '</p>' +
+            '<h3 style="font-family:Cinzel,serif; color:#7dd3fc; margin:0 0 0.5rem 0;">' + pactTitle + '</h3>' +
+            '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:1rem;">' + pactDesc + '</p>' +
             '<div style="display:flex; flex-direction:column; gap:0.5rem;">';
         for (var pt = 0; pt < partners.length; pt++) {
             var item = partners[pt];
             var part = item.player;
+            var partDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(part) : part.name;
             var disabled = item.isLeaderAhead || (p.gold < cost);
+            var estatesText = isEn ? "estates" : "panství";
+            var leaderCannotText = isEn ? " (Cannot: Leader)" : " (Nelze: Lídr)";
+
             html += '<button class="btn-gold-lg" ' + (disabled ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '') + ' style="text-align:left; padding:0.6rem 0.85rem; background:linear-gradient(135deg, #0284c7, #0369a1); border-color:#38bdf8;" onclick="PRS_App.confirmTradePact(' + part.index + ')">' +
-                part.badge + ' <strong>' + self.escapeHtml(part.name) + '</strong> (' + (part.ownedNodes ? part.ownedNodes.length : 0) + ' panství, ' + part.totalHearts + ' 💖)' +
-                (item.isLeaderAhead ? ' <small style="color:#fca5a5;">(Nelze: Lídr)</small>' : '') +
+                part.badge + ' <strong>' + self.escapeHtml(partDisplayName) + '</strong> (' + (part.ownedNodes ? part.ownedNodes.length : 0) + ' ' + estatesText + ', ' + part.totalHearts + ' 💖)' +
+                (item.isLeaderAhead ? (' <small style="color:#fca5a5;">' + leaderCannotText + '</small>') : '') +
                 '</button>';
         }
         if (partners.length === 0) {
-            html += '<p style="color:#bae6fd; font-size:0.85rem;">V království není žádný volný spojenec pro pakt.</p>';
+            html += '<p style="color:#bae6fd; font-size:0.85rem;">' + (isEn ? "No eligible partner available in the realm." : "V království není žádný volný spojenec pro pakt.") + '</p>';
         }
+        var cancelText = isEn ? "Cancel" : "Zrušit";
         html += '</div>' +
-            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">Zrušit</button>' +
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">' + cancelText + '</button>' +
             '</div>';
         modal.innerHTML = html;
         modal.style.display = "flex";
@@ -3296,6 +3346,8 @@
 
     openFestivalChallengeModal: function () {
         var self = this;
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var currG = isEn ? "g." : "zl.";
         var modal = this.getGenericModal();
         if (!modal || !self.state) return;
         var p = self.state.players[self.state.currentPlayerIndex];
@@ -3307,34 +3359,44 @@
             var pl = self.state.players[i];
             if (pl.index !== p.index && !pl.isEliminated) rivals.push(pl);
         }
+
+        var festTitle = isEn ? "Personal Challenge at Festival" : "Osobní výzva na Slavnosti";
+        var festDesc = isEn
+            ? ("Choose a rival and discipline (1d6 roll + virtue stat). The victor wins <strong>" + stake.toLocaleString("en-US") + " " + currG + "</strong> and <strong>+0.5 💖</strong> of glory!")
+            : ("Zvol rivala a disciplínu (hod 1d6 + hodnota ctnosti). Vítěz získá <strong>" + stake.toLocaleString("cs-CZ") + " zl.</strong> a <strong>+0,5 💖</strong> slávy!");
+
         var html = '<div class="modal-box tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #ec4899; border-radius:14px; text-align:center; box-shadow:0 12px 35px rgba(0,0,0,0.85);">' +
             '<div style="font-size:2rem; margin-bottom:0.25rem;">🏆 🤺</div>' +
-            '<h3 style="font-family:Cinzel,serif; color:#fbcfe8; margin:0 0 0.5rem 0;">Osobní výzva na Slavnosti</h3>' +
-            '<p style="font-size:0.84rem; color:#fce7f3; margin-bottom:0.85rem;">' +
-            'Zvol rivala a disciplínu (hod 1d6 + hodnota ctnosti). Vítěz získá <strong>' + stake.toLocaleString("cs-CZ") + ' zl.</strong> a <strong>+0,5 💖</strong> slávy!' +
-            '</p>' +
-            (!canAfford ? '<div style="background:rgba(239,68,68,0.2); border:1px solid #f87171; border-radius:8px; padding:0.45rem; font-size:0.8rem; color:#fca5a5; margin-bottom:0.75rem;">⚠️ Nemáš dostatek zlaťáků na sázku (' + (p.gold || 0) + ' / ' + stake + ' zl.).</div>' : '') +
+            '<h3 style="font-family:Cinzel,serif; color:#fbcfe8; margin:0 0 0.5rem 0;">' + festTitle + '</h3>' +
+            '<p style="font-size:0.84rem; color:#fce7f3; margin-bottom:0.85rem;">' + festDesc + '</p>' +
+            (!canAfford ? ('<div style="background:rgba(239,68,68,0.2); border:1px solid #f87171; border-radius:8px; padding:0.45rem; font-size:0.8rem; color:#fca5a5; margin-bottom:0.75rem;">' + (isEn ? ("⚠️ Not enough gold for the stake (" + (p.gold || 0) + " / " + stake + " " + currG + ").") : ("⚠️ Nemáš dostatek zlaťáků na sázku (" + (p.gold || 0) + " / " + stake + " zl.).")) + '</div>') : '') +
             '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
         for (var r = 0; r < rivals.length; r++) {
             var riv = rivals[r];
+            var rivDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(riv) : riv.name;
             var rCombat = (riv.skills && riv.skills.combat !== undefined) ? riv.skills.combat : 1;
             var rRiding = (riv.skills && riv.skills.riding !== undefined) ? riv.skills.riding : 1;
             var rDance = (riv.skills && riv.skills.dance !== undefined) ? riv.skills.dance : 1;
             var btnDis = !canAfford ? 'disabled style="flex:1; font-size:0.78rem; padding:0.35rem; opacity:0.5;"' : 'style="flex:1; font-size:0.78rem; padding:0.35rem;"';
+            var combatLabel = isEn ? ("⚔️ Combat (" + rCombat + ")") : ("⚔️ Boj (" + rCombat + ")");
+            var ridingLabel = isEn ? ("🏇 Riding (" + rRiding + ")") : ("🏇 Jízda (" + rRiding + ")");
+            var danceLabel = isEn ? ("💃 Dance (" + rDance + ")") : ("💃 Tanec (" + rDance + ")");
+
             html += '<div style="background:rgba(0,0,0,0.35); border:1px solid rgba(236,72,153,0.3); border-radius:8px; padding:0.55rem; text-align:left;">' +
-                '<div style="font-weight:700; color:#fbcfe8; margin-bottom:4px;">' + riv.badge + ' ' + (self.escapeHtml ? self.escapeHtml(riv.name) : riv.name) + ' (' + riv.totalHearts + ' 💖)</div>' +
+                '<div style="font-weight:700; color:#fbcfe8; margin-bottom:4px;">' + riv.badge + ' ' + self.escapeHtml(rivDisplayName) + ' (' + riv.totalHearts + ' 💖)</div>' +
                 '<div style="display:flex; gap:4px;">' +
-                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'boj\')">⚔️ Boj (' + rCombat + ')</button>' +
-                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'jizda\')">🏇 Jízda (' + rRiding + ')</button>' +
-                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'tanec\')">💃 Tanec (' + rDance + ')</button>' +
+                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'boj\')">' + combatLabel + '</button>' +
+                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'jizda\')">' + ridingLabel + '</button>' +
+                '  <button class="btn-secondary" ' + btnDis + ' onclick="PRS_App.confirmFestivalChallenge(' + riv.index + ', \'tanec\')">' + danceLabel + '</button>' +
                 '</div>' +
                 '</div>';
         }
         if (rivals.length === 0) {
-            html += '<p style="color:#fca5a5; font-size:0.85rem;">V království již nezbyl žádný aktivní soupeř k výzvě.</p>';
+            html += '<p style="color:#fca5a5; font-size:0.85rem;">' + (isEn ? "No active rivals remain in the realm." : "V království již nezbyl žádný aktivní soupeř k výzvě.") + '</p>';
         }
+        var cancelText = isEn ? "Cancel" : "Zrušit";
         html += '</div>' +
-            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m){ m.style.display=\'none\'; if(window.PRS_App && window.PRS_App.updateBodyModalClass) window.PRS_App.updateBodyModalClass(); }">Zrušit</button>' +
+            '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m){ m.style.display=\'none\'; if(window.PRS_App && window.PRS_App.updateBodyModalClass) window.PRS_App.updateBodyModalClass(); }">' + cancelText + '</button>' +
             '</div>';
         modal.innerHTML = html;
         modal.style.display = "flex";
@@ -3359,31 +3421,29 @@
         if (!res) return;
 
         var modal = document.getElementById("knight-duel-modal");
-
         var titleEl = document.getElementById("knight-duel-header-title");
-
         var subEl = document.getElementById("knight-duel-header-sub");
-
         var bodyEl = document.getElementById("knight-duel-modal-body");
 
         if (!modal || !bodyEl) return;
 
+        var isEnDuel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var currDuelG = isEnDuel ? "g." : "zl.";
         var isFestival = (category === "festival" || res.type === "festival_challenge");
 
         if (titleEl) {
-
-            titleEl.textContent = isFestival ? "Osobní výzva na Slavnosti" : "Rytířský duel cti";
-
+            titleEl.textContent = isFestival
+                ? (isEnDuel ? "Personal Challenge at Festival" : "Osobní výzva na Slavnosti")
+                : (isEnDuel ? "Knightly Duel of Honor" : "Rytířský duel cti");
         }
 
         if (subEl) {
-
-            subEl.textContent = isFestival ? "Rytířské klání v turnajové disciplíně" : "Výsledek přímého souboje na poli";
-
+            subEl.textContent = isFestival
+                ? (isEnDuel ? "Knightly contest in tournament discipline" : "Rytířské klání v turnajové disciplíně")
+                : (isEnDuel ? "Outcome of direct combat on the tile" : "Výsledek přímého souboje na poli");
         }
 
         var p1 = res.p1;
-
         var p2 = res.p2;
 
         var p1Obj = (this.state && this.state.players && p1 && p1.index !== undefined) ? this.state.players[p1.index] : null;
@@ -3398,143 +3458,107 @@
         }
 
         var isDraw = res.isDraw;
-
         var p1Won = (res.winnerIndex === p1.index);
-
         var p2Won = (res.winnerIndex === p2.index);
 
-        var statName = isFestival ? ((window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(res.discipline, true) : "⚔️ Boj") : "⚔️ Boj";
+        var p1DisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p1) : p1.name;
+        var p2DisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p2) : p2.name;
 
+        var statName = isFestival ? ((window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(res.discipline, true) : (isEnDuel ? "⚔️ Combat" : "⚔️ Boj")) : (isEnDuel ? "⚔️ Combat" : "⚔️ Boj");
         var statVal1 = isFestival ? p1.stat : p1.combat;
-
         var statVal2 = isFestival ? p2.stat : p2.combat;
 
-        var html = [];
+        var roleAttacker = isEnDuel ? "Attacker" : "Útočník";
+        var roleDefender = isEnDuel ? "Defender" : "Obránce";
+        var diceRollText = isEnDuel ? "Dice Roll: 🎲 " : "Hod kostkou: 🎲 ";
+        var totalPowerText = isEnDuel ? "Total Power" : "Celková síla";
+        var stakeText = isEnDuel ? "Stake: " : "Sázka: ";
+        var winnerBadgeText = isEnDuel ? "👑 WINNER" : "👑 VÍTĚZ";
 
+        var html = [];
         html.push('<div class="duel-combatants-arena">');
 
         // Bojovník 1 (Útočník / Vyzývatel)
-
         html.push('  <div class="duel-combatant-card' + (p1Won ? ' winner' : '') + '" style="border-color:' + p1.color + ';">');
-
-        if (p1Won) html.push('    <div style="position:absolute; top:-10px; right:10px; background:#fbbf24; color:#000; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.6);">👑 VÍTĚZ</div>');
-
+        if (p1Won) html.push('    <div style="position:absolute; top:-10px; right:10px; background:#fbbf24; color:#000; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.6);">' + winnerBadgeText + '</div>');
         html.push('    <div class="duel-combatant-badge">' + p1.badge + '</div>');
-
-        html.push('    <div class="duel-combatant-name" style="color:' + p1.color + ';" title="' + this.escapeHtml(p1.name) + '">' + this.escapeHtml(p1.name) + '</div>');
-
-        html.push('    <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">Útočník</div>');
-
+        html.push('    <div class="duel-combatant-name" style="color:' + p1.color + ';" title="' + this.escapeHtml(p1DisplayName) + '">' + this.escapeHtml(p1DisplayName) + '</div>');
+        html.push('    <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">' + roleAttacker + '</div>');
         html.push('    <div class="duel-combatant-stats">');
-
         html.push('      <div>' + statName + ': <strong>+' + statVal1 + '</strong></div>');
-
-        html.push('      <div>Hod kostkou: 🎲 <strong>' + p1.roll + '</strong></div>');
-
+        html.push('      <div>' + diceRollText + '<strong>' + p1.roll + '</strong></div>');
         html.push('    </div>');
-
         html.push('    <div class="duel-combatant-total">' + p1.total + '</div>');
-
-        html.push('    <div style="font-size:0.7rem; color:#fde047;">Celková síla</div>');
-
+        html.push('    <div style="font-size:0.7rem; color:#fde047;">' + totalPowerText + '</div>');
         html.push('  </div>');
 
         // VS střed
-
         html.push('  <div class="duel-vs-divider">');
-
         html.push('    <div style="font-size:1.6rem;">⚔️</div>');
-
         html.push('    <div class="duel-vs-text">VS</div>');
-
-        html.push('    <div style="font-size:0.72rem; color:#cbd5e1; font-weight:bold;">Sázka: ' + res.stake.toLocaleString("cs-CZ") + ' zl.</div>');
-
+        html.push('    <div style="font-size:0.72rem; color:#cbd5e1; font-weight:bold;">' + stakeText + res.stake.toLocaleString(isEnDuel ? "en-US" : "cs-CZ") + ' ' + currDuelG + '</div>');
         html.push('  </div>');
 
         // Bojovník 2 (Obránce / Rival)
-
         html.push('  <div class="duel-combatant-card' + (p2Won ? ' winner' : '') + '" style="border-color:' + p2.color + ';">');
-
-        if (p2Won) html.push('    <div style="position:absolute; top:-10px; right:10px; background:#fbbf24; color:#000; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.6);">👑 VÍTĚZ</div>');
-
+        if (p2Won) html.push('    <div style="position:absolute; top:-10px; right:10px; background:#fbbf24; color:#000; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.6);">' + winnerBadgeText + '</div>');
         html.push('    <div class="duel-combatant-badge">' + p2.badge + '</div>');
-
-        html.push('    <div class="duel-combatant-name" style="color:' + p2.color + ';" title="' + this.escapeHtml(p2.name) + '">' + this.escapeHtml(p2.name) + '</div>');
-
-        html.push('    <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">Obránce</div>');
-
+        html.push('    <div class="duel-combatant-name" style="color:' + p2.color + ';" title="' + this.escapeHtml(p2DisplayName) + '">' + this.escapeHtml(p2DisplayName) + '</div>');
+        html.push('    <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">' + roleDefender + '</div>');
         html.push('    <div class="duel-combatant-stats">');
-
         html.push('      <div>' + statName + ': <strong>+' + statVal2 + '</strong></div>');
-
-        html.push('      <div>Hod kostkou: 🎲 <strong>' + p2.roll + '</strong></div>');
-
+        html.push('      <div>' + diceRollText + '<strong>' + p2.roll + '</strong></div>');
         html.push('    </div>');
-
         html.push('    <div class="duel-combatant-total">' + p2.total + '</div>');
-
-        html.push('    <div style="font-size:0.7rem; color:#fde047;">Celková síla</div>');
-
+        html.push('    <div style="font-size:0.7rem; color:#fde047;">' + totalPowerText + '</div>');
         html.push('  </div>');
 
         html.push('</div>');
 
         // Banner s výsledkem
-
         var bannerCls = isDraw ? 'draw' : (p1Won ? 'win' : 'lose');
-
         html.push('<div class="duel-outcome-banner ' + bannerCls + '">');
 
         if (isDraw) {
-
-            html.push('  <h4 style="margin:0 0 0.35rem; color:#7dd3fc; font-family:\"Cinzel\",serif; font-size:1.15rem;">⚖️ Nerozhodný střet čepelí!</h4>');
-
-            html.push('  <p style="margin:0; font-size:0.85rem; color:#e0f2fe;">Oba rytíři předvedli stejnou sílu (' + p1.total + ' vs ' + p2.total + '). Žádné zlaťáky ani srdce princezny se nemění.</p>');
-
+            html.push('  <h4 style="margin:0 0 0.35rem; color:#7dd3fc; font-family:\"Cinzel\",serif; font-size:1.15rem;">' + (isEnDuel ? "⚖️ Stalemate clash of blades!" : "⚖️ Nerozhodný střet čepelí!") + '</h4>');
+            html.push('  <p style="margin:0; font-size:0.85rem; color:#e0f2fe;">' + (isEnDuel ? ("Both knights displayed equal power (" + p1.total + " vs " + p2.total + "). No gold or princess's hearts are exchanged.") : ("Oba rytíři předvedli stejnou sílu (" + p1.total + " vs " + p2.total + "). Žádné zlaťáky ani srdce princezny se nemění.")) + '</p>');
         } else {
-
             var winner = p1Won ? p1 : p2;
-
             var loser = p1Won ? p2 : p1;
+            var winnerDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(winner) : winner.name;
+            var loserDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(loser) : loser.name;
 
-            html.push('  <h4 style="margin:0 0 0.35rem; color:#fef08a; font-family:\"Cinzel\",serif; font-size:1.15rem;">🏆 Vítězem duelu je ' + winner.badge + ' ' + this.escapeHtml(winner.name) + '!</h4>');
-
+            html.push('  <h4 style="margin:0 0 0.35rem; color:#fef08a; font-family:\"Cinzel\",serif; font-size:1.15rem;">' + (isEnDuel ? ("🏆 The victor of the duel is " + winner.badge + " " + this.escapeHtml(winnerDisplayName) + "!") : ("🏆 Vítězem duelu je " + winner.badge + " " + this.escapeHtml(winnerDisplayName) + "!")) + '</h4>');
             html.push('  <div style="font-size:0.88rem; line-height:1.45; color:#f1f5f9;">');
-
-            html.push('    <div>Slavný úder překonal soupeře (<strong>' + winner.total + '</strong> vs <strong>' + loser.total + '</strong>).</div>');
-
-            html.push('    <div style="margin-top:0.35rem; font-weight:bold; color:#a7f3d0;">💰 Kořist vítěze: +' + (res.actualGold || res.stake).toLocaleString("cs-CZ") + ' zl. &nbsp;•&nbsp; 💖 +' + (res.heartStake || 0.5) + ' Srdce princezny</div>');
+            html.push('    <div>' + (isEnDuel ? ("A glorious strike overcame the rival (<strong>" + winner.total + "</strong> vs <strong>" + loser.total + "</strong>).") : ("Slavný úder překonal soupeře (<strong>" + winner.total + "</strong> vs <strong>" + loser.total + "</strong>).")) + '</div>');
+            html.push('    <div style="margin-top:0.35rem; font-weight:bold; color:#a7f3d0;">' + (isEnDuel ? ("💰 Victor's spoils: +" + (res.actualGold || res.stake).toLocaleString("en-US") + " " + currDuelG + " &nbsp;•&nbsp; 💖 +" + (res.heartStake || 0.5) + " Princess's Heart") : ("💰 Kořist vítěze: +" + (res.actualGold || res.stake).toLocaleString("cs-CZ") + " zl. &nbsp;•&nbsp; 💖 +" + (res.heartStake || 0.5) + " Srdce princezny")) + '</div>');
 
             if (res.heartLost) {
-
-                html.push('    <div style="font-size:0.8rem; color:#fca5a5; margin-top:2px;">💔 Poražený ztrácí -' + (res.heartStake || 0.5) + ' 💖 slávy</div>');
-
+                html.push('    <div style="font-size:0.8rem; color:#fca5a5; margin-top:2px;">' + (isEnDuel ? ("💔 Defeated loses -" + (res.heartStake || 0.5) + " 💖 of glory") : ("💔 Poražený ztrácí -" + (res.heartStake || 0.5) + " 💖 slávy")) + '</div>');
             }
 
             if (res.hospitalTransferred) {
-
-                html.push('    <div style="font-size:0.82rem; color:#fca5a5; margin-top:4px; font-weight:bold;">🏥 V režimu Na život a smrt je těžce zraněný rytíř ' + this.escapeHtml(loser.name) + ' urychleně převezen do Královského lazaretu!</div>');
-
+                html.push('    <div style="font-size:0.82rem; color:#fca5a5; margin-top:4px; font-weight:bold;">' + (isEnDuel ? ("🏥 In Life & Death mode, severely wounded knight " + this.escapeHtml(loserDisplayName) + " is urgently rushed to the Royal Infirmary!") : ("🏥 V režimu Na život a smrt je těžce zraněný rytíř " + this.escapeHtml(loserDisplayName) + " urychleně převezen do Královského lazaretu!")) + '</div>');
             }
 
             html.push('  </div>');
-
         }
 
         html.push('</div>');
 
         // Tlačítko pokračovat
+        var continueBtnText = isEnDuel ? "⚔️ Continue game" : "⚔️ Pokračovat ve hře";
+        var botDuelNote = isEnDuel ? "(BOT duel – closing in 0.5s...)" : "(BOT duel – zavře se za 0,5 s...)";
+
         if (isBothBots) {
-            html.push('<button class="btn-gold-lg" style="width:100%; padding:0.75rem; font-size:1.02rem;" onclick="PRS_App.closeKnightDuelModal()">⚔️ Pokračovat ve hře <span style="font-size:0.8rem; opacity:0.85; margin-left:6px;">(BOT duel – zavře se za 0,5 s...)</span></button>');
+            html.push('<button class="btn-gold-lg" style="width:100%; padding:0.75rem; font-size:1.02rem;" onclick="PRS_App.closeKnightDuelModal()">' + continueBtnText + ' <span style="font-size:0.8rem; opacity:0.85; margin-left:6px;">' + botDuelNote + '</span></button>');
             html.push('<div style="height:3px; background:rgba(239,68,68,0.25); border-radius:2px; margin-top:8px; overflow:hidden;"><div style="height:100%; background:#ef4444; width:100%; animation:botDuelProgress 0.5s linear forwards;"></div></div>');
         } else {
-            html.push('<button class="btn-gold-lg" style="width:100%; padding:0.75rem; font-size:1.02rem;" onclick="PRS_App.closeKnightDuelModal()">⚔️ Pokračovat ve hře</button>');
+            html.push('<button class="btn-gold-lg" style="width:100%; padding:0.75rem; font-size:1.02rem;" onclick="PRS_App.closeKnightDuelModal()">' + continueBtnText + '</button>');
         }
 
         bodyEl.innerHTML = html.join("\n");
-
         modal.style.display = "flex";
-
         this.updateBodyModalClass();
 
         if (isBothBots) {

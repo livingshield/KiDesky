@@ -309,7 +309,7 @@
                     window.PRS_BoardBuilder.computeRiverBridges(restoredState.board);
                 }
             }
-            if (restoredState.board && restoredState.board.nodes && restoredState.board.decorationsVersion !== 3) {
+            if (restoredState.board && restoredState.board.nodes && restoredState.board.decorationsVersion !== 4) {
                 if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
                     window.PRS_BoardBuilder.generateBoardDecorations(restoredState.board, restoredState.board.seed || 1000);
                 }

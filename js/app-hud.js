@@ -211,11 +211,11 @@
 
                     '<div class="mobile-tempo-row">' +
 
-                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')" title="' + mTitleStandard + '">🎲 1–6</button>' +
+                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')" title="' + mTitleStandard + '" data-i18n-title="hud.stance_march_title">🎲 1–6</button>' +
 
-                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')" title="' + mTitleCautious + '">🚶 1–4</button>' +
+                    '  <button type="button" class="mobile-tempo-btn ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')" title="' + mTitleCautious + '" data-i18n-title="hud.stance_cautious_title">🚶 1–4</button>' +
 
-                    '  <button type="button" class="mobile-tempo-btn ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + ' title="' + mTitleHorse + '">🏇 2d6</button>' +
+                    '  <button type="button" class="mobile-tempo-btn ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + ' title="' + mTitleHorse + '" data-i18n-title="' + (hasHorse ? "hud.stance_gallop_title" : "hud.stance_gallop_locked_title") + '">🏇 2d6</button>' +
 
                     '</div>' +
 
@@ -735,18 +735,6 @@
     // INTERAKTIVNÍ ZOOM A POSOUVÁNÍ MAPY (PAN & ZOOM)
 
     // ========================================================================,
-
-    getPlayerDisplayName: function (player) {
-        if (!player) return "";
-        var name = player.name || "";
-        var isYou = (player.type === "Human" && (name.indexOf("(Ty)") !== -1 || name.indexOf("(You)") !== -1));
-        var cleanName = name.replace(/\s*\((?:Ty|You|PC|AI)\)$/i, "").trim();
-        if (isYou) {
-            var youTag = window.PRS_I18n ? window.PRS_I18n.t("common.you_tag", null, "(Ty)") : "(Ty)";
-            return cleanName + " " + youTag;
-        }
-        return name;
-    },
 
     getPlayerPawnAvatarHtml: function (p, sizePx) {
         var sz = sizePx || 28;
@@ -2486,67 +2474,63 @@
         }
 
         // 3. Výbava rytíře (Armory Rack)
-
+        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var itemsHtml = '';
-
         var eqItems = window.PRS_GameEngine.getEquippedItems(p);
 
         if (p.items.length === 0) {
-
             itemsHtml = '<div class="equipment-rack">' +
-
-                '<div class="eq-slot-pill empty"><span class="eq-icon">🗡️</span> <span class="eq-name">Zbraň (volno)</span></div>' +
-
-                '<div class="eq-slot-pill empty"><span class="eq-icon">🛡️</span> <span class="eq-name">Zbroj (volno)</span></div>' +
-
-                '<div class="eq-slot-pill empty"><span class="eq-icon">💍</span> <span class="eq-name">Klenot (volno)</span></div>' +
-
-                '<div class="eq-slot-pill empty"><span class="eq-icon">🏆</span> <span class="eq-name">Trofej (volno)</span></div>' +
-
+                '<div class="eq-slot-pill empty"><span class="eq-icon">🗡️</span> <span class="eq-name">' + (isEn ? "Weapon (empty)" : "Zbraň (volno)") + '</span></div>' +
+                '<div class="eq-slot-pill empty"><span class="eq-icon">🛡️</span> <span class="eq-name">' + (isEn ? "Armor (empty)" : "Zbroj (volno)") + '</span></div>' +
+                '<div class="eq-slot-pill empty"><span class="eq-icon">💍</span> <span class="eq-name">' + (isEn ? "Jewel (empty)" : "Klenot (volno)") + '</span></div>' +
+                '<div class="eq-slot-pill empty"><span class="eq-icon">🏆</span> <span class="eq-name">' + (isEn ? "Trophy (empty)" : "Trofej (volno)") + '</span></div>' +
                 '</div>';
-
         } else {
-
             itemsHtml = '<div class="asset-list">';
-
             for (var i = 0; i < p.items.length; i++) {
-
                 var it = p.items[i];
-
                 if (!it.uid) {
-
                     it.uid = (it.id || "item") + "_" + (i + 1) + "_" + Math.random().toString(36).substring(2, 7);
-
                 }
-
                 var isEq = (it.isEquipped === true || (it.isEquipped !== false && eqItems[it.slot] === it));
-
                 var isTrophy = (it.slot === "trophy");
-
                 var slotLabel = this.formatSlotLabel(it.slot, true);
-
                 var sellRatio = atMerchant ? this.state.config.sellRates.merchantItem : this.state.config.sellRates.anywhereItem;
-
                 var sellVal = Math.round(it.price * sellRatio);
 
+                var baseDef = (window.PRS_ITEMS && window.PRS_ITEMS.find(function(x) { return x.id === it.id; })) ||
+                              (window.PRS_TROPHIES && window.PRS_TROPHIES[it.id]);
+                var itCombat = Number(it.combat !== undefined && it.combat !== null ? it.combat : (baseDef && baseDef.combat !== undefined ? baseDef.combat : (it.boj !== undefined ? it.boj : 0))) || 0;
+                var itRiding = Number(it.riding !== undefined && it.riding !== null ? it.riding : (baseDef && baseDef.riding !== undefined ? baseDef.riding : (it.jizda !== undefined ? it.jizda : 0))) || 0;
+                var itDance = Number(it.dance !== undefined && it.dance !== null ? it.dance : (baseDef && baseDef.dance !== undefined ? baseDef.dance : (it.tanec !== undefined ? it.tanec : 0))) || 0;
+                var itCharisma = Number(it.charisma !== undefined && it.charisma !== null ? it.charisma : (baseDef && baseDef.charisma !== undefined ? baseDef.charisma : 0)) || 0;
+
+                var statParts = [];
+                if (itCombat !== 0) statParts.push("⚔️" + (itCombat > 0 ? "+" : "") + itCombat);
+                if (itRiding !== 0) statParts.push("🏇" + (itRiding > 0 ? "+" : "") + itRiding);
+                if (itDance !== 0) statParts.push("💃" + (itDance > 0 ? "+" : "") + itDance);
+                if (itCharisma !== 0) statParts.push("✨" + (itCharisma > 0 ? "+" : "") + itCharisma);
+                var statStr = statParts.length > 0 ? statParts.join(" ") : "(⚔️+0 🏇+0 💃+0 ✨+0)";
+
+                var toggleTitle = isEq
+                    ? (isEn ? "Store in backpack" : "Uložit do batohu")
+                    : (isEn ? "Equip into active gear" : "Nasadit do aktivní výstroje");
+                var toggleLabel = isEq
+                    ? (isEn ? "⚔️ Equipped" : "⚔️ Nasazeno")
+                    : (isEn ? "🎒 In Bag" : "🎒 V batohu");
+                var sellLabel = isEn ? ("Sell +" + sellVal + " g.") : ("Prodat +" + sellVal + " zl.");
+
+                var displayName = (window.PRS_App && window.PRS_App.getItemDisplayName) ? window.PRS_App.getItemDisplayName(it) : it.name;
+
                 itemsHtml += '<div class="asset-chip ' + (isEq ? 'chip-equipped' : 'chip-in-bag') + '">' +
-
-                    '<span><small class="slot-badge ' + (isTrophy ? 'slot-badge-trophy' : '') + '">' + slotLabel + '</small> ' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> <small>(⚔️' + it.boj + ' 🏇' + it.jizda + ' 💃' + it.tanec + ' ✨' + it.charisma + ')</small></span>' +
-
+                    '<span><small class="slot-badge ' + (isTrophy ? 'slot-badge-trophy' : '') + '">' + slotLabel + '</small> ' + (it.icon || '🎒') + ' <strong>' + this.escapeHtml(displayName) + '</strong> <small style="color:var(--gold-light); font-weight:600;">(' + statStr + ')</small></span>' +
                     '<div style="display:flex;align-items:center;">' +
-
-                    '  <button class="btn-equip-toggle ' + (isEq ? 'equipped' : 'in-bag') + '" onclick="PRS_App.handleToggleEquip(\'' + it.uid + '\', ' + i + ', ' + inspIdx + ')" title="' + (isEq ? 'Uložit do batohu' : 'Nasadit do aktivní výstroje') + '">' + (isEq ? '⚔️ Nasazeno' : '🎒 V batohu') + '</button>' +
-
-                    '  <button class="btn-sell-mini" onclick="PRS_App.handleSellAsset(\'item\', \'' + it.uid + '\', ' + i + ', ' + inspIdx + ')">Prodat +' + sellVal + ' zl.</button>' +
-
+                    '  <button class="btn-equip-toggle ' + (isEq ? 'equipped' : 'in-bag') + '" onclick="PRS_App.handleToggleEquip(\'' + it.uid + '\', ' + i + ', ' + inspIdx + ')" title="' + toggleTitle + '">' + toggleLabel + '</button>' +
+                    '  <button class="btn-sell-mini" onclick="PRS_App.handleSellAsset(\'item\', \'' + it.uid + '\', ' + i + ', ' + inspIdx + ')">' + sellLabel + '</button>' +
                     '</div>' +
-
                     '</div>';
-
             }
-
             itemsHtml += '</div>';
-
         }
 
         // 4. Panství a chovy zvířat
@@ -3501,29 +3485,41 @@
 
         // Trvalé stabilní zobrazení tahu bota - tlačítko je nahoře na pevné pozici, text pod ním
         if (isBot && this.autoBotEnabled) {
+            var isEnBotTurn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var pDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(player) : player.name;
             var botRoll = this.state.lastRoll;
             var botLandedNode = (this.state.board && this.state.board.nodes) ? this.state.board.nodes[player.nodeId] : null;
+            var botLandedName = botLandedNode ? ((window.PRS_App && window.PRS_App.getNodeDisplayName) ? window.PRS_App.getNodeDisplayName(botLandedNode) : botLandedNode.name) : "";
+
             var botStatusText = "";
             if (this.state.phase === "ROLL") {
-                botStatusText = "Připravuje se k hodu kostkou...";
+                botStatusText = isEnBotTurn ? "Preparing to roll the dice..." : "Připravuje se k hodu kostkou...";
             } else if (botRoll) {
-                botStatusText = "Hodil <strong>" + botRoll + "</strong>" + (botLandedNode ? (" a dorazil na pole <strong>" + this.escapeHtml(botLandedNode.name) + "</strong>.") : ".");
+                botStatusText = isEnBotTurn
+                    ? ("Rolled <strong>" + botRoll + "</strong>" + (botLandedNode ? (" and arrived at tile <strong>" + this.escapeHtml(botLandedName) + "</strong>.") : "."))
+                    : ("Hodil <strong>" + botRoll + "</strong>" + (botLandedNode ? (" a dorazil na pole <strong>" + this.escapeHtml(botLandedName) + "</strong>.") : "."));
             } else {
-                botStatusText = "Provádí tah královstvím...";
+                botStatusText = isEnBotTurn ? "Making moves across the realm..." : "Provádí tah královstvím...";
             }
+
+            var skipBtnText = isEnBotTurn ? "⚡ Skip directly to my turn" : "⚡ Přeskočit přímo na můj tah";
+            var onTurnLabel = isEnBotTurn ? "On turn: " : "Na tahu: ";
+            var botAutoNotice = isEnBotTurn
+                ? "The AI turn runs automatically. Tap the button above to jump straight to your turn."
+                : "Tah počítače běží automaticky. Klepnutím na tlačítko výše ihned skočíš na svůj tah.";
 
             el.innerHTML = '<div class="action-card" style="border-color:rgba(212,175,55,0.4);">' +
                 '<div class="turn-indicator" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">' +
-                '  <span>Na tahu: <span style="color:' + player.color + ';">' + player.badge + ' <strong>' + this.escapeHtml(player.name) + '</strong></span></span>' +
+                '  <span>' + onTurnLabel + '<span style="color:' + player.color + ';">' + player.badge + ' <strong>' + this.escapeHtml(pDisplayName) + '</strong></span></span>' +
                 '  <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(0,0,0,0.3); padding:2px 8px; border-radius:10px;">🤖 PC</span>' +
                 '</div>' +
                 '<div style="margin-bottom:0.75rem;">' +
-                '  <button class="btn-gold-lg" style="width:100%; font-size:0.92rem; padding:0.58rem 0.85rem; font-weight:700; box-shadow:0 4px 14px rgba(212,175,55,0.3);" onclick="PRS_App.skipToNextHumanTurn()">⚡ Přeskočit přímo na můj tah</button>' +
+                '  <button class="btn-gold-lg" style="width:100%; font-size:0.92rem; padding:0.58rem 0.85rem; font-weight:700; box-shadow:0 4px 14px rgba(212,175,55,0.3);" onclick="PRS_App.skipToNextHumanTurn()">' + skipBtnText + '</button>' +
                 '</div>' +
                 '<div class="bot-auto-status" style="text-align:center; padding:0.75rem 0.6rem; background:rgba(0,0,0,0.35); border-radius:10px; border:1px solid rgba(212,175,55,0.18);">' +
-                '  <div style="font-size:0.98rem; font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.3rem;">🤖 ' + this.escapeHtml(player.name) + '</div>' +
+                '  <div style="font-size:0.98rem; font-family:\'Cinzel\',serif; color:var(--gold-light); margin-bottom:0.3rem;">🤖 ' + this.escapeHtml(pDisplayName) + '</div>' +
                 '  <div style="font-size:0.82rem; color:#cbd5e1; margin-bottom:0.4rem;">' + botStatusText + '</div>' +
-                '  <div style="font-size:0.75rem; color:var(--text-muted);">Tah počítače běží automaticky. Klepnutím na tlačítko výše ihned skočíš na svůj tah.</div>' +
+                '  <div style="font-size:0.75rem; color:var(--text-muted);">' + botAutoNotice + '</div>' +
                 '</div>' +
                 '</div>';
             return;
@@ -3561,19 +3557,19 @@
                 '<div class="movement-stance-selector">' +
                 '  <div style="font-size:0.73rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px; font-weight:600;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.movement_mode", null, "Režim pohybu:") : "Režim pohybu:") + '</div>' +
                 '  <div class="movement-stance-grid">' +
-                '    <button type="button" class="btn-tempo-option ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')" title="' + titleStandard + '">' +
+                '    <button type="button" class="btn-tempo-option ' + (curMode === "standard" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'standard\')" title="' + titleStandard + '" data-i18n-title="hud.stance_march_title">' +
                 '      <span class="tempo-icon">🎲</span>' +
-                '      <span class="tempo-name">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_march", null, "Pochod") : "Pochod") + '</span>' +
-                '      <span class="tempo-desc">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_march_desc", null, "1–6 polí") : "1–6 polí") + '</span>' +
+                '      <span class="tempo-name" data-i18n="hud.stance_march">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_march", null, "Pochod") : "Pochod") + '</span>' +
+                '      <span class="tempo-desc" data-i18n="hud.stance_march_desc">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_march_desc", null, "1–6 polí") : "1–6 polí") + '</span>' +
                 '    </button>' +
-                '    <button type="button" class="btn-tempo-option ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')" title="' + titleCautious + '">' +
+                '    <button type="button" class="btn-tempo-option ' + (curMode === "cautious" ? "active" : "") + '" onclick="PRS_App.selectMovementMode(\'cautious\')" title="' + titleCautious + '" data-i18n-title="hud.stance_cautious_title">' +
                 '      <span class="tempo-icon">🚶</span>' +
-                '      <span class="tempo-name">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_cautious", null, "Opatrný") : "Opatrný") + '</span>' +
-                '      <span class="tempo-desc">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_cautious_desc", null, "1–4 pole") : "1–4 pole") + '</span>' +
+                '      <span class="tempo-name" data-i18n="hud.stance_cautious">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_cautious", null, "Opatrný") : "Opatrný") + '</span>' +
+                '      <span class="tempo-desc" data-i18n="hud.stance_cautious_desc">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_cautious_desc", null, "1–4 pole") : "1–4 pole") + '</span>' +
                 '    </button>' +
-                '    <button type="button" class="btn-tempo-option ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + ' title="' + titleHorse + '">' +
+                '    <button type="button" class="btn-tempo-option ' + (!hasHorse ? "disabled" : (curMode === "horse" ? "active" : "")) + '" ' + (!hasHorse ? 'disabled' : 'onclick="PRS_App.selectMovementMode(\'horse\')"') + ' title="' + titleHorse + '" data-i18n-title="' + (hasHorse ? "hud.stance_gallop_title" : "hud.stance_gallop_locked_title") + '">' +
                 '      <span class="tempo-icon">🏇</span>' +
-                '      <span class="tempo-name">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_gallop", null, "Cval") : "Cval") + '</span>' +
+                '      <span class="tempo-name" data-i18n="hud.stance_gallop">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_gallop", null, "Cval") : "Cval") + '</span>' +
                 '      <span class="tempo-desc">' + (hasHorse ? (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_gallop_desc", null, "2d6 volba") : "2d6 volba") : (window.PRS_I18n ? window.PRS_I18n.t("hud.stance_locked", null, "Zamčeno") : "Zamčeno")) + '</span>' +
                 '    </button>' +
                 '  </div>' +
@@ -3670,35 +3666,48 @@
 
                 var targetHigh = window.PRS_GameEngine.getTargetNodeForBranch(this.state, pbc.junctionNodeId, "high", pbc.remainingSteps);
 
-                var lowName = branchLowNode ? branchLowNode.name : "Vnější cesta";
+                var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+                var getNdName = function(node, fallback) {
+                    if (!node) return fallback;
+                    return (window.PRS_App && window.PRS_App.getNodeDisplayName) ? window.PRS_App.getNodeDisplayName(node) : node.name;
+                };
 
-                var highName = branchHighNode ? branchHighNode.name : "Královská stezka";
+                var lowName = getNdName(branchLowNode, isEn ? "Outer Path" : "Vnější cesta");
+                var highName = getNdName(branchHighNode, isEn ? "Royal Path" : "Královská stezka");
+                var targetLowName = getNdName(targetLow, (isEn ? "Tile #" : "Pole #") + pbc.branchLow);
+                var targetHighName = getNdName(targetHigh, (isEn ? "Tile #" : "Pole #") + pbc.branchHigh);
+                var junctionName = getNdName(junctionNode, "");
 
-                var targetLowName = targetLow ? targetLow.name : ("Pole #" + pbc.branchLow);
-
-                var targetHighName = targetHigh ? targetHigh.name : ("Pole #" + pbc.branchHigh);
+                var branchTitle = isEn ? "🔀 Crossroads Route Choice!" : "🔀 Volba trasy na rozcestí!";
+                var branchPrompt = isEn
+                    ? ("You are standing on <strong>" + this.escapeHtml(junctionName) + "</strong>. You have <strong>" + pbc.remainingSteps + "</strong> steps remaining. Which path will you take?")
+                    : ("Stojíš na poli <strong>" + this.escapeHtml(junctionName) + "</strong>. Zbývá ti ještě <strong>" + pbc.remainingSteps + "</strong> kroků. Kudy se vydáš?");
+                var branchLowLabel = isEn ? ("🌿 Outer Ring (" + this.escapeHtml(lowName) + ")") : ("🌿 Vnější okruh (" + this.escapeHtml(lowName) + ")");
+                var branchLowTarget = isEn ? ("🎯 Destination in " + pbc.remainingSteps + " steps: <strong>" + this.escapeHtml(targetLowName) + "</strong>") : ("🎯 Cíl za " + pbc.remainingSteps + " kr.: <strong>" + this.escapeHtml(targetLowName) + "</strong>");
+                var branchHighLabel = isEn ? ("🏰 Inner Royal Path (" + this.escapeHtml(highName) + ")") : ("🏰 Vnitřní královská stezka (" + this.escapeHtml(highName) + ")");
+                var branchHighTarget = isEn ? ("🎯 Destination in " + pbc.remainingSteps + " steps: <strong>" + this.escapeHtml(targetHighName) + "</strong>") : ("🎯 Cíl za " + pbc.remainingSteps + " kr.: <strong>" + this.escapeHtml(targetHighName) + "</strong>");
 
                 el.innerHTML = '<div class="action-card branch-choice-card" style="border:1.5px solid var(--gold); background:linear-gradient(180deg, rgba(30,27,75,0.92), rgba(15,23,42,0.95));">' +
 
-                    '<div class="turn-indicator" style="color:var(--gold-light); font-size:1rem; font-family:\'Cinzel\',serif;">🔀 Volba trasy na rozcestí!</div>' +
+                    '<div class="turn-indicator" style="color:var(--gold-light); font-size:1rem; font-family:\'Cinzel\',serif;">' + branchTitle + '</div>' +
 
-                    '<div style="font-size:0.84rem; color:var(--text-muted); margin:0.35rem 0 0.75rem 0;">Stojíš na poli <strong>' + this.escapeHtml(junctionNode ? junctionNode.name : '') + '</strong>. Zbývá ti ještě <strong>' + pbc.remainingSteps + '</strong> kroků. Kudy se vydáš?</div>' +
+                    '<div style="font-size:0.84rem; color:var(--text-muted); margin:0.35rem 0 0.75rem 0;">' + branchPrompt + '</div>' +
 
                     '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
 
                     '  <button class="btn-branch-choice branch-low" onclick="PRS_App.handleChooseBranch(\'low\')" style="text-align:left; padding:0.75rem 0.9rem; background:rgba(16,185,129,0.15); border:1px solid #10b981; border-radius:8px; color:#ecfdf5; cursor:pointer;">' +
 
-                    '    <div style="font-weight:700; font-size:0.95rem; color:#6ee7b7; margin-bottom:2px;">🌿 Vnější okruh (' + this.escapeHtml(lowName) + ')</div>' +
+                    '    <div style="font-weight:700; font-size:0.95rem; color:#6ee7b7; margin-bottom:2px;">' + branchLowLabel + '</div>' +
 
-                    '    <div style="font-size:0.78rem; color:#a7f3d0;">🎯 Cíl za ' + pbc.remainingSteps + ' kr.: <strong>' + this.escapeHtml(targetLowName) + '</strong></div>' +
+                    '    <div style="font-size:0.78rem; color:#a7f3d0;">' + branchLowTarget + '</div>' +
 
                     '  </button>' +
 
                     '  <button class="btn-branch-choice branch-high" onclick="PRS_App.handleChooseBranch(\'high\')" style="text-align:left; padding:0.75rem 0.9rem; background:rgba(217,119,6,0.15); border:1px solid #f59e0b; border-radius:8px; color:#fffbeb; cursor:pointer;">' +
 
-                    '    <div style="font-weight:700; font-size:0.95rem; color:#fde68a; margin-bottom:2px;">🏰 Vnitřní královská stezka (' + this.escapeHtml(highName) + ')</div>' +
+                    '    <div style="font-weight:700; font-size:0.95rem; color:#fde68a; margin-bottom:2px;">' + branchHighLabel + '</div>' +
 
-                    '    <div style="font-size:0.78rem; color:#fef3c7;">🎯 Cíl za ' + pbc.remainingSteps + ' kr.: <strong>' + this.escapeHtml(targetHighName) + '</strong></div>' +
+                    '    <div style="font-size:0.78rem; color:#fef3c7;">' + branchHighTarget + '</div>' +
 
                     '  </button>' +
 
@@ -4142,6 +4151,9 @@
         }
 
         // Šatlava (Vězení)
+        var isEnAction = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var actGoldUnit = isEnAction ? "g." : "zl.";
+        var actLoc = isEnAction ? "en-US" : "cs-CZ";
 
         if (pa.canPayPrisonBail || pa.canAttemptPrisonEscape || pa.canServeSentence) {
 
@@ -4155,23 +4167,23 @@
 
                 '  <div>' +
 
-                '    <span class="standing-tile-badge" style="background:rgba(113,113,122,0.3); color:#e4e4e7; border-color:#71717a;">⛓️ Žalář &amp; Vězení</span>' +
+                '    <span class="standing-tile-badge" style="background:rgba(113,113,122,0.3); color:#e4e4e7; border-color:#71717a;">' + (isEnAction ? "⛓️ Dungeon &amp; Prison" : "⛓️ Žalář &amp; Vězení") + '</span>' +
 
-                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#f4f4f5;">Královská Šatlava</div>' +
+                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#f4f4f5;">' + (isEnAction ? "Royal Prison" : "Královská Šatlava") + '</div>' +
 
                 '  </div>' +
 
                 '</div>' +
 
-                '<p style="font-size:0.84rem; color:#d4d4d8; margin-bottom:0.6rem;">Rytíř je uvězněn! Vyber si způsob propuštění:</p>' +
+                '<p style="font-size:0.84rem; color:#d4d4d8; margin-bottom:0.6rem;">' + (isEnAction ? "The knight is imprisoned! Choose how to secure release:" : "Rytíř je uvězněn! Vyber si způsob propuštění:") + '</p>' +
 
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
 
-                '  <button class="btn-action-prison" ' + (!canAffordBail ? 'disabled' : '') + ' onclick="PRS_App.handlePayPrisonBail()">🔓 Složit kauci (' + (pa.bailCost || 1000) + ' zl.) – Okamžité propuštění</button>' +
+                '  <button class="btn-action-prison" ' + (!canAffordBail ? 'disabled' : '') + ' onclick="PRS_App.handlePayPrisonBail()">' + (isEnAction ? ("🔓 Post bail (" + (pa.bailCost || 1000) + " g.) – Immediate release") : ("🔓 Složit kauci (" + (pa.bailCost || 1000) + " zl.) – Okamžité propuštění")) + '</button>' +
 
-                '  <button class="btn-action-prison" onclick="PRS_App.handlePrisonEscape()">🏃‍♂️ Pokus o noční útěk (Hoď 🎲 6 – zisk +500 zl. / jinak zůstáváš)</button>' +
+                '  <button class="btn-action-prison" onclick="PRS_App.handlePrisonEscape()">' + (isEnAction ? "🏃‍♂️ Attempt night escape (Roll 🎲 6 – gain +500 g. / else stay)" : "🏃‍♂️ Pokus o noční útěk (Hoď 🎲 6 – zisk +500 zl. / jinak zůstáváš)") + '</button>' +
 
-                '  <button class="btn-action-prison" style="background:#27272a; border-color:#52525b;" onclick="PRS_App.handleServePrisonSentence()">⚖️ Odpykat trest (královský rychtář tě propustí)</button>' +
+                '  <button class="btn-action-prison" style="background:#27272a; border-color:#52525b;" onclick="PRS_App.handleServePrisonSentence()">' + (isEnAction ? "⚖️ Serve sentence (royal bailiff will release you)" : "⚖️ Odpykat trest (královský rychtář tě propustí)") + '</button>' +
 
                 '</div>' +
 
@@ -4193,21 +4205,21 @@
 
                 '  <div>' +
 
-                '    <span class="standing-tile-badge" style="background:rgba(2,132,199,0.3); color:#7dd3fc; border-color:#0284c7;">🏥 Lazaret</span>' +
+                '    <span class="standing-tile-badge" style="background:rgba(2,132,199,0.3); color:#7dd3fc; border-color:#0284c7;">' + (isEnAction ? "🏥 Infirmary" : "🏥 Lazaret") + '</span>' +
 
-                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#f0f9ff;">Královský Lazaret &amp; Ranhojič</div>' +
+                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#f0f9ff;">' + (isEnAction ? "Royal Infirmary &amp; Healer" : "Královský Lazaret &amp; Ranhojič") + '</div>' +
 
                 '  </div>' +
 
                 '</div>' +
 
-                '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:0.6rem;">Zranění rytíři zde nabírají síly do dalších klání:</p>' +
+                '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:0.6rem;">' + (isEnAction ? "Wounded knights gather strength here for forthcoming contests:" : "Zranění rytíři zde nabírají síly do dalších klání:") + '</p>' +
 
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
 
-                '  <button class="btn-action-hospital" ' + (!canAffordElix ? 'disabled' : '') + ' onclick="PRS_App.handleBuyHospitalElixir()">🧪 Zakoupit Hojivý lektvar (+1 Boj, +0.5 💖 za ' + (pa.elixirCost || 800) + ' zl.)</button>' +
+                '  <button class="btn-action-hospital" ' + (!canAffordElix ? 'disabled' : '') + ' onclick="PRS_App.handleBuyHospitalElixir()">' + (isEnAction ? ("🧪 Purchase Healing Elixir (+1 Combat, +0.5 💖 for " + (pa.elixirCost || 800) + " g.)") : ("🧪 Zakoupit Hojivý lektvar (+1 Boj, +0.5 💖 za " + (pa.elixirCost || 800) + " zl.)")) + '</button>' +
 
-                '  <button class="btn-action-hospital" style="background:#0369a1; border-color:#0284c7;" onclick="PRS_App.handleRestHospital()">🌿 Zdarma odpočívat u bylinkáře</button>' +
+                '  <button class="btn-action-hospital" style="background:#0369a1; border-color:#0284c7;" onclick="PRS_App.handleRestHospital()">' + (isEnAction ? "🌿 Rest for free with the herbalist" : "🌿 Zdarma odpočívat u bylinkáře") + '</button>' +
 
                 '</div>' +
 
@@ -4261,55 +4273,62 @@
 
         if (validBuyoutCandidates.length > 0) {
             specialCardHtml += '<div class="buyout-interaction-card" style="border:1.5px solid #10b981; background:linear-gradient(180deg, rgba(6,78,59,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; margin-bottom:4px;">📜 Královské předkupní právo na zvíře!</div>' +
-                '<p style="font-size:0.8rem; color:#a7f3d0; margin-bottom:0.6rem;">Vlastníš 2 ze 3 zvířat sady! Můžeš vykoupit chybějící kus od majitele za dvojnásobek ceny a ihned zkompletovat sadu (+1,0 💖):</p>' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; margin-bottom:4px;">' + (isEnAction ? "📜 Royal Pre-Emption Right on Animal!" : "📜 Královské předkupní právo na zvíře!") + '</div>' +
+                '<p style="font-size:0.8rem; color:#a7f3d0; margin-bottom:0.6rem;">' + (isEnAction ? "You own 2 of 3 animals in this set! You may buy out the missing animal from its owner for 2x price to immediately complete the set (+1.0 💖):" : "Vlastníš 2 ze 3 zvířat sady! Můžeš vykoupit chybějící kus od majitele za dvojnásobek ceny a ihned zkompletovat sadu (+1,0 💖):") + '</p>' +
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">';
 
             for (var bi = 0; bi < validBuyoutCandidates.length; bi++) {
                 var bc = validBuyoutCandidates[bi];
                 var canAffordBc = player.gold >= bc.buyoutPrice;
+                var boBtnText = isEnAction
+                    ? (bc.icon + ' Buy out ' + this.escapeHtml(bc.name) + ' from set #' + bc.setId + ' (' + bc.buyoutPrice + ' g. for ' + this.escapeHtml(bc.ownerName) + ') ➔ +1.0 💖')
+                    : (bc.icon + ' Vykoupit ' + this.escapeHtml(bc.name) + ' ze sady #' + bc.setId + ' (' + bc.buyoutPrice + ' zl. pro ' + this.escapeHtml(bc.ownerName) + ') ➔ +1.0 💖');
                 specialCardHtml += '  <button class="btn-action-buyout" ' + (!canAffordBc ? 'disabled' : '') + ' style="padding:0.55rem; background:linear-gradient(135deg, #059669, #047857); color:#fff; border:1px solid #6ee7b7; border-radius:7px; font-weight:700; text-align:left; cursor:pointer;" onclick="PRS_App.handleAnimalBuyout(' + bc.nodeId + ')">' +
-                    bc.icon + ' Vykoupit ' + this.escapeHtml(bc.name) + ' ze sady #' + bc.setId + ' (' + bc.buyoutPrice + ' zl. pro ' + this.escapeHtml(bc.ownerName) + ') ➔ +1.0 💖' +
+                    boBtnText +
                     '</button>';
             }
 
             specialCardHtml += '</div></div>';
         } else if (pa.buyoutSuccess) {
             var bs = pa.buyoutSuccess;
+            var boSuccTitle = isEnAction ? "✅ Royal Buyout Successfully Completed!" : "✅ Královský výkup úspěšně dokončen!";
+            var boSuccDesc = isEnAction
+                ? ("Animal <strong>" + this.escapeHtml(bs.nodeName) + "</strong> was bought from rival <strong>" + this.escapeHtml(bs.sellerName) + "</strong> for <strong>" + bs.price.toLocaleString(actLoc) + " g.</strong> Your breeding set #" + bs.setId + " is now complete (+1.0 💖)!")
+                : ("Kus <strong>" + this.escapeHtml(bs.nodeName) + "</strong> byl vykoupen od soupeře <strong>" + this.escapeHtml(bs.sellerName) + "</strong> za <strong>" + bs.price.toLocaleString("cs-CZ") + " zl.</strong> Tvoje chovná sada #" + bs.setId + " je nyní kompletní (+1,0 💖)!");
             specialCardHtml += '<div class="buyout-interaction-card" style="border:1.5px solid #10b981; background:linear-gradient(180deg, rgba(6,78,59,0.55), rgba(15,23,42,0.92)); border-radius:10px; padding:0.85rem; margin-top:0.6rem; display:flex; align-items:flex-start; gap:0.75rem; position:relative;">' +
                 '<div style="font-size:1.8rem; line-height:1;">' + (bs.nodeIcon || '🦅') + '</div>' +
                 '<div style="flex:1;">' +
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; font-weight:700;">✅ Královský výkup úspěšně dokončen!</div>' +
-                '<div style="font-size:0.82rem; color:#a7f3d0; margin-top:0.25rem;">Kus <strong>' + this.escapeHtml(bs.nodeName) + '</strong> byl vykoupen od soupeře <strong>' + this.escapeHtml(bs.sellerName) + '</strong> za <strong>' + bs.price.toLocaleString("cs-CZ") + ' zl.</strong> Tvoje chovná sada #' + bs.setId + ' je nyní kompletní (+1,0 💖)!</div>' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; font-weight:700;">' + boSuccTitle + '</div>' +
+                '<div style="font-size:0.82rem; color:#a7f3d0; margin-top:0.25rem;">' + boSuccDesc + '</div>' +
                 '</div>' +
-                '<button type="button" onclick="this.closest(\'.buyout-interaction-card\').remove(); if(PRS_App.state && PRS_App.state.pendingAction) PRS_App.state.pendingAction.buyoutSuccess=null;" style="background:transparent; border:none; color:#a7f3d0; font-size:1.15rem; cursor:pointer; padding:0 4px; line-height:1;" title="Zavřít oznámení">✕</button>' +
+                '<button type="button" onclick="this.closest(\'.buyout-interaction-card\').remove(); if(PRS_App.state && PRS_App.state.pendingAction) PRS_App.state.pendingAction.buyoutSuccess=null;" style="background:transparent; border:none; color:#a7f3d0; font-size:1.15rem; cursor:pointer; padding:0 4px; line-height:1;" title="' + (isEnAction ? "Close notice" : "Zavřít oznámení") + '">✕</button>' +
                 '</div>';
         }
 
         // 3. Dvorní intriky u Kejklíře a v Krčmě
 
         if (pa.canPlotIntrigue) {
+            var bCost = pa.intrigueBalladCost || 750;
+            var cCost = pa.intrigueCustomsCost || 600;
+            var balladBtnLabel = isEnAction
+                ? ('🎭 Mocking Ballad Under Balcony (' + bCost + ' g. ➔ Reduce Rival\'s Hearts 💖)')
+                : ('🎭 Posměšná balada pod balkónem (' + bCost + ' zl. ➔ Srazit soupeři Srdce 💖)');
+            var customsBtnLabel = isEnAction
+                ? ('📜 Royal Customs Inspection (' + cCost + ' g. ➔ Freeze Rents for 1 Round)')
+                : ('📜 Královská celní kontrola (' + cCost + ' zl. ➔ Zmrazit nájemné na 1 kolo)');
 
             specialCardHtml += '<div class="intrigue-interaction-card" style="border:1.5px solid #d97706; background:linear-gradient(180deg, rgba(120,53,15,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fde68a; margin-bottom:4px;">🃏 Dvorní intriky proti soupeřům</div>' +
-
-                '<p style="font-size:0.8rem; color:#fef3c7; margin-bottom:0.6rem;">Najmi kejklíře k posměchu lídra nebo uplatni královské pravomoci:</p>' +
-
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fde68a; margin-bottom:4px;">' + (isEnAction ? "🃏 Court Intrigues Against Rivals" : "🃏 Dvorní intriky proti soupeřům") + '</div>' +
+                '<p style="font-size:0.8rem; color:#fef3c7; margin-bottom:0.6rem;">' + (isEnAction ? "Hire a jester to mock the leader or exercise royal authority:" : "Najmi kejklíře k posměchu lídra nebo uplatni královské pravomoci:") + '</p>' +
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
-
-                '  <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #7c3aed, #5b21b6); border-color:#c084fc;" onclick="PRS_App.openIntrigueModal(\'ballad\')">🎭 Posměšná balada pod balkónem (' + (pa.intrigueBalladCost || 750) + ' zl. ➔ Srazit soupeři Srdce 💖)</button>' +
-
-                '  <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #b45309, #78350f); border-color:#fbbf24;" onclick="PRS_App.openIntrigueModal(\'customs\')">📜 Královská celní kontrola (' + (pa.intrigueCustomsCost || 600) + ' zl. ➔ Zmrazit nájemné na 1 kolo)</button>' +
-
+                '  <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #7c3aed, #5b21b6); border-color:#c084fc;" onclick="PRS_App.openIntrigueModal(\'ballad\')">' + balladBtnLabel + '</button>' +
+                '  <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #b45309, #78350f); border-color:#fbbf24;" onclick="PRS_App.openIntrigueModal(\'customs\')">' + customsBtnLabel + '</button>' +
                 '</div></div>';
 
         } else if (pa.intriguePlotted) {
 
             specialCardHtml += '<div class="intrigue-interaction-card" style="border:1px solid #10b981; background:rgba(6,78,59,0.35); border-radius:10px; padding:0.6rem 0.8rem; margin-top:0.6rem; font-size:0.82rem; color:#6ee7b7; display:flex; align-items:center; gap:8px;">' +
-
-                '<span style="font-size:1.3rem;">🎭</span> <span>' + this.escapeHtml(pa.intrigueSummary || 'Dvorní intrika byla pro tento tah vyhodnocena.') + '</span>' +
-
+                '<span style="font-size:1.3rem;">🎭</span> <span>' + this.escapeHtml(pa.intrigueSummary || (isEnAction ? "Court intrigue has been evaluated for this turn." : "Dvorní intrika byla pro tento tah vyhodnocena.")) + '</span>' +
                 '</div>';
 
         }
@@ -4317,15 +4336,15 @@
         // 4. Obchodní pakt u Obchodníka a na STARTu
 
         if (pa.canFormTradePact) {
+            var tpCost = pa.tradePactCost || 750;
+            var tpBtnLabel = isEnAction
+                ? ('🤝 Seal Trade Pact (' + tpCost + ' g.)')
+                : ('🤝 Uzavřít Obchodní pakt (' + tpCost + ' zl.)');
 
             specialCardHtml += '<div class="pact-interaction-card" style="border:1.5px solid #0284c7; background:linear-gradient(180deg, rgba(12,74,110,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">🤝 Obchodní pakt (Bezcelní aliance na 8 kol)</div>' +
-
-                '<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">Spoj se s rytířem: nulové mýtné na panstvích a dividenda +300 zl. při každé návštěvě!</p>' +
-
-                '<button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #0284c7, #0369a1); border-color:#38bdf8;" onclick="PRS_App.openTradePactModal()">🤝 Uzavřít Obchodní pakt (' + (pa.tradePactCost || 750) + ' zl.)</button>' +
-
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">' + (isEnAction ? "🤝 Trade Pact (Duty-Free Alliance for 8 Rounds)" : "🤝 Obchodní pakt (Bezcelní aliance na 8 kol)") + '</div>' +
+                '<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">' + (isEnAction ? "Ally with a knight: zero tolls on estates and +300 g. dividend on every visit!" : "Spoj se s rytířem: nulové mýtné na panstvích a dividenda +300 zl. při každé návštěvě!") + '</p>' +
+                '<button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #0284c7, #0369a1); border-color:#38bdf8;" onclick="PRS_App.openTradePactModal()">' + tpBtnLabel + '</button>' +
                 '</div>';
 
         }
@@ -4333,15 +4352,15 @@
         // 5. Osobní výzva na Slavnosti
 
         if (pa.canChallengeFestivalRival) {
+            var fcStake = pa.festivalChallengeStake || 750;
+            var fcBtnLabel = isEnAction
+                ? ('🤺 Issue Personal Challenge to Rival (' + fcStake + ' g.)')
+                : ('🤺 Vyhlásit osobní výzvu soupeři (' + fcStake + ' zl.)');
 
             specialCardHtml += '<div class="festival-challenge-card" style="border:1.5px solid #ec4899; background:linear-gradient(180deg, rgba(131,24,67,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fbcfe8; margin-bottom:4px;">🏆 Osobní výzva 1 na 1 na Slavnosti</div>' +
-
-                '<p style="font-size:0.8rem; color:#fce7f3; margin-bottom:0.6rem;">Vyzvi konkrétního soupeře k souboji v královské ctnosti o zlato a slávu:</p>' +
-
-                '<button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #ec4899, #be185d); border-color:#fbcfe8;" onclick="PRS_App.openFestivalChallengeModal()">🤺 Vyhlásit osobní výzvu soupeři (' + (pa.festivalChallengeStake || 750) + ' zl.)</button>' +
-
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fbcfe8; margin-bottom:4px;">' + (isEnAction ? "🏆 1-on-1 Personal Challenge at Festival" : "🏆 Osobní výzva 1 na 1 na Slavnosti") + '</div>' +
+                '<p style="font-size:0.8rem; color:#fce7f3; margin-bottom:0.6rem;">' + (isEnAction ? "Challenge a specific rival to a contest of royal virtue for gold and glory:" : "Vyzvi konkrétního soupeře k souboji v královské ctnosti o zlato a slávu:") + '</p>' +
+                '<button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #ec4899, #be185d); border-color:#fbcfe8;" onclick="PRS_App.openFestivalChallengeModal()">' + fcBtnLabel + '</button>' +
                 '</div>';
 
         }
@@ -4351,35 +4370,27 @@
         if (pa.canTavernGamble || pa.canBuyTavernRound) {
 
             var canAffordBet = player.gold >= (pa.gambleBet || 500);
-
             var canAffordRound = player.gold >= (pa.roundCost || 400);
+            var tBetLabel = isEnAction
+                ? ('🎲 Dice with Innkeeper (Bet ' + (pa.gambleBet || 500) + ' g. – roll 2 dice)')
+                : ('🎲 Kostky s krčmářem (Sázka ' + (pa.gambleBet || 500) + ' zl. – hod 2 kostkami)');
+            var tRoundLabel = isEnAction
+                ? ('🍻 Round of Mead for the Entire Tavern (+0.5 💖 for ' + (pa.roundCost || 400) + ' g.)')
+                : ('🍻 Runda medoviny pro celou hospodu (+0.5 💖 za ' + (pa.roundCost || 400) + ' zl.)');
 
             specialCardHtml += '<div class="tavern-encounter-card">' +
-
                 '<div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">' +
-
                 '  <div class="standing-tile-medallion" style="border-color:#f59e0b; background:#451a03;"><span style="font-size:1.6rem;">🍺</span></div>' +
-
                 '  <div>' +
-
-                '    <span class="standing-tile-badge" style="background:rgba(217,119,6,0.3); color:#fde68a; border-color:#d97706;">🍺 Hostinec</span>' +
-
-                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#fef3c7;">Krčma U Zlatého korbelu</div>' +
-
+                '    <span class="standing-tile-badge" style="background:rgba(217,119,6,0.3); color:#fde68a; border-color:#d97706;">' + (isEnAction ? "🍺 Tavern" : "🍺 Hostinec") + '</span>' +
+                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#fef3c7;">' + (isEnAction ? "The Golden Flagon Tavern" : "Krčma U Zlatého korbelu") + '</div>' +
                 '  </div>' +
-
                 '</div>' +
-
-                '<p style="font-size:0.84rem; color:#fde68a; margin-bottom:0.6rem;">U krbu sedí veselá chasa i záletní kupci. Vyber si zábavu:</p>' +
-
+                '<p style="font-size:0.84rem; color:#fde68a; margin-bottom:0.6rem;">' + (isEnAction ? "Merry folk and travelling merchants sit by the hearth. Choose your entertainment:" : "U krbu sedí veselá chasa i záletní kupci. Vyber si zábavu:") + '</p>' +
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
-
-                '  <button class="btn-action-tavern" ' + (!canAffordBet ? 'disabled' : '') + ' onclick="PRS_App.handleTavernGamble()">🎲 Kostky s krčmářem (Sázka ' + (pa.gambleBet || 500) + ' zl. – hod 2 kostkami)</button>' +
-
-                '  <button class="btn-action-tavern" ' + (!canAffordRound ? 'disabled' : '') + ' onclick="PRS_App.handleBuyTavernRound()">🍻 Runda medoviny pro celou hospodu (+0.5 💖 za ' + (pa.roundCost || 400) + ' zl.)</button>' +
-
+                '  <button class="btn-action-tavern" ' + (!canAffordBet ? 'disabled' : '') + ' onclick="PRS_App.handleTavernGamble()">' + tBetLabel + '</button>' +
+                '  <button class="btn-action-tavern" ' + (!canAffordRound ? 'disabled' : '') + ' onclick="PRS_App.handleBuyTavernRound()">' + tRoundLabel + '</button>' +
                 '</div>' +
-
                 '</div>';
 
         }
@@ -4389,34 +4400,28 @@
         if (pa.debt) {
 
             var creditor = this.state.players[pa.debt.creditorIndex];
-
-            var credName = creditor ? creditor.name : "věřiteli";
-
+            var credName = creditor ? creditor.name : (isEnAction ? "creditor" : "věřiteli");
             var rate = (this.state.config.sellRates && this.state.config.sellRates.forcedLiquidation) || 0.60;
-
             var assetsRows = "";
 
             // 1. Předměty v inventáři
 
             for (var itIdx = 0; itIdx < player.items.length; itIdx++) {
-
                 var itObj = player.items[itIdx];
                 var baseDef = (window.PRS_ITEMS && window.PRS_ITEMS.find(function(x) { return x.id === itObj.id; })) ||
                               (window.PRS_TROPHIES && window.PRS_TROPHIES[itObj.id]);
                 var itPrice = (itObj.price !== undefined && itObj.price !== null) ? itObj.price : (baseDef && baseDef.price ? baseDef.price : 1000);
                 var itName = itObj.name || (baseDef ? baseDef.name : "Neznámý předmět");
                 var itIcon = itObj.icon || (baseDef ? baseDef.icon : "📦");
-
                 var itLiq = Math.round(itPrice * rate);
 
+                var eqBadge = itObj.isEquipped === false ? (isEnAction ? "🎒 in bag" : "🎒 v batohu") : (isEnAction ? "⚔️ equipped" : "⚔️ nasazeno");
+                var liqBtnText = isEnAction ? ("Sell for +" + itLiq + " g.") : ("Odprodat za +" + itLiq + " zl.");
+
                 assetsRows += '<div class="debt-asset-row">' +
-
-                    '<span>' + itIcon + ' <strong>' + this.escapeHtml(itName) + '</strong> (' + (itObj.isEquipped === false ? '🎒 v batohu' : '⚔️ nasazeno') + ')</span>' +
-
-                    '<button class="btn-liquidate-mini" onclick="PRS_App.handleLiquidateAsset(\'item\', \'' + (itObj.uid || itObj.id) + '\')">Odprodat za +' + itLiq + ' zl.</button>' +
-
+                    '<span>' + itIcon + ' <strong>' + this.escapeHtml(itName) + '</strong> (' + eqBadge + ')</span>' +
+                    '<button class="btn-liquidate-mini" onclick="PRS_App.handleLiquidateAsset(\'item\', \'' + (itObj.uid || itObj.id) + '\')">' + liqBtnText + '</button>' +
                     '</div>';
-
             }
 
             // 2. Vlastněná panství a zvířata
@@ -4426,59 +4431,52 @@
                 : (player.ownedNodes || []);
 
             for (var ndIdx = 0; ndIdx < sortedDebtNodes.length; ndIdx++) {
-
                 var ndObj = this.state.board.nodes[sortedDebtNodes[ndIdx]];
-
                 if (!ndObj) continue;
 
                 if (ndObj.type === "VILLAGE" && (ndObj.villageLevel || 1) > 1) {
-
                     var downCost = (this.state.config.estates.villagePrices && this.state.config.estates.villagePrices[ndObj.villageLevel - 1]) || 1500;
-
                     var downLiq = Math.round(downCost * rate);
+                    var downSpan = isEnAction
+                        ? ('🏘️ Downgrade village <strong>' + this.escapeHtml(ndObj.name) + '</strong> from ' + ndObj.villageLevel + '★ to ' + (ndObj.villageLevel - 1) + '★')
+                        : ('🏘️ Snížit vesnici <strong>' + this.escapeHtml(ndObj.name) + '</strong> z ' + ndObj.villageLevel + '★ na ' + (ndObj.villageLevel - 1) + '★');
+                    var downBtn = isEnAction ? ('Downgrade for +' + downLiq + ' g.') : ('Snížit za +' + downLiq + ' zl.');
 
                     assetsRows += '<div class="debt-asset-row">' +
-
-                        '<span>🏘️ Snížit vesnici <strong>' + this.escapeHtml(ndObj.name) + '</strong> z ' + ndObj.villageLevel + '★ na ' + (ndObj.villageLevel - 1) + '★</span>' +
-
-                        '<button class="btn-liquidate-mini" onclick="PRS_App.handleLiquidateAsset(\'village_downgrade\', ' + ndObj.id + ')">Snížit za +' + downLiq + ' zl.</button>' +
-
+                        '<span>' + downSpan + '</span>' +
+                        '<button class="btn-liquidate-mini" onclick="PRS_App.handleLiquidateAsset(\'village_downgrade\', ' + ndObj.id + ')">' + downBtn + '</button>' +
                         '</div>';
-
                 }
 
                 var investVal = window.PRS_GameEngine.getNodeInvestedValue(this.state, ndObj);
-
                 var ndLiq = Math.round(investVal * rate);
+                var ndBtn = isEnAction ? ('Sell for +' + ndLiq + ' g.') : ('Odprodat za +' + ndLiq + ' zl.');
 
                 assetsRows += '<div class="debt-asset-row">' +
-
                     '<span>' + (ndObj.icon || '📍') + ' <strong>' + this.escapeHtml(ndObj.name) + '</strong> (' + ndObj.code + ')</span>' +
-
-                    '<button class="btn-liquidate-mini" onclick="PRS_App.handleLiquidateAsset(\'node\', ' + ndObj.id + ')">Odprodat za +' + ndLiq + ' zl.</button>' +
-
+                    '<button class="btn-liquidate-mini" onclick="PRS_App.handleLiquidateAsset(\'node\', ' + ndObj.id + ')">' + ndBtn + '</button>' +
                     '</div>';
-
             }
 
+            var debtBadge = isEnAction ? "⚖️ Royal Auction &amp; Debt Settlement" : "⚖️ Královská dražba &amp; Vyrovnání dluhu";
+            var debtRem = isEnAction
+                ? ('Remaining to pay: <span style="color:#ef4444;">' + pa.debt.remainingDebt + ' g.</span>')
+                : ('Zbývá doplatit: <span style="color:#ef4444;">' + pa.debt.remainingDebt + ' zl.</span>');
+            var debtDesc = isEnAction
+                ? ('Not enough cash to pay rent to knight <strong>' + this.escapeHtml(credName) + '</strong>. To settle the debt, you must liquidate assets to the Royal Chamber at 60% value:')
+                : ('Hotovost nestačila na úhradu nájmu hráči <strong>' + this.escapeHtml(credName) + '</strong>. K vyrovnání závazku musíš odprodat část majetku Královské komoře za 60 % pořizovací ceny:');
+            var debtEmpty = isEnAction ? "No assets available for liquidation." : "Žádný majetek k odprodeji.";
+            var debtAuto = isEnAction ? "⚡ Automatically select and settle debt" : "⚡ Automaticky vybrat a uhradit dluh";
+
             specialCardHtml += '<div class="debt-encounter-card">' +
-
-                '<span class="debt-badge">⚖️ Královská dražba &amp; Vyrovnání dluhu</span>' +
-
-                '<div class="debt-title">Zbývá doplatit: <span style="color:#ef4444;">' + pa.debt.remainingDebt + ' zl.</span></div>' +
-
-                '<p style="font-size:0.84rem; color:#fde68a; margin-bottom:0.5rem;">Hotovost nestačila na úhradu nájmu hráči <strong>' + this.escapeHtml(credName) + '</strong>. K vyrovnání závazku musíš odprodat část majetku Královské komoře za 60 % pořizovací ceny:</p>' +
-
-                '<div class="debt-assets-list">' + (assetsRows || '<div class="empty-note">Žádný majetek k odprodeji.</div>') + '</div>' +
-
+                '<span class="debt-badge">' + debtBadge + '</span>' +
+                '<div class="debt-title">' + debtRem + '</div>' +
+                '<p style="font-size:0.84rem; color:#fde68a; margin-bottom:0.5rem;">' + debtDesc + '</p>' +
+                '<div class="debt-assets-list">' + (assetsRows || ('<div class="empty-note">' + debtEmpty + '</div>')) + '</div>' +
                 '<div style="margin-top:0.6rem; display:flex; gap:0.5rem; flex-wrap:wrap;">' +
-
-                '  <button class="btn-action-buy" style="background:#b45309; border-color:#fbbf24; font-weight:bold; width:100%;" onclick="PRS_App.handleAutoLiquidateDebt()">⚡ Automaticky vybrat a uhradit dluh</button>' +
-
+                '  <button class="btn-action-buy" style="background:#b45309; border-color:#fbbf24; font-weight:bold; width:100%;" onclick="PRS_App.handleAutoLiquidateDebt()">' + debtAuto + '</button>' +
                 '</div>' +
-
                 '</div>';
-
         }
 
         var isScrollPending = !!(pa.canStoreScroll || pa.scrollCard || (pa.chanceCard && (pa.chanceCard.isScroll || pa.chanceCard.category === "scroll" || pa.chanceCard.scrollType)));
@@ -4486,9 +4484,13 @@
 
         if (isScrollPending) {
             if (!player.inventory || player.inventory.length < 3) {
-                btns.push('<button class="btn-primary" style="background:linear-gradient(135deg, #059669, #047857); border:1.5px solid #34d399; font-weight:700; padding:0.55rem 0.9rem;" onclick="PRS_App.handleStoreScroll()">🎒 Uložit do brašny (' + ((player.inventory && player.inventory.length) || 0) + '/3)</button>');
+                var storeText = isEnAction
+                    ? ('🎒 Store in pouch (' + ((player.inventory && player.inventory.length) || 0) + '/3)')
+                    : ('🎒 Uložit do brašny (' + ((player.inventory && player.inventory.length) || 0) + '/3)');
+                btns.push('<button class="btn-primary" style="background:linear-gradient(135deg, #059669, #047857); border:1.5px solid #34d399; font-weight:700; padding:0.55rem 0.9rem;" onclick="PRS_App.handleStoreScroll()">' + storeText + '</button>');
             }
-            btns.push('<button class="btn-primary" style="background:linear-gradient(135deg, #d97706, #b45309); border:1.5px solid #fde047; font-weight:700; padding:0.55rem 0.9rem;" onclick="PRS_App.handleUseScrollNow()">⚡ Použít svitek ihned</button>');
+            var useText = isEnAction ? '⚡ Use scroll immediately' : '⚡ Použít svitek ihned';
+            btns.push('<button class="btn-primary" style="background:linear-gradient(135deg, #d97706, #b45309); border:1.5px solid #fde047; font-weight:700; padding:0.55rem 0.9rem;" onclick="PRS_App.handleUseScrollNow()">' + useText + '</button>');
         }
 
         if (!mustCompleteFirst) {
@@ -4514,7 +4516,9 @@
         }
 
         var summaryRaw = pa.summary || "";
-        if (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en" && summaryRaw) {
+        if (pa.summaryMeta && window.PRS_I18n) {
+            summaryRaw = window.PRS_I18n.t(pa.summaryMeta.key, pa.summaryMeta.params, pa.summary);
+        } else if (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en" && summaryRaw) {
             summaryRaw = summaryRaw.replace(/Pole je volné ke koupi za\s*(\d+)\s*zl\./gi, "Tile is available for purchase for $1 g.");
         }
         var encounterHtml = this.parseTurnEncounter(summaryRaw);
@@ -5075,29 +5079,50 @@
             return;
         }
 
+        var isEnPed = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var getNdName = function(node) {
+            if (!node) return "";
+            return (window.PRS_App && window.PRS_App.getNodeDisplayName) ? window.PRS_App.getNodeDisplayName(node) : node.name;
+        };
+        var targetSprintName = getNdName(targetSprint);
+        var targetBaseName = getNdName(targetBase);
+        var destLabel = isEnPed ? "Destination: " : "Cíl: ";
+
+        var titleStr = isEnPed ? ("Riding Training: Rolled " + baseRoll + "!") : ("Výcvik Jízdy: Hod " + baseRoll + "!");
+        var subStr = isEnPed
+            ? ("Thanks to your knightly agility and Riding training, you can take a swift advance (+" + jzBonus + (jzBonus === 1 ? " tile" : " tiles") + ")!")
+            : ("Díky své rytířské mrštnosti a výcviku Jízdy můžeš vyrazit svižným přesunem (+" + jzBonus + (jzBonus === 1 ? " pole" : " pole") + ")!");
+
+        var sprintBtnText = isEnPed
+            ? ("⚡ Swift Advance: " + sprintRoll + " tiles (+" + jzBonus + ")")
+            : ("⚡ Rychlý přesun: " + sprintRoll + " polí (+" + jzBonus + ")");
+        var baseBtnText = isEnPed
+            ? ("🚶 Standard March: " + baseRoll + " tiles")
+            : ("🚶 Běžný krok: " + baseRoll + " polí");
+
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
 
             '<div style="font-size:2rem; margin-bottom:0.3rem;">🏃‍♂️ 🏇</div>' +
 
-            '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.5rem 0;">Výcvik Jízdy: Hod ' + baseRoll + '!</h3>' +
+            '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.5rem 0;">' + titleStr + '</h3>' +
 
-            '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">Díky své rytířské mrštnosti a výcviku Jízdy můžeš vyrazit svižným přesunem (+' + jzBonus + ' ' + (jzBonus === 1 ? 'pole' : 'pole') + ')!</div>' +
+            '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">' + subStr + '</div>' +
 
             '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
 
-            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border-color:#38bdf8;" onclick="PRS_App.confirmFalconRoll(' + sprintRoll + ')">' +
+            '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border:2px solid #38bdf8; color:#f0f9ff;" onclick="PRS_App.confirmFalconRoll(' + sprintRoll + ')">' +
 
-            '    <div style="font-weight:700; color:#e0f2fe;">⚡ Rychlý přesun: ' + sprintRoll + ' polí (+' + jzBonus + ')</div>' +
+            '    <div style="font-weight:800; font-size:0.96rem; color:#e0f2fe;">' + sprintBtnText + '</div>' +
 
-            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + (targetSprint ? self.escapeHtml(targetSprint.name) : '') + '</div>' +
+            '    <div style="font-size:0.84rem; color:#bae6fd; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#ffffff;">' + (targetSprint ? self.escapeHtml(targetSprintName) : '') + '</strong></div>' +
 
             '  </button>' +
 
-            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmFalconRoll(' + baseRoll + ')">' +
+            '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #f59e0b, #d97706); border:2px solid #fbbf24; color:#291201;" onclick="PRS_App.confirmFalconRoll(' + baseRoll + ')">' +
 
-            '    <div style="font-weight:700; color:#fef08a;">🚶 Běžný krok: ' + baseRoll + ' polí</div>' +
+            '    <div style="font-weight:800; font-size:0.96rem; color:#451a03;">' + baseBtnText + '</div>' +
 
-            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + (targetBase ? self.escapeHtml(targetBase.name) : '') + '</div>' +
+            '    <div style="font-size:0.84rem; color:#291201; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#1e0d00;">' + (targetBase ? self.escapeHtml(targetBaseName) : '') + '</strong></div>' +
 
             '  </button>' +
 
@@ -5143,49 +5168,76 @@
 
         }
 
-        var headerTitle = canSprint ? "Královský trysk" : (canGallop ? "Koňský cval" : "Koňský klus");
+        var isEnHorse = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var headerTitle = canSprint
+            ? (isEnHorse ? "Royal Sprint" : "Královský trysk")
+            : (canGallop ? (isEnHorse ? "Horse Gallop" : "Koňský cval") : (isEnHorse ? "Horse Trot" : "Koňský klus"));
 
         var headerSub = canGallop
-            ? ("Díky mistrovství Jízdy (" + jz + "/5) a koni máš volbu mezi bleskovým cvalem či přesným manévrem.")
-            : ("Koňský klus (Jízda " + jz + "/5): Volíš z obou kostek (plný cval d1+d2 vyžaduje Jízdu ≥ 2).");
+            ? (isEnHorse ? ("Thanks to Riding mastery (" + jz + "/5) and your horse, you can choose between a fast gallop or a precise maneuver.") : ("Díky mistrovství Jízdy (" + jz + "/5) a koni máš volbu mezi bleskovým cvalem či přesným manévrem."))
+            : (isEnHorse ? ("Horse Trot (Riding " + jz + "/5): Choose from either die (full gallop d1+d2 requires Riding ≥ 2).") : ("Koňský klus (Jízda " + jz + "/5): Volíš z obou kostek (plný cval d1+d2 vyžaduje Jízdu ≥ 2)."));
 
         if (hasFalcon) {
-            headerSub += "<br><span style='color:#7dd3fc; font-size:0.8rem;'>🦅 <strong>Sokolí navigaci (±1 pole)</strong> můžeš využít při taktických manévrech (při plném cvalu či trysku kůň pádí příliš rychle na navigaci sokolem).</span>";
+            headerSub += "<br><span style='color:#7dd3fc; font-size:0.8rem;'>🦅 <strong>" + (isEnHorse ? "Falcon navigation (±1 tile)" : "Sokolí navigaci (±1 pole)") + "</strong> " + (isEnHorse ? "can be used during tactical maneuvers (during full gallop or sprint, the horse charges too fast for falcon scouting)." : "můžeš využít při taktických manévrech (při plném cvalu či trysku kůň pádí příliš rychle na navigaci sokolem).") + "</span>";
         }
+
+        var getNdName = function(node) {
+            if (!node) return "";
+            return (window.PRS_App && window.PRS_App.getNodeDisplayName) ? window.PRS_App.getNodeDisplayName(node) : node.name;
+        };
+
+        var targetSprintName = getNdName(targetSprint);
+        var targetSumName = getNdName(targetSum);
+        var targetD1Name = getNdName(targetD1);
+        var targetD2Name = getNdName(targetD2);
+        var destLabel = isEnHorse ? "Destination: " : "Cíl: ";
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid var(--gold); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
             '<div style="font-size:2rem; margin-bottom:0.3rem;">🏇 🎲 🎲</div>' +
-            '<h3 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + headerTitle + ': Padlo ' + d1 + ' a ' + d2 + '!</h3>' +
+            '<h3 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + headerTitle + (isEnHorse ? (': Rolled ' + d1 + ' and ' + d2 + '!') : (': Padlo ' + d1 + ' a ' + d2 + '!')) + '</h3>' +
             '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">' + headerSub + '</div>' +
             '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
 
         if (canSprint && targetSprint) {
-            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #7c3aed, #4f46e5); border-color:#c084fc;" onclick="PRS_App.confirmHorseRoll(' + sprintSum + ', false)">' +
-                '    <div style="font-weight:700; color:#f5d0fe;">👑 Královský trysk (' + sprintSum + ' polí: ' + sum + '+2)' + (hasFalcon ? ' <small style="font-size:0.72rem; color:#fbcfe8; font-weight:normal;">(přímý trysk – bez sokola)</small>' : '') + '</div>' +
-                '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + self.escapeHtml(targetSprint.name) + '</div>' +
+            var sprintTitle = isEnHorse
+                ? ("👑 Royal Sprint (" + sprintSum + " tiles: " + sum + "+2)" + (hasFalcon ? ' <small style="font-size:0.75rem; color:#fbcfe8; font-weight:600;">(direct sprint – no falcon)</small>' : ''))
+                : ("👑 Královský trysk (" + sprintSum + " polí: " + sum + "+2)" + (hasFalcon ? ' <small style="font-size:0.75rem; color:#fbcfe8; font-weight:600;">(přímý trysk – bez sokola)</small>' : ''));
+            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #7c3aed, #4f46e5); border:2px solid #c084fc; color:#ffffff;" onclick="PRS_App.confirmHorseRoll(' + sprintSum + ', false)">' +
+                '    <div style="font-weight:800; font-size:0.96rem; color:#f5d0fe;">' + sprintTitle + '</div>' +
+                '    <div style="font-size:0.84rem; color:#e9d5ff; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#ffffff;">' + self.escapeHtml(targetSprintName) + '</strong></div>' +
                 '  </button>';
         }
 
         if (canGallop && targetSum) {
-            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmHorseRoll(' + sum + ', false)">' +
-                '    <div style="font-weight:700; color:#fef08a;">⚡ Plný cval (' + sum + ' polí)' + (hasFalcon ? ' <small style="font-size:0.72rem; color:#fde047; font-weight:normal;">(přímý cval – bez sokola)</small>' : '') + '</div>' +
-                '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + self.escapeHtml(targetSum.name) + '</div>' +
+            var gallopTitle = isEnHorse
+                ? ("⚡ Full Gallop (" + sum + " tiles)" + (hasFalcon ? ' <small style="font-size:0.75rem; color:#78350f; font-weight:700;">(direct gallop – no falcon)</small>' : ''))
+                : ("⚡ Plný cval (" + sum + " polí)" + (hasFalcon ? ' <small style="font-size:0.75rem; color:#78350f; font-weight:700;">(přímý cval – bez sokola)</small>' : ''));
+            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #f59e0b, #d97706); border:2px solid #fbbf24; color:#291201;" onclick="PRS_App.confirmHorseRoll(' + sum + ', false)">' +
+                '    <div style="font-weight:800; font-size:0.96rem; color:#451a03;">' + gallopTitle + '</div>' +
+                '    <div style="font-size:0.84rem; color:#291201; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#1e0d00;">' + self.escapeHtml(targetSumName) + '</strong></div>' +
                 '  </button>';
         }
 
         var scoutLevel = hasFalcon ? self.getFalconScoutLevel(player) : 0;
 
-        html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d1 + ', ' + hasFalcon + ')">' +
-            '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d1 + ' ' + (d1 === 1 ? 'pole' : (d1 < 5 ? 'pole' : 'polí')) + ')' + (hasFalcon ? ' <span style="color:#7dd3fc; font-size:0.78rem; font-weight:normal;">🦅 + Sokolí navigace (±1)</span>' : '') + '</div>' +
-            '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + (targetD1 ? self.escapeHtml(targetD1.name) : '') + '</div>' +
-            (hasFalcon ? self.renderFalconTargetIntelHtml(player, targetD1, scoutLevel, d1) : '') +
+        var man1Title = isEnHorse
+            ? ("🎯 Tactical Maneuver (" + d1 + " " + (d1 === 1 ? "tile" : "tiles") + ")" + (hasFalcon ? ' <span style="color:#38bdf8; font-size:0.8rem; font-weight:600;">🦅 + Falcon navigation (±1)</span>' : ''))
+            : ("🎯 Taktický manévr (" + d1 + " " + (d1 === 1 ? 'pole' : (d1 < 5 ? 'pole' : 'polí')) + ')' + (hasFalcon ? ' <span style="color:#38bdf8; font-size:0.8rem; font-weight:600;">🦅 + Sokolí navigace (±1)</span>' : ''));
+
+        html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #1e293b, #334155); border:2px solid #64748b; color:#f8fafc;" onclick="PRS_App.confirmHorseRoll(' + d1 + ', ' + hasFalcon + ')">' +
+            '    <div style="font-weight:800; font-size:0.96rem; color:#f8fafc;">' + man1Title + '</div>' +
+            '    <div style="font-size:0.84rem; color:#cbd5e1; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#ffffff;">' + (targetD1 ? self.escapeHtml(targetD1Name) : '') + '</strong></div>' +
+            (hasFalcon ? self.renderFalconTargetIntelHtml(player, targetD1, scoutLevel, d1, false) : '') +
             '  </button>';
 
         if (targetD2) {
-            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #1e293b, #334155); border-color:#64748b;" onclick="PRS_App.confirmHorseRoll(' + d2 + ', ' + hasFalcon + ')">' +
-                '    <div style="font-weight:700; color:#cbd5e1;">🎯 Taktický manévr (' + d2 + ' ' + (d2 < 5 ? 'pole' : 'polí') + ')' + (hasFalcon ? ' <span style="color:#7dd3fc; font-size:0.78rem; font-weight:normal;">🦅 + Sokolí navigace (±1)</span>' : '') + '</div>' +
-                '    <div style="font-size:0.78rem; opacity:0.85;">Cíl: ' + self.escapeHtml(targetD2.name) + '</div>' +
-                (hasFalcon ? self.renderFalconTargetIntelHtml(player, targetD2, scoutLevel, d2) : '') +
+            var man2Title = isEnHorse
+                ? ("🎯 Tactical Maneuver (" + d2 + " " + (d2 === 1 ? "tile" : "tiles") + ")" + (hasFalcon ? ' <span style="color:#38bdf8; font-size:0.8rem; font-weight:600;">🦅 + Falcon navigation (±1)</span>' : ''))
+                : ("🎯 Taktický manévr (" + d2 + " " + (d2 < 5 ? 'pole' : 'polí') + ')' + (hasFalcon ? ' <span style="color:#38bdf8; font-size:0.8rem; font-weight:600;">🦅 + Sokolí navigace (±1)</span>' : ''));
+            html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #1e293b, #334155); border:2px solid #64748b; color:#f8fafc;" onclick="PRS_App.confirmHorseRoll(' + d2 + ', ' + hasFalcon + ')">' +
+                '    <div style="font-weight:800; font-size:0.96rem; color:#f8fafc;">' + man2Title + '</div>' +
+                '    <div style="font-size:0.84rem; color:#cbd5e1; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#ffffff;">' + self.escapeHtml(targetD2Name) + '</strong></div>' +
+                (hasFalcon ? self.renderFalconTargetIntelHtml(player, targetD2, scoutLevel, d2, false) : '') +
                 '  </button>';
         }
 
@@ -5246,38 +5298,49 @@
         return 1;
     },
 
-    renderFalconTargetIntelHtml: function (player, targetNode, scoutLevel, moveRoll) {
+    renderFalconTargetIntelHtml: function (player, targetNode, scoutLevel, moveRoll, isGold) {
         if (!targetNode || !this.state || !window.PRS_GameEngine) return "";
+        var isEnIntel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var currIntel = isEnIntel ? "g." : "zl.";
+        var locIntel = isEnIntel ? "en-US" : "cs-CZ";
+
         if (scoutLevel < 2) {
-            return '<div style="font-size:0.71rem; color:#94a3b8; margin-top:2px;">🔒 Průzkum vlastníka od 2 sokolů nebo se Sokolníkem</div>';
+            var lockColor = isGold ? "#78350f" : "#cbd5e1";
+            return '<div style="font-size:0.75rem; color:' + lockColor + '; font-weight:600; margin-top:3px;">' + (isEnIntel ? "🔒 Owner intel requires 2+ falcons or Falconer" : "🔒 Průzkum vlastníka od 2 sokolů nebo se Sokolníkem") + '</div>';
         }
         var eng = window.PRS_GameEngine;
         var isBuyable = eng.isPurchasableNode ? eng.isPurchasableNode(targetNode) : false;
         if (!isBuyable) {
-            return '<div style="font-size:0.73rem; color:#94a3b8; margin-top:2px;">🏳️ Neutrální / akční pole</div>';
+            var neutralColor = isGold ? "#5c3d18" : "#94a3b8";
+            return '<div style="font-size:0.75rem; color:' + neutralColor + '; font-weight:600; margin-top:3px;">' + (isEnIntel ? "🏳️ Neutral / action tile" : "🏳️ Neutrální / akční pole") + '</div>';
         }
         if (targetNode.owner === player.index) {
             var vStars = (targetNode.type === "VILLAGE") ? " (" + (targetNode.villageLevel || 1) + "★)" : "";
-            var upgHint = (scoutLevel >= 3 && targetNode.type === "VILLAGE" && (targetNode.villageLevel || 1) < 3) ? " · Povýšení možné" : "";
-            return '<div style="font-size:0.73rem; color:#86efac; margin-top:2px;">👑 Tvé panství' + vStars + upgHint + '</div>';
+            var upgHint = (scoutLevel >= 3 && targetNode.type === "VILLAGE" && (targetNode.villageLevel || 1) < 3) ? (isEnIntel ? " · Upgrade possible" : " · Povýšení možné") : "";
+            var ownColor = isGold ? "#14532d" : "#86efac";
+            return '<div style="font-size:0.75rem; color:' + ownColor + '; font-weight:700; margin-top:3px;">' + (isEnIntel ? ("👑 Your estate" + vStars + upgHint) : ("👑 Tvé panství" + vStars + upgHint)) + '</div>';
         }
         if (targetNode.owner !== null && targetNode.owner !== undefined && this.state.players && this.state.players[targetNode.owner]) {
             var ownerObj = this.state.players[targetNode.owner];
             var rentStr = "";
             if (scoutLevel >= 3 && eng.calculateNodeRent) {
                 var rentVal = eng.calculateNodeRent(this.state, targetNode, ownerObj, moveRoll || 0);
+                var rentColor = isGold ? "#991b1b" : "#fca5a5";
+                var noRentColor = isGold ? "#451a03" : "#cbd5e1";
                 rentStr = (rentVal > 0)
-                    ? (' · <span style="color:#fca5a5;">💸 Nájem: ' + rentVal.toLocaleString("cs-CZ") + ' zl.</span>')
-                    : ' · <span style="color:#cbd5e1;">🤝 Bez nájmu</span>';
+                    ? (' · <span style="color:' + rentColor + '; font-weight:700;">💸 ' + (isEnIntel ? "Rent: " : "Nájem: ") + rentVal.toLocaleString(locIntel) + ' ' + currIntel + '</span>')
+                    : (' · <span style="color:' + noRentColor + ';">' + (isEnIntel ? "🤝 No rent" : "🤝 Bez nájmu") + '</span>');
             }
-            return '<div style="font-size:0.73rem; margin-top:2px; color:' + (ownerObj.color || '#fca5a5') + '; font-weight:600;">🛡️ Vlastník: ' + (ownerObj.badge || '') + ' ' + this.escapeHtml(ownerObj.name) + rentStr + '</div>';
+            var ownerTextColor = isGold ? "#7f1d1d" : (ownerObj.color || '#fca5a5');
+            return '<div style="font-size:0.75rem; margin-top:3px; color:' + ownerTextColor + '; font-weight:700;">🛡️ ' + (isEnIntel ? "Owner: " : "Vlastník: ") + (ownerObj.badge || '') + ' ' + this.escapeHtml(ownerObj.name) + rentStr + '</div>';
         }
         var priceStr = "";
         if (scoutLevel >= 3 && eng.getNodePrice) {
             var pVal = eng.getNodePrice(this.state, targetNode);
-            if (pVal > 0) priceStr = ' · 💰 Cena: ' + pVal.toLocaleString("cs-CZ") + ' zl.';
+            if (pVal > 0) priceStr = ' · 💰 ' + (isEnIntel ? "Price: " : "Cena: ") + pVal.toLocaleString(locIntel) + ' ' + currIntel;
         }
-        return '<div style="font-size:0.73rem; color:#fde68a; margin-top:2px;">🏷️ Volné k nákupu' + priceStr + '</div>';
+        var availColor = isGold ? "#5c3d18" : "#fde68a";
+        return '<div style="font-size:0.75rem; color:' + availColor + '; font-weight:700; margin-top:3px;">🏷️ ' + (isEnIntel ? "Available for purchase" : "Volné k nákupu") + priceStr + '</div>';
     },
 
     showFalconNavigationDialog: function (player, baseRoll) {
@@ -5305,48 +5368,65 @@
             return;
         }
 
+        var isEnFalcon = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var getNdName = function(node) {
+            if (!node) return "";
+            return (window.PRS_App && window.PRS_App.getNodeDisplayName) ? window.PRS_App.getNodeDisplayName(node) : node.name;
+        };
+        var targetMinusName = getNdName(targetMinus);
+        var targetBaseName = getNdName(targetBase);
+        var targetPlusName = getNdName(targetPlus);
+
+        var destLabel = isEnFalcon ? "Destination: " : "Cíl: ";
+        var baseLabel = isEnFalcon
+            ? ("🎯 Original roll: " + baseRoll + " tiles (no change)")
+            : ("🎯 Původní hod: " + baseRoll + " polí (bez změny)");
+        var plusLabel = isEnFalcon
+            ? ("▶️ Adjustment: " + plusRoll + " tiles (+1)")
+            : ("▶️ Úprava: " + plusRoll + " polí (+1)");
+
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
 
-            '<div style="font-size:2rem; margin-bottom:0.3rem;">🦅 🎯</div>' +
+                '<div style="font-size:2rem; margin-bottom:0.3rem;">🦅 🎯</div>' +
 
-            '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.4rem 0;">Sokolí navigace: Hod ' + baseRoll + '!</h3>' +
+                '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.4rem 0;">' + (isEnFalcon ? ("Falcon Navigation: Rolled " + baseRoll + "!") : ("Sokolí navigace: Hod " + baseRoll + "!")) + '</h3>' +
 
-            '<div style="display:inline-block; font-size:0.74rem; color:#bae6fd; background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.35); border-radius:999px; padding:0.15rem 0.65rem; margin-bottom:0.55rem;">' + scoutBadgeText + '</div>' +
+                '<div style="display:inline-block; font-size:0.74rem; color:#bae6fd; background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.35); border-radius:999px; padding:0.15rem 0.65rem; margin-bottom:0.55rem;">' + scoutBadgeText + '</div>' +
 
-            '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.05rem;">Tvůj sokol krouží nad krajinou a dává ti možnost upravit výsledný doskok o ±1 pole!</div>' +
+                '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.05rem;">' + (isEnFalcon ? "Your falcon circles above the landscape, granting you the power to adjust your reach by ±1 tile!" : "Tvůj sokol krouží nad krajinou a dává ti možnost upravit výsledný doskok o ±1 pole!") + '</div>' +
 
-            '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
+                '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
 
-            (targetMinus ? '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border-color:#38bdf8;" onclick="PRS_App.confirmFalconRoll(' + minusRoll + ')">' +
+                (targetMinus ? '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border:2px solid #38bdf8; color:#f0f9ff;" onclick="PRS_App.confirmFalconRoll(' + minusRoll + ')">' +
 
-            '    <div style="font-weight:700; color:#e0f2fe;">◀️ Úprava: ' + minusRoll + ' polí (-1)</div>' +
+                '    <div style="font-weight:800; font-size:0.96rem; color:#e0f2fe;">' + (isEnFalcon ? ("◀️ Adjustment: " + minusRoll + " tiles (-1)") : ("◀️ Úprava: " + minusRoll + " polí (-1)")) + '</div>' +
 
-            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + self.escapeHtml(targetMinus.name) + '</div>' +
-            self.renderFalconTargetIntelHtml(player, targetMinus, scoutLevel, minusRoll) +
+                '    <div style="font-size:0.84rem; color:#bae6fd; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#ffffff;">' + self.escapeHtml(targetMinusName) + '</strong></div>' +
+                self.renderFalconTargetIntelHtml(player, targetMinus, scoutLevel, minusRoll, false) +
 
-            '  </button>' : '') +
+                '  </button>' : '') +
 
-            '  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem;" onclick="PRS_App.confirmFalconRoll(' + baseRoll + ')">' +
+                '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #f59e0b, #d97706); border:2px solid #fbbf24; color:#291201;" onclick="PRS_App.confirmFalconRoll(' + baseRoll + ')">' +
 
-            '    <div style="font-weight:700; color:#fef08a;">🎯 Původní hod: ' + baseRoll + ' polí (bez změny)</div>' +
+                '    <div style="font-weight:800; font-size:0.96rem; color:#451a03;">' + baseLabel + '</div>' +
 
-            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + (targetBase ? self.escapeHtml(targetBase.name) : '') + '</div>' +
-            self.renderFalconTargetIntelHtml(player, targetBase, scoutLevel, baseRoll) +
+                '    <div style="font-size:0.84rem; color:#291201; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#1e0d00;">' + self.escapeHtml(targetBaseName) + '</strong></div>' +
+                self.renderFalconTargetIntelHtml(player, targetBase, scoutLevel, baseRoll, true) +
 
-            '  </button>' +
+                '  </button>' +
 
-            (targetPlus ? ('  <button class="btn-gold-lg" style="text-align:left; padding:0.75rem 1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border-color:#38bdf8;" onclick="PRS_App.confirmFalconRoll(' + plusRoll + ')">' +
+                (targetPlus ? ('  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border:2px solid #38bdf8; color:#f0f9ff;" onclick="PRS_App.confirmFalconRoll(' + plusRoll + ')">' +
 
-            '    <div style="font-weight:700; color:#e0f2fe;">▶️ Úprava: ' + plusRoll + ' polí (+1)</div>' +
+                '    <div style="font-weight:800; font-size:0.96rem; color:#e0f2fe;">' + plusLabel + '</div>' +
 
-            '    <div style="font-size:0.78rem; opacity:0.9;">Cíl: ' + self.escapeHtml(targetPlus.name) + '</div>' +
-            self.renderFalconTargetIntelHtml(player, targetPlus, scoutLevel, plusRoll) +
+                '    <div style="font-size:0.84rem; color:#bae6fd; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#ffffff;">' + self.escapeHtml(targetPlusName) + '</strong></div>' +
+                self.renderFalconTargetIntelHtml(player, targetPlus, scoutLevel, plusRoll, false) +
 
-            '  </button>') : '') +
+                '  </button>') : '') +
 
-            '</div>' +
+                '</div>' +
 
-            '</div>';
+                '</div>';
 
         modal.innerHTML = html;
 

@@ -59,6 +59,7 @@
             this.syncNodeBranches(this.board, !this.board._branchesSynced);
             this.board._branchesSynced = true;
             this.normalizeBoardForEngine(this.board);
+            this.refreshBoardDerivedLayers(this.board);
             this.activeTool = "select";
             this.selectedNodeId = null;
             this.selectedEdge = null;
@@ -2959,7 +2960,7 @@
                 if (typeof window.PRS_BoardBuilder.computeRiverBridges === "function") {
                     window.PRS_BoardBuilder.computeRiverBridges(board);
                 }
-                if (board._decorDirty && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
+                if ((!board.decorations || board.decorations.length === 0 || board._decorDirty) && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
                     window.PRS_BoardBuilder.generateBoardDecorations(board, board.seed || 4242);
                     board._decorDirty = false;
                 }
@@ -2971,6 +2972,7 @@
             var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             this.refreshBoardDerivedLayers(this.board);
             this.normalizeBoardForEngine(this.board);
+            this.refreshBoardDerivedLayers(this.board);
             var customName = prompt(isEn ? "Enter a name for this custom board template:" : "Zadej název této upravené šablony plánu:", this.board.name || (isEn ? "My Custom Board" : "Můj ručně upravený plán"));
             if (!customName || !customName.trim()) return;
 
@@ -2993,6 +2995,7 @@
             } catch (e) { }
             this.refreshBoardDerivedLayers(this.board);
             this.normalizeBoardForEngine(this.board);
+            this.refreshBoardDerivedLayers(this.board);
             if (window.PRS_App) {
                 var cloned = JSON.parse(JSON.stringify(this.board));
                 delete cloned._decorDirty;

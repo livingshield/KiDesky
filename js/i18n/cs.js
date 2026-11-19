@@ -37,6 +37,7 @@ window.PRS_I18N.cs = {
         },
         "theme": {
             "title": "Vyber živel & barevný design království",
+            "lang_select_title": "Jazyk hry (Čeština / English / ...)",
             "aria": "Barevný design království",
             "light": "👑 Zlato",
             "fire": "🔥 Oheň",
@@ -94,6 +95,7 @@ window.PRS_I18N.cs = {
         },
         "common": {
             "gold": "zl.",
+            "gold_short": "zl.",
             "hearts": "Srdcí",
             "hearts_single": "Srdce",
             "points": "bodů",
@@ -232,6 +234,8 @@ window.PRS_I18N.cs = {
         "back_cancel": "Zpět / Zrušit"
     },
     "hud": {
+        "horse_gallop": "🏇 KOŇSKÝ CVAL (2d6)",
+        "cautious_step": "🚶 OPATRNÝ KROK (1–4)",
         "end_turn": "➡️ Ukončit tah",
         "roll_dice": "🎲 HODIT KOSTKOU (1–6)",
         "stance_careful": "Opatrný krok",
@@ -309,6 +313,7 @@ window.PRS_I18N.cs = {
         "game_over_banner_ceremony": "👑 Otevřít ceremoniál & Síň slávy"
     },
     "modals": {
+        "chance_destiny_scroll": "Královská karta osudu",
         "armory_tab_weapon": "🗡️ Zbraně",
         "armory_tab_armor": "🛡️ Brnění & Štíty",
         "armory_tab_dress": "👗 Šaty & Pláště",
@@ -1784,7 +1789,7 @@ window.PRS_I18N.cs = {
         },
         "labels": {
             "scenario": "🏆 Herní scénář:",
-            "difficulty": "⚖️ Obtížnost & Mód:",
+            "difficulty": "⚖️ Obtížnost &amp; Mód:",
             "timer": "⏱️ Tahový časovač:",
             "royal_castle": "🏰 Královské sídlo:"
         }

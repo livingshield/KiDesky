@@ -2883,7 +2883,8 @@
 
                     var sc = dec.scale || 1;
 
-                    out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')">');
+                    var scX = dec.isFlipped ? (-sc) : sc;
+                    out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + scX + ',' + sc + ')">');
                     out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
                     out.push('      <ellipse cx="0" cy="' + (footY + 2) + '" rx="' + shadRx + '" ry="' + shadRy + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
                     out.push(cat.renderSVG());
