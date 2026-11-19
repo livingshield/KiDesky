@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kidesky-cache-v1.9.41';
+const CACHE_NAME = 'kidesky-cache-v1.9.42';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -17,19 +17,19 @@ const CORE_ASSETS = [
   './js/game-engine.js',
   './js/game-combat-ai.js',
   './js/app-audio.js',
+  './js/app-dialog.js',
   './js/app-api.js',
+  './js/app.js',
   './js/app-board.js',
   './js/app-hud.js',
   './js/app-modals.js',
-  './js/app-admin.js',
   './js/app-online.js',
   './js/app-saves.js',
   './js/app-map-editor.js',
-  './js/app-dialog.js',
   './js/app-catalog.js',
   './js/app-rules-guide.js',
-  './js/app-musicwidget.js',
-  './js/app.js'
+  './js/app-admin.js',
+  './js/app-musicwidget.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -57,54 +57,123 @@ self.addEventListener('activate', (event) => {
             console.log('[SW] Deleting old cache:', name);
             return caches.delete(name);
           }
+          return null;
         })
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// Network-first strategy with cache fallback for offline play
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  // Ignore non-GET and cross-origin external API requests (like Firebase / telemetry)
-  if (req.method !== 'GET' || !req.url.startsWith(self.location.origin)) {
+  if (req.method !== 'GET') {
     return;
   }
 
-  // API calls or dynamic saves should never be served stale
-  if (req.url.includes('/api/') || req.url.includes('aspone') || req.url.includes('firebase')) {
+  let url;
+  try {
+    url = new URL(req.url);
+  } catch (e) {
     return;
   }
 
-  // Pro HTML, skripty a styly preferujeme vždy síť bez mezilehlé HTTP cache, mezipaměť slouží jako offline záloha
-  const fetchPromise = (req.mode === 'navigate' || req.url.includes('.js') || req.url.includes('.css'))
+  // Ignore cross-origin external requests
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  const pathLower = url.pathname.toLowerCase();
+
+  // API calls, dynamic handlers or remote dynamic hosts should never be cached or served stale
+  if (
+    pathLower.includes('api.ashx') ||
+    pathLower.includes('/api/') ||
+    url.hostname.includes('aspone') ||
+    url.hostname.includes('firebase')
+  ) {
+    return;
+  }
+
+  // Bypass Range requests and large audio/video media streams
+  if (
+    req.headers.has('range') ||
+    pathLower.includes('/assets/video/') ||
+    pathLower.includes('/assets/audio/') ||
+    /\.(mp4|webm|mov|mp3|wav|ogg|m4a)$/.test(pathLower)
+  ) {
+    return;
+  }
+
+  // Static images: Stale-While-Revalidate
+  if (/\.(png|jpe?g|webp|gif|svg|ico)$/.test(pathLower)) {
+    const cacheMatchPromise = caches.match(req).then((c) => c || caches.match(req, { ignoreSearch: true }));
+    const networkUpdatePromise = fetch(req).then((networkResponse) => {
+      if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+        const responseToCache = networkResponse.clone();
+        return caches.open(CACHE_NAME)
+          .then((cache) => cache.put(req, responseToCache))
+          .catch(() => {})
+          .then(() => networkResponse);
+      }
+      return networkResponse;
+    });
+
+    event.waitUntil(networkUpdatePromise.catch(() => {}));
+    event.respondWith(
+      cacheMatchPromise.then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return networkUpdatePromise.catch(() =>
+          new Response('Offline - asset not cached', { status: 503, statusText: 'Offline' })
+        );
+      })
+    );
+    return;
+  }
+
+  // HTML navigations, JS, CSS, JSON: Network-First with cache fallback (ignoring ?v= on offline hit)
+  const fetchPromise = (
+    req.mode === 'navigate' ||
+    pathLower.endsWith('.js') ||
+    pathLower.endsWith('.css') ||
+    pathLower.endsWith('.json')
+  )
     ? fetch(req, { cache: 'no-cache' })
     : fetch(req);
 
   event.respondWith(
     fetchPromise
       .then((networkResponse) => {
-        // Cache successful responses for local resources
-        if (networkResponse && networkResponse.status === 200) {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(req, responseToCache);
-          });
+          const cacheWrite = caches.open(CACHE_NAME)
+            .then((cache) => cache.put(req, responseToCache))
+            .catch(() => {});
+          try {
+            event.waitUntil(cacheWrite);
+          } catch (e) {}
         }
         return networkResponse;
       })
       .catch(() => {
-        // Network failed (offline) -> look up in cache
-        return caches.match(req).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // If HTML page failed, serve index.html
-          if (req.mode === 'navigate') {
-            return caches.match('./index.html');
-          }
-          return new Response('Offline - asset not cached', { status: 503, statusText: 'Offline' });
-        });
+        return caches.match(req)
+          .then((cachedResponse) => cachedResponse || caches.match(req, { ignoreSearch: true }))
+          .then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            if (req.mode === 'navigate') {
+              return caches.match('./index.html', { ignoreSearch: true });
+            }
+            return new Response('Offline - asset not cached', { status: 503, statusText: 'Offline' });
+          });
       })
   );
 });

@@ -2393,7 +2393,8 @@ window.PRS_I18N.cs = {
         "mobile_hint": "ℹ️ Pro instalaci na mobilu použij volbu „Přidat na plochu“ v nabídce prohlížeče.",
         "already_installed": "✅ KiDesky již běží jako nainstalovaná aplikace na tvém zařízení!",
         "installing": "📲 KiDesky se instaluje na tvou plochu...",
-        "already_installed_pc": "ℹ️ KiDesky je již na tomto počítači nainstalována! Spustit ji můžeš z nabídky Start nebo ikony v adresním řádku."
+        "already_installed_pc": "ℹ️ KiDesky je již na tomto počítači nainstalována! Spustit ji můžeš z nabídky Start nebo ikony v adresním řádku.",
+        "installed_btn": "✅ Nainstalováno na ploše"
     },
     "reactions": {
         "label": "💬 Reakce:",
@@ -2996,6 +2997,9 @@ window.PRS_I18N.cs = {
         "save_room_code_success": "✅ Uloženo! Kód místnosti: <strong>{code}</strong>",
         "save_local_browser": "⚠️ Uloženo lokálně v prohlížeči.",
         "save_local_storage": "💾 Uloženo do lokální paměti prohlížeče.",
+        "chat_send_failed": "⚠️ Zprávu se nepodařilo odeslat na server.",
+        "load_room_failed": "⚠️ Nepodařilo se načíst online místnost {code}.",
+        "room_not_found": "⚠️ Online místnost {code} nebyla nalezena.",
         "waiting_for_teammate": "Čeká se na tah spoluhráče: {badge} {name}",
         "waiting_chosen_knight_info": "Tvůj zvolený rytíř u stolu je <strong>{name}</strong>. Herní plán se automaticky synchronizuje každé 3 sekundy.",
         "waiting_timer_label": "⏱️ Čas rytíře na tahu:",

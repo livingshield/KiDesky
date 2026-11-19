@@ -227,12 +227,12 @@ window.PRS_App = {
         try { this.initAmbientCanvas(); } catch (e) { console.warn("initAmbientCanvas err:", e); }
 
         window.addEventListener("resize", function () {
-            try { self.detectDeviceProfile(); } catch (e) { }
+            try { self.detectDeviceProfile(); } catch (e) { console.warn("[KiDesky] resize detectDeviceProfile err:", e); }
         });
 
         window.addEventListener("orientationchange", function () {
             setTimeout(function () {
-                try { self.detectDeviceProfile(); } catch (e) { }
+                try { self.detectDeviceProfile(); } catch (e) { console.warn("[KiDesky] orientationchange detectDeviceProfile err:", e); }
             }, 160);
         });
 
@@ -240,7 +240,7 @@ window.PRS_App = {
         window.addEventListener("beforeunload", function () {
             if (self.hasGameStarted && self.state && self.state.phase !== "GAME_OVER") {
                 if (typeof self.saveActiveGameAutosave === "function") {
-                    try { self.saveActiveGameAutosave(); } catch (e) { }
+                    try { self.saveActiveGameAutosave(); } catch (e) { console.warn("[KiDesky] beforeunload autosave err:", e); }
                 }
             }
         });
@@ -265,13 +265,13 @@ window.PRS_App = {
         try { this.renderHeroVideosSection(); } catch (vErr) { console.warn("renderHeroVideosSection err:", vErr); }
         try { this.loadActiveHeroVideo(); } catch (avErr) { console.warn("loadActiveHeroVideo err:", avErr); }
 
-        try { this.loadAnnouncement(); } catch (e) { }
+        try { this.loadAnnouncement(); } catch (e) { console.warn("[KiDesky] loadAnnouncement err:", e); }
 
-        try { this.initPwa(); } catch (e) { }
+        try { this.initPwa(); } catch (e) { console.warn("[KiDesky] initPwa err:", e); }
 
         this.hasGameStarted = false;
 
-        try { this.startOnlinePollingLoop(); } catch (e) { }
+        try { this.startOnlinePollingLoop(); } catch (e) { console.warn("[KiDesky] startOnlinePollingLoop err:", e); }
 
         // Automatická obnova rozehrané hry z autosavu při F5 / Ctrl+F5
         var curSearch = (window.location && window.location.search) ? window.location.search : "";
@@ -359,10 +359,10 @@ window.PRS_App = {
                                 self.activeConfig = merged;
                                 self.renderBalanceStudioInputs();
                             }
-                        } catch (e) { }
+                        } catch (e) { console.warn("[KiDesky] get-config apply err:", e); }
                     }
                 })
-                .catch(function () { });
+                .catch(function (err) { console.warn("[KiDesky] get-config failed:", err); });
 
         }, 60);
 
@@ -535,6 +535,18 @@ window.PRS_App = {
     // ========================================================================
     initPwa: function () {
         var self = this;
+
+        if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof window !== 'undefined' && window.location) {
+            var isSecureSw = (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+            if (isSecureSw && !window._pwaSwRegistered) {
+                window._pwaSwRegistered = true;
+                navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' }).catch(function (err) {
+                    window._pwaSwRegistered = false;
+                    console.warn('[PWA] Service Worker registration failed:', err);
+                });
+            }
+        }
+
         var topBtn = document.getElementById('topbar-pwa-install-btn');
         var setStatus = document.getElementById('settings-pwa-status');
         var setBtn = document.getElementById('settings-pwa-install-btn');
@@ -544,13 +556,33 @@ window.PRS_App = {
         // Pokud nejsme v standalone režimu a už máme prompt, aktualizujeme UI
         if (window._pwaDeferredPrompt) {
             if (topBtn) topBtn.style.display = 'inline-flex';
-            if (setStatus) setStatus.textContent = 'Aplikace je připravena k rychlé instalaci na jedno kliknutí.';
+            if (setStatus) setStatus.textContent = (window.PRS_I18n ? window.PRS_I18n.t("settings.pwa_status_ready") : "Aplikace je připravena k instalaci.");
             if (setBtn) {
                 setBtn.style.display = 'inline-flex';
-                setBtn.innerHTML = '📲 Nainstalovat na plochu';
+                setBtn.textContent = (window.PRS_I18n ? window.PRS_I18n.t("settings.pwa_btn") : "📲 Nainstalovat na plochu");
             }
         } else if (topBtn && !window._pwaIsInstalled) {
             topBtn.style.display = 'inline-flex';
+        }
+    },
+
+    onPwaPromptReady: function () {
+        var topBtn = document.getElementById('topbar-pwa-install-btn');
+        var setStatus = document.getElementById('settings-pwa-status');
+        var setBtn = document.getElementById('settings-pwa-install-btn');
+
+        if (!window._pwaIsInstalled) {
+            if (topBtn) topBtn.style.display = 'inline-flex';
+            if (setStatus) setStatus.textContent = (window.PRS_I18n ? window.PRS_I18n.t("settings.pwa_status_ready") : "Aplikace je připravena k instalaci.");
+            if (setBtn) {
+                setBtn.style.display = 'inline-flex';
+                setBtn.textContent = (window.PRS_I18n ? window.PRS_I18n.t("settings.pwa_btn") : "📲 Nainstalovat na plochu");
+            }
+        }
+
+        if (window._pwaInstallRequested && window._pwaDeferredPrompt) {
+            window._pwaInstallRequested = false;
+            this.promptPwaInstall();
         }
     },
 
@@ -568,7 +600,9 @@ window.PRS_App = {
                     window._pwaIsInstalled = true;
                     self.updatePwaUiForInstalled();
                 }
-            }).catch(function () {});
+            }).catch(function (err) {
+                console.warn('[PWA] getInstalledRelatedApps check failed:', err);
+            });
         }
     },
 
@@ -576,10 +610,14 @@ window.PRS_App = {
         var topBtn = document.getElementById('topbar-pwa-install-btn');
         if (topBtn) topBtn.style.display = 'none';
         var setStatus = document.getElementById('settings-pwa-status');
-        if (setStatus) setStatus.innerHTML = '✅ <strong style="color:#4ade80;">Hra je úspěšně nainstalována na tomto zařízení!</strong>';
+        if (setStatus) {
+            setStatus.textContent = (window.PRS_I18n ? window.PRS_I18n.t("settings.pwa_status_installed") : "Aplikace je již nainstalována.");
+            setStatus.style.color = '#4ade80';
+            setStatus.style.fontWeight = '700';
+        }
         var setBtn = document.getElementById('settings-pwa-install-btn');
         if (setBtn) {
-            setBtn.innerHTML = '✅ Nainstalováno na ploše';
+            setBtn.textContent = (window.PRS_I18n ? window.PRS_I18n.t("pwa.installed_btn") : "✅ Nainstalováno na ploše");
             setBtn.style.background = 'rgba(16, 185, 129, 0.2)';
             setBtn.style.borderColor = '#10b981';
         }
@@ -590,7 +628,7 @@ window.PRS_App = {
         var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
         if (isStandalone || window._pwaIsInstalled) {
             if (this.showToast) {
-                this.showToast('✅ KiDesky již běží jako nainstalovaná aplikace na tvém zařízení!', 'good');
+                this.showToast((window.PRS_I18n ? window.PRS_I18n.t("pwa.already_installed") : "✅ KiDesky již běží jako nainstalovaná aplikace na tvém zařízení!"), 'good');
             }
             return;
         }
@@ -603,7 +641,7 @@ window.PRS_App = {
                 if (choiceResult && choiceResult.outcome === 'accepted') {
                     console.log('[PWA] Uživatel potvrdil instalaci aplikace.');
                     if (self.showToast) {
-                        self.showToast('📲 KiDesky se instaluje na tvou plochu...', 'success');
+                        self.showToast((window.PRS_I18n ? window.PRS_I18n.t("pwa.installing") : "📲 KiDesky se instaluje na tvou plochu..."), 'success');
                     }
                     window._pwaDeferredPrompt = null;
                     self.updatePwaUiForInstalled();
@@ -635,7 +673,7 @@ window.PRS_App = {
                                 window._pwaIsInstalled = true;
                                 self.updatePwaUiForInstalled();
                                 if (self.showToast) {
-                                    self.showToast('ℹ️ KiDesky je již na tomto počítači nainstalována! Spustit ji můžeš z nabídky Start nebo ikony v adresním řádku.', 'info');
+                                    self.showToast((window.PRS_I18n ? window.PRS_I18n.t("pwa.already_installed_pc") : "ℹ️ KiDesky je již na tomto počítači nainstalována! Spustit ji můžeš z nabídky Start nebo ikony v adresním řádku."), 'info');
                                 }
                                 return;
                             }
@@ -728,7 +766,7 @@ window.PRS_App = {
                 color = '#bae6fd';
             }
             toast.style.cssText = 'background:' + bg + '; border:' + border + '; color:' + color + '; padding:10px 18px; border-radius:10px; font-family:"Outfit",sans-serif; font-size:0.88rem; box-shadow:0 10px 30px rgba(0,0,0,0.7); pointer-events:auto; text-align:center; transition:opacity 0.28s ease, transform 0.28s ease; opacity:0; transform:translateY(-12px); display:flex; align-items:center; justify-content:center; gap:8px; line-height:1.45; font-weight:500; backdrop-filter:blur(6px);';
-            toast.innerHTML = message;
+            toast.textContent = String(message === null || message === undefined ? '' : message);
             container.appendChild(toast);
             requestAnimationFrame(function () {
                 toast.style.opacity = '1';
@@ -950,78 +988,55 @@ window.PRS_App = {
 
     },
 
+    _safeCall: function (label, fn, ctx) {
+        if (typeof fn !== "function") return;
+        try {
+            fn.call(ctx || this);
+        } catch (err) {
+            console.warn("[KiDesky] " + label + " error:", err);
+        }
+    },
+
     onLanguageChanged: function (lang) {
+        var self = this;
         if (window.PRS_I18n) {
             window.PRS_I18n.translateDOM();
             window.PRS_I18n.syncUi();
         }
 
-        if (typeof this.renderAnnouncement === "function") {
-            try { this.renderAnnouncement(); } catch (raErr) {}
-        }
-        if (typeof this.renderCurrentUserCard === "function") {
-            try { this.renderCurrentUserCard(); } catch (uErr) {}
-        }
-        if (typeof this.refreshMapStudioSelectOptions === "function") {
-            try { this.refreshMapStudioSelectOptions(); } catch (msoErr) {}
-        }
-        if (typeof this.syncMapStudioInputsFromRecipe === "function") {
-            try { this.syncMapStudioInputsFromRecipe(); } catch (smrErr) {}
-        }
-        if (typeof this.updateMapStudioPreview === "function") {
-            try { this.updateMapStudioPreview(); } catch (umpErr) {}
-        }
-        if (typeof this.renderCardDecksRow === "function") {
-            try { this.renderCardDecksRow(); } catch (cdrErr) {}
-        }
-        if (typeof this.refreshLobbySettingsSelects === "function") {
-            try { this.refreshLobbySettingsSelects(); } catch (lselErr) {}
-        }
-        if (typeof this.updateSavedGamesUI === "function") {
-            try { this.updateSavedGamesUI(); } catch (sErr) {}
-        }
-        if (typeof this.renderRuleGuide === "function") {
-            try { this.renderRuleGuide(); } catch (rgErr) {}
-        }
-        if (typeof this.renderGlossary === "function") {
-            try { this.renderGlossary(); } catch (glErr) {}
-        }
-        if (typeof this.renderTilesAtlas === "function") {
-            try { this.renderTilesAtlas(); } catch (taErr) {}
-        }
-        if (typeof this.renderSidebarQuickLogPanel === "function") {
-            try { this.renderSidebarQuickLogPanel(); } catch (qlpErr) {}
-        }
+        this._safeCall("renderAnnouncement", this.renderAnnouncement);
+        this._safeCall("renderCurrentUserCard", this.renderCurrentUserCard);
+        this._safeCall("refreshMapStudioSelectOptions", this.refreshMapStudioSelectOptions);
+        this._safeCall("syncMapStudioInputsFromRecipe", this.syncMapStudioInputsFromRecipe);
+        this._safeCall("updateMapStudioPreview", this.updateMapStudioPreview);
+        this._safeCall("renderCardDecksRow", this.renderCardDecksRow);
+        this._safeCall("refreshLobbySettingsSelects", this.refreshLobbySettingsSelects);
+        this._safeCall("updateSavedGamesUI", this.updateSavedGamesUI);
+        this._safeCall("renderRuleGuide", this.renderRuleGuide);
+        this._safeCall("renderGlossary", this.renderGlossary);
+        this._safeCall("renderTilesAtlas", this.renderTilesAtlas);
+        this._safeCall("renderSidebarQuickLogPanel", this.renderSidebarQuickLogPanel);
         if (this.lastSavedSessions && typeof this.renderSavedSessionsList === "function") {
-            try { this.renderSavedSessionsList(this.lastSavedSessions); } catch (slErr) {}
+            this._safeCall("renderSavedSessionsList", function () { self.renderSavedSessionsList(self.lastSavedSessions); });
         }
-        if (typeof this.renderPawnShopModal === "function") {
-            var pawnModal = document.getElementById("pawn-shop-modal");
-            if (pawnModal && pawnModal.style.display !== "none") {
-                try { this.renderPawnShopModal(); } catch (psmErr) {}
-            }
+        var pawnModal = document.getElementById("pawn-shop-modal");
+        if (pawnModal && pawnModal.style.display !== "none") {
+            this._safeCall("renderPawnShopModal", this.renderPawnShopModal);
         }
-        if (typeof this.renderHeroVideosSection === "function") {
-            try { this.renderHeroVideosSection(); } catch (hvsErr) {}
-        }
-
-        if (typeof this.refreshBoardTemplateSelects === "function") {
-            try { this.refreshBoardTemplateSelects(); } catch (selErr) {}
-        }
+        this._safeCall("renderHeroVideosSection", this.renderHeroVideosSection);
+        this._safeCall("refreshBoardTemplateSelects", this.refreshBoardTemplateSelects);
 
         // Pokud existuje renderer desky, překreslíme dominanty a nápisy
         if (typeof this.renderBoard === "function") {
-            try { this.renderBoard(); } catch (bErr) {}
+            this._safeCall("renderBoard", this.renderBoard);
         } else if (this.boardRenderer && typeof this.boardRenderer.renderBoard === "function") {
-            try { this.boardRenderer.renderBoard(); } catch (bErr) {}
+            this._safeCall("boardRenderer.renderBoard", this.boardRenderer.renderBoard, this.boardRenderer);
         } else if (window.PRS_Board && typeof window.PRS_Board.renderBoard === "function") {
-            try { window.PRS_Board.renderBoard(); } catch (bErr) {}
+            this._safeCall("PRS_Board.renderBoard", window.PRS_Board.renderBoard, window.PRS_Board);
         }
 
         // Překreslíme lobby hráče a aktivní banner
-        if (typeof this.renderLobbyPlayers === "function") {
-            try { this.renderLobbyPlayers(); } catch (lErr) {}
-        }
+        this._safeCall("renderLobbyPlayers", this.renderLobbyPlayers);
         var activeRound = document.getElementById("gamehall-active-round-info");
         if (activeRound && this.state) {
             var roundTxt = window.PRS_I18n ? window.PRS_I18n.t("lobby.active_game_info", { round: this.state.roundNumber || 1, count: this.state.players ? this.state.players.length : 4 }) : ("Kolo " + (this.state.roundNumber || 1) + " • " + (this.state.players ? this.state.players.length : 4) + " Rytířů");
@@ -1030,87 +1045,40 @@ window.PRS_App = {
 
         // Okamžitě překreslíme herní HUD, detail pole a spodní dashboard
         if (this.state) {
-            if (typeof this.renderTopPlayersHud === "function") {
-                try { this.renderTopPlayersHud(); } catch (e) {}
-            }
-            if (typeof this.renderHeartTrack === "function") {
-                try { this.renderHeartTrack(); } catch (e) {}
-            }
-            if (typeof this.renderLowerKnightDetail === "function") {
-                try { this.renderLowerKnightDetail(); } catch (e) {}
-            }
-            if (typeof this.updateHudTurnInfo === "function") {
-                try { this.updateHudTurnInfo(); } catch (e) {}
-            }
-            if (typeof this.renderStandingTileDetail === "function") {
-                try { this.renderStandingTileDetail(); } catch (e) {}
-            }
-            if (typeof this.renderActivePlayerPanel === "function") {
-                try { this.renderActivePlayerPanel(); } catch (e) {}
-            }
-            if (typeof this.renderActionPanel === "function") {
-                try { this.renderActionPanel(); } catch (e) {}
-            }
-            if (typeof this.renderStandingNodeCard === "function") {
-                try { this.renderStandingNodeCard(); } catch (e) {}
-            }
-            if (typeof this.updateMobileDock === "function") {
-                try { this.updateMobileDock(); } catch (e) {}
-            }
-            if (typeof this.renderKnightEmotesHud === "function") {
-                try { this.renderKnightEmotesHud(); } catch (e) {}
-            }
-            if (typeof this.renderCardDecksRow === "function") {
-                try { this.renderCardDecksRow(); } catch (e) {}
-            }
-            if (typeof this.syncSettingsSoundLabel === "function") {
-                try { this.syncSettingsSoundLabel(); } catch (e) {}
-            }
-            if (typeof this.syncSettingsDeviceLabel === "function") {
-                try { this.syncSettingsDeviceLabel(); } catch (e) {}
-            }
+            this._safeCall("renderTopPlayersHud", this.renderTopPlayersHud);
+            this._safeCall("renderHeartTrack", this.renderHeartTrack);
+            this._safeCall("renderLowerKnightDetail", this.renderLowerKnightDetail);
+            this._safeCall("updateHudTurnInfo", this.updateHudTurnInfo);
+            this._safeCall("renderStandingTileDetail", this.renderStandingTileDetail);
+            this._safeCall("renderActivePlayerPanel", this.renderActivePlayerPanel);
+            this._safeCall("renderActionPanel", this.renderActionPanel);
+            this._safeCall("renderStandingNodeCard", this.renderStandingNodeCard);
+            this._safeCall("updateMobileDock", this.updateMobileDock);
+            this._safeCall("renderKnightEmotesHud", this.renderKnightEmotesHud);
+            this._safeCall("renderCardDecksRow", this.renderCardDecksRow);
+            this._safeCall("syncSettingsSoundLabel", this.syncSettingsSoundLabel);
+            this._safeCall("syncSettingsDeviceLabel", this.syncSettingsDeviceLabel);
         }
 
         // Zajištění reference pro PRS_Catalog
         window.PRS_Catalog = this;
 
         // Okamžité přerenderování všech podzáložek Pravidel a Katalogu
-        if (typeof this.renderRulesAndCatalog === "function") {
-            try { this.renderRulesAndCatalog(); } catch (catErr) {}
-        }
-        if (typeof this.renderCastlesGallery === "function") {
-            try { this.renderCastlesGallery(); } catch (cgErr) {}
-        }
-        if (typeof this.renderBestiary === "function") {
-            try { this.renderBestiary(); } catch (bErr) {}
-        }
-        if (typeof this.renderTrophiesHall === "function") {
-            try { this.renderTrophiesHall(); } catch (thErr) {}
-        }
-        if (typeof this.renderDecorationsGallery === "function") {
-            try { this.renderDecorationsGallery(); } catch (decErr) {}
-        }
-        if (typeof this.renderRulesItemsTable === "function") {
-            try { this.renderRulesItemsTable(); } catch (ritErr) {}
-        }
+        this._safeCall("renderRulesAndCatalog", this.renderRulesAndCatalog);
+        this._safeCall("renderCastlesGallery", this.renderCastlesGallery);
+        this._safeCall("renderBestiary", this.renderBestiary);
+        this._safeCall("renderTrophiesHall", this.renderTrophiesHall);
+        this._safeCall("renderDecorationsGallery", this.renderDecorationsGallery);
+        this._safeCall("renderRulesItemsTable", this.renderRulesItemsTable);
         if (typeof this.switchRulesView === "function") {
-            try { this.switchRulesView(this.rulesCurrentView || "quick"); } catch (srvErr) {}
+            this._safeCall("switchRulesView", function () { self.switchRulesView(self.rulesCurrentView || "quick"); });
         }
-        if (typeof this.renderCheatSheetContent === "function") {
-            try { this.renderCheatSheetContent(); } catch (csErr) {}
+        this._safeCall("renderCheatSheetContent", this.renderCheatSheetContent);
+        var wModal = document.getElementById("wardrobe-modal");
+        if (wModal && wModal.style.display !== "none") {
+            this._safeCall("renderWardrobeModal", this.renderWardrobeModal);
         }
-        if (typeof this.renderWardrobeModal === "function") {
-            var wModal = document.getElementById("wardrobe-modal");
-            if (wModal && wModal.style.display !== "none") {
-                try { this.renderWardrobeModal(); } catch (wErr) {}
-            }
-        }
-        if (typeof this.renderChatMessagesList === "function") {
-            try { this.renderChatMessagesList(); } catch (chatErr) {}
-        }
-        if (typeof this.renderHeroVideosSection === "function") {
-            try { this.renderHeroVideosSection(); } catch (vhErr) {}
-        }
+        this._safeCall("renderChatMessagesList", this.renderChatMessagesList);
     },
 
     // --- HUDEBNÍ PŘEHRÁVAČ & BGM KONTROLER ---,
@@ -1384,6 +1352,10 @@ window.PRS_App = {
         if (sfxLbl) sfxLbl.textContent = Math.round(window.PRS_Audio.sfxVolume * 100) + "%";
 
         this.updateMusicProgressUI();
+
+        if (window.PRS_MusicWidget && typeof window.PRS_MusicWidget.refresh === "function") {
+            try { window.PRS_MusicWidget.refresh(); } catch (mwErr) { console.warn("[KiDesky] MusicWidget refresh err:", mwErr); }
+        }
 
     },
 
@@ -1732,7 +1704,7 @@ window.PRS_App = {
                     self.renderHeroVideosSection();
                 }
             })
-            .catch(function () { });
+            .catch(function (err) { console.warn("[KiDesky] list-videos failed:", err); });
     },
 
     renderHeroVideoControls: function () {
@@ -2097,7 +2069,7 @@ window.PRS_App = {
                     self.renderAnnouncement();
                 }
             })
-            .catch(function () { });
+            .catch(function (err) { console.warn("[KiDesky] get-announcement failed:", err); });
     },
 
     renderAnnouncement: function () {
@@ -2857,7 +2829,7 @@ window.PRS_App = {
 
                         if (Array.isArray(arr) && arr.length > 0) this.unlockedPawns = arr;
 
-                    } catch (e2) { }
+                    } catch (e2) { console.warn("[KiDesky] Invalid saved unlockedPawnsJson:", e2); }
 
                 }
 
@@ -2906,7 +2878,7 @@ window.PRS_App = {
                                 selfSync.handleSessionExpired();
                             }
                         })
-                        .catch(function () { });
+                        .catch(function (err) { console.warn("[KiDesky] session-me sync failed:", err); });
                 }
             }
             if (isGuest) {
@@ -3203,7 +3175,7 @@ window.PRS_App = {
         if (this.currentUser && this.currentUser.role !== "Guest") {
             this.currentUser.displayName = newNick;
             try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
-            PRS_Api.post("update_nickname", { displayName: newNick }).catch(function () { });
+            PRS_Api.post("update_nickname", { displayName: newNick }).catch(function (err) { console.warn("[KiDesky] update_nickname failed:", err); });
         }
         try { localStorage.setItem("prs_player_nickname", newNick); } catch (e) { }
         this.updateUserUI();
@@ -3483,7 +3455,7 @@ window.PRS_App = {
 
     logoutUser: function () {
         if (window.PRS_Api) {
-            window.PRS_Api.post("logout", {}, { silentAuth: true }).catch(function () { });
+            window.PRS_Api.post("logout", {}, { silentAuth: true }).catch(function (err) { console.warn("[KiDesky] logout request failed:", err); });
             window.PRS_Api.clearAuthToken();
         }
         this.setGuestMode();
@@ -3531,7 +3503,7 @@ window.PRS_App = {
         if (this.currentUser && this.currentUser.role !== "Guest") {
             this.currentUser.displayName = newNick;
             try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
-            PRS_Api.post("update_nickname", { displayName: newNick }).catch(function () { });
+            PRS_Api.post("update_nickname", { displayName: newNick }).catch(function (err) { console.warn("[KiDesky] saveProfileNickname failed:", err); });
         }
         try { localStorage.setItem("prs_player_nickname", newNick); } catch (e) { }
         this.updateUserUI();
@@ -3641,13 +3613,13 @@ window.PRS_App = {
 
                             if (this.currentUser.username) {
 
-                                PRS_Api.post("update_nickname", { displayName: cleanNick }).catch(function () { });
+                                PRS_Api.post("update_nickname", { displayName: cleanNick }).catch(function (err) { console.warn("[KiDesky] updateLobbyPlayerName sync failed:", err); });
 
                             }
 
                         }
 
-                    } catch (e) { }
+                    } catch (e) { console.warn("[KiDesky] lobby nickname persist error:", e); }
 
                 }
 
@@ -3857,7 +3829,7 @@ window.PRS_App = {
                 this.currentUser.selectedPawnId = pawnId;
                 try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
                 if (this.currentUser.role !== "Guest" && this.currentUser.username) {
-                    PRS_Api.post("save-user-pawn", { selectedPawnId: pawnId }).catch(function () { });
+                    PRS_Api.post("save-user-pawn", { selectedPawnId: pawnId }).catch(function (err) { console.warn("[KiDesky] save-user-pawn failed:", err); });
                 }
             }
         }
@@ -3907,7 +3879,7 @@ window.PRS_App = {
                         self.updateUserUI();
                     }
                 })
-                .catch(function () { });
+                .catch(function (err) { console.warn("[KiDesky] award-credits failed:", err); });
             }
         }
         this.updateUserUI();
@@ -3968,14 +3940,14 @@ window.PRS_App = {
                         }
                         if (res.unlockedPawnsJson) {
                             self.currentUser.unlockedPawnsJson = res.unlockedPawnsJson;
-                            try { self.unlockedPawns = JSON.parse(res.unlockedPawnsJson); } catch (e2) { }
+                            try { self.unlockedPawns = JSON.parse(res.unlockedPawnsJson); } catch (e2) { console.warn("[KiDesky] Invalid unlockedPawnsJson response:", e2); }
                         }
                         try { localStorage.setItem("prs_user", JSON.stringify(self.currentUser)); } catch (e3) { }
                         self.updateUserUI();
                         self.renderPawnShopModal();
                     }
                 })
-                .catch(function () { });
+                .catch(function (err) { console.warn("[KiDesky] unlock-pawn failed:", err); });
             }
         }
 
@@ -4022,15 +3994,16 @@ window.PRS_App = {
                     var unlNames = res.stats.newlyUnlocked.map(function (k) { return names[k] || k; }).join(", ");
                     if (window.PRS_Audio) window.PRS_Audio.playFanfare();
                     setTimeout(function () {
-                        KiDeskyDialog.alert("Gratulujeme! Získal jsi nový královský odznak:<br><br><strong style='color:#fde68a; font-size:1.15rem;'>" + unlNames + "</strong><br><br>Najdeš ho ve své Rytířské síni slávy.", {
+                        KiDeskyDialog.alert("Gratulujeme! Získal jsi nový královský odznak:<br><br><strong style='color:#fde68a; font-size:1.15rem;'>" + self.escapeHtml(unlNames) + "</strong><br><br>Najdeš ho ve své Rytířské síni slávy.", {
                             title: "Nový královský odznak",
-                            icon: "🏆"
+                            icon: "🏆",
+                            allowHtml: true
                         });
                     }, 1200);
                 }
             }
         })
-        .catch(function () { });
+        .catch(function (err) { console.warn("[KiDesky] record-game-stats failed:", err); });
     },
 
     openAchievementsModal: function () {
@@ -4244,7 +4217,7 @@ window.PRS_App = {
         var achList = [];
         try {
             if (u.achievementsJson) achList = JSON.parse(u.achievementsJson);
-        } catch (e) { }
+        } catch (e) { console.warn("[KiDesky] Invalid achievementsJson:", e); }
 
         var badges = [
             { id: "first_game", icon: "🥉", title: "První krok", desc: "Zahraj svou první partii v království Princeznina srdce." },
@@ -4461,7 +4434,8 @@ window.PRS_App = {
         var alertTitle = isEn ? "Beta Testing Application Accepted" : "Přihláška k testování přijata";
         KiDeskyDialog.alert(alertMsg, {
             title: alertTitle,
-            icon: "📜"
+            icon: "📜",
+            allowHtml: true
         });
     },
 
@@ -4920,8 +4894,8 @@ window.PRS_App = {
                         difficulty: difficultyMode,
                         playerCount: this.state.players.length
                     })
-                }).catch(function () { });
-            } catch (e) { }
+                }).catch(function (err) { console.warn("[KiDesky] log-telemetry failed:", err); });
+            } catch (e) { console.warn("[KiDesky] telemetry payload error:", e); }
         }
 
         this.isBoardStaticDirty = true;

@@ -594,14 +594,15 @@
                     },
                     {
                         id: "original_room",
-                        label: "🔄 Připojit se k původnímu stolu (" + self.escapeHtml(rCode) + ")",
+                        label: "🔄 Připojit se k původnímu stolu (" + rCode + ")",
                         description: "Pokusí se načíst aktuální živý stav původní online místnosti ze serveru.",
                         isPrimary: false
                     }
                 ],
                 {
                     title: "Načtení multiplayerové výpravy",
-                    icon: "🏰"
+                    icon: "🏰",
+                    allowHtml: true
                 }
             ).then(function (chosenMode) {
                 if (!chosenMode) return;
@@ -1362,7 +1363,8 @@
                     title: "Převést na offline hru proti botům",
                     icon: "🤖",
                     confirmText: "🤖 Ano, hrát offline proti botům",
-                    cancelText: "Zůstat online"
+                    cancelText: "Zůstat online",
+                    allowHtml: true
                 }
             );
             if (!conf) return;

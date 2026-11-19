@@ -423,7 +423,7 @@
         var hist = [];
         try {
             hist = JSON.parse(localStorage.getItem("prs_game_history") || "[]");
-        } catch (e) { }
+        } catch (e) { console.warn("[Modals] Invalid prs_game_history JSON:", e); }
 
         var entry = {
             id: "game_" + Date.now(),
@@ -465,7 +465,7 @@
             try {
                 var hist = JSON.parse(localStorage.getItem("prs_game_history") || "[]");
                 matchData = hist[histIndex];
-            } catch (e) { }
+            } catch (e) { console.warn("[Modals] Invalid prs_game_history diploma JSON:", e); }
         }
 
         if (!matchData && this.state) {
@@ -3045,7 +3045,7 @@
             try { this.renderActionPanel(); } catch (e) { console.error("renderActionPanel error:", e); }
             try { this.renderLowerKnightDetail(); } catch (e) { console.error("renderLowerKnightDetail error:", e); }
             if (this.activeSidebarTab === "property") {
-                try { this.renderSidebarPropertyPanel(); } catch (e) { }
+                try { this.renderSidebarPropertyPanel(); } catch (e) { console.warn("[Modals] renderSidebarPropertyPanel error:", e); }
             }
 
             var self = this;
@@ -3059,7 +3059,7 @@
             }
         } else {
             this.isActionProcessing = false;
-            try { this.renderActionPanel(); } catch (e) { }
+            try { this.renderActionPanel(); } catch (e) { console.warn("[Modals] renderActionPanel error:", e); }
         }
     },
 

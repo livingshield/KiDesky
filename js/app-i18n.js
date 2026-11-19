@@ -151,13 +151,13 @@
                     if (window.dispatchEvent) window.dispatchEvent(event);
                     if (document.dispatchEvent) document.dispatchEvent(event);
                 }
-            } catch (evErr) {}
+            } catch (evErr) { console.warn('[i18n] CustomEvent dispatch failed:', evErr); }
 
             // Pokud existuje HUD, překreslíme ho
             if (window.PRS_HUD && typeof window.PRS_HUD.render === 'function') {
                 try {
                     window.PRS_HUD.render();
-                } catch (e) {}
+                } catch (e) { console.warn('[i18n] PRS_HUD.render failed:', e); }
             }
         },
 
@@ -386,14 +386,14 @@
 
             // 7. Map Studio a Editor živá synchronizace při otevřeném modálu
             if (window.PRS_App && typeof window.PRS_App.refreshMapStudioSelectOptions === 'function') {
-                try { window.PRS_App.refreshMapStudioSelectOptions(); } catch (e) { }
+                try { window.PRS_App.refreshMapStudioSelectOptions(); } catch (e) { console.warn('[i18n] refreshMapStudioSelectOptions failed:', e); }
             }
             if (window.PRS_App && typeof window.PRS_App.renderMapStudioCounters === 'function' && document.getElementById('ms-counters-grid')) {
                 try {
                     window.PRS_App.renderMapStudioCounters();
                     window.PRS_App.renderMapStudioAnimalLevels();
                     window.PRS_App.updateMapStudioPreview();
-                } catch (e) { }
+                } catch (e) { console.warn('[i18n] Map Studio UI sync failed:', e); }
             }
             if (window.PRS_MapEditor && typeof window.PRS_MapEditor.renderEditorUI === 'function') {
                 var edView = document.getElementById('ms-editor-view');
@@ -403,7 +403,7 @@
                         window.PRS_MapEditor.updateStatusHelp();
                         window.PRS_MapEditor.updateInspectorUI();
                         window.PRS_MapEditor.renderCanvas();
-                    } catch (e) { }
+                    } catch (e) { console.warn('[i18n] PRS_MapEditor UI sync failed:', e); }
                 }
             }
         },

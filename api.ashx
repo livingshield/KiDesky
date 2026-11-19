@@ -35,8 +35,6 @@ public class KiDeskyApiHandler : IHttpHandler
         public string emote;
         public long timestamp;
     }
-    private static readonly Dictionary<string, List<RoomEmoteItem>> _roomEmotes = new Dictionary<string, List<RoomEmoteItem>>(StringComparer.OrdinalIgnoreCase);
-    private static readonly object _emoteLock = new object();
 
     public class RoomChatMessage
     {
@@ -50,8 +48,6 @@ public class KiDeskyApiHandler : IHttpHandler
         public long timestamp;
         public bool isSystem;
     }
-    private static readonly Dictionary<string, List<RoomChatMessage>> _roomChat = new Dictionary<string, List<RoomChatMessage>>(StringComparer.OrdinalIgnoreCase);
-    private static readonly object _chatLock = new object();
 
     public class AuthenticatedUser
     {
@@ -1236,6 +1232,44 @@ BEGIN
     );
     CREATE UNIQUE INDEX [IX_prs_UserSessions_TokenHash] ON [prs].[prs_UserSessions]([TokenHash]);
     CREATE INDEX [IX_prs_UserSessions_UserId] ON [prs].[prs_UserSessions]([UserId]);
+END
+
+IF OBJECT_ID(N'[prs].[prs_GameSessions]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_GameSessions]', N'StateVersion') IS NULL
+BEGIN
+    ALTER TABLE [prs].[prs_GameSessions] ADD [StateVersion] INT NOT NULL CONSTRAINT [DF_prs_GameSessions_StateVersion] DEFAULT 1;
+END
+
+IF OBJECT_ID(N'[prs].[prs_RoomChat]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [prs].[prs_RoomChat] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [MessageId] NVARCHAR(16) NOT NULL,
+        [RoomCode] NVARCHAR(16) NOT NULL,
+        [PlayerIndex] INT NOT NULL DEFAULT 0,
+        [Author] NVARCHAR(64) NOT NULL,
+        [CrestId] NVARCHAR(32) NOT NULL DEFAULT N'lion',
+        [CrestColor] NVARCHAR(32) NOT NULL DEFAULT N'gold',
+        [MessageText] NVARCHAR(320) NOT NULL,
+        [IsSystem] BIT NOT NULL DEFAULT 0,
+        [TimestampMs] BIGINT NOT NULL,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+    CREATE INDEX [IX_prs_RoomChat_RoomCode_Ts] ON [prs].[prs_RoomChat]([RoomCode], [TimestampMs] DESC);
+END
+
+IF OBJECT_ID(N'[prs].[prs_RoomEmotes]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [prs].[prs_RoomEmotes] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [EmoteId] NVARCHAR(16) NOT NULL,
+        [RoomCode] NVARCHAR(16) NOT NULL,
+        [PlayerIndex] INT NOT NULL DEFAULT 0,
+        [Author] NVARCHAR(64) NOT NULL,
+        [EmoteText] NVARCHAR(128) NOT NULL,
+        [TimestampMs] BIGINT NOT NULL,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+    CREATE INDEX [IX_prs_RoomEmotes_RoomCode_Ts] ON [prs].[prs_RoomEmotes]([RoomCode], [TimestampMs] DESC);
 END", conn))
             {
                 migCmd.ExecuteNonQuery();
@@ -1590,6 +1624,8 @@ BEGIN
 
         [StateJson] NVARCHAR(MAX) NOT NULL,
 
+        [StateVersion] INT NOT NULL DEFAULT 1,
+
         [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
 
         [UpdatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
@@ -1673,6 +1709,44 @@ BEGIN
     );
     CREATE UNIQUE INDEX [IX_prs_UserSessions_TokenHash] ON [prs].[prs_UserSessions]([TokenHash]);
     CREATE INDEX [IX_prs_UserSessions_UserId] ON [prs].[prs_UserSessions]([UserId]);
+END
+
+IF OBJECT_ID(N'[prs].[prs_GameSessions]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_GameSessions]', N'StateVersion') IS NULL
+BEGIN
+    ALTER TABLE [prs].[prs_GameSessions] ADD [StateVersion] INT NOT NULL CONSTRAINT [DF_prs_GameSessions_StateVersion] DEFAULT 1;
+END
+
+IF OBJECT_ID(N'[prs].[prs_RoomChat]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [prs].[prs_RoomChat] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [MessageId] NVARCHAR(16) NOT NULL,
+        [RoomCode] NVARCHAR(16) NOT NULL,
+        [PlayerIndex] INT NOT NULL DEFAULT 0,
+        [Author] NVARCHAR(64) NOT NULL,
+        [CrestId] NVARCHAR(32) NOT NULL DEFAULT N'lion',
+        [CrestColor] NVARCHAR(32) NOT NULL DEFAULT N'gold',
+        [MessageText] NVARCHAR(320) NOT NULL,
+        [IsSystem] BIT NOT NULL DEFAULT 0,
+        [TimestampMs] BIGINT NOT NULL,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+    CREATE INDEX [IX_prs_RoomChat_RoomCode_Ts] ON [prs].[prs_RoomChat]([RoomCode], [TimestampMs] DESC);
+END
+
+IF OBJECT_ID(N'[prs].[prs_RoomEmotes]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [prs].[prs_RoomEmotes] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [EmoteId] NVARCHAR(16) NOT NULL,
+        [RoomCode] NVARCHAR(16) NOT NULL,
+        [PlayerIndex] INT NOT NULL DEFAULT 0,
+        [Author] NVARCHAR(64) NOT NULL,
+        [EmoteText] NVARCHAR(128) NOT NULL,
+        [TimestampMs] BIGINT NOT NULL,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+    CREATE INDEX [IX_prs_RoomEmotes_RoomCode_Ts] ON [prs].[prs_RoomEmotes]([RoomCode], [TimestampMs] DESC);
 END
 
 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'DisplayName')
@@ -2674,19 +2748,130 @@ END";
         }
     }
 
+    private static string StripControlChars(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        StringBuilder sb = new StringBuilder(s.Length);
+        for (int i = 0; i < s.Length; i++)
+        {
+            char c = s[i];
+            if (c >= 0x20 || c == '\n' || c == '\r' || c == '\t')
+            {
+                sb.Append(c);
+            }
+        }
+        return sb.ToString();
+    }
+
+    private static string TruncateStr(string s, int maxLen)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        return s.Length > maxLen ? s.Substring(0, maxLen) : s;
+    }
+
+    private List<RoomChatMessage> LoadRoomChat(SqlConnection conn, string roomCode, long sinceTs, int maxCount)
+    {
+        List<RoomChatMessage> list = new List<RoomChatMessage>();
+        if (string.IsNullOrEmpty(roomCode)) return list;
+        int lim = maxCount > 0 ? maxCount : 60;
+        if (lim > 100) lim = 100;
+        using (var cmd = new SqlCommand(@"
+            SELECT TOP (@lim) [MessageId], [RoomCode], [PlayerIndex], [Author], [CrestId], [CrestColor], [MessageText], [IsSystem], [TimestampMs]
+            FROM [prs].[prs_RoomChat]
+            WHERE [RoomCode] = @code AND (@since <= 0 OR [TimestampMs] > @since)
+            ORDER BY [TimestampMs] DESC, [Id] DESC", conn))
+        {
+            cmd.Parameters.Add("@lim", SqlDbType.Int).Value = lim;
+            cmd.Parameters.Add("@code", SqlDbType.NVarChar, 16).Value = TruncateStr(roomCode.Trim().ToUpperInvariant(), 16);
+            cmd.Parameters.Add("@since", SqlDbType.BigInt).Value = sinceTs;
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    list.Add(new RoomChatMessage
+                    {
+                        id = r["MessageId"].ToString(),
+                        code = r["RoomCode"].ToString(),
+                        playerIndex = Convert.ToInt32(r["PlayerIndex"]),
+                        author = r["Author"].ToString(),
+                        crestId = r["CrestId"].ToString(),
+                        crestColor = r["CrestColor"].ToString(),
+                        text = r["MessageText"].ToString(),
+                        isSystem = Convert.ToBoolean(r["IsSystem"]),
+                        timestamp = Convert.ToInt64(r["TimestampMs"])
+                    });
+                }
+            }
+        }
+        list.Reverse();
+        return list;
+    }
+
+    private List<RoomEmoteItem> LoadRecentRoomEmotes(SqlConnection conn, string roomCode, long minTs)
+    {
+        List<RoomEmoteItem> list = new List<RoomEmoteItem>();
+        if (string.IsNullOrEmpty(roomCode)) return list;
+        using (var cmd = new SqlCommand(@"
+            SELECT TOP 15 [EmoteId], [RoomCode], [PlayerIndex], [Author], [EmoteText], [TimestampMs]
+            FROM [prs].[prs_RoomEmotes]
+            WHERE [RoomCode] = @code AND [TimestampMs] > @minTs
+            ORDER BY [TimestampMs] ASC, [Id] ASC", conn))
+        {
+            cmd.Parameters.Add("@code", SqlDbType.NVarChar, 16).Value = TruncateStr(roomCode.Trim().ToUpperInvariant(), 16);
+            cmd.Parameters.Add("@minTs", SqlDbType.BigInt).Value = minTs;
+            using (var r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                {
+                    list.Add(new RoomEmoteItem
+                    {
+                        id = r["EmoteId"].ToString(),
+                        code = r["RoomCode"].ToString(),
+                        playerIndex = Convert.ToInt32(r["PlayerIndex"]),
+                        author = r["Author"].ToString(),
+                        emote = r["EmoteText"].ToString(),
+                        timestamp = Convert.ToInt64(r["TimestampMs"])
+                    });
+                }
+            }
+        }
+        return list;
+    }
+
     private void HandleSendEmote(HttpContext context)
     {
+        EnsureDatabaseSchema();
         string code = (context.Request.QueryString["code"] ?? "").Trim().ToUpperInvariant();
         string playerIdxStr = context.Request.QueryString["playerIdx"] ?? "0";
         int playerIdx = 0;
         int.TryParse(playerIdxStr, out playerIdx);
         string emote = context.Request.QueryString["emote"] ?? "";
         string author = context.Request.QueryString["author"] ?? "";
+
+        if (string.Equals(context.Request.HttpMethod, "POST", StringComparison.OrdinalIgnoreCase))
+        {
+            var body = ReadJsonBody(context);
+            if (body != null)
+            {
+                if (string.IsNullOrEmpty(code)) code = GetStr(body, "code").Trim().ToUpperInvariant();
+                if (string.IsNullOrEmpty(author)) author = GetStr(body, "author").Trim();
+                if (string.IsNullOrEmpty(emote)) emote = GetStr(body, "emote");
+                if (body.ContainsKey("playerIndex") && body["playerIndex"] != null) int.TryParse(body["playerIndex"].ToString(), out playerIdx);
+                else if (body.ContainsKey("playerIdx") && body["playerIdx"] != null) int.TryParse(body["playerIdx"].ToString(), out playerIdx);
+            }
+        }
+
+        code = TruncateStr(code, 16);
+        emote = TruncateStr(StripControlChars(emote).Trim(), 128);
+        author = TruncateStr(StripControlChars(author).Trim(), 64);
+
         if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(emote))
         {
             context.Response.Write(_json.Serialize(new { ok = false, message = "Missing code or emote" }));
             return;
         }
+        if (string.IsNullOrEmpty(author)) author = "Rytíř";
+
         long nowMs = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
         var item = new RoomEmoteItem
         {
@@ -2697,18 +2882,32 @@ END";
             emote = emote,
             timestamp = nowMs
         };
-        lock (_emoteLock)
+
+        using (var conn = new SqlConnection(CONN_STR))
         {
-            if (!_roomEmotes.ContainsKey(code)) _roomEmotes[code] = new List<RoomEmoteItem>();
-            var list = _roomEmotes[code];
-            list.Add(item);
-            if (list.Count > 15) list.RemoveRange(0, list.Count - 15);
+            conn.Open();
+            using (var ins = new SqlCommand(@"
+                INSERT INTO [prs].[prs_RoomEmotes] ([EmoteId], [RoomCode], [PlayerIndex], [Author], [EmoteText], [TimestampMs])
+                VALUES (@eid, @code, @pidx, @auth, @emote, @ts);
+                DELETE FROM [prs].[prs_RoomEmotes] WHERE [TimestampMs] < @cutoff;", conn))
+            {
+                ins.Parameters.Add("@eid", SqlDbType.NVarChar, 16).Value = item.id;
+                ins.Parameters.Add("@code", SqlDbType.NVarChar, 16).Value = item.code;
+                ins.Parameters.Add("@pidx", SqlDbType.Int).Value = item.playerIndex;
+                ins.Parameters.Add("@auth", SqlDbType.NVarChar, 64).Value = item.author;
+                ins.Parameters.Add("@emote", SqlDbType.NVarChar, 128).Value = item.emote;
+                ins.Parameters.Add("@ts", SqlDbType.BigInt).Value = item.timestamp;
+                ins.Parameters.Add("@cutoff", SqlDbType.BigInt).Value = nowMs - 300000L;
+                ins.ExecuteNonQuery();
+            }
         }
+
         context.Response.Write(_json.Serialize(new { ok = true, emote = item }));
     }
 
     private void HandleSendChat(HttpContext context)
     {
+        EnsureDatabaseSchema();
         string code = (context.Request.QueryString["code"] ?? "").Trim().ToUpperInvariant();
         string playerIdxStr = context.Request.QueryString["playerIdx"] ?? "0";
         int playerIdx = 0;
@@ -2718,14 +2917,14 @@ END";
         string crestColor = (context.Request.QueryString["crestColor"] ?? "gold").Trim();
         string text = "";
 
-        if (context.Request.HttpMethod == "POST")
+        if (string.Equals(context.Request.HttpMethod, "POST", StringComparison.OrdinalIgnoreCase))
         {
             var body = ReadJsonBody(context);
             if (body != null)
             {
                 if (string.IsNullOrEmpty(code)) code = GetStr(body, "code").Trim().ToUpperInvariant();
                 if (string.IsNullOrEmpty(author)) author = GetStr(body, "author").Trim();
-                if (body.ContainsKey("playerIndex")) int.TryParse(body["playerIndex"].ToString(), out playerIdx);
+                if (body.ContainsKey("playerIndex") && body["playerIndex"] != null) int.TryParse(body["playerIndex"].ToString(), out playerIdx);
                 string cId = GetStr(body, "crestId");
                 if (!string.IsNullOrEmpty(cId)) crestId = cId;
                 string cCol = GetStr(body, "crestColor");
@@ -2738,14 +2937,18 @@ END";
             text = (context.Request.QueryString["text"] ?? "").Trim();
         }
 
+        code = TruncateStr(code, 16);
+        text = TruncateStr(StripControlChars(text).Trim(), 280);
+        author = TruncateStr(StripControlChars(author).Trim(), 64);
+        crestId = TruncateStr(StripControlChars(crestId).Trim(), 32);
+        crestColor = TruncateStr(StripControlChars(crestColor).Trim(), 32);
+
         if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(text))
         {
             context.Response.Write(_json.Serialize(new { ok = false, message = "Missing code or text" }));
             return;
         }
 
-        if (text.Length > 280) text = text.Substring(0, 280);
-        text = text.Replace("<", "&lt;").Replace(">", "&gt;");
         if (string.IsNullOrEmpty(author)) author = "Rytíř";
         if (string.IsNullOrEmpty(crestId)) crestId = "lion";
         if (string.IsNullOrEmpty(crestColor)) crestColor = "gold";
@@ -2764,38 +2967,46 @@ END";
             isSystem = false
         };
 
-        lock (_chatLock)
+        using (var conn = new SqlConnection(CONN_STR))
         {
-            if (!_roomChat.ContainsKey(code)) _roomChat[code] = new List<RoomChatMessage>();
-            var list = _roomChat[code];
-            list.Add(msg);
-            if (list.Count > 60) list.RemoveRange(0, list.Count - 60);
+            conn.Open();
+            using (var ins = new SqlCommand(@"
+                INSERT INTO [prs].[prs_RoomChat] ([MessageId], [RoomCode], [PlayerIndex], [Author], [CrestId], [CrestColor], [MessageText], [IsSystem], [TimestampMs])
+                VALUES (@mid, @code, @pidx, @auth, @cid, @ccol, @txt, 0, @ts);
+                DELETE FROM [prs].[prs_RoomChat]
+                WHERE [RoomCode] = @code
+                  AND [Id] NOT IN (SELECT TOP 100 [Id] FROM [prs].[prs_RoomChat] WHERE [RoomCode] = @code ORDER BY [TimestampMs] DESC, [Id] DESC);", conn))
+            {
+                ins.Parameters.Add("@mid", SqlDbType.NVarChar, 16).Value = msg.id;
+                ins.Parameters.Add("@code", SqlDbType.NVarChar, 16).Value = msg.code;
+                ins.Parameters.Add("@pidx", SqlDbType.Int).Value = msg.playerIndex;
+                ins.Parameters.Add("@auth", SqlDbType.NVarChar, 64).Value = msg.author;
+                ins.Parameters.Add("@cid", SqlDbType.NVarChar, 32).Value = msg.crestId;
+                ins.Parameters.Add("@ccol", SqlDbType.NVarChar, 32).Value = msg.crestColor;
+                ins.Parameters.Add("@txt", SqlDbType.NVarChar, 320).Value = msg.text;
+                ins.Parameters.Add("@ts", SqlDbType.BigInt).Value = msg.timestamp;
+                ins.ExecuteNonQuery();
+            }
         }
 
-        context.Response.Write(_json.Serialize(new { ok = true, message = msg }));
+        context.Response.Write(_json.Serialize(new { ok = true, chat = msg, message = msg }));
     }
 
     private void HandleGetChat(HttpContext context)
     {
-        string code = (context.Request.QueryString["code"] ?? "").Trim().ToUpperInvariant();
+        EnsureDatabaseSchema();
+        string code = TruncateStr((context.Request.QueryString["code"] ?? "").Trim().ToUpperInvariant(), 16);
         string sinceStr = context.Request.QueryString["since"] ?? "0";
         long sinceTs = 0;
         long.TryParse(sinceStr, out sinceTs);
 
         List<RoomChatMessage> res = new List<RoomChatMessage>();
-        lock (_chatLock)
+        if (!string.IsNullOrEmpty(code))
         {
-            if (!string.IsNullOrEmpty(code) && _roomChat.ContainsKey(code))
+            using (var conn = new SqlConnection(CONN_STR))
             {
-                var list = _roomChat[code];
-                if (sinceTs > 0)
-                {
-                    res = list.FindAll(m => m.timestamp > sinceTs);
-                }
-                else
-                {
-                    res = new List<RoomChatMessage>(list);
-                }
+                conn.Open();
+                res = LoadRoomChat(conn, code, sinceTs, 60);
             }
         }
         context.Response.Write(_json.Serialize(new { ok = true, messages = res }));
@@ -3334,222 +3545,151 @@ END";
     }
 
     private void HandleSaveSession(HttpContext context)
-
     {
-
+        EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
-
         string sessionGuid = GetStr(body, "sessionGuid");
-
         if (string.IsNullOrEmpty(sessionGuid)) sessionGuid = Guid.NewGuid().ToString("N");
-
         string roomCode = GetStr(body, "roomCode");
-
         if (string.IsNullOrEmpty(roomCode)) roomCode = sessionGuid.Substring(0, 6).ToUpperInvariant();
-
         string templateCode = GetStr(body, "boardCode", GetStr(body, "templateCode", "classic_96"));
-
         string hostUsername = GetStr(body, "hostUsername", "Guest");
-
         string mode = GetStr(body, "mode", "Hotseat");
-
         double targetHearts = 30;
-
         if (body.ContainsKey("targetHearts") && body["targetHearts"] != null)
-
             double.TryParse(body["targetHearts"].ToString(), out targetHearts);
-
         string status = GetStr(body, "status", "Active");
-
         int currentTurnIdx = GetInt(body, "currentTurnPlayer", GetInt(body, "currentTurnPlayerIdx", 0));
-
         int turnNumber = GetInt(body, "turnNumber", 1);
-
         string winnerName = GetStr(body, "winnerName", null);
-
         string stateJson = GetStr(body, "stateJson", "{}");
-
         int expectedTurn = GetInt(body, "expectedTurnNumber", -1);
+        int expectedStateVersion = GetInt(body, "expectedStateVersion", -1);
+        bool allowBotOverride = body.ContainsKey("allowBotOverride") && Convert.ToBoolean(body["allowBotOverride"]);
+
+        int newStateVersion = 1;
 
         using (var conn = new SqlConnection(CONN_STR))
         {
             conn.Open();
-
-            bool isNewSession = false;
-            using (var chkNew = new SqlCommand("SELECT COUNT(*) FROM [prs].[prs_GameSessions] WHERE [SessionGuid] = @g", conn))
+            using (var tx = conn.BeginTransaction(IsolationLevel.ReadCommitted))
             {
-                chkNew.Parameters.AddWithValue("@g", sessionGuid);
-                isNewSession = (Convert.ToInt32(chkNew.ExecuteScalar()) == 0);
-            }
+                bool rowExists = false;
+                int dbTurn = 0;
+                int dbVersion = 1;
+                string dbStatus = "Active";
+                string existingJson = null;
 
-            if (isNewSession && string.IsNullOrEmpty(hostUsername))
-            {
-                hostUsername = "Host";
-            }
-
-            // 2.2 Optimistický zámek proti race conditions v online multiplayeru
-
-            if (expectedTurn >= 0)
-
-            {
-
-                using (var chk = new SqlCommand("SELECT [TurnNumber], [StateJson] FROM [prs].[prs_GameSessions] WHERE [SessionGuid] = @chkGuid", conn))
-
+                using (var chk = new SqlCommand(@"
+                    SELECT [TurnNumber], [StateVersion], [Status], [StateJson]
+                    FROM [prs].[prs_GameSessions] WITH (UPDLOCK, HOLDLOCK)
+                    WHERE [SessionGuid] = @guid", conn, tx))
                 {
-
-                    chk.Parameters.AddWithValue("@chkGuid", sessionGuid);
-
+                    chk.Parameters.AddWithValue("@guid", sessionGuid);
                     using (var rdr = chk.ExecuteReader())
-
                     {
-
                         if (rdr.Read())
-
                         {
-
-                            int dbTurn = Convert.ToInt32(rdr["TurnNumber"]);
-
-                            if (dbTurn > expectedTurn)
-
-                            {
-
-                                string dbState = rdr["StateJson"] != DBNull.Value ? rdr["StateJson"].ToString() : null;
-
-                                context.Response.StatusCode = 409;
-
-                                context.Response.Write(_json.Serialize(new
-
-                                {
-
-                                    ok = false,
-
-                                    status = "conflict",
-
-                                    error = "turn_conflict",
-
-                                    message = "Tento tah ji\u017e byl odehr\u00e1n jin\u00fdm hr\u00e1\u010dem. Synchronizuji aktu\u00e1ln\u00ed stav hry.",
-
-                                    serverTurnNumber = dbTurn,
-
-                                    sessionGuid = sessionGuid,
-
-                                    stateJson = dbState
-
-                                }));
-
-                                return;
-
-                            }
-
+                            rowExists = true;
+                            dbTurn = Convert.ToInt32(rdr["TurnNumber"]);
+                            dbVersion = rdr["StateVersion"] != DBNull.Value ? Convert.ToInt32(rdr["StateVersion"]) : 1;
+                            dbStatus = rdr["Status"] != DBNull.Value ? rdr["Status"].ToString() : "Active";
+                            existingJson = rdr["StateJson"] != DBNull.Value ? rdr["StateJson"].ToString() : null;
                         }
-
                     }
-
                 }
 
-            }
-
-            // 2.3 Ochrana lidských křesel před nechtěným přepsáním hostitelským bot-stavem
-            bool allowBotOverride = body.ContainsKey("allowBotOverride") && Convert.ToBoolean(body["allowBotOverride"]);
-            if (!allowBotOverride && !string.IsNullOrEmpty(stateJson) && stateJson != "{}")
-            {
-                using (var chkPlayers = new SqlCommand("SELECT TOP 1 [StateJson] FROM [prs].[prs_GameSessions] WHERE [SessionGuid] = @chkGuid OR [RoomCode] = @chkRoom ORDER BY [UpdatedAt] DESC", conn))
+                if (rowExists)
                 {
-                    chkPlayers.Parameters.Add("@chkGuid", SqlDbType.NVarChar, 64).Value = sessionGuid;
-                    chkPlayers.Parameters.Add("@chkRoom", SqlDbType.NVarChar, 16).Value = roomCode;
-                    object exObj = chkPlayers.ExecuteScalar();
-                    if (exObj != null && exObj != DBNull.Value)
+                    bool turnConflict = (expectedTurn >= 0 && dbTurn > expectedTurn);
+                    bool finishedVersionConflict = (expectedStateVersion > 0 && dbVersion > expectedStateVersion && string.Equals(dbStatus, "Finished", StringComparison.OrdinalIgnoreCase));
+
+                    if (turnConflict || finishedVersionConflict)
                     {
-                        string existingJson = exObj.ToString();
+                        tx.Rollback();
+                        context.Response.StatusCode = 409;
+                        context.Response.Write(_json.Serialize(new
+                        {
+                            ok = false,
+                            status = "conflict",
+                            error = "turn_conflict",
+                            message = "Tento tah ji\u017e byl odehr\u00e1n jin\u00fdm hr\u00e1\u010dem. Synchronizuji aktu\u00e1ln\u00ed stav hry.",
+                            serverTurnNumber = dbTurn,
+                            serverStateVersion = dbVersion,
+                            sessionGuid = sessionGuid,
+                            stateJson = existingJson
+                        }));
+                        return;
+                    }
+
+                    if (!allowBotOverride && !string.IsNullOrEmpty(stateJson) && stateJson != "{}" && !string.IsNullOrEmpty(existingJson))
+                    {
                         stateJson = MergeHumanPlayerClaims(existingJson, stateJson);
                     }
+
+                    using (var upd = new SqlCommand(@"
+                        UPDATE [prs].[prs_GameSessions]
+                        SET [Status] = @status,
+                            [CurrentTurnPlayerIdx] = @turnIdx,
+                            [TurnNumber] = @turnNum,
+                            [WinnerName] = @winner,
+                            [StateJson] = @state,
+                            [StateVersion] = [StateVersion] + 1,
+                            [UpdatedAt] = SYSUTCDATETIME()
+                        WHERE [SessionGuid] = @guid", conn, tx))
+                    {
+                        upd.Parameters.AddWithValue("@guid", sessionGuid);
+                        upd.Parameters.AddWithValue("@status", status);
+                        upd.Parameters.AddWithValue("@turnIdx", currentTurnIdx);
+                        upd.Parameters.AddWithValue("@turnNum", turnNumber);
+                        upd.Parameters.AddWithValue("@winner", (object)winnerName ?? DBNull.Value);
+                        upd.Parameters.AddWithValue("@state", stateJson);
+                        upd.ExecuteNonQuery();
+                    }
+                    newStateVersion = dbVersion + 1;
                 }
+                else
+                {
+                    if (string.IsNullOrEmpty(hostUsername))
+                    {
+                        hostUsername = "Host";
+                    }
+
+                    using (var ins = new SqlCommand(@"
+                        INSERT INTO [prs].[prs_GameSessions]
+                            ([SessionGuid], [RoomCode], [TemplateCode], [HostUsername], [Mode], [TargetHearts], [Status], [CurrentTurnPlayerIdx], [TurnNumber], [WinnerName], [StateJson], [StateVersion])
+                        VALUES
+                            (@guid, @room, @tpl, @host, @mode, @target, @status, @turnIdx, @turnNum, @winner, @state, 1)", conn, tx))
+                    {
+                        ins.Parameters.AddWithValue("@guid", sessionGuid);
+                        ins.Parameters.AddWithValue("@room", roomCode);
+                        ins.Parameters.AddWithValue("@tpl", templateCode);
+                        ins.Parameters.AddWithValue("@host", hostUsername);
+                        ins.Parameters.AddWithValue("@mode", mode);
+                        ins.Parameters.AddWithValue("@target", targetHearts);
+                        ins.Parameters.AddWithValue("@status", status);
+                        ins.Parameters.AddWithValue("@turnIdx", currentTurnIdx);
+                        ins.Parameters.AddWithValue("@turnNum", turnNumber);
+                        ins.Parameters.AddWithValue("@winner", (object)winnerName ?? DBNull.Value);
+                        ins.Parameters.AddWithValue("@state", stateJson);
+                        ins.ExecuteNonQuery();
+                    }
+                    newStateVersion = 1;
+                }
+
+                tx.Commit();
             }
-
-            using (var cmd = new SqlCommand(@"
-
-                IF EXISTS (SELECT 1 FROM [prs].[prs_GameSessions] WHERE [SessionGuid] = @guid)
-
-                BEGIN
-
-                    UPDATE [prs].[prs_GameSessions]
-
-                    SET [Status] = @status,
-
-                        [CurrentTurnPlayerIdx] = @turnIdx,
-
-                        [TurnNumber] = @turnNum,
-
-                        [WinnerName] = @winner,
-
-                        [StateJson] = @state,
-
-                        [UpdatedAt] = SYSUTCDATETIME()
-
-                    WHERE [SessionGuid] = @guid;
-
-                END
-
-                ELSE
-
-                BEGIN
-
-                    INSERT INTO [prs].[prs_GameSessions]
-
-                        ([SessionGuid], [RoomCode], [TemplateCode], [HostUsername], [Mode], [TargetHearts], [Status], [CurrentTurnPlayerIdx], [TurnNumber], [WinnerName], [StateJson])
-
-                    VALUES
-
-                        (@guid, @room, @tpl, @host, @mode, @target, @status, @turnIdx, @turnNum, @winner, @state);
-
-                END", conn))
-
-            {
-
-                cmd.Parameters.AddWithValue("@guid", sessionGuid);
-
-                cmd.Parameters.AddWithValue("@room", roomCode);
-
-                cmd.Parameters.AddWithValue("@tpl", templateCode);
-
-                cmd.Parameters.AddWithValue("@host", hostUsername);
-
-                cmd.Parameters.AddWithValue("@mode", mode);
-
-                cmd.Parameters.AddWithValue("@target", targetHearts);
-
-                cmd.Parameters.AddWithValue("@status", status);
-
-                cmd.Parameters.AddWithValue("@turnIdx", currentTurnIdx);
-
-                cmd.Parameters.AddWithValue("@turnNum", turnNumber);
-
-                cmd.Parameters.AddWithValue("@winner", (object)winnerName ?? DBNull.Value);
-
-                cmd.Parameters.AddWithValue("@state", stateJson);
-
-                cmd.ExecuteNonQuery();
-
-            }
-
         }
 
         context.Response.Write(_json.Serialize(new
-
         {
-
             ok = true,
-
             status = "success",
-
             sessionGuid = sessionGuid,
-
             roomCode = roomCode,
-
+            stateVersion = newStateVersion,
             savedAt = DateTime.UtcNow.ToString("o")
-
         }));
-
     }
 
     private string MergeHumanPlayerClaims(string existingJson, string incomingJson)
@@ -3664,200 +3804,161 @@ END";
     }
 
     private void HandleCheckSession(HttpContext context)
-
     {
-
+        EnsureDatabaseSchema();
         string guid = context.Request.QueryString["guid"] ?? "";
-
         string room = context.Request.QueryString["room"] ?? context.Request.QueryString["code"] ?? "";
-
         if (string.IsNullOrEmpty(guid)) guid = room;
+        long chatSince = 0;
+        long.TryParse(context.Request.QueryString["chatSince"] ?? "0", out chatSince);
+
+        bool found = false;
+        string dbSessionGuid = "";
+        string dbRoomCode = "";
+        int dbTurn = 0;
+        int dbCurIdx = 0;
+        int dbStateVersion = 1;
+        string dbStatus = "";
+        string dbWinner = null;
+        string dbUpdatedAt = "";
+        List<RoomEmoteItem> recentEmotes = new List<RoomEmoteItem>();
+        List<RoomChatMessage> recentChat = new List<RoomChatMessage>();
 
         using (var conn = new SqlConnection(CONN_STR))
-
         {
-
             conn.Open();
-
             using (var cmd = new SqlCommand(@"
-
-                SELECT TOP 1 [SessionGuid], [RoomCode], [TurnNumber], [CurrentTurnPlayerIdx], [Status], [WinnerName], [UpdatedAt]
-
+                SELECT TOP 1 [SessionGuid], [RoomCode], [TurnNumber], [CurrentTurnPlayerIdx], [StateVersion], [Status], [WinnerName], [UpdatedAt]
                 FROM [prs].[prs_GameSessions]
-
                 WHERE [SessionGuid] = @guid OR [RoomCode] = @room
-
                 ORDER BY [UpdatedAt] DESC", conn))
-
             {
-
                 cmd.Parameters.AddWithValue("@guid", guid);
-
                 cmd.Parameters.AddWithValue("@room", room);
-
                 using (var r = cmd.ExecuteReader())
-
                 {
-
                     if (r.Read())
-
                     {
-
-                        List<RoomEmoteItem> recentEmotes = new List<RoomEmoteItem>();
-                        List<RoomChatMessage> recentChat = new List<RoomChatMessage>();
-                        lock (_emoteLock)
-                        {
-                            string lookupCode = !string.IsNullOrEmpty(room) ? room : guid;
-                            if (!string.IsNullOrEmpty(lookupCode) && _roomEmotes.ContainsKey(lookupCode))
-                            {
-                                long nowMs = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
-                                recentEmotes = _roomEmotes[lookupCode].FindAll(e => (nowMs - e.timestamp) < 25000);
-                            }
-                        }
-                        lock (_chatLock)
-                        {
-                            string lookupCode = !string.IsNullOrEmpty(room) ? room : guid;
-                            if (!string.IsNullOrEmpty(lookupCode) && _roomChat.ContainsKey(lookupCode))
-                            {
-                                long nowMs = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
-                                recentChat = _roomChat[lookupCode].FindAll(c => (nowMs - c.timestamp) < 3600000);
-                            }
-                        }
-
-                        var checkObj = new
-                        {
-                            ok = true,
-                            status = "success",
-                            sessionGuid = r["SessionGuid"].ToString(),
-                            roomCode = r["RoomCode"].ToString(),
-                            turnNumber = Convert.ToInt32(r["TurnNumber"]),
-                            currentPlayerIndex = Convert.ToInt32(r["CurrentTurnPlayerIdx"]),
-                            gameStatus = r["Status"].ToString(),
-                            winnerName = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString(),
-                            updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o"),
-                            emotes = recentEmotes,
-                            chat = recentChat
-                        };
-
-                        context.Response.Write(_json.Serialize(checkObj));
-
-                        return;
-
+                        found = true;
+                        dbSessionGuid = r["SessionGuid"].ToString();
+                        dbRoomCode = r["RoomCode"].ToString();
+                        dbTurn = Convert.ToInt32(r["TurnNumber"]);
+                        dbCurIdx = Convert.ToInt32(r["CurrentTurnPlayerIdx"]);
+                        dbStateVersion = r["StateVersion"] != DBNull.Value ? Convert.ToInt32(r["StateVersion"]) : 1;
+                        dbStatus = r["Status"].ToString();
+                        dbWinner = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString();
+                        dbUpdatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o");
                     }
-
                 }
-
             }
 
+            if (found)
+            {
+                long nowMs = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+                string sessionRoomCode = !string.IsNullOrEmpty(dbRoomCode) ? dbRoomCode : (!string.IsNullOrEmpty(room) ? room : guid);
+                recentEmotes = LoadRecentRoomEmotes(conn, sessionRoomCode, nowMs - 25000L);
+                long effectiveSince = chatSince > 0 ? chatSince : (nowMs - 86400000L);
+                recentChat = LoadRoomChat(conn, sessionRoomCode, effectiveSince, 60);
+            }
+        }
+
+        if (found)
+        {
+            var checkObj = new
+            {
+                ok = true,
+                status = "success",
+                sessionGuid = dbSessionGuid,
+                roomCode = dbRoomCode,
+                turnNumber = dbTurn,
+                currentPlayerIndex = dbCurIdx,
+                stateVersion = dbStateVersion,
+                gameStatus = dbStatus,
+                winnerName = dbWinner,
+                updatedAt = dbUpdatedAt,
+                emotes = recentEmotes,
+                chat = recentChat
+            };
+            context.Response.Write(_json.Serialize(checkObj));
+            return;
         }
 
         context.Response.StatusCode = 404;
-
         context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Ulo\u017een\u00e1 hra nebyla nalezena." }));
-
     }
 
     private void HandleLoadSession(HttpContext context)
-
     {
-
+        EnsureDatabaseSchema();
         string guid = context.Request.QueryString["guid"] ?? "";
-
         string room = context.Request.QueryString["room"] ?? context.Request.QueryString["code"] ?? "";
-
         if (string.IsNullOrEmpty(guid)) guid = room;
 
+        bool found = false;
+        object sessObj = null;
+        string sessRoomCode = "";
+        string sessStateJson = "";
+        List<RoomChatMessage> recentChat = new List<RoomChatMessage>();
+
         using (var conn = new SqlConnection(CONN_STR))
-
         {
-
             conn.Open();
-
             using (var cmd = new SqlCommand(@"
-
-                SELECT TOP 1 [SessionGuid], [RoomCode], [TemplateCode], [HostUsername], [Mode], [TargetHearts], [Status], [CurrentTurnPlayerIdx], [TurnNumber], [WinnerName], [StateJson], [UpdatedAt]
-
+                SELECT TOP 1 [SessionGuid], [RoomCode], [TemplateCode], [HostUsername], [Mode], [TargetHearts], [Status], [CurrentTurnPlayerIdx], [TurnNumber], [StateVersion], [WinnerName], [StateJson], [UpdatedAt]
                 FROM [prs].[prs_GameSessions]
-
                 WHERE [SessionGuid] = @guid OR [RoomCode] = @room
-
                 ORDER BY [UpdatedAt] DESC", conn))
-
             {
-
                 cmd.Parameters.AddWithValue("@guid", guid);
-
                 cmd.Parameters.AddWithValue("@room", room);
-
                 using (var r = cmd.ExecuteReader())
-
                 {
-
                     if (r.Read())
-
                     {
-
-                        var sessObj = new
-
+                        found = true;
+                        sessRoomCode = r["RoomCode"].ToString();
+                        sessStateJson = r["StateJson"].ToString();
+                        int dbStateVersion = r["StateVersion"] != DBNull.Value ? Convert.ToInt32(r["StateVersion"]) : 1;
+                        sessObj = new
                         {
-
                             sessionGuid = r["SessionGuid"].ToString(),
-
-                            roomCode = r["RoomCode"].ToString(),
-
+                            roomCode = sessRoomCode,
                             templateCode = r["TemplateCode"].ToString(),
-
                             hostUsername = r["HostUsername"].ToString(),
-
                             mode = r["Mode"].ToString(),
-
                             targetHearts = Convert.ToDouble(r["TargetHearts"]),
-
                             gameStatus = r["Status"].ToString(),
-
                             turnNumber = Convert.ToInt32(r["TurnNumber"]),
-
+                            stateVersion = dbStateVersion,
                             winnerName = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString(),
-
-                            stateJson = r["StateJson"].ToString(),
-
+                            stateJson = sessStateJson,
                             updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o")
-
                         };
-
-                        List<RoomChatMessage> recentChat = new List<RoomChatMessage>();
-                        lock (_chatLock)
-                        {
-                            string lookupCode = sessObj.roomCode;
-                            if (!string.IsNullOrEmpty(lookupCode) && _roomChat.ContainsKey(lookupCode))
-                            {
-                                recentChat = new List<RoomChatMessage>(_roomChat[lookupCode]);
-                            }
-                        }
-
-                        context.Response.Write(_json.Serialize(new
-                        {
-                            ok = true,
-                            status = "success",
-                            session = sessObj,
-                            stateJson = sessObj.stateJson,
-                            chat = recentChat
-                        }));
-
-                        return;
-
                     }
-
                 }
-
             }
 
+            if (found)
+            {
+                recentChat = LoadRoomChat(conn, sessRoomCode, 0, 60);
+            }
+        }
+
+        if (found)
+        {
+            context.Response.Write(_json.Serialize(new
+            {
+                ok = true,
+                status = "success",
+                session = sessObj,
+                stateJson = sessStateJson,
+                chat = recentChat
+            }));
+            return;
         }
 
         context.Response.StatusCode = 404;
-
         context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Ulo\u017een\u00e1 hra nebyla nalezena." }));
-
     }
 
     private void HandleLogTelemetry(HttpContext context)
@@ -4872,6 +4973,12 @@ END";
             conn.Open();
             EnsureExtendedAdminSchema(conn);
             using (var cmd = new SqlCommand(@"
+                DELETE FROM [prs].[prs_RoomChat]
+                WHERE [CreatedAt] < DATEADD(day, -@days, SYSUTCDATETIME());
+
+                DELETE FROM [prs].[prs_RoomEmotes]
+                WHERE [CreatedAt] < DATEADD(day, -@days, SYSUTCDATETIME());
+
                 DELETE FROM [prs].[prs_SessionPlayers]
                 WHERE [SessionGuid] IN (SELECT [SessionGuid] FROM [prs].[prs_GameSessions] WHERE [UpdatedAt] < DATEADD(day, -@days, SYSUTCDATETIME()));
 
@@ -4895,7 +5002,7 @@ END";
         {
             conn.Open();
             EnsureExtendedAdminSchema(conn);
-            string[] tables = new string[] { "prs_Users", "prs_UserSessions", "prs_GameSessions", "prs_SessionPlayers", "prs_TelemetryLogs", "prs_GameConfigs", "prs_BoardTemplates", "prs_Videos", "prs_Announcements" };
+            string[] tables = new string[] { "prs_Users", "prs_UserSessions", "prs_GameSessions", "prs_SessionPlayers", "prs_RoomChat", "prs_RoomEmotes", "prs_TelemetryLogs", "prs_GameConfigs", "prs_BoardTemplates", "prs_Videos", "prs_Announcements" };
             foreach (var t in tables)
             {
                 try

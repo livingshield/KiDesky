@@ -264,7 +264,7 @@ openAuthModal: function () {
                         try {
                             var unl = JSON.parse(data.user.unlockedPawnsJson);
                             if (Array.isArray(unl) && unl.length > 0) self.unlockedPawns = unl;
-                        } catch (e2) { }
+                        } catch (e2) { console.warn("[Online] Invalid unlockedPawnsJson:", e2); }
                     }
                     if (self.lobbyPlayers && self.lobbyPlayers[0]) {
                         self.lobbyPlayers[0].pawnId = self.selectedPawnId || "knight_valiant";
@@ -485,7 +485,8 @@ openAuthModal: function () {
                     title: "Odemknout hraní za všechny u 1 PC?",
                     icon: "🛋️",
                     confirmText: "Ano, hrát za všechny (Hot-Seat)",
-                    cancelText: "Ponechat zamčeno na svou roli"
+                    cancelText: "Ponechat zamčeno na svou roli",
+                    allowHtml: true
                 }
             );
             if (!conf) return;
@@ -665,7 +666,7 @@ openAuthModal: function () {
             var isOccupiedByOther = !isMyAccount && (pl.type === "Human" || isHost) && (pl.claimedBy && pl.claimedBy !== myClientId);
 
             if (isOccupiedByOther) {
-                KiDeskyDialog.alert("Role rytíře **" + this.escapeHtml(pl.name) + "** je již obsazena jiným hráčem. Zvol si prosím volnou roli označenou jako ✨ Volné k převzetí.", {
+                KiDeskyDialog.alert("Role rytíře „" + pl.name + "“ je již obsazena jiným hráčem. Zvol si prosím volnou roli označenou jako ✨ Volné k převzetí.", {
                     title: "Role je již obsazena",
                     icon: "🔒"
                 });
@@ -805,7 +806,9 @@ openAuthModal: function () {
                 this.loadSessionFromCloud(savedRoom);
             }
 
-        } catch (e) { }
+        } catch (e) {
+            console.warn("[Online] checkAutoJoinFromUrl error:", e);
+        }
 
     },
 
@@ -824,24 +827,69 @@ openAuthModal: function () {
     },
 
     stopOnlinePollingLoop: function () {
+        this._onlinePollingRunning = false;
         if (this.onlinePollTimer) {
-            clearInterval(this.onlinePollTimer);
+            clearTimeout(this.onlinePollTimer);
             this.onlinePollTimer = null;
         }
     },
 
+    _scheduleNextOnlinePoll: function () {
+        var self = this;
+        if (this.onlinePollTimer) {
+            clearTimeout(this.onlinePollTimer);
+            this.onlinePollTimer = null;
+        }
+        if (!this._onlinePollingRunning) return;
+        if (typeof document !== "undefined" && document.hidden) return;
+
+        var errCount = Math.min(this._onlinePollErrorCount || 0, 4);
+        var delay = Math.min(30000, 3000 * Math.pow(2, errCount));
+        this.onlinePollTimer = setTimeout(function () {
+            self.onlinePollTimer = null;
+            if (!self._onlinePollingRunning) return;
+            if (typeof document === "undefined" || !document.hidden) {
+                if (self.activeTab === "board" && self.onlinePollingEnabled && self.state && self.state.roomCode && !self.isMoveAnimating && !self.isOnlineSyncing) {
+                    self.pollOnlineSessionNow(false);
+                }
+                if (self.activeTab === "board" && self.state) {
+                    self.checkTurnInactivity();
+                }
+                self._scheduleNextOnlinePoll();
+            }
+        }, delay);
+    },
+
     startOnlinePollingLoop: function () {
         var self = this;
-        if (this.onlinePollTimer) clearInterval(this.onlinePollTimer);
+        this.stopOnlinePollingLoop();
+        this._onlinePollingRunning = true;
+        this._onlinePollErrorCount = 0;
 
-        this.onlinePollTimer = setInterval(function () {
-            if (self.activeTab === "board" && self.onlinePollingEnabled && self.state && self.state.roomCode && !self.isMoveAnimating && !self.isOnlineSyncing) {
-                self.pollOnlineSessionNow(false);
-            }
-            if (self.activeTab === "board" && self.state) {
-                self.checkTurnInactivity();
-            }
-        }, 3000);
+        if (!this._onlineVisibilityBound && typeof document !== "undefined" && typeof window !== "undefined") {
+            this._onlineVisibilityBound = true;
+            document.addEventListener("visibilitychange", function () {
+                if (!document.hidden && self._onlinePollingRunning) {
+                    self._onlinePollErrorCount = 0;
+                    if (self.activeTab === "board" && self.onlinePollingEnabled && self.state && self.state.roomCode && !self.isMoveAnimating && !self.isOnlineSyncing) {
+                        self.pollOnlineSessionNow(false);
+                    }
+                    self._scheduleNextOnlinePoll();
+                }
+            });
+            window.addEventListener("online", function () {
+                if (!self._onlinePollingRunning) return;
+                self._onlinePollErrorCount = 0;
+                if (typeof document === "undefined" || !document.hidden) {
+                    if (self.activeTab === "board" && self.onlinePollingEnabled && self.state && self.state.roomCode && !self.isMoveAnimating && !self.isOnlineSyncing) {
+                        self.pollOnlineSessionNow(false);
+                    }
+                    self._scheduleNextOnlinePoll();
+                }
+            });
+        }
+
+        this._scheduleNextOnlinePoll();
     },
 
     // Kontrola neaktivity živého hráče na tahu (více než 2 minuty) – platí pouze pro multi hru (2+ hráčů) a upozorňuje zakladatele
@@ -919,7 +967,8 @@ openAuthModal: function () {
                 ],
                 {
                     title: afkTitle,
-                    icon: "⏳"
+                    icon: "⏳",
+                    allowHtml: true
                 }
             ).then(function (chosen) {
                 if (!self.state || self.state.currentPlayerIndex !== curIdx) return;
@@ -1017,74 +1066,54 @@ openAuthModal: function () {
     },
 
     pollOnlineSessionNow: function (manual) {
-
         var self = this;
-
         if (!this.state || !this.state.roomCode || this.isMoveAnimating || this.state.phase === "GAME_OVER") return;
-
         if (this.isActionProcessing || this.isSavingSession) return;
 
         this.isOnlineSyncing = true;
-
         var roomCode = this.state.roomCode;
 
         // Pomocná funkce pro plné stažení a aplikaci herního stavu
-
         var fetchFullSession = function () {
-
             PRS_Api.get("load-session", { code: roomCode })
-
                 .then(function (res) {
-
                     self.isOnlineSyncing = false;
-
                     if (res && res.ok && res.session && res.session.stateJson) {
+                        self._onlinePollErrorCount = 0;
 
                         if (res.chat && Array.isArray(res.chat)) {
                             self.handleIncomingChatMessages(res.chat, true);
                         }
 
                         var remoteState = JSON.parse(res.session.stateJson);
-
                         if (!remoteState || !remoteState.players) return;
 
                         self.lastKnownUpdatedAt = res.session.updatedAt;
+                        if (typeof res.session.stateVersion === "number") {
+                            self.lastKnownStateVersion = res.session.stateVersion;
+                        }
 
                         // Synchronizujeme obsazenost křesel a typy hráčů (např. připojení živého hráče)
                         self.syncOnlinePlayersRoster(remoteState.players);
 
                         var localSig = (self.state.turnNumber || 1) + ":" + self.state.currentPlayerIndex + ":" + self.state.phase + ":" + (self.state.logs ? self.state.logs.length : 0);
-
                         var remoteSig = (remoteState.turnNumber || 1) + ":" + remoteState.currentPlayerIndex + ":" + remoteState.phase + ":" + (remoteState.logs ? remoteState.logs.length : 0);
 
                         // Pokud jsem na tahu a remote má stejné číslo tahu, remote nesmí přepsat můj čerstvý lokální tah starším stavem
-
                         var isMyTurn = (self.myOnlinePlayerIndex >= 0 && self.state.currentPlayerIndex === self.myOnlinePlayerIndex);
-
                         if (isMyTurn && remoteState.turnNumber === self.state.turnNumber) {
-
                             var localLogs = self.state.logs ? self.state.logs.length : 0;
-
                             var remoteLogs = remoteState.logs ? remoteState.logs.length : 0;
-
                             if (remoteLogs <= localLogs) {
-
                                 return;
-
                             }
-
                         }
 
                         if ((remoteState.turnNumber > self.state.turnNumber) || (remoteState.turnNumber === self.state.turnNumber && remoteSig !== localSig)) {
-
                             var prevPlayerIdx = self.state.currentPlayerIndex;
-
                             self.state = remoteState;
-
                             self.state.sessionGuid = res.session.sessionGuid;
-
                             self.state.roomCode = res.session.roomCode;
-
                             self.lastKnownTurnNumber = self.state.turnNumber;
 
                             var activeP = self.state.players[self.state.currentPlayerIndex];
@@ -1098,80 +1127,57 @@ openAuthModal: function () {
                             }
 
                             self.renderGameScreen();
-
                             if (window.PRS_Audio) window.PRS_Audio.playNotice();
 
                             if (self.myOnlinePlayerIndex >= 0 && self.state.currentPlayerIndex === self.myOnlinePlayerIndex && prevPlayerIdx !== self.myOnlinePlayerIndex) {
-
                                 self.addLog("🔔 Jsi na tahu! Spoluhráč dokončil svůj tah.", "win");
-
                             }
 
                             self.scheduleBotTurnIfNeeded();
-
                         } else if (manual) {
-
                             self.renderOnlineRoomBar();
-
                         }
-
+                    } else {
+                        self._onlinePollErrorCount = Math.min((self._onlinePollErrorCount || 0) + 1, 6);
                     }
-
                 })
-
-                .catch(function () {
-
+                .catch(function (err) {
                     self.isOnlineSyncing = false;
-
+                    self._onlinePollErrorCount = Math.min((self._onlinePollErrorCount || 0) + 1, 6);
+                    console.warn("[Online] load-session poll failed:", err);
                 });
-
         };
 
         // Manuální stisk tlačítka Sync vynutí okamžité plné načtení
-
         if (manual) {
-
             fetchFullSession();
-
             return;
-
         }
 
-        // Automatický polling: Odlehčený Headless Turn-Check (~180 bajtů namísto ~100 kB JSONu)
-
-        PRS_Api.get("check-session", { code: roomCode })
-
+        // Automatický polling: Odlehčený Headless Turn-Check
+        PRS_Api.get("check-session", { code: roomCode, chatSince: this._lastChatTimestamp || 0 })
             .then(function (res) {
-
                 if (res && res.ok) {
-
+                    self._onlinePollErrorCount = 0;
                     var needsFullFetch = false;
 
                     // 1. Změnilo se číslo tahu?
-
                     if (res.turnNumber !== self.state.turnNumber) {
-
                         needsFullFetch = true;
-
                     }
-
                     // 2. Změnil se aktivní hráč na tahu?
-
                     else if (res.currentPlayerIndex !== self.state.currentPlayerIndex) {
-
                         needsFullFetch = true;
-
                     }
-
-                    // 3. Byla hra mezitím dokončena?
-
+                    // 3. Změnila se DB verze stavu?
+                    else if (typeof res.stateVersion === "number" && typeof self.lastKnownStateVersion === "number" && res.stateVersion > self.lastKnownStateVersion) {
+                        needsFullFetch = true;
+                    }
+                    // 4. Byla hra mezitím dokončena?
                     else if (res.gameStatus === "Finished" && self.state.phase !== "GAME_OVER") {
-
                         needsFullFetch = true;
-
                     }
-
-                    // 4. Došlo k uložení na serveru s novým časovým razítkem (např. připojení jiného hráče do místnosti)?
+                    // 5. Došlo k uložení na serveru s novým časovým razítkem?
                     else if (self.lastKnownUpdatedAt && res.updatedAt && res.updatedAt !== self.lastKnownUpdatedAt) {
                         needsFullFetch = true;
                     }
@@ -1196,33 +1202,24 @@ openAuthModal: function () {
                     }
 
                     if (needsFullFetch) {
-
                         fetchFullSession();
-
                     } else {
-
                         self.isOnlineSyncing = false;
-
                         self.lastKnownUpdatedAt = res.updatedAt;
-
+                        if (typeof res.stateVersion === "number") {
+                            self.lastKnownStateVersion = res.stateVersion;
+                        }
                     }
-
                 } else {
-
                     // Fallback na plný load při neočekávané odpovědi
-
                     fetchFullSession();
-
                 }
-
             })
-
-            .catch(function () {
-
+            .catch(function (err) {
                 self.isOnlineSyncing = false;
-
+                self._onlinePollErrorCount = Math.min((self._onlinePollErrorCount || 0) + 1, 6);
+                console.warn("[Online] check-session poll failed:", err);
             });
-
     },
 
     saveCurrentSessionToCloud: function (allowBotOverride) {
@@ -1265,6 +1262,7 @@ openAuthModal: function () {
             currentTurnPlayer: this.state.currentPlayerIndex || 0,
             turnNumber: this.state.turnNumber || 1,
             expectedTurnNumber: (this.lastKnownTurnNumber !== undefined) ? this.lastKnownTurnNumber : -1,
+            expectedStateVersion: (typeof this.lastKnownStateVersion === "number") ? this.lastKnownStateVersion : -1,
             targetHearts: (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30,
             difficultyMode: (this.state.config && this.state.config.difficultyMode) ? this.state.config.difficultyMode : "standard",
             winnerName: (this.state.winner ? this.state.winner.name : null),
@@ -1305,12 +1303,12 @@ openAuthModal: function () {
                 }
 
                 if (res && res.ok) {
-
                     self.state.sessionGuid = res.sessionGuid;
-
                     self.state.roomCode = res.roomCode;
-
                     self.lastKnownTurnNumber = self.state.turnNumber;
+                    if (typeof res.stateVersion === "number") {
+                        self.lastKnownStateVersion = res.stateVersion;
+                    }
 
                     try {
                         localStorage.setItem("prs_active_online_room", res.roomCode);
@@ -1320,59 +1318,41 @@ openAuthModal: function () {
                     } catch (e) { }
 
                     if (isNewRoom) {
-
                         try {
-
                             localStorage.setItem("prs_slot_" + res.roomCode, "0");
-
                         } catch (e) { }
 
                         if (window.PRS_Audio) window.PRS_Audio.playFanfare();
-
                         self.copyRoomInviteLink();
 
                         KiDeskyDialog.alert("Hra byla úspěšně převedena na Online stůl!<br><br>Kód místnosti: <strong style='color:var(--gold-light); font-size:1.15rem; letter-spacing:1px;'>" + self.escapeHtml(res.roomCode) + "</strong><br><br>Odkaz pro přátele byl zkopírován do schránky.", {
                             title: "Online stůl připraven",
-                            icon: "🌐"
+                            icon: "🌐",
+                            allowHtml: true
                         });
-
                     }
 
-                    if (statusEl) statusEl.innerHTML = (window.PRS_I18n ? window.PRS_I18n.t("online.save_room_code_success", { code: res.roomCode }) : ("✅ Uloženo! Kód místnosti: <strong>" + res.roomCode + "</strong>"));
+                    if (statusEl) statusEl.innerHTML = (window.PRS_I18n ? window.PRS_I18n.t("online.save_room_code_success", { code: self.escapeHtml(res.roomCode) }) : ("✅ Uloženo! Kód místnosti: <strong>" + self.escapeHtml(res.roomCode) + "</strong>"));
 
                     self.renderOnlineRoomBar();
-
                     self.fetchServerStatusAndSessions();
-
                     self.addLog("☁️ Hra uložena do cloudu! Kód online místnosti: " + res.roomCode, "turn");
-
                 } else {
-
                     if (statusEl) statusEl.textContent = (window.PRS_I18n ? window.PRS_I18n.t("online.save_local_browser") : "⚠️ Uloženo lokálně v prohlížeči.");
-
-                    localStorage.setItem("prs_saved_game", JSON.stringify(self.state));
-
+                    try { localStorage.setItem("prs_saved_game", JSON.stringify(self.state)); } catch (e) { }
                 }
-
             })
-
             .catch(function (err) {
-
-                localStorage.setItem("prs_saved_game", JSON.stringify(self.state));
-
+                try { localStorage.setItem("prs_saved_game", JSON.stringify(self.state)); } catch (e) { }
                 if (statusEl) statusEl.textContent = (window.PRS_I18n ? window.PRS_I18n.t("online.save_local_storage") : "💾 Uloženo do lokální paměti prohlížeče.");
-
-                KiDeskyDialog.alert("Nepodařilo se synchronizovat online místnost se serverem (" + (err && err.message ? self.escapeHtml(err.message) : err) + "). Hra je uložena lokálně v prohlížeči.", {
+                KiDeskyDialog.alert("Nepodařilo se synchronizovat online místnost se serverem (" + (err && err.message ? err.message : err) + "). Hra je uložena lokálně v prohlížeči.", {
                     title: "Offline režim",
                     icon: "⚠️"
                 });
-
             });
-
     },
 
     saveSessionAuto: function () {
-
         var self = this;
 
         // VŽDY provést lokální autosave pro okamžité obnovení při Ctrl+F5 / reloadu
@@ -1408,6 +1388,7 @@ openAuthModal: function () {
             currentTurnPlayer: this.state.currentPlayerIndex,
             turnNumber: this.state.turnNumber,
             expectedTurnNumber: (this.lastKnownTurnNumber !== undefined) ? this.lastKnownTurnNumber : (this.state.turnNumber - 1),
+            expectedStateVersion: (typeof this.lastKnownStateVersion === "number") ? this.lastKnownStateVersion : -1,
             targetHearts: (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30,
             difficultyMode: (this.state.config && this.state.config.difficultyMode) ? this.state.config.difficultyMode : "standard",
             winnerName: (this.state.winner ? this.state.winner.name : null),
@@ -1416,166 +1397,122 @@ openAuthModal: function () {
         };
 
         return PRS_Api.post("save-session", payload)
-
             .then(function (res) {
-
                 if (res && res._httpStatus === 409) {
-
                     self.handleTurnConflict(res);
                     return;
-
                 }
-
                 if (res && res.ok) {
-
                     self.lastKnownTurnNumber = self.state.turnNumber;
-
+                    if (typeof res.stateVersion === "number") {
+                        self.lastKnownStateVersion = res.stateVersion;
+                    }
                 }
-
             })
-
-            .catch(function () {
-
+            .catch(function (err) {
                 // Tichý fallback při síťových výpadcích
-
+                console.warn("[Online] saveSessionAuto failed (offline fallback):", err);
             })
-
             .finally(function () {
-
                 self.isSavingSession = false;
-
             });
-
     },
 
     handleTurnConflict: function (res) {
-
         if (!res) return;
-
         if (window.PRS_Audio) window.PRS_Audio.playNotice();
-
         var msg = "⚠️ Konflikt tahů: jiný hráč již odehrál svůj tah na serveru (tah #" + (res.serverTurnNumber || "?") + "). Herní plán byl synchronizován.";
-
         this.addLog(msg, "warning");
-
-        if (res.stateJson) {
-
-            try {
-
-                var newState = JSON.parse(res.stateJson);
-
-                if (newState && newState.players) {
-
-                    this.state = newState;
-
-                    this.lastKnownTurnNumber = this.state.turnNumber;
-
-                    this.isBoardStaticDirty = true;
-
-                    this.renderGameScreen();
-
-                }
-
-            } catch (e) {
-
-                console.error("Chyba při synchronizaci stavu hry po konfliktu:", e);
-
-            }
-
+        if (typeof res.serverStateVersion === "number") {
+            this.lastKnownStateVersion = res.serverStateVersion;
         }
-
+        if (res.stateJson) {
+            try {
+                var newState = JSON.parse(res.stateJson);
+                if (newState && newState.players) {
+                    this.state = newState;
+                    this.lastKnownTurnNumber = this.state.turnNumber;
+                    this.isBoardStaticDirty = true;
+                    this.renderGameScreen();
+                }
+            } catch (e) {
+                console.error("Chyba při synchronizaci stavu hry po konfliktu:", e);
+            }
+        }
     },
 
     fetchServerStatusAndSessions: function () {
-
         var self = this;
-
         PRS_Api.get("list-sessions")
-
             .then(function (res) {
-
                 if (res && res.ok && res.sessions) {
-
                     self.lastSavedSessions = res.sessions;
                     self.renderSavedSessionsList(res.sessions);
-
                 }
-
             })
-
-            .catch(function () { });
-
+            .catch(function (err) {
+                console.warn("[Online] list-sessions failed:", err);
+            });
     },
 
     renderSavedSessionsList: function (sessions) {
-
         var box = document.getElementById("saved-sessions-list");
-
         if (!box) return;
-
         var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
-
         if (!sessions || sessions.length === 0) {
-
             box.innerHTML = '<div class="empty-note">' + (isEn ? 'No saved active games on the server yet.' : 'Zatím žádné uložené rozehrané partie na serveru.') + '</div>';
-
             return;
-
         }
-
         var codeLabel = isEn ? "Code: " : "Kód: ";
         var turnLabel = isEn ? "Turn " : "Tah ";
         var targetLabel = isEn ? "Target: " : "Cíl: ";
         var loadBtn = window.PRS_I18n ? window.PRS_I18n.t("online.btn_load") : (isEn ? "▶️ Load" : "▶️ Načíst");
-
         var html = "";
-
         for (var i = 0; i < sessions.length; i++) {
-
             var s = sessions[i];
-
+            var rawCode = String(s.roomCode || "");
+            var safeAttrCode = rawCode.replace(/[^A-Za-z0-9_-]/g, "");
             html += '<div class="saved-session-row">' +
-
-                '<div><strong>' + this.escapeHtml(s.title) + '</strong> <span class="room-code-pill">' + codeLabel + s.roomCode + '</span><br/><small>' + turnLabel + s.turnNumber + ' | ' + targetLabel + s.targetHearts + ' 💖 | ' + s.updatedAt + '</small></div>' +
-
-                '<button class="btn-action-buy" onclick="PRS_App.loadSessionFromCloud(\'' + s.roomCode + '\')">' + loadBtn + '</button>' +
-
+                '<div><strong>' + this.escapeHtml(s.title) + '</strong> <span class="room-code-pill">' + codeLabel + this.escapeHtml(rawCode) + '</span><br/><small>' + turnLabel + this.escapeHtml(String(s.turnNumber)) + ' | ' + targetLabel + this.escapeHtml(String(s.targetHearts)) + ' 💖 | ' + this.escapeHtml(String(s.updatedAt || "")) + '</small></div>' +
+                '<button class="btn-action-buy" onclick="PRS_App.loadSessionFromCloud(\'' + safeAttrCode + '\')">' + loadBtn + '</button>' +
                 '</div>';
-
         }
-
         box.innerHTML = html;
-
     },
 
     loadSessionFromCloud: function (codeOrGuid) {
-
         var self = this;
-
         var inputEl = document.getElementById("join-room-code-input");
-
         var code = codeOrGuid || (inputEl ? inputEl.value.trim().toUpperCase() : "");
-
         if (!code) return;
 
         PRS_Api.get("load-session", { code: code })
-
             .then(function (res) {
-
                 if (res && res.ok && res.session && res.session.stateJson) {
+                    if (self._chatRoomCode !== res.session.roomCode) {
+                        self._chatRoomCode = res.session.roomCode;
+                        self._chatMessages = [];
+                        self._seenChatIds = {};
+                        self._lastChatTimestamp = 0;
+                        self._unreadChatCount = 0;
+                        var badgeReset = document.getElementById("chat-unread-badge");
+                        if (badgeReset) {
+                            badgeReset.style.display = "none";
+                            badgeReset.textContent = "0";
+                        }
+                        self.renderChatMessagesList();
+                    }
 
                     if (res.chat && Array.isArray(res.chat)) {
                         self.handleIncomingChatMessages(res.chat, true);
                     }
 
                     self.state = JSON.parse(res.session.stateJson);
-
                     self.state.sessionGuid = res.session.sessionGuid;
-
                     self.state.roomCode = res.session.roomCode;
                     self.state.hostUsername = res.session.hostUsername;
-
                     self.lastKnownTurnNumber = self.state.turnNumber;
+                    self.lastKnownStateVersion = (typeof res.session.stateVersion === "number") ? res.session.stateVersion : 1;
 
                     try {
                         localStorage.setItem("prs_active_online_room", res.session.roomCode);
@@ -1585,17 +1522,15 @@ openAuthModal: function () {
                     } catch (e) { }
 
                     self.isBoardStaticDirty = true;
-
                     self.hasGameStarted = true;
                     self.updateUserUI();
-
                     self.switchTab("board");
 
                     // Zjistíme, zda už má tento hráč pro tuto místnost přiřazený slot podle účtu nebo clientId
                     var myClientId = self.getOnlineClientId();
                     var autoSlotIdx = -1;
 
-                    // 1. Nejvyšší priorita: Shoda s účtem přihlášeného rytíře (hostitel nebo rytíř se stejným jménem)
+                    // 1. Nejvyšší priorita: Shoda s účtem přihlášeného rytíře
                     if (self.currentUser && self.currentUser.role !== "Guest" && self.state.players && Array.isArray(self.state.players)) {
                         for (var pi = 0; pi < self.state.players.length; pi++) {
                             if (self.isMySlot(self.state.players[pi], pi)) {
@@ -1621,7 +1556,6 @@ openAuthModal: function () {
                     } catch (e) { }
 
                     if (autoSlotIdx >= 0) {
-                        // Uvolníme případná duplicitní křesla držená tímto zařízením
                         for (var opi = 0; opi < self.state.players.length; opi++) {
                             if (opi !== autoSlotIdx && self.state.players[opi] && self.state.players[opi].claimedBy === myClientId) {
                                 delete self.state.players[opi].claimedBy;
@@ -1664,22 +1598,25 @@ openAuthModal: function () {
                             self.openOnlineRoleModal();
                         }
                     } else {
-                        // Nově připojený hráč si musí vybrat volnou postavu označenou jako ✨ Volné k převzetí!
                         self.myOnlinePlayerIndex = -1;
                         self.renderGameScreen();
                         self.openOnlineRoleModal();
                     }
 
                     self.addLog("☁️ Hra byla úspěšně načtena ze serveru (Kód: " + res.session.roomCode + ", tah #" + self.state.turnNumber + ").", "turn");
-
                     if (window.PRS_Audio) window.PRS_Audio.playNotice();
-
+                } else {
+                    if (self.showToast) {
+                        self.showToast(window.PRS_I18n ? window.PRS_I18n.t("online.room_not_found", { code: code }) : ("⚠️ Online místnost " + code + " nebyla nalezena."), "warning");
+                    }
                 }
-
             })
-
-            .catch(function () { });
-
+            .catch(function (err) {
+                console.warn("[Online] loadSessionFromCloud failed:", err);
+                if (self.showToast) {
+                    self.showToast(window.PRS_I18n ? window.PRS_I18n.t("online.load_room_failed", { code: code }) : ("⚠️ Nepodařilo se načíst online místnost " + code + "."), "warning");
+                }
+            });
     },
 
     // --- RYTÍŘSKÉ EMOTIKONY & REAKCE U STOLU ---
@@ -1695,7 +1632,9 @@ openAuthModal: function () {
                 playerIdx: myIdx,
                 emote: text,
                 author: author
-            }).catch(function () { });
+            }).catch(function (err) {
+                console.warn("[Online] send-emote failed:", err);
+            });
         }
     },
 
@@ -1847,11 +1786,19 @@ openAuthModal: function () {
                 text: text
             })
                 .then(function (res) {
-                    if (res && res.ok && res.chat) {
-                        self.handleIncomingChatMessages([res.chat], false, true);
+                    var sentMsg = res && (res.chat || res.message);
+                    if (res && res.ok && sentMsg) {
+                        self.handleIncomingChatMessages([sentMsg], false, true);
+                    } else if (self.showToast) {
+                        self.showToast(window.PRS_I18n ? window.PRS_I18n.t("online.chat_send_failed") : "⚠️ Zprávu se nepodařilo odeslat na server.", "warning");
                     }
                 })
-                .catch(function () { });
+                .catch(function (err) {
+                    console.warn("[Online] sendChatMessage failed:", err);
+                    if (self.showToast) {
+                        self.showToast(window.PRS_I18n ? window.PRS_I18n.t("online.chat_send_failed") : "⚠️ Zprávu se nepodařilo odeslat na server.", "warning");
+                    }
+                });
         } else {
             var localMsg = {
                 id: "local_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
@@ -1902,7 +1849,11 @@ openAuthModal: function () {
         var newCount = 0;
         for (var i = 0; i < messages.length; i++) {
             var msg = messages[i];
-            if (!msg || !msg.id || this._seenChatIds[msg.id]) continue;
+            if (!msg || !msg.id) continue;
+            if (typeof msg.timestamp === "number" && msg.timestamp > (this._lastChatTimestamp || 0)) {
+                this._lastChatTimestamp = msg.timestamp;
+            }
+            if (this._seenChatIds[msg.id]) continue;
             this._seenChatIds[msg.id] = true;
             this._chatMessages.push(msg);
             newCount++;
@@ -2031,7 +1982,7 @@ openAuthModal: function () {
                             try {
                                 var unl = JSON.parse(res.user.unlockedPawnsJson);
                                 if (Array.isArray(unl) && unl.length > 0) PRS_App.unlockedPawns = unl;
-                            } catch (e2) { }
+                            } catch (e2) { console.warn("[Online] Invalid Google unlockedPawnsJson:", e2); }
                         }
                         if (PRS_App.lobbyPlayers && PRS_App.lobbyPlayers[0]) {
                             PRS_App.lobbyPlayers[0].pawnId = PRS_App.selectedPawnId || "knight_valiant";

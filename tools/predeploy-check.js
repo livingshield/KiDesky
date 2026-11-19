@@ -12,9 +12,6 @@ const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 
-// Odstranit v Etapě 2
-const KNOWN_LEGACY_COLLISIONS = new Set(['getNodeDisplayName', 'updateMusicUI']);
-
 const IGNORED_DIRS = new Set(['.git', 'node_modules']);
 
 let failCount = 0;
@@ -369,20 +366,15 @@ function checkPrsAppMethodCollisions() {
     }
   }
 
-  const legacyCollisions = [];
-  const newCollisions = [];
+  const collisions = [];
 
   for (const [method, owners] of methodOwners.entries()) {
     if (owners.length <= 1) continue;
-    const desc = `${method} (${owners.join(', ')})`;
-    if (KNOWN_LEGACY_COLLISIONS.has(method)) legacyCollisions.push(desc);
-    else newCollisions.push(desc);
+    collisions.push(`${method} (${owners.join(', ')})`);
   }
 
-  if (newCollisions.length > 0) {
-    report('FAIL', '6. Kolize metod na window.PRS_App', `Nové kolize: ${newCollisions.join('; ')}`);
-  } else if (legacyCollisions.length > 0) {
-    report('WARN', '6. Kolize metod na window.PRS_App', `Známé legacy kolize (řešit v Etapě 2): ${legacyCollisions.join('; ')}`);
+  if (collisions.length > 0) {
+    report('FAIL', '6. Kolize metod na window.PRS_App', `Kolize metod: ${collisions.join('; ')}`);
   } else {
     report('OK', '6. Kolize metod na window.PRS_App', '0 kolizí');
   }

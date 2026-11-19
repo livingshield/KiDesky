@@ -3215,7 +3215,7 @@ window.PRS_BoardBuilder = {
                 try {
                     var g = JSON.parse(dbTpl.graphJson);
                     if (g && Array.isArray(g.nodes) && g.nodes.length > 0) parsedGraph = g;
-                } catch (e) { }
+                } catch (e) { console.warn("[Boards] Invalid dbTpl.graphJson:", e); }
             } else if (dbTpl.graphJson && typeof dbTpl.graphJson === "object" && Array.isArray(dbTpl.graphJson.nodes)) {
                 parsedGraph = JSON.parse(JSON.stringify(dbTpl.graphJson));
             }

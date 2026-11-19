@@ -1,5 +1,5 @@
 // ============================================================================
-// KiDesky: KRÁLOVSKÝ DIALOGOVÝ SYSTÉM (Custom Alert, Confirm & Prompt)
+// KiDesky: KRÁLOVSKÝ DIALOGOVÝ SYSTÉM (Custom Alert, Confirm, Prompt & Choice)
 // ============================================================================
 (function (window, document) {
     'use strict';
@@ -7,6 +7,135 @@
     var backdropEl = null;
     var currentResolver = null;
     var keyListener = null;
+
+    function escapeHtml(str) {
+        return String(str === null || str === undefined ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    var ALLOWED_TAGS = {
+        B: true,
+        STRONG: true,
+        I: true,
+        EM: true,
+        U: true,
+        BR: true,
+        CODE: true,
+        SPAN: true,
+        SMALL: true,
+        P: true,
+        UL: true,
+        OL: true,
+        LI: true
+    };
+
+    var DROP_TAGS = {
+        SCRIPT: true,
+        STYLE: true,
+        IFRAME: true,
+        OBJECT: true,
+        EMBED: true,
+        SVG: true,
+        MATH: true,
+        TEMPLATE: true,
+        NOSCRIPT: true
+    };
+
+    function isSafeCssStyle(val) {
+        var s = String(val || '');
+        if (!s) return false;
+        if (/url\s*\(|expression\s*\(|javascript:|vbscript:|behavior:|@import|-moz-binding/i.test(s)) {
+            return false;
+        }
+        return true;
+    }
+
+    function serializeSafeNode(node) {
+        if (!node) return '';
+        if (node.nodeType === 3) {
+            return escapeHtml(node.nodeValue || '');
+        }
+        if (node.nodeType !== 1) {
+            return '';
+        }
+        var tag = String(node.tagName || '').toUpperCase();
+        if (DROP_TAGS[tag]) {
+            return '';
+        }
+        var inner = '';
+        var children = node.childNodes || [];
+        for (var i = 0; i < children.length; i++) {
+            inner += serializeSafeNode(children[i]);
+        }
+        if (!ALLOWED_TAGS[tag]) {
+            return inner;
+        }
+        var lowerTag = tag.toLowerCase();
+        if (tag === 'BR') {
+            return '<br>';
+        }
+        var attrs = '';
+        if (node.attributes) {
+            for (var j = 0; j < node.attributes.length; j++) {
+                var attr = node.attributes[j];
+                var aName = String(attr.name || '').toLowerCase();
+                var aVal = String(attr.value || '');
+                if (aName === 'class') {
+                    attrs += ' class="' + escapeHtml(aVal) + '"';
+                } else if (aName === 'style' && isSafeCssStyle(aVal)) {
+                    attrs += ' style="' + escapeHtml(aVal) + '"';
+                }
+            }
+        }
+        return '<' + lowerTag + attrs + '>' + inner + '</' + lowerTag + '>';
+    }
+
+    function sanitizeSafeHtml(html) {
+        var raw = String(html === null || html === undefined ? '' : html);
+        if (!raw) return '';
+        if (typeof DOMParser === 'function') {
+            try {
+                var doc = new DOMParser().parseFromString(raw, 'text/html');
+                if (doc && doc.body) {
+                    var out = '';
+                    var kids = doc.body.childNodes || [];
+                    for (var i = 0; i < kids.length; i++) {
+                        out += serializeSafeNode(kids[i]);
+                    }
+                    return out;
+                }
+            } catch (e) {
+                if (typeof console !== 'undefined' && console.warn) {
+                    console.warn('[KiDeskyDialog] HTML sanitize fallback:', e);
+                }
+            }
+        }
+        return escapeHtml(raw).replace(/\n/g, '<br>');
+    }
+
+    function cleanupPendingDialog() {
+        if (keyListener) {
+            document.removeEventListener('keydown', keyListener);
+            keyListener = null;
+        }
+        if (currentResolver) {
+            var prevResolve = currentResolver;
+            currentResolver = null;
+            var prevType = backdropEl ? backdropEl.dataset.type : 'alert';
+            var fallback = (prevType === 'confirm') ? false : ((prevType === 'prompt' || prevType === 'choice') ? null : true);
+            try {
+                prevResolve(fallback);
+            } catch (e) {
+                if (typeof console !== 'undefined' && console.warn) {
+                    console.warn('[KiDeskyDialog] pending resolver cleanup error:', e);
+                }
+            }
+        }
+    }
 
     function ensureDOM() {
         if (backdropEl && document.body.contains(backdropEl)) return backdropEl;
@@ -17,7 +146,7 @@
         backdropEl.setAttribute('role', 'dialog');
         backdropEl.setAttribute('aria-modal', 'true');
 
-        backdropEl.innerHTML = 
+        backdropEl.innerHTML =
             '<div class="kd-dialog-card" id="kd-dialog-card">' +
                 '<div class="kd-dialog-icon-badge" id="kd-dialog-icon">👑</div>' +
                 '<h3 class="kd-dialog-title" id="kd-dialog-title">Královské poselství</h3>' +
@@ -34,7 +163,7 @@
             if (e.target === backdropEl) {
                 if (backdropEl.dataset.type === 'confirm') {
                     dismiss(false);
-                } else if (backdropEl.dataset.type === 'prompt') {
+                } else if (backdropEl.dataset.type === 'prompt' || backdropEl.dataset.type === 'choice') {
                     dismiss(null);
                 } else {
                     dismiss(true);
@@ -55,34 +184,48 @@
         var resolve = currentResolver;
         currentResolver = null;
         setTimeout(function () {
-            if (backdropEl) backdropEl.style.display = 'none';
+            if (backdropEl && !currentResolver) {
+                backdropEl.style.display = 'none';
+                var actions = document.getElementById('kd-dialog-actions');
+                if (actions) {
+                    actions.style.flexDirection = '';
+                    actions.style.gap = '';
+                }
+            }
             if (resolve) resolve(result);
         }, 220);
     }
 
-    function setDialogContent(el, msgStr) {
+    function setDialogContent(el, msgStr, allowHtml) {
         if (!el) return;
-        var s = String(msgStr || "");
-        if (/<[a-z][\s\S]*>/i.test(s)) {
-            el.innerHTML = s;
+        var s = String(msgStr === null || msgStr === undefined ? '' : msgStr);
+        if (allowHtml === true) {
+            el.innerHTML = sanitizeSafeHtml(s);
         } else {
-            el.innerHTML = s
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\n/g, "<br>");
+            el.innerHTML = escapeHtml(s).replace(/\n/g, '<br>');
         }
     }
 
+    function createActionButton(id, className, label) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = className;
+        if (id) btn.id = id;
+        btn.textContent = String(label || '');
+        return btn;
+    }
+
     var Dialog = {
+        escapeHtml: escapeHtml,
+        sanitizeSafeHtml: sanitizeSafeHtml,
+
         alert: function (message, options) {
             options = options || {};
             var title = options.title || (window.PRS_I18n ? window.PRS_I18n.t("dialog.alert_title", null, "Královské poselství") : "Královské poselství");
             var icon = options.icon || "👑";
             var btnText = options.buttonText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.ok", null, "👑 Rozumím") : "👑 Rozumím");
 
-            var msgStr = String(message || "");
-            // Extract leading emoji if present for the badge
+            var msgStr = String(message === null || message === undefined ? "" : message);
             var emojiMatch = msgStr.match(/^([\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF]|\u2705|\u274C|\u26A0\uFE0F|\u2139\uFE0F|\u2728|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]|\uD83D[\uDE80-\uDEFF]|\uD83E[\uDD00-\uDDFF])/);
             if (emojiMatch && !options.icon) {
                 icon = emojiMatch[1];
@@ -90,6 +233,7 @@
             }
 
             return new Promise(function (resolve) {
+                cleanupPendingDialog();
                 var root = ensureDOM();
                 root.dataset.type = 'alert';
                 currentResolver = resolve;
@@ -102,14 +246,18 @@
 
                 if (iconEl) iconEl.textContent = icon;
                 if (titleEl) titleEl.textContent = title;
-                if (msgEl) setDialogContent(msgEl, msgStr);
+                if (msgEl) setDialogContent(msgEl, msgStr, !!options.allowHtml);
                 if (inputWrap) inputWrap.style.display = 'none';
 
+                var okBtn = null;
                 if (actions) {
-                    actions.innerHTML = '<button type="button" class="kd-dialog-btn kd-dialog-btn-primary" id="kd-dialog-ok-btn">' + btnText + '</button>';
+                    actions.style.flexDirection = '';
+                    actions.style.gap = '';
+                    actions.innerHTML = '';
+                    okBtn = createActionButton('kd-dialog-ok-btn', 'kd-dialog-btn kd-dialog-btn-primary', btnText);
+                    actions.appendChild(okBtn);
                 }
 
-                var okBtn = document.getElementById('kd-dialog-ok-btn');
                 if (okBtn) {
                     okBtn.onclick = function () {
                         if (window.PRS_Audio && window.PRS_Audio.playDiceRoll) {
@@ -144,9 +292,9 @@
             var icon = options.icon || "⚔️";
             var confirmText = options.confirmText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.confirm_btn", null, "Ano, provést") : "Ano, provést");
             var cancelText = options.cancelText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.cancel_btn", null, "Zrušit") : "Zrušit");
-            var isDanger = !!options.isDanger;
+            var isDanger = !!(options.isDanger || options.danger);
 
-            var msgStr = String(message || "");
+            var msgStr = String(message === null || message === undefined ? "" : message);
             var emojiMatch = msgStr.match(/^([\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF]|\u2705|\u274C|\u26A0\uFE0F|\u2139\uFE0F|\u2728|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]|\uD83D[\uDE80-\uDEFF]|\uD83E[\uDD00-\uDDFF])/);
             if (emojiMatch && !options.icon) {
                 icon = emojiMatch[1];
@@ -154,6 +302,7 @@
             }
 
             return new Promise(function (resolve) {
+                cleanupPendingDialog();
                 var root = ensureDOM();
                 root.dataset.type = 'confirm';
                 currentResolver = resolve;
@@ -166,18 +315,21 @@
 
                 if (iconEl) iconEl.textContent = icon;
                 if (titleEl) titleEl.textContent = title;
-                if (msgEl) setDialogContent(msgEl, msgStr);
+                if (msgEl) setDialogContent(msgEl, msgStr, !!options.allowHtml);
                 if (inputWrap) inputWrap.style.display = 'none';
 
                 var confirmBtnClass = isDanger ? 'kd-dialog-btn kd-dialog-btn-danger' : 'kd-dialog-btn kd-dialog-btn-primary';
+                var cancelBtn = null;
+                var confirmBtn = null;
                 if (actions) {
-                    actions.innerHTML = 
-                        '<button type="button" class="kd-dialog-btn kd-dialog-btn-secondary" id="kd-dialog-cancel-btn">' + cancelText + '</button>' +
-                        '<button type="button" class="' + confirmBtnClass + '" id="kd-dialog-confirm-btn">' + confirmText + '</button>';
+                    actions.style.flexDirection = '';
+                    actions.style.gap = '';
+                    actions.innerHTML = '';
+                    cancelBtn = createActionButton('kd-dialog-cancel-btn', 'kd-dialog-btn kd-dialog-btn-secondary', cancelText);
+                    confirmBtn = createActionButton('kd-dialog-confirm-btn', confirmBtnClass, confirmText);
+                    actions.appendChild(cancelBtn);
+                    actions.appendChild(confirmBtn);
                 }
-
-                var confirmBtn = document.getElementById('kd-dialog-confirm-btn');
-                var cancelBtn = document.getElementById('kd-dialog-cancel-btn');
 
                 if (confirmBtn) {
                     confirmBtn.onclick = function () {
@@ -224,7 +376,7 @@
             var placeholder = options.placeholder || "";
             var inputType = options.inputType || "text";
 
-            var msgStr = String(message || "");
+            var msgStr = String(message === null || message === undefined ? "" : message);
             var emojiMatch = msgStr.match(/^([\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF]|\u2705|\u274C|\u26A0\uFE0F|\u2139\uFE0F|\u2728|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]|\uD83D[\uDE80-\uDEFF]|\uD83E[\uDD00-\uDDFF])/);
             if (emojiMatch && !options.icon) {
                 icon = emojiMatch[1];
@@ -232,6 +384,7 @@
             }
 
             return new Promise(function (resolve) {
+                cleanupPendingDialog();
                 var root = ensureDOM();
                 root.dataset.type = 'prompt';
                 currentResolver = resolve;
@@ -245,7 +398,7 @@
 
                 if (iconEl) iconEl.textContent = icon;
                 if (titleEl) titleEl.textContent = title;
-                if (msgEl) setDialogContent(msgEl, msgStr);
+                if (msgEl) setDialogContent(msgEl, msgStr, !!options.allowHtml);
 
                 if (inputWrap) inputWrap.style.display = 'block';
                 if (inp) {
@@ -254,14 +407,17 @@
                     inp.placeholder = placeholder;
                 }
 
+                var cancelBtn = null;
+                var confirmBtn = null;
                 if (actions) {
-                    actions.innerHTML = 
-                        '<button type="button" class="kd-dialog-btn kd-dialog-btn-secondary" id="kd-dialog-cancel-btn">' + cancelText + '</button>' +
-                        '<button type="button" class="kd-dialog-btn kd-dialog-btn-primary" id="kd-dialog-confirm-btn">' + confirmText + '</button>';
+                    actions.style.flexDirection = '';
+                    actions.style.gap = '';
+                    actions.innerHTML = '';
+                    cancelBtn = createActionButton('kd-dialog-cancel-btn', 'kd-dialog-btn kd-dialog-btn-secondary', cancelText);
+                    confirmBtn = createActionButton('kd-dialog-confirm-btn', 'kd-dialog-btn kd-dialog-btn-primary', confirmText);
+                    actions.appendChild(cancelBtn);
+                    actions.appendChild(confirmBtn);
                 }
-
-                var confirmBtn = document.getElementById('kd-dialog-confirm-btn');
-                var cancelBtn = document.getElementById('kd-dialog-cancel-btn');
 
                 function submitValue() {
                     var val = inp ? inp.value : "";
@@ -315,6 +471,7 @@
             var cancelText = options.cancelText || (window.PRS_I18n ? window.PRS_I18n.t("dialog.back_cancel", null, "Zpět / Zrušit") : "Zrušit");
 
             return new Promise(function (resolve) {
+                cleanupPendingDialog();
                 var root = ensureDOM();
                 root.dataset.type = 'choice';
                 currentResolver = resolve;
@@ -329,41 +486,51 @@
                 if (iconEl) iconEl.textContent = icon;
                 if (inputWrap) inputWrap.style.display = 'none';
 
-                setDialogContent(msgEl, message);
-
-                var btnsHtml = [];
-                (choices || []).forEach(function (c, idx) {
-                    var cls = c.isPrimary ? 'kd-dialog-btn kd-dialog-btn-primary' : (c.isDanger ? 'kd-dialog-btn kd-dialog-btn-danger' : 'kd-dialog-btn kd-dialog-btn-secondary');
-                    var extraStyle = c.style || 'width:100%; text-align:left; justify-content:flex-start; padding:0.6rem 0.85rem; font-size:0.86rem; box-sizing:border-box; margin-bottom:0.25rem;';
-                    btnsHtml.push('<button type="button" class="' + cls + '" id="kd-dialog-choice-' + idx + '" style="' + extraStyle + '">' + c.label + (c.description ? ('<div style="font-size:0.75rem; opacity:0.82; font-weight:normal; margin-top:3px; line-height:1.25;">' + c.description + '</div>') : '') + '</button>');
-                });
-                btnsHtml.push('<button type="button" class="kd-dialog-btn kd-dialog-btn-secondary" id="kd-dialog-choice-cancel" style="margin-top:0.35rem; width:100%; justify-content:center;">' + cancelText + '</button>');
+                setDialogContent(msgEl, message, !!options.allowHtml);
 
                 if (actions) {
                     actions.style.flexDirection = 'column';
                     actions.style.gap = '0.4rem';
-                    actions.innerHTML = btnsHtml.join('\n');
-                }
+                    actions.innerHTML = '';
 
-                (choices || []).forEach(function (c, idx) {
-                    var b = document.getElementById('kd-dialog-choice-' + idx);
-                    if (b) {
+                    (choices || []).forEach(function (c, idx) {
+                        var cls = c.isPrimary ? 'kd-dialog-btn kd-dialog-btn-primary' : (c.isDanger ? 'kd-dialog-btn kd-dialog-btn-danger' : 'kd-dialog-btn kd-dialog-btn-secondary');
+                        var extraStyle = c.style || 'width:100%; text-align:left; justify-content:flex-start; padding:0.6rem 0.85rem; font-size:0.86rem; box-sizing:border-box; margin-bottom:0.25rem;';
+                        var b = document.createElement('button');
+                        b.type = 'button';
+                        b.className = cls;
+                        b.id = 'kd-dialog-choice-' + idx;
+                        b.style.cssText = extraStyle;
+                        b.appendChild(document.createTextNode(String(c.label || '')));
+                        if (c.description) {
+                            var descEl = document.createElement('div');
+                            descEl.style.cssText = 'font-size:0.75rem; opacity:0.82; font-weight:normal; margin-top:3px; line-height:1.25;';
+                            descEl.textContent = String(c.description);
+                            b.appendChild(descEl);
+                        }
                         b.onclick = function () {
                             if (window.PRS_Audio && window.PRS_Audio.playDiceRoll) {
                                 try { window.PRS_Audio.playDiceRoll(); } catch (e) {}
                             }
-                            if (actions) { actions.style.flexDirection = ''; actions.style.gap = ''; }
+                            actions.style.flexDirection = '';
+                            actions.style.gap = '';
                             dismiss(c.id);
                         };
-                    }
-                });
+                        actions.appendChild(b);
+                    });
 
-                var cancelBtn = document.getElementById('kd-dialog-choice-cancel');
-                if (cancelBtn) {
+                    var cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.className = 'kd-dialog-btn kd-dialog-btn-secondary';
+                    cancelBtn.id = 'kd-dialog-choice-cancel';
+                    cancelBtn.style.cssText = 'margin-top:0.35rem; width:100%; justify-content:center;';
+                    cancelBtn.textContent = String(cancelText || '');
                     cancelBtn.onclick = function () {
-                        if (actions) { actions.style.flexDirection = ''; actions.style.gap = ''; }
+                        actions.style.flexDirection = '';
+                        actions.style.gap = '';
                         dismiss(null);
                     };
+                    actions.appendChild(cancelBtn);
                 }
 
                 keyListener = function (e) {

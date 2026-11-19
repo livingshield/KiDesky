@@ -4053,20 +4053,6 @@
         return raw;
     },
 
-    getNodeDisplayName: function (nd) {
-        if (!nd) return "";
-        if (this._inGetNodeDisplayName) return nd.name || nd.code || "";
-        this._inGetNodeDisplayName = true;
-        try {
-            if (window.PRS_App && typeof window.PRS_App.getUnifiedNodeDisplayName === "function") {
-                return window.PRS_App.getUnifiedNodeDisplayName(nd);
-            }
-            return nd.name || nd.code || "";
-        } finally {
-            this._inGetNodeDisplayName = false;
-        }
-    },
-
     getNodeCategoryLabel: function (nd) {
         if (!nd) return "Herní pole";
         var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };

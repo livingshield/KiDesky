@@ -2393,7 +2393,8 @@ window.PRS_I18N.en = {
         "mobile_hint": "ℹ️ On mobile, use 'Add to Home screen' from your browser menu.",
         "already_installed": "✅ KiDesky is already running as an installed app on your device!",
         "installing": "📲 KiDesky is installing to your home screen...",
-        "already_installed_pc": "ℹ️ KiDesky is already installed on this computer! You can launch it from the Start menu or address bar icon."
+        "already_installed_pc": "ℹ️ KiDesky is already installed on this computer! You can launch it from the Start menu or address bar icon.",
+        "installed_btn": "✅ Installed on device"
     },
     "reactions": {
         "label": "💬 Reactions:",
@@ -2996,6 +2997,9 @@ window.PRS_I18N.en = {
         "save_room_code_success": "✅ Saved! Room code: <strong>{code}</strong>",
         "save_local_browser": "⚠️ Saved locally in browser.",
         "save_local_storage": "💾 Saved to local browser storage.",
+        "chat_send_failed": "⚠️ Failed to send chat message to the server.",
+        "load_room_failed": "⚠️ Failed to load online room {code}.",
+        "room_not_found": "⚠️ Online room {code} was not found.",
         "waiting_for_teammate": "Waiting for teammate's turn: {badge} {name}",
         "waiting_chosen_knight_info": "Your chosen knight at the table is <strong>{name}</strong>. The board automatically syncs every 3 seconds.",
         "waiting_timer_label": "⏱️ Turn timer:",

@@ -995,7 +995,7 @@
                         document.getElementById("admin-ann-active").checked = !!a.isActive;
                     }
                 })
-                .catch(function () { });
+                .catch(function (err) { console.warn("[Admin] loadAdminAnnouncements failed:", err); });
         },
 
         saveAdminAnnouncement: function () {
@@ -1191,7 +1191,7 @@
                             var aCnt = Array.isArray(r.animalLevels) ? r.animalLevels.length : 6;
                             recipeInfo = '<div style="font-size:0.71rem; color:#94a3b8; margin-top:2px;">🐎 ' + aCnt + ' sad zvířat • 🏯 ' + (r.castles || 0) + 'H / ' + (r.towns || 0) + 'M / ' + (r.villages || 0) + 'V • 🐲 ' + (r.questsU3 || 0) + ' draků</div>';
                         }
-                    } catch (e) { }
+                    } catch (e) { console.warn("[Admin] Invalid board recipeJson:", e); }
                 }
 
                 var delBtnLabel = b.isBuiltIn ? (b.isActive ? "👁️ Skrýt" : "👁️ Obnovit") : "🗑️ Odebrat";

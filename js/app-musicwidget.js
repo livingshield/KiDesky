@@ -54,18 +54,8 @@
                 if (self.open && self.el && !self.el.contains(ev.target)) self.toggle(false);
             });
 
-            // synchronizace s existujícím UI přehrávače
-            if (window.PRS_App && window.PRS_App.updateMusicUI && !window.PRS_App._mwWrapped) {
-                var orig = window.PRS_App.updateMusicUI;
-                window.PRS_App.updateMusicUI = function () {
-                    var r = orig.apply(this, arguments);
-                    try { W.refresh(); } catch (e) { }
-                    return r;
-                };
-                window.PRS_App._mwWrapped = true;
-            }
             this.refresh();
-            this.timer = setInterval(function () { if (self.open) self.refresh(); }, 500);
+            this.timer = setInterval(function () { if (self.open && !document.hidden) self.refresh(); }, 500);
         },
 
         toggle: function (force) {

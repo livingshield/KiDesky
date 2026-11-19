@@ -1422,7 +1422,7 @@
                 turnNumber: Math.round(result.avgRounds),
                 message: "Simulace " + result.gamesSimulated + " her [" + bCode + "/" + simOpts.scenario + "] (" + result.estTabletopHoursText + ")",
                 payloadJson: JSON.stringify(result)
-            }).catch(function () { });
+            }).catch(function (err) { console.warn("[KiDesky] telemetry log failed:", err); });
         }
     },
 
