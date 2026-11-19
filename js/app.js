@@ -5561,6 +5561,18 @@ window.PRS_App = {
 
     },
 
+    setInputValue: function (id, val) {
+        var el = document.getElementById(id);
+        if (el) el.value = val;
+    },
+
+    getInputNum: function (id, fallback) {
+        var el = document.getElementById(id);
+        if (!el || el.value === "") return fallback;
+        var n = Number(el.value);
+        return isNaN(n) ? fallback : n;
+    },
+
     // ========================================================================
     // KRÁLOVSKÉ MAP STUDIO (DYNAMICKÝ SESTAVOVAČ HERNÍHO PLÁNU 2.0)
     // ========================================================================

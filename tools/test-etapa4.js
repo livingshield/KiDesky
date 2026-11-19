@@ -252,19 +252,79 @@ async function main() {
     return `eager=${Math.round(eagerJsBytes / 1024)} KB, deferred=${savedKb} KB across ${forbiddenEager.length} lazy scripts`;
   });
 
-  // 3. Cross-module separation check (openImageModal in app-modals.js, Balance Studio in app-admin.js)
-  await test('3. Cross-module decoupling (lightbox in app-modals.js, Balance Studio in app-admin.js)', async () => {
-    const modalsSrc = fs.readFileSync(path.join(ROOT, 'js', 'app-modals.js'), 'utf8');
+  // 3. Cross-module separation check (openImageModal in modal-cheatsheet.js, Balance Studio in app-admin.js, setInputValue in app.js)
+  await test('3. Cross-module decoupling (lightbox in modal-cheatsheet.js, Balance Studio in app-admin.js, helpers in app.js)', async () => {
+    const cheatsheetSrc = fs.readFileSync(path.join(ROOT, 'js', 'modals', 'modal-cheatsheet.js'), 'utf8');
     const adminSrc = fs.readFileSync(path.join(ROOT, 'js', 'app-admin.js'), 'utf8');
+    const appSrc = fs.readFileSync(path.join(ROOT, 'js', 'app.js'), 'utf8');
     const catSrc = fs.readFileSync(path.join(ROOT, 'js', 'app-catalog.js'), 'utf8');
 
-    assert(modalsSrc.includes('openImageModal:'), 'openImageModal missing from app-modals.js');
+    assert(cheatsheetSrc.includes('openImageModal:'), 'openImageModal missing from modal-cheatsheet.js');
     assert(!catSrc.includes('openImageModal:'), 'openImageModal should not stay in app-catalog.js');
+    assert(appSrc.includes('setInputValue:'), 'setInputValue missing from app.js');
+    assert(!adminSrc.includes('setInputValue:'), 'setInputValue should not stay in app-admin.js');
     assert(adminSrc.includes('renderBalanceStudioInputs:'), 'renderBalanceStudioInputs missing from app-admin.js');
     assert(!catSrc.includes('renderBalanceStudioInputs:'), 'renderBalanceStudioInputs should not stay in app-catalog.js');
     assert(adminSrc.includes('_adminModuleLoaded: true'), '_adminModuleLoaded flag missing in app-admin.js');
     assert(catSrc.includes('_rulesBundleLoaded: true'), '_rulesBundleLoaded flag missing in app-catalog.js');
     return 'All cross-module dependencies cleanly separated with zero duplicate methods';
+  });
+
+  // 3b. Fáze 4B-1 split modules check (15 files under js/board, js/hud, js/modals; old monoliths removed)
+  const splitModules = [
+    'js/board/board-camera.js',
+    'js/board/board-rivers.js',
+    'js/board/board-static-svg.js',
+    'js/board/board-tokens.js',
+    'js/board/board-ambient.js',
+    'js/hud/hud-mobile-dock.js',
+    'js/hud/hud-inspector.js',
+    'js/hud/hud-advisor.js',
+    'js/hud/hud-action-panel.js',
+    'js/hud/hud-turn-actions.js',
+    'js/modals/modal-victory-diploma.js',
+    'js/modals/modal-armory.js',
+    'js/modals/modal-combat.js',
+    'js/modals/modal-festival-chance.js',
+    'js/modals/modal-cheatsheet.js'
+  ];
+
+  await test('3b. Fáze 4B-1 split modules syntax & VM load (15 modules, old monoliths removed)', async () => {
+    for (const oldFile of ['js/app-hud.js', 'js/app-modals.js', 'js/app-board.js']) {
+      assert(!fs.existsSync(path.join(ROOT, oldFile)), `Old monolith still exists: ${oldFile}`);
+    }
+
+    const win = { PRS_App: {} };
+    const ctx = vm.createContext({
+      window: win,
+      document: {},
+      console
+    });
+    for (const rel of splitModules) {
+      const fullPath = path.join(ROOT, rel);
+      assert(fs.existsSync(fullPath), `Missing split module: ${rel}`);
+      execFileSync(process.execPath, ['--check', fullPath], { stdio: 'pipe' });
+      const code = fs.readFileSync(fullPath, 'utf8');
+      vm.runInContext(code, ctx, { filename: rel });
+    }
+
+    const expectedMethods = [
+      '_renderActionPhaseRoll',
+      '_renderActionPhaseLanded',
+      'openGraphicsModal',
+      'openArmoryModal',
+      'openQuestDuelModal',
+      'openFestivalModal',
+      'openImageModal',
+      'renderBoardSVG',
+      'renderBoardRiversHTML',
+      'initMapPanAndZoom',
+      'updateMobileDock'
+    ];
+    for (const m of expectedMethods) {
+      assert(typeof win.PRS_App[m] === 'function', `Expected PRS_App.${m} function missing after loading split modules`);
+    }
+    return `15 split modules syntax-ok & loaded (${Object.keys(win.PRS_App).length} PRS_App entries)`;
   });
 
   // 4. Unit test for PRS_ModuleLoader + lazy PRS_I18n language switching
@@ -290,22 +350,26 @@ async function main() {
       const res = await fetchWithTimeout(`${baseUrl}service-worker.js`, { cache: 'no-store' });
       assert(res.status === 200, `Expected HTTP 200, got ${res.status}`);
       const text = await res.text();
-      for (const tok of [cacheName, 'languages.js', 'module-loader.js']) {
+      for (const tok of [cacheName, 'languages.js', 'module-loader.js', 'hud-action-panel.js', 'board-rivers.js', 'modal-combat.js']) {
         assert(text.includes(tok), `Live service-worker.js missing ${tok}`);
       }
       return `HTTP 200, ${cacheName} active`;
     });
 
-    await test(`7. LIVE GET index.html (?v=${assetVersion} lazy scripts wired)`, async () => {
+    await test(`7. LIVE GET index.html (?v=${assetVersion} lazy & split scripts wired)`, async () => {
       const res = await fetchWithTimeout(`${baseUrl}index.html`, { cache: 'no-store' });
       assert(res.status === 200, `Expected HTTP 200, got ${res.status}`);
       const liveHtml = await res.text();
       assert(liveHtml.includes(`js/i18n/languages.js?v=${assetVersion}`), 'Live index.html missing languages.js');
       assert(liveHtml.includes(`js/core/module-loader.js?v=${assetVersion}`), 'Live index.html missing module-loader.js');
+      assert(liveHtml.includes(`js/hud/hud-action-panel.js?v=${assetVersion}`), 'Live index.html missing hud-action-panel.js');
       assert(!liveHtml.includes('src="js/app-admin.js'), 'Live index.html still eagerly loads app-admin.js');
       assert(!liveHtml.includes('src="js/app-map-editor.js'), 'Live index.html still eagerly loads app-map-editor.js');
       assert(!liveHtml.includes('src="js/app-catalog.js'), 'Live index.html still eagerly loads app-catalog.js');
-      return `HTTP 200, ?v=${assetVersion} & lazy-loader active`;
+      assert(!liveHtml.includes('src="js/app-hud.js'), 'Live index.html still loads deprecated app-hud.js');
+      assert(!liveHtml.includes('src="js/app-modals.js'), 'Live index.html still loads deprecated app-modals.js');
+      assert(!liveHtml.includes('src="js/app-board.js'), 'Live index.html still loads deprecated app-board.js');
+      return `HTTP 200, ?v=${assetVersion} & lazy/split modules active`;
     });
 
     for (const rel of [
@@ -313,7 +377,7 @@ async function main() {
       'js/core/module-loader.js',
       'js/app-i18n.js',
       'js/app.js',
-      'js/app-modals.js',
+      ...splitModules,
       'js/app-admin.js',
       'js/app-catalog.js'
     ]) {

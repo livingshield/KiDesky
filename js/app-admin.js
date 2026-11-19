@@ -1562,18 +1562,6 @@
             this.setInputValue("cfg-u3Hearts", c.quests.u3HeartReward !== undefined ? c.quests.u3HeartReward : 3.0);
         },
 
-        setInputValue: function (id, val) {
-            var el = document.getElementById(id);
-            if (el) el.value = val;
-        },
-
-        getInputNum: function (id, fallback) {
-            var el = document.getElementById(id);
-            if (!el || el.value === "") return fallback;
-            var n = Number(el.value);
-            return isNaN(n) ? fallback : n;
-        },
-
         readBalanceStudioInputs: function () {
             var c = window.PRS_GameEngine.deepClone(this.activeConfig || window.PRS_DEFAULT_CONFIG);
             if (!c.estates) c.estates = window.PRS_GameEngine.deepClone(window.PRS_DEFAULT_CONFIG.estates);
