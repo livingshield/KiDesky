@@ -134,6 +134,10 @@ openAuthModal: function () {
 
     setGuestMode: function () {
 
+        if (window.PRS_Api && typeof window.PRS_Api.clearAuthToken === "function") {
+            window.PRS_Api.clearAuthToken();
+        }
+
         this.currentUser = {
 
             id: null,
@@ -246,15 +250,14 @@ openAuthModal: function () {
             return;
         }
 
-        fetch("api.ashx?action=" + mode, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: username, password: password, displayName: displayName, email: email })
-        })
-            .then(function (r) { return r.json(); })
+        PRS_Api.post(mode, { username: username, password: password, displayName: displayName, email: email })
             .then(function (data) {
                 if (data && data.ok && data.user) {
                     self.currentUser = data.user;
+                    if (data.authToken && window.PRS_Api) {
+                        window.PRS_Api.setAuthToken(data.authToken);
+                        self.currentUser.authToken = data.authToken;
+                    }
                     if (typeof data.user.credits === "number") self.userCredits = data.user.credits;
                     if (data.user.selectedPawnId) self.selectedPawnId = data.user.selectedPawnId;
                     if (data.user.unlockedPawnsJson) {
@@ -284,7 +287,12 @@ openAuthModal: function () {
                         alert(data.message || "Registrace proběhla úspěšně! Na tvůj e-mail byl odeslán potvrzovací odkaz. Do jeho potvrzení můžeš hrát v režimu Hosta.");
                     }
                 } else {
-                    var rawErr = (data && (data.error || data.message)) ? (data.error || data.message) : "Přihlášení se nezdařilo.";
+                    var rawErr;
+                    if (data && data.code === "ACCOUNT_DISABLED" && window.PRS_I18n) {
+                        rawErr = window.PRS_I18n.t("auth.account_disabled");
+                    } else {
+                        rawErr = (data && (data.error || data.message)) ? (data.error || data.message) : "Přihlášení se nezdařilo.";
+                    }
                     if (rawErr.indexOf("Neplatn") !== -1 && rawErr.indexOf("heslo") !== -1) {
                         rawErr = "Neplatné jméno nebo heslo.";
                     }
@@ -292,11 +300,10 @@ openAuthModal: function () {
                 }
             })
             .catch(function () {
-                var role = (username.toLowerCase() === "admin") ? "Admin" : "Player";
-                self.currentUser = { id: 1, username: username, displayName: displayName || username, role: role, token: "local" };
-                localStorage.setItem("prs_user", JSON.stringify(self.currentUser));
-                self.updateUserUI();
-                self.closeAuthModal();
+                var netMsg = (window.PRS_I18n)
+                    ? window.PRS_I18n.t("auth.network_error")
+                    : "Chyba připojení k serveru. Zkus to prosím za chvíli znovu.";
+                if (msgEl) msgEl.textContent = netMsg;
             });
     },
 
@@ -314,14 +321,9 @@ openAuthModal: function () {
             alert("Zadej prosím své uživatelské jméno nebo e-mail.");
             return;
         }
-        fetch("api.ashx?action=resend-confirmation", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: u, email: u })
-        })
-            .then(function (r) { return r.json(); })
+        PRS_Api.post("resend-confirmation", { username: u, email: u })
             .then(function (res) {
-                alert(res.message || "Požadavek na znovuzaslání byl zpracován.");
+                alert((res && res.message) || "Požadavek na znovuzaslání byl zpracován.");
             })
             .catch(function () {
                 alert("Chyba sítě při odesílání potvrzení.");
@@ -1030,9 +1032,7 @@ openAuthModal: function () {
 
         var fetchFullSession = function () {
 
-            fetch("api.ashx?action=load-session&code=" + encodeURIComponent(roomCode))
-
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("load-session", { code: roomCode })
 
                 .then(function (res) {
 
@@ -1139,9 +1139,7 @@ openAuthModal: function () {
 
         // Automatický polling: Odlehčený Headless Turn-Check (~180 bajtů namísto ~100 kB JSONu)
 
-        fetch("api.ashx?action=check-session&code=" + encodeURIComponent(roomCode))
-
-            .then(function (r) { return r.json(); })
+        PRS_Api.get("check-session", { code: roomCode })
 
             .then(function (res) {
 
@@ -1276,17 +1274,14 @@ openAuthModal: function () {
         };
 
         var doFetch = function (retryCount) {
-            return fetch("api.ashx?action=save-session", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            }).then(function (r) {
-                if ((r.status === 403 || r.status === 503 || r.status === 502) && retryCount > 0) {
+            return PRS_Api.post("save-session", payload).then(function (res) {
+                var st = res && res._httpStatus;
+                if ((st === 403 || st === 503 || st === 502) && retryCount > 0) {
                     return new Promise(function (resolve) { setTimeout(resolve, 650); }).then(function () {
                         return doFetch(retryCount - 1);
                     });
                 }
-                return r;
+                return res;
             }).catch(function (networkErr) {
                 if (retryCount > 0) {
                     return new Promise(function (resolve) { setTimeout(resolve, 650); }).then(function () {
@@ -1298,76 +1293,66 @@ openAuthModal: function () {
         };
 
         doFetch(2)
-            .then(function (r) {
-                if (r.status === 409) {
-                    return r.json().then(function (conf) {
-                        if (statusEl) statusEl.innerHTML = "⚠️ Konflikt: Tah byl odehrán na jiném zařízení.";
-                        self.handleTurnConflict(conf);
-                    });
+            .then(function (res) {
+                var st = res && res._httpStatus;
+                if (st === 409) {
+                    if (statusEl) statusEl.innerHTML = "⚠️ Konflikt: Tah byl odehrán na jiném zařízení.";
+                    self.handleTurnConflict(res);
+                    return;
                 }
-                if (!r.ok) {
-                    return r.json().then(function (errJson) {
-                        throw new Error(errJson.message || ("HTTP " + r.status));
-                    }).catch(function (parseErr) {
-                        if (parseErr && parseErr.message && !parseErr.message.startsWith("JSON")) {
-                            throw parseErr;
+                if (st && (st < 200 || st >= 300)) {
+                    throw new Error((res && res.message) || ("HTTP " + st));
+                }
+
+                if (res && res.ok) {
+
+                    self.state.sessionGuid = res.sessionGuid;
+
+                    self.state.roomCode = res.roomCode;
+
+                    self.lastKnownTurnNumber = self.state.turnNumber;
+
+                    try {
+                        localStorage.setItem("prs_active_online_room", res.roomCode);
+                        if (window.history && window.history.replaceState) {
+                            window.history.replaceState(null, "", "?room=" + encodeURIComponent(res.roomCode));
                         }
-                        throw new Error("HTTP " + r.status);
-                    });
-                }
-                return r.json().then(function (res) {
+                    } catch (e) { }
 
-                    if (res && res.ok) {
-
-                        self.state.sessionGuid = res.sessionGuid;
-
-                        self.state.roomCode = res.roomCode;
-
-                        self.lastKnownTurnNumber = self.state.turnNumber;
+                    if (isNewRoom) {
 
                         try {
-                            localStorage.setItem("prs_active_online_room", res.roomCode);
-                            if (window.history && window.history.replaceState) {
-                                window.history.replaceState(null, "", "?room=" + encodeURIComponent(res.roomCode));
-                            }
+
+                            localStorage.setItem("prs_slot_" + res.roomCode, "0");
+
                         } catch (e) { }
 
-                        if (isNewRoom) {
+                        if (window.PRS_Audio) window.PRS_Audio.playFanfare();
 
-                            try {
+                        self.copyRoomInviteLink();
 
-                                localStorage.setItem("prs_slot_" + res.roomCode, "0");
-
-                            } catch (e) { }
-
-                            if (window.PRS_Audio) window.PRS_Audio.playFanfare();
-
-                            self.copyRoomInviteLink();
-
-                            KiDeskyDialog.alert("Hra byla úspěšně převedena na Online stůl!<br><br>Kód místnosti: <strong style='color:var(--gold-light); font-size:1.15rem; letter-spacing:1px;'>" + self.escapeHtml(res.roomCode) + "</strong><br><br>Odkaz pro přátele byl zkopírován do schránky.", {
-                                title: "Online stůl připraven",
-                                icon: "🌐"
-                            });
-
-                        }
-
-                        if (statusEl) statusEl.innerHTML = (window.PRS_I18n ? window.PRS_I18n.t("online.save_room_code_success", { code: res.roomCode }) : ("✅ Uloženo! Kód místnosti: <strong>" + res.roomCode + "</strong>"));
-
-                        self.renderOnlineRoomBar();
-
-                        self.fetchServerStatusAndSessions();
-
-                        self.addLog("☁️ Hra uložena do cloudu! Kód online místnosti: " + res.roomCode, "turn");
-
-                    } else {
-
-                        if (statusEl) statusEl.textContent = (window.PRS_I18n ? window.PRS_I18n.t("online.save_local_browser") : "⚠️ Uloženo lokálně v prohlížeči.");
-
-                        localStorage.setItem("prs_saved_game", JSON.stringify(self.state));
+                        KiDeskyDialog.alert("Hra byla úspěšně převedena na Online stůl!<br><br>Kód místnosti: <strong style='color:var(--gold-light); font-size:1.15rem; letter-spacing:1px;'>" + self.escapeHtml(res.roomCode) + "</strong><br><br>Odkaz pro přátele byl zkopírován do schránky.", {
+                            title: "Online stůl připraven",
+                            icon: "🌐"
+                        });
 
                     }
 
-                });
+                    if (statusEl) statusEl.innerHTML = (window.PRS_I18n ? window.PRS_I18n.t("online.save_room_code_success", { code: res.roomCode }) : ("✅ Uloženo! Kód místnosti: <strong>" + res.roomCode + "</strong>"));
+
+                    self.renderOnlineRoomBar();
+
+                    self.fetchServerStatusAndSessions();
+
+                    self.addLog("☁️ Hra uložena do cloudu! Kód online místnosti: " + res.roomCode, "turn");
+
+                } else {
+
+                    if (statusEl) statusEl.textContent = (window.PRS_I18n ? window.PRS_I18n.t("online.save_local_browser") : "⚠️ Uloženo lokálně v prohlížeči.");
+
+                    localStorage.setItem("prs_saved_game", JSON.stringify(self.state));
+
+                }
 
             })
 
@@ -1430,37 +1415,22 @@ openAuthModal: function () {
             players: this.state.players
         };
 
-        return fetch("api.ashx?action=save-session", {
+        return PRS_Api.post("save-session", payload)
 
-            method: "POST",
+            .then(function (res) {
 
-            headers: { "Content-Type": "application/json" },
+                if (res && res._httpStatus === 409) {
 
-            body: JSON.stringify(payload)
-
-        })
-
-            .then(function (r) {
-
-                if (r.status === 409) {
-
-                    return r.json().then(function (conf) {
-
-                        self.handleTurnConflict(conf);
-
-                    });
+                    self.handleTurnConflict(res);
+                    return;
 
                 }
 
-                return r.json().then(function (res) {
+                if (res && res.ok) {
 
-                    if (res && res.ok) {
+                    self.lastKnownTurnNumber = self.state.turnNumber;
 
-                        self.lastKnownTurnNumber = self.state.turnNumber;
-
-                    }
-
-                });
+                }
 
             })
 
@@ -1520,9 +1490,7 @@ openAuthModal: function () {
 
         var self = this;
 
-        fetch("api.ashx?action=list-sessions")
-
-            .then(function (r) { return r.json(); })
+        PRS_Api.get("list-sessions")
 
             .then(function (res) {
 
@@ -1590,9 +1558,7 @@ openAuthModal: function () {
 
         if (!code) return;
 
-        fetch("api.ashx?action=load-session&code=" + encodeURIComponent(code))
-
-            .then(function (r) { return r.json(); })
+        PRS_Api.get("load-session", { code: code })
 
             .then(function (res) {
 
@@ -1724,11 +1690,12 @@ openAuthModal: function () {
         this.showKnightEmoteBubble(myIdx, text, author);
         if (window.PRS_Audio) window.PRS_Audio.playNotice();
         if (this.state && this.state.roomCode) {
-            var url = "api.ashx?action=send-emote&code=" + encodeURIComponent(this.state.roomCode) +
-                "&playerIdx=" + myIdx +
-                "&emote=" + encodeURIComponent(text) +
-                "&author=" + encodeURIComponent(author);
-            fetch(url).catch(function () { });
+            PRS_Api.get("send-emote", {
+                code: this.state.roomCode,
+                playerIdx: myIdx,
+                emote: text,
+                author: author
+            }).catch(function () { });
         }
     },
 
@@ -1871,19 +1838,14 @@ openAuthModal: function () {
         var roomCode = (this.state && this.state.roomCode) ? this.state.roomCode : "";
 
         if (roomCode) {
-            fetch("api.ashx?action=send-chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    code: roomCode,
-                    playerIndex: myIdx,
-                    author: author,
-                    crestId: crestInfo.crestId,
-                    crestColor: crestInfo.tincture,
-                    text: text
-                })
+            PRS_Api.post("send-chat", {
+                code: roomCode,
+                playerIndex: myIdx,
+                author: author,
+                crestId: crestInfo.crestId,
+                crestColor: crestInfo.tincture,
+                text: text
             })
-                .then(function (r) { return r.json(); })
                 .then(function (res) {
                     if (res && res.ok && res.chat) {
                         self.handleIncomingChatMessages([res.chat], false, true);
@@ -2050,28 +2012,19 @@ openAuthModal: function () {
             try { desiredNick = (localStorage.getItem("prs_player_nickname") || "").trim(); } catch (e) { }
         }
 
-        fetch("api.ashx?action=google-login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                credential: response.credential,
-                displayName: desiredNick
-            })
+        PRS_Api.post("google-login", {
+            credential: response.credential,
+            displayName: desiredNick
         })
-            .then(function (r) {
-                return r.text().then(function (txt) {
-                    try {
-                        return JSON.parse(txt);
-                    } catch (pe) {
-                        throw new Error("Neplatná odpověď serveru (HTTP " + r.status + "): " + txt.substring(0, 100));
-                    }
-                });
-            })
             .then(function (res) {
                 if (res && res.ok && res.user) {
                     setMsg("#4ade80", "✅ Přihlášení úspěšné! Vítej, " + (res.user.displayName || res.user.username) + "!");
                     if (window.PRS_App) {
                         PRS_App.currentUser = res.user;
+                        if (res.authToken && window.PRS_Api) {
+                            window.PRS_Api.setAuthToken(res.authToken);
+                            PRS_App.currentUser.authToken = res.authToken;
+                        }
                         if (typeof res.user.credits === "number") PRS_App.userCredits = res.user.credits;
                         if (res.user.selectedPawnId) PRS_App.selectedPawnId = res.user.selectedPawnId;
                         if (res.user.unlockedPawnsJson) {

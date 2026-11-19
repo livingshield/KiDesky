@@ -2220,7 +2220,11 @@ window.PRS_I18N.en = {
         "btn_play_guest": "👤 Play freely as Guest",
         "btn_resend_code": "🔁 Resend Code",
         "btn_login": "🔑 Sign In",
-        "btn_register": "✨ Register"
+        "btn_register": "✨ Register",
+        "session_expired": "Your login session has expired or needs to be refreshed. Please sign in again.",
+        "network_error": "Server connection error. Please try again in a moment.",
+        "admin_required": "This action requires an active administrator login.",
+        "account_disabled": "This user account has been disabled by an administrator."
     },
     "online_lobby": {
         "badge": "Mode 3 • Online Multiplayer & Cloud",

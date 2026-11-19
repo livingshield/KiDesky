@@ -1,52 +1,28 @@
 <%@ WebHandler Language="C#" Class="KiDeskyApiHandler" %>
 
-
-
 using System;
-
-
 
 using System.Collections.Generic;
 
-
-
 using System.Data;
-
-
 
 using System.Data.SqlClient;
 
-
-
 using System.IO;
-
-
 
 using System.Security.Cryptography;
 
-
-
 using System.Text;
 
-
-
 using System.Web;
-
-
 
 using System.Web.Script.Serialization;
 using System.Net;
 using System.Net.Mail;
 
-
-
 public class KiDeskyApiHandler : IHttpHandler
 
-
-
 {
-
-
 
     // Dynamické načtení connection stringu z web.config / appsettings.json / produkčního MSSQL db4937
 
@@ -77,449 +53,270 @@ public class KiDeskyApiHandler : IHttpHandler
     private static readonly Dictionary<string, List<RoomChatMessage>> _roomChat = new Dictionary<string, List<RoomChatMessage>>(StringComparer.OrdinalIgnoreCase);
     private static readonly object _chatLock = new object();
 
+    public class AuthenticatedUser
+    {
+        public int Id;
+        public string Username;
+        public string Email;
+        public string Role;
+        public string DisplayName;
+        public bool IsActive;
+        public bool EmailConfirmed;
+        public int Credits;
+        public string SelectedPawnId;
+        public string UnlockedPawnsJson;
+        public int GamesPlayed;
+        public int GamesWon;
+        public int DragonsSlain;
+        public double TotalHeartsEarned;
+        public double HighestScore;
+        public string AchievementsJson;
+        public string AvatarUrl;
+        public string AuthProvider;
+    }
+
+    private static readonly Dictionary<string, int> _authoritativePawnPrices = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "knight_valiant", 0 },
+        { "knight_tourney", 0 },
+        { "lady_huntress", 0 },
+        { "lord_diplomat", 0 },
+        { "knight_warden", 0 },
+        { "lady_sorceress", 0 },
+        { "bot_aggressive", 0 },
+        { "bot_breeder", 0 },
+        { "bot_noble", 0 },
+        { "bot_balanced", 0 },
+        { "bot_easy", 0 },
+        { "prem_dragon_lord", 500 },
+        { "prem_ice_queen", 500 },
+        { "prem_shadow_assassin", 600 },
+        { "prem_golden_king", 750 },
+        { "prem_unicorn_rider", 800 },
+        { "prem_phoenix_paladin", 1000 }
+    };
+
     private static string _resolvedConnStr = null;
-
-
 
     private static string ExtractJsonConn(string json, string key)
 
-
-
     {
-
-
 
         if (string.IsNullOrEmpty(json)) return null;
 
-
-
         int idx = json.IndexOf("\"" + key + "\"", StringComparison.OrdinalIgnoreCase);
-
-
 
         if (idx < 0) return null;
 
-
-
         int colon = json.IndexOf(':', idx);
-
-
 
         if (colon < 0) return null;
 
-
-
         int startQuote = json.IndexOf('"', colon + 1);
-
-
 
         if (startQuote < 0) return null;
 
-
-
         int endQuote = json.IndexOf('"', startQuote + 1);
-
-
 
         if (startQuote > 0 && endQuote > startQuote)
 
-
-
         {
-
-
 
             string val = json.Substring(startQuote + 1, endQuote - startQuote - 1).Replace("\\\"", "\"").Replace("\\\\", "\\");
 
-
-
             if (!string.IsNullOrEmpty(val) && !val.Contains("YOUR_SERVER"))
 
-
-
             {
-
-
 
                 return val;
 
-
-
             }
 
-
-
         }
-
-
 
         return null;
 
-
-
     }
-
-
 
     private static string CONN_STR
 
-
-
     {
-
-
 
         get
 
-
-
         {
-
-
 
             if (!string.IsNullOrEmpty(_resolvedConnStr)) return _resolvedConnStr;
 
-
-
             // 1. Web.config ConnectionStrings
-
-
 
             try
 
-
-
             {
-
-
 
                 var csProd = System.Configuration.ConfigurationManager.ConnectionStrings["ProductionConnection"];
 
-
-
                 if (csProd != null && !string.IsNullOrEmpty(csProd.ConnectionString) && !csProd.ConnectionString.Contains("YOUR_SERVER"))
 
-
-
                 {
-
-
 
                     _resolvedConnStr = csProd.ConnectionString;
 
-
-
                     return _resolvedConnStr;
 
-
-
                 }
-
-
 
                 var csDef = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"];
 
-
-
                 if (csDef != null && !string.IsNullOrEmpty(csDef.ConnectionString) && !csDef.ConnectionString.Contains("YOUR_SERVER"))
 
-
-
                 {
-
-
 
                     _resolvedConnStr = csDef.ConnectionString;
 
-
-
                     return _resolvedConnStr;
-
-
 
                 }
 
-
-
             }
 
-
-
             catch { }
-
-
 
             // 2. JSON konfigurace v ruznych moznych umistenich
 
-
-
             string[] candidateFiles = new string[] {
-
-
 
                 "appsettings.Production.json",
 
-
-
                 "appsettings.local.json",
-
-
 
                 "appsettings.json"
 
-
-
             };
-
-
 
             List<string> candidatePaths = new List<string>();
 
-
-
             try
 
-
-
             {
-
-
 
                 if (HttpContext.Current != null && HttpContext.Current.Server != null)
 
-
-
                 {
-
-
 
                     foreach (var cf in candidateFiles)
 
-
-
                     {
-
-
 
                         try { candidatePaths.Add(HttpContext.Current.Server.MapPath(cf)); } catch { }
 
-
-
                         try { candidatePaths.Add(HttpContext.Current.Server.MapPath("./" + cf)); } catch { }
-
-
 
                         try { candidatePaths.Add(HttpContext.Current.Server.MapPath("~/" + cf)); } catch { }
 
-
-
                         try { candidatePaths.Add(HttpContext.Current.Server.MapPath("~/apps/KiDesky/" + cf)); } catch { }
-
-
 
                     }
 
-
-
                 }
-
-
 
             }
 
-
-
             catch { }
-
-
 
             try
 
-
-
             {
-
-
 
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
 
-
-
                 if (!string.IsNullOrEmpty(baseDir))
 
-
-
                 {
-
-
 
                     foreach (var cf in candidateFiles)
 
-
-
                     {
-
-
 
                         candidatePaths.Add(Path.Combine(baseDir, cf));
 
-
-
                         candidatePaths.Add(Path.Combine(baseDir, "apps", "KiDesky", cf));
-
-
 
                     }
 
-
-
                 }
-
-
 
             }
 
-
-
             catch { }
-
-
 
             foreach (var path in candidatePaths)
 
-
-
             {
-
-
 
                 try
 
-
-
                 {
-
-
 
                     if (!string.IsNullOrEmpty(path) && File.Exists(path))
 
-
-
                     {
-
-
 
                         string json = File.ReadAllText(path);
 
-
-
                         string res = ExtractJsonConn(json, "ProductionConnection") ?? ExtractJsonConn(json, "DefaultConnection");
-
-
 
                         if (!string.IsNullOrEmpty(res))
 
-
-
                         {
-
-
 
                             _resolvedConnStr = res;
 
-
-
                             return _resolvedConnStr;
-
-
 
                         }
 
-
-
                     }
 
-
-
                 }
-
-
 
                 catch { }
 
-
-
             }
-
-
 
             // 3. Environment variable
 
-
-
             try
-
-
 
             {
 
-
-
                 string envConn = Environment.GetEnvironmentVariable("SQL_CONN_STR") ?? Environment.GetEnvironmentVariable("DB_CONN_STR");
-
-
 
                 if (!string.IsNullOrEmpty(envConn) && !envConn.Contains("YOUR_SERVER"))
 
-
-
                 {
-
-
 
                     _resolvedConnStr = envConn;
 
-
-
                     return _resolvedConnStr;
-
-
 
                 }
 
-
-
             }
-
-
 
             catch { }
 
-
-
             _resolvedConnStr = string.Empty;
-
-
 
             return _resolvedConnStr;
 
-
-
         }
-
-
 
     }
 
-
-
     private readonly JavaScriptSerializer _json = new JavaScriptSerializer { MaxJsonLength = 20 * 1024 * 1024 };
 
-
-
     private static bool _schemaEnsured = false;
-
-
 
     private static readonly object _schemaLock = new object();
 
@@ -596,127 +393,336 @@ public class KiDeskyApiHandler : IHttpHandler
         }
     }
 
+    private static bool IsAllowedOrigin(string origin)
+    {
+        if (string.IsNullOrEmpty(origin)) return false;
+        Uri uri;
+        if (!Uri.TryCreate(origin, UriKind.Absolute, out uri)) return false;
+        string host = uri.Host;
+        if (uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
+            (host.Equals("www.ekobio.org", StringComparison.OrdinalIgnoreCase) ||
+             host.Equals("ekobio.org", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+        if ((uri.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase) || uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase)) &&
+            (host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+        return false;
+    }
 
+    private static string ComputeSha256Hex(string input)
+    {
+        using (var sha = SHA256.Create())
+        {
+            byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input ?? ""));
+            StringBuilder sb = new StringBuilder(bytes.Length * 2);
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                sb.Append(bytes[i].ToString("x2"));
+            }
+            return sb.ToString();
+        }
+    }
+
+    private static string ExtractAuthToken(HttpContext context)
+    {
+        if (context == null || context.Request == null) return null;
+        string tok = context.Request.Headers["X-KiDesky-Auth"];
+        if (!string.IsNullOrEmpty(tok)) return tok.Trim();
+        string authHdr = context.Request.Headers["Authorization"];
+        if (!string.IsNullOrEmpty(authHdr) && authHdr.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            return authHdr.Substring(7).Trim();
+        }
+        return null;
+    }
+
+    private string CreateSessionToken(SqlConnection conn, int userId, HttpContext context)
+    {
+        byte[] rawBytes = new byte[32];
+        using (var rng = new RNGCryptoServiceProvider())
+        {
+            rng.GetBytes(rawBytes);
+        }
+        StringBuilder sb = new StringBuilder(rawBytes.Length * 2);
+        for (int i = 0; i < rawBytes.Length; i++)
+        {
+            sb.Append(rawBytes[i].ToString("x2"));
+        }
+        string rawToken = sb.ToString();
+        string tokenHash = ComputeSha256Hex(rawToken);
+        DateTime expiresAt = DateTime.UtcNow.AddDays(30);
+        string ua = (context != null && context.Request != null) ? (context.Request.UserAgent ?? "") : "";
+        if (ua.Length > 256) ua = ua.Substring(0, 256);
+
+        try
+        {
+            using (var cleanupCmd = new SqlCommand("DELETE FROM [prs].[prs_UserSessions] WHERE [ExpiresAt] < SYSUTCDATETIME()", conn))
+            {
+                cleanupCmd.ExecuteNonQuery();
+            }
+        }
+        catch { }
+
+        using (var insCmd = new SqlCommand(@"
+            INSERT INTO [prs].[prs_UserSessions] ([UserId], [TokenHash], [CreatedAt], [ExpiresAt], [UserAgent])
+            VALUES (@uid, @th, SYSUTCDATETIME(), @exp, @ua)", conn))
+        {
+            insCmd.Parameters.AddWithValue("@uid", userId);
+            insCmd.Parameters.Add("@th", SqlDbType.NVarChar, 64).Value = tokenHash;
+            insCmd.Parameters.AddWithValue("@exp", expiresAt);
+            insCmd.Parameters.Add("@ua", SqlDbType.NVarChar, 256).Value = string.IsNullOrEmpty(ua) ? (object)DBNull.Value : ua;
+            insCmd.ExecuteNonQuery();
+        }
+        return rawToken;
+    }
+
+    private void RevokeSessionToken(SqlConnection conn, string rawToken)
+    {
+        if (conn == null || string.IsNullOrEmpty(rawToken)) return;
+        string tokenHash = ComputeSha256Hex(rawToken.Trim());
+        try
+        {
+            using (var cmd = new SqlCommand("UPDATE [prs].[prs_UserSessions] SET [RevokedAt] = SYSUTCDATETIME() WHERE [TokenHash] = @th AND [RevokedAt] IS NULL", conn))
+            {
+                cmd.Parameters.Add("@th", SqlDbType.NVarChar, 64).Value = tokenHash;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch { }
+    }
+
+    private void RevokeAllUserSessions(SqlConnection conn, int userId)
+    {
+        if (conn == null || userId <= 0) return;
+        try
+        {
+            using (var cmd = new SqlCommand("UPDATE [prs].[prs_UserSessions] SET [RevokedAt] = SYSUTCDATETIME() WHERE [UserId] = @uid AND [RevokedAt] IS NULL", conn))
+            {
+                cmd.Parameters.AddWithValue("@uid", userId);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch { }
+    }
+
+    private object BuildUserDto(AuthenticatedUser u)
+    {
+        return new
+        {
+            id = u.Id,
+            username = u.Username,
+            displayName = u.DisplayName,
+            role = u.Role,
+            email = u.Email,
+            emailConfirmed = u.EmailConfirmed,
+            avatarUrl = u.AvatarUrl,
+            authProvider = u.AuthProvider,
+            gamesPlayed = u.GamesPlayed,
+            gamesWon = u.GamesWon,
+            dragonsSlain = u.DragonsSlain,
+            totalHeartsEarned = Math.Round(u.TotalHeartsEarned, 1),
+            highestScore = Math.Round(u.HighestScore, 1),
+            achievementsJson = u.AchievementsJson,
+            credits = u.Credits,
+            selectedPawnId = u.SelectedPawnId,
+            unlockedPawnsJson = u.UnlockedPawnsJson
+        };
+    }
+
+    private AuthenticatedUser GetAuthenticatedUser(HttpContext context)
+    {
+        string token = ExtractAuthToken(context);
+        if (string.IsNullOrEmpty(token) || !IsDbConfigured()) return null;
+        string tokenHash = ComputeSha256Hex(token);
+
+        using (var conn = new SqlConnection(CONN_STR))
+        {
+            conn.Open();
+            EnsureExtendedAdminSchema(conn);
+            using (var cmd = new SqlCommand(@"
+                SELECT TOP 1
+                    u.[Id], u.[Username], u.[Email], u.[Role], u.[DisplayName],
+                    ISNULL(u.[IsActive], 1) AS [IsActive],
+                    ISNULL(u.[EmailConfirmed], 0) AS [EmailConfirmed],
+                    ISNULL(u.[Credits], 250) AS [Credits],
+                    ISNULL(u.[SelectedPawnId], N'knight_valiant') AS [SelectedPawnId],
+                    u.[UnlockedPawnsJson],
+                    ISNULL(u.[GamesPlayed], 0) AS [GamesPlayed],
+                    ISNULL(u.[GamesWon], 0) AS [GamesWon],
+                    ISNULL(u.[DragonsSlain], 0) AS [DragonsSlain],
+                    ISNULL(u.[TotalHeartsEarned], 0) AS [TotalHeartsEarned],
+                    ISNULL(u.[HighestScore], 0) AS [HighestScore],
+                    u.[AchievementsJson],
+                    u.[AvatarUrl],
+                    ISNULL(u.[AuthProvider], N'local') AS [AuthProvider]
+                FROM [prs].[prs_UserSessions] s
+                INNER JOIN [prs].[prs_Users] u ON u.[Id] = s.[UserId]
+                WHERE s.[TokenHash] = @th
+                  AND s.[RevokedAt] IS NULL
+                  AND s.[ExpiresAt] > SYSUTCDATETIME()", conn))
+            {
+                cmd.Parameters.Add("@th", SqlDbType.NVarChar, 64).Value = tokenHash;
+                using (var r = cmd.ExecuteReader())
+                {
+                    if (!r.Read()) return null;
+                    bool isActive = Convert.ToBoolean(r["IsActive"]);
+                    if (!isActive) return null;
+
+                    string uname = r["Username"].ToString();
+                    string disp = (r["DisplayName"] == DBNull.Value || string.IsNullOrEmpty(r["DisplayName"].ToString()))
+                        ? uname : r["DisplayName"].ToString();
+                    string unlocked = (r["UnlockedPawnsJson"] == DBNull.Value || string.IsNullOrEmpty(r["UnlockedPawnsJson"].ToString()))
+                        ? "[\"knight_valiant\",\"knight_tourney\",\"lady_huntress\",\"lord_diplomat\",\"knight_warden\",\"lady_sorceress\"]"
+                        : r["UnlockedPawnsJson"].ToString();
+                    string ach = (r["AchievementsJson"] == DBNull.Value || string.IsNullOrEmpty(r["AchievementsJson"].ToString()))
+                        ? "[]" : r["AchievementsJson"].ToString();
+
+                    return new AuthenticatedUser
+                    {
+                        Id = Convert.ToInt32(r["Id"]),
+                        Username = uname,
+                        Email = r["Email"] == DBNull.Value ? "" : r["Email"].ToString(),
+                        Role = r["Role"].ToString(),
+                        DisplayName = disp,
+                        IsActive = isActive,
+                        EmailConfirmed = Convert.ToBoolean(r["EmailConfirmed"]),
+                        Credits = Convert.ToInt32(r["Credits"]),
+                        SelectedPawnId = r["SelectedPawnId"].ToString(),
+                        UnlockedPawnsJson = unlocked,
+                        GamesPlayed = Convert.ToInt32(r["GamesPlayed"]),
+                        GamesWon = Convert.ToInt32(r["GamesWon"]),
+                        DragonsSlain = Convert.ToInt32(r["DragonsSlain"]),
+                        TotalHeartsEarned = Convert.ToDouble(r["TotalHeartsEarned"]),
+                        HighestScore = Convert.ToDouble(r["HighestScore"]),
+                        AchievementsJson = ach,
+                        AvatarUrl = r["AvatarUrl"] == DBNull.Value ? "" : r["AvatarUrl"].ToString(),
+                        AuthProvider = r["AuthProvider"].ToString()
+                    };
+                }
+            }
+        }
+    }
+
+    private AuthenticatedUser RequireAuthenticatedUser(HttpContext context)
+    {
+        AuthenticatedUser user = GetAuthenticatedUser(context);
+        if (user == null)
+        {
+            context.Response.StatusCode = 401;
+            context.Response.Write(_json.Serialize(new
+            {
+                ok = false,
+                status = "unauthorized",
+                code = "AUTH_REQUIRED",
+                message = "Vyžadováno přihlášení."
+            }));
+            return null;
+        }
+        return user;
+    }
+
+    private AuthenticatedUser RequireAdmin(HttpContext context)
+    {
+        AuthenticatedUser user = RequireAuthenticatedUser(context);
+        if (user == null) return null;
+        if (!string.Equals(user.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.StatusCode = 403;
+            context.Response.Write(_json.Serialize(new
+            {
+                ok = false,
+                status = "forbidden",
+                code = "ADMIN_REQUIRED",
+                message = "Vyžadována oprávnění administrátora."
+            }));
+            return null;
+        }
+        return user;
+    }
+
+    private void HandleSessionMe(HttpContext context)
+    {
+        AuthenticatedUser user = RequireAuthenticatedUser(context);
+        if (user == null) return;
+        context.Response.Write(_json.Serialize(new
+        {
+            ok = true,
+            status = "success",
+            user = BuildUserDto(user)
+        }));
+    }
+
+    private void HandleLogout(HttpContext context)
+    {
+        string token = ExtractAuthToken(context);
+        if (!string.IsNullOrEmpty(token) && IsDbConfigured())
+        {
+            using (var conn = new SqlConnection(CONN_STR))
+            {
+                conn.Open();
+                EnsureExtendedAdminSchema(conn);
+                RevokeSessionToken(conn, token);
+            }
+        }
+        context.Response.Write(_json.Serialize(new { ok = true, status = "success" }));
+    }
 
     public void ProcessRequest(HttpContext context)
-
-
-
     {
-
-
-
         context.Response.TrySkipIisCustomErrors = true;
-
-
-
         context.Response.ContentEncoding = Encoding.UTF8;
-
-
-
         context.Response.HeaderEncoding = Encoding.UTF8;
-
-
-
         context.Response.Charset = "utf-8";
-
-
-
         context.Response.ContentType = "application/json; charset=utf-8";
 
-
-
-        context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
-
-
-
-        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, X-KiDesky-Auth");
-
-
-
+        string origin = context.Request.Headers["Origin"];
+        if (IsAllowedOrigin(origin))
+        {
+            context.Response.Headers.Add("Access-Control-Allow-Origin", origin);
+            context.Response.Headers.Add("Vary", "Origin");
+        }
+        context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, X-KiDesky-Auth, Authorization");
         context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
 
-
-
         if (context.Request.HttpMethod == "OPTIONS")
-
-
-
         {
-
-
-
             context.Response.StatusCode = 200;
-
-
-
             return;
-
-
-
         }
-
-
 
         string action = (context.Request.QueryString["action"] ?? "status").ToLowerInvariant();
 
-
-
         try
-
-
 
         {
 
-
-
             if (IsDbConfigured())
 
-
-
             {
-
-
 
                 EnsureDatabaseSchema();
 
-
-
             }
-
-
 
             switch (action)
 
-
-
             {
-
-
 
                 case "hello":
 
-
-
                 case "status":
-
-
 
                     HandleStatus(context);
 
-
-
                     break;
-
-
 
                 case "register":
 
-
-
                     HandleRegister(context);
-
-
 
                     break;
 
@@ -732,103 +738,61 @@ public class KiDeskyApiHandler : IHttpHandler
                     HandleGoogleLogin(context);
                     break;
 
-
-
                 case "login":
-
-
 
                     HandleLogin(context);
 
-
-
                     break;
 
+                case "session-me":
+                    HandleSessionMe(context);
+                    break;
 
+                case "logout":
+                    HandleLogout(context);
+                    break;
 
                 case "get-config":
 
-
-
                     HandleGetConfig(context);
 
-
-
                     break;
-
-
 
                 case "save-config":
 
-
-
                     HandleSaveConfig(context);
 
-
-
                     break;
-
-
 
                 case "save-session":
 
-
-
                     HandleSaveSession(context);
 
-
-
                     break;
-
-
 
                 case "list-sessions":
 
-
-
                     HandleListSessions(context);
 
-
-
                     break;
-
-
 
                 case "check-session":
 
-
-
                     HandleCheckSession(context);
 
-
-
                     break;
-
-
 
                 case "load-session":
 
-
-
                     HandleLoadSession(context);
 
-
-
                     break;
-
-
 
                 case "log-telemetry":
 
-
-
                     HandleLogTelemetry(context);
 
-
-
                     break;
-
-
 
                 case "admin-stats":
                     HandleAdminStats(context);
@@ -942,371 +906,182 @@ public class KiDeskyApiHandler : IHttpHandler
                     HandleAdminDeleteBoardTemplate(context);
                     break;
 
-
-
                 default:
-
-
 
                     HandleStatus(context);
 
-
-
                     break;
-
-
 
             }
 
-
-
         }
-
-
 
         catch (Exception ex)
-
-
-
         {
-
-
-
+            string errorId = Guid.NewGuid().ToString("N").Substring(0, 8);
+            System.Diagnostics.Trace.TraceError("KiDesky API error [" + errorId + "] action=" + action + ": " + ex.ToString());
             context.Response.StatusCode = 500;
-
-
-
             context.Response.Write(_json.Serialize(new
-
-
-
             {
-
-
-
+                ok = false,
                 status = "error",
-
-
-
-                message = ex.Message,
-
-
-
+                message = "Došlo k interní chybě serveru.",
+                errorId = errorId,
                 timestamp = DateTime.UtcNow.ToString("o")
-
-
-
             }));
-
-
-
         }
 
-
-
     }
-
-
 
     private bool IsDbConfigured()
 
-
-
     {
-
-
 
         return !string.IsNullOrEmpty(CONN_STR) && !CONN_STR.Contains("YOUR_SERVER") && !CONN_STR.Contains("__DB_" + "CONN_STRING__");
 
-
-
     }
-
-
 
     private static string HashPassword(string password)
 
-
-
     {
-
-
 
         byte[] salt = new byte[16];
 
-
-
         using (var rng = new RNGCryptoServiceProvider())
 
-
-
         {
-
-
 
             rng.GetBytes(salt);
 
-
-
         }
-
-
 
         using (var pbkdf2 = new Rfc2898DeriveBytes(password ?? "", salt, 10000))
 
-
-
         {
-
-
 
             byte[] hash = pbkdf2.GetBytes(32);
 
-
-
             return Convert.ToBase64String(salt) + ":" + Convert.ToBase64String(hash);
-
-
 
         }
 
-
-
     }
-
-
 
     private static bool VerifyPassword(string password, string storedHash)
 
-
-
     {
-
-
 
         if (string.IsNullOrEmpty(storedHash)) return false;
 
-
-
         // Zpětná kompatibilita pro původní SHA256 hashe
-
-
 
         if (!storedHash.Contains(":"))
 
-
-
         {
-
-
 
             using (var sha = SHA256.Create())
 
-
-
             {
-
-
 
                 byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes("prs_salt_2026_" + (password ?? "")));
 
-
-
                 StringBuilder sb = new StringBuilder();
-
-
 
                 foreach (byte b in bytes) sb.Append(b.ToString("x2"));
 
-
-
                 return sb.ToString().Equals(storedHash, StringComparison.OrdinalIgnoreCase);
-
-
 
             }
 
-
-
         }
-
-
 
         string[] parts = storedHash.Split(':');
 
-
-
         if (parts.Length != 2) return false;
-
-
 
         try
 
-
-
         {
-
-
 
             byte[] salt = Convert.FromBase64String(parts[0]);
 
-
-
             byte[] expectedHash = Convert.FromBase64String(parts[1]);
-
-
 
             using (var pbkdf2 = new Rfc2898DeriveBytes(password ?? "", salt, 10000))
 
-
-
             {
-
-
 
                 byte[] actualHash = pbkdf2.GetBytes(32);
 
-
-
                 if (actualHash.Length != expectedHash.Length) return false;
-
-
 
                 int diff = 0;
 
-
-
                 for (int i = 0; i < actualHash.Length; i++) diff |= (actualHash[i] ^ expectedHash[i]);
-
-
 
                 return diff == 0;
 
-
-
             }
 
-
-
         }
-
-
 
         catch
 
-
-
         {
-
-
 
             return false;
 
-
-
         }
 
-
-
     }
-
-
 
     private Dictionary<string, object> ReadJsonBody(HttpContext context)
 
-
-
     {
-
-
 
         using (var reader = new StreamReader(context.Request.InputStream, Encoding.UTF8))
 
-
-
         {
-
-
 
             string body = reader.ReadToEnd();
 
-
-
             if (string.IsNullOrWhiteSpace(body)) return new Dictionary<string, object>();
-
-
 
             return _json.Deserialize<Dictionary<string, object>>(body) ?? new Dictionary<string, object>();
 
-
-
         }
 
-
-
     }
-
-
 
     private string GetStr(Dictionary<string, object> dict, string key, string defVal = "")
 
-
-
     {
 
-
-
         if (dict != null && dict.ContainsKey(key) && dict[key] != null)
-
-
 
             return dict[key].ToString();
 
-
-
         return defVal;
 
-
-
     }
-
-
 
     private int GetInt(Dictionary<string, object> dict, string key, int defVal = 0)
 
-
-
     {
-
-
 
         if (dict != null && dict.ContainsKey(key) && dict[key] != null)
 
-
-
         {
-
-
 
             int val;
 
-
-
             if (int.TryParse(dict[key].ToString(), out val)) return val;
-
-
 
         }
 
-
-
         return defVal;
 
-
-
     }
-
-
 
     private bool GetBool(Dictionary<string, object> dict, string key, bool defVal = false)
 
@@ -1331,8 +1106,6 @@ public class KiDeskyApiHandler : IHttpHandler
         return defVal;
 
     }
-
-
 
     private static bool _extendedAdminSchemaChecked = false;
     private void EnsureExtendedAdminSchema(SqlConnection conn)
@@ -1448,6 +1221,21 @@ BEGIN
         [IsActive] BIT NOT NULL DEFAULT 1,
         [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
+END
+
+IF OBJECT_ID(N'[prs].[prs_UserSessions]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [prs].[prs_UserSessions] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [UserId] INT NOT NULL,
+        [TokenHash] NVARCHAR(64) NOT NULL,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        [ExpiresAt] DATETIME2 NOT NULL,
+        [RevokedAt] DATETIME2 NULL,
+        [UserAgent] NVARCHAR(256) NULL
+    );
+    CREATE UNIQUE INDEX [IX_prs_UserSessions_TokenHash] ON [prs].[prs_UserSessions]([TokenHash]);
+    CREATE INDEX [IX_prs_UserSessions_UserId] ON [prs].[prs_UserSessions]([UserId]);
 END", conn))
             {
                 migCmd.ExecuteNonQuery();
@@ -1628,901 +1416,468 @@ END", conn))
         EnsureExtendedAdminSchema(conn);
     }
 
-
-
     private void EnsureDatabaseSchema()
-
-
 
     {
 
-
-
         if (_schemaEnsured || !IsDbConfigured()) return;
-
-
 
         lock (_schemaLock)
 
-
-
         {
-
-
 
             if (_schemaEnsured) return;
 
-
-
             using (var conn = new SqlConnection(CONN_STR))
 
-
-
             {
-
-
 
                 conn.Open();
 
                 EnsureExtendedAdminSchema(conn);
 
-
-
                 // Rychlá kontrola, zda schéma a hlavní tabulky již existují (ušetří DDL a PBKDF2 při studeném startu IIS)
-
-
 
                 using (var fastCheck = new SqlCommand("SELECT CASE WHEN OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND OBJECT_ID(N'[prs].[prs_GameSessions]', N'U') IS NOT NULL AND OBJECT_ID(N'[prs].[prs_TelemetryLogs]', N'U') IS NOT NULL THEN 1 ELSE 0 END", conn))
 
-
-
                 {
-
-
 
                     if (Convert.ToInt32(fastCheck.ExecuteScalar()) == 1)
 
-
-
                     {
-
-
 
                         EnsureSeedUsers(conn);
 
-
-
                         _schemaEnsured = true;
-
-
 
                         return;
 
-
-
                     }
 
-
-
                 }
-
-
 
                 // 1. Ensure schema [prs]
 
-
-
                 string schemaSql = @"
-
-
 
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = N'prs')
 
-
-
 BEGIN
-
-
 
     EXEC('CREATE SCHEMA [prs]');
 
-
-
 END";
-
-
 
                 using (var cmd = new SqlCommand(schemaSql, conn))
 
-
-
                 {
-
-
 
                     cmd.ExecuteNonQuery();
 
-
-
                 }
-
-
 
                 // 2. Ensure tables [prs].[prs_*]
 
-
-
                 string tablesSql = @"
-
-
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND type in (N'U'))
 
-
-
 BEGIN
-
-
 
     CREATE TABLE [prs].[prs_Users] (
 
-
-
         [Id] INT IDENTITY(1,1) PRIMARY KEY,
-
-
 
         [Username] NVARCHAR(64) NOT NULL UNIQUE,
 
-
-
         [Email] NVARCHAR(128) NULL,
-
-
 
         [PasswordHash] NVARCHAR(128) NOT NULL,
 
-
-
         [Role] NVARCHAR(24) NOT NULL DEFAULT N'Player',
-
-
 
         [GamesPlayed] INT NOT NULL DEFAULT 0,
 
-
-
         [GamesWon] INT NOT NULL DEFAULT 0,
 
-
-
         [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-
-
 
         [LastLoginAt] DATETIME2 NULL
 
-
-
     );
 
-
-
 END
-
-
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_GameConfigs]') AND type in (N'U'))
 
-
-
 BEGIN
-
-
 
     CREATE TABLE [prs].[prs_GameConfigs] (
 
-
-
         [Id] INT IDENTITY(1,1) PRIMARY KEY,
-
-
 
         [GameCode] NVARCHAR(64) NOT NULL,
 
-
-
         [VersionName] NVARCHAR(64) NOT NULL,
-
-
 
         [IsActive] BIT NOT NULL DEFAULT 1,
 
-
-
         [ConfigJson] NVARCHAR(MAX) NOT NULL,
-
-
 
         [UpdatedBy] NVARCHAR(64) NULL,
 
-
-
         [UpdatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
-
-
 
     );
 
-
-
 END
-
-
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_BoardTemplates]') AND type in (N'U'))
 
-
-
 BEGIN
-
-
 
     CREATE TABLE [prs].[prs_BoardTemplates] (
 
-
-
         [Id] INT IDENTITY(1,1) PRIMARY KEY,
-
-
 
         [TemplateCode] NVARCHAR(64) NOT NULL UNIQUE,
 
-
-
         [Name] NVARCHAR(128) NOT NULL,
-
-
 
         [Description] NVARCHAR(500) NULL,
 
-
-
         [NodeCount] INT NOT NULL DEFAULT 0,
-
-
 
         [GraphJson] NVARCHAR(MAX) NOT NULL,
 
-
-
         [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
-
-
 
     );
 
-
-
 END
-
-
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_GameSessions]') AND type in (N'U'))
 
-
-
 BEGIN
-
-
 
     CREATE TABLE [prs].[prs_GameSessions] (
 
-
-
         [Id] INT IDENTITY(1,1) PRIMARY KEY,
-
-
 
         [SessionGuid] NVARCHAR(64) NOT NULL UNIQUE,
 
-
-
         [RoomCode] NVARCHAR(16) NOT NULL,
-
-
 
         [GameCode] NVARCHAR(64) NOT NULL DEFAULT N'princeznino_srdce',
 
-
-
         [TemplateCode] NVARCHAR(64) NOT NULL DEFAULT N'classic_96',
-
-
 
         [HostUsername] NVARCHAR(64) NOT NULL DEFAULT N'Guest',
 
-
-
         [Mode] NVARCHAR(32) NOT NULL DEFAULT N'Hotseat',
-
-
 
         [TargetHearts] FLOAT NOT NULL DEFAULT 30,
 
-
-
         [TurnTimeLimitSec] INT NULL,
-
-
 
         [Status] NVARCHAR(24) NOT NULL DEFAULT N'Active',
 
-
-
         [CurrentTurnPlayerIdx] INT NOT NULL DEFAULT 0,
-
-
 
         [TurnNumber] INT NOT NULL DEFAULT 1,
 
-
-
         [WinnerName] NVARCHAR(64) NULL,
-
-
 
         [StateJson] NVARCHAR(MAX) NOT NULL,
 
-
-
         [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-
-
 
         [UpdatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 
-
-
     );
-
-
 
     CREATE INDEX IX_prs_GameSessions_RoomCode ON [prs].[prs_GameSessions]([RoomCode]);
 
-
-
     CREATE INDEX IX_prs_GameSessions_UpdatedAt ON [prs].[prs_GameSessions]([UpdatedAt] DESC);
 
-
-
 END
-
-
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_SessionPlayers]') AND type in (N'U'))
 
-
-
 BEGIN
-
-
 
     CREATE TABLE [prs].[prs_SessionPlayers] (
 
-
-
         [Id] INT IDENTITY(1,1) PRIMARY KEY,
-
-
 
         [SessionGuid] NVARCHAR(64) NOT NULL,
 
-
-
         [SlotIndex] INT NOT NULL,
-
-
 
         [PlayerType] NVARCHAR(32) NOT NULL,
 
-
-
         [Username] NVARCHAR(64) NULL,
-
-
 
         [DisplayName] NVARCHAR(64) NOT NULL,
 
-
-
         [Color] NVARCHAR(24) NOT NULL,
-
-
 
         [Hearts] FLOAT NOT NULL DEFAULT 0,
 
-
-
         [Gold] INT NOT NULL DEFAULT 10000
 
-
-
     );
-
-
 
     CREATE INDEX IX_prs_SessionPlayers_SessionGuid ON [prs].[prs_SessionPlayers]([SessionGuid]);
 
-
-
 END
-
-
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[prs].[prs_TelemetryLogs]') AND type in (N'U'))
 
-
-
 BEGIN
-
-
 
     CREATE TABLE [prs].[prs_TelemetryLogs] (
 
-
-
         [Id] INT IDENTITY(1,1) PRIMARY KEY,
-
-
 
         [SessionGuid] NVARCHAR(64) NULL,
 
-
-
         [TurnNumber] INT NOT NULL DEFAULT 0,
-
-
 
         [EventType] NVARCHAR(64) NOT NULL,
 
-
-
         [PlayerName] NVARCHAR(64) NULL,
-
-
 
         [Message] NVARCHAR(500) NOT NULL,
 
-
-
         [PayloadJson] NVARCHAR(MAX) NULL,
-
-
 
         [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 
-
-
     );
-
-
 
     CREATE INDEX IX_prs_TelemetryLogs_CreatedAt ON [prs].[prs_TelemetryLogs]([CreatedAt] DESC);
 
-
-
 END
 
-
+IF OBJECT_ID(N'[prs].[prs_UserSessions]', N'U') IS NULL
+BEGIN
+    CREATE TABLE [prs].[prs_UserSessions] (
+        [Id] INT IDENTITY(1,1) PRIMARY KEY,
+        [UserId] INT NOT NULL,
+        [TokenHash] NVARCHAR(64) NOT NULL,
+        [CreatedAt] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        [ExpiresAt] DATETIME2 NOT NULL,
+        [RevokedAt] DATETIME2 NULL,
+        [UserAgent] NVARCHAR(256) NULL
+    );
+    CREATE UNIQUE INDEX [IX_prs_UserSessions_TokenHash] ON [prs].[prs_UserSessions]([TokenHash]);
+    CREATE INDEX [IX_prs_UserSessions_UserId] ON [prs].[prs_UserSessions]([UserId]);
+END
 
 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'DisplayName')
 
-
-
 BEGIN
-
-
 
     ALTER TABLE [prs].[prs_Users] ADD [DisplayName] NVARCHAR(64) NULL;
 
-
-
 END";
-
-
 
                 using (var cmd = new SqlCommand(tablesSql, conn))
 
-
-
                 {
-
-
 
                     cmd.ExecuteNonQuery();
 
-
-
                 }
-
-
 
                 // 3. Seed default Admin, Demo Player & Jan Kytyr if not exists
 
-
-
                 EnsureSeedUsers(conn);
 
-
-
             }
-
-
 
             _schemaEnsured = true;
 
-
-
         }
 
-
-
     }
-
-
 
     private void EnsureSeedUsers(SqlConnection conn)
 
-
-
     {
-
-
 
         try
 
-
-
         {
-
-
 
             string adminHash = HashPassword("admin123");
 
-
-
             string seedUsersSql = @"
-
-
 
 IF NOT EXISTS (SELECT 1 FROM [prs].[prs_Users] WHERE [Username] = N'admin')
 
-
-
 BEGIN
 
-
-
     INSERT INTO [prs].[prs_Users] ([Username], [Email], [PasswordHash], [Role])
-
-
 
     VALUES (N'admin', N'admin@ekobio.org', @AdminHash, N'Admin');
 
-
-
 END
-
-
 
 IF NOT EXISTS (SELECT 1 FROM [prs].[prs_Users] WHERE [Username] = N'rytir_jan')
 
-
-
 BEGIN
 
-
-
     INSERT INTO [prs].[prs_Users] ([Username], [Email], [PasswordHash], [Role])
-
-
 
     VALUES (N'rytir_jan', N'jan@ekobio.org', @AdminHash, N'Player');
 
-
-
 END
-
-
 
 IF NOT EXISTS (SELECT 1 FROM [prs].[prs_Users] WHERE [Username] = N'jan.kytyr@seznam.cz' OR [Email] = N'jan.kytyr@seznam.cz')
 
-
-
 BEGIN
-
-
 
     INSERT INTO [prs].[prs_Users] ([Username], [Email], [PasswordHash], [Role])
 
-
-
     VALUES (N'jan.kytyr@seznam.cz', N'jan.kytyr@seznam.cz', @AdminHash, N'Player');
-
-
 
 END";
 
-
-
             using (var cmd = new SqlCommand(seedUsersSql, conn))
 
-
-
             {
-
-
 
                 cmd.Parameters.AddWithValue("@AdminHash", adminHash);
 
-
-
                 cmd.ExecuteNonQuery();
-
-
 
             }
 
-
-
         }
-
-
 
         catch { }
 
-
-
     }
-
-
 
     private void HandleStatus(HttpContext context)
 
-
-
     {
-
-
 
         bool dbConnected = false;
 
-
-
         string dbError = null;
-
-
 
         int usersCount = 0;
 
-
-
         int sessionsCount = 0;
-
-
 
         int configsCount = 0;
 
-
-
         int logsCount = 0;
-
-
 
         if (IsDbConfigured())
 
-
-
         {
-
-
 
             try
 
-
-
             {
-
-
 
                 using (var conn = new SqlConnection(CONN_STR))
 
-
-
                 {
-
-
 
                     conn.Open();
 
-
-
                     using (var cmd = new SqlCommand(@"
-
-
 
                         SELECT 
 
-
-
                             (SELECT COUNT(*) FROM [prs].[prs_Users]) AS UsersCount,
-
-
 
                             (SELECT COUNT(*) FROM [prs].[prs_GameSessions]) AS SessionsCount,
 
-
-
                             (SELECT COUNT(*) FROM [prs].[prs_GameConfigs]) AS ConfigsCount,
-
-
 
                             (SELECT COUNT(*) FROM [prs].[prs_TelemetryLogs]) AS LogsCount", conn))
 
-
-
                     using (var r = cmd.ExecuteReader())
-
-
 
                     {
 
-
-
                         if (r.Read())
-
-
 
                         {
 
-
-
                             usersCount = Convert.ToInt32(r["UsersCount"]);
-
-
 
                             sessionsCount = Convert.ToInt32(r["SessionsCount"]);
 
-
-
                             configsCount = Convert.ToInt32(r["ConfigsCount"]);
-
-
 
                             logsCount = Convert.ToInt32(r["LogsCount"]);
 
-
-
                             dbConnected = true;
-
-
 
                         }
 
-
-
                     }
-
-
 
                 }
 
-
-
             }
-
-
 
             catch (Exception ex)
 
-
-
             {
-
-
 
                 dbConnected = false;
 
-
-
                 dbError = ex.Message;
-
-
 
             }
 
-
-
         }
-
-
 
         else
 
-
-
         {
-
-
 
             dbError = "IsDbConfigured returned false";
 
-
-
         }
-
-
 
         context.Response.Write(_json.Serialize(new
 
-
-
         {
-
-
 
             ok = true,
 
-
-
             status = "success",
-
-
 
             project = "KiDesky \u2013 Princeznino srdce",
 
-
-
             schema = "prs (prefix prs_)",
-
-
 
             dbConnected = dbConnected,
 
-
-
             dbError = dbError,
-
-
 
             usersCount = usersCount,
 
-
-
             sessionsCount = sessionsCount,
-
-
 
             configsCount = configsCount,
 
-
-
             telemetryCount = logsCount,
-
-
 
             serverTime = DateTime.UtcNow.ToString("o")
 
-
-
         }));
 
-
-
     }
-
-
 
     private void HandleRegister(HttpContext context)
     {
@@ -2571,13 +1926,12 @@ END";
             }
 
             string displayName = !string.IsNullOrEmpty(reqDisplayName) ? reqDisplayName : username;
-            bool isAdmin = username.ToLowerInvariant().StartsWith("admin") || email.Equals("jan.kytyr@seznam.cz", StringComparison.OrdinalIgnoreCase);
-            string role = isAdmin ? "Admin" : "Guest";
-            bool isConfirmed = isAdmin;
+            string role = "Guest";
+            bool isConfirmed = false;
             string confirmationToken = Guid.NewGuid().ToString("N");
             DateTime tokenExpires = DateTime.UtcNow.AddHours(48);
             string defaultPawns = @"[""knight_valiant"",""knight_tourney"",""lady_huntress"",""lord_diplomat"",""knight_warden"",""lady_sorceress""]";
-            int initialCredits = isAdmin ? 2500 : 250;
+            int initialCredits = 250;
 
             int userId = 0;
             try
@@ -2626,17 +1980,13 @@ END";
             }
 
             string mailErr = null;
-            bool emailSent = false;
-            if (!isConfirmed)
-            {
-                emailSent = SendConfirmationEmail(email, displayName, confirmationToken, out mailErr);
-            }
+            bool emailSent = SendConfirmationEmail(email, displayName, confirmationToken, out mailErr);
 
-            string msg = isAdmin
-                ? "Administrátorský účet byl úspěšně vytvořen."
-                : (emailSent
-                    ? ("Registrace proběhla úspěšně! Na e-mail " + email + " byl odeslán potvrzovací odkaz. Do jeho potvrzení můžeš hrát v režimu Hosta.")
-                    : "Účet byl vytvořen, ale nepodařilo se odeslat potvrzovací e-mail. Můžeš hrát v režimu Hosta a potvrzení si poslat znovu z profilu.");
+            string authToken = CreateSessionToken(conn, userId, context);
+
+            string msg = emailSent
+                ? ("Registrace proběhla úspěšně! Na e-mail " + email + " byl odeslán potvrzovací odkaz. Do jeho potvrzení můžeš hrát v režimu Hosta.")
+                : "Účet byl vytvořen, ale nepodařilo se odeslat potvrzovací e-mail. Můžeš hrát v režimu Hosta a potvrzení si poslat znovu z profilu.";
 
             context.Response.Write(_json.Serialize(new
             {
@@ -2644,6 +1994,7 @@ END";
                 status = "success",
                 message = msg,
                 emailSent = emailSent,
+                authToken = authToken,
                 user = new
                 {
                     id = userId,
@@ -2747,11 +2098,14 @@ END";
                 upd.ExecuteNonQuery();
             }
 
+            string authToken = CreateSessionToken(conn, userId, context);
+
             context.Response.Write(_json.Serialize(new
             {
                 ok = true,
                 status = "success",
                 message = "E-mail byl úspěšně potvrzen! Vítej v království jako plnohodnotný rytíř.",
+                authToken = authToken,
                 user = new
                 {
                     id = userId,
@@ -2873,77 +2227,56 @@ END";
         string name = null;
         string picture = null;
 
-        // 1. Přímé dekódování podepsaného JWT payloadu z tokenu (bez závislosti na odchozím síťovém volání)
         try
         {
-            string[] jwtParts = credential.Split('.');
-            if (jwtParts.Length >= 2)
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+            using (var wc = new WebClient())
             {
-                string payloadBase64 = jwtParts[1].Replace('-', '+').Replace('_', '/');
-                switch (payloadBase64.Length % 4)
+                wc.Headers[HttpRequestHeader.UserAgent] = "KiDesky-App/1.0";
+                wc.Encoding = Encoding.UTF8;
+                string tokenInfoJson = wc.DownloadString("https://oauth2.googleapis.com/tokeninfo?id_token=" + HttpUtility.UrlEncode(credential));
+                var tokenInfo = _json.Deserialize<Dictionary<string, object>>(tokenInfoJson);
+                if (tokenInfo != null)
                 {
-                    case 2: payloadBase64 += "=="; break;
-                    case 3: payloadBase64 += "="; break;
-                }
-                byte[] payloadBytes = Convert.FromBase64String(payloadBase64);
-                string payloadJson = Encoding.UTF8.GetString(payloadBytes);
-                var tokenDict = _json.Deserialize<Dictionary<string, object>>(payloadJson);
-                if (tokenDict != null)
-                {
-                    if (tokenDict.ContainsKey("sub") && tokenDict["sub"] != null) googleId = tokenDict["sub"].ToString();
-                    if (tokenDict.ContainsKey("email") && tokenDict["email"] != null) email = tokenDict["email"].ToString();
-                    if (tokenDict.ContainsKey("name") && tokenDict["name"] != null) name = tokenDict["name"].ToString();
-                    if (tokenDict.ContainsKey("picture") && tokenDict["picture"] != null) picture = tokenDict["picture"].ToString();
+                    string subVal = tokenInfo.ContainsKey("sub") && tokenInfo["sub"] != null ? tokenInfo["sub"].ToString().Trim() : "";
+                    string emailVal = tokenInfo.ContainsKey("email") && tokenInfo["email"] != null ? tokenInfo["email"].ToString().Trim() : "";
+                    string verifiedVal = tokenInfo.ContainsKey("email_verified") && tokenInfo["email_verified"] != null ? tokenInfo["email_verified"].ToString().Trim() : "";
+                    string audVal = tokenInfo.ContainsKey("aud") && tokenInfo["aud"] != null ? tokenInfo["aud"].ToString().Trim() : "";
+                    string issVal = tokenInfo.ContainsKey("iss") && tokenInfo["iss"] != null ? tokenInfo["iss"].ToString().Trim() : "";
+                    string expVal = tokenInfo.ContainsKey("exp") && tokenInfo["exp"] != null ? tokenInfo["exp"].ToString().Trim() : "";
 
-                    // Základní bezpečnostní kontrola issueru a audience
-                    string iss = tokenDict.ContainsKey("iss") && tokenDict["iss"] != null ? tokenDict["iss"].ToString() : "";
-                    string aud = tokenDict.ContainsKey("aud") && tokenDict["aud"] != null ? tokenDict["aud"].ToString() : "";
-                    if (!iss.Contains("accounts.google.com") && !iss.Contains("google.com"))
+                    long expUnix = 0;
+                    long.TryParse(expVal, out expUnix);
+                    long nowUnix = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+
+                    bool issuerOk = issVal.Equals("https://accounts.google.com", StringComparison.OrdinalIgnoreCase) ||
+                                    issVal.Equals("accounts.google.com", StringComparison.OrdinalIgnoreCase);
+                    bool audOk = audVal.Equals(GOOGLE_CLIENT_ID, StringComparison.Ordinal);
+                    bool verifiedOk = verifiedVal.Equals("true", StringComparison.OrdinalIgnoreCase);
+                    bool expOk = expUnix > nowUnix;
+
+                    if (!string.IsNullOrEmpty(subVal) && !string.IsNullOrEmpty(emailVal) && issuerOk && audOk && verifiedOk && expOk)
                     {
-                        googleId = null; // Neplatný vydavatel
-                    }
-                    if (!string.IsNullOrEmpty(aud) && !aud.StartsWith("335921016939-", StringComparison.OrdinalIgnoreCase))
-                    {
-                        googleId = null; // Neplatná cílová aplikace
+                        googleId = subVal;
+                        email = emailVal;
+                        if (tokenInfo.ContainsKey("name") && tokenInfo["name"] != null) name = tokenInfo["name"].ToString();
+                        if (tokenInfo.ContainsKey("picture") && tokenInfo["picture"] != null) picture = tokenInfo["picture"].ToString();
                     }
                 }
             }
         }
-        catch { }
-
-        // 2. Fallback: pokud přímé dekódování selhalo, dotážeme se Google tokeninfo endpointu
-        if (string.IsNullOrEmpty(googleId) || string.IsNullOrEmpty(email))
+        catch (Exception ex)
         {
-            try
-            {
-                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                using (var wc = new WebClient())
-                {
-                    wc.Headers[HttpRequestHeader.UserAgent] = "KiDesky-App/1.0";
-                    wc.Encoding = Encoding.UTF8;
-                    string tokenInfoJson = wc.DownloadString("https://oauth2.googleapis.com/tokeninfo?id_token=" + HttpUtility.UrlEncode(credential));
-                    var tokenInfo = _json.Deserialize<Dictionary<string, object>>(tokenInfoJson);
-                    if (tokenInfo != null)
-                    {
-                        if (tokenInfo.ContainsKey("sub")) googleId = tokenInfo["sub"].ToString();
-                        if (tokenInfo.ContainsKey("email")) email = tokenInfo["email"].ToString();
-                        if (tokenInfo.ContainsKey("name")) name = tokenInfo["name"].ToString();
-                        if (tokenInfo.ContainsKey("picture")) picture = tokenInfo["picture"].ToString();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                context.Response.StatusCode = 200;
-                context.Response.Write(_json.Serialize(new { ok = false, message = "Ověření Google účtu selhalo: " + ex.Message }));
-                return;
-            }
+            System.Diagnostics.Trace.TraceWarning("Google tokeninfo verification failed: " + ex.Message);
+            context.Response.StatusCode = 401;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Ověření Google účtu selhalo." }));
+            return;
         }
 
         if (string.IsNullOrEmpty(googleId) || string.IsNullOrEmpty(email))
         {
-            context.Response.StatusCode = 200;
-            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatný Google token (chybí ID nebo e-mail uživatele)." }));
+            context.Response.StatusCode = 401;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatný nebo expirovaný Google token." }));
             return;
         }
 
@@ -2956,6 +2289,7 @@ END";
             string username = null;
             string currentRole = null;
             string currentDisplayName = null;
+            bool isUserActive = true;
             int credits = 250;
             string selectedPawn = "knight_valiant";
             string unlockedPawns = null;
@@ -2967,7 +2301,15 @@ END";
             string gAchJson = "[]";
 
             using (var cmd = new SqlCommand(@"
-                SELECT [Id], [Username], [Email], [Role], [DisplayName], [Credits], [SelectedPawnId], [UnlockedPawnsJson]
+                SELECT [Id], [Username], [Email], [Role], [DisplayName],
+                       ISNULL([IsActive], 1) AS [IsActive],
+                       [Credits], [SelectedPawnId], [UnlockedPawnsJson],
+                       ISNULL([GamesPlayed], 0) AS [GamesPlayed],
+                       ISNULL([GamesWon], 0) AS [GamesWon],
+                       ISNULL([DragonsSlain], 0) AS [DragonsSlain],
+                       ISNULL([TotalHeartsEarned], 0) AS [TotalHeartsEarned],
+                       ISNULL([HighestScore], 0) AS [HighestScore],
+                       [AchievementsJson]
                 FROM [prs].[prs_Users]
                 WHERE [GoogleId] = @gid OR ([Email] IS NOT NULL AND [Email] != '' AND [Email] = @e)", conn))
             {
@@ -2981,6 +2323,7 @@ END";
                         username = r["Username"].ToString();
                         currentRole = r["Role"].ToString();
                         currentDisplayName = r["DisplayName"] == DBNull.Value ? username : r["DisplayName"].ToString();
+                        isUserActive = Convert.ToBoolean(r["IsActive"]);
                         credits = r["Credits"] == DBNull.Value ? 250 : Convert.ToInt32(r["Credits"]);
                         selectedPawn = r["SelectedPawnId"] == DBNull.Value ? "knight_valiant" : r["SelectedPawnId"].ToString();
                         unlockedPawns = r["UnlockedPawnsJson"] == DBNull.Value ? "" : r["UnlockedPawnsJson"].ToString();
@@ -3004,10 +2347,15 @@ END";
                 }
             }
 
-            bool isAdminEmail = email.Equals("jan.kytyr@seznam.cz", StringComparison.OrdinalIgnoreCase) ||
-                               email.Equals("lordkikin@gmail.com", StringComparison.OrdinalIgnoreCase) ||
-                               email.StartsWith("admin@", StringComparison.OrdinalIgnoreCase) ||
-                               (username != null && username.Equals("admin", StringComparison.OrdinalIgnoreCase));
+            if (userId > 0 && !isUserActive)
+            {
+                context.Response.StatusCode = 403;
+                context.Response.Write(_json.Serialize(new { ok = false, status = "error", code = "ACCOUNT_DISABLED", message = "Tento účet byl deaktivován administrátorem." }));
+                return;
+            }
+
+            bool isAdminOwner = email.Equals("jan.kytyr@seznam.cz", StringComparison.OrdinalIgnoreCase) ||
+                                email.Equals("lordkikin@gmail.com", StringComparison.OrdinalIgnoreCase);
 
             string effectiveDisplayName = !string.IsNullOrEmpty(reqDisplayName)
                 ? reqDisplayName
@@ -3017,8 +2365,10 @@ END";
 
             if (userId > 0)
             {
-                string targetRole = isAdminEmail ? "Admin" : ((currentRole == "Guest") ? "Player" : currentRole);
-                int targetCredits = isAdminEmail ? Math.Max(credits, 2500) : credits;
+                string targetRole = (isAdminOwner || string.Equals(currentRole, "Admin", StringComparison.OrdinalIgnoreCase))
+                    ? "Admin"
+                    : ((currentRole == "Guest") ? "Player" : currentRole);
+                int targetCredits = isAdminOwner ? Math.Max(credits, 2500) : credits;
 
                 using (var upd = new SqlCommand(@"
                     UPDATE [prs].[prs_Users]
@@ -3040,11 +2390,14 @@ END";
                     upd.ExecuteNonQuery();
                 }
 
+                string authTokenExisting = CreateSessionToken(conn, userId, context);
+
                 context.Response.Write(_json.Serialize(new
                 {
                     ok = true,
                     status = "success",
                     message = "Prihlaseni pres Google probehlo uspesne.",
+                    authToken = authTokenExisting,
                     user = new
                     {
                         id = userId,
@@ -3070,7 +2423,7 @@ END";
             }
 
             // New user via Google
-            string targetNewRole = isAdminEmail ? "Admin" : "Player";
+            string targetNewRole = isAdminOwner ? "Admin" : "Player";
             int newCredits = (targetNewRole == "Admin") ? 2500 : 250;
             string defaultUnlocked = @"[""knight_valiant"",""knight_tourney"",""lady_huntress"",""lord_diplomat"",""knight_warden"",""lady_sorceress""]";
             string newUsername = email.Split('@')[0].Replace(".", "_").Replace("-", "_");
@@ -3110,11 +2463,14 @@ END";
                 userId = Convert.ToInt32(ins.ExecuteScalar());
             }
 
+            string authTokenNew = CreateSessionToken(conn, userId, context);
+
             context.Response.Write(_json.Serialize(new
             {
                 ok = true,
                 status = "success",
                 message = "Vitej! Ucet pres Google byl uspesne vytvoren.",
+                authToken = authTokenNew,
                 user = new
                 {
                     id = userId,
@@ -3134,99 +2490,45 @@ END";
     }
 
     private void HandleUpdateNickname(HttpContext context)
-
-
-
     {
-
-
+        AuthenticatedUser authUser = RequireAuthenticatedUser(context);
+        if (authUser == null) return;
 
         var body = ReadJsonBody(context);
-
-
-
-        string username = GetStr(body, "username").Trim();
-
-
-
         string nickname = GetStr(body, "displayName").Trim();
+        if (string.IsNullOrEmpty(nickname)) nickname = GetStr(body, "nickname").Trim();
 
-
-
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(nickname))
-
-
-
+        if (string.IsNullOrEmpty(nickname) || nickname.Length < 2 || nickname.Length > 48)
         {
-
-
-
-            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné parametry." }));
-
-
-
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Rytířské jméno musí mít 2 až 48 znaků." }));
             return;
-
-
-
         }
-
-
 
         using (var conn = new SqlConnection(CONN_STR))
-
-
-
         {
-
-
-
             conn.Open();
-
-
-
             EnsureExtendedAdminSchema(conn);
-            using (var cmd = new SqlCommand("UPDATE [prs].[prs_Users] SET [DisplayName] = @d WHERE [Username] = @u OR [Email] = @u", conn))
-
-
-
+            using (var cmd = new SqlCommand("UPDATE [prs].[prs_Users] SET [DisplayName] = @d WHERE [Id] = @id", conn))
             {
-
-
-
-                cmd.Parameters.AddWithValue("@d", nickname);
-
-
-
-                cmd.Parameters.AddWithValue("@u", username);
-
-
-
+                cmd.Parameters.Add("@d", SqlDbType.NVarChar, 64).Value = nickname;
+                cmd.Parameters.AddWithValue("@id", authUser.Id);
                 cmd.ExecuteNonQuery();
-
-
-
             }
-
-
-
         }
-
-
-
         context.Response.Write(_json.Serialize(new { ok = true, displayName = nickname }));
-
-
-
     }
 
     private void HandleSaveUserPawn(HttpContext context)
     {
+        AuthenticatedUser authUser = RequireAuthenticatedUser(context);
+        if (authUser == null) return;
+
         var body = ReadJsonBody(context);
-        string username = GetStr(body, "username").Trim();
         string pawnId = GetStr(body, "selectedPawnId", "knight_valiant").Trim();
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(pawnId))
+        if (string.IsNullOrEmpty(pawnId) || pawnId.Length > 64)
         {
+            context.Response.StatusCode = 400;
             context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné parametry." }));
             return;
         }
@@ -3234,10 +2536,10 @@ END";
         {
             conn.Open();
             EnsureExtendedAdminSchema(conn);
-            using (var cmd = new SqlCommand("UPDATE [prs].[prs_Users] SET [SelectedPawnId] = @p WHERE [Username] = @u OR [Email] = @u", conn))
+            using (var cmd = new SqlCommand("UPDATE [prs].[prs_Users] SET [SelectedPawnId] = @p WHERE [Id] = @id", conn))
             {
-                cmd.Parameters.AddWithValue("@p", pawnId);
-                cmd.Parameters.AddWithValue("@u", username);
+                cmd.Parameters.Add("@p", SqlDbType.NVarChar, 64).Value = pawnId;
+                cmd.Parameters.AddWithValue("@id", authUser.Id);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -3246,13 +2548,16 @@ END";
 
     private void HandleAwardCredits(HttpContext context)
     {
+        AuthenticatedUser authUser = RequireAuthenticatedUser(context);
+        if (authUser == null) return;
+
         var body = ReadJsonBody(context);
-        string username = GetStr(body, "username").Trim();
         int amount = GetInt(body, "amount", 0);
         bool isWin = GetBool(body, "isWin", false);
-        if (string.IsNullOrEmpty(username) || amount <= 0)
+        if (amount < 1 || amount > 500)
         {
-            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné parametry." }));
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatný počet kreditů (povoleno 1 až 500)." }));
             return;
         }
 
@@ -3266,13 +2571,13 @@ END";
                 SET [Credits] = ISNULL([Credits], 250) + @amt,
                     [GamesPlayed] = ISNULL([GamesPlayed], 0) + 1,
                     [GamesWon] = ISNULL([GamesWon], 0) + (CASE WHEN @isWin = 1 THEN 1 ELSE 0 END)
-                WHERE [Username] = @u OR [Email] = @u;
-                SELECT [Credits] FROM [prs].[prs_Users] WHERE [Username] = @u OR [Email] = @u;
+                WHERE [Id] = @id;
+                SELECT [Credits] FROM [prs].[prs_Users] WHERE [Id] = @id;
             ", conn))
             {
                 cmd.Parameters.AddWithValue("@amt", amount);
                 cmd.Parameters.AddWithValue("@isWin", isWin ? 1 : 0);
-                cmd.Parameters.AddWithValue("@u", username);
+                cmd.Parameters.AddWithValue("@id", authUser.Id);
                 var scalar = cmd.ExecuteScalar();
                 if (scalar != null && scalar != DBNull.Value)
                 {
@@ -3285,15 +2590,17 @@ END";
 
     private void HandleUnlockPawn(HttpContext context)
     {
-        var body = ReadJsonBody(context);
-        string username = GetStr(body, "username").Trim();
-        string pawnId = GetStr(body, "pawnId").Trim();
-        int price = GetInt(body, "priceCredits", 150);
-        if (price < 0) price = 0;
+        AuthenticatedUser authUser = RequireAuthenticatedUser(context);
+        if (authUser == null) return;
 
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(pawnId))
+        var body = ReadJsonBody(context);
+        string pawnId = GetStr(body, "pawnId").Trim();
+
+        int price;
+        if (string.IsNullOrEmpty(pawnId) || !_authoritativePawnPrices.TryGetValue(pawnId, out price))
         {
-            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatné parametry." }));
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neznámá figurka." }));
             return;
         }
 
@@ -3304,9 +2611,9 @@ END";
         {
             conn.Open();
             EnsureExtendedAdminSchema(conn);
-            using (var cmd = new SqlCommand("SELECT [Credits], [UnlockedPawnsJson] FROM [prs].[prs_Users] WHERE [Username] = @u OR [Email] = @u", conn))
+            using (var cmd = new SqlCommand("SELECT [Credits], [UnlockedPawnsJson] FROM [prs].[prs_Users] WHERE [Id] = @id", conn))
             {
-                cmd.Parameters.AddWithValue("@u", username);
+                cmd.Parameters.AddWithValue("@id", authUser.Id);
                 using (var r = cmd.ExecuteReader())
                 {
                     if (r.Read())
@@ -3319,6 +2626,7 @@ END";
                     }
                     else
                     {
+                        context.Response.StatusCode = 404;
                         context.Response.Write(_json.Serialize(new { ok = false, message = "Uživatel nenalezen." }));
                         return;
                     }
@@ -3337,6 +2645,7 @@ END";
             {
                 if (curCredits < price)
                 {
+                    context.Response.StatusCode = 400;
                     context.Response.Write(_json.Serialize(new { ok = false, message = "Nedostatek kreditů na účtu." }));
                     return;
                 }
@@ -3345,12 +2654,12 @@ END";
             }
 
             string newUnlockedJson = _json.Serialize(unlockedList);
-            using (var upd = new SqlCommand("UPDATE [prs].[prs_Users] SET [Credits] = @c, [UnlockedPawnsJson] = @uJson, [SelectedPawnId] = @p WHERE [Username] = @u OR [Email] = @u", conn))
+            using (var upd = new SqlCommand("UPDATE [prs].[prs_Users] SET [Credits] = @c, [UnlockedPawnsJson] = @uJson, [SelectedPawnId] = @p WHERE [Id] = @id", conn))
             {
                 upd.Parameters.AddWithValue("@c", curCredits);
                 upd.Parameters.AddWithValue("@uJson", newUnlockedJson);
-                upd.Parameters.AddWithValue("@p", pawnId);
-                upd.Parameters.AddWithValue("@u", username);
+                upd.Parameters.Add("@p", SqlDbType.NVarChar, 64).Value = pawnId;
+                upd.Parameters.AddWithValue("@id", authUser.Id);
                 upd.ExecuteNonQuery();
             }
 
@@ -3494,22 +2803,32 @@ END";
 
     private void HandleRecordGameStats(HttpContext context)
     {
+        AuthenticatedUser authUser = RequireAuthenticatedUser(context);
+        if (authUser == null) return;
+
         var body = ReadJsonBody(context);
-        string username = GetStr(body, "username").Trim();
         bool isWin = GetBool(body, "isWin", false);
         double hearts = 0;
         double.TryParse(GetStr(body, "hearts"), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out hearts);
+        if (hearts < 0) hearts = 0;
+        if (hearts > 200) hearts = 200;
+
         int dragons = GetInt(body, "dragons", 0);
+        if (dragons < 0) dragons = 0;
+        if (dragons > 20) dragons = 20;
+
         int castles = GetInt(body, "castles", 0);
+        if (castles < 0) castles = 0;
+        if (castles > 20) castles = 20;
+
         int herds = GetInt(body, "herds", 0);
+        if (herds < 0) herds = 0;
+        if (herds > 30) herds = 30;
+
         double festHearts = 0;
         double.TryParse(GetStr(body, "festivalHearts"), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out festHearts);
-
-        if (string.IsNullOrEmpty(username))
-        {
-            context.Response.Write(_json.Serialize(new { ok = false, message = "Missing username" }));
-            return;
-        }
+        if (festHearts < 0) festHearts = 0;
+        if (festHearts > 200) festHearts = 200;
 
         int played = 0, won = 0, totalDragons = 0;
         double totalHearts = 0, highestScore = 0;
@@ -3527,9 +2846,9 @@ END";
                        ISNULL([HighestScore], 0) as HighestScore,
                        ISNULL([AchievementsJson], '') as AchievementsJson
                 FROM [prs].[prs_Users]
-                WHERE [Username] = @u OR [Email] = @u", conn))
+                WHERE [Id] = @id", conn))
             {
-                cmd.Parameters.AddWithValue("@u", username);
+                cmd.Parameters.AddWithValue("@id", authUser.Id);
                 using (var r = cmd.ExecuteReader())
                 {
                     if (r.Read())
@@ -3586,7 +2905,7 @@ END";
                     [TotalHeartsEarned] = @th,
                     [HighestScore] = @hs,
                     [AchievementsJson] = @aj
-                WHERE [Username] = @u OR [Email] = @u", conn))
+                WHERE [Id] = @id", conn))
             {
                 upd.Parameters.AddWithValue("@gp", played);
                 upd.Parameters.AddWithValue("@gw", won);
@@ -3594,7 +2913,7 @@ END";
                 upd.Parameters.AddWithValue("@th", totalHearts);
                 upd.Parameters.AddWithValue("@hs", highestScore);
                 upd.Parameters.AddWithValue("@aj", newAchJson);
-                upd.Parameters.AddWithValue("@u", username);
+                upd.Parameters.AddWithValue("@id", authUser.Id);
                 upd.ExecuteNonQuery();
             }
 
@@ -3615,33 +2934,19 @@ END";
         }
     }
 
-
-
     private void HandleLogin(HttpContext context)
-
-
 
     {
 
-
-
         var body = ReadJsonBody(context);
-
-
 
         string username = GetStr(body, "username").Trim();
         string password = GetStr(body, "password");
         string reqDisplayName = GetStr(body, "displayName").Trim();
 
-
-
         using (var conn = new SqlConnection(CONN_STR))
 
-
-
         {
-
-
 
             conn.Open();
 
@@ -3656,11 +2961,18 @@ END";
             {
 
                 cmd = new SqlCommand(@"
-
-                    SELECT [Id], [Username], [Email], [Role], [DisplayName], [PasswordHash], [GamesPlayed], [GamesWon], [Credits], [SelectedPawnId], [UnlockedPawnsJson]
-
+                    SELECT [Id], [Username], [Email], [Role], [DisplayName], [PasswordHash],
+                           ISNULL([IsActive], 1) AS [IsActive],
+                           ISNULL([EmailConfirmed], 0) AS [EmailConfirmed],
+                           [AvatarUrl],
+                           ISNULL([AuthProvider], N'local') AS [AuthProvider],
+                           [GamesPlayed], [GamesWon],
+                           ISNULL([DragonsSlain], 0) AS [DragonsSlain],
+                           ISNULL([TotalHeartsEarned], 0) AS [TotalHeartsEarned],
+                           ISNULL([HighestScore], 0) AS [HighestScore],
+                           [AchievementsJson],
+                           [Credits], [SelectedPawnId], [UnlockedPawnsJson]
                     FROM [prs].[prs_Users]
-
                     WHERE [Username] = @u OR [Email] = @u", conn);
 
                 cmd.Parameters.AddWithValue("@u", username);
@@ -3703,65 +3015,44 @@ END";
 
             }
 
-
-
             using (cmd)
 
             using (r)
 
-
-
                 {
-
-
 
                     if (r.Read())
 
-
-
                     {
-
-
 
                         string dbHash = r["PasswordHash"].ToString();
 
-
-
                         if (!VerifyPassword(password, dbHash))
-
-
-
                         {
-
-
-
                             context.Response.StatusCode = 401;
-
-
-
                             context.Response.Write(_json.Serialize(new { ok = false, status = "error", error = "Neplatn\u00e9 jm\u00e9no nebo heslo.", message = "Neplatn\u00e9 jm\u00e9no nebo heslo." }));
-
-
-
                             return;
-
-
-
                         }
 
-
+                        bool isActive = true;
+                        try
+                        {
+                            int iaIdx = r.GetOrdinal("IsActive");
+                            if (!r.IsDBNull(iaIdx)) isActive = Convert.ToBoolean(r.GetValue(iaIdx));
+                        }
+                        catch { }
+                        if (!isActive)
+                        {
+                            context.Response.StatusCode = 403;
+                            context.Response.Write(_json.Serialize(new { ok = false, status = "error", code = "ACCOUNT_DISABLED", message = "Tento účet byl deaktivován administrátorem." }));
+                            return;
+                        }
 
                         int id = Convert.ToInt32(r["Id"]);
 
-
-
                         string u = r["Username"].ToString();
 
-
-
                         string role = r["Role"].ToString();
-
-
 
                         string dn = u;
 
@@ -3785,11 +3076,7 @@ END";
 
                         catch { }
 
-
-
                         int gp = Convert.ToInt32(r["GamesPlayed"]);
-
-
 
                         int gw = Convert.ToInt32(r["GamesWon"]);
 
@@ -3846,59 +3133,31 @@ END";
                         }
                         catch { }
 
-
-
                         r.Close();
-
-
 
                         // Pokud byl uživatel ověřen starým SHA-256 hashem (bez dvojtečky per-user saltu),
 
-
-
                         // transparentně zmigrujeme heslo na standardní PBKDF2 / Rfc2898DeriveBytes
-
-
 
                         if (!dbHash.Contains(":"))
 
-
-
                         {
-
-
 
                             string newPbkdf2Hash = HashPassword(password);
 
-
-
                             using (var upg = new SqlCommand("UPDATE [prs].[prs_Users] SET [PasswordHash] = @newHash WHERE [Id] = @id", conn))
-
-
 
                             {
 
-
-
                                 upg.Parameters.AddWithValue("@newHash", newPbkdf2Hash);
-
-
 
                                 upg.Parameters.AddWithValue("@id", id);
 
-
-
                                 upg.ExecuteNonQuery();
-
-
 
                             }
 
-
-
                         }
-
-
 
                         if (!string.IsNullOrEmpty(reqDisplayName) && reqDisplayName != dn)
                         {
@@ -3916,392 +3175,199 @@ END";
                         }
 
                         using (var upd = new SqlCommand("UPDATE [prs].[prs_Users] SET [LastLoginAt] = SYSUTCDATETIME() WHERE [Id] = @id", conn))
-
-
-
                         {
-
-
-
                             upd.Parameters.AddWithValue("@id", id);
-
-
-
                             upd.ExecuteNonQuery();
-
-
-
                         }
 
-
+                        string authToken = CreateSessionToken(conn, id, context);
 
                         context.Response.Write(_json.Serialize(new
                         {
                             ok = true,
                             status = "success",
+                            authToken = authToken,
                             user = new { id = id, username = u, displayName = dn, role = role, email = userEmail, emailConfirmed = emailConfirmed, avatarUrl = avatarUrl, authProvider = authProvider, gamesPlayed = gp, gamesWon = gw, dragonsSlain = ds, totalHeartsEarned = Math.Round(th, 1), highestScore = Math.Round(hs, 1), achievementsJson = ach, credits = credits, selectedPawnId = selectedPawnId, unlockedPawnsJson = unlockedPawnsJson }
                         }));
 
-
-
                         return;
-
-
 
                     }
 
-
-
                 }
 
-
-
             }
-
-
-
-
-
 
         context.Response.StatusCode = 401;
 
-
-
         context.Response.Write(_json.Serialize(new { ok = false, status = "error", error = "Neplatn\u00e9 jm\u00e9no nebo heslo.", message = "Neplatn\u00e9 jm\u00e9no nebo heslo." }));
 
-
-
     }
-
-
 
     private void HandleGetConfig(HttpContext context)
 
-
-
     {
-
-
 
         string gameCode = context.Request.QueryString["game"] ?? "princeznino_srdce";
 
-
-
         string configJson = null;
-
-
 
         string versionName = "v1.0-default";
 
-
-
         string updatedAt = null;
-
-
 
         if (IsDbConfigured())
 
-
-
         {
-
-
 
             using (var conn = new SqlConnection(CONN_STR))
 
-
-
             {
-
-
 
                 conn.Open();
 
-
-
                 using (var cmd = new SqlCommand(@"
-
-
 
                     SELECT TOP 1 [VersionName], [ConfigJson], [UpdatedAt]
 
-
-
                     FROM [prs].[prs_GameConfigs]
-
-
 
                     WHERE [GameCode] = @g AND [IsActive] = 1
 
-
-
                     ORDER BY [UpdatedAt] DESC", conn))
-
-
 
                 {
 
-
-
                     cmd.Parameters.AddWithValue("@g", gameCode);
-
-
 
                     using (var r = cmd.ExecuteReader())
 
-
-
                     {
-
-
 
                         if (r.Read())
 
-
-
                         {
-
-
 
                             versionName = r["VersionName"].ToString();
 
-
-
                             configJson = r["ConfigJson"].ToString();
-
-
 
                             updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o");
 
-
-
                         }
-
-
 
                     }
 
-
-
                 }
-
-
 
             }
 
-
-
         }
-
-
 
         context.Response.Write(_json.Serialize(new
 
-
-
         {
-
-
 
             status = "success",
 
-
-
             gameCode = gameCode,
-
-
 
             versionName = versionName,
 
-
-
             updatedAt = updatedAt,
-
-
 
             hasCustomConfig = !string.IsNullOrEmpty(configJson),
 
-
-
             configJson = configJson
-
-
 
         }));
 
-
-
     }
 
-
-
     private void HandleSaveConfig(HttpContext context)
-
-
-
     {
-
-
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
 
         var body = ReadJsonBody(context);
-
-
 
         string gameCode = GetStr(body, "gameCode", "princeznino_srdce");
 
-
-
         string versionName = GetStr(body, "versionName", "v1.0-custom");
-
-
 
         string configJson = GetStr(body, "configJson", "{}");
 
-
-
-        string updatedBy = GetStr(body, "updatedBy", "admin");
-
-
+        string updatedBy = adminUser.Username;
 
         using (var conn = new SqlConnection(CONN_STR))
 
-
-
         {
-
-
 
             conn.Open();
 
-
-
             using (var cmd = new SqlCommand(@"
-
-
 
                 UPDATE [prs].[prs_GameConfigs] SET [IsActive] = 0 WHERE [GameCode] = @g;
 
-
-
                 INSERT INTO [prs].[prs_GameConfigs] ([GameCode], [VersionName], [IsActive], [ConfigJson], [UpdatedBy], [UpdatedAt])
-
-
 
                 VALUES (@g, @v, 1, @c, @u, SYSUTCDATETIME());", conn))
 
-
-
             {
-
-
 
                 cmd.Parameters.AddWithValue("@g", gameCode);
 
-
-
                 cmd.Parameters.AddWithValue("@v", versionName);
-
-
 
                 cmd.Parameters.AddWithValue("@c", configJson);
 
-
-
                 cmd.Parameters.AddWithValue("@u", updatedBy);
-
-
 
                 cmd.ExecuteNonQuery();
 
-
-
             }
-
-
 
         }
 
-
-
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Konfigurace vyv\u00e1\u017een\u00ed hry byla ulo\u017eena do datab\u00e1ze [prs].[prs_GameConfigs]." }));
-
-
 
     }
 
-
-
     private void HandleSaveSession(HttpContext context)
-
-
 
     {
 
-
-
         var body = ReadJsonBody(context);
-
-
 
         string sessionGuid = GetStr(body, "sessionGuid");
 
-
-
         if (string.IsNullOrEmpty(sessionGuid)) sessionGuid = Guid.NewGuid().ToString("N");
-
-
 
         string roomCode = GetStr(body, "roomCode");
 
-
-
         if (string.IsNullOrEmpty(roomCode)) roomCode = sessionGuid.Substring(0, 6).ToUpperInvariant();
-
-
 
         string templateCode = GetStr(body, "boardCode", GetStr(body, "templateCode", "classic_96"));
 
-
-
         string hostUsername = GetStr(body, "hostUsername", "Guest");
-
-
 
         string mode = GetStr(body, "mode", "Hotseat");
 
-
-
         double targetHearts = 30;
-
-
 
         if (body.ContainsKey("targetHearts") && body["targetHearts"] != null)
 
-
-
             double.TryParse(body["targetHearts"].ToString(), out targetHearts);
-
-
 
         string status = GetStr(body, "status", "Active");
 
-
-
         int currentTurnIdx = GetInt(body, "currentTurnPlayer", GetInt(body, "currentTurnPlayerIdx", 0));
-
-
 
         int turnNumber = GetInt(body, "turnNumber", 1);
 
-
-
         string winnerName = GetStr(body, "winnerName", null);
 
-
-
         string stateJson = GetStr(body, "stateJson", "{}");
-
-
 
         int expectedTurn = GetInt(body, "expectedTurnNumber", -1);
 
@@ -4323,123 +3389,63 @@ END";
 
             // 2.2 Optimistický zámek proti race conditions v online multiplayeru
 
-
-
             if (expectedTurn >= 0)
-
-
 
             {
 
-
-
                 using (var chk = new SqlCommand("SELECT [TurnNumber], [StateJson] FROM [prs].[prs_GameSessions] WHERE [SessionGuid] = @chkGuid", conn))
-
-
 
                 {
 
-
-
                     chk.Parameters.AddWithValue("@chkGuid", sessionGuid);
-
-
 
                     using (var rdr = chk.ExecuteReader())
 
-
-
                     {
-
-
 
                         if (rdr.Read())
 
-
-
                         {
-
-
 
                             int dbTurn = Convert.ToInt32(rdr["TurnNumber"]);
 
-
-
                             if (dbTurn > expectedTurn)
-
-
 
                             {
 
-
-
                                 string dbState = rdr["StateJson"] != DBNull.Value ? rdr["StateJson"].ToString() : null;
-
-
 
                                 context.Response.StatusCode = 409;
 
-
-
                                 context.Response.Write(_json.Serialize(new
-
-
 
                                 {
 
-
-
                                     ok = false,
-
-
 
                                     status = "conflict",
 
-
-
                                     error = "turn_conflict",
-
-
 
                                     message = "Tento tah ji\u017e byl odehr\u00e1n jin\u00fdm hr\u00e1\u010dem. Synchronizuji aktu\u00e1ln\u00ed stav hry.",
 
-
-
                                     serverTurnNumber = dbTurn,
-
-
 
                                     sessionGuid = sessionGuid,
 
-
-
                                     stateJson = dbState
-
-
 
                                 }));
 
-
-
                                 return;
-
-
 
                             }
 
-
-
                         }
-
-
 
                     }
 
-
-
                 }
-
-
 
             }
 
@@ -4460,175 +3466,89 @@ END";
                 }
             }
 
-
-
             using (var cmd = new SqlCommand(@"
-
-
 
                 IF EXISTS (SELECT 1 FROM [prs].[prs_GameSessions] WHERE [SessionGuid] = @guid)
 
-
-
                 BEGIN
-
-
 
                     UPDATE [prs].[prs_GameSessions]
 
-
-
                     SET [Status] = @status,
-
-
 
                         [CurrentTurnPlayerIdx] = @turnIdx,
 
-
-
                         [TurnNumber] = @turnNum,
-
-
 
                         [WinnerName] = @winner,
 
-
-
                         [StateJson] = @state,
-
-
 
                         [UpdatedAt] = SYSUTCDATETIME()
 
-
-
                     WHERE [SessionGuid] = @guid;
-
-
 
                 END
 
-
-
                 ELSE
-
-
 
                 BEGIN
 
-
-
                     INSERT INTO [prs].[prs_GameSessions]
-
-
 
                         ([SessionGuid], [RoomCode], [TemplateCode], [HostUsername], [Mode], [TargetHearts], [Status], [CurrentTurnPlayerIdx], [TurnNumber], [WinnerName], [StateJson])
 
-
-
                     VALUES
-
-
 
                         (@guid, @room, @tpl, @host, @mode, @target, @status, @turnIdx, @turnNum, @winner, @state);
 
-
-
                 END", conn))
-
-
 
             {
 
-
-
                 cmd.Parameters.AddWithValue("@guid", sessionGuid);
-
-
 
                 cmd.Parameters.AddWithValue("@room", roomCode);
 
-
-
                 cmd.Parameters.AddWithValue("@tpl", templateCode);
-
-
 
                 cmd.Parameters.AddWithValue("@host", hostUsername);
 
-
-
                 cmd.Parameters.AddWithValue("@mode", mode);
-
-
 
                 cmd.Parameters.AddWithValue("@target", targetHearts);
 
-
-
                 cmd.Parameters.AddWithValue("@status", status);
-
-
 
                 cmd.Parameters.AddWithValue("@turnIdx", currentTurnIdx);
 
-
-
                 cmd.Parameters.AddWithValue("@turnNum", turnNumber);
-
-
 
                 cmd.Parameters.AddWithValue("@winner", (object)winnerName ?? DBNull.Value);
 
-
-
                 cmd.Parameters.AddWithValue("@state", stateJson);
-
-
 
                 cmd.ExecuteNonQuery();
 
-
-
             }
-
-
 
         }
 
-
-
         context.Response.Write(_json.Serialize(new
-
-
 
         {
 
-
-
             ok = true,
-
-
 
             status = "success",
 
-
-
             sessionGuid = sessionGuid,
-
-
 
             roomCode = roomCode,
 
-
-
             savedAt = DateTime.UtcNow.ToString("o")
 
-
-
         }));
-
-
 
     }
 
@@ -4675,223 +3595,113 @@ END";
         return incomingJson;
     }
 
-
-
     private void HandleListSessions(HttpContext context)
 
-
-
     {
-
-
 
         var list = new List<object>();
 
-
-
         using (var conn = new SqlConnection(CONN_STR))
-
-
 
         {
 
-
-
             conn.Open();
 
-
-
             using (var cmd = new SqlCommand(@"
-
-
 
                 SELECT TOP 25 [SessionGuid], [RoomCode], [TemplateCode], [HostUsername], [Mode], [TargetHearts], [Status], [TurnNumber], [WinnerName], [UpdatedAt]
 
-
-
                 FROM [prs].[prs_GameSessions]
 
-
-
                 ORDER BY [UpdatedAt] DESC", conn))
-
-
 
             using (var r = cmd.ExecuteReader())
 
-
-
             {
-
-
 
                 while (r.Read())
 
-
-
                 {
-
-
 
                     int tNum = Convert.ToInt32(r["TurnNumber"]);
 
-
-
                     list.Add(new
 
-
-
                     {
-
-
 
                         sessionGuid = r["SessionGuid"].ToString(),
 
-
-
                         roomCode = r["RoomCode"].ToString(),
-
-
 
                         title = "Princeznino srdce (" + r["TemplateCode"].ToString() + ")",
 
-
-
                         templateCode = r["TemplateCode"].ToString(),
-
-
 
                         hostUsername = r["HostUsername"].ToString(),
 
-
-
                         mode = r["Mode"].ToString(),
-
-
 
                         targetHearts = Convert.ToDouble(r["TargetHearts"]),
 
-
-
                         status = r["Status"].ToString(),
-
-
 
                         turnNumber = tNum,
 
-
-
                         winnerName = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString(),
-
-
 
                         updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("dd.MM.yyyy HH:mm")
 
-
-
                     });
-
-
 
                 }
 
-
-
             }
-
-
 
         }
 
-
-
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", sessions = list }));
-
-
 
     }
 
-
-
     private void HandleCheckSession(HttpContext context)
-
-
 
     {
 
-
-
         string guid = context.Request.QueryString["guid"] ?? "";
-
-
 
         string room = context.Request.QueryString["room"] ?? context.Request.QueryString["code"] ?? "";
 
-
-
         if (string.IsNullOrEmpty(guid)) guid = room;
-
-
 
         using (var conn = new SqlConnection(CONN_STR))
 
-
-
         {
-
-
 
             conn.Open();
 
-
-
             using (var cmd = new SqlCommand(@"
-
-
 
                 SELECT TOP 1 [SessionGuid], [RoomCode], [TurnNumber], [CurrentTurnPlayerIdx], [Status], [WinnerName], [UpdatedAt]
 
-
-
                 FROM [prs].[prs_GameSessions]
-
-
 
                 WHERE [SessionGuid] = @guid OR [RoomCode] = @room
 
-
-
                 ORDER BY [UpdatedAt] DESC", conn))
-
-
 
             {
 
-
-
                 cmd.Parameters.AddWithValue("@guid", guid);
-
-
 
                 cmd.Parameters.AddWithValue("@room", room);
 
-
-
                 using (var r = cmd.ExecuteReader())
-
-
 
                 {
 
-
-
                     if (r.Read())
 
-
-
                     {
-
-
 
                         List<RoomEmoteItem> recentEmotes = new List<RoomEmoteItem>();
                         List<RoomChatMessage> recentChat = new List<RoomChatMessage>();
@@ -4929,175 +3739,89 @@ END";
                             chat = recentChat
                         };
 
-
-
                         context.Response.Write(_json.Serialize(checkObj));
-
-
 
                         return;
 
-
-
                     }
-
-
 
                 }
 
-
-
             }
-
-
 
         }
 
-
-
         context.Response.StatusCode = 404;
-
-
 
         context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Ulo\u017een\u00e1 hra nebyla nalezena." }));
 
-
-
     }
-
-
 
     private void HandleLoadSession(HttpContext context)
 
-
-
     {
-
-
 
         string guid = context.Request.QueryString["guid"] ?? "";
 
-
-
         string room = context.Request.QueryString["room"] ?? context.Request.QueryString["code"] ?? "";
-
-
 
         if (string.IsNullOrEmpty(guid)) guid = room;
 
-
-
         using (var conn = new SqlConnection(CONN_STR))
-
-
 
         {
 
-
-
             conn.Open();
-
-
 
             using (var cmd = new SqlCommand(@"
 
-
-
                 SELECT TOP 1 [SessionGuid], [RoomCode], [TemplateCode], [HostUsername], [Mode], [TargetHearts], [Status], [CurrentTurnPlayerIdx], [TurnNumber], [WinnerName], [StateJson], [UpdatedAt]
-
-
 
                 FROM [prs].[prs_GameSessions]
 
-
-
                 WHERE [SessionGuid] = @guid OR [RoomCode] = @room
-
-
 
                 ORDER BY [UpdatedAt] DESC", conn))
 
-
-
             {
-
-
 
                 cmd.Parameters.AddWithValue("@guid", guid);
 
-
-
                 cmd.Parameters.AddWithValue("@room", room);
-
-
 
                 using (var r = cmd.ExecuteReader())
 
-
-
                 {
-
-
 
                     if (r.Read())
 
-
-
                     {
-
-
 
                         var sessObj = new
 
-
-
                         {
-
-
 
                             sessionGuid = r["SessionGuid"].ToString(),
 
-
-
                             roomCode = r["RoomCode"].ToString(),
-
-
 
                             templateCode = r["TemplateCode"].ToString(),
 
-
-
                             hostUsername = r["HostUsername"].ToString(),
-
-
 
                             mode = r["Mode"].ToString(),
 
-
-
                             targetHearts = Convert.ToDouble(r["TargetHearts"]),
-
-
 
                             gameStatus = r["Status"].ToString(),
 
-
-
                             turnNumber = Convert.ToInt32(r["TurnNumber"]),
-
-
 
                             winnerName = r["WinnerName"] == DBNull.Value ? null : r["WinnerName"].ToString(),
 
-
-
                             stateJson = r["StateJson"].ToString(),
 
-
-
                             updatedAt = Convert.ToDateTime(r["UpdatedAt"]).ToString("o")
-
-
 
                         };
 
@@ -5120,320 +3844,162 @@ END";
                             chat = recentChat
                         }));
 
-
-
                         return;
-
-
 
                     }
 
-
-
                 }
-
-
 
             }
 
-
-
         }
-
-
 
         context.Response.StatusCode = 404;
 
-
-
         context.Response.Write(_json.Serialize(new { ok = false, status = "error", message = "Ulo\u017een\u00e1 hra nebyla nalezena." }));
 
-
-
     }
-
-
 
     private void HandleLogTelemetry(HttpContext context)
 
-
-
     {
-
-
 
         var body = ReadJsonBody(context);
 
-
-
         string sessionGuid = GetStr(body, "sessionGuid", null);
-
-
 
         int turnNumber = GetInt(body, "turnNumber", 0);
 
-
-
         string eventType = GetStr(body, "eventType", "GAME_EVENT");
-
-
 
         string playerName = GetStr(body, "playerName", null);
 
-
-
         string message = GetStr(body, "message", "");
-
-
 
         string payloadJson = GetStr(body, "payloadJson", null);
 
-
-
         using (var conn = new SqlConnection(CONN_STR))
-
-
 
         {
 
-
-
             conn.Open();
-
-
 
             using (var cmd = new SqlCommand(@"
 
-
-
                 INSERT INTO [prs].[prs_TelemetryLogs] ([SessionGuid], [TurnNumber], [EventType], [PlayerName], [Message], [PayloadJson])
-
-
 
                 VALUES (@s, @t, @e, @p, @m, @j)", conn))
 
-
-
             {
-
-
 
                 cmd.Parameters.AddWithValue("@s", (object)sessionGuid ?? DBNull.Value);
 
-
-
                 cmd.Parameters.AddWithValue("@t", turnNumber);
-
-
 
                 cmd.Parameters.AddWithValue("@e", eventType);
 
-
-
                 cmd.Parameters.AddWithValue("@p", (object)playerName ?? DBNull.Value);
-
-
 
                 cmd.Parameters.AddWithValue("@m", message);
 
-
-
                 cmd.Parameters.AddWithValue("@j", (object)payloadJson ?? DBNull.Value);
-
-
 
                 cmd.ExecuteNonQuery();
 
-
-
             }
 
-
-
         }
-
-
 
         context.Response.Write(_json.Serialize(new { status = "success" }));
 
-
-
     }
 
-
-
     private void HandleAdminStats(HttpContext context)
-
-
-
     {
-
-
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
 
         var users = new List<object>();
 
-
-
         var logs = new List<object>();
-
-
 
         using (var conn = new SqlConnection(CONN_STR))
 
-
-
         {
-
-
 
             conn.Open();
 
-
-
             using (var cmd = new SqlCommand("SELECT TOP 50 [Id], [Username], [Email], [Role], [GamesPlayed], [GamesWon], [CreatedAt], [LastLoginAt] FROM [prs].[prs_Users] ORDER BY [Id] ASC", conn))
-
-
 
             using (var r = cmd.ExecuteReader())
 
-
-
             {
-
-
 
                 while (r.Read())
 
-
-
                 {
-
-
 
                     users.Add(new
 
-
-
                     {
 
-
-
                         id = Convert.ToInt32(r["Id"]),
-
-
 
                         username = r["Username"].ToString(),
 
-
-
                         email = r["Email"] == DBNull.Value ? "" : r["Email"].ToString(),
-
-
 
                         role = r["Role"].ToString(),
 
-
-
                         gamesPlayed = Convert.ToInt32(r["GamesPlayed"]),
-
-
 
                         gamesWon = Convert.ToInt32(r["GamesWon"]),
 
-
-
                         createdAt = Convert.ToDateTime(r["CreatedAt"]).ToString("o")
-
-
 
                     });
 
-
-
                 }
 
-
-
             }
-
-
 
             using (var cmd = new SqlCommand("SELECT TOP 30 [Id], [SessionGuid], [TurnNumber], [EventType], [PlayerName], [Message], [CreatedAt] FROM [prs].[prs_TelemetryLogs] ORDER BY [Id] DESC", conn))
 
-
-
             using (var r = cmd.ExecuteReader())
-
-
 
             {
 
-
-
                 while (r.Read())
-
-
 
                 {
 
-
-
                     logs.Add(new
-
-
 
                     {
 
-
-
                         id = Convert.ToInt32(r["Id"]),
-
-
 
                         turnNumber = Convert.ToInt32(r["TurnNumber"]),
 
-
-
                         eventType = r["EventType"].ToString(),
-
-
 
                         playerName = r["PlayerName"] == DBNull.Value ? "" : r["PlayerName"].ToString(),
 
-
-
                         message = r["Message"].ToString(),
-
-
 
                         createdAt = Convert.ToDateTime(r["CreatedAt"]).ToString("o")
 
-
-
                     });
-
-
 
                 }
 
-
-
             }
-
-
 
         }
 
-
-
         context.Response.Write(_json.Serialize(new { status = "success", users = users, recentLogs = logs }));
 
-
-
     }
-
-
-
 
     // ==========================================
     // 🛡️ ADMINISTRACE & SPRÁVA (VIDEA, UŽIVATELÉ, RELACE, OZNÁMENÍ, SYSTÉM)
@@ -5476,7 +4042,6 @@ END";
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", videos = videos }));
     }
 
-    
     private void HandleLikeVideo(HttpContext context)
     {
         EnsureDatabaseSchema();
@@ -5515,7 +4080,6 @@ END";
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", videoId = id, likesCount = newLikes }));
     }
 
-
     private void HandleGetHeroVideo(HttpContext context)
     {
         EnsureDatabaseSchema();
@@ -5553,6 +4117,9 @@ END";
 
     private void HandleUploadVideo(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
+
         if (context.Request.HttpMethod != "POST")
         {
             context.Response.StatusCode = 405;
@@ -5603,12 +4170,20 @@ END";
             System.IO.Directory.CreateDirectory(targetDir);
         }
 
-        // Čištění názvu souboru na bezpečné ASCII znaky
+        // Čištění názvu souboru na bezpečné ASCII znaky + ochrana proti path traversal
         string rawName = System.IO.Path.GetFileNameWithoutExtension(originalName);
         string safeBase = System.Text.RegularExpressions.Regex.Replace(rawName, @"[^a-zA-Z0-9_\-]", "_");
+        if (safeBase.Length > 80) safeBase = safeBase.Substring(0, 80);
         if (string.IsNullOrEmpty(safeBase)) safeBase = "media_" + DateTime.UtcNow.Ticks;
         string safeFileName = safeBase + ext;
-        string fullPath = System.IO.Path.Combine(targetDir, safeFileName);
+        string fullTargetDir = System.IO.Path.GetFullPath(targetDir).TrimEnd(System.IO.Path.DirectorySeparatorChar) + System.IO.Path.DirectorySeparatorChar;
+        string fullPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(targetDir, safeFileName));
+        if (!fullPath.StartsWith(fullTargetDir, StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatný název souboru." }));
+            return;
+        }
 
         file.SaveAs(fullPath);
 
@@ -5652,6 +4227,8 @@ END";
 
     private void HandleAdminSaveVideo(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -5721,6 +4298,8 @@ END";
 
     private void HandleAdminDeleteVideo(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -5745,6 +4324,8 @@ END";
 
     private void HandleAdminSetHeroVideo(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -5831,7 +4412,14 @@ END";
     private void HandleListAudio(HttpContext context)
     {
         EnsureDatabaseSchema();
-        bool all = context.Request.QueryString["all"] == "1";
+        bool wantsAll = context.Request.QueryString["all"] == "1";
+        bool isAdminCaller = false;
+        if (wantsAll)
+        {
+            AuthenticatedUser authUser = GetAuthenticatedUser(context);
+            isAdminCaller = (authUser != null && string.Equals(authUser.Role, "Admin", StringComparison.OrdinalIgnoreCase));
+        }
+        bool all = wantsAll && isAdminCaller;
         var tracks = new List<object>();
         using (var conn = new SqlConnection(CONN_STR))
         {
@@ -5862,6 +4450,9 @@ END";
 
     private void HandleUploadAudio(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
+
         if (context.Request.HttpMethod != "POST")
         {
             context.Response.StatusCode = 405;
@@ -5893,7 +4484,14 @@ END";
         if (safeBase.Length > 80) safeBase = safeBase.Substring(0, 80);
         if (string.IsNullOrEmpty(safeBase)) safeBase = "audio_" + DateTime.UtcNow.Ticks;
         string safeFileName = safeBase + ext;
-        string fullPath = System.IO.Path.Combine(targetDir, safeFileName);
+        string fullTargetDir = System.IO.Path.GetFullPath(targetDir).TrimEnd(System.IO.Path.DirectorySeparatorChar) + System.IO.Path.DirectorySeparatorChar;
+        string fullPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(targetDir, safeFileName));
+        if (!fullPath.StartsWith(fullTargetDir, StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.StatusCode = 400;
+            context.Response.Write(_json.Serialize(new { ok = false, message = "Neplatný název souboru." }));
+            return;
+        }
         file.SaveAs(fullPath);
 
         // Synchronizace do paralelní webroot složky (/www/apps vs /www/wwwroot/apps)
@@ -5916,6 +4514,8 @@ END";
 
     private void HandleAdminSaveAudio(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -5962,6 +4562,8 @@ END";
 
     private void HandleAdminDeleteAudio(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -6016,6 +4618,8 @@ END";
 
     private void HandleAdminSaveAnnouncement(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         string message = GetStr(body, "message").Trim();
@@ -6047,6 +4651,8 @@ END";
 
     private void HandleAdminListUsers(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var users = new List<object>();
         using (var conn = new SqlConnection(CONN_STR))
@@ -6084,6 +4690,8 @@ END";
 
     private void HandleAdminUpdateUser(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -6114,12 +4722,18 @@ END";
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.ExecuteNonQuery();
             }
+            if (!isActive)
+            {
+                RevokeAllUserSessions(conn, id);
+            }
         }
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Uživatelský účet byl aktualizován." }));
     }
 
     private void HandleAdminResetPassword(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -6142,12 +4756,15 @@ END";
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.ExecuteNonQuery();
             }
+            RevokeAllUserSessions(conn, id);
         }
         context.Response.Write(_json.Serialize(new { ok = true, status = "success", message = "Heslo uživatele bylo úspěšně změněno." }));
     }
 
     private void HandleAdminDeleteUser(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -6162,6 +4779,7 @@ END";
         {
             conn.Open();
             EnsureExtendedAdminSchema(conn);
+            RevokeAllUserSessions(conn, id);
             using (var cmd = new SqlCommand("DELETE FROM [prs].[prs_Users] WHERE [Id] = @id AND [Username] <> 'admin'", conn))
             {
                 cmd.Parameters.AddWithValue("@id", id);
@@ -6173,6 +4791,8 @@ END";
 
     private void HandleAdminListSessions(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var sessions = new List<object>();
         using (var conn = new SqlConnection(CONN_STR))
@@ -6212,6 +4832,8 @@ END";
 
     private void HandleAdminCloseSession(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         string sessionGuid = GetStr(body, "sessionGuid").Trim();
@@ -6237,6 +4859,8 @@ END";
 
     private void HandleAdminPurgeSessions(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int daysOld = GetInt(body, "daysOld", 7);
@@ -6263,13 +4887,15 @@ END";
 
     private void HandleAdminSystemInfo(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var counts = new Dictionary<string, int>();
         using (var conn = new SqlConnection(CONN_STR))
         {
             conn.Open();
             EnsureExtendedAdminSchema(conn);
-            string[] tables = new string[] { "prs_Users", "prs_GameSessions", "prs_SessionPlayers", "prs_TelemetryLogs", "prs_GameConfigs", "prs_BoardTemplates", "prs_Videos", "prs_Announcements" };
+            string[] tables = new string[] { "prs_Users", "prs_UserSessions", "prs_GameSessions", "prs_SessionPlayers", "prs_TelemetryLogs", "prs_GameConfigs", "prs_BoardTemplates", "prs_Videos", "prs_Announcements" };
             foreach (var t in tables)
             {
                 try
@@ -6305,7 +4931,14 @@ END";
     private void HandleListBoardTemplates(HttpContext context)
     {
         EnsureDatabaseSchema();
-        bool showAll = (context.Request.QueryString["all"] == "1");
+        bool wantsAll = (context.Request.QueryString["all"] == "1");
+        bool isAdminCaller = false;
+        if (wantsAll)
+        {
+            AuthenticatedUser authUser = GetAuthenticatedUser(context);
+            isAdminCaller = (authUser != null && string.Equals(authUser.Role, "Admin", StringComparison.OrdinalIgnoreCase));
+        }
+        bool showAll = wantsAll && isAdminCaller;
         bool includeGraph = (context.Request.QueryString["includeGraph"] != "0");
         var list = new List<object>();
 
@@ -6414,6 +5047,8 @@ END";
 
     private void HandleAdminSaveBoardTemplate(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -6424,7 +5059,7 @@ END";
         int seed = GetInt(body, "seed", 4598);
         int sortOrder = GetInt(body, "sortOrder", 50);
         bool isActive = !body.ContainsKey("isActive") || GetBool(body, "isActive", true);
-        string createdBy = GetStr(body, "createdBy", "admin").Trim();
+        string createdBy = adminUser.Username;
         string recipeJson = GetStr(body, "recipeJson");
         string graphJson = GetStr(body, "graphJson", "{}");
 
@@ -6531,6 +5166,8 @@ END";
 
     private void HandleAdminRenameBoardTemplate(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -6583,6 +5220,8 @@ END";
 
     private void HandleAdminDeleteBoardTemplate(HttpContext context)
     {
+        AuthenticatedUser adminUser = RequireAdmin(context);
+        if (adminUser == null) return;
         EnsureDatabaseSchema();
         var body = ReadJsonBody(context);
         int id = GetInt(body, "id", 0);
@@ -6645,9 +5284,4 @@ END";
 
     public bool IsReusable { get { return false; } }
 
-
-
 }
-
-
-

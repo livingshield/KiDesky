@@ -750,8 +750,7 @@
         connectToOriginalOnlineRoom: function (saveEntry) {
             var self = this;
             var roomCode = saveEntry.roomCode;
-            fetch("api.ashx?action=load-session&code=" + encodeURIComponent(roomCode))
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("load-session", { code: roomCode })
                 .then(function (res) {
                     if (res && res.ok && res.session && res.session.stateJson) {
                         self.state = JSON.parse(res.session.stateJson);

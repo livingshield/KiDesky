@@ -99,8 +99,7 @@
             var self = this;
             var listEl = document.getElementById("admin-audio-table-body");
             if (listEl) listEl.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem;">⏳ Načítám skladby...</td></tr>';
-            fetch("api.ashx?action=list-audio&all=1")
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("list-audio", { all: 1 })
                 .then(function (res) {
                     if (res && res.ok && res.tracks) {
                         self.adminAudioList = res.tracks;
@@ -219,50 +218,36 @@
 
             var fd = new FormData();
             fd.append("file", file);
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "api.ashx?action=upload-audio", true);
-
-            xhr.upload.onprogress = function (ev) {
-                if (ev.lengthComputable) {
-                    var pct = Math.round((ev.loaded / ev.total) * 100);
-                    if (progBar) progBar.style.width = pct + "%";
-                    if (progPct) progPct.textContent = pct + "%";
-                }
-            };
-
             var fail = function (msg) {
                 if (fb) { fb.style.color = "#ef4444"; fb.textContent = msg; }
                 if (progStatus) { progStatus.textContent = "❌ Chyba nahrávání"; progStatus.style.color = "#ef4444"; }
             };
 
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    try {
-                        var res = JSON.parse(xhr.responseText);
-                        if (res && res.ok && res.url) {
-                            document.getElementById("admin-aud-url").value = res.url;
-                            document.getElementById("admin-aud-type").value = "mp3";
-                            var titleInput = document.getElementById("admin-aud-title");
-                            if (titleInput && !titleInput.value.trim()) {
-                                var base = file.name.replace(/\.[^/.]+$/, "").replace(/[_\-]+/g, " ");
-                                titleInput.value = base.charAt(0).toUpperCase() + base.slice(1);
-                            }
-                            if (progBar) progBar.style.width = "100%";
-                            if (progPct) progPct.textContent = "100%";
-                            if (progStatus) { progStatus.textContent = "✅ Nahráno: " + res.url; progStatus.style.color = "#4ade80"; }
-                            if (fb) { fb.style.color = "#4ade80"; fb.textContent = "✅ Soubor byl úspěšně nahrán na server."; }
-                            return;
-                        }
-                        fail((res && res.message) || "Nahrání selhalo.");
-                    } catch (err) {
-                        fail("Chyba při zpracování odpovědi serveru.");
-                    }
-                } else {
-                    fail("Chyba serveru při nahrávání (kód " + xhr.status + ").");
+            PRS_Api.upload("upload-audio", fd, {
+                timeoutMs: 300000,
+                onProgress: function (pct) {
+                    if (progBar) progBar.style.width = pct + "%";
+                    if (progPct) progPct.textContent = pct + "%";
                 }
-            };
-            xhr.onerror = function () { fail("Chyba sítě při odesílání souboru."); };
-            xhr.send(fd);
+            })
+                .then(function (res) {
+                    if (res && res.ok && res.url) {
+                        document.getElementById("admin-aud-url").value = res.url;
+                        document.getElementById("admin-aud-type").value = "mp3";
+                        var titleInput = document.getElementById("admin-aud-title");
+                        if (titleInput && !titleInput.value.trim()) {
+                            var base = file.name.replace(/\.[^/.]+$/, "").replace(/[_\-]+/g, " ");
+                            titleInput.value = base.charAt(0).toUpperCase() + base.slice(1);
+                        }
+                        if (progBar) progBar.style.width = "100%";
+                        if (progPct) progPct.textContent = "100%";
+                        if (progStatus) { progStatus.textContent = "✅ Nahráno: " + res.url; progStatus.style.color = "#4ade80"; }
+                        if (fb) { fb.style.color = "#4ade80"; fb.textContent = "✅ Soubor byl úspěšně nahrán na server."; }
+                        return;
+                    }
+                    fail((res && res.message) || ("Chyba serveru při nahrávání (kód " + ((res && res._httpStatus) || "?") + ")."));
+                })
+                .catch(function () { fail("Chyba sítě při odesílání souboru."); });
         },
 
         autoFetchYoutubeAudioMeta: function () {
@@ -314,12 +299,7 @@
                 sortOrder: parseInt(document.getElementById("admin-aud-order").value, 10) || 0
             };
 
-            fetch("api.ashx?action=admin-save-audio", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-save-audio", payload)
                 .then(function (res) {
                     if (res && res.ok) {
                         self.closeAdminAudioModal();
@@ -345,12 +325,7 @@
             });
             if (!conf) return;
             var self = this;
-            fetch("api.ashx?action=admin-delete-audio", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: id })
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-delete-audio", { id: id })
                 .then(function (res) {
                     if (res && res.ok) {
                         self.loadAdminAudio();
@@ -371,8 +346,7 @@
             var listEl = document.getElementById("admin-videos-table-body");
             if (listEl) listEl.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem;">⏳ Načítám královská videa...</td></tr>';
 
-            fetch("api.ashx?action=list-videos")
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("list-videos")
                 .then(function (res) {
                     if (res && res.ok && res.videos) {
                         self.adminVideosList = res.videos;
@@ -497,81 +471,58 @@
             var fd = new FormData();
             fd.append("file", file);
 
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "api.ashx?action=upload-video", true);
-
-            xhr.upload.onprogress = function (ev) {
-                if (ev.lengthComputable) {
-                    var pct = Math.round((ev.loaded / ev.total) * 100);
+            PRS_Api.upload("upload-video", fd, {
+                timeoutMs: 600000,
+                onProgress: function (pct) {
                     if (progBar) progBar.style.width = pct + "%";
                     if (progPct) progPct.textContent = pct + "%";
                 }
-            };
+            })
+                .then(function (res) {
+                    if (res && res.ok && res.url) {
+                        var urlInput = document.getElementById("admin-vid-url");
+                        if (urlInput) urlInput.value = res.url;
 
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    try {
-                        var res = JSON.parse(xhr.responseText);
-                        if (res && res.ok && res.url) {
-                            var urlInput = document.getElementById("admin-vid-url");
-                            if (urlInput) urlInput.value = res.url;
+                        var typeSel = document.getElementById("admin-vid-type");
+                        if (typeSel) typeSel.value = "mp4";
 
-                            var typeSel = document.getElementById("admin-vid-type");
-                            if (typeSel) typeSel.value = "mp4";
-
-                            var titleInput = document.getElementById("admin-vid-title");
-                            if (titleInput && !titleInput.value.trim()) {
-                                var base = file.name.replace(/\.[^/.]+$/, "").replace(/[_\-]+/g, " ");
-                                titleInput.value = base.charAt(0).toUpperCase() + base.slice(1);
-                            }
-
-                            if (progBar) progBar.style.width = "100%";
-                            if (progPct) progPct.textContent = "100%";
-                            if (progStatus) {
-                                progStatus.textContent = "✅ Video nahráno: " + res.url;
-                                progStatus.style.color = "#4ade80";
-                            }
-                            if (fb) {
-                                fb.style.color = "#4ade80";
-                                fb.textContent = "✅ Soubor byl úspěšně nahrán na server.";
-                            }
-                            return;
-                        } else {
-                            if (fb) {
-                                fb.style.color = "#ef4444";
-                                fb.textContent = (res && res.message) || "Nahrání selhalo.";
-                            }
+                        var titleInput = document.getElementById("admin-vid-title");
+                        if (titleInput && !titleInput.value.trim()) {
+                            var base = file.name.replace(/\.[^/.]+$/, "").replace(/[_\-]+/g, " ");
+                            titleInput.value = base.charAt(0).toUpperCase() + base.slice(1);
                         }
-                    } catch (err) {
+
+                        if (progBar) progBar.style.width = "100%";
+                        if (progPct) progPct.textContent = "100%";
+                        if (progStatus) {
+                            progStatus.textContent = "✅ Video nahráno: " + res.url;
+                            progStatus.style.color = "#4ade80";
+                        }
                         if (fb) {
-                            fb.style.color = "#ef4444";
-                            fb.textContent = "Chyba při zpracování odpovědi serveru.";
+                            fb.style.color = "#4ade80";
+                            fb.textContent = "✅ Soubor byl úspěšně nahrán na server.";
                         }
+                        return;
                     }
-                } else {
                     if (fb) {
                         fb.style.color = "#ef4444";
-                        fb.textContent = "Chyba serveru při nahrávání (kód " + xhr.status + ").";
+                        fb.textContent = (res && res.message) || ("Chyba serveru při nahrávání (kód " + ((res && res._httpStatus) || "?") + ").");
                     }
-                }
-                if (progStatus) {
-                    progStatus.textContent = "❌ Chyba nahrávání";
-                    progStatus.style.color = "#ef4444";
-                }
-            };
-
-            xhr.onerror = function () {
-                if (fb) {
-                    fb.style.color = "#ef4444";
-                    fb.textContent = "Chyba sítě při odesílání souboru.";
-                }
-                if (progStatus) {
-                    progStatus.textContent = "❌ Chyba sítě";
-                    progStatus.style.color = "#ef4444";
-                }
-            };
-
-            xhr.send(fd);
+                    if (progStatus) {
+                        progStatus.textContent = "❌ Chyba nahrávání";
+                        progStatus.style.color = "#ef4444";
+                    }
+                })
+                .catch(function () {
+                    if (fb) {
+                        fb.style.color = "#ef4444";
+                        fb.textContent = "Chyba sítě při odesílání souboru.";
+                    }
+                    if (progStatus) {
+                        progStatus.textContent = "❌ Chyba sítě";
+                        progStatus.style.color = "#ef4444";
+                    }
+                });
         },
 
         handlePosterFileSelected: function (e) {
@@ -587,38 +538,28 @@
             var fd = new FormData();
             fd.append("file", file);
 
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "api.ashx?action=upload-video", true);
-
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    try {
-                        var res = JSON.parse(xhr.responseText);
-                        if (res && res.ok && res.url) {
-                            var posterInput = document.getElementById("admin-vid-poster");
-                            if (posterInput) posterInput.value = res.url;
-                            if (fb) {
-                                fb.style.color = "#4ade80";
-                                fb.textContent = "✅ Plakát nahrán: " + res.url;
-                            }
-                            return;
+            PRS_Api.upload("upload-video", fd, { timeoutMs: 120000 })
+                .then(function (res) {
+                    if (res && res.ok && res.url) {
+                        var posterInput = document.getElementById("admin-vid-poster");
+                        if (posterInput) posterInput.value = res.url;
+                        if (fb) {
+                            fb.style.color = "#4ade80";
+                            fb.textContent = "✅ Plakát nahrán: " + res.url;
                         }
-                    } catch (err) { }
-                }
-                if (fb) {
-                    fb.style.color = "#ef4444";
-                    fb.textContent = "Nahrání plakátu selhalo.";
-                }
-            };
-
-            xhr.onerror = function () {
-                if (fb) {
-                    fb.style.color = "#ef4444";
-                    fb.textContent = "Chyba sítě při nahrávání plakátu.";
-                }
-            };
-
-            xhr.send(fd);
+                        return;
+                    }
+                    if (fb) {
+                        fb.style.color = "#ef4444";
+                        fb.textContent = (res && res.message) || "Nahrání plakátu selhalo.";
+                    }
+                })
+                .catch(function () {
+                    if (fb) {
+                        fb.style.color = "#ef4444";
+                        fb.textContent = "Chyba sítě při nahrávání plakátu.";
+                    }
+                });
         },
 
         autoFetchYoutubeMeta: function () {
@@ -711,12 +652,7 @@
                 sortOrder: sortOrder
             };
 
-            fetch("api.ashx?action=admin-save-video", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-save-video", payload)
                 .then(function (res) {
                     if (res && res.ok) {
                         self.closeAdminVideoModal();
@@ -741,12 +677,7 @@
             });
             if (!conf) return;
             var self = this;
-            fetch("api.ashx?action=admin-delete-video", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: id })
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-delete-video", { id: id })
                 .then(function (res) {
                     if (res && res.ok) {
                         self.loadAdminVideos();
@@ -760,12 +691,7 @@
 
         toggleHeroVideo: function (id) {
             var self = this;
-            fetch("api.ashx?action=admin-set-hero-video", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: id, toggle: true })
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-set-hero-video", { id: id, toggle: true })
                 .then(function (res) {
                     if (res && res.ok) {
                         self.loadAdminVideos();
@@ -790,8 +716,7 @@
             var listEl = document.getElementById("admin-users-table-body");
             if (listEl) listEl.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">⏳ Načítám účty hráčů...</td></tr>';
 
-            fetch("api.ashx?action=admin-list-users")
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("admin-list-users")
                 .then(function (res) {
                     if (res && res.ok && res.users) {
                         self.adminUsersList = res.users;
@@ -894,12 +819,7 @@
                 isActive: active
             };
 
-            fetch("api.ashx?action=admin-update-user", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-update-user", payload)
                 .then(function (res) {
                     if (res && res.ok) {
                         self.closeAdminUserModal();
@@ -927,12 +847,7 @@
             }
 
             var self = this;
-            fetch("api.ashx?action=admin-reset-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: id, newPassword: newPass.trim() })
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-reset-password", { id: id, newPassword: newPass.trim() })
                 .then(function (res) {
                     if (res && res.ok) {
                         alert("Heslo uživatele " + username + " bylo úspěšně změněno.");
@@ -953,12 +868,7 @@
             });
             if (!conf) return;
             var self = this;
-            fetch("api.ashx?action=admin-delete-user", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: id })
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-delete-user", { id: id })
                 .then(function (res) {
                     if (res && res.ok) {
                         self.loadAdminUsers();
@@ -978,8 +888,7 @@
             var listEl = document.getElementById("admin-sessions-table-body");
             if (listEl) listEl.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">⏳ Načítám herní relace...</td></tr>';
 
-            fetch("api.ashx?action=admin-list-sessions")
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("admin-list-sessions")
                 .then(function (res) {
                     if (res && res.ok && res.sessions) {
                         self.adminSessionsList = res.sessions;
@@ -1038,12 +947,7 @@
             });
             if (!conf) return;
             var self = this;
-            fetch("api.ashx?action=admin-close-session", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sessionGuid: sessionGuid })
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-close-session", { sessionGuid: sessionGuid })
                 .then(function (res) {
                     if (res && res.ok) {
                         self.loadAdminSessions();
@@ -1065,12 +969,7 @@
             if (!days || isNaN(days) || parseInt(days, 10) < 1) return;
 
             var self = this;
-            fetch("api.ashx?action=admin-purge-sessions", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ daysOld: parseInt(days, 10) })
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-purge-sessions", { daysOld: parseInt(days, 10) })
                 .then(function (res) {
                     if (res && res.ok) {
                         alert(res.message);
@@ -1087,8 +986,7 @@
         // ==========================================
 
         loadAdminAnnouncements: function () {
-            fetch("api.ashx?action=get-announcement")
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("get-announcement")
                 .then(function (res) {
                     if (res && res.ok && res.announcement) {
                         var a = res.announcement;
@@ -1112,12 +1010,7 @@
             }
 
             var self = this;
-            fetch("api.ashx?action=admin-save-announcement", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: msg, linkUrl: link, isActive: active })
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-save-announcement", { message: msg, linkUrl: link, isActive: active })
                 .then(function (res) {
                     if (res && res.ok) {
                         if (fb) {
@@ -1149,8 +1042,7 @@
             var logsEl = document.getElementById("admin-telemetry-logs-body");
             if (logsEl) logsEl.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1.5rem;">⏳ Načítám telemetrii z MSSQL...</td></tr>';
 
-            fetch("api.ashx?action=admin-stats")
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("admin-stats")
                 .then(function (res) {
                     if (res && res.status === "success") {
                         self.renderAdminTelemetryLogs(res.recentLogs || []);
@@ -1197,8 +1089,7 @@
             var diagEl = document.getElementById("admin-system-diag-box");
             if (diagEl) diagEl.innerHTML = '<div style="text-align:center; padding:2rem;">⏳ Prověřuji stav databáze a IIS serveru...</div>';
 
-            fetch("api.ashx?action=admin-system-info")
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("admin-system-info")
                 .then(function (res) {
                     if (res && res.ok) {
                         var c = res.tableCounts || {};
@@ -1254,8 +1145,7 @@
             var listEl = document.getElementById("admin-boards-table-body");
             if (listEl) listEl.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">⏳ Načítám předdefinované herní plány...</td></tr>';
 
-            fetch("api.ashx?action=list-board-templates&all=1&includeGraph=1")
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("list-board-templates", { all: 1, includeGraph: 1 })
                 .then(function (res) {
                     if (res && res.ok && Array.isArray(res.templates)) {
                         self.adminBoardsList = res.templates;
@@ -1458,12 +1348,7 @@
                     graphJson: brd ? JSON.stringify(brd) : "{}"
                 };
 
-                fetch("api.ashx?action=admin-save-board-template", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                })
-                    .then(function (r) { return r.json(); })
+                PRS_Api.post("admin-save-board-template", payload)
                     .then(function (res) {
                         if (res && res.ok) {
                             self.closeAdminBoardModal();
@@ -1495,12 +1380,7 @@
                     sortOrder: sortOrder,
                     isActive: isActive
                 };
-                fetch("api.ashx?action=admin-rename-board-template", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(renamePayload)
-                })
-                    .then(function (r) { return r.json(); })
+                PRS_Api.post("admin-rename-board-template", renamePayload)
                     .then(function (res) {
                         if (res && res.ok) {
                             self.closeAdminBoardModal();
@@ -1555,19 +1435,14 @@
             }
             if (!item) return;
 
-            fetch("api.ashx?action=admin-rename-board-template", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id: item.id,
-                    templateCode: item.templateCode,
-                    name: item.name,
-                    description: item.description || "",
-                    sortOrder: item.sortOrder || 50,
-                    isActive: Boolean(newActive)
-                })
+            PRS_Api.post("admin-rename-board-template", {
+                id: item.id,
+                templateCode: item.templateCode,
+                name: item.name,
+                description: item.description || "",
+                sortOrder: item.sortOrder || 50,
+                isActive: Boolean(newActive)
             })
-                .then(function (r) { return r.json(); })
                 .then(function (res) {
                     if (res && res.ok) {
                         KiDeskyToast.show(newActive ? "👁️ Plán byl aktivován v nabídce." : "👁️ Plán byl skryt z nabídky.", "info");
@@ -1601,12 +1476,7 @@
             });
             if (!conf) return;
 
-            fetch("api.ashx?action=admin-delete-board-template", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: item.id, templateCode: item.templateCode })
-            })
-                .then(function (r) { return r.json(); })
+            PRS_Api.post("admin-delete-board-template", { id: item.id, templateCode: item.templateCode })
                 .then(function (res) {
                     if (res && res.ok) {
                         KiDeskyToast.show("🗑️ " + (res.message || "Herní plán byl odebrán."), "info");

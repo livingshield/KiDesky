@@ -398,12 +398,7 @@
             players: this.state.players
         };
 
-        fetch("api.ashx?action=save-session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        })
-            .then(function (r) { return r.json(); })
+        PRS_Api.post("save-session", payload)
             .then(function (res) {
                 if (btn) btn.disabled = false;
                 if (fb) {

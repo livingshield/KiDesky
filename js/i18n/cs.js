@@ -2220,7 +2220,11 @@ window.PRS_I18N.cs = {
         "btn_play_guest": "👤 Hrát volně jako Host",
         "btn_resend_code": "🔁 Znovu poslat",
         "btn_login": "🔑 Přihlásit se",
-        "btn_register": "✨ Registrovat"
+        "btn_register": "✨ Registrovat",
+        "session_expired": "Tvoje přihlášení vypršelo nebo je potřeba ho obnovit. Přihlas se prosím znovu.",
+        "network_error": "Chyba připojení k serveru. Zkus to prosím za chvíli znovu.",
+        "admin_required": "Tato akce vyžaduje aktivní administrátorské přihlášení.",
+        "account_disabled": "Tento uživatelský účet byl deaktivován administrátorem."
     },
     "online_lobby": {
         "badge": "Režim 3 • Online Multiplayer & Cloud",

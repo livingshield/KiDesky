@@ -1416,16 +1416,14 @@
             winRowsHtml +
             '</div>';
 
-        fetch("api.ashx?action=log-telemetry", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
+        if (window.PRS_Api) {
+            PRS_Api.post("log-telemetry", {
                 eventType: "SimulationRun",
                 turnNumber: Math.round(result.avgRounds),
                 message: "Simulace " + result.gamesSimulated + " her [" + bCode + "/" + simOpts.scenario + "] (" + result.estTabletopHoursText + ")",
                 payloadJson: JSON.stringify(result)
-            })
-        }).catch(function () { });
+            }).catch(function () { });
+        }
     },
 
     saveConfigToServer: function () {
@@ -1433,28 +1431,25 @@
         var msgEl = document.getElementById("save-config-feedback");
         if (msgEl) msgEl.textContent = "⏳ Ukládám konfiguraci do databáze [prs].[prs_GameConfigs]...";
 
-        fetch("api.ashx?action=save-config", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                versionName: "v2.0-nova-ekonomika",
-                targetHearts: cfg.targetHearts,
-                startGold: cfg.startGold,
-                passStartGold: cfg.passStartGold,
-                configJson: JSON.stringify(cfg),
-                notes: "Uloženo z Administrace – Balancovací studio v2.0"
-            })
+        PRS_Api.post("save-config", {
+            versionName: "v2.0-nova-ekonomika",
+            targetHearts: cfg.targetHearts,
+            startGold: cfg.startGold,
+            passStartGold: cfg.passStartGold,
+            configJson: JSON.stringify(cfg),
+            notes: "Uloženo z Administrace – Balancovací studio v2.0"
         })
-            .then(function (r) { return r.json(); })
             .then(function (res) {
                 if (msgEl) {
-                    msgEl.textContent = (res && res.ok)
-                        ? "✅ Konfigurace uložena do DB a aktivována pro všechny nové hry!"
-                        : "✅ Konfigurace aktivována pro tuto relaci.";
+                    if (res && res.ok) {
+                        msgEl.textContent = "✅ Konfigurace uložena do DB a aktivována pro všechny nové hry!";
+                    } else {
+                        msgEl.textContent = "⚠️ " + ((res && res.message) || (window.PRS_I18n ? window.PRS_I18n.t("auth.admin_required") : "Tato akce vyžaduje aktivní administrátorské přihlášení."));
+                    }
                 }
             })
             .catch(function () {
-                if (msgEl) msgEl.textContent = "✅ Konfigurace aktivována lokálně.";
+                if (msgEl) msgEl.textContent = "⚠️ " + (window.PRS_I18n ? window.PRS_I18n.t("auth.network_error") : "Chyba připojení k serveru.");
             });
     },
 

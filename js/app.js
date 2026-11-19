@@ -338,8 +338,7 @@ window.PRS_App = {
             self.checkUrlRoomParam();
             if (self.loadBoardTemplatesFromServer) self.loadBoardTemplatesFromServer();
 
-            fetch("api.ashx?action=get-config")
-                .then(function (r) { return r.json(); })
+            PRS_Api.get("get-config")
                 .then(function (res) {
                     if (res && res.ok && res.configJson) {
                         try {
@@ -1686,8 +1685,7 @@ window.PRS_App = {
 
     loadActiveHeroVideo: function () {
         var self = this;
-        fetch("api.ashx?action=list-videos")
-            .then(function (r) { return r.json(); })
+        PRS_Api.get("list-videos")
             .then(function (res) {
                 if (res && res.ok && Array.isArray(res.videos)) {
                     // Intro videa pro Landing Page: bereme pouze videa aktivovaná správcem (isHeroActive)
@@ -1724,8 +1722,7 @@ window.PRS_App = {
 
     fetchSingleHeroFallback: function () {
         var self = this;
-        fetch("api.ashx?action=hero-video")
-            .then(function (r) { return r.json(); })
+        PRS_Api.get("hero-video")
             .then(function (res) {
                 if (res && res.ok && res.hero) {
                     self.heroVideosList = [res.hero];
@@ -1937,8 +1934,7 @@ window.PRS_App = {
         var likeBtn = document.getElementById("lp-btn-like-video");
         var likeCountEl = document.getElementById("lp-like-count");
 
-        fetch("api.ashx?action=like-video&id=" + encodeURIComponent(v.id), { method: "POST" })
-            .then(function (r) { return r.json(); })
+        PRS_Api.post("like-video", null, { params: { id: v.id } })
             .then(function (res) {
                 if (res && res.ok) {
                     self._likedVideoIds[v.id] = true;
@@ -2079,8 +2075,7 @@ window.PRS_App = {
             }
         }
 
-        fetch("api.ashx?action=like-video&id=" + encodeURIComponent(id), { method: "POST" })
-            .then(function (r) { return r.json(); })
+        PRS_Api.post("like-video", null, { params: { id: id } })
             .then(function (res) {
                 if (res && res.ok && typeof res.likesCount === "number" && btn) {
                     var numEl = btn.querySelector(".like-num");
@@ -2095,8 +2090,7 @@ window.PRS_App = {
 
     loadAnnouncement: function () {
         var self = this;
-        fetch("api.ashx?action=get-announcement")
-            .then(function (r) { return r.json(); })
+        PRS_Api.get("get-announcement")
             .then(function (res) {
                 if (res && res.ok && res.announcement && res.announcement.message) {
                     self._lastAnnouncement = res.announcement;
@@ -2739,48 +2733,23 @@ window.PRS_App = {
 
         var title = "Online stůl (" + ((this.currentUser && this.currentUser.role !== "Guest" && (this.currentUser.displayName || this.currentUser.username)) ? (this.currentUser.displayName || this.currentUser.username) : "Host") + ")";
 
-        fetch("api.ashx?action=save-session", {
-
-            method: "POST",
-
-            headers: { "Content-Type": "application/json" },
-
-            body: JSON.stringify({
-
-                sessionGuid: this.state.sessionGuid || "",
-
-                roomCode: this.state.roomCode || "",
-
-                title: title,
-
-                hostUsername: (this.currentUser && this.currentUser.role !== "Guest") ? (this.currentUser.username || this.currentUser.displayName || "Admin") : "Guest",
-
-                boardCode: (this.state.board && this.state.board.code) ? this.state.board.code : "classic_96",
-
-                targetHearts: (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30,
-
-                turnNumber: this.state.turnNumber || 1,
-
-                expectedTurnNumber: 0,
-
-                stateJson: JSON.stringify(this.state),
-
-                players: this.state.players
-
-            })
-
+        PRS_Api.post("save-session", {
+            sessionGuid: this.state.sessionGuid || "",
+            roomCode: this.state.roomCode || "",
+            title: title,
+            hostUsername: (this.currentUser && this.currentUser.role !== "Guest") ? (this.currentUser.username || this.currentUser.displayName || "Admin") : "Guest",
+            boardCode: (this.state.board && this.state.board.code) ? this.state.board.code : "classic_96",
+            targetHearts: (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30,
+            turnNumber: this.state.turnNumber || 1,
+            expectedTurnNumber: 0,
+            stateJson: JSON.stringify(this.state),
+            players: this.state.players
         })
-
-            .then(function (r) {
-
-                if (!r.ok) {
-
-                    throw new Error("Server vrátil HTTP " + r.status);
-
+            .then(function (res) {
+                if (res && res._httpStatus && (res._httpStatus < 200 || res._httpStatus >= 300)) {
+                    throw new Error(res.message || ("Server vrátil HTTP " + res._httpStatus));
                 }
-
-                return r.json();
-
+                return res;
             })
 
             .then(function (res) {
@@ -2895,6 +2864,51 @@ window.PRS_App = {
             }
 
             var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
+            if (!isGuest) {
+                var tok = (window.PRS_Api && typeof window.PRS_Api.getAuthToken === "function") ? window.PRS_Api.getAuthToken() : null;
+                if (!tok || tok === "local") {
+                    isGuest = true;
+                    this.currentUser = {
+                        id: null,
+                        username: "Host",
+                        displayName: "Host",
+                        role: "Guest",
+                        credits: 0,
+                        selectedPawnId: "knight_valiant",
+                        token: null
+                    };
+                    try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e3) { }
+                    if (window.PRS_Api) window.PRS_Api.clearAuthToken();
+                    var selfLegacy = this;
+                    setTimeout(function () {
+                        if (typeof selfLegacy.handleSessionExpired === "function") {
+                            selfLegacy.handleSessionExpired();
+                        }
+                    }, 400);
+                } else {
+                    var selfSync = this;
+                    window.PRS_Api.get("session-me", null, { silentAuth: true })
+                        .then(function (res) {
+                            if (res && res.ok && res.user) {
+                                res.user.authToken = tok;
+                                selfSync.currentUser = res.user;
+                                if (typeof res.user.credits === "number") selfSync.userCredits = res.user.credits;
+                                if (res.user.selectedPawnId) selfSync.selectedPawnId = res.user.selectedPawnId;
+                                if (res.user.unlockedPawnsJson) {
+                                    try {
+                                        var unlArr = JSON.parse(res.user.unlockedPawnsJson);
+                                        if (Array.isArray(unlArr) && unlArr.length > 0) selfSync.unlockedPawns = unlArr;
+                                    } catch (e4) { }
+                                }
+                                try { localStorage.setItem("prs_user", JSON.stringify(selfSync.currentUser)); } catch (e5) { }
+                                selfSync.updateUserUI();
+                            } else if (res && (res._httpStatus === 401 || res._httpStatus === 403)) {
+                                selfSync.handleSessionExpired();
+                            }
+                        })
+                        .catch(function () { });
+                }
+            }
             if (isGuest) {
                 // Host má VŽDY 0 modrých krystalů a pouze 6 základních figurek zdarma
                 this.userCredits = 0;
@@ -2935,11 +2949,14 @@ window.PRS_App = {
         }
         if (!token) return;
 
-        fetch("api.ashx?action=confirm-email&token=" + encodeURIComponent(token))
-            .then(function (r) { return r.json(); })
+        PRS_Api.get("confirm-email", { token: token })
             .then(function (res) {
                 if (res && res.ok && res.user) {
                     self.currentUser = res.user;
+                    if (res.authToken && window.PRS_Api) {
+                        window.PRS_Api.setAuthToken(res.authToken);
+                        self.currentUser.authToken = res.authToken;
+                    }
                     if (typeof res.user.credits === "number") self.userCredits = res.user.credits;
                     if (res.user.selectedPawnId) self.selectedPawnId = res.user.selectedPawnId;
                     if (res.user.unlockedPawnsJson) {
@@ -3186,11 +3203,7 @@ window.PRS_App = {
         if (this.currentUser && this.currentUser.role !== "Guest") {
             this.currentUser.displayName = newNick;
             try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
-            fetch("api.ashx?action=update_nickname", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: this.currentUser.id, nickname: newNick })
-            }).catch(function () { });
+            PRS_Api.post("update_nickname", { displayName: newNick }).catch(function () { });
         }
         try { localStorage.setItem("prs_player_nickname", newNick); } catch (e) { }
         this.updateUserUI();
@@ -3469,11 +3482,38 @@ window.PRS_App = {
     },
 
     logoutUser: function () {
+        if (window.PRS_Api) {
+            window.PRS_Api.post("logout", {}, { silentAuth: true }).catch(function () { });
+            window.PRS_Api.clearAuthToken();
+        }
         this.setGuestMode();
         if (window.PRS_Audio && window.PRS_Audio.playNotice) window.PRS_Audio.playNotice();
         this.closeAuthModal();
         this.updateUserUI();
         var outMsg = window.PRS_I18n ? window.PRS_I18n.t("auth.logout_success") : "Byl jsi úspěšně odhlášen. Nyní pokračuješ volně v režimu Hosta."; if (window.KiDeskyToast) { KiDeskyToast.show(outMsg, "info"); } else { alert(outMsg); }
+    },
+
+    handleSessionExpired: function () {
+        if (window.PRS_Api && typeof window.PRS_Api.clearAuthToken === "function") {
+            window.PRS_Api.clearAuthToken();
+        }
+        if (typeof this.setGuestMode === "function") {
+            this.setGuestMode();
+        } else {
+            this.currentUser = { id: null, username: "Host", displayName: "Host", role: "Guest", credits: 0, selectedPawnId: "knight_valiant", token: null };
+            this.userCredits = 0;
+            try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
+        }
+        this.updateUserUI();
+        if (this.activeTab === "admin" && typeof this.switchTab === "function") {
+            this.switchTab("welcome");
+        }
+        var expMsg = (window.PRS_I18n ? window.PRS_I18n.t("auth.session_expired") : "Tvoje přihlášení vypršelo nebo je potřeba ho obnovit. Přihlas se prosím znovu.");
+        if (window.KiDeskyToast) {
+            KiDeskyToast.show(expMsg, "warning");
+        } else if (typeof this.showToast === "function") {
+            this.showToast(expMsg, "warning");
+        }
     },
 
     showAuthLoginForm: function () {
@@ -3491,11 +3531,7 @@ window.PRS_App = {
         if (this.currentUser && this.currentUser.role !== "Guest") {
             this.currentUser.displayName = newNick;
             try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
-            fetch("api.ashx?action=update_nickname", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: this.currentUser.id, nickname: newNick })
-            }).catch(function () { });
+            PRS_Api.post("update_nickname", { displayName: newNick }).catch(function () { });
         }
         try { localStorage.setItem("prs_player_nickname", newNick); } catch (e) { }
         this.updateUserUI();
@@ -3605,15 +3641,7 @@ window.PRS_App = {
 
                             if (this.currentUser.username) {
 
-                                fetch("api.ashx?action=update_nickname", {
-
-                                    method: "POST",
-
-                                    headers: { "Content-Type": "application/json" },
-
-                                    body: JSON.stringify({ username: this.currentUser.username, displayName: cleanNick })
-
-                                }).catch(function () { });
+                                PRS_Api.post("update_nickname", { displayName: cleanNick }).catch(function () { });
 
                             }
 
@@ -3829,11 +3857,7 @@ window.PRS_App = {
                 this.currentUser.selectedPawnId = pawnId;
                 try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
                 if (this.currentUser.role !== "Guest" && this.currentUser.username) {
-                    fetch("api.ashx?action=save-user-pawn", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ username: this.currentUser.username, selectedPawnId: pawnId })
-                    }).catch(function () { });
+                    PRS_Api.post("save-user-pawn", { selectedPawnId: pawnId }).catch(function () { });
                 }
             }
         }
@@ -3871,16 +3895,10 @@ window.PRS_App = {
 
             if (this.currentUser.role !== "Guest" && this.currentUser.username) {
                 var self = this;
-                fetch("api.ashx?action=award-credits", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        username: this.currentUser.username,
-                        amount: amount,
-                        isWin: !!isWin
-                    })
+                PRS_Api.post("award-credits", {
+                    amount: amount,
+                    isWin: !!isWin
                 })
-                .then(function (r) { return r.json(); })
                 .then(function (res) {
                     if (res && res.ok && typeof res.credits === "number") {
                         self.userCredits = res.credits;
@@ -3939,16 +3957,9 @@ window.PRS_App = {
             try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
 
             if (this.currentUser.role !== "Guest" && this.currentUser.username) {
-                fetch("api.ashx?action=unlock-pawn", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        username: this.currentUser.username,
-                        pawnId: pawnId,
-                        priceCredits: price
-                    })
+                PRS_Api.post("unlock-pawn", {
+                    pawnId: pawnId
                 })
-                .then(function (r) { return r.json(); })
                 .then(function (res) {
                     if (res && res.ok) {
                         if (typeof res.credits === "number") {
@@ -3976,24 +3987,17 @@ window.PRS_App = {
     // --- RYTÍŘSKÉ STATISTIKY & SÍŇ SLÁVY (ETAPA 4) ---
     recordGameStats: function (statsPayload) {
         if (!statsPayload) return;
+        if (!this.currentUser || this.currentUser.role === "Guest" || !window.PRS_Api || !window.PRS_Api.getAuthToken()) return;
         var self = this;
-        var u = (this.currentUser && this.currentUser.username) || statsPayload.username;
-        if (!u) return;
 
-        fetch("api.ashx?action=record-game-stats", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                username: u,
-                isWin: !!statsPayload.isWin,
-                hearts: statsPayload.hearts || 0,
-                dragons: statsPayload.dragons || 0,
-                castles: statsPayload.castles || 0,
-                herds: statsPayload.herds || 0,
-                festivalHearts: statsPayload.festivalHearts || 0
-            })
+        PRS_Api.post("record-game-stats", {
+            isWin: !!statsPayload.isWin,
+            hearts: statsPayload.hearts || 0,
+            dragons: statsPayload.dragons || 0,
+            castles: statsPayload.castles || 0,
+            herds: statsPayload.herds || 0,
+            festivalHearts: statsPayload.festivalHearts || 0
         })
-        .then(function (r) { return r.json(); })
         .then(function (res) {
             if (res && res.ok && res.stats) {
                 if (self.currentUser) {
@@ -4637,8 +4641,7 @@ window.PRS_App = {
 
     loadBoardTemplatesFromServer: function (cb) {
         var self = this;
-        fetch("api.ashx?action=list-board-templates")
-            .then(function (r) { return r.json(); })
+        PRS_Api.get("list-board-templates")
             .then(function (res) {
                 if (res && res.ok && Array.isArray(res.templates)) {
                     if (window.PRS_BoardBuilder && window.PRS_BoardBuilder.registerDbTemplates) {
@@ -4905,21 +4908,17 @@ window.PRS_App = {
 
         this.lastKnownTurnNumber = 1;
 
-        if (isDynamicOrProc && typeof fetch === "function") {
+        if (isDynamicOrProc && window.PRS_Api) {
             try {
-                fetch("api.ashx?action=log-telemetry", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        eventType: "WorldGenerated",
-                        turnNumber: 1,
-                        message: "Vygenerováno království #" + this.currentBoardSeed + " (" + (this.state.board ? this.state.board.name : "Neznámé") + ")",
-                        payloadJson: JSON.stringify({
-                            seed: this.currentBoardSeed,
-                            scenario: scenario,
-                            difficulty: difficultyMode,
-                            playerCount: this.state.players.length
-                        })
+                PRS_Api.post("log-telemetry", {
+                    eventType: "WorldGenerated",
+                    turnNumber: 1,
+                    message: "Vygenerováno království #" + this.currentBoardSeed + " (" + (this.state.board ? this.state.board.name : "Neznámé") + ")",
+                    payloadJson: JSON.stringify({
+                        seed: this.currentBoardSeed,
+                        scenario: scenario,
+                        difficulty: difficultyMode,
+                        playerCount: this.state.players.length
                     })
                 }).catch(function () { });
             } catch (e) { }

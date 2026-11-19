@@ -192,9 +192,8 @@ window.PRS_Audio = {
     // --- SERVEROVÉ SKLADBY (spravované v administraci) + YOUTUBE ---
     loadServerTracks: function (done) {
         var self = this;
-        if (typeof fetch === "undefined") return;
-        fetch("api.ashx?action=list-audio")
-            .then(function (r) { return r.json(); })
+        if (!window.PRS_Api) return;
+        PRS_Api.get("list-audio")
             .then(function (res) {
                 if (!res || !res.ok || !res.tracks) return;
                 var current = self.getCurrentTrack();
