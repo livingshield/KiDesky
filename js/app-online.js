@@ -20,6 +20,11 @@ openAuthModal: function () {
 
             m.style.display = "flex";
 
+            var fb = document.getElementById("auth-feedback");
+            if (fb) fb.textContent = "";
+            var gfb = document.getElementById("auth-google-feedback");
+            if (gfb) gfb.textContent = "";
+
             var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
             var loggedView = document.getElementById("auth-logged-view");
             var guestView = document.getElementById("auth-guest-view");
@@ -51,13 +56,16 @@ openAuthModal: function () {
 
             if (window.google && window.google.accounts && window.google.accounts.id) {
                 try {
-                    google.accounts.id.initialize({
-                        client_id: "335921016939-afepn3s6mpsep890pjr08bli6ufj0jub.apps.googleusercontent.com",
-                        callback: window.PRS_handleGoogleCredentialResponse,
-                        auto_select: false,
-                        cancel_on_tap_outside: true,
-                        ux_mode: "popup"
-                    });
+                    if (!window._prsGsiInitialized) {
+                        google.accounts.id.initialize({
+                            client_id: "335921016939-afepn3s6mpsep890pjr08bli6ufj0jub.apps.googleusercontent.com",
+                            callback: window.PRS_handleGoogleCredentialResponse,
+                            auto_select: false,
+                            cancel_on_tap_outside: true,
+                            ux_mode: "popup"
+                        });
+                        window._prsGsiInitialized = true;
+                    }
                     var gBox = document.getElementById("g_id_signin_box");
                     if (gBox) {
                         gBox.innerHTML = "";

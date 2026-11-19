@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 /**
  * KiDesky Etapa 2 Live Verification Tests (100% read-only on production DB)
- * Verifies SW v1.9.42, early beforeinstallprompt hook, ?v=202611192010,
- * DB-backed get-chat / check-session / load-session stateVersion & validation.
+ * Dynamically reads expected CACHE_NAME and ?v= from local files and verifies
+ * live SW, early beforeinstallprompt hook, DB-backed get-chat / check-session / load-session stateVersion & validation.
  */
 'use strict';
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.resolve(__dirname, '..');
 
 function parseArgs(argv) {
   let baseUrl = 'https://www.ekobio.org/apps/KiDesky/';
@@ -15,6 +20,17 @@ function parseArgs(argv) {
   }
   if (!baseUrl.endsWith('/')) baseUrl += '/';
   return { baseUrl };
+}
+
+function getLocalVersions() {
+  const swSrc = fs.readFileSync(path.join(ROOT, 'service-worker.js'), 'utf8');
+  const cacheMatch = swSrc.match(/const\s+CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
+  const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  const verMatch = indexHtml.match(/\?v=(\d+)/);
+  if (!cacheMatch || !verMatch) {
+    throw new Error('Could not parse local CACHE_NAME or ?v= version');
+  }
+  return { cacheName: cacheMatch[1], assetVersion: verMatch[1] };
 }
 
 async function fetchWithTimeout(url, options = {}) {
@@ -29,7 +45,8 @@ async function fetchWithTimeout(url, options = {}) {
 
 async function main() {
   const { baseUrl } = parseArgs(process.argv.slice(2));
-  console.log(`=== KiDesky Etapa 2 Live Verification (${baseUrl}) ===`);
+  const { cacheName, assetVersion } = getLocalVersions();
+  console.log(`=== KiDesky Etapa 2 Live Verification (${baseUrl}, ${cacheName}, ?v=${assetVersion}) ===`);
 
   let passed = 0;
   let failed = 0;
@@ -46,31 +63,30 @@ async function main() {
   }
 
   // 1. Service Worker checks
-  await test('1. GET service-worker.js (v1.9.42, api.ashx bypass, ignoreSearch)', async () => {
+  await test(`1. GET service-worker.js (${cacheName}, api.ashx bypass, ignoreSearch)`, async () => {
     const res = await fetchWithTimeout(`${baseUrl}service-worker.js`, { cache: 'no-store' });
     if (res.status !== 200) throw new Error(`Expected HTTP 200, got ${res.status}`);
     const text = await res.text();
-    for (const token of ['kidesky-cache-v1.9.42', 'api.ashx', 'ignoreSearch']) {
+    for (const token of [cacheName, 'api.ashx', 'ignoreSearch']) {
       if (!text.includes(token)) throw new Error(`Missing token in SW: ${token}`);
     }
     return 'HTTP 200, all required SW directives present';
   });
 
   // 2. index.html PWA hook & cache busting version
-  await test('2. GET index.html (beforeinstallprompt, ?v=202611192010)', async () => {
+  await test(`2. GET index.html (beforeinstallprompt, ?v=${assetVersion})`, async () => {
     const res = await fetchWithTimeout(`${baseUrl}index.html`, { cache: 'no-store' });
     if (res.status !== 200) throw new Error(`Expected HTTP 200, got ${res.status}`);
     const html = await res.text();
     if (!html.includes('beforeinstallprompt')) throw new Error('Missing early beforeinstallprompt handler');
-    if (!html.includes('?v=202611192010')) throw new Error('Missing ?v=202611192010');
-    if (html.includes('?v=202611191930')) throw new Error('Stale ?v=202611191930 still present');
-    return 'HTTP 200, PWA prompt capture + v202611192010 active';
+    if (!html.includes(`?v=${assetVersion}`)) throw new Error(`Missing ?v=${assetVersion}`);
+    return `HTTP 200, PWA prompt capture + v${assetVersion} active`;
   });
 
   // 3. Updated JS assets accessible with new version query string
   for (const rel of ['js/app-dialog.js', 'js/app-musicwidget.js', 'js/app-online.js']) {
-    await test(`3. HEAD ${rel}?v=202611192010`, async () => {
-      const res = await fetchWithTimeout(`${baseUrl}${rel}?v=202611192010`, { method: 'HEAD', cache: 'no-store' });
+    await test(`3. HEAD ${rel}?v=${assetVersion}`, async () => {
+      const res = await fetchWithTimeout(`${baseUrl}${rel}?v=${assetVersion}`, { method: 'HEAD', cache: 'no-store' });
       if (res.status !== 200) throw new Error(`Expected HTTP 200, got ${res.status}`);
       return `HTTP ${res.status}`;
     });

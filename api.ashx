@@ -1110,28 +1110,28 @@ public class KiDeskyApiHandler : IHttpHandler
         try
         {
             using (var migCmd = new SqlCommand(@"
-IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'DisplayName')
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'DisplayName') IS NULL
 BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [DisplayName] NVARCHAR(64) NULL;
 END
 
-IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'IsActive')
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'IsActive') IS NULL
 BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [IsActive] BIT NOT NULL DEFAULT 1;
 END
 
-IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'Credits')
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'Credits') IS NULL
 BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [Credits] INT NOT NULL DEFAULT 250;
     EXEC(N'UPDATE [prs].[prs_Users] SET [Credits] = 2500 WHERE [Role] = N''Admin'' OR [Username] = N''rytir_jan''');
 END
 
-IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'SelectedPawnId')
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'SelectedPawnId') IS NULL
 BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [SelectedPawnId] NVARCHAR(64) NOT NULL DEFAULT N'knight_valiant';
 END
 
-IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'UnlockedPawnsJson')
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'UnlockedPawnsJson') IS NULL
 BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [UnlockedPawnsJson] NVARCHAR(MAX) NULL;
 END
@@ -1141,30 +1141,75 @@ BEGIN
     EXEC(N'UPDATE [prs].[prs_Users] SET [DisplayName] = [Username] WHERE [DisplayName] IS NULL OR [DisplayName] = ''''');
 END
 
-IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'EmailConfirmed')
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'EmailConfirmed') IS NULL
 BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [EmailConfirmed] BIT NOT NULL DEFAULT 0;
-    ALTER TABLE [prs].[prs_Users] ADD [EmailConfirmationToken] NVARCHAR(128) NULL;
-    ALTER TABLE [prs].[prs_Users] ADD [EmailConfirmationExpires] DATETIME2 NULL;
-    ALTER TABLE [prs].[prs_Users] ADD [GoogleId] NVARCHAR(128) NULL;
-    ALTER TABLE [prs].[prs_Users] ADD [AuthProvider] NVARCHAR(32) NOT NULL DEFAULT N'local';
-    ALTER TABLE [prs].[prs_Users] ADD [AvatarUrl] NVARCHAR(512) NULL;
     EXEC(N'UPDATE [prs].[prs_Users] SET [EmailConfirmed] = 1 WHERE [Role] = N''Admin'' OR [Username] IN (N''admin'', N''rytir_jan'', N''jan.kytyr@seznam.cz'')');
 END
 
-IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'IX_prs_Users_GoogleId')
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'EmailConfirmationToken') IS NULL
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [EmailConfirmationToken] NVARCHAR(128) NULL;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'EmailConfirmationExpires') IS NULL
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [EmailConfirmationExpires] DATETIME2 NULL;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'GoogleId') IS NULL
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [GoogleId] NVARCHAR(128) NULL;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'AuthProvider') IS NULL
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [AuthProvider] NVARCHAR(32) NOT NULL DEFAULT N'local';
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'AvatarUrl') IS NULL
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [AvatarUrl] NVARCHAR(512) NULL;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'GoogleId') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'IX_prs_Users_GoogleId')
 BEGIN
     CREATE NONCLUSTERED INDEX IX_prs_Users_GoogleId ON [prs].[prs_Users]([GoogleId]) WHERE [GoogleId] IS NOT NULL;
 END
 
-IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Users]') AND name = 'GamesPlayed')
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'GamesPlayed') IS NULL
 BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [GamesPlayed] INT NOT NULL DEFAULT 0;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'GamesWon') IS NULL
+BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [GamesWon] INT NOT NULL DEFAULT 0;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'DragonsSlain') IS NULL
+BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [DragonsSlain] INT NOT NULL DEFAULT 0;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'TotalHeartsEarned') IS NULL
+BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [TotalHeartsEarned] FLOAT NOT NULL DEFAULT 0;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'HighestScore') IS NULL
+BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [HighestScore] FLOAT NOT NULL DEFAULT 0;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'AchievementsJson') IS NULL
+BEGIN
     ALTER TABLE [prs].[prs_Users] ADD [AchievementsJson] NVARCHAR(MAX) NULL;
+END
+
+IF OBJECT_ID(N'[prs].[prs_Users]', N'U') IS NOT NULL AND COL_LENGTH(N'[prs].[prs_Users]', N'LastLoginAt') IS NULL
+BEGIN
+    ALTER TABLE [prs].[prs_Users] ADD [LastLoginAt] DATETIME2 NULL;
 END
 
 IF OBJECT_ID(N'[prs].[prs_Videos]', N'U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[prs].[prs_Videos]') AND name = 'LikesCount')
@@ -1442,7 +1487,10 @@ END", conn))
 
             _extendedAdminSchemaChecked = true;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.TraceError("EnsureExtendedAdminSchema error: " + ex.ToString());
+        }
     }
 
     private void EnsureDisplayNameColumn(SqlConnection conn)
@@ -2354,6 +2402,10 @@ END";
             return;
         }
 
+        googleId = TruncateStr(googleId, 128);
+        email = TruncateStr(email, 128);
+        if (picture != null) picture = TruncateStr(picture, 512);
+
         using (var conn = new SqlConnection(CONN_STR))
         {
             conn.Open();
@@ -2394,8 +2446,8 @@ END";
                     if (r.Read())
                     {
                         userId = Convert.ToInt32(r["Id"]);
-                        username = r["Username"].ToString();
-                        currentRole = r["Role"].ToString();
+                        username = r["Username"] == DBNull.Value ? "" : r["Username"].ToString();
+                        currentRole = r["Role"] == DBNull.Value ? "Player" : r["Role"].ToString();
                         currentDisplayName = r["DisplayName"] == DBNull.Value ? username : r["DisplayName"].ToString();
                         isUserActive = Convert.ToBoolean(r["IsActive"]);
                         credits = r["Credits"] == DBNull.Value ? 250 : Convert.ToInt32(r["Credits"]);
@@ -2434,8 +2486,9 @@ END";
             string effectiveDisplayName = !string.IsNullOrEmpty(reqDisplayName)
                 ? reqDisplayName
                 : (!string.IsNullOrEmpty(currentDisplayName) && currentDisplayName != "Host" && !currentDisplayName.Contains("@")
-                    ? currentDisplayName 
+                    ? currentDisplayName
                     : (!string.IsNullOrEmpty(name) ? name : email.Split('@')[0]));
+            effectiveDisplayName = TruncateStr(effectiveDisplayName, 64);
 
             if (userId > 0)
             {
@@ -2500,15 +2553,16 @@ END";
             string targetNewRole = isAdminOwner ? "Admin" : "Player";
             int newCredits = (targetNewRole == "Admin") ? 2500 : 250;
             string defaultUnlocked = @"[""knight_valiant"",""knight_tourney"",""lady_huntress"",""lord_diplomat"",""knight_warden"",""lady_sorceress""]";
-            string newUsername = email.Split('@')[0].Replace(".", "_").Replace("-", "_");
+            string newUsername = TruncateStr(email.Split('@')[0].Replace(".", "_").Replace("-", "_"), 60);
             if (newUsername.Length < 3) newUsername = "player_" + (googleId.Length > 6 ? googleId.Substring(0, 6) : googleId);
+            newUsername = TruncateStr(newUsername, 64);
 
             using (var unCheck = new SqlCommand("SELECT COUNT(*) FROM [prs].[prs_Users] WHERE [Username] = @u", conn))
             {
                 unCheck.Parameters.AddWithValue("@u", newUsername);
                 if (Convert.ToInt32(unCheck.ExecuteScalar()) > 0)
                 {
-                    newUsername = newUsername + "_" + (new Random()).Next(100, 999);
+                    newUsername = TruncateStr(TruncateStr(newUsername, 59) + "_" + (new Random()).Next(100, 999), 64);
                 }
             }
 

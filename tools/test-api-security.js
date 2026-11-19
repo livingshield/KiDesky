@@ -143,7 +143,11 @@ async function main() {
     if (nosniff !== 'nosniff') {
       throw new Error(`Missing or invalid X-Content-Type-Options: ${nosniff || '<absent>'}`);
     }
-    return `HTTP 200, X-Content-Type-Options=${nosniff}`;
+    const coop = (res.headers.get('cross-origin-opener-policy') || '').toLowerCase();
+    if (coop !== 'same-origin-allow-popups') {
+      throw new Error(`Missing or invalid Cross-Origin-Opener-Policy: ${coop || '<absent>'}`);
+    }
+    return `HTTP 200, X-Content-Type-Options=${nosniff}, COOP=${coop}`;
   });
 
   // 6. Public guest endpoints remain operational
@@ -157,6 +161,19 @@ async function main() {
       return 'HTTP 200, valid JSON ok=true';
     });
   }
+
+  // 7. Login query schema integrity regression (invalid creds -> HTTP 401, never HTTP 500)
+  await test('7. POST api.ashx?action=login schema query returns 401 (no 500)', async () => {
+    const res = await fetchWithTimeout(`${baseUrl}api.ashx?action=login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: '__nonexistent_probe_xyz__', password: 'wrong' })
+    });
+    if (res.status !== 401) throw new Error(`Expected HTTP 401, got ${res.status}`);
+    const data = await res.json();
+    if (!data || data.ok !== false) throw new Error(`Expected ok === false, got ${JSON.stringify(data)}`);
+    return `HTTP 401 (${data.status})`;
+  });
 
   console.log(`=== Výsledek: ${passed} PASS, ${failed} FAIL ===`);
   process.exit(failed > 0 ? 1 : 0);
