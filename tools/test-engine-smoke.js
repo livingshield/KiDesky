@@ -70,8 +70,15 @@ function createHeadlessSandbox() {
     'js/i18n/cs.js',
     'js/app-i18n.js',
     'js/game-data.js',
-    'js/game-boards.js',
-    'js/game-engine.js',
+    'js/boards/boards-decor-catalog.js',
+    'js/boards/boards-geometry.js',
+    'js/boards/boards-generator.js',
+    'js/boards/boards-builder.js',
+    'js/boards/boards-presets.js',
+    'js/engine/engine-state.js',
+    'js/engine/engine-movement.js',
+    'js/engine/engine-economy.js',
+    'js/engine/engine-actions.js',
     'js/game-combat-ai.js'
   ];
 

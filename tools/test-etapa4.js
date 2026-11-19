@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
- * KiDesky Etapa 4 (Fáze 4A) Verification Suite (Local + --live modes)
+ * KiDesky Etapa 4 (Fáze 4A + 4B-1 + 4B-2) Verification Suite (Local + --live modes)
  * Verifies:
  *  - js/i18n/languages.js and js/core/module-loader.js existence, syntax, and structure
  *  - index.html removes the 8 eager optional/dict scripts and boots via languages.js + module-loader.js
  *  - Eager initial JS payload savings (>= 500 KB reduced compared to pre-4A 2,456 KB baseline)
+ *  - Fáze 4B-1 (js/board/*, js/hud/*, js/modals/*) & Fáze 4B-2 (js/boards/*, js/engine/*, thin js/app.js + js/app/*) split modules + VM parity
  *  - Node VM unit test for PRS_ModuleLoader + PRS_I18n (dedup, error retry, lazy switch cs -> en)
- *  - Cross-module method separation (0 collisions on PRS_App, openImageModal in app-modals.js, Balance Studio in app-admin.js)
+ *  - Cross-module method separation (0 collisions on PRS_App, openImageModal in modal-cheatsheet.js, Balance Studio in app-admin.js)
  *  - Optional --live verification on https://www.ekobio.org/apps/KiDesky/
  */
 'use strict';
@@ -327,6 +328,101 @@ async function main() {
     return `15 split modules syntax-ok & loaded (${Object.keys(win.PRS_App).length} PRS_App entries)`;
   });
 
+  // 3c. Fáze 4B-2 split modules check (14 new submodules + thin app.js; old game-boards/game-engine removed)
+  const b2SplitModules = [
+    'js/boards/boards-decor-catalog.js',
+    'js/boards/boards-geometry.js',
+    'js/boards/boards-generator.js',
+    'js/boards/boards-builder.js',
+    'js/boards/boards-presets.js',
+    'js/engine/engine-state.js',
+    'js/engine/engine-movement.js',
+    'js/engine/engine-economy.js',
+    'js/engine/engine-actions.js',
+    'js/app.js',
+    'js/app/app-music-ui.js',
+    'js/app/app-landing.js',
+    'js/app/app-profile-cosmetics.js',
+    'js/app/app-lobby-session.js',
+    'js/app/app-map-studio.js'
+  ];
+
+  await test('3c. Fáze 4B-2 split modules syntax, size (<105 KB), VM load & parity keys', async () => {
+    for (const oldFile of ['js/game-boards.js', 'js/game-engine.js']) {
+      assert(!fs.existsSync(path.join(ROOT, oldFile)), `Old monolith still exists: ${oldFile}`);
+    }
+
+    const doc = {
+      documentElement: { lang: 'cs' },
+      readyState: 'complete',
+      querySelectorAll() { return []; },
+      getElementById() { return null; },
+      addEventListener() {},
+      dispatchEvent() {}
+    };
+    const win = {
+      document: doc,
+      navigator: { language: 'cs-CZ' },
+      localStorage: {
+        _m: {},
+        getItem(k) { return Object.prototype.hasOwnProperty.call(this._m, k) ? this._m[k] : null; },
+        setItem(k, v) { this._m[k] = String(v); },
+        removeItem(k) { delete this._m[k]; }
+      },
+      addEventListener() {},
+      dispatchEvent() {},
+      CustomEvent: function (name, opts) { this.type = name; this.detail = opts ? opts.detail : null; },
+      console
+    };
+    win.window = win;
+
+    const ctx = vm.createContext({
+      window: win,
+      document: doc,
+      navigator: win.navigator,
+      localStorage: win.localStorage,
+      CustomEvent: win.CustomEvent,
+      console,
+      Math,
+      Date,
+      JSON,
+      Number,
+      String,
+      Array,
+      Object,
+      parseInt,
+      parseFloat,
+      isNaN,
+      setTimeout,
+      clearTimeout,
+      setInterval,
+      clearInterval
+    });
+
+    for (const rel of b2SplitModules) {
+      const fullPath = path.join(ROOT, rel);
+      assert(fs.existsSync(fullPath), `Missing Fáze 4B-2 module: ${rel}`);
+      const sizeBytes = fs.statSync(fullPath).size;
+      assert(sizeBytes < 105 * 1024, `Module ${rel} exceeds 105 KB (${(sizeBytes / 1024).toFixed(1)} KB)`);
+      execFileSync(process.execPath, ['--check', fullPath], { stdio: 'pipe' });
+      const code = fs.readFileSync(fullPath, 'utf8');
+      vm.runInContext(code, ctx, { filename: rel });
+    }
+
+    assert(win.PRS_DECOR_CATALOG && Object.keys(win.PRS_DECOR_CATALOG).length === 49, 'PRS_DECOR_CATALOG key count != 49');
+    assert(win.KiDeskyMapGenerator && Object.keys(win.KiDeskyMapGenerator).length === 26, 'KiDeskyMapGenerator key count != 26');
+    assert(win.KiDeskyMapGenerator.ALL_CASTLES[0] && win.KiDeskyMapGenerator.ALL_CASTLES[0]._i18nWrapped === true, 'ALL_CASTLES[0]._i18nWrapped missing');
+    assert(win.PRS_BoardBuilder && Object.keys(win.PRS_BoardBuilder).length === 18, 'PRS_BoardBuilder key count != 18');
+    const castlesDesc = Object.getOwnPropertyDescriptor(win.PRS_BoardBuilder, 'ALL_CASTLES');
+    assert(castlesDesc && typeof castlesDesc.get === 'function', 'PRS_BoardBuilder.ALL_CASTLES getter missing');
+    assert(win.PRS_GameEngine && Object.keys(win.PRS_GameEngine).length === 59, 'PRS_GameEngine key count != 59');
+    assert(win.PRS_App && Object.keys(win.PRS_App).length === 212, `PRS_App key count != 212 (got ${Object.keys(win.PRS_App || {}).length})`);
+    assert(win.KiDeskyToast && typeof win.KiDeskyToast.show === 'function', 'KiDeskyToast.show missing');
+    assert(String(win.PRS_App.toggleEmotePicker).includes('knight-emotes-hud'), 'toggleEmotePicker must use #knight-emotes-hud');
+
+    return '15 modules <105 KB each; parity keys verified (49/26/18/59/212/1) & toggleEmotePicker fixed';
+  });
+
   // 4. Unit test for PRS_ModuleLoader + lazy PRS_I18n language switching
   await test('4. PRS_ModuleLoader & lazy PRS_I18n unit test (boot, dedup, retry, cs -> en switch)', async () => {
     await runModuleLoaderAndI18nUnitTest();
@@ -350,7 +446,7 @@ async function main() {
       const res = await fetchWithTimeout(`${baseUrl}service-worker.js`, { cache: 'no-store' });
       assert(res.status === 200, `Expected HTTP 200, got ${res.status}`);
       const text = await res.text();
-      for (const tok of [cacheName, 'languages.js', 'module-loader.js', 'hud-action-panel.js', 'board-rivers.js', 'modal-combat.js']) {
+      for (const tok of [cacheName, 'languages.js', 'module-loader.js', 'hud-action-panel.js', 'board-rivers.js', 'modal-combat.js', 'boards-generator.js', 'engine-state.js', 'app-map-studio.js']) {
         assert(text.includes(tok), `Live service-worker.js missing ${tok}`);
       }
       return `HTTP 200, ${cacheName} active`;
@@ -363,12 +459,17 @@ async function main() {
       assert(liveHtml.includes(`js/i18n/languages.js?v=${assetVersion}`), 'Live index.html missing languages.js');
       assert(liveHtml.includes(`js/core/module-loader.js?v=${assetVersion}`), 'Live index.html missing module-loader.js');
       assert(liveHtml.includes(`js/hud/hud-action-panel.js?v=${assetVersion}`), 'Live index.html missing hud-action-panel.js');
+      assert(liveHtml.includes(`js/boards/boards-generator.js?v=${assetVersion}`), 'Live index.html missing boards-generator.js');
+      assert(liveHtml.includes(`js/engine/engine-state.js?v=${assetVersion}`), 'Live index.html missing engine-state.js');
+      assert(liveHtml.includes(`js/app/app-map-studio.js?v=${assetVersion}`), 'Live index.html missing app-map-studio.js');
       assert(!liveHtml.includes('src="js/app-admin.js'), 'Live index.html still eagerly loads app-admin.js');
       assert(!liveHtml.includes('src="js/app-map-editor.js'), 'Live index.html still eagerly loads app-map-editor.js');
       assert(!liveHtml.includes('src="js/app-catalog.js'), 'Live index.html still eagerly loads app-catalog.js');
       assert(!liveHtml.includes('src="js/app-hud.js'), 'Live index.html still loads deprecated app-hud.js');
       assert(!liveHtml.includes('src="js/app-modals.js'), 'Live index.html still loads deprecated app-modals.js');
       assert(!liveHtml.includes('src="js/app-board.js'), 'Live index.html still loads deprecated app-board.js');
+      assert(!liveHtml.includes('src="js/game-boards.js'), 'Live index.html still loads deprecated game-boards.js');
+      assert(!liveHtml.includes('src="js/game-engine.js'), 'Live index.html still loads deprecated game-engine.js');
       return `HTTP 200, ?v=${assetVersion} & lazy/split modules active`;
     });
 
@@ -376,7 +477,7 @@ async function main() {
       'js/i18n/languages.js',
       'js/core/module-loader.js',
       'js/app-i18n.js',
-      'js/app.js',
+      ...b2SplitModules,
       ...splitModules,
       'js/app-admin.js',
       'js/app-catalog.js'

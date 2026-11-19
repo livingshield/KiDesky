@@ -336,7 +336,7 @@ function extractPrsAppMethods(src) {
     methods.push(dm[1]);
   }
 
-  return [...new Set(methods)];
+  return methods;
 }
 
 function checkPrsAppMethodCollisions() {
@@ -357,16 +357,24 @@ function checkPrsAppMethodCollisions() {
   });
 
   const methodOwners = new Map();
+  const intraFileDups = [];
   for (const file of jsFiles) {
     const src = fs.readFileSync(file, 'utf8');
     const rel = relPath(file);
+    const counts = new Map();
     for (const method of extractPrsAppMethods(src)) {
+      counts.set(method, (counts.get(method) || 0) + 1);
+    }
+    for (const [method, cnt] of counts.entries()) {
+      if (cnt > 1) {
+        intraFileDups.push(`${method} (${rel} x${cnt})`);
+      }
       if (!methodOwners.has(method)) methodOwners.set(method, []);
       methodOwners.get(method).push(rel);
     }
   }
 
-  const collisions = [];
+  const collisions = [...intraFileDups];
 
   for (const [method, owners] of methodOwners.entries()) {
     if (owners.length <= 1) continue;
