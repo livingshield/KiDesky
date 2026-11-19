@@ -141,18 +141,18 @@
         .modal-box.flex-modal,
         #admin-video-modal .modal-box,
         #admin-user-modal .modal-box {
-            display: flex !important;
-            flex-direction: column !important;
-            max-height: 92vh !important;
-            padding: 1.15rem 1.35rem !important;
-            overflow: hidden !important;
+            display: flex;
+            flex-direction: column;
+            max-height: 92vh;
+            padding: 1.15rem 1.35rem;
+            overflow: hidden;
         }
 
         #admin-video-modal .modal-body,
         #admin-user-modal .modal-body {
             flex: 1 1 auto;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
+            overflow-y: auto;
+            overflow-x: hidden;
             padding-right: 6px;
             scrollbar-width: thin;
             scrollbar-color: rgba(212, 175, 55, 0.6) rgba(15, 11, 5, 0.8);
@@ -885,7 +885,7 @@
         }
 
         /* Horní lišta & Herní plán - výběr jazyka (dropdown select) */
-        .topbar-lang-wrap, .board-bar-lang-wrap {
+        .topbar-lang-wrap {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
@@ -899,11 +899,11 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .topbar-lang-wrap:hover, .board-bar-lang-wrap:hover {
+        .topbar-lang-wrap:hover {
             border-color: var(--gold);
             background: rgba(212, 175, 55, 0.15);
         }
-        .topbar-lang-select, .board-bar-lang-select {
+        .topbar-lang-select {
             background: transparent;
             border: none;
             color: var(--gold-light);
@@ -915,7 +915,7 @@
             padding: 0;
             margin: 0;
         }
-        .topbar-lang-select option, .board-bar-lang-select option, .settings-lang-select option {
+        .topbar-lang-select option, .settings-lang-select option {
             background: #18110a;
             color: #f5f5f4;
             padding: 6px 10px;
@@ -3933,14 +3933,14 @@
 /* ========================================================================
    KRÁLOVSKÁ ŠATNA A KLENOTNICE FIGUREK (#pawn-shop-modal)
    ======================================================================== */
-.pawn-shop-modal-box {
-    max-width: 920px !important;
-    width: 95% !important;
-    max-height: 90vh !important;
-    display: flex !important;
-    flex-direction: column !important;
-    padding: 1rem 1.25rem !important;
-    overflow: hidden !important;
+.modal-box.pawn-shop-modal-box {
+    max-width: 920px;
+    width: 95%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.25rem;
+    overflow: hidden;
 }
 
 .pawn-shop-header {
@@ -4465,14 +4465,35 @@
 /* ==========================================================================
    KRÁLOVSKÉ MAP STUDIO (GENERÁTOR MAP 2.0)
    ========================================================================== */
+.map-studio-grid {
+    display: grid;
+    grid-template-columns: 465px 1fr;
+    gap: 1.1rem;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 0.25rem;
+}
+#ms-preview-container {
+    flex: 1;
+    min-height: 290px;
+    max-height: 430px;
+    background: #120c08;
+    border: 1px solid rgba(212,175,55,0.35);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
 @media (max-width: 860px) {
     .map-studio-grid {
-        grid-template-columns: 1fr !important;
-        gap: 0.85rem !important;
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
     }
     #ms-preview-container {
-        min-height: 220px !important;
-        max-height: 280px !important;
+        min-height: 220px;
+        max-height: 280px;
     }
 }
 

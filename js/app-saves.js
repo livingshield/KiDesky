@@ -49,8 +49,9 @@
         },
 
         openSaveGameModal: function () {
+            var tSave = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
             if (!this.state || !this.hasGameStarted) {
-                alert("Zatím nebyla rozehrána žádná partie k uložení.");
+                alert(tSave("saves.no_active_game", null, "Zatím nebyla rozehrána žádná partie k uložení."));
                 return;
             }
 
@@ -62,21 +63,25 @@
 
             var isOnline = Boolean(this.state.roomCode);
             var isHotSeat = !isOnline && this.state.players && this.state.players.filter(function (p) { return p.type === "Human"; }).length > 1;
-            var modeName = isOnline ? "Online Multiplayer" : (isHotSeat ? "Hot-Seat u stolu" : "Solo výprava proti PC");
+            var modeName = isOnline
+                ? tSave("saves.mode_online", null, "Online Multiplayer")
+                : (isHotSeat ? tSave("saves.mode_hotseat", null, "Hot-Seat u stolu") : tSave("saves.mode_solo", null, "Solo výprava proti PC"));
 
             var roundNum = this.state.roundNumber || 1;
             var turnNum = this.state.turnNumber || 0;
-            var activeP = (this.state.players && this.state.players[this.state.currentPlayerIndex]) ? this.state.players[this.state.currentPlayerIndex].name : "Neznámý";
+            var activeP = (this.state.players && this.state.players[this.state.currentPlayerIndex]) ? this.state.players[this.state.currentPlayerIndex].name : tSave("saves.unknown_player", null, "Neznámý");
 
             var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var defaultTitle = modeName + (isEn ? " – Round " : " – Kolo ") + roundNum + " (" + new Date().toLocaleTimeString(isEn ? "en-US" : "cs-CZ", { hour: "2-digit", minute: "2-digit" }) + ")";
+            var currGold = tSave("common.gold", null, "zl.");
+            var timeStr = new Date().toLocaleTimeString(isEn ? "en-US" : "cs-CZ", { hour: "2-digit", minute: "2-digit" });
+            var defaultTitle = tSave("saves.default_title", { mode: modeName, round: roundNum, time: timeStr }, modeName + " – Kolo " + roundNum + " (" + timeStr + ")");
             if (titleInput) {
                 titleInput.value = defaultTitle;
                 setTimeout(function () { titleInput.select(); }, 100);
             }
 
             var tplInput = document.getElementById("save-game-template-name-input");
-            var curBName = (this.state.board && this.state.board.name) ? this.state.board.name : "Vlastní plán";
+            var curBName = (this.state.board && this.state.board.name) ? this.state.board.name : tSave("saves.default_board", null, "Vlastní plán");
             if (tplInput) {
                 tplInput.value = curBName;
             }
@@ -87,7 +92,7 @@
                     var pl = this.state.players[i];
                     playersHtml.push(
                         '<span class="save-game-player-chip" style="border-left:3px solid ' + (pl.color || '#d4af37') + ';">' +
-                        this.escapeHtml(this.getPlayerDisplayName ? this.getPlayerDisplayName(pl) : pl.name) + ' (' + (pl.totalHearts || 0) + ' 💖, ' + (pl.gold || 0).toLocaleString(isEn ? 'en-US' : 'cs-CZ') + ' ' + (isEn ? 'g.' : 'zl.') + ')' +
+                        this.escapeHtml(this.getPlayerDisplayName ? this.getPlayerDisplayName(pl) : pl.name) + ' (' + (pl.totalHearts || 0) + ' 💖, ' + (pl.gold || 0).toLocaleString(isEn ? 'en-US' : 'cs-CZ') + ' ' + currGold + ')' +
                         '</span>'
                     );
                 }
@@ -95,10 +100,10 @@
                 infoEl.innerHTML =
                     '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.45rem; flex-wrap:wrap; gap:0.4rem;">' +
                     '  <span class="lp-mode-badge" style="margin:0;">' + (isOnline ? '🌐 ' : '🎲 ') + modeName + '</span>' +
-                    '  <span style="color:var(--gold-light); font-weight:700; font-size:0.84rem;">Kolo ' + roundNum + ' • Tah #' + turnNum + '</span>' +
+                    '  <span style="color:var(--gold-light); font-weight:700; font-size:0.84rem;">' + tSave("saves.round_turn_meta", { round: roundNum, turn: turnNum }, "Kolo " + roundNum + " • Tah #" + turnNum) + '</span>' +
                     '</div>' +
-                    '<div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.5rem;">Na tahu: <strong style="color:#fff;">' + this.escapeHtml(activeP) + '</strong>' +
-                    (isOnline ? ' | Kód stolu: <strong style="color:#38bdf8;">' + this.state.roomCode + '</strong>' : '') +
+                    '<div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:0.5rem;">' + tSave("saves.active_turn_label", null, "Na tahu:") + ' <strong style="color:#fff;">' + this.escapeHtml(activeP) + '</strong>' +
+                    (isOnline ? (' | ' + tSave("saves.table_code_label", null, "Kód stolu:") + ' <strong style="color:#38bdf8;">' + this.state.roomCode + '</strong>') : '') +
                     '</div>' +
                     '<div style="display:flex; gap:0.35rem; flex-wrap:wrap;">' + playersHtml.join("") + '</div>';
             }
@@ -797,7 +802,8 @@
             if (!container) return;
 
             var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var currStr = isEn ? "g." : "zl.";
+            var tList = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+            var currStr = tList("common.gold", null, "zl.");
 
             var saves = this.getSavedGames();
             var savedMaps = [];
@@ -810,13 +816,11 @@
                     container.innerHTML =
                         '<div class="empty-note" style="padding:2rem 1rem; text-align:center;">' +
                         '  <div style="font-size:2.4rem; margin-bottom:0.5rem;">🗺️</div>' +
-                        '  <strong style="color:var(--gold-light); font-size:1rem; display:block; margin-bottom:0.35rem;">' + (isEn ? "No saved custom board templates yet" : "Zatím nemáš žádné uložené šablony vlastních plánů") + '</strong>' +
+                        '  <strong style="color:var(--gold-light); font-size:1rem; display:block; margin-bottom:0.35rem;">' + tList("saves.empty_maps_title", null, "Zatím nemáš žádné uložené šablony vlastních plánů") + '</strong>' +
                         '  <p style="color:var(--text-muted); font-size:0.84rem; max-width:440px; margin:0 auto 1rem;">' +
-                        (isEn
-                            ? 'In Royal Map Studio, you can freely configure animals, castles, towns, river, and dragons, then save your setup using <strong>💾 Save to My Templates</strong>.'
-                            : 'V Královském Map Studiu si můžeš libovolně navolit zvířata, hrady, města, řeku i draky a sestavu uložit tlačítkem <strong>💾 Uložit do mých šablon</strong>.') +
+                        tList("saves.empty_maps_desc", null, "V Královském Map Studiu si můžeš libovolně navolit zvířata, hrady, města, řeku i draky a sestavu uložit tlačítkem <strong>💾 Uložit do mých šablon</strong>.") +
                         '  </p>' +
-                        '  <button class="btn-gold-lg" style="font-size:0.86rem; padding:0.45rem 1rem;" onclick="PRS_App.openMapStudioModal()">' + (isEn ? '🛠️ Open Map Studio & Create Board' : '🛠️ Otevřít Map Studio a vytvořit plán') + '</button>' +
+                        '  <button class="btn-gold-lg" style="font-size:0.86rem; padding:0.45rem 1rem;" onclick="PRS_App.openMapStudioModal()">' + tList("saves.empty_maps_btn", null, "🛠️ Otevřít Map Studio a vytvořit plán") + '</button>' +
                         '</div>';
                     return;
                 }
@@ -827,39 +831,39 @@
                     var r = sm.recipe || {};
                     var aCnt = Array.isArray(r.animalLevels) ? r.animalLevels.length : 12;
                     var rivLabel = "";
-                    if (r.riverMode === "none") rivLabel = isEn ? "No River" : "Bez řeky";
-                    else if (r.riverMode === "dual") rivLabel = isEn ? "Confluence (2 Rivers)" : "Soutok 2 řek";
-                    else if (r.riverMode === "island") rivLabel = isEn ? "River Island" : "Říční ostrov";
-                    else if (r.riverMode === "delta") rivLabel = isEn ? "River Delta" : "Říční delta";
-                    else rivLabel = isEn ? "Royal River" : "Královská";
+                    if (r.riverMode === "none") rivLabel = tList("saves.river_none", null, "Bez řeky");
+                    else if (r.riverMode === "dual") rivLabel = tList("saves.river_dual", null, "Soutok 2 řek");
+                    else if (r.riverMode === "island") rivLabel = tList("saves.river_island", null, "Říční ostrov");
+                    else if (r.riverMode === "delta") rivLabel = tList("saves.river_delta", null, "Říční delta");
+                    else rivLabel = tList("saves.river_royal", null, "Královská");
 
                     mapsHtml.push(
                         '<div class="save-game-card" style="border-color:rgba(168,85,247,0.45); background:rgba(88,28,135,0.14);">' +
                         '  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; gap:0.5rem; flex-wrap:wrap;">' +
                         '    <div>' +
                         '      <h4 style="font-family:\'Cinzel\',serif; color:#fef08a; font-size:1.05rem; margin:0 0 0.25rem;">' +
-                        '        ⭐ ' + this.escapeHtml(sm.name || ((isEn ? "Custom Board #" : "Vlastní plán #") + sm.seed)) +
+                        '        ⭐ ' + this.escapeHtml(sm.name || (tList("saves.tpl_custom_board_prefix", null, "Vlastní plán #") + sm.seed)) +
                         '      </h4>' +
                         '      <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; font-size:0.76rem; color:var(--text-muted);">' +
-                        '        <span class="lp-mode-badge" style="background:rgba(168,85,247,0.25); color:#e9d5ff; border-color:#c084fc;">' + (isEn ? "Dynamic Template" : "Dynamická šablona") + '</span>' +
-                        '        <span style="color:#fde047; font-weight:700;">📍 ' + (sm.nodeCount || 96) + (isEn ? " tiles" : " polí") + '</span>' +
+                        '        <span class="lp-mode-badge" style="background:rgba(168,85,247,0.25); color:#e9d5ff; border-color:#c084fc;">' + tList("saves.tpl_dynamic_template", null, "Dynamická šablona") + '</span>' +
+                        '        <span style="color:#fde047; font-weight:700;">📍 ' + (sm.nodeCount || 96) + tList("saves.tpl_tiles_suffix", null, " polí") + '</span>' +
                         '        <span>🎲 Seed #' + (sm.seed || "—") + '</span>' +
-                        '        <span>🕒 ' + (sm.savedAt || (isEn ? "Saved" : "Uloženo")) + '</span>' +
+                        '        <span>🕒 ' + (sm.savedAt || tList("saves.tpl_saved_fallback", null, "Uloženo")) + '</span>' +
                         '      </div>' +
                         '    </div>' +
                         '    <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">' +
-                        '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.8rem;" onclick="PRS_App.playOnSavedFavoriteMap(' + m + ')">' + (isEn ? "⚔️ Play on Map" : "⚔️ Hrát na plánu") + '</button>' +
-                        '      <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem; border-color:#a855f7; color:#e9d5ff;" onclick="PRS_App.editSavedFavoriteMapInStudio(' + m + ')">' + (isEn ? "🛠️ Edit in Studio" : "🛠️ Upravit") + '</button>' +
-                        '      <button class="btn-icon-danger" style="padding:0.3rem 0.55rem; font-size:0.85rem;" onclick="PRS_App.deleteSavedFavoriteMap(' + m + ', event)" title="' + (isEn ? "Delete this board template" : "Smazat tuto šablonu plánu") + '">🗑️</button>' +
+                        '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.8rem;" onclick="PRS_App.playOnSavedFavoriteMap(' + m + ')">' + tList("saves.tpl_play_btn", null, "⚔️ Hrát na plánu") + '</button>' +
+                        '      <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.7rem; border-color:#a855f7; color:#e9d5ff;" onclick="PRS_App.editSavedFavoriteMapInStudio(' + m + ')">' + tList("saves.tpl_edit_btn", null, "🛠️ Upravit") + '</button>' +
+                        '      <button class="btn-icon-danger" style="padding:0.3rem 0.55rem; font-size:0.85rem;" onclick="PRS_App.deleteSavedFavoriteMap(' + m + ', event)" title="' + tList("saves.tpl_delete_title", null, "Smazat tuto šablonu plánu") + '">🗑️</button>' +
                         '    </div>' +
                         '  </div>' +
                         '  <div style="display:flex; gap:0.4rem; flex-wrap:wrap; font-size:0.73rem; color:#cbd5e1; margin-top:0.35rem; padding-top:0.35rem; border-top:1px solid rgba(168,85,247,0.2);">' +
-                        '    <span>🐎 ' + aCnt + (isEn ? " animal sets" : " sad zvířat") + '</span>' +
-                        '    <span>🏰 ' + (r.castles !== undefined ? r.castles : 3) + (isEn ? " castles" : " hradů") + '</span>' +
-                        '    <span>🏙️ ' + (r.towns !== undefined ? r.towns : 6) + (isEn ? " towns" : " měst") + '</span>' +
-                        '    <span>🏘️ ' + (r.villages !== undefined ? r.villages : 8) + (isEn ? " villages" : " vesnic") + '</span>' +
-                        '    <span>🐲 ' + (r.questsU3 !== undefined ? r.questsU3 : 2) + (isEn ? " dragons" : " draků") + '</span>' +
-                        '    <span>🌊 ' + (isEn ? "River: " : "Řeka: ") + rivLabel + '</span>' +
+                        '    <span>🐎 ' + aCnt + tList("saves.tpl_stat_animals", null, " sad zvířat") + '</span>' +
+                        '    <span>🏰 ' + (r.castles !== undefined ? r.castles : 3) + tList("saves.tpl_stat_castles", null, " hradů") + '</span>' +
+                        '    <span>🏙️ ' + (r.towns !== undefined ? r.towns : 6) + tList("saves.tpl_stat_towns", null, " měst") + '</span>' +
+                        '    <span>🏘️ ' + (r.villages !== undefined ? r.villages : 8) + tList("saves.tpl_stat_villages", null, " vesnic") + '</span>' +
+                        '    <span>🐲 ' + (r.questsU3 !== undefined ? r.questsU3 : 2) + tList("saves.tpl_stat_dragons", null, " draků") + '</span>' +
+                        '    <span>🌊 ' + tList("saves.tpl_stat_river", null, "Řeka: ") + rivLabel + '</span>' +
                         '  </div>' +
                         '</div>'
                     );
@@ -885,7 +889,7 @@
                     (filter === "online" && activeMeta.mode === "Online");
                 if (activeModeMatch) {
                     var aOnline = (activeMeta.mode === "Online");
-                    var aBadgeLabel = aOnline ? ("🌐 Online (" + (isEn ? "Code: " : "Kód: ") + (activeMeta.roomCode || "—") + ")") : (activeMeta.mode === "HotSeat" ? "🛋️ Hot-Seat" : "⚡ Solo AI");
+                    var aBadgeLabel = aOnline ? ("🌐 Online (" + tList("saves.code_prefix", null, "Kód: ") + (activeMeta.roomCode || "—") + ")") : (activeMeta.mode === "HotSeat" ? "🛋️ Hot-Seat" : "⚡ Solo AI");
                     var aBadgeClass = aOnline ? "lp-mode-badge" : "user-pill";
                     var aPills = [];
                     for (var ap = 0; ap < activeMeta.players.length; ap++) {
@@ -1051,6 +1055,7 @@
             if (countEl) countEl.textContent = String(totalCount);
 
             var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var tRec = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
             var recentBox = document.getElementById("gamehall-recent-save-box");
             if (recentBox) {
                 var latestManual = (saves.length > 0) ? saves[0] : null;
@@ -1061,21 +1066,13 @@
                 if (useAutosave) {
                     var curPlayerName = activeMeta.currentPlayerName || "";
                     if (isEn && curPlayerName.indexOf("(Ty)") !== -1) {
-                        curPlayerName = curPlayerName.replace(/\s*\(Ty\)/gi, " (You)");
+                        curPlayerName = curPlayerName.replace(/\s*\(Ty\)/gi, " " + tRec("common.you_tag", null, "(You)"));
                     }
-                    var headerTxt = isEn ? "⚔️ Last Played Game" : "⚔️ Poslední rozehraná hra";
-                    var questTxt = isEn
-                        ? ("Active Quest – Round " + activeMeta.roundNumber + " (Turn #" + activeMeta.turnNumber + ")")
-                        : ("Rozehraná výprava – Kolo " + activeMeta.roundNumber + " (Tah #" + activeMeta.turnNumber + ")");
-                    var mapTxt = isEn
-                        ? ("🗺️ Map: " + this.escapeHtml(activeMeta.boardName) + " • Active: " + this.escapeHtml(curPlayerName))
-                        : ("🗺️ Plán: " + this.escapeHtml(activeMeta.boardName) + " • Na tahu: " + this.escapeHtml(curPlayerName));
-                    var btnContinueTxt = isEn
-                        ? ("▶️ Continue Game (Round " + activeMeta.roundNumber + ")")
-                        : ("▶️ Pokračovat ve hře (Kolo " + activeMeta.roundNumber + ")");
-                    var btnAllTxt = isEn
-                        ? ("Show all quests (" + totalCount + ") →")
-                        : ("Zobrazit všechny výpravy (" + totalCount + ") →");
+                    var headerTxt = tRec("saves.last_played", null, "⚔️ Poslední rozehraná hra");
+                    var questTxt = tRec("saves.active_quest", { round: activeMeta.roundNumber, turn: activeMeta.turnNumber }, "Rozehraná výprava – Kolo " + activeMeta.roundNumber + " (Tah #" + activeMeta.turnNumber + ")");
+                    var mapTxt = tRec("saves.map_active", { map: this.escapeHtml(activeMeta.boardName), player: this.escapeHtml(curPlayerName) }, "🗺️ Plán: " + this.escapeHtml(activeMeta.boardName) + " • Na tahu: " + this.escapeHtml(curPlayerName));
+                    var btnContinueTxt = tRec("saves.btn_continue", { round: activeMeta.roundNumber }, "▶️ Pokračovat ve hře (Kolo " + activeMeta.roundNumber + ")");
+                    var btnAllTxt = tRec("saves.btn_show_all", { count: totalCount }, "Zobrazit všechny výpravy (" + totalCount + ") →");
 
                     recentBox.style.display = "block";
                     recentBox.innerHTML =
@@ -1096,14 +1093,10 @@
                         '  </div>' +
                         '</div>';
                 } else if (latestManual) {
-                    var bLabel = latestManual.boardName || latestManual.boardCode || (isEn ? "Royal Map" : "Královský plán");
-                    var mHeader = isEn ? "💾 Last Saved Game" : "💾 Poslední uložená hra";
-                    var mBtnContinue = isEn
-                        ? ("▶️ Continue Game (Round " + (latestManual.roundNumber || 1) + ")")
-                        : ("▶️ Pokračovat ve hře (Kolo " + (latestManual.roundNumber || 1) + ")");
-                    var mBtnAll = isEn
-                        ? ("Show all quests (" + totalCount + ") →")
-                        : ("Zobrazit všechny výpravy (" + totalCount + ") →");
+                    var bLabel = latestManual.boardName || latestManual.boardCode || tRec("saves.default_royal_map", null, "Královský plán");
+                    var mHeader = tRec("saves.last_saved", null, "💾 Poslední uložená hra");
+                    var mBtnContinue = tRec("saves.btn_continue", { round: (latestManual.roundNumber || 1) }, "▶️ Pokračovat ve hře (Kolo " + (latestManual.roundNumber || 1) + ")");
+                    var mBtnAll = tRec("saves.btn_show_all", { count: totalCount }, "Zobrazit všechny výpravy (" + totalCount + ") →");
 
                     recentBox.style.display = "block";
                     recentBox.innerHTML =
@@ -1115,7 +1108,7 @@
                         '  <div style="font-size:0.84rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:0.2rem;">' +
                         this.escapeHtml(latestManual.title) +
                         '  </div>' +
-                        '  <div style="font-size:0.72rem; color:#fde68a; margin-bottom:0.45rem;">🗺️ ' + (isEn ? "Map: " : "Plán: ") + this.escapeHtml(bLabel) + '</div>' +
+                        '  <div style="font-size:0.72rem; color:#fde68a; margin-bottom:0.45rem;">🗺️ ' + tRec("saves.recent_map_prefix", null, "Plán: ") + this.escapeHtml(bLabel) + '</div>' +
                         '  <button class="btn-gold-lg" style="width:100%; font-size:0.8rem; padding:0.35rem 0.65rem;" onclick="PRS_App.loadSavedGame(\'' + latestManual.id + '\')">' +
                         mBtnContinue +
                         '  </button>' +
@@ -1125,11 +1118,11 @@
                         '</div>';
                 } else if (savedMaps.length > 0) {
                     var latestMap = savedMaps[0];
-                    var tHeader = isEn ? "⭐ Saved Map Template" : "⭐ Uložená šablona plánu";
-                    var tPlay = isEn ? "⚔️ Play on this Map" : "⚔️ Hrát na tomto plánu";
-                    var tAll = isEn ? ("Show templates (" + totalCount + ") →") : ("Zobrazit šablony (" + totalCount + ") →");
-                    var tName = latestMap.name || (isEn ? "Custom Map" : "Vlastní plán");
-                    var tNodes = isEn ? " tiles)" : " polí)";
+                    var tHeader = tRec("saves.saved_template", null, "⭐ Uložená šablona plánu");
+                    var tPlay = tRec("saves.btn_play_this_map", null, "⚔️ Hrát na tomto plánu");
+                    var tAll = tRec("saves.btn_show_templates", { count: totalCount }, "Zobrazit šablony (" + totalCount + ") →");
+                    var tName = latestMap.name || tRec("saves.default_board", null, "Vlastní plán");
+                    var tNodes = tRec("saves.recent_tpl_tiles_suffix", null, " polí)");
 
                     recentBox.style.display = "block";
                     recentBox.innerHTML =

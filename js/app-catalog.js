@@ -629,13 +629,13 @@
         }
         if (!t) return;
 
-        var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
-        var codeLabel = isEn ? "Code: " : "Kód: ";
-        var catLabel = isEn ? "Category: " : "Kategorie: ";
-        var costLabel = isEn ? "Acquisition Cost / Value: " : "Pořizovací hodnota / Náklad: ";
-        var tipLabel = isEn ? "<strong>👑 Royal Advisor's Tip:</strong> " : "<strong>👑 Doporučení Královského rádce:</strong> ";
-        var guideBtn = isEn ? "📖 Open Guide Chapter" : "📖 Otevřít kapitolu v Průvodci";
-        var closeBtn = isEn ? "✕ Close" : "✕ Zavřít";
+        var tCatMod = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
+        var codeLabel = tCatMod("ui.catalog.tile_code_label", "Kód: ");
+        var catLabel = tCatMod("ui.catalog.tile_category_label", "Kategorie: ");
+        var costLabel = tCatMod("ui.catalog.tile_cost_label", "Pořizovací hodnota / Náklad: ");
+        var tipLabel = tCatMod("ui.catalog.advisor_tip_label", "<strong>👑 Doporučení Královského rádce:</strong> ");
+        var guideBtn = tCatMod("ui.catalog.open_guide_btn", "📖 Otevřít kapitolu v Průvodci");
+        var closeBtn = tCatMod("ui.catalog.close_btn", "✕ Zavřít");
 
         if (content) {
             content.innerHTML = '<div class="tile-atlas-modal-box">' +
@@ -929,10 +929,12 @@
             var c = castles[k];
             var col = elemColors[c.element] || "var(--gold-light)";
 
+            var zoomCastleTitle = (window.PRS_I18n && window.PRS_I18n.t) ? window.PRS_I18n.t("ui.catalog.zoom_title", null, "Klikni pro zvětšení ilustrace") : "Klikni pro zvětšení ilustrace";
+            var royalFallback = (window.PRS_I18n && window.PRS_I18n.t) ? window.PRS_I18n.t("ui.catalog.royal_fallback", null, "KRÁLOVSKÝ") : "KRÁLOVSKÝ";
             html.push('<div class="castle-card">');
-            html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + c.img + '\', \'' + this.escapeHtml(c.name) + '\', \'' + this.escapeHtml(c.desc) + '\')" title="Klikni pro zvětšení ilustrace">');
+            html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + c.img + '\', \'' + this.escapeHtml(c.name) + '\', \'' + this.escapeHtml(c.desc) + '\')" title="' + zoomCastleTitle + '">');
             html.push('    <img src="' + c.img + '" alt="' + this.escapeHtml(c.name) + '" class="card-media-img" loading="lazy" />');
-            html.push('    <span class="card-media-badge-left" style="border-color:' + col + '; color:' + col + ';">' + elemLabel + ' ' + (c.element ? c.element.toUpperCase() : (isEn ? 'ROYAL' : 'KRÁLOVSKÝ')) + '</span>');
+            html.push('    <span class="card-media-badge-left" style="border-color:' + col + '; color:' + col + ';">' + elemLabel + ' ' + (c.element ? c.element.toUpperCase() : royalFallback) + '</span>');
             html.push('    <span class="card-media-badge-right" style="border-color:var(--gold); color:var(--gold-light);">' + priceLabel + ' 8 000 ' + curr + '</span>');
             html.push('  </div>');
 
@@ -1036,25 +1038,16 @@
         var catalog = window.PRS_DECOR_CATALOG;
         var filter = this.decorationsActiveCategory || "all";
 
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var categoryLabels = isEn ? {
-            vegetation: "Forests & Trees",
-            terrain: "Rocks & Mountains",
-            agriculture: "Agriculture & Fields",
-            settlement: "Settlements & Buildings",
-            civilization: "Fortifications & Guards",
-            water: "Water & Swamps",
-            magic: "Magic & Ruins",
-            quest_lair: "Lairs & Caves"
-        } : {
-            vegetation: "Lesy & Vegetace",
-            terrain: "Skály & Hory",
-            agriculture: "Zemědělství",
-            settlement: "Sídla & Stavby",
-            civilization: "Opevnění & Stráže",
-            water: "Voda & Močály",
-            magic: "Magie & Ruiny",
-            quest_lair: "Doupata & Sluje"
+        var tCat = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var categoryLabels = {
+            vegetation: tCat("ui.catalog.decor_cats.vegetation", null, "Lesy & Vegetace"),
+            terrain: tCat("ui.catalog.decor_cats.terrain", null, "Skály & Hory"),
+            agriculture: tCat("ui.catalog.decor_cats.agriculture", null, "Zemědělství"),
+            settlement: tCat("ui.catalog.decor_cats.settlement", null, "Sídla & Stavby"),
+            civilization: tCat("ui.catalog.decor_cats.civilization", null, "Opevnění & Stráže"),
+            water: tCat("ui.catalog.decor_cats.water", null, "Voda & Močály"),
+            magic: tCat("ui.catalog.decor_cats.magic", null, "Magie & Ruiny"),
+            quest_lair: tCat("ui.catalog.decor_cats.quest_lair", null, "Doupata & Sluje")
         };
 
         var categoryColors = {
@@ -1067,6 +1060,11 @@
             magic: "#c084fc",
             quest_lair: "#f87171"
         };
+
+        var defaultDecorDesc = tCat("ui.catalog.decor_default_desc", null, "Malebný prvek oživující herní plochu království.");
+        var clearanceLabel = tCat("ui.catalog.decor_clearance_label", null, "🏷️ Bezpečná zóna (Clearance):");
+        var flipBtnText = tCat("ui.catalog.flip_mirror", null, "🔄 Otočit zrcadlení");
+        var zoomTitle = tCat("ui.catalog.zoom_title", null, "Klikni pro zvětšení ilustrace");
 
         var html = [];
         for (var k in catalog) {
@@ -1087,12 +1085,10 @@
             var catName = categoryLabels[cat] || cat.toUpperCase();
             var icon = d.icon || "🌲";
 
-            var decorLang = (isEn && window.PRS_I18N && window.PRS_I18N.en && window.PRS_I18N.en.decorations && window.PRS_I18N.en.decorations[k]) ? window.PRS_I18N.en.decorations[k] : null;
-            var dName = decorLang ? decorLang.name : d.name;
-            var desc = decorLang ? decorLang.desc : (d.desc || (isEn ? "Picturesque element enlivening the kingdom board." : "Malebný prvek oživující herní plochu království."));
-            var clearanceLabel = isEn ? "🏷️ Clearance Zone:" : "🏷️ Bezpečná zóna (Clearance):";
-            var flipBtnText = isEn ? "🔄 Mirror Orientation" : "🔄 Otočit zrcadlení";
-            var zoomTitle = isEn ? "Click to enlarge illustration" : "Klikni pro zvětšení ilustrace";
+            var trDecorName = window.PRS_I18n ? window.PRS_I18n.t("decorations." + k + ".name") : null;
+            var dName = (trDecorName && trDecorName !== ("decorations." + k + ".name")) ? trDecorName : d.name;
+            var trDecorDesc = window.PRS_I18n ? window.PRS_I18n.t("decorations." + k + ".desc") : null;
+            var desc = (trDecorDesc && trDecorDesc !== ("decorations." + k + ".desc")) ? trDecorDesc : (d.desc || defaultDecorDesc);
 
             html.push('<div class="decor-card" style="background:var(--card-bg, #1a1625); border:1px solid rgba(212,175,55,0.25); border-radius:8px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 4px 14px rgba(0,0,0,0.4);">');
             html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(dName) + '\', \'' + this.escapeHtml(desc) + '\')" title="' + zoomTitle + '" style="position:relative; background:radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.5) 100%); padding:1rem 0.5rem; display:flex; justify-content:center; align-items:center; min-height:160px; cursor:pointer;">');
@@ -1121,15 +1117,15 @@
         if (!card) return;
         var img = card.querySelector(".card-media-img");
         if (!img) return;
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tFlip = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
         if (img.getAttribute("data-is-flipped") === "true") {
             img.src = normalSrc;
             img.setAttribute("data-is-flipped", "false");
-            btn.textContent = isEn ? "🔄 Mirror Orientation" : "🔄 Otočit zrcadlení";
+            btn.textContent = tFlip("ui.catalog.flip_mirror", "🔄 Otočit zrcadlení");
         } else {
             img.src = flipSrc || normalSrc;
             img.setAttribute("data-is-flipped", "true");
-            btn.textContent = isEn ? "↩️ Original Facing" : "↩️ Původní směr";
+            btn.textContent = tFlip("ui.catalog.flip_original", "↩️ Původní směr");
         }
     },
 
@@ -1570,16 +1566,21 @@
         var outcomeEl = document.getElementById("calc-outcome-val");
         var rewardEl = document.getElementById("calc-reward-val");
 
-        if (scoreEl) scoreEl.textContent = score + " bodů";
+        var tCalc = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var ptsUnit = tCalc("rules.calc_pts_unit", null, "bodů");
+        var goldUnit = tCalc("rules.calc_gold_unit", null, "zl.");
+        var andWord = tCalc("rules.calc_and", null, "a");
 
-        var standing = "🥇 1. Místo (Vysoká šance na triumf)";
-        var rewardStr = "+" + r1Heart.toFixed(1) + " 💖 a +" + r1Gold + " zl.";
+        if (scoreEl) scoreEl.textContent = score + " " + ptsUnit;
+
+        var standing = tCalc("rules.calc_place_1", null, "🥇 1. Místo (Vysoká šance na triumf)");
+        var rewardStr = "+" + r1Heart.toFixed(1) + " 💖 " + andWord + " +" + r1Gold + " " + goldUnit;
         if (score < 8) {
-            standing = "🥉 3. Místo (Bude to tuhý boj)";
-            rewardStr = "+" + r3Heart.toFixed(1) + " 💖 a +" + r3Gold + " zl.";
+            standing = tCalc("rules.calc_place_3", null, "🥉 3. Místo (Bude to tuhý boj)");
+            rewardStr = "+" + r3Heart.toFixed(1) + " 💖 " + andWord + " +" + r3Gold + " " + goldUnit;
         } else if (score < 12) {
-            standing = "🥈 2. Místo (Přední příčky království)";
-            rewardStr = "+" + r2Heart.toFixed(1) + " 💖 a +" + r2Gold + " zl.";
+            standing = tCalc("rules.calc_place_2", null, "🥈 2. Místo (Přední příčky království)");
+            rewardStr = "+" + r2Heart.toFixed(1) + " 💖 " + andWord + " +" + r2Gold + " " + goldUnit;
         }
 
         if (outcomeEl) outcomeEl.textContent = standing;

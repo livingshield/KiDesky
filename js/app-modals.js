@@ -142,7 +142,7 @@
                     if (isHumanWinner) creditsEarned += 150; // triumf
                     if (winType === "slayer_dragons" && isHumanWinner) creditsEarned += 50; // drakobijec bonus
                     if (this.awardCredits) {
-                        this.awardCredits(creditsEarned, isHumanWinner ? (isEn ? "Royal Triumph" : "Královský triumf") : (isEn ? "Tournament Participation" : "Účast v turnaji"), isHumanWinner);
+                        this.awardCredits(creditsEarned, isHumanWinner ? tModal("modals.endgame.credit_triumph", null, "Královský triumf") : tModal("modals.endgame.credit_participation", null, "Účast v turnaji"), isHumanWinner);
                     }
                     if (this.recordGameStats) {
                         var castlesCount = 0;
@@ -344,14 +344,11 @@
 
         var winIdx = this.state.originalWinnerIndex;
         var winP = (this.state.players && this.state.players[winIdx]) ? this.state.players[winIdx] : null;
-        var winName = winP ? winP.name : "Vítěz";
+        var tToast = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var winName = winP ? winP.name : tToast("modals.endgame.default_winner_name", null, "Vítěz");
 
         if (this.showToast) {
-            var isEnEndlessToast = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var tToast = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
-            var msgToast = tToast("modals.endgame.endless_toast", { name: winName }, isEnEndlessToast
-                ? ("♾️ Endless Mode started! Official winner: " + winName + ". You can continue freely playing and developing estates.")
-                : ("♾️ Nekonečná hra zahájena! Oficiální vítěz: " + winName + ". Můžeš dál volně hrát a rozvíjet panství."));
+            var msgToast = tToast("modals.endgame.endless_toast", { name: winName }, "♾️ Nekonečná hra zahájena! Oficiální vítěz: " + winName + ". Můžeš dál volně hrát a rozvíjet panství.");
             this.showToast(msgToast, "success");
         }
 
@@ -3082,7 +3079,9 @@
     openIntrigueModal: function (type) {
         var self = this;
         var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var currG = isEn ? "g." : "zl.";
+        var tInt = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var currG = tInt("common.gold", null, "zl.");
+        var localeStr = isEn ? "en-US" : "cs-CZ";
         var modal = this.getGenericModal();
         if (!modal) return;
         var p = self.state.players[self.state.currentPlayerIndex];
@@ -3093,28 +3092,22 @@
         }
         var isBallad = (type === "ballad");
         var cost = isBallad ? ((self.state.pendingAction && self.state.pendingAction.intrigueBalladCost) || 750) : ((self.state.pendingAction && self.state.pendingAction.intrigueCustomsCost) || 600);
+        var costFmt = cost.toLocaleString(localeStr);
+        var goldFmt = p.gold.toLocaleString(localeStr);
         var canAfford = (p.gold >= cost);
 
         var modalTitle = isBallad
-            ? (isEn ? "Mocking Ballad Under Balcony" : "Posměšná balada pod balkónem")
-            : (isEn ? "Royal Customs Audit" : "Královská celní kontrola");
+            ? tInt("modals.intrigue.ballad_title", null, "Posměšná balada pod balkónem")
+            : tInt("modals.intrigue.customs_title", null, "Královská celní kontrola");
         var modalDesc = isBallad
-            ? (isEn
-                ? ("A jester composes a biting ballad about the chosen rival (Charisma contest + 1d6). Success: rival loses 💖 and you gain court favor! Cost: <strong>" + cost.toLocaleString("en-US") + " " + currG + "</strong>")
-                : ("Kejklíř složí uštěpačnou píseň o vybraném soupeři (souboj Charisma + 1d6). Úspěch: soupeř ztrácí 💖 a ty získáváš dvorskou přízeň! Cena: <strong>" + cost.toLocaleString("cs-CZ") + " zl.</strong>"))
-            : (isEn
-                ? ("Select a rival whose estates will be frozen by customs audit for 1 round (no player pays them rent). Cost: <strong>" + cost.toLocaleString("en-US") + " " + currG + "</strong>")
-                : ("Zvol soupeře, jehož panství budou na 1 kolo zmrazena celní kontrolou (nikdo mu neplatí nájem). Cena: <strong>" + cost.toLocaleString("cs-CZ") + " zl.</strong>"));
+            ? tInt("modals.intrigue.ballad_desc", { cost: costFmt, curr: currG }, "Kejklíř složí uštěpačnou píseň o vybraném soupeři (souboj Charisma + 1d6). Úspěch: soupeř ztrácí 💖 a ty získáváš dvorskou přízeň! Cena: <strong>" + costFmt + " " + currG + "</strong>")
+            : tInt("modals.intrigue.customs_desc", { cost: costFmt, curr: currG }, "Zvol soupeře, jehož panství budou na 1 kolo zmrazena celní kontrolou (nikdo mu neplatí nájem). Cena: <strong>" + costFmt + " " + currG + "</strong>");
 
         var costWarnHtml = "";
         if (!canAfford) {
-            costWarnHtml = isEn
-                ? ('<div style="background:rgba(239,68,68,0.2); border:1px solid #ef4444; border-radius:8px; padding:0.45rem 0.65rem; color:#fca5a5; font-size:0.8rem; margin-bottom:0.75rem;">' +
-                    '⚠️ <strong>Not enough gold!</strong> You need <strong>' + cost.toLocaleString("en-US") + ' ' + currG + '</strong> for this intrigue, but you only have <strong>' + p.gold.toLocaleString("en-US") + ' ' + currG + '</strong>' +
-                    '</div>')
-                : ('<div style="background:rgba(239,68,68,0.2); border:1px solid #ef4444; border-radius:8px; padding:0.45rem 0.65rem; color:#fca5a5; font-size:0.8rem; margin-bottom:0.75rem;">' +
-                    '⚠️ <strong>Nedostatek zlata!</strong> Na tuto intriku potřebuješ <strong>' + cost.toLocaleString("cs-CZ") + ' zl.</strong>, ve váčku máš pouze <strong>' + p.gold.toLocaleString("cs-CZ") + ' zl.</strong>' +
-                    '</div>');
+            costWarnHtml = '<div style="background:rgba(239,68,68,0.2); border:1px solid #ef4444; border-radius:8px; padding:0.45rem 0.65rem; color:#fca5a5; font-size:0.8rem; margin-bottom:0.75rem;">' +
+                tInt("modals.intrigue.no_gold_warn", { cost: costFmt, gold: goldFmt, curr: currG }, "⚠️ <strong>Nedostatek zlata!</strong> Na tuto intriku potřebuješ <strong>" + costFmt + " " + currG + "</strong>, ve váčku máš pouze <strong>" + goldFmt + " " + currG + "</strong>") +
+                '</div>';
         }
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid var(--gold); border-radius:14px; text-align:center;">' +
@@ -3134,9 +3127,9 @@
                 '</button>';
         }
         if (targets.length === 0) {
-            html += '<p style="color:#fca5a5; font-size:0.85rem;">' + (isEn ? "No active rivals remain in the realm." : "V království již nezbyl žádný aktivní soupeř.") + '</p>';
+            html += '<p style="color:#fca5a5; font-size:0.85rem;">' + tInt("modals.intrigue.no_rivals", null, "V království již nezbyl žádný aktivní soupeř.") + '</p>';
         }
-        var cancelText = isEn ? "Cancel" : "Zrušit";
+        var cancelText = tInt("common.cancel", null, "Zrušit");
         html += '</div>' +
             '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">' + cancelText + '</button>' +
             '</div>';
@@ -3152,9 +3145,11 @@
 
         var res = window.PRS_GameEngine.executePlotIntrigue(this.state, type, targetIdx);
 
+        var tPlot = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+
         if (!res) {
             if (this.showToast) {
-                this.showToast("⚠️ Nemáš dostatek zlata na provedení intriky!", "warning");
+                this.showToast(tPlot("modals.intrigue.toast_no_gold", null, "⚠️ Nemáš dostatek zlata na provedení intriky!"), "warning");
             }
             return;
         }
@@ -3171,21 +3166,22 @@
         } else if (res.type === "customs") {
             if (window.PRS_Audio && window.PRS_Audio.playNotice) window.PRS_Audio.playNotice();
             if (this.showToast) {
-                this.showToast("📜 Královský celní dekret uvalen na panství hráče " + res.target.name + "!", "success");
+                this.showToast(tPlot("modals.intrigue.toast_customs_applied", { name: res.target.name }, "📜 Královský celní dekret uvalen na panství hráče " + res.target.name + "!"), "success");
             }
         }
 
         if (this.showPawnToast) {
+            var currGoldBadge = tPlot("common.gold", null, "zl.");
             if (res.type === "ballad") {
                 if (res.success) {
                     this.showPawnToast(res.player.index, "+0,5 💖", "👑", "#86efac");
                     this.showPawnToast(res.target.index, "-" + res.penalty + " 💖", "💔", "#f87171");
                 } else {
-                    this.showPawnToast(res.player.index, "-" + res.cost + " zl.", "💸", "#fca5a5");
+                    this.showPawnToast(res.player.index, tPlot("modals.intrigue.pawn_ballad_cost", { cost: res.cost, curr: currGoldBadge }, "-" + res.cost + " " + currGoldBadge), "💸", "#fca5a5");
                     this.showPawnToast(res.target.index, "+0,25 💖", "✨", "#86efac");
                 }
             } else if (res.type === "customs") {
-                this.showPawnToast(res.target.index, "Celní kontrola!", "⚖️", "#fbbf24");
+                this.showPawnToast(res.target.index, tPlot("modals.intrigue.pawn_customs_badge", null, "Celní kontrola!"), "⚖️", "#fbbf24");
             }
         }
 
@@ -3198,37 +3194,34 @@
     showIntrigueResultModal: function (res) {
         var modal = this.getGenericModal();
         if (!modal) return;
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var currG = isEn ? "g." : "zl.";
+        var tRes = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var currG = tRes("common.gold", null, "zl.");
         var p1 = res.player;
         var p2 = res.target;
         var isSuccess = res.success;
 
         var p1DisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p1) : p1.name;
         var p2DisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p2) : p2.name;
+        var safeP2 = this.escapeHtml(p2DisplayName);
 
         var modalTitle = isSuccess
-            ? (isEn ? "Mocking Ballad Succeeded!" : "Posměšná balada uspěla!")
-            : (isEn ? "Mocking Ballad Failed!" : "Posměšná balada selhala!");
-        var modalSub = isEn ? "Court intrigue under the balcony at the Jester" : "Dvorní intrika pod balkónem u Kejklíře";
-        var yourSingerText = isEn ? "Your singer" : "Tvůj pěvec";
-        var targetIntrigueText = isEn ? "Intrigue target" : "Cíl intriky";
-        var diceLabel = isEn ? "🎲 Die: " : "🎲 Kostka: ";
-        var okBtnText = isEn ? "Understood" : "Rozumím";
+            ? tRes("modals.intrigue.result_success_title", null, "Posměšná balada uspěla!")
+            : tRes("modals.intrigue.result_fail_title", null, "Posměšná balada selhala!");
+        var modalSub = tRes("modals.intrigue.result_sub", null, "Dvorní intrika pod balkónem u Kejklíře");
+        var yourSingerText = tRes("modals.intrigue.your_singer", null, "Tvůj pěvec");
+        var targetIntrigueText = tRes("modals.intrigue.target_label", null, "Cíl intriky");
+        var diceLabel = tRes("modals.intrigue.dice_label", null, "🎲 Kostka: ");
+        var okBtnText = tRes("modals.intrigue.ok_btn", null, "Rozumím");
 
         var outcomeHtml = isSuccess
             ? ('<div style="color:#86efac; font-weight:700; margin-bottom:4px;">' +
-               (isEn ? "👑 The jester's ballad amused the court and shamed your rival!" : "👑 Kejklířova balada pobavila dvůr a zostudila soupeře!") + '</div>' +
+               tRes("modals.intrigue.success_head", null, "👑 Kejklířova balada pobavila dvůr a zostudila soupeře!") + '</div>' +
                '<div style="color:#e2e8f0;">' +
-               (isEn
-                   ? ("Courtiers laughed out loud at your rival's clumsy ways. " + this.escapeHtml(p2DisplayName) + " loses <strong style='color:#f87171;'>-" + res.penalty + " 💖</strong> and your knight earns the princess's favor (<strong style='color:#86efac;'>+0.5 💖</strong>)!")
-                   : ("Dvořané se soupeřově neobratnosti hlasitě vysmáli. " + this.escapeHtml(p2DisplayName) + " ztrácí <strong style='color:#f87171;'>-" + res.penalty + " 💖</strong> a tvůj rytíř si získává obdiv princezny (<strong style='color:#86efac;'>+0,5 💖</strong>)!")) + '</div>')
+               tRes("modals.intrigue.success_body", { name: safeP2, penalty: res.penalty }, "Dvořané se soupeřově neobratnosti hlasitě vysmáli. " + safeP2 + " ztrácí <strong style='color:#f87171;'>-" + res.penalty + " 💖</strong> a tvůj rytíř si získává obdiv princezny (<strong style='color:#86efac;'>+0,5 💖</strong>)!") + '</div>')
             : ('<div style="color:#fca5a5; font-weight:700; margin-bottom:4px;">' +
-               (isEn ? "🛡️ The rival retained noble grace and turned the joke against you!" : "🛡️ Soupeř zachoval vznešenou noblesu a vtip obrátil proti tobě!") + '</div>' +
+               tRes("modals.intrigue.fail_head", null, "🛡️ Soupeř zachoval vznešenou noblesu a vtip obrátil proti tobě!") + '</div>' +
                '<div style="color:#e2e8f0;">' +
-               (isEn
-                   ? ("The court condemned this cheap slander attempt. " + this.escapeHtml(p2DisplayName) + " gains <strong style='color:#86efac;'>+0.25 💖</strong> for courtly virtue and the jester refuses to refund your <strong>" + res.cost + " " + currG + "</strong>")
-                   : ("Dvůr odsoudil laciný pokus o pomluvu. " + this.escapeHtml(p2DisplayName) + " získává <strong style='color:#86efac;'>+0,25 💖</strong> za dvorskou ctnost a kejklíř ti odmítá vrátit zaplacených <strong>" + res.cost + " zl.</strong>")) + '</div>');
+               tRes("modals.intrigue.fail_body", { name: safeP2, cost: res.cost, curr: currG }, "Dvůr odsoudil laciný pokus o pomluvu. " + safeP2 + " získává <strong style='color:#86efac;'>+0,25 💖</strong> za dvorskou ctnost a kejklíř ti odmítá vrátit zaplacených <strong>" + res.cost + " " + currG + "</strong>") + '</div>');
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:480px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid ' + (isSuccess ? '#10b981' : '#f59e0b') + '; border-radius:14px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.7);">' +
             '<div style="font-size:2.5rem; margin-bottom:0.25rem;">' + (isSuccess ? '🎭 🎶 👑' : '🛡️ 📜 🎭') + '</div>' +
@@ -3274,8 +3267,8 @@
 
     openTradePactModal: function () {
         var self = this;
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var currG = isEn ? "g." : "zl.";
+        var tPact = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var currG = tPact("common.gold", null, "zl.");
         var modal = this.getGenericModal();
         if (!modal) return;
         var p = self.state.players[self.state.currentPlayerIndex];
@@ -3294,23 +3287,21 @@
             }
         }
 
-        var pactTitle = isEn ? "Form Trade Pact" : "Uzavření Obchodního paktu";
-        var pactDesc = isEn
-            ? ("Seal a duty-free alliance for <strong>8 full rounds</strong> for <strong>" + cost + " " + currG + "</strong> (half goes to the treasury, half to your partner as a gift). Code of chivalry: Pact cannot be formed with a realm leader ahead by 2+ 💖!")
-            : ("Zpečeť bezcelní alianci na <strong>8 celých kol</strong> za <strong>" + cost + " zl.</strong> (polovina jde do pokladny, polovina partnerovi jako dar). Pravidlo cti: Pakt nelze uzavřít s lídrem království, který vede o 2+ 💖!");
+        var pactTitle = tPact("modals.pact.title", null, "Uzavření Obchodního paktu");
+        var pactDesc = tPact("modals.pact.desc", { cost: cost, curr: currG }, "Zpečeť bezcelní alianci na <strong>8 celých kol</strong> za <strong>" + cost + " " + currG + "</strong> (polovina jde do pokladny, polovina partnerovi jako dar). Pravidlo cti: Pakt nelze uzavřít s lídrem království, který vede o 2+ 💖!");
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; text-align:center;">' +
             '<div style="font-size:2rem; margin-bottom:0.25rem;">🤝 📜</div>' +
             '<h3 style="font-family:Cinzel,serif; color:#7dd3fc; margin:0 0 0.5rem 0;">' + pactTitle + '</h3>' +
             '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:1rem;">' + pactDesc + '</p>' +
             '<div style="display:flex; flex-direction:column; gap:0.5rem;">';
+        var estatesText = tPact("modals.pact.estates_label", null, "panství");
+        var leaderCannotText = tPact("modals.pact.leader_cannot", null, " (Nelze: Lídr)");
         for (var pt = 0; pt < partners.length; pt++) {
             var item = partners[pt];
             var part = item.player;
             var partDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(part) : part.name;
             var disabled = item.isLeaderAhead || (p.gold < cost);
-            var estatesText = isEn ? "estates" : "panství";
-            var leaderCannotText = isEn ? " (Cannot: Leader)" : " (Nelze: Lídr)";
 
             html += '<button class="btn-gold-lg" ' + (disabled ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : '') + ' style="text-align:left; padding:0.6rem 0.85rem; background:linear-gradient(135deg, #0284c7, #0369a1); border-color:#38bdf8;" onclick="PRS_App.confirmTradePact(' + part.index + ')">' +
                 part.badge + ' <strong>' + self.escapeHtml(partDisplayName) + '</strong> (' + (part.ownedNodes ? part.ownedNodes.length : 0) + ' ' + estatesText + ', ' + part.totalHearts + ' 💖)' +
@@ -3318,9 +3309,9 @@
                 '</button>';
         }
         if (partners.length === 0) {
-            html += '<p style="color:#bae6fd; font-size:0.85rem;">' + (isEn ? "No eligible partner available in the realm." : "V království není žádný volný spojenec pro pakt.") + '</p>';
+            html += '<p style="color:#bae6fd; font-size:0.85rem;">' + tPact("modals.pact.no_partners", null, "V království není žádný volný spojenec pro pakt.") + '</p>';
         }
-        var cancelText = isEn ? "Cancel" : "Zrušit";
+        var cancelText = tPact("common.cancel", null, "Zrušit");
         html += '</div>' +
             '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m) m.style.display=\'none\';">' + cancelText + '</button>' +
             '</div>';
@@ -3342,12 +3333,15 @@
     openFestivalChallengeModal: function () {
         var self = this;
         var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var currG = isEn ? "g." : "zl.";
+        var tFest = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var currG = tFest("common.gold", null, "zl.");
+        var stakeLocale = isEn ? "en-US" : "cs-CZ";
         var modal = this.getGenericModal();
         if (!modal || !self.state) return;
         var p = self.state.players[self.state.currentPlayerIndex];
         if (!p) return;
         var stake = (self.state.pendingAction && self.state.pendingAction.festivalChallengeStake) || 750;
+        var stakeFmt = stake.toLocaleString(stakeLocale);
         var canAfford = (p.gold >= stake);
         var rivals = [];
         for (var i = 0; i < self.state.players.length; i++) {
@@ -3355,16 +3349,14 @@
             if (pl.index !== p.index && !pl.isEliminated) rivals.push(pl);
         }
 
-        var festTitle = isEn ? "Personal Challenge at Festival" : "Osobní výzva na Slavnosti";
-        var festDesc = isEn
-            ? ("Choose a rival and discipline (1d6 roll + virtue stat). The victor wins <strong>" + stake.toLocaleString("en-US") + " " + currG + "</strong> and <strong>+0.5 💖</strong> of glory!")
-            : ("Zvol rivala a disciplínu (hod 1d6 + hodnota ctnosti). Vítěz získá <strong>" + stake.toLocaleString("cs-CZ") + " zl.</strong> a <strong>+0,5 💖</strong> slávy!");
+        var festTitle = tFest("modals.festival_challenge.title", null, "Osobní výzva na Slavnosti");
+        var festDesc = tFest("modals.festival_challenge.desc", { stake: stakeFmt, curr: currG }, "Zvol rivala a disciplínu (hod 1d6 + hodnota ctnosti). Vítěz získá <strong>" + stakeFmt + " " + currG + "</strong> a <strong>+0,5 💖</strong> slávy!");
 
         var html = '<div class="modal-box tactical-modal-box" style="padding:1.4rem; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #ec4899; border-radius:14px; text-align:center; box-shadow:0 12px 35px rgba(0,0,0,0.85);">' +
             '<div style="font-size:2rem; margin-bottom:0.25rem;">🏆 🤺</div>' +
             '<h3 style="font-family:Cinzel,serif; color:#fbcfe8; margin:0 0 0.5rem 0;">' + festTitle + '</h3>' +
             '<p style="font-size:0.84rem; color:#fce7f3; margin-bottom:0.85rem;">' + festDesc + '</p>' +
-            (!canAfford ? ('<div style="background:rgba(239,68,68,0.2); border:1px solid #f87171; border-radius:8px; padding:0.45rem; font-size:0.8rem; color:#fca5a5; margin-bottom:0.75rem;">' + (isEn ? ("⚠️ Not enough gold for the stake (" + (p.gold || 0) + " / " + stake + " " + currG + ").") : ("⚠️ Nemáš dostatek zlaťáků na sázku (" + (p.gold || 0) + " / " + stake + " zl.).")) + '</div>') : '') +
+            (!canAfford ? ('<div style="background:rgba(239,68,68,0.2); border:1px solid #f87171; border-radius:8px; padding:0.45rem; font-size:0.8rem; color:#fca5a5; margin-bottom:0.75rem;">' + tFest("modals.festival_challenge.no_gold_warn", { gold: (p.gold || 0), stake: stake, curr: currG }, "⚠️ Nemáš dostatek zlaťáků na sázku (" + (p.gold || 0) + " / " + stake + " " + currG + ").") + '</div>') : '') +
             '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
         for (var r = 0; r < rivals.length; r++) {
             var riv = rivals[r];
@@ -3373,9 +3365,9 @@
             var rRiding = (riv.skills && riv.skills.riding !== undefined) ? riv.skills.riding : 1;
             var rDance = (riv.skills && riv.skills.dance !== undefined) ? riv.skills.dance : 1;
             var btnDis = !canAfford ? 'disabled style="flex:1; font-size:0.78rem; padding:0.35rem; opacity:0.5;"' : 'style="flex:1; font-size:0.78rem; padding:0.35rem;"';
-            var combatLabel = isEn ? ("⚔️ Combat (" + rCombat + ")") : ("⚔️ Boj (" + rCombat + ")");
-            var ridingLabel = isEn ? ("🏇 Riding (" + rRiding + ")") : ("🏇 Jízda (" + rRiding + ")");
-            var danceLabel = isEn ? ("💃 Dance (" + rDance + ")") : ("💃 Tanec (" + rDance + ")");
+            var combatLabel = tFest("modals.festival_challenge.btn_combat", { val: rCombat }, "⚔️ Boj (" + rCombat + ")");
+            var ridingLabel = tFest("modals.festival_challenge.btn_riding", { val: rRiding }, "🏇 Jízda (" + rRiding + ")");
+            var danceLabel = tFest("modals.festival_challenge.btn_dance", { val: rDance }, "💃 Tanec (" + rDance + ")");
 
             html += '<div style="background:rgba(0,0,0,0.35); border:1px solid rgba(236,72,153,0.3); border-radius:8px; padding:0.55rem; text-align:left;">' +
                 '<div style="font-weight:700; color:#fbcfe8; margin-bottom:4px;">' + riv.badge + ' ' + self.escapeHtml(rivDisplayName) + ' (' + riv.totalHearts + ' 💖)</div>' +
@@ -3387,9 +3379,9 @@
                 '</div>';
         }
         if (rivals.length === 0) {
-            html += '<p style="color:#fca5a5; font-size:0.85rem;">' + (isEn ? "No active rivals remain in the realm." : "V království již nezbyl žádný aktivní soupeř k výzvě.") + '</p>';
+            html += '<p style="color:#fca5a5; font-size:0.85rem;">' + tFest("modals.festival_challenge.no_rivals", null, "V království již nezbyl žádný aktivní soupeř k výzvě.") + '</p>';
         }
-        var cancelText = isEn ? "Cancel" : "Zrušit";
+        var cancelText = tFest("common.cancel", null, "Zrušit");
         html += '</div>' +
             '<button class="btn-secondary" style="margin-top:0.85rem; width:100%;" onclick="var m=document.getElementById(\'generic-modal\'); if(m){ m.style.display=\'none\'; if(window.PRS_App && window.PRS_App.updateBodyModalClass) window.PRS_App.updateBodyModalClass(); }">' + cancelText + '</button>' +
             '</div>';
@@ -3423,19 +3415,21 @@
         if (!modal || !bodyEl) return;
 
         var isEnDuel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var currDuelG = isEnDuel ? "g." : "zl.";
+        var tDuel = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var currDuelG = tDuel("common.gold", null, "zl.");
+        var duelLocale = isEnDuel ? "en-US" : "cs-CZ";
         var isFestival = (category === "festival" || res.type === "festival_challenge");
 
         if (titleEl) {
             titleEl.textContent = isFestival
-                ? (isEnDuel ? "Personal Challenge at Festival" : "Osobní výzva na Slavnosti")
-                : (isEnDuel ? "Knightly Duel of Honor" : "Rytířský duel cti");
+                ? tDuel("modals.duel.festival_title", null, "Osobní výzva na Slavnosti")
+                : tDuel("modals.duel.duel_title", null, "Rytířský duel cti");
         }
 
         if (subEl) {
             subEl.textContent = isFestival
-                ? (isEnDuel ? "Knightly contest in tournament discipline" : "Rytířské klání v turnajové disciplíně")
-                : (isEnDuel ? "Outcome of direct combat on the tile" : "Výsledek přímého souboje na poli");
+                ? tDuel("modals.duel.festival_sub", null, "Rytířské klání v turnajové disciplíně")
+                : tDuel("modals.duel.duel_sub", null, "Výsledek přímého souboje na poli");
         }
 
         var p1 = res.p1;
@@ -3459,16 +3453,17 @@
         var p1DisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p1) : p1.name;
         var p2DisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p2) : p2.name;
 
-        var statName = isFestival ? ((window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(res.discipline, true) : (isEnDuel ? "⚔️ Combat" : "⚔️ Boj")) : (isEnDuel ? "⚔️ Combat" : "⚔️ Boj");
+        var defaultCombatStat = tDuel("modals.duel.default_combat_stat", null, "⚔️ Boj");
+        var statName = isFestival ? ((window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(res.discipline, true) : defaultCombatStat) : defaultCombatStat;
         var statVal1 = isFestival ? p1.stat : p1.combat;
         var statVal2 = isFestival ? p2.stat : p2.combat;
 
-        var roleAttacker = isEnDuel ? "Attacker" : "Útočník";
-        var roleDefender = isEnDuel ? "Defender" : "Obránce";
-        var diceRollText = isEnDuel ? "Dice Roll: 🎲 " : "Hod kostkou: 🎲 ";
-        var totalPowerText = isEnDuel ? "Total Power" : "Celková síla";
-        var stakeText = isEnDuel ? "Stake: " : "Sázka: ";
-        var winnerBadgeText = isEnDuel ? "👑 WINNER" : "👑 VÍTĚZ";
+        var roleAttacker = tDuel("modals.duel.attacker", null, "Útočník");
+        var roleDefender = tDuel("modals.duel.defender", null, "Obránce");
+        var diceRollText = tDuel("modals.duel.dice_roll", null, "Hod kostkou: 🎲 ");
+        var totalPowerText = tDuel("modals.duel.total_power", null, "Celková síla");
+        var stakeText = tDuel("modals.duel.stake", null, "Sázka: ");
+        var winnerBadgeText = tDuel("modals.duel.winner_badge", null, "👑 VÍTĚZ");
 
         var html = [];
         html.push('<div class="duel-combatants-arena">');
@@ -3515,25 +3510,29 @@
         html.push('<div class="duel-outcome-banner ' + bannerCls + '">');
 
         if (isDraw) {
-            html.push('  <h4 style="margin:0 0 0.35rem; color:#7dd3fc; font-family:\"Cinzel\",serif; font-size:1.15rem;">' + (isEnDuel ? "⚖️ Stalemate clash of blades!" : "⚖️ Nerozhodný střet čepelí!") + '</h4>');
-            html.push('  <p style="margin:0; font-size:0.85rem; color:#e0f2fe;">' + (isEnDuel ? ("Both knights displayed equal power (" + p1.total + " vs " + p2.total + "). No gold or princess's hearts are exchanged.") : ("Oba rytíři předvedli stejnou sílu (" + p1.total + " vs " + p2.total + "). Žádné zlaťáky ani srdce princezny se nemění.")) + '</p>');
+            html.push('  <h4 style="margin:0 0 0.35rem; color:#7dd3fc; font-family:\"Cinzel\",serif; font-size:1.15rem;">' + tDuel("modals.duel.draw_title", null, "⚖️ Nerozhodný střet čepelí!") + '</h4>');
+            html.push('  <p style="margin:0; font-size:0.85rem; color:#e0f2fe;">' + tDuel("modals.duel.draw_desc", { p1: p1.total, p2: p2.total }, "Oba rytíři předvedli stejnou sílu (" + p1.total + " vs " + p2.total + "). Žádné zlaťáky ani srdce princezny se nemění.") + '</p>');
         } else {
             var winner = p1Won ? p1 : p2;
             var loser = p1Won ? p2 : p1;
             var winnerDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(winner) : winner.name;
             var loserDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(loser) : loser.name;
+            var safeWin = this.escapeHtml(winnerDisplayName);
+            var safeLose = this.escapeHtml(loserDisplayName);
+            var spoilsGold = (res.actualGold || res.stake).toLocaleString(duelLocale);
+            var heartStakeVal = (res.heartStake || 0.5);
 
-            html.push('  <h4 style="margin:0 0 0.35rem; color:#fef08a; font-family:\"Cinzel\",serif; font-size:1.15rem;">' + (isEnDuel ? ("🏆 The victor of the duel is " + winner.badge + " " + this.escapeHtml(winnerDisplayName) + "!") : ("🏆 Vítězem duelu je " + winner.badge + " " + this.escapeHtml(winnerDisplayName) + "!")) + '</h4>');
+            html.push('  <h4 style="margin:0 0 0.35rem; color:#fef08a; font-family:\"Cinzel\",serif; font-size:1.15rem;">' + tDuel("modals.duel.win_title", { badge: winner.badge, name: safeWin }, "🏆 Vítězem duelu je " + winner.badge + " " + safeWin + "!") + '</h4>');
             html.push('  <div style="font-size:0.88rem; line-height:1.45; color:#f1f5f9;">');
-            html.push('    <div>' + (isEnDuel ? ("A glorious strike overcame the rival (<strong>" + winner.total + "</strong> vs <strong>" + loser.total + "</strong>).") : ("Slavný úder překonal soupeře (<strong>" + winner.total + "</strong> vs <strong>" + loser.total + "</strong>).")) + '</div>');
-            html.push('    <div style="margin-top:0.35rem; font-weight:bold; color:#a7f3d0;">' + (isEnDuel ? ("💰 Victor's spoils: +" + (res.actualGold || res.stake).toLocaleString("en-US") + " " + currDuelG + " &nbsp;•&nbsp; 💖 +" + (res.heartStake || 0.5) + " Princess's Heart") : ("💰 Kořist vítěze: +" + (res.actualGold || res.stake).toLocaleString("cs-CZ") + " zl. &nbsp;•&nbsp; 💖 +" + (res.heartStake || 0.5) + " Srdce princezny")) + '</div>');
+            html.push('    <div>' + tDuel("modals.duel.win_desc", { w: winner.total, l: loser.total }, "Slavný úder překonal soupeře (<strong>" + winner.total + "</strong> vs <strong>" + loser.total + "</strong>).") + '</div>');
+            html.push('    <div style="margin-top:0.35rem; font-weight:bold; color:#a7f3d0;">' + tDuel("modals.duel.win_spoils", { gold: spoilsGold, curr: currDuelG, hearts: heartStakeVal }, "💰 Kořist vítěze: +" + spoilsGold + " " + currDuelG + " &nbsp;•&nbsp; 💖 +" + heartStakeVal + " Srdce princezny") + '</div>');
 
             if (res.heartLost) {
-                html.push('    <div style="font-size:0.8rem; color:#fca5a5; margin-top:2px;">' + (isEnDuel ? ("💔 Defeated loses -" + (res.heartStake || 0.5) + " 💖 of glory") : ("💔 Poražený ztrácí -" + (res.heartStake || 0.5) + " 💖 slávy")) + '</div>');
+                html.push('    <div style="font-size:0.8rem; color:#fca5a5; margin-top:2px;">' + tDuel("modals.duel.loser_heart_lost", { hearts: heartStakeVal }, "💔 Poražený ztrácí -" + heartStakeVal + " 💖 slávy") + '</div>');
             }
 
             if (res.hospitalTransferred) {
-                html.push('    <div style="font-size:0.82rem; color:#fca5a5; margin-top:4px; font-weight:bold;">' + (isEnDuel ? ("🏥 In Life & Death mode, severely wounded knight " + this.escapeHtml(loserDisplayName) + " is urgently rushed to the Royal Infirmary!") : ("🏥 V režimu Na život a smrt je těžce zraněný rytíř " + this.escapeHtml(loserDisplayName) + " urychleně převezen do Královského lazaretu!")) + '</div>');
+                html.push('    <div style="font-size:0.82rem; color:#fca5a5; margin-top:4px; font-weight:bold;">' + tDuel("modals.duel.hospital_transfer", { name: safeLose }, "🏥 V režimu Na život a smrt je těžce zraněný rytíř " + safeLose + " urychleně převezen do Královského lazaretu!") + '</div>');
             }
 
             html.push('  </div>');
@@ -3542,8 +3541,8 @@
         html.push('</div>');
 
         // Tlačítko pokračovat
-        var continueBtnText = isEnDuel ? "⚔️ Continue game" : "⚔️ Pokračovat ve hře";
-        var botDuelNote = isEnDuel ? "(BOT duel – closing in 0.5s...)" : "(BOT duel – zavře se za 0,5 s...)";
+        var continueBtnText = tDuel("modals.duel.continue_btn", null, "⚔️ Pokračovat ve hře");
+        var botDuelNote = tDuel("modals.duel.bot_auto_close", null, "(BOT duel – zavře se za 0,5 s...)");
 
         if (isBothBots) {
             html.push('<button class="btn-gold-lg" style="width:100%; padding:0.75rem; font-size:1.02rem;" onclick="PRS_App.closeKnightDuelModal()">' + continueBtnText + ' <span style="font-size:0.8rem; opacity:0.85; margin-left:6px;">' + botDuelNote + '</span></button>');

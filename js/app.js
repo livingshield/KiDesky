@@ -1044,6 +1044,9 @@ window.PRS_App = {
         }
 
         // Okamžitě překreslíme herní HUD, detail pole a spodní dashboard
+        this._safeCall("syncSettingsSoundLabel", this.syncSettingsSoundLabel);
+        this._safeCall("syncSettingsDeviceLabel", this.syncSettingsDeviceLabel);
+
         if (this.state) {
             this._safeCall("renderTopPlayersHud", this.renderTopPlayersHud);
             this._safeCall("renderHeartTrack", this.renderHeartTrack);
@@ -1056,8 +1059,9 @@ window.PRS_App = {
             this._safeCall("updateMobileDock", this.updateMobileDock);
             this._safeCall("renderKnightEmotesHud", this.renderKnightEmotesHud);
             this._safeCall("renderCardDecksRow", this.renderCardDecksRow);
-            this._safeCall("syncSettingsSoundLabel", this.syncSettingsSoundLabel);
-            this._safeCall("syncSettingsDeviceLabel", this.syncSettingsDeviceLabel);
+            if (this.state.roomCode) {
+                this._safeCall("renderOnlineRoomBar", this.renderOnlineRoomBar);
+            }
         }
 
         // Zajištění reference pro PRS_Catalog
@@ -1077,6 +1081,22 @@ window.PRS_App = {
         var wModal = document.getElementById("wardrobe-modal");
         if (wModal && wModal.style.display !== "none") {
             this._safeCall("renderWardrobeModal", this.renderWardrobeModal);
+        }
+        var tutModal = document.getElementById("tutorial-onboarding-modal");
+        if (tutModal && tutModal.style.display !== "none") {
+            this._safeCall("renderTutorialStep", this.renderTutorialStep);
+        }
+        var achModal = document.getElementById("achievements-modal");
+        if (achModal && achModal.style.display !== "none") {
+            this._safeCall("renderAchievementsModalContent", this.renderAchievementsModalContent);
+        }
+        var armModal = document.getElementById("armory-modal");
+        if (armModal && armModal.style.display !== "none") {
+            this._safeCall("renderArmoryModalContent", this.renderArmoryModalContent);
+        }
+        var seatsModal = document.getElementById("online-seats-modal");
+        if (seatsModal && seatsModal.style.display !== "none") {
+            this._safeCall("renderOnlineSeatsModal", this.renderOnlineSeatsModal);
         }
         this._safeCall("renderChatMessagesList", this.renderChatMessagesList);
     },
@@ -1448,33 +1468,23 @@ window.PRS_App = {
     // --- VÍTĚZNÝ CEREMONIÁL & KRÁLOVSKÁ SVATBA (MODAL) ---,
 
     updateBodyModalClass: function () {
-
+        if (window.PRS_ModalManager && typeof window.PRS_ModalManager.syncAll === "function") {
+            window.PRS_ModalManager.syncAll();
+            return;
+        }
         var anyOpen = false;
-
         var backdrops = document.querySelectorAll(".modal-backdrop");
-
         for (var i = 0; i < backdrops.length; i++) {
-
             var d = backdrops[i].style.display;
-
             if (d && d !== "none") {
-
                 anyOpen = true;
-
                 break;
-
             }
-
         }
-
         if (document.body) {
-
             if (anyOpen) document.body.classList.add("modal-open");
-
             else document.body.classList.remove("modal-open");
-
         }
-
     },
 
     victoryModalShown: false,
@@ -3546,9 +3556,10 @@ window.PRS_App = {
 
             var pDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(p) : p.name;
 
-            var placeholder = (i === 0) 
-                ? (' placeholder="' + (window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en' ? 'Your knight nickname (e.g. Sir Gawain)' : 'Tvoje rytířská přezdívka (např. Sir Gawain)') + '" title="' + (window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en' ? 'Enter your knight name at the table' : 'Zadej svou herní přezdívku (jméno rytíře u stolu)') + '"')
-                : (' placeholder="' + (window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en' ? 'Player name / AI bot' : 'Jméno hráče / PC bota') + '"');
+            var tLobby = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
+            var placeholder = (i === 0)
+                ? (' placeholder="' + this.escapeHtml(tLobby("lobby.placeholder_p1", "Tvoje rytířská přezdívka (např. Sir Gawain)")) + '" title="' + this.escapeHtml(tLobby("lobby.placeholder_p1_title", "Zadej svou herní přezdívku (jméno rytíře u stolu)")) + '"')
+                : (' placeholder="' + this.escapeHtml(tLobby("lobby.placeholder_other", "Jméno hráče / PC bota")) + '"');
 
             html += '<div class="lobby-player-row">' +
 
@@ -5019,158 +5030,139 @@ window.PRS_App = {
         }, true);
 
         window.addEventListener("keydown", function (e) {
+            // Pokud je otevřený KiDeskyDialog (#kd-dialog-root), nepřekrýváme jeho ovládání
+            if (document.getElementById("kd-dialog-root")) return;
 
-            // Ignorujeme, pokud uživatel píše do formulářového pole
+            var modalOpen = !!(window.PRS_ModalManager && window.PRS_ModalManager.isAnyOpen());
 
-            var tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
-
-            if (tag === "input" || tag === "textarea" || tag === "select") return;
-
-            // 1. ESC -> Zavření libovolného modálu
-
+            // 1. ESC -> Nejprve necháme PRS_ModalManager zavřít horní modál; jinak zavřeme drawer / sheet
             if (e.key === "Escape" || e.code === "Escape") {
-
-                self.closeAllModals();
-
+                if (e.defaultPrevented) return;
+                if (modalOpen && window.PRS_ModalManager) {
+                    e.preventDefault();
+                    window.PRS_ModalManager.closeTop();
+                    return;
+                }
+                var chatDrawer = document.getElementById("online-chat-drawer");
+                if (chatDrawer && !chatDrawer.classList.contains("hidden") && typeof self.toggleChatDrawer === "function") {
+                    e.preventDefault();
+                    self.toggleChatDrawer(false);
+                    return;
+                }
+                var mobileSheet = document.getElementById("mobile-bottom-sheet");
+                if (mobileSheet && mobileSheet.classList.contains("open") && typeof self.closeMobileSheet === "function") {
+                    e.preventDefault();
+                    self.closeMobileSheet();
+                    return;
+                }
                 return;
-
             }
 
-            // 1b. T / t -> Otevřít / Zavřít Rychlý tahák do kapsy
-            if (e.key === "t" || e.key === "T") {
+            // Ignorujeme zkratky, pokud uživatel píše do formulářového pole nebo contentEditable
+            var targetEl = e.target;
+            var tag = (targetEl && targetEl.tagName) ? targetEl.tagName.toLowerCase() : "";
+            if (tag === "input" || tag === "textarea" || tag === "select" || (targetEl && targetEl.isContentEditable)) return;
+
+            // 1b. T / t nebo ? -> Otevřít / Zavřít Rychlý tahák do kapsy (jen když není otevřený jiný modál)
+            if (e.key === "t" || e.key === "T" || e.key === "?") {
                 var csM = document.getElementById("cheatsheet-modal");
-                if (csM && csM.style.display !== "none") {
+                var csOpen = !!(csM && csM.style.display !== "none");
+                var topModal = window.PRS_ModalManager ? window.PRS_ModalManager.getTopModal() : null;
+                if (csOpen && (!topModal || topModal.id === "cheatsheet-modal")) {
+                    e.preventDefault();
                     if (self.closeCheatSheetModal) self.closeCheatSheetModal();
-                } else {
+                } else if (!modalOpen) {
+                    e.preventDefault();
                     if (self.openCheatSheetModal) self.openCheatSheetModal();
                 }
                 return;
             }
 
-            // 2. MEZERNÍK -> Primární akce
+            // 2. MEZERNÍK -> Pokud je nahoře quest-duel-modal a není focus na tlačítku/odkazu, hoď kostkou v aréně
+            if (e.key === " " || e.code === "Space") {
+                var topDuel = window.PRS_ModalManager ? window.PRS_ModalManager.getTopModal() : null;
+                if (topDuel && topDuel.id === "quest-duel-modal" && tag !== "button" && tag !== "a") {
+                    e.preventDefault();
+                    self.executeDuelRoll();
+                    return;
+                }
+            }
+
+            // Všechny herní klávesové zkratky jsou aktivní POUZE na záložce Hrací stůl a bez otevřených modálů
+            if (modalOpen || self.activeTab !== "board") return;
 
             if (e.key === " " || e.code === "Space") {
-
-                var duelModal = document.getElementById("quest-duel-modal");
-
-                if (duelModal && duelModal.style.display !== "none") {
-
-                    e.preventDefault();
-
-                    self.executeDuelRoll();
-
-                    return;
-
-                }
-
                 if (self.state) {
-
                     if (self.state.phase === "ROLL") {
-
                         e.preventDefault();
-
                         self.handleRollDice();
-
                         return;
-
                     } else if (self.state.pendingAction) {
-
                         var pa = self.state.pendingAction;
-
                         if (pa.canResolveQuest && pa.questCard) {
-
                             e.preventDefault();
-
                             self.openQuestDuelModal();
-
                             return;
-
                         } else if (pa.canBuyNode) {
-
                             e.preventDefault();
-
                             self.handleBuyNode();
-
                             return;
-
                         }
-
                     }
-
                 }
-
             }
 
             // 3. ENTER -> Konec tahu
-
             if (e.key === "Enter" || e.code === "Enter") {
-
                 if (self.state && self.state.phase === "ACTION") {
-
                     e.preventDefault();
-
                     self.handleEndTurn();
-
                     return;
-
                 }
-
             }
 
             // 4. Klávesy 1 až 4 -> Přepínání záložek postranního panelu
-
             if (e.key === "1") { self.switchSidebarTab("tile"); }
-
             else if (e.key === "2") { self.switchSidebarTab("knight"); }
-
             else if (e.key === "3") { self.switchSidebarTab("property"); }
-
             else if (e.key === "4") { self.switchSidebarTab("log"); }
 
             // 5. Klávesa F nebo C -> Vycentrovat na aktivního hráče
-
             if (e.key === "f" || e.key === "F" || e.key === "c" || e.key === "C") {
-
                 if (!e.ctrlKey && !e.metaKey) {
-
                     self.centerOnActivePlayer();
-
                 }
-
             }
-
         });
 
     },
 
     closeAllModals: function () {
         this.hidePlayerTooltip();
-        this.closeChanceModal();
-
-        this.closeQuestDuelModal();
-
-        this.closeKnightDuelModal();
-
-        this.closeDeckModal();
-
-        this.closeArmoryModal();
-
-        this.closeOnlineRoleModal();
-
-        this.closeGraphicsModal();
-
-        this.closeMusicPopup();
-
-        this.closeImageModal();
-
-        if (this.closeCheatSheetModal) this.closeCheatSheetModal();
-
-        var authModal = document.getElementById("auth-modal");
-
-        if (authModal) authModal.style.display = "none";
-
-        this.updateBodyModalClass();
-
+        if (window.PRS_ModalManager && typeof window.PRS_ModalManager.closeAll === "function") {
+            window.PRS_ModalManager.closeAll();
+        } else {
+            this.closeChanceModal();
+            this.closeQuestDuelModal();
+            this.closeKnightDuelModal();
+            this.closeDeckModal();
+            this.closeArmoryModal();
+            this.closeOnlineRoleModal();
+            this.closeGraphicsModal();
+            this.closeMusicPopup();
+            this.closeImageModal();
+            if (this.closeCheatSheetModal) this.closeCheatSheetModal();
+            var authModal = document.getElementById("auth-modal");
+            if (authModal) authModal.style.display = "none";
+            this.updateBodyModalClass();
+        }
+        var chatDrawer = document.getElementById("online-chat-drawer");
+        if (chatDrawer && !chatDrawer.classList.contains("hidden") && typeof this.toggleChatDrawer === "function") {
+            this.toggleChatDrawer(false);
+        }
+        if (typeof this.closeMobileSheet === "function") {
+            this.closeMobileSheet();
+        }
     },
 
     // --- FÁZE 4 & 5: MULTIPLAYER, EMOTES, TUTORIÁL & SCÉNÁŘE ---
@@ -5365,10 +5357,10 @@ window.PRS_App = {
     syncSettingsSoundLabel: function () {
         var btn = document.getElementById("settings-audio-btn");
         if (btn && window.PRS_Audio) {
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            btn.innerHTML = window.PRS_Audio.muted 
-                ? (isEn ? "🔇 Sound: Off" : "🔇 Zvuk: Vyp")
-                : (isEn ? "🔊 Sound: On" : "🔊 Zvuk: Zap");
+            var tSet = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
+            btn.innerHTML = window.PRS_Audio.muted
+                ? tSet("settings.sound_off", "🔇 Zvuk: Vyp")
+                : tSet("settings.sound_on", "🔊 Zvuk: Zap");
         }
     },
 
@@ -5376,12 +5368,16 @@ window.PRS_App = {
         var btn = document.getElementById("settings-device-btn");
         if (btn && this.deviceProfile) {
             var cur = this.deviceProfile.override;
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var tSet = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
             var icon = (this.deviceProfile.device === "mobile") ? "📱" : ((this.deviceProfile.device === "tablet") ? "📟" : "💻");
-            var devLabel = (this.deviceProfile.device === "mobile" ? (isEn ? "Mobile" : "Mobil") : (this.deviceProfile.device === "tablet" ? "Tablet" : "PC"));
-            var modeAuto = isEn ? "Mode: Auto (" : "Režim: Auto (";
-            var modePrefix = isEn ? "Mode: " : "Režim: ";
-            btn.textContent = (!cur) ? (icon + " " + modeAuto + devLabel + ")") : (icon + " " + modePrefix + (cur === "mobile" ? (isEn ? "Mobile" : "Mobil") : "PC"));
+            var devLabel = (this.deviceProfile.device === "mobile"
+                ? tSet("settings.device_mobile", null, "Mobil")
+                : (this.deviceProfile.device === "tablet"
+                    ? tSet("settings.device_tablet", null, "Tablet")
+                    : tSet("settings.device_pc", null, "PC")));
+            btn.textContent = (!cur)
+                ? (icon + " " + tSet("settings.mode_auto_fmt", { device: devLabel }, "Režim: Auto (" + devLabel + ")"))
+                : (icon + " " + (cur === "mobile" ? tSet("settings.mode_mobile", null, "Režim: Mobil") : tSet("settings.mode_pc", null, "Režim: PC")));
         }
     },
 

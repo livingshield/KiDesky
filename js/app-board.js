@@ -3063,8 +3063,8 @@
 
                 out.push('      <rect x="-24" y="-12" width="48" height="15" rx="5" fill="#b45309" stroke="#fbbf24" stroke-width="1.2"/>');
 
-                var isEnStanding = (window.PRS_I18n && window.PRS_I18n.getLanguage() === 'en');
-                out.push('      <text x="0" y="-1" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">' + (isEnStanding ? 'HERE' : 'ZDE STOJÍŠ') + '</text>');
+                var standingLabel = (window.PRS_I18n && window.PRS_I18n.t) ? window.PRS_I18n.t("board.standing_here", null, "ZDE STOJÍŠ") : "ZDE STOJÍŠ";
+                out.push('      <text x="0" y="-1" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">' + standingLabel + '</text>');
 
                 out.push('      <polygon points="-4,3 0,7 4,3" fill="#fbbf24"/>');
 

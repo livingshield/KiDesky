@@ -1219,3 +1219,189 @@
 .seat-item-card:hover {
     border-color: rgba(212, 175, 55, 0.6);
 }
+
+/* ==========================================================================
+   ETAPA 3: SDÍLENÉ KOMPONENTOVÉ & UTILITY TŘÍDY (NÁHRADA INLINE STYLŮ)
+   ========================================================================== */
+.topbar #topbar-credits-btn {
+    padding: 0.3rem 0.65rem;
+    font-weight: 700;
+    border-color: var(--gold);
+    color: var(--gold-light);
+    align-items: center;
+    gap: 0.35rem;
+}
+.topbar #topbar-pwa-install-btn {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #059669, #10b981);
+    border-color: #34d399;
+    align-items: center;
+    gap: 0.35rem;
+}
+.topbar #topbar-achievements-btn,
+.topbar #topbar-cheatsheet-btn {
+    padding: 0.3rem 0.65rem;
+    font-weight: 700;
+    border-color: var(--gold);
+    color: var(--gold-light);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.topbar #topbar-login-btn {
+    padding: 0.32rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.topbar #topbar-logout-btn {
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+.topbar #topbar-settings-btn {
+    padding: 0.32rem 0.65rem;
+    font-weight: 600;
+    border-color: var(--gold);
+    color: var(--gold-light);
+}
+
+.lp-media-card-pad {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.welcome-entry-card .prs-welcome-cta-primary,
+.lp-media-card .prs-welcome-cta-primary {
+    flex: 1;
+    min-width: 180px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+}
+.welcome-entry-card .prs-welcome-cta-secondary,
+.lp-media-card .prs-welcome-cta-secondary {
+    flex: 1;
+    min-width: 160px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.86rem;
+    border-color: var(--gold);
+    color: var(--gold-light);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+}
+.lobby-settings-grid {
+    display: grid;
+    gap: 0.55rem;
+    margin-bottom: 0.95rem;
+}
+.gamehall-table-tabs {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+.gamehall-table-tabs .gamehall-tab-btn {
+    flex: 1;
+}
+
+.prs-settings-card {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+}
+.prs-settings-card-title {
+    font-weight: bold;
+    color: var(--gold-light);
+    margin-bottom: 0.4rem;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.prs-form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.prs-form-label-sm {
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    display: block;
+    margin-bottom: 2px;
+}
+.prs-form-label-gold {
+    font-size: 0.78rem;
+    color: var(--gold-light);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+.prs-input-full {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.35rem 0.65rem;
+}
+.prs-modal-heading {
+    margin: 0;
+    font-family: 'Cinzel', serif;
+    color: var(--gold-light);
+}
+.prs-section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+.prs-modal-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.prs-text-muted-sm {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 0.65rem;
+}
+.prs-text-muted-xs {
+    font-size: 0.76rem;
+    color: #cbd5e1;
+}
+.prs-text-gold {
+    color: var(--gold-light);
+}
+.prs-text-gold-soft {
+    color: #fef08a;
+}
+.prs-flex-gap-xs {
+    display: flex;
+    gap: 4px;
+}
+.prs-flex-wrap-sm {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+.prs-mb-sm {
+    margin-bottom: 0.45rem;
+}
+.prs-flex-1 {
+    flex: 1;
+}

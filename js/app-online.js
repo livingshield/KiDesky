@@ -437,10 +437,10 @@ openAuthModal: function () {
 
             : null;
 
-        var isEnBar = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tBar = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var myRoleText = myPl
-            ? ((window.PRS_I18n ? window.PRS_I18n.t("online.role_playing_as") : "🛡️ Hraješ za:") + ' <strong style="color:' + myPl.color + ';">' + myPl.badge + ' ' + this.escapeHtml(myPl.name) + '</strong>')
-            : (window.PRS_I18n ? window.PRS_I18n.t("online.role_all_hotseat") : "🛋️ Všichni hráči (Hot-Seat bez zámku)");
+            ? (tBar("online.role_playing_as", null, "🛡️ Hraješ za:") + ' <strong style="color:' + myPl.color + ';">' + myPl.badge + ' ' + this.escapeHtml(myPl.name) + '</strong>')
+            : tBar("online.role_all_hotseat", null, "🛋️ Všichni hráči (Hot-Seat bez zámku)");
 
         var restoreMyRoleBtn = '';
         if (this.myOnlinePlayerIndex === -1 && this.state.players) {
@@ -453,21 +453,22 @@ openAuthModal: function () {
             }
             if (myMatchingIdx >= 0) {
                 var myTargetP = this.state.players[myMatchingIdx];
-                restoreMyRoleBtn = '  <button class="btn-gold-lg" style="font-size:0.75rem; padding:0.22rem 0.55rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + myMatchingIdx + ')" title="' + (isEnBar ? "Lock this window only for your character" : "Znovu uzamknout toto okno pouze pro tvou postavu") + '">' + (window.PRS_I18n ? window.PRS_I18n.t("online.btn_lock_only_my_role", { name: this.escapeHtml(myTargetP.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "")) }) : ("🔒 Hrát pouze za " + this.escapeHtml(myTargetP.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, "")))) + '</button>';
+                var cleanMyName = this.escapeHtml(myTargetP.name.replace(/\s*\(PC.*?\)/gi, "").replace(/\s*\(Ty\)/gi, ""));
+                restoreMyRoleBtn = '  <button class="btn-gold-lg" style="font-size:0.75rem; padding:0.22rem 0.55rem; background:linear-gradient(135deg, #d4af37, #b45309); border-color:#fef08a;" onclick="PRS_App.claimOnlineRole(' + myMatchingIdx + ')" title="' + tBar("online.btn_lock_only_my_role_title", null, "Znovu uzamknout toto okno pouze pro tvou postavu") + '">' + tBar("online.btn_lock_only_my_role", { name: cleanMyName }, "🔒 Hrát pouze za " + cleanMyName) + '</button>';
             }
         }
 
-        var optionsHtml = '<option value="-1" ' + (this.myOnlinePlayerIndex === -1 ? 'selected' : '') + '>🛋️ Všichni hráči u 1 PC (Hot-Seat bez zámku)</option>';
+        var optionsHtml = '<option value="-1" ' + (this.myOnlinePlayerIndex === -1 ? 'selected' : '') + '>' + tBar("online.opt_all_hotseat", null, "🛋️ Všichni hráči u 1 PC (Hot-Seat bez zámku)") + '</option>';
 
         for (var i = 0; i < this.state.players.length; i++) {
             var pl = this.state.players[i];
-            var typeTag = (pl.type === "Human") ? "Hráč" : "PC";
+            var typeTag = (pl.type === "Human") ? tBar("online.tag_human", null, "Hráč") : tBar("online.tag_bot", null, "PC");
             optionsHtml += '<option value="' + i + '" ' + (this.myOnlinePlayerIndex === i ? 'selected' : '') + '>🛡️ ' + pl.badge + ' ' + (i + 1) + '. ' + this.escapeHtml(pl.name) + ' (' + typeTag + ')</option>';
         }
 
         barEl.innerHTML = '<div class="online-room-banner">' +
             '<div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">' +
-            '  <span class="online-pulse-dot" title="Online místnost je aktivní"></span>' +
+            '  <span class="online-pulse-dot" title="' + tBar("online.table_active_dot_title", null, "Online místnost je aktivní") + '"></span>' +
             '  <span style="font-size:0.88rem; color:#f0f9ff;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.table_bar_prefix") : "🌐 Online Stůl:") + ' <strong style="color:var(--gold-light); letter-spacing:1px; font-size:0.98rem;">' + this.escapeHtml(code) + '</strong></span>' +
             '  <button class="btn-secondary" style="font-size:0.76rem; padding:0.22rem 0.55rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.copyRoomInviteLink()">' + (window.PRS_I18n ? window.PRS_I18n.t("online.btn_copy_invite_link") : "📋 Kopírovat odkaz pro přátele") + '</button>' +
             '  <span id="online-copy-feedback" style="font-size:0.76rem; color:#86efac;"></span>' +
@@ -517,8 +518,9 @@ openAuthModal: function () {
 
             var diffLabel = { easy: "🌿 Easy", standard: "👑 Standard", hard: "⚔️ Hard", ultimate: "💀 Ultimate" }[(this.state.config && this.state.config.difficultyMode) || "standard"] || "👑 Standard";
 
-            var isEnInf = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        infoEl.innerHTML = (isEnInf ? "Room Code: " : "Kód místnosti: ") + '<strong style="color:var(--gold-light); letter-spacing:1px;">' + this.escapeHtml(this.state.roomCode || "") + '</strong> | ' + (isEnInf ? "Goal: " : "Cíl: ") + '<strong>' + (this.state.config.targetHearts || 30) + ' 💖</strong> | ' + (isEnInf ? "Mode: " : "Mód: ") + '<strong style="color:#fde68a;">' + diffLabel + '</strong> | ' + (isEnInf ? "Round: #" : "Kolo: #") + this.state.roundNumber;
+        infoEl.innerHTML = window.PRS_I18n
+            ? window.PRS_I18n.t("online.role_info_line", { code: this.escapeHtml(this.state.roomCode || ""), target: (this.state.config.targetHearts || 30), diff: diffLabel, round: this.state.roundNumber })
+            : ('Kód místnosti: <strong style="color:var(--gold-light); letter-spacing:1px;">' + this.escapeHtml(this.state.roomCode || "") + '</strong> | Cíl: <strong>' + (this.state.config.targetHearts || 30) + ' 💖</strong> | Mód: <strong style="color:#fde68a;">' + diffLabel + '</strong> | Kolo: #' + this.state.roundNumber);
 
         }
 
@@ -939,7 +941,6 @@ openAuthModal: function () {
                 try { window.PRS_Audio.playNotice(); } catch (e) {}
             }
 
-            var isEnAfk = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var afkTitle = window.PRS_I18n ? window.PRS_I18n.t("online.afk_dialog.title") : "Neaktivita hráče u online stolu";
             var afkPrompt = window.PRS_I18n
                 ? window.PRS_I18n.t("online.afk_dialog.prompt", { name: this.escapeHtml(curPlayer.name), seat: (curIdx + 1) })
@@ -1002,8 +1003,10 @@ openAuthModal: function () {
         var origType = p.type;
         var self = this;
 
-        var isEnStep = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        this.addLog(isEnStep ? ("⚡ Player " + p.name + " did not respond. Host had the Royal Advisor play their turn.") : ("⚡ Hráč " + p.name + " neodpovídal. Hostitel nechal jeho tah odehrát královským rádcem."), "danger");
+        var logMsg = window.PRS_I18n
+            ? window.PRS_I18n.t("online.afk_step_log", { name: p.name }, "⚡ Hráč " + p.name + " neodpovídal. Hostitel nechal jeho tah odehrát královským rádcem.")
+            : ("⚡ Hráč " + p.name + " neodpovídal. Hostitel nechal jeho tah odehrát královským rádcem.");
+        this.addLog(logMsg, "danger");
 
         // Dočasně nastavíme typ hráče na bota, aby bot AI rozhodovala
         p.type = "Bot_Balanced";
@@ -1466,15 +1469,15 @@ openAuthModal: function () {
     renderSavedSessionsList: function (sessions) {
         var box = document.getElementById("saved-sessions-list");
         if (!box) return;
-        var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
+        var tSess = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
         if (!sessions || sessions.length === 0) {
-            box.innerHTML = '<div class="empty-note">' + (isEn ? 'No saved active games on the server yet.' : 'Zatím žádné uložené rozehrané partie na serveru.') + '</div>';
+            box.innerHTML = '<div class="empty-note">' + tSess("online.saved_sessions_empty", "Zatím žádné uložené rozehrané partie na serveru.") + '</div>';
             return;
         }
-        var codeLabel = isEn ? "Code: " : "Kód: ";
-        var turnLabel = isEn ? "Turn " : "Tah ";
-        var targetLabel = isEn ? "Target: " : "Cíl: ";
-        var loadBtn = window.PRS_I18n ? window.PRS_I18n.t("online.btn_load") : (isEn ? "▶️ Load" : "▶️ Načíst");
+        var codeLabel = tSess("online.saved_sessions_code", "Kód: ");
+        var turnLabel = tSess("online.saved_sessions_turn", "Tah ");
+        var targetLabel = tSess("online.saved_sessions_target", "Cíl: ");
+        var loadBtn = tSess("online.btn_load", "▶️ Načíst");
         var html = "";
         for (var i = 0; i < sessions.length; i++) {
             var s = sessions[i];
@@ -1828,24 +1831,33 @@ openAuthModal: function () {
 
     sendQuickShout: function (shoutKeyOrText) {
         if (!shoutKeyOrText) return;
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var shoutMap = {
-            "duel": isEn ? "⚔️ I challenge you to a tournament duel!" : "⚔️ Vyzývám tě na turnajový duel!",
-            "toast": isEn ? "🍻 A toast to the Queen and good neighbors!" : "🍻 Připíjím na královnu a dobré sousedy!",
-            "dragon": isEn ? "🐉 Dragon on the horizon, take cover!" : "🐉 Drak na obzoru, kryjte se!",
-            "peace": isEn ? "🤝 I offer honorable peace and friendship." : "🤝 Nabízím čestný mír a přátelství.",
-            "village": isEn ? "🏰 My estate grows, prepare your rent!" : "🏰 Mé panství roste, chystejte nájem!",
-            "victory": isEn ? "👑 The Princess's Heart shall soon be mine!" : "👑 Princeznino srdce bude brzy mé!"
+        var tShout = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
+        var legacyKeyMap = [
+            ["turnajový duel", "duel"],
+            ["Připíjím na královnu", "toast"],
+            ["Drak na obzoru", "dragon"],
+            ["Nabízím čestný mír", "peace"],
+            ["Mé panství roste", "village"],
+            ["Princeznino srdce bude brzy mé", "victory"]
+        ];
+        var shoutDefaults = {
+            "duel": "⚔️ Vyzývám tě na turnajový duel!",
+            "toast": "🍻 Připíjím na královnu a dobré sousedy!",
+            "dragon": "🐉 Drak na obzoru, kryjte se!",
+            "peace": "🤝 Nabízím čestný mír a přátelství.",
+            "village": "🏰 Mé panství roste, chystejte nájem!",
+            "victory": "👑 Princeznino srdce bude brzy mé!"
         };
-        var textToSend = shoutMap[shoutKeyOrText] || shoutKeyOrText;
-        if (isEn && !shoutMap[shoutKeyOrText]) {
-            if (shoutKeyOrText.indexOf("turnajový duel") !== -1) textToSend = "⚔️ I challenge you to a tournament duel!";
-            else if (shoutKeyOrText.indexOf("Připíjím na královnu") !== -1) textToSend = "🍻 A toast to the Queen and good neighbors!";
-            else if (shoutKeyOrText.indexOf("Drak na obzoru") !== -1) textToSend = "🐉 Dragon on the horizon, take cover!";
-            else if (shoutKeyOrText.indexOf("Nabízím čestný mír") !== -1) textToSend = "🤝 I offer honorable peace and friendship.";
-            else if (shoutKeyOrText.indexOf("Mé panství roste") !== -1) textToSend = "🏰 My estate grows, prepare your rent!";
-            else if (shoutKeyOrText.indexOf("Princeznino srdce bude brzy mé") !== -1) textToSend = "👑 The Princess's Heart shall soon be mine!";
+        var resolvedKey = shoutDefaults[shoutKeyOrText] ? shoutKeyOrText : null;
+        if (!resolvedKey) {
+            for (var li = 0; li < legacyKeyMap.length; li++) {
+                if (shoutKeyOrText.indexOf(legacyKeyMap[li][0]) !== -1) {
+                    resolvedKey = legacyKeyMap[li][1];
+                    break;
+                }
+            }
         }
+        var textToSend = resolvedKey ? tShout("chat.shout_texts." + resolvedKey, shoutDefaults[resolvedKey]) : shoutKeyOrText;
         this.sendChatMessage(textToSend);
     },
 
@@ -1896,9 +1908,8 @@ openAuthModal: function () {
         if (!container) return;
 
         if (!this._chatMessages || this._chatMessages.length === 0) {
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var emptyTxt = isEn
-                ? "💬 No messages at the table yet.<br/>Type a message or pick a quick shout above!"
+            var emptyTxt = window.PRS_I18n
+                ? window.PRS_I18n.t("chat.empty", null, "💬 Žádné zprávy u stolu.<br/>Napiš zprávu nebo zvol rychlý pokřik výše!")
                 : "💬 Žádné zprávy u stolu.<br/>Napiš zprávu nebo zvol rychlý pokřik výše!";
             container.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:0.78rem; padding:2rem 0.5rem; font-style:italic;">' + emptyTxt + '</div>';
             return;

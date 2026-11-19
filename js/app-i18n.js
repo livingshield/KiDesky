@@ -162,10 +162,18 @@
         },
 
         /**
-         * Přepne mezi CS a EN
+         * Přepne na další dostupný jazyk ze registrovaných slovníků
          */
         toggleLanguage: function () {
-            var nextLang = this._lang === 'cs' ? 'en' : 'cs';
+            var avail = this.getAvailableLanguages();
+            var nextLang = 'en';
+            if (avail.length > 0) {
+                var idx = -1;
+                for (var i = 0; i < avail.length; i++) {
+                    if (avail[i].code === this._lang) { idx = i; break; }
+                }
+                nextLang = avail[(idx + 1) % avail.length].code;
+            }
             this.setLanguage(nextLang);
             return nextLang;
         },
@@ -304,6 +312,14 @@
                     aNode.setAttribute('aria-label', this.t(aKey));
                 }
             }
+
+            // 5. Titulek dokumentu
+            if (el === document && document.title !== undefined) {
+                var pageTitle = this.t('app.page_title', null, '');
+                if (pageTitle && pageTitle !== 'app.page_title') {
+                    document.title = pageTitle;
+                }
+            }
         },
 
         /**
@@ -313,15 +329,19 @@
             var lang = this._lang;
 
             // 0. Dynamické naplnění a synchronizace všech dropdown výběrů jazyka (.prs-lang-select)
-            var selects = document.querySelectorAll('.prs-lang-select, #global-lang-select, #board-bar-lang-select, #settings-lang-select, #mobile-dock-lang-select');
+            var selects = document.querySelectorAll('.prs-lang-select, #global-lang-select, #settings-lang-select, #mobile-dock-lang-select');
             var avail = this.getAvailableLanguages();
             for (var s = 0; s < selects.length; s++) {
                 var sel = selects[s];
                 if (!sel || sel.tagName !== 'SELECT') continue;
+                var isCompact = (sel.id === 'mobile-dock-lang-select');
                 var needsRebuild = (sel.options.length !== avail.length);
                 if (!needsRebuild) {
                     for (var o = 0; o < avail.length; o++) {
-                        if (sel.options[o].value !== avail[o].code) {
+                        var expectedTxt = isCompact
+                            ? ((avail[o].flag ? avail[o].flag + ' ' : '') + avail[o].short)
+                            : avail[o].label;
+                        if (sel.options[o].value !== avail[o].code || sel.options[o].textContent !== expectedTxt) {
                             needsRebuild = true;
                             break;
                         }
@@ -332,56 +352,13 @@
                     for (var a = 0; a < avail.length; a++) {
                         var opt = document.createElement('option');
                         opt.value = avail[a].code;
-                        opt.textContent = avail[a].label;
+                        opt.textContent = isCompact
+                            ? ((avail[a].flag ? avail[a].flag + ' ' : '') + avail[a].short)
+                            : avail[a].label;
                         sel.appendChild(opt);
                     }
                 }
                 sel.value = lang;
-            }
-
-            // 1. Tlačítko v horní liště (zpětná kompatibilita)
-            var topBtn = document.getElementById('topbar-lang-btn');
-            if (topBtn) {
-                if (lang === 'cs') {
-                    topBtn.innerHTML = '🇨🇿 <span class="hide-on-mobile">CZ</span>';
-                    topBtn.title = 'Jazyk: Čeština (kliknutím přepneš na English)';
-                } else {
-                    topBtn.innerHTML = '🇬🇧 <span class="hide-on-mobile">EN</span>';
-                    topBtn.title = 'Language: English (click to switch to Čeština)';
-                }
-            }
-
-            // 1b. Tlačítko na plovoucí liště herního plánu
-            var boardLabel = document.getElementById('board-bar-lang-label');
-            var boardBtn = document.getElementById('board-bar-lang-btn');
-            if (boardLabel) boardLabel.textContent = (lang === 'cs' ? 'CZ' : 'EN');
-            if (boardBtn) boardBtn.title = (lang === 'cs' ? 'Přepnout jazyk (Čeština / English)' : 'Toggle language (English / Čeština)');
-
-            // 1c. Tlačítko ve spodní mobilní liště (Mobile Dock)
-            var dockLabel = document.getElementById('mobile-dock-lang-label');
-            var dockBtn = document.getElementById('mobile-dock-lang-btn');
-            if (dockLabel) dockLabel.textContent = (lang === 'cs' ? 'CZ' : 'EN');
-            if (dockBtn) dockBtn.title = (lang === 'cs' ? 'Přepnout jazyk (Čeština / English)' : 'Toggle language (English / Čeština)');
-
-            // 2. Tlačítka v nastavení
-            var csBtn = document.getElementById('settings-lang-cs-btn');
-            var enBtn = document.getElementById('settings-lang-en-btn');
-            if (csBtn && enBtn) {
-                if (lang === 'cs') {
-                    csBtn.classList.add('active');
-                    csBtn.style.borderColor = 'var(--gold)';
-                    csBtn.style.background = 'rgba(212,175,55,0.25)';
-                    enBtn.classList.remove('active');
-                    enBtn.style.borderColor = 'rgba(255,255,255,0.2)';
-                    enBtn.style.background = 'rgba(0,0,0,0.3)';
-                } else {
-                    enBtn.classList.add('active');
-                    enBtn.style.borderColor = 'var(--gold)';
-                    enBtn.style.background = 'rgba(212,175,55,0.25)';
-                    csBtn.classList.remove('active');
-                    csBtn.style.borderColor = 'rgba(255,255,255,0.2)';
-                    csBtn.style.background = 'rgba(0,0,0,0.3)';
-                }
             }
 
             // 7. Map Studio a Editor živá synchronizace při otevřeném modálu
