@@ -1,15 +1,204 @@
 param(
-    [switch]$AllAssets = $false
+    [switch]$AllAssets = $false,
+    [string[]]$AssetFolders = @(),
+    [switch]$IncludeMedia = $false,
+    [switch]$DryRun = $false,
+    [switch]$SkipPreCheck = $false
 )
 
-[System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+$ErrorActionPreference = "Stop"
 
 $localBase = $PSScriptRoot
 if (-not $localBase) { $localBase = (Get-Location).Path }
 
+$remoteBases = @("/www/apps/KiDesky/", "/www/wwwroot/apps/KiDesky/")
+
+function Assert-NoExePath {
+    param([string]$FilePath)
+    if ($FilePath -match '\.exe($|\.)') {
+        throw "CRITICAL VIOLATION (ASPONE policy): Refusing .exe file in deployment set: $FilePath"
+    }
+}
+
+function Get-RelativeUnixPath {
+    param([string]$BaseDir, [string]$FullPath)
+    $baseNorm = [System.IO.Path]::GetFullPath($BaseDir).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+    $fullNorm = [System.IO.Path]::GetFullPath($FullPath)
+    if (-not $fullNorm.StartsWith($baseNorm, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Path outside project root: $FullPath"
+    }
+    return $fullNorm.Substring($baseNorm.Length).Replace('\', '/')
+}
+
+function Add-AllowedFile {
+    param(
+        [System.Collections.Generic.List[string]]$TargetList,
+        [System.Collections.Generic.HashSet[string]]$SeenSet,
+        [string]$FullPath
+    )
+    if (-not (Test-Path -LiteralPath $FullPath -PathType Leaf)) { return }
+    $rel = Get-RelativeUnixPath -BaseDir $localBase -FullPath $FullPath
+    Assert-NoExePath $rel
+    if ($SeenSet.Add($rel)) {
+        [void]$TargetList.Add($rel)
+    }
+}
+
+function Collect-MatchingFiles {
+    param(
+        [System.Collections.Generic.List[string]]$TargetList,
+        [System.Collections.Generic.HashSet[string]]$SeenSet,
+        [string]$DirPath,
+        [string[]]$AllowedExtensions,
+        [string[]]$ExcludeTopSubdirs = @()
+    )
+    if (-not (Test-Path -LiteralPath $DirPath -PathType Container)) { return }
+    $baseDirFull = [System.IO.Path]::GetFullPath($DirPath).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+    $items = Get-ChildItem -LiteralPath $DirPath -Recurse -File
+    foreach ($item in $items) {
+        Assert-NoExePath $item.FullName
+        $subRel = $item.FullName.Substring($baseDirFull.Length).Replace('\', '/')
+        $firstSegment = ($subRel -split '/')[0]
+        if ($ExcludeTopSubdirs -contains $firstSegment) { continue }
+        $ext = $item.Extension.ToLowerInvariant()
+        if ($AllowedExtensions -contains $ext) {
+            Add-AllowedFile -TargetList $TargetList -SeenSet $SeenSet -FullPath $item.FullName
+        }
+    }
+}
+
+# 1. Pre-deploy verification check
+if (-not $SkipPreCheck) {
+    $preCheckScript = Join-Path $localBase "tools\predeploy-check.js"
+    if (-not (Test-Path -LiteralPath $preCheckScript)) {
+        Write-Error "Pre-deploy check script missing: $preCheckScript"
+        exit 1
+    }
+    Write-Host "Running pre-deploy check..." -ForegroundColor Cyan
+    & node $preCheckScript
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Pre-deploy check failed (exit code $LASTEXITCODE). Deployment aborted."
+        exit 1
+    }
+} else {
+    Write-Warning "Skipping pre-deploy check (-SkipPreCheck)."
+}
+
+# 2. Dynamically assemble code & asset file lists
+$codeFiles = New-Object 'System.Collections.Generic.List[string]'
+$codeSeen = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+
+$allowedRootFiles = @(
+    "index.html",
+    "manifest.json",
+    "service-worker.js",
+    "web.config",
+    "appsettings.json",
+    "appsettings.Production.json"
+)
+foreach ($rf in $allowedRootFiles) {
+    Add-AllowedFile -TargetList $codeFiles -SeenSet $codeSeen -FullPath (Join-Path $localBase $rf)
+}
+
+$ashxFiles = Get-ChildItem -LiteralPath $localBase -Filter "api*.ashx" -File
+foreach ($af in $ashxFiles) {
+    Add-AllowedFile -TargetList $codeFiles -SeenSet $codeSeen -FullPath $af.FullName
+}
+
+Collect-MatchingFiles -TargetList $codeFiles -SeenSet $codeSeen -DirPath (Join-Path $localBase "css") -AllowedExtensions @(".css")
+Collect-MatchingFiles -TargetList $codeFiles -SeenSet $codeSeen -DirPath (Join-Path $localBase "js") -AllowedExtensions @(".js", ".json")
+Collect-MatchingFiles -TargetList $codeFiles -SeenSet $codeSeen -DirPath (Join-Path $localBase "App_Code") -AllowedExtensions @(".cs")
+
+$iconsDir = Join-Path $localBase "assets\icons"
+if (Test-Path -LiteralPath $iconsDir -PathType Container) {
+    $iconItems = Get-ChildItem -LiteralPath $iconsDir -File
+    foreach ($ii in $iconItems) {
+        Assert-NoExePath $ii.FullName
+        if (@(".png", ".svg", ".webp") -contains $ii.Extension.ToLowerInvariant()) {
+            Add-AllowedFile -TargetList $codeFiles -SeenSet $codeSeen -FullPath $ii.FullName
+        }
+    }
+}
+Add-AllowedFile -TargetList $codeFiles -SeenSet $codeSeen -FullPath (Join-Path $localBase "assets\web.config")
+
+$assetFiles = New-Object 'System.Collections.Generic.List[string]'
+$assetSeen = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+
+# Avoid adding files to assetFiles if already scheduled in codeFiles
+foreach ($cf in $codeFiles) {
+    [void]$assetSeen.Add($cf)
+}
+
+$imageExts = @(".png", ".jpg", ".jpeg", ".webp", ".svg")
+$assetAllowedExts = @(".png", ".jpg", ".jpeg", ".webp", ".svg", ".mp3", ".ogg", ".m4a", ".mp4", ".webm")
+
+if ($AssetFolders -and $AssetFolders.Count -gt 0) {
+    $normalizedFolders = @()
+    foreach ($entry in $AssetFolders) {
+        if ([string]::IsNullOrWhiteSpace($entry)) { continue }
+        foreach ($part in ($entry -split ',')) {
+            $trimmed = $part.Trim().Trim('\', '/')
+            if ($trimmed) { $normalizedFolders += $trimmed }
+        }
+    }
+    $assetsRootFull = [System.IO.Path]::GetFullPath((Join-Path $localBase "assets"))
+    foreach ($folder in $normalizedFolders) {
+        if ($folder -match '\.\.') {
+            throw "Invalid AssetFolders entry: $folder"
+        }
+        $targetFolder = [System.IO.Path]::GetFullPath((Join-Path $assetsRootFull $folder))
+        if (-not $targetFolder.StartsWith($assetsRootFull, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw "Asset folder escapes assets directory: $folder"
+        }
+        if (-not (Test-Path -LiteralPath $targetFolder -PathType Container)) {
+            Write-Warning "Asset folder not found: assets/$folder"
+            continue
+        }
+        Collect-MatchingFiles -TargetList $assetFiles -SeenSet $assetSeen -DirPath $targetFolder -AllowedExtensions $assetAllowedExts
+    }
+}
+
+if ($AllAssets) {
+    Collect-MatchingFiles -TargetList $assetFiles -SeenSet $assetSeen -DirPath (Join-Path $localBase "assets") -AllowedExtensions $imageExts -ExcludeTopSubdirs @("audio", "video")
+}
+
+if ($IncludeMedia) {
+    Collect-MatchingFiles -TargetList $assetFiles -SeenSet $assetSeen -DirPath (Join-Path $localBase "assets\audio") -AllowedExtensions $assetAllowedExts
+    Collect-MatchingFiles -TargetList $assetFiles -SeenSet $assetSeen -DirPath (Join-Path $localBase "assets\video") -AllowedExtensions $assetAllowedExts
+}
+
+$allDeployFiles = New-Object 'System.Collections.Generic.List[string]'
+foreach ($f in $codeFiles) { [void]$allDeployFiles.Add($f) }
+foreach ($f in $assetFiles) { [void]$allDeployFiles.Add($f) }
+
+# Final strict safety check across all scheduled files
+$exeMatches = @($allDeployFiles | Where-Object { $_ -match '\.exe($|\.)' })
+if ($exeMatches.Count -gt 0) {
+    throw "CRITICAL VIOLATION: .exe files detected in deployment manifest: $($exeMatches -join ', ')"
+}
+
+if ($DryRun) {
+    Write-Host ""
+    Write-Host "=== DRY RUN DEPLOYMENT MANIFEST ===" -ForegroundColor Yellow
+    Write-Host "Target FTP roots: $($remoteBases -join ', ')" -ForegroundColor Cyan
+    Write-Host "Code files ($($codeFiles.Count)):" -ForegroundColor Green
+    foreach ($f in $codeFiles) { Write-Host "  [CODE]  $f" }
+    Write-Host "Asset files ($($assetFiles.Count)):" -ForegroundColor Green
+    if ($assetFiles.Count -eq 0) {
+        Write-Host "  (none; pass -AllAssets, -AssetFolders, or -IncludeMedia)" -ForegroundColor DarkGray
+    } else {
+        foreach ($f in $assetFiles) { Write-Host "  [ASSET] $f" }
+    }
+    Write-Host "Safety check: 0 .exe files | Total scheduled: $($allDeployFiles.Count) files per mirror." -ForegroundColor Cyan
+    exit 0
+}
+
+# 3. Load FTP credentials only for real deployment
+[System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+
 $configPath = Join-Path $localBase "appsettings.local.json"
-if (Test-Path $configPath) {
-    $cfg = Get-Content $configPath -Raw | ConvertFrom-Json
+if (Test-Path -LiteralPath $configPath) {
+    $cfg = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $FtpServer = $cfg.FTP.Host
     $FtpUsername = $cfg.FTP.Username
     $FtpPassword = $cfg.FTP.Password
@@ -25,14 +214,51 @@ if (-not $FtpUsername -or -not $FtpPassword) {
 }
 
 $credentials = New-Object System.Net.NetworkCredential($FtpUsername, $FtpPassword)
+$createdDirsCache = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
 
-$remoteBases = @("/www/apps/KiDesky/", "/www/wwwroot/apps/KiDesky/")
+function Ensure-FtpDirectory {
+    param([string]$remoteDirUri)
+    if ($createdDirsCache.Contains($remoteDirUri)) { return }
+    try {
+        $req = [System.Net.FtpWebRequest]::Create($remoteDirUri)
+        $req.Credentials = $credentials
+        $req.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory
+        $req.KeepAlive = $false
+        $req.EnableSsl = $false
+        $resp = $req.GetResponse()
+        $resp.Close()
+        Write-Host "Created FTP dir: $remoteDirUri" -ForegroundColor Cyan
+    } catch {
+        # Directory likely already exists on FTP
+    }
+    [void]$createdDirsCache.Add($remoteDirUri)
+}
+
+function Ensure-FtpDirectoryTree {
+    param(
+        [string]$ftpHost,
+        [string]$remoteBase,
+        [string]$relFilePath
+    )
+    $dirPart = [System.IO.Path]::GetDirectoryName($relFilePath)
+    if ([string]::IsNullOrEmpty($dirPart)) { return }
+    $segments = $dirPart.Replace('\', '/').Split('/', [System.StringSplitOptions]::RemoveEmptyEntries)
+    $accum = ""
+    foreach ($seg in $segments) {
+        $accum = if ($accum) { "$accum/$seg" } else { $seg }
+        $uri = "ftp://$ftpHost$remoteBase$accum"
+        Ensure-FtpDirectory $uri
+    }
+}
 
 function Upload-FtpFile {
-    param($localFilePath, $remoteFileUri)
+    param(
+        [string]$localFilePath,
+        [string]$remoteFileUri
+    )
     if ($localFilePath -match '\.exe($|\.)' -or $remoteFileUri -match '\.exe($|\.)') {
         Write-Error "CRITICAL VIOLATION: Refusing to upload .exe file: $localFilePath"
-        return
+        return $false
     }
     try {
         $req = [System.Net.FtpWebRequest]::Create($remoteFileUri)
@@ -49,125 +275,33 @@ function Upload-FtpFile {
         $stream.Close()
         $resp = $req.GetResponse()
         $resp.Close()
-        Write-Host "Uploaded: $(Split-Path $localFilePath -Leaf) -> $remoteFileUri" -ForegroundColor Green
+        Write-Host "Uploaded: $localFilePath -> $remoteFileUri" -ForegroundColor Green
+        return $true
     } catch {
         Write-Warning "Failed uploading $localFilePath to $remoteFileUri : $_"
+        return $false
     }
 }
 
-function Ensure-FtpDirectory {
-    param($remoteDirUri)
-    try {
-        $req = [System.Net.FtpWebRequest]::Create($remoteDirUri)
-        $req.Credentials = $credentials
-        $req.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory
-        $req.KeepAlive = $false
-        $req.EnableSsl = $false
-        $resp = $req.GetResponse()
-        $resp.Close()
-        Write-Host "Created FTP dir: $remoteDirUri" -ForegroundColor Cyan
-    } catch {
-        # Directory probably already exists
-    }
-}
-
-$codeFiles = @(
-    "index.html",
-    "manifest.json",
-    "service-worker.js",
-    "web.config",
-    "api.ashx",
-    "appsettings.Production.json",
-    "appsettings.json",
-    "css/main.css",
-    "css/board.css",
-    "css/modals.css",
-    "css/mobile.css",
-    "js/i18n/cs.js",
-    "js/i18n/en.js",
-    "js/app-i18n.js",
-    "js/game-data.js",
-    "js/game-boards.js",
-    "js/game-engine.js",
-    "js/game-combat-ai.js",
-    "js/app-audio.js",
-    "js/app.js",
-    "js/app-board.js",
-    "js/app-hud.js",
-    "js/app-modals.js",
-    "js/app-online.js",
-    "js/app-saves.js",
-    "js/app-map-editor.js",
-    "js/app-dialog.js",
-    "js/app-catalog.js",
-    "js/app-rules-guide.js",
-    "js/app-admin.js",
-    "js/app-musicwidget.js",
-    "assets/icons/icon-192.png",
-    "assets/icons/icon-512.png"
-)
+$uploadedCount = 0
+$failedCount = 0
 
 foreach ($rb in $remoteBases) {
-    Write-Host "=== Deploying code files to $rb ===" -ForegroundColor Yellow
-    Ensure-FtpDirectory "ftp://$FtpServer$($rb)css"
-    Ensure-FtpDirectory "ftp://$FtpServer$($rb)js"
-    Ensure-FtpDirectory "ftp://$FtpServer$($rb)js/i18n"
-    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets"
-    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/icons"
-    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/monsters"
-    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/tiles"
-    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/pawns"
-    Ensure-FtpDirectory "ftp://$FtpServer$($rb)assets/decorations"
-    foreach ($rel in $codeFiles) {
-        $localF = Join-Path $localBase $rel.Replace('/', '\')
-        if (Test-Path $localF) {
-            $remoteF = "ftp://$FtpServer$rb$rel"
-            Upload-FtpFile $localF $remoteF
+    Write-Host "=== Deploying $($allDeployFiles.Count) files to $rb ===" -ForegroundColor Yellow
+    foreach ($rel in $allDeployFiles) {
+        Ensure-FtpDirectoryTree -ftpHost $FtpServer -remoteBase $rb -relFilePath $rel
+        $localF = Join-Path $localBase ($rel.Replace('/', '\'))
+        $remoteF = "ftp://$FtpServer$rb$rel"
+        if (Upload-FtpFile -localFilePath $localF -remoteFileUri $remoteF) {
+            $uploadedCount++
         } else {
-            Write-Warning "Local file not found: $localF"
-        }
-    }
-
-    if ($AllAssets) {
-        # Deploy pawns if any
-        $pawnsDir = Join-Path $localBase "assets\pawns"
-        if (Test-Path $pawnsDir) {
-            $pawnFiles = Get-ChildItem -Path $pawnsDir -Filter "*.png"
-            foreach ($pf in $pawnFiles) {
-                $remoteF = "ftp://$FtpServer$($rb)assets/pawns/$($pf.Name)"
-                Upload-FtpFile $pf.FullName $remoteF
-            }
-        }
-
-        # Deploy monsters if any
-        $monstersDir = Join-Path $localBase "assets\monsters"
-        if (Test-Path $monstersDir) {
-            $monsterFiles = Get-ChildItem -Path $monstersDir -Filter "*.png"
-            foreach ($mf in $monsterFiles) {
-                $remoteF = "ftp://$FtpServer$($rb)assets/monsters/$($mf.Name)"
-                Upload-FtpFile $mf.FullName $remoteF
-            }
-        }
-
-        # Deploy tiles if any
-        $tilesDir = Join-Path $localBase "assets\tiles"
-        if (Test-Path $tilesDir) {
-            $tileFiles = Get-ChildItem -Path $tilesDir -Include "*.png","*.jpg" -Recurse
-            foreach ($tf in $tileFiles) {
-                $remoteF = "ftp://$FtpServer$($rb)assets/tiles/$($tf.Name)"
-                Upload-FtpFile $tf.FullName $remoteF
-            }
-        }
-
-        # Deploy decorations if any
-        $decorDir = Join-Path $localBase "assets\decorations"
-        if (Test-Path $decorDir) {
-            $decorFiles = Get-ChildItem -Path $decorDir -Include "*.png","*.jpg" -Recurse
-            foreach ($df in $decorFiles) {
-                $remoteF = "ftp://$FtpServer$($rb)assets/decorations/$($df.Name)"
-                Upload-FtpFile $df.FullName $remoteF
-            }
+            $failedCount++
         }
     }
 }
-Write-Host "All code files deployed successfully to FTP!" -ForegroundColor Green
+
+Write-Host "=== Deployment summary: $uploadedCount succeeded, $failedCount failed ===" -ForegroundColor $(if ($failedCount -gt 0) { "Red" } else { "Green" })
+if ($failedCount -gt 0) {
+    exit 1
+}
+exit 0
