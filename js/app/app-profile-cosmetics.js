@@ -675,15 +675,69 @@
         }
     },
 
+    resetActiveGameSessionForLogout: function () {
+        if (this.autoBotTimer) {
+            clearTimeout(this.autoBotTimer);
+            this.autoBotTimer = null;
+        }
+        if (typeof this.stopTurnTimer === "function") {
+            this.stopTurnTimer();
+        }
+        this.hasGameStarted = false;
+        this.state = null;
+        this.selectedNodeId = null;
+        this.isMoveAnimating = false;
+        this.animatingPlayerIndex = null;
+        this.animTokenPos = null;
+        this.victoryModalShown = false;
+        this.myOnlinePlayerIndex = 0;
+
+        if (typeof this.clearActiveGameAutosave === "function") {
+            this.clearActiveGameAutosave();
+        } else {
+            try {
+                localStorage.removeItem("prs_active_autosave");
+                sessionStorage.removeItem("prs_active_tab");
+            } catch (e) { }
+        }
+        try { localStorage.removeItem("prs_active_online_room"); } catch (e2) { }
+        try { localStorage.removeItem("prs_saved_game"); } catch (e3) { }
+        try { localStorage.setItem("prs_last_logout_ts", String(Date.now())); } catch (e4) { }
+        try {
+            var slotKeys = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                var k = localStorage.key(i);
+                if (k && k.indexOf("prs_slot_") === 0) slotKeys.push(k);
+            }
+            for (var j = 0; j < slotKeys.length; j++) {
+                localStorage.removeItem(slotKeys[j]);
+            }
+        } catch (e5) { }
+        try {
+            if (window.location && window.location.search && window.location.search.indexOf("room=") !== -1 && window.history && window.history.replaceState) {
+                window.history.replaceState(null, "", window.location.pathname);
+            }
+        } catch (e6) { }
+        if (typeof this.closeAllModals === "function") {
+            this.closeAllModals();
+        }
+    },
+
     logoutUser: function () {
         if (window.PRS_Api) {
             window.PRS_Api.post("logout", {}, { silentAuth: true }).catch(function (err) { console.warn("[KiDesky] logout request failed:", err); });
             window.PRS_Api.clearAuthToken();
         }
+        this.resetActiveGameSessionForLogout();
         this.setGuestMode();
         if (window.PRS_Audio && window.PRS_Audio.playNotice) window.PRS_Audio.playNotice();
-        this.closeAuthModal();
+        if (typeof this.closeAuthModal === "function") this.closeAuthModal();
         this.updateUserUI();
+        if (typeof this.updateResumeGameButtonUI === "function") this.updateResumeGameButtonUI();
+        if (typeof this.updateSavedGamesUI === "function") this.updateSavedGamesUI();
+        if (this.activeTab && this.activeTab !== "welcome" && this.activeTab !== "rules" && this.activeTab !== "lobby" && typeof this.switchTab === "function") {
+            this.switchTab("welcome");
+        }
         var outMsg = window.PRS_I18n ? window.PRS_I18n.t("auth.logout_success") : "Byl jsi úspěšně odhlášen. Nyní pokračuješ volně v režimu Hosta."; if (window.KiDeskyToast) { KiDeskyToast.show(outMsg, "info"); } else { alert(outMsg); }
     },
 
@@ -698,7 +752,10 @@
             this.userCredits = 0;
             try { localStorage.setItem("prs_user", JSON.stringify(this.currentUser)); } catch (e) { }
         }
+        try { localStorage.removeItem("prs_active_online_room"); } catch (e2) { }
         this.updateUserUI();
+        if (typeof this.updateResumeGameButtonUI === "function") this.updateResumeGameButtonUI();
+        if (typeof this.updateSavedGamesUI === "function") this.updateSavedGamesUI();
         if (this.activeTab === "admin" && typeof this.switchTab === "function") {
             this.switchTab("welcome");
         }

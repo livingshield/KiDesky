@@ -284,6 +284,8 @@ openAuthModal: function () {
 
                     localStorage.setItem("prs_user", JSON.stringify(self.currentUser));
                     self.updateUserUI();
+                    if (typeof self.updateResumeGameButtonUI === "function") self.updateResumeGameButtonUI();
+                    if (typeof self.updateSavedGamesUI === "function") self.updateSavedGamesUI();
                     self.closeAuthModal();
                     if (typeof self.rebindOnlineSeatAfterLogin === "function") {
                         self.rebindOnlineSeatAfterLogin();
@@ -2013,6 +2015,8 @@ openAuthModal: function () {
                         try { localStorage.setItem("prs_user", JSON.stringify(PRS_App.currentUser)); } catch (e4) { }
                         PRS_App.updateUserUI();
                         PRS_App.updateGameHallUI();
+                        if (typeof PRS_App.updateResumeGameButtonUI === "function") PRS_App.updateResumeGameButtonUI();
+                        if (typeof PRS_App.updateSavedGamesUI === "function") PRS_App.updateSavedGamesUI();
 
                         setTimeout(function () {
                             PRS_App.closeAuthModal();

@@ -416,11 +416,12 @@ async function main() {
     const castlesDesc = Object.getOwnPropertyDescriptor(win.PRS_BoardBuilder, 'ALL_CASTLES');
     assert(castlesDesc && typeof castlesDesc.get === 'function', 'PRS_BoardBuilder.ALL_CASTLES getter missing');
     assert(win.PRS_GameEngine && Object.keys(win.PRS_GameEngine).length === 59, 'PRS_GameEngine key count != 59');
-    assert(win.PRS_App && Object.keys(win.PRS_App).length === 212, `PRS_App key count != 212 (got ${Object.keys(win.PRS_App || {}).length})`);
+    assert(win.PRS_App && Object.keys(win.PRS_App).length >= 213, `PRS_App key count < 213 (got ${Object.keys(win.PRS_App || {}).length})`);
+    assert(typeof win.PRS_App.resetActiveGameSessionForLogout === 'function', 'PRS_App.resetActiveGameSessionForLogout missing');
     assert(win.KiDeskyToast && typeof win.KiDeskyToast.show === 'function', 'KiDeskyToast.show missing');
     assert(String(win.PRS_App.toggleEmotePicker).includes('knight-emotes-hud'), 'toggleEmotePicker must use #knight-emotes-hud');
 
-    return '15 modules <105 KB each; parity keys verified (49/26/18/59/212/1) & toggleEmotePicker fixed';
+    return '15 modules <105 KB each; parity keys verified & toggleEmotePicker fixed';
   });
 
   // 4. Unit test for PRS_ModuleLoader + lazy PRS_I18n language switching

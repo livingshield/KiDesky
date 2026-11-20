@@ -321,6 +321,33 @@
             }
         },
 
+        // Vlastnictví automaticky uložené rozehrané partie podle aktivního účtu
+        getActiveAccountKey: function () {
+            if (this.currentUser && this.currentUser.role !== "Guest" && (this.currentUser.username || this.currentUser.id)) {
+                return "user:" + String(this.currentUser.username || this.currentUser.id).trim().toLowerCase();
+            }
+            return "guest";
+        },
+
+        isAutosaveOwnedByCurrentAccount: function (data, restoredState) {
+            var curKey = this.getActiveAccountKey();
+            if (data && typeof data.ownerKey === "string" && data.ownerKey) {
+                return data.ownerKey === curKey;
+            }
+            if (curKey === "guest") {
+                if (restoredState && restoredState.hostUsername) {
+                    var hu = String(restoredState.hostUsername).trim().toLowerCase();
+                    if (hu && hu !== "host" && hu !== "guest") return false;
+                }
+                try {
+                    var logoutTs = parseInt(localStorage.getItem("prs_last_logout_ts") || "0", 10);
+                    var saveTs = (data && typeof data.timestamp === "number") ? data.timestamp : 0;
+                    if (logoutTs > 0 && saveTs <= logoutTs) return false;
+                } catch (e) { }
+            }
+            return true;
+        },
+
         // Pomocný objekt metadat pro poslední aktivní / automaticky uloženou hru
         getActiveAutosaveMeta: function () {
             try {
@@ -334,6 +361,7 @@
                     if (!ts) ts = Date.now();
                 } else if (data && data.stateJson) {
                     st = JSON.parse(data.stateJson);
+                    if (!this.isAutosaveOwnedByCurrentAccount(data, st)) return null;
                 }
 
                 if (!st || !Array.isArray(st.players) || st.phase === "GAME_OVER") return null;
@@ -373,6 +401,9 @@
             try {
                 var payload = {
                     timestamp: Date.now(),
+                    ownerKey: this.getActiveAccountKey(),
+                    ownerRole: (this.currentUser && this.currentUser.role) ? this.currentUser.role : "Guest",
+                    ownerUsername: (this.currentUser && this.currentUser.role !== "Guest" && this.currentUser.username) ? this.currentUser.username : null,
                     currentBoardSeed: this.currentBoardSeed,
                     selectedRoyalCastle: this.selectedRoyalCastle,
                     selectedGameScenario: this.selectedGameScenario,
@@ -413,6 +444,9 @@
                     return false;
                 }
 
+                if (!this.isAutosaveOwnedByCurrentAccount(data, restored)) {
+                    return false;
+                }
                 this.sanitizeRestoredState(restored);
                 this.state = restored;
                 this.hasGameStarted = true;
@@ -501,7 +535,7 @@
                     return;
                 }
                 var st = JSON.parse(data.stateJson);
-                if (!st || !st.players || st.phase === "GAME_OVER") {
+                if (!st || !st.players || st.phase === "GAME_OVER" || !this.isAutosaveOwnedByCurrentAccount(data, st)) {
                     banner.style.display = "none";
                     return;
                 }
