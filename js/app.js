@@ -288,17 +288,21 @@ window.PRS_App = {
             }
         }
 
-        // Výchozí záložka při startu: pokud máme rozehranou hru, zůstáváme přímo u stolu!
+        // Výchozí záložka při startu:
+        // Ke stolu (tab-board) přecházíme POUZE pokud:
+        // 1. Obnova z autosavu proběhla v pořádku (restoredOk && hasGameStarted && state)
+        // 2. A ZÁROVEŇ byl hráč v tomto okně před obnovením prokazatelně u stolu (sTab === "board")!
+        // Pokud byl hráč na Landing Page / Úvodu, nebo se odhlásil, zůstává na 'welcome' (s bannerem pokračovat).
+        var sTab = null;
+        try { sTab = sessionStorage.getItem("prs_active_tab"); } catch (eInit) { }
+
         var initialTab = "welcome";
-        if (restoredOk && this.hasGameStarted && this.state) {
+        if (restoredOk && this.hasGameStarted && this.state && sTab === "board") {
             initialTab = "board";
         } else {
-            try {
-                var sTab = sessionStorage.getItem("prs_active_tab");
-                if (sTab && (sTab === "lobby" || sTab === "rules" || sTab === "admin")) {
-                    initialTab = sTab;
-                }
-            } catch (eInit) { }
+            if (sTab && (sTab === "lobby" || sTab === "rules" || sTab === "admin")) {
+                initialTab = sTab;
+            }
             if (curSearch.indexOf("room=") !== -1) {
                 initialTab = "lobby";
             }

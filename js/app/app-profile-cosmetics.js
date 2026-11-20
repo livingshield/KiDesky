@@ -700,6 +700,7 @@
                 sessionStorage.removeItem("prs_active_tab");
             } catch (e) { }
         }
+        try { sessionStorage.setItem("prs_active_tab", "welcome"); } catch (eTab) { }
         try { localStorage.removeItem("prs_active_online_room"); } catch (e2) { }
         try { localStorage.removeItem("prs_saved_game"); } catch (e3) { }
         try { localStorage.setItem("prs_last_logout_ts", String(Date.now())); } catch (e4) { }
@@ -735,7 +736,7 @@
         this.updateUserUI();
         if (typeof this.updateResumeGameButtonUI === "function") this.updateResumeGameButtonUI();
         if (typeof this.updateSavedGamesUI === "function") this.updateSavedGamesUI();
-        if (this.activeTab && this.activeTab !== "welcome" && this.activeTab !== "rules" && this.activeTab !== "lobby" && typeof this.switchTab === "function") {
+        if (typeof this.switchTab === "function") {
             this.switchTab("welcome");
         }
         var outMsg = window.PRS_I18n ? window.PRS_I18n.t("auth.logout_success") : "Byl jsi úspěšně odhlášen. Nyní pokračuješ volně v režimu Hosta."; if (window.KiDeskyToast) { KiDeskyToast.show(outMsg, "info"); } else { alert(outMsg); }

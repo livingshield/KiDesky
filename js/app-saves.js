@@ -330,20 +330,73 @@
         },
 
         isAutosaveOwnedByCurrentAccount: function (data, restoredState) {
+            if (!data || !restoredState) return false;
             var curKey = this.getActiveAccountKey();
+
+            // 1. Pokud nese autosave explicitní vlastnictví ownerKey
             if (data && typeof data.ownerKey === "string" && data.ownerKey) {
-                return data.ownerKey === curKey;
+                if (data.ownerKey !== curKey) {
+                    return false;
+                }
+                if (curKey === "guest") {
+                    if (data.ownerRole && data.ownerRole !== "Guest") return false;
+                    if (data.ownerUsername) return false;
+                }
             }
+
+            // 2. Kontrola v režimu Host (nepřihlášený uživatel)
             if (curKey === "guest") {
+                // Nesmí patřit online hře založené registrovaným hráčem
                 if (restoredState && restoredState.hostUsername) {
                     var hu = String(restoredState.hostUsername).trim().toLowerCase();
-                    if (hu && hu !== "host" && hu !== "guest") return false;
+                    if (hu && hu !== "host" && hu !== "guest" && hu.indexOf("host") !== 0 && hu.indexOf("guest") !== 0) return false;
                 }
+                // Pokud chybí explicitní ownerKey (legacy save z verze bez ownerKey):
+                if (!data.ownerKey) {
+                    if (data.ownerRole && data.ownerRole !== "Guest") return false;
+                    if (data.ownerUsername) return false;
+                    if (restoredState && Array.isArray(restoredState.players)) {
+                        for (var pIdx = 0; pIdx < restoredState.players.length; pIdx++) {
+                            var pl = restoredState.players[pIdx];
+                            if (pl && pl.type === "Human" && pl.name) {
+                                var pNameLower = String(pl.name).trim().toLowerCase();
+                                if (pNameLower !== "host" && pNameLower !== "guest" && pNameLower.indexOf("host") !== 0 && pNameLower.indexOf("guest") !== 0 && pNameLower.indexOf("hráč") !== 0 && pNameLower.indexOf("player") !== 0) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+                // Nesmí být vytvořen před posledním odhlášením uživatele
                 try {
                     var logoutTs = parseInt(localStorage.getItem("prs_last_logout_ts") || "0", 10);
                     var saveTs = (data && typeof data.timestamp === "number") ? data.timestamp : 0;
                     if (logoutTs > 0 && saveTs <= logoutTs) return false;
                 } catch (e) { }
+            } else {
+                // 3. Kontrola pro přihlášeného rytíře (pokud jde o starší autosave bez ownerKey)
+                if (data && !data.ownerKey) {
+                    var curUName = (this.currentUser && this.currentUser.username) ? String(this.currentUser.username).trim().toLowerCase() : "";
+                    var curDisp = (this.currentUser && this.currentUser.displayName) ? String(this.currentUser.displayName).trim().toLowerCase() : "";
+                    var matchesUser = false;
+                    if (restoredState && restoredState.hostUsername) {
+                        var rHost = String(restoredState.hostUsername).trim().toLowerCase();
+                        if (rHost && (rHost === curUName || (curDisp && rHost === curDisp))) matchesUser = true;
+                    }
+                    if (restoredState && Array.isArray(restoredState.players)) {
+                        for (var i = 0; i < restoredState.players.length; i++) {
+                            var p = restoredState.players[i];
+                            if (p && p.type === "Human" && p.name) {
+                                var pn = String(p.name).trim().toLowerCase();
+                                if (pn === curUName || (curDisp && pn === curDisp)) {
+                                    matchesUser = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!matchesUser) return false;
+                }
             }
             return true;
         },
@@ -445,6 +498,13 @@
                 }
 
                 if (!this.isAutosaveOwnedByCurrentAccount(data, restored)) {
+                    try {
+                        var logoutTs = parseInt(localStorage.getItem("prs_last_logout_ts") || "0", 10);
+                        var saveTs = (data && typeof data.timestamp === "number") ? data.timestamp : 0;
+                        if (logoutTs > 0 && saveTs <= logoutTs) {
+                            this.clearActiveGameAutosave();
+                        }
+                    } catch (eClean) { }
                     return false;
                 }
                 this.sanitizeRestoredState(restored);

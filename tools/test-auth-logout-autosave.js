@@ -272,8 +272,70 @@ function main() {
     assert(reloadEnv.app.state && reloadEnv.app.state.roundNumber === 4, 'Guest state corrupted on restore');
   });
 
+  ok &= runTest('6. Legacy autosave without ownerKey belonging to registered user is rejected for Guest', () => {
+    // Simulate legacy storage payload where ownerKey was never set and player is Lord Kikin
+    const legacyPayload = {
+      timestamp: Date.now() - 50000,
+      stateJson: JSON.stringify(makeSampleState('lordkikin'))
+    };
+    const env = createEnv({
+      prs_active_autosave: JSON.stringify(legacyPayload)
+    });
+    env.app.currentUser = { id: null, username: 'Host', displayName: 'Host', role: 'Guest' };
+    assert(env.app.tryRestoreActiveGameAutosave() === false, 'Guest restored legacy save belonging to Lord Kikin');
+    assert(env.app.getActiveAutosaveMeta() === null, 'Guest saw active meta for Lord Kikin legacy save');
+  });
+
+  ok &= runTest('7. Cold reload with restored game stays on "welcome" tab if user was not on "board"', () => {
+    const env = createEnv();
+    env.app.currentUser = { id: 7, username: 'LordKikin', displayName: 'Lord Kikin', role: 'Player' };
+    env.app.hasGameStarted = true;
+    env.app.state = makeSampleState('LordKikin');
+    env.app.saveActiveGameAutosave();
+
+    // User was on welcome tab before F5 / Ctrl+F5
+    const reloadEnv = createEnv(env.localStorage._dump(), { prs_active_tab: 'welcome' });
+    reloadEnv.app.currentUser = { id: 7, username: 'LordKikin', displayName: 'Lord Kikin', role: 'Player' };
+
+    // Simulate js/app.js init() tab determination
+    const curSearch = '';
+    const forceWelcome = false;
+    let restoredOk = false;
+    let sTab = null;
+    try { sTab = reloadEnv.sessionStorage.getItem('prs_active_tab'); } catch (e) {}
+
+    if (!forceWelcome && curSearch.indexOf('room=') === -1) {
+      if (typeof reloadEnv.app.tryRestoreActiveGameAutosave === 'function') {
+        restoredOk = reloadEnv.app.tryRestoreActiveGameAutosave();
+      }
+    }
+
+    let initialTab = 'welcome';
+    if (restoredOk && reloadEnv.app.hasGameStarted && reloadEnv.app.state && sTab === 'board') {
+      initialTab = 'board';
+    } else {
+      if (sTab && (sTab === 'lobby' || sTab === 'rules' || sTab === 'admin')) {
+        initialTab = sTab;
+      }
+    }
+
+    assert(restoredOk === true, 'Autosave should restore in memory for owner');
+    assert(initialTab === 'welcome', `Expected initialTab "welcome" because sTab was "welcome", got "${initialTab}"`);
+
+    // Now test if sTab was "board", initialTab goes to "board"
+    const reloadBoardEnv = createEnv(env.localStorage._dump(), { prs_active_tab: 'board' });
+    reloadBoardEnv.app.currentUser = { id: 7, username: 'LordKikin', displayName: 'Lord Kikin', role: 'Player' };
+    let sTabBoard = reloadBoardEnv.sessionStorage.getItem('prs_active_tab');
+    let restoredBoardOk = reloadBoardEnv.app.tryRestoreActiveGameAutosave();
+    let initialTabBoard = 'welcome';
+    if (restoredBoardOk && reloadBoardEnv.app.hasGameStarted && reloadBoardEnv.app.state && sTabBoard === 'board') {
+      initialTabBoard = 'board';
+    }
+    assert(initialTabBoard === 'board', `Expected initialTab "board" when sTab is "board", got "${initialTabBoard}"`);
+  });
+
   if (!ok) process.exit(1);
-  console.log('\n=== Výsledek test-auth-logout-autosave: 5 PASS, 0 FAIL ===');
+  console.log('\n=== Výsledek test-auth-logout-autosave: 7 PASS, 0 FAIL ===');
 }
 
 main();
