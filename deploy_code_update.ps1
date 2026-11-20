@@ -108,6 +108,7 @@ foreach ($af in $ashxFiles) {
 Collect-MatchingFiles -TargetList $codeFiles -SeenSet $codeSeen -DirPath (Join-Path $localBase "css") -AllowedExtensions @(".css")
 Collect-MatchingFiles -TargetList $codeFiles -SeenSet $codeSeen -DirPath (Join-Path $localBase "js") -AllowedExtensions @(".js", ".json")
 Collect-MatchingFiles -TargetList $codeFiles -SeenSet $codeSeen -DirPath (Join-Path $localBase "App_Code") -AllowedExtensions @(".cs")
+Collect-MatchingFiles -TargetList $codeFiles -SeenSet $codeSeen -DirPath (Join-Path $localBase "backend") -AllowedExtensions @(".cs", ".config")
 
 $iconsDir = Join-Path $localBase "assets\icons"
 if (Test-Path -LiteralPath $iconsDir -PathType Container) {

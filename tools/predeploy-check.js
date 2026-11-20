@@ -77,12 +77,18 @@ function checkJsSyntax() {
 
 function checkUtf8Encoding() {
   const targets = [];
-  for (const rootName of ['index.html', 'service-worker.js', 'api.ashx']) {
+  for (const rootName of ['index.html', 'service-worker.js', 'web.config']) {
     const p = path.join(ROOT, rootName);
     if (fs.existsSync(p)) targets.push(p);
   }
+  for (const entry of fs.readdirSync(ROOT)) {
+    if (/^api.*\.ashx$/i.test(entry)) {
+      targets.push(path.join(ROOT, entry));
+    }
+  }
   targets.push(...walkDir(path.join(ROOT, 'css'), (_f, n) => n.endsWith('.css')));
   targets.push(...walkDir(path.join(ROOT, 'js'), (_f, n) => n.endsWith('.js')));
+  targets.push(...walkDir(path.join(ROOT, 'backend'), (_f, n) => n.endsWith('.cs')));
   targets.push(...walkDir(path.join(ROOT, 'App_Code'), (_f, n) => n.endsWith('.cs')));
 
   const decoder = new TextDecoder('utf-8', { fatal: true });
@@ -405,6 +411,35 @@ function checkTrackedSecrets() {
   }
 }
 
+function checkBackendCompilation() {
+  const cscExists = [
+    'C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe',
+    'C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319\\csc.exe'
+  ].some((p) => fs.existsSync(p));
+
+  const compileScript = path.join(ROOT, 'tools', 'test-backend-compile.js');
+  if (!fs.existsSync(compileScript)) {
+    report('FAIL', '8. Kompilace C# backendu', 'Chybí tools/test-backend-compile.js');
+    return;
+  }
+
+  try {
+    execFileSync(process.execPath, [compileScript, '--quiet'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+    if (cscExists) {
+      report('OK', '8. Kompilace C# backendu', 'KiDeskyCore.cs + 5 .ashx zkompilováno přes csc.exe (0 chyb, 0 varování)');
+    } else {
+      report('WARN', '8. Kompilace C# backendu', 'csc.exe nenalezen — ověřeny pouze trasy a velikosti bez kompilace');
+    }
+  } catch (err) {
+    const details = ((err.stderr && String(err.stderr)) || (err.stdout && String(err.stdout)) || err.message || '').trim();
+    report('FAIL', '8. Kompilace C# backendu', details.split(/\r?\n/)[0] || 'Selhala kompilace C#');
+  }
+}
+
 function main() {
   console.log('=== KiDesky Pre-Deploy Check ===');
   checkNoExeFiles();
@@ -414,6 +449,7 @@ function main() {
   checkCacheBustingConsistency();
   checkPrsAppMethodCollisions();
   checkTrackedSecrets();
+  checkBackendCompilation();
   console.log(`=== Výsledek: ${failCount} FAIL, ${warnCount} WARN ===`);
   process.exit(failCount > 0 ? 1 : 0);
 }
