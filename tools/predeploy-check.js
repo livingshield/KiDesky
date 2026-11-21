@@ -396,7 +396,21 @@ function checkPrsAppMethodCollisions() {
 
 function checkTrackedSecrets() {
   try {
-    const out = execFileSync('git', ['ls-files', 'appsettings.local.json', 'appsettings.Production.json'], {
+    const gitBinCandidates = [
+      'git',
+      'C:\\Program Files\\Git\\cmd\\git.exe',
+      'C:\\Program Files\\Git\\bin\\git.exe'
+    ];
+    let gitBin = 'git';
+    for (const c of gitBinCandidates) {
+      if (c === 'git') {
+        try { execFileSync('git', ['--version'], { stdio: 'ignore' }); gitBin = 'git'; break; } catch (e) {}
+      } else if (fs.existsSync(c)) {
+        gitBin = c;
+        break;
+      }
+    }
+    const out = execFileSync(gitBin, ['ls-files', 'appsettings.local.json', 'appsettings.Production.json'], {
       cwd: ROOT,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe']

@@ -471,6 +471,8 @@
 
     
     getRoyalAdvisorAdvice: function (player, phase, pa, currNode) {
+        if (!player && this.state && Array.isArray(this.state.players)) { player = this.state.players[this.state.currentPlayerIndex || 0]; }
+        if (!phase && this.state) { phase = this.state.phase; }
         if (!this.state || !player) return null;
         var cfg = this.state.config || {};
         var scen = cfg.scenario || "classic";
@@ -537,7 +539,7 @@
                         threats.push({ node: tNode, roll: rollVal, rent: rentCost });
                     }
                 } else if (tNode.type === "PRISON") {
-                    threats.push({ node: tNode, roll: rollVal, isPrison: true });
+                    threats.push({ node: tNode, roll: rollVal, isPrison: true, rent: 0 });
                 }
 
                 // Příležitosti: volné zvíře do stávající sady
@@ -567,21 +569,24 @@
 
             if (hasMissingAnimalInReach) {
                 var opp = opportunities.find(function (o) { return o.isTrioCompleter; });
-                return {
+                if (opp && opp.node) {
+                    return {
                     icon: "👑",
                     title: "Královský rádce",
                     badge: "Šlechtický chov",
                     badgeClass: "advisor-good",
                     text: "Při hodu **" + opp.roll + "** máš na dosah volné zvíře **" + this.escapeHtml(opp.node.name) + "**, které zkompletuje tvou chovnou sadu na **3/3** a zajistí ti korunu 👑 a **+1.5 💖**!" + (curMode !== "cautious" && opp.roll <= 4 ? " Zvaž přepnutí na **Opatrný krok 🚶 (1–4)** pro vyšší šanci na přesný hod." : ""),
                     actionPrompt: "Hoď kostkou a usiluj o číslo " + opp.roll + "!"
-                };
+                    };
+                }
             }
 
             if (threats.length > 0 && curMode === "standard") {
                 var th = threats[0];
                 var isEnAdv = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
                 var tAdvH = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
-                var rentStr = th.rent.toLocaleString(isEnAdv ? "en-US" : "cs-CZ") + " " + (isEnAdv ? "g." : "zl.");
+                var rentVal = (typeof th.rent === "number") ? th.rent : 0;
+                var rentStr = rentVal.toLocaleString(isEnAdv ? "en-US" : "cs-CZ") + " " + (isEnAdv ? "g." : "zl.");
                 var dangerDesc = th.isPrison ? tAdvH("advisor.hazard_danger_prison", null, "šatlava") : tAdvH("advisor.hazard_danger_rent", { rent: rentStr }, "cizí panství s nájmem **" + rentStr + "**");
                 return {
                     icon: "🛡️",
@@ -636,7 +641,8 @@
                 };
             }
 
-            var pGoldStrAdv = player.gold.toLocaleString(isEnAdv ? "en-US" : "cs-CZ") + " " + (isEnAdv ? "g." : "zl.");
+            var pGoldVal = (typeof player.gold === "number") ? player.gold : 0;
+            var pGoldStrAdv = pGoldVal.toLocaleString(isEnAdv ? "en-US" : "cs-CZ") + " " + (isEnAdv ? "g." : "zl.");
             return {
                 icon: "🧙‍♂️",
                 title: isEnAdv ? "Royal Advisor" : "Královský rádce",

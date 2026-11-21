@@ -325,7 +325,32 @@ async function main() {
     for (const m of expectedMethods) {
       assert(typeof win.PRS_App[m] === 'function', `Expected PRS_App.${m} function missing after loading split modules`);
     }
-    return `15 split modules syntax-ok & loaded (${Object.keys(win.PRS_App).length} PRS_App entries)`;
+
+    // Verify Royal Advisor getRoyalAdvisorAdvice does not crash when PRISON is within reach
+    win.PRS_GameEngine = {
+      getTargetNodeForRoll: function (st, pl, r) {
+        return (st.board && st.board.nodes) ? st.board.nodes[r] : null;
+      }
+    };
+    win.PRS_App.state = {
+      phase: 'ROLL',
+      scenario: 'slayer',
+      config: { prisonBail: 1000 },
+      players: [{ index: 0, name: 'Lord Kikin', gold: 1000, totalHearts: 5, ownedNodes: [] }],
+      currentPlayerIndex: 0,
+      board: {
+        nodes: [
+          { id: 0, name: 'Start', type: 'START' },
+          { id: 1, name: 'Pole 1', type: 'NORMAL' },
+          { id: 2, name: 'Pole 2', type: 'NORMAL' },
+          { id: 3, name: 'Královská šatlava', type: 'PRISON' }
+        ]
+      }
+    };
+    const advResult = win.PRS_App.getRoyalAdvisorAdvice();
+    assert(advResult && advResult.text, 'getRoyalAdvisorAdvice should return advice object with text when near PRISON');
+
+    return `15 split modules syntax-ok & loaded (${Object.keys(win.PRS_App).length} PRS_App entries, advisor prison safe)`;
   });
 
   // 3c. Fáze 4B-2 split modules check (14 new submodules + thin app.js; old game-boards/game-engine removed)
