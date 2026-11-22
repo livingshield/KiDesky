@@ -874,6 +874,12 @@
 
             this.startTurnTimer();
 
+            var skipDecree = false;
+            try { skipDecree = (localStorage.getItem("prs_skip_story_decree") === "1"); } catch (eDec) { }
+            if (!skipDecree && typeof this.openStoryDecreeModal === "function") {
+                this.openStoryDecreeModal();
+            }
+
         }
 
     },
@@ -983,6 +989,56 @@
         }
 
         this.handleDifficultyChange(this.selectedDifficultyMode || "standard");
+    },
+
+    openStoryDecreeModal: function () {
+        var modal = document.getElementById("story-decree-modal");
+        if (!modal || !this.state) return;
+
+        var tDec = function (key, params, fb) {
+            return (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t(key, params, fb)
+                : fb;
+        };
+
+        var cfg = this.state.config || {};
+        var scen = cfg.scenario || "classic";
+        var targetH = cfg.targetHearts || 30;
+        var targetD = cfg.targetDragons || 2;
+
+        var textKey = "story.decree_classic_text";
+        var goalKey = "story.decree_classic_goal";
+        var goalParams = { target: targetH };
+        if (scen === "sprint") { textKey = "story.decree_sprint_text"; goalKey = "story.decree_sprint_goal"; }
+        else if (scen === "epic") { textKey = "story.decree_epic_text"; goalKey = "story.decree_epic_goal"; }
+        else if (scen === "slayer") { textKey = "story.decree_slayer_text"; goalKey = "story.decree_slayer_goal"; goalParams = { target: targetD }; }
+        else if (scen === "tycoon") { textKey = "story.decree_tycoon_text"; goalKey = "story.decree_tycoon_goal"; goalParams = null; }
+
+        var txtEl = document.getElementById("story-decree-text");
+        var goalEl = document.getElementById("story-decree-goal");
+        var skipCb = document.getElementById("story-decree-skip-cb");
+
+        if (txtEl) txtEl.textContent = tDec(textKey, null, "");
+        if (goalEl) goalEl.textContent = tDec(goalKey, goalParams, "");
+        if (skipCb) {
+            try { skipCb.checked = (localStorage.getItem("prs_skip_story_decree") === "1"); } catch (e) { skipCb.checked = false; }
+        }
+
+        modal.style.display = "flex";
+        this.updateBodyModalClass();
+    },
+
+    closeStoryDecreeModal: function () {
+        var modal = document.getElementById("story-decree-modal");
+        var skipCb = document.getElementById("story-decree-skip-cb");
+        if (skipCb) {
+            try {
+                if (skipCb.checked) localStorage.setItem("prs_skip_story_decree", "1");
+                else localStorage.removeItem("prs_skip_story_decree");
+            } catch (e) { }
+        }
+        if (modal) modal.style.display = "none";
+        this.updateBodyModalClass();
     },
 
     sendPlayerEmote: function (emoji, label) {

@@ -947,10 +947,10 @@
         }
         .lp-two-videos-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.35rem;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 1.15rem;
         }
-        @media (max-width: 900px) {
+        @media (max-width: 720px) {
             .lp-two-videos-grid {
                 grid-template-columns: 1fr;
             }
@@ -5095,4 +5095,52 @@
         padding-top: 1.5mm !important;
         margin-top: 2mm !important;
     }
+}
+
+/* --- KRÁLOVSKÝ EDIKT VÝPRAVY & VÍTĚZNÝ EPILOG --- */
+.story-decree-box {
+    border: 1.5px solid var(--gold);
+    background: linear-gradient(145deg, rgba(28, 21, 14, 0.98), rgba(14, 10, 7, 0.99));
+}
+.story-decree-text {
+    margin: 0 0 0.85rem;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: #f5f5f4;
+}
+.story-decree-goal-pill {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+    background: rgba(236, 72, 153, 0.14);
+    border: 1px solid rgba(244, 114, 182, 0.45);
+    color: #fbcfe8;
+    font-size: 0.88rem;
+}
+.story-decree-goal-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--gold-light);
+    font-weight: 700;
+}
+.victory-epilogue-box {
+    margin-top: 0.65rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 10px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: #fef3c7;
+    font-size: 0.86rem;
+    line-height: 1.48;
+    text-align: left;
+}
+.victory-epilogue-box strong {
+    display: block;
+    color: var(--gold-light);
+    font-family: 'Cinzel', serif;
+    margin-bottom: 0.2rem;
 }

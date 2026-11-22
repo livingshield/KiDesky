@@ -1601,3 +1601,99 @@
 .prs-flex-1 {
     flex: 1;
 }
+
+/* --- PŘÍBĚHOVÝ PROLOG & TŘI CESTY K VÍTĚZSTVÍ (LANDING PAGE) --- */
+.lp-story-section {
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.4rem;
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(24, 18, 12, 0.94) 0%, rgba(15, 11, 8, 0.97) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+.lp-story-subtitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    max-width: 820px;
+    line-height: 1.45;
+}
+.lp-story-beats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+.lp-story-beat-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 14px;
+    padding: 0.95rem 1.05rem;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.lp-story-beat-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+}
+.lp-story-beat-card.is-highlight {
+    background: linear-gradient(145deg, rgba(236, 72, 153, 0.1), rgba(212, 175, 55, 0.08));
+    border-color: rgba(244, 114, 182, 0.45);
+}
+.lp-story-beat-icon {
+    font-size: 1.55rem;
+    margin-bottom: 0.35rem;
+}
+.lp-story-beat-card h3 {
+    margin: 0 0 0.35rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.96rem;
+    color: var(--gold-light);
+}
+.lp-story-beat-card p {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.48;
+    color: #e2e8f0;
+}
+.lp-story-paths-wrap {
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+}
+.lp-story-paths-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gold-light);
+    margin-bottom: 0.55rem;
+}
+.lp-story-paths-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+.lp-story-path-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(212, 175, 55, 0.16);
+}
+.lp-story-path-card strong {
+    font-size: 0.83rem;
+    color: #fde68a;
+}
+.lp-story-path-card span {
+    font-size: 0.77rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+@media (max-width: 900px) {
+    .lp-story-beats-grid,
+    .lp-story-paths-grid {
+        grid-template-columns: 1fr;
+    }
+}

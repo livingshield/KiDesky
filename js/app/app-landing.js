@@ -314,35 +314,55 @@
         var container = document.getElementById("lp-two-videos-grid");
         if (!container) return;
 
+        var tStory = function (key, fb) {
+            return (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t(key, null, fb)
+                : fb;
+        };
+
         var list = this.heroVideosList || [];
         var videos = [];
-        if (list.length >= 2) {
-            videos = [list[0], list[1]];
-        } else if (list.length === 1) {
-            videos = [list[0]];
+        if (list.length > 0) {
+            videos = list.slice(0, 3);
         } else {
-            // Výchozí dvojice oficiálních videí deskové hry
+            // Výchozí trojice oficiálních příběhových videí
             videos = [
                 {
                     id: 4,
-                    title: "Intro první princezna - youtube",
+                    title: tStory("story.video_ch1_title", "Sokolí poselství & Dračí souboj"),
                     url: "https://www.youtube.com/watch?v=sO-MnlHy_O4",
                     likesCount: 14,
-                    description: "Oficiální příběhová upoutávka: záchrana princezny, dračí sluj a královské slavnosti."
+                    description: tStory("story.video_ch1_desc", "")
                 },
                 {
-                    id: 5,
-                    title: "Intro první princezna - youtube multi",
-                    url: "https://www.youtube.com/watch?v=fPyG8yeCHas",
+                    id: 7,
+                    title: tStory("story.video_ch2_title", "Čtyři šampioni nad herním plánem"),
+                    url: "https://www.youtube.com/watch?v=BoDAksZugus",
                     likesCount: 9,
-                    description: "Ukázka deskového plánu, herní mechaniky, budování panství a online výpravy."
+                    description: tStory("story.video_ch2_desc", "")
+                },
+                {
+                    id: 6,
+                    title: tStory("story.video_ch3_title", "Únos princezny & Návrat s fanfárami"),
+                    url: "https://www.youtube.com/watch?v=TTXwxA90gPk",
+                    likesCount: 7,
+                    description: tStory("story.video_ch3_desc", "")
                 }
             ];
         }
 
+        var resolveChapter = function (v, idx) {
+            var u = (v && v.url) ? String(v.url) : "";
+            if (u.indexOf("sO-MnlHy_O4") !== -1) return 1;
+            if (u.indexOf("BoDAksZugus") !== -1 || u.indexOf("fPyG8yeCHas") !== -1) return 2;
+            if (u.indexOf("TTXwxA90gPk") !== -1) return 3;
+            return (idx % 3) + 1;
+        };
+
         var html = [];
         for (var i = 0; i < videos.length; i++) {
             var v = videos[i];
+            var ch = resolveChapter(v, i);
             var isYt = this.isYoutubeVideo(v);
             var ytid = isYt ? this.getYoutubeId(v.url) : "";
             var embedUrl = "";
@@ -353,52 +373,51 @@
             }
 
             var isLiked = !!(this._likedVideoIds && this._likedVideoIds[v.id]);
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var badgeText = (i === 0) ? (isEn ? "🎬 Story Intro" : "🎬 Příběhové intro") : (isEn ? "⚔️ Gameplay & Rules" : "⚔️ Hratelnost & Pravidla");
+            var badgeText = tStory("story.video_ch" + ch + "_badge", "🎬 Kapitola " + ch);
+
+            var rawTitle = (v.title || "").trim();
+            var isGenericTitle = !rawTitle ||
+                /^královská upoutávka/i.test(rawTitle) ||
+                /^princeznino srdce - intro/i.test(rawTitle) ||
+                /^intro první princezna/i.test(rawTitle);
+            var vTitle = isGenericTitle ? tStory("story.video_ch" + ch + "_title", rawTitle || ("Video " + (i + 1))) : rawTitle;
+
+            var rawDesc = (v.description || "").trim();
+            var isGenericDesc = !rawDesc ||
+                /^oficiální videopředstavení/i.test(rawDesc) ||
+                /^princeznino srdce - intro/i.test(rawDesc) ||
+                /^oficiální příběhová upoutávka/i.test(rawDesc) ||
+                /^ukázka deskového plánu/i.test(rawDesc);
+            var vDesc = isGenericDesc ? tStory("story.video_ch" + ch + "_desc", rawDesc) : rawDesc;
 
             html.push('<div class="lp-video-cinema-card">');
             html.push('  <div class="lp-video-card-header">');
-            var isEnVid = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var vTitle = v.title || ("Video " + (i + 1));
-            var vDesc = v.description || "";
-            if (isEnVid) {
-                if (v.id === 4 || (v.url && v.url.includes("sO-MnlHy_O4"))) {
-                    vTitle = "The Princess's Heart – Official Intro";
-                    vDesc = "Official story trailer: rescue of the princess, dragon's lair, and royal festivals.";
-                } else if (v.id === 5 || (v.url && v.url.includes("fPyG8yeCHas"))) {
-                    vTitle = "The Princess's Heart – Board & Multiplayer Showcase";
-                    vDesc = "Showcase of board mechanics, kingdom estates, and online multiplayer quests.";
-                } else if (vTitle && vTitle.toLowerCase().includes("videopředstavení")) {
-                    vTitle = "Official video showcase of KiDesky & The Princess's Heart";
-                }
-            }
             html.push('    <h3 class="lp-video-card-title">' + this.escapeHtml(vTitle) + '</h3>');
-            html.push('    <span class="lp-video-card-badge">' + badgeText + '</span>');
+            html.push('    <span class="lp-video-card-badge">' + this.escapeHtml(badgeText) + '</span>');
             html.push('  </div>');
 
             html.push('  <div class="lp-video-player-frame">');
             if (isYt && ytid) {
-                html.push('    <iframe src="' + embedUrl + '" title="' + this.escapeHtml(v.title || "") + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>');
+                html.push('    <iframe src="' + embedUrl + '" title="' + this.escapeHtml(vTitle) + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>');
             } else if (v.url && v.url.match(/\.(mp4|webm)($|\?)/i)) {
                 html.push('    <video controls preload="metadata" style="width:100%; height:100%; object-fit:cover; border-radius:10px;"><source src="' + this.escapeHtml(v.url) + '" type="video/mp4"></video>');
             } else {
-                html.push('    <iframe src="' + embedUrl + '" title="' + this.escapeHtml(v.title || "") + '" frameborder="0" allowfullscreen loading="lazy"></iframe>');
+                html.push('    <iframe src="' + embedUrl + '" title="' + this.escapeHtml(vTitle) + '" frameborder="0" allowfullscreen loading="lazy"></iframe>');
             }
             html.push('  </div>');
 
-            if (v.description) {
-                html.push('  <p class="lp-video-card-desc">' + this.escapeHtml(vDesc || v.description) + '</p>');
+            if (vDesc) {
+                html.push('  <p class="lp-video-card-desc">' + this.escapeHtml(vDesc) + '</p>');
             }
 
             html.push('  <div class="lp-video-card-footer">');
-            html.push('    <button type="button" class="lp-video-btn-action ' + (isLiked ? 'liked' : '') + '" onclick="PRS_App.likeVideoById(' + v.id + ', this)" title="' + (isLiked ? 'Tomuto videu jsi již dal like! 👍' : 'Dát videu to se mi líbí') + '">');
+            html.push('    <button type="button" class="lp-video-btn-action ' + (isLiked ? 'liked' : '') + '" onclick="PRS_App.likeVideoById(' + v.id + ', this)" title="' + this.escapeHtml(isLiked ? tStory("story.video_like_done", "👍") : tStory("story.video_like_title", "👍")) + '">');
             html.push('      <span class="like-heart">👍</span> <span class="like-num">' + (v.likesCount || 0) + '</span>');
             html.push('    </button>');
 
             if (isYt && ytid) {
-                html.push('    <a href="https://www.youtube.com/watch?v=' + ytid + '" target="_blank" rel="noopener noreferrer" class="lp-video-btn-action" title="' + (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en" ? "Play video on YouTube" : "Přehrát video na YouTube") + '">');
-                var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-                html.push('      <span>📺 ' + (isEn ? "Play on YouTube" : "Přehrát na YouTube") + '</span>');
+                html.push('    <a href="https://www.youtube.com/watch?v=' + ytid + '" target="_blank" rel="noopener noreferrer" class="lp-video-btn-action" title="' + this.escapeHtml(tStory("story.video_watch_yt", "YouTube")) + '">');
+                html.push('      <span>' + this.escapeHtml(tStory("story.video_watch_yt", "📺 YouTube")) + '</span>');
                 html.push('    </a>');
             }
             html.push('  </div>');

@@ -86,7 +86,148 @@
     },
 
     
+    renderQuestGoalBar: function () {
+        var bar = document.getElementById("board-quest-goal-bar");
+        if (!bar) return;
+        if (!this.state || !this.state.players || this.state.players.length === 0) {
+            bar.style.display = "none";
+            return;
+        }
+
+        var tStory = function (key, params, fb) {
+            return (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t(key, params, fb)
+                : fb;
+        };
+
+        var cfg = this.state.config || {};
+        var scen = cfg.scenario || "classic";
+        var targetHearts = cfg.targetHearts || 30;
+        var targetDragons = cfg.targetDragons || 2;
+
+        var living = this.state.players.filter(function (p) { return !p.isEliminated; });
+        var pool = living.length > 0 ? living : this.state.players;
+
+        var self = this;
+        var getProgress = function (p) {
+            if (scen === "slayer") {
+                var ds = (p.stats && p.stats.dragonsSlain) ? p.stats.dragonsSlain : 0;
+                return {
+                    score: ds,
+                    pct: Math.min(100, Math.round((ds / targetDragons) * 100)),
+                    label: "🐉 " + ds + " / " + targetDragons
+                };
+            }
+            if (scen === "tycoon") {
+                var cCount = 0, kCount = 0;
+                if (p.ownedNodes && self.state.board && self.state.board.nodes) {
+                    for (var i = 0; i < p.ownedNodes.length; i++) {
+                        var nd = self.state.board.nodes[p.ownedNodes[i]];
+                        if (nd) {
+                            if (nd.level === 3 || nd.type === "CASTLE") kCount++;
+                            else if (nd.level === 2 || nd.type === "TOWN") cCount++;
+                        }
+                    }
+                }
+                var scoreTy = Math.min(cCount, 3) + Math.min(kCount, 1);
+                return {
+                    score: scoreTy,
+                    pct: Math.min(100, Math.round((scoreTy / 4) * 100)),
+                    label: "🏰 " + cCount + "/3 · " + kCount + "/1"
+                };
+            }
+            var hVal = Math.round((p.totalHearts || 0) * 10) / 10;
+            return {
+                score: hVal,
+                pct: Math.min(100, Math.round((hVal / targetHearts) * 100)),
+                label: "💖 " + hVal + " / " + targetHearts
+            };
+        };
+
+        var leader = pool[0];
+        var leaderProg = getProgress(leader);
+        for (var j = 1; j < pool.length; j++) {
+            var cand = pool[j];
+            var candProg = getProgress(cand);
+            if (candProg.score > leaderProg.score || (candProg.score === leaderProg.score && (cand.totalHearts || 0) > (leader.totalHearts || 0))) {
+                leader = cand;
+                leaderProg = candProg;
+            }
+        }
+
+        var goalDescKey = "story.goal_classic";
+        var goalParams = { target: targetHearts };
+        if (scen === "sprint") goalDescKey = "story.goal_sprint";
+        else if (scen === "epic") goalDescKey = "story.goal_epic";
+        else if (scen === "slayer") { goalDescKey = "story.goal_slayer"; goalParams = { target: targetDragons }; }
+        else if (scen === "tycoon") { goalDescKey = "story.goal_tycoon"; goalParams = null; }
+
+        var isFinale = (leaderProg.pct >= 80 && !this.state.isEndlessMode);
+        bar.className = "board-quest-goal-bar" + (isFinale ? " is-finale" : "");
+        bar.style.display = "flex";
+
+        bar.innerHTML =
+            '<div class="quest-goal-left">' +
+            '  <span class="quest-goal-prefix">' + tStory("story.goal_prefix", null, "👑 Cíl výpravy:") + '</span>' +
+            '  <span class="quest-goal-desc">' + tStory(goalDescKey, goalParams, "") + '</span>' +
+            '</div>' +
+            '<div class="quest-goal-right">' +
+            '  <span class="quest-goal-leader">' + tStory("story.goal_leader", { name: this.escapeHtml(leader.name) }, leader.name) + '</span>' +
+            '  <div class="quest-goal-track"><div class="quest-goal-fill" style="width:' + leaderProg.pct + '%;"></div></div>' +
+            '  <span class="quest-goal-stat">' + leaderProg.label + '</span>' +
+            (isFinale ? ('  <span class="quest-goal-finale-badge">' + tStory("story.goal_finale", null, "🔥 Finále na dosah!") + '</span>') : '') +
+            '</div>';
+    },
+
+    checkStoryMilestones: function () {
+        if (!this.state || !this.state.players || this.state.isEndlessMode || this.state.phase === "GAME_OVER") return;
+        if (!this.state._storyMilestonesReached) {
+            this.state._storyMilestonesReached = {};
+        }
+        var reached = this.state._storyMilestonesReached;
+        var targetHearts = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30;
+        var tM = function (key, params, fb) {
+            return (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t(key, params, fb)
+                : fb;
+        };
+
+        var self = this;
+        var announce = function (msg) {
+            if (typeof self.addLog === "function") self.addLog(msg, "event");
+            if (window.KiDeskyToast && typeof window.KiDeskyToast.show === "function") {
+                window.KiDeskyToast.show(msg, "info");
+            }
+        };
+
+        for (var i = 0; i < this.state.players.length; i++) {
+            var p = this.state.players[i];
+            if (!p || p.isEliminated) continue;
+            var h = Math.round((p.totalHearts || 0) * 10) / 10;
+            var ds = (p.stats && p.stats.dragonsSlain) ? p.stats.dragonsSlain : 0;
+
+            if (!reached.h10 && h >= 10 && h < targetHearts) {
+                reached.h10 = true;
+                announce(tM("story.milestone_hearts_10", { name: p.name, hearts: h }, p.name + " -> " + h + " 💖"));
+            }
+            if (!reached.h20 && h >= 20 && h < targetHearts) {
+                reached.h20 = true;
+                announce(tM("story.milestone_hearts_20", { name: p.name, hearts: h }, p.name + " -> " + h + " 💖"));
+            }
+            if (!reached.h25 && targetHearts >= 30 && h >= 25 && h < targetHearts) {
+                reached.h25 = true;
+                announce(tM("story.milestone_hearts_25", { name: p.name, hearts: h }, p.name + " -> " + h + " 💖"));
+            }
+            if (!reached.dragon && ds >= 1) {
+                reached.dragon = true;
+                announce(tM("story.milestone_first_dragon", { name: p.name }, p.name + " 🐉"));
+            }
+        }
+    },
+
     renderTopPlayersHud: function () {
+        this.renderQuestGoalBar();
+        this.checkStoryMilestones();
         this.renderEndlessModeBanner();
 
         var el = document.getElementById("board-top-players-hud");

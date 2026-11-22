@@ -62,13 +62,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611221850">
+    <link rel="stylesheet" href="css/main.css?v=202611221945">
 
-    <link rel="stylesheet" href="css/board.css?v=202611221850">
+    <link rel="stylesheet" href="css/board.css?v=202611221945">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611221850">
+    <link rel="stylesheet" href="css/modals.css?v=202611221945">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611221850">
+    <link rel="stylesheet" href="css/mobile.css?v=202611221945">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -348,7 +348,54 @@
 
             </div>
 
-            <!-- 2. KRÁLOVSKÁ FILMOVÁ SÍŇ: VIDEA A UPOUTÁVKY (Dvě videa vedle sebe) -->
+            <!-- 1b. PŘÍBĚH KRÁLOVSTVÍ & CÍL VÝPRAVY (Propojení 3 videí a cesty ke korunce) -->
+            <section id="lp-story-section" class="lp-story-section">
+                <div class="lp-story-header">
+                    <div>
+                        <div class="lp-kicker-badge" style="margin-bottom:0.4rem;" data-i18n="story.kicker">📜 Příběh království &amp; Cíl hry</div>
+                        <h2 class="lp-section-heading" style="margin:0;" data-i18n="story.title">Legenda o unesené princezně a rubínovém náhrdelníku</h2>
+                        <p class="lp-story-subtitle" data-i18n="story.subtitle">Od sokolího poselství a přísahy u dvora až po záchranu princezny z dračí sluje — každé tvoje rozhodnutí na plánu píše pokračování této ságy.</p>
+                    </div>
+                </div>
+
+                <div class="lp-story-beats-grid">
+                    <article class="lp-story-beat-card">
+                        <div class="lp-story-beat-icon" aria-hidden="true">🦅</div>
+                        <h3 data-i18n="story.beat1_title">1. Sokolí poselství &amp; Společníci</h3>
+                        <p data-i18n="story.beat1_desc">Osamělá princezna vysílá sokolí vzkaz s rubínovým pečetěním. Rytíř na koni s věrným psem a sokolem opouští bezpečí hradu a vydává se na křižovatku osudů.</p>
+                    </article>
+                    <article class="lp-story-beat-card">
+                        <div class="lp-story-beat-icon" aria-hidden="true">🐉</div>
+                        <h3 data-i18n="story.beat2_title">2. Únos z audience &amp; Dračí sluj</h3>
+                        <p data-i18n="story.beat2_desc">Blesk rozetne královskou síň a drak unese princeznu do horských slují. Plačící královna svírá rubínové srdce, zatímco rytíř s pážetem přísahají záchranu.</p>
+                    </article>
+                    <article class="lp-story-beat-card is-highlight">
+                        <div class="lp-story-beat-icon" aria-hidden="true">💖</div>
+                        <h3 data-i18n="story.beat3_title">3. Zkouška šampionů &amp; Rubínová pocta</h3>
+                        <p data-i18n-html="story.beat3_desc">Nad deskou se spojí ruce hrdinů. Ten, kdo jako první prokáže hodnotu a dosáhne cíle výpravy (výchozí <strong>30 💖</strong>), položí draka a získá ruku princezny i královskou korunu.</p>
+                    </article>
+                </div>
+
+                <div class="lp-story-paths-wrap">
+                    <div class="lp-story-paths-title" data-i18n="story.paths_title">⚔️ Tři cesty k vítězství (Jak získat 30 💖)</div>
+                    <div class="lp-story-paths-grid">
+                        <div class="lp-story-path-card">
+                            <strong data-i18n="story.path1_title">🏰 Panství &amp; Šlechtické chovy</strong>
+                            <span data-i18n="story.path1_desc">Kupuj koně, psy a sokoly, rozšiřuj vesnice v města a hrady a pobírej královské výnosy.</span>
+                        </div>
+                        <div class="lp-story-path-card">
+                            <strong data-i18n="story.path2_title">🎭 Ctnosti &amp; Slavnosti dvora</strong>
+                            <span data-i18n="story.path2_desc">Studuj u mistrů Čest, Boj, Jízdu a Tanec a oslň královský dvůr na plesech i turnajích.</span>
+                        </div>
+                        <div class="lp-story-path-card">
+                            <strong data-i18n="story.path3_title">🐉 Zápas s monstry &amp; Dračí sluj</strong>
+                            <span data-i18n="story.path3_desc">Vyzbroj se v kovárnách, utkej se s lesními obludami a slož hlavu draka princezně k nohám.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. KRÁLOVSKÁ FILMOVÁ SÍŇ: VIDEA A UPOUTÁVKY (3 příběhové kapitoly) -->
             <section id="lp-video-showcase-section" class="lp-video-showcase-section">
                 <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:0.6rem; margin-bottom:1.15rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.65rem;">
                     <div>
@@ -1019,6 +1066,9 @@
 
             <!-- BANNER NEKONEČNÉ HRY PO VÍTĚZSTVÍ -->
             <div id="board-endless-mode-banner" class="board-endless-mode-banner"></div>
+
+            <!-- UKAZATEL CÍLE VÝPRAVY ("CESTA K TRŮNU") -->
+            <div id="board-quest-goal-bar" class="board-quest-goal-bar" style="display:none;"></div>
 
             <!-- KRÁLOVSKÁ POKLADNICE & PŘEHLED ZLATA RYTÍŘŮ U STOLU -->
 
@@ -3045,48 +3095,48 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/languages.js?v=202611221850" defer></script>
-    <script src="js/core/module-loader.js?v=202611221850" defer></script>
-    <script src="js/app-i18n.js?v=202611221850" defer></script>
-    <script src="js/game-data.js?v=202611221850" defer></script>
-    <script src="js/boards/boards-decor-catalog.js?v=202611221850" defer></script>
-    <script src="js/boards/boards-geometry.js?v=202611221850" defer></script>
-    <script src="js/boards/boards-generator.js?v=202611221850" defer></script>
-    <script src="js/boards/boards-builder.js?v=202611221850" defer></script>
-    <script src="js/boards/boards-presets.js?v=202611221850" defer></script>
-    <script src="js/engine/engine-state.js?v=202611221850" defer></script>
-    <script src="js/engine/engine-movement.js?v=202611221850" defer></script>
-    <script src="js/engine/engine-economy.js?v=202611221850" defer></script>
-    <script src="js/engine/engine-actions.js?v=202611221850" defer></script>
-    <script src="js/game-combat-ai.js?v=202611221850" defer></script>
-    <script src="js/app-audio.js?v=202611221850" defer></script>
-    <script src="js/app-dialog.js?v=202611221850" defer></script>
-    <script src="js/app-api.js?v=202611221850" defer></script>
-    <script src="js/app-modal-manager.js?v=202611221850" defer></script>
-    <script src="js/app.js?v=202611221850" defer></script>
-    <script src="js/app/app-music-ui.js?v=202611221850" defer></script>
-    <script src="js/app/app-landing.js?v=202611221850" defer></script>
-    <script src="js/app/app-profile-cosmetics.js?v=202611221850" defer></script>
-    <script src="js/app/app-lobby-session.js?v=202611221850" defer></script>
-    <script src="js/app/app-map-studio.js?v=202611221850" defer></script>
-    <script src="js/board/board-camera.js?v=202611221850" defer></script>
-    <script src="js/board/board-rivers.js?v=202611221850" defer></script>
-    <script src="js/board/board-static-svg.js?v=202611221850" defer></script>
-    <script src="js/board/board-tokens.js?v=202611221850" defer></script>
-    <script src="js/board/board-ambient.js?v=202611221850" defer></script>
-    <script src="js/hud/hud-mobile-dock.js?v=202611221850" defer></script>
-    <script src="js/hud/hud-inspector.js?v=202611221850" defer></script>
-    <script src="js/hud/hud-advisor.js?v=202611221850" defer></script>
-    <script src="js/hud/hud-action-panel.js?v=202611221850" defer></script>
-    <script src="js/hud/hud-turn-actions.js?v=202611221850" defer></script>
-    <script src="js/modals/modal-victory-diploma.js?v=202611221850" defer></script>
-    <script src="js/modals/modal-armory.js?v=202611221850" defer></script>
-    <script src="js/modals/modal-combat.js?v=202611221850" defer></script>
-    <script src="js/modals/modal-festival-chance.js?v=202611221850" defer></script>
-    <script src="js/modals/modal-cheatsheet.js?v=202611221850" defer></script>
-    <script src="js/app-online.js?v=202611221850" defer></script>
-    <script src="js/app-saves.js?v=202611221850" defer></script>
-    <script src="js/app-musicwidget.js?v=202611221850" defer></script>
+    <script src="js/i18n/languages.js?v=202611221945" defer></script>
+    <script src="js/core/module-loader.js?v=202611221945" defer></script>
+    <script src="js/app-i18n.js?v=202611221945" defer></script>
+    <script src="js/game-data.js?v=202611221945" defer></script>
+    <script src="js/boards/boards-decor-catalog.js?v=202611221945" defer></script>
+    <script src="js/boards/boards-geometry.js?v=202611221945" defer></script>
+    <script src="js/boards/boards-generator.js?v=202611221945" defer></script>
+    <script src="js/boards/boards-builder.js?v=202611221945" defer></script>
+    <script src="js/boards/boards-presets.js?v=202611221945" defer></script>
+    <script src="js/engine/engine-state.js?v=202611221945" defer></script>
+    <script src="js/engine/engine-movement.js?v=202611221945" defer></script>
+    <script src="js/engine/engine-economy.js?v=202611221945" defer></script>
+    <script src="js/engine/engine-actions.js?v=202611221945" defer></script>
+    <script src="js/game-combat-ai.js?v=202611221945" defer></script>
+    <script src="js/app-audio.js?v=202611221945" defer></script>
+    <script src="js/app-dialog.js?v=202611221945" defer></script>
+    <script src="js/app-api.js?v=202611221945" defer></script>
+    <script src="js/app-modal-manager.js?v=202611221945" defer></script>
+    <script src="js/app.js?v=202611221945" defer></script>
+    <script src="js/app/app-music-ui.js?v=202611221945" defer></script>
+    <script src="js/app/app-landing.js?v=202611221945" defer></script>
+    <script src="js/app/app-profile-cosmetics.js?v=202611221945" defer></script>
+    <script src="js/app/app-lobby-session.js?v=202611221945" defer></script>
+    <script src="js/app/app-map-studio.js?v=202611221945" defer></script>
+    <script src="js/board/board-camera.js?v=202611221945" defer></script>
+    <script src="js/board/board-rivers.js?v=202611221945" defer></script>
+    <script src="js/board/board-static-svg.js?v=202611221945" defer></script>
+    <script src="js/board/board-tokens.js?v=202611221945" defer></script>
+    <script src="js/board/board-ambient.js?v=202611221945" defer></script>
+    <script src="js/hud/hud-mobile-dock.js?v=202611221945" defer></script>
+    <script src="js/hud/hud-inspector.js?v=202611221945" defer></script>
+    <script src="js/hud/hud-advisor.js?v=202611221945" defer></script>
+    <script src="js/hud/hud-action-panel.js?v=202611221945" defer></script>
+    <script src="js/hud/hud-turn-actions.js?v=202611221945" defer></script>
+    <script src="js/modals/modal-victory-diploma.js?v=202611221945" defer></script>
+    <script src="js/modals/modal-armory.js?v=202611221945" defer></script>
+    <script src="js/modals/modal-combat.js?v=202611221945" defer></script>
+    <script src="js/modals/modal-festival-chance.js?v=202611221945" defer></script>
+    <script src="js/modals/modal-cheatsheet.js?v=202611221945" defer></script>
+    <script src="js/app-online.js?v=202611221945" defer></script>
+    <script src="js/app-saves.js?v=202611221945" defer></script>
+    <script src="js/app-musicwidget.js?v=202611221945" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3605,6 +3655,33 @@
     <!-- PLOVOUCÍ RPG KARTA STATISTIK HRÁČE (Při najetí na figurku nebo jméno) -->
 
     <div id="player-hover-tooltip" class="player-hover-tooltip" style="display:none; position:fixed; z-index:99999;"></div>
+
+    <!-- MODÁL: KRÁLOVSKÝ EDIKT VÝPRAVY (ÚVODNÍ PŘÍBĚH & CÍL PARTIE) -->
+    <div id="story-decree-modal" class="modal-backdrop" style="display:none; z-index:10120;" role="dialog" aria-modal="true">
+        <div class="modal-box story-decree-box" style="max-width:560px;">
+            <div class="modal-header">
+                <div>
+                    <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--gold); font-weight:700;" data-i18n="story.decree_kicker">📜 Královský edikt výpravy</div>
+                    <h3 id="story-decree-title" style="margin:0.15rem 0 0; font-size:1.2rem; color:var(--gold-light); font-family:'Cinzel',serif;" data-i18n="story.decree_title">Přísaha u královského dvora</h3>
+                </div>
+                <button class="modal-close" onclick="PRS_App.closeStoryDecreeModal()" title="Zavřít královský edikt" data-i18n-title="story.decree_close_title">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:0.85rem 0.4rem 0.4rem;">
+                <p id="story-decree-text" class="story-decree-text"></p>
+                <div class="story-decree-goal-pill">
+                    <span class="story-decree-goal-label" data-i18n="story.decree_goal_label">Vítězný cíl:</span>
+                    <strong id="story-decree-goal"></strong>
+                </div>
+                <label style="display:inline-flex; align-items:center; gap:0.45rem; font-size:0.8rem; color:var(--text-muted); margin-top:0.85rem; cursor:pointer;">
+                    <input id="story-decree-skip-cb" type="checkbox" style="width:15px; height:15px;">
+                    <span data-i18n="story.decree_skip">Příště nezobrazovat při startu nové hry</span>
+                </label>
+            </div>
+            <div class="modal-footer" style="justify-content:flex-end;">
+                <button id="story-decree-confirm-btn" type="button" class="btn-gold-lg" onclick="PRS_App.closeStoryDecreeModal()" style="padding:0.55rem 1.25rem; font-size:0.9rem;" data-i18n="story.decree_cta">⚔️ Přijmout přísahu a vyrazit →</button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODÁL: PŘIDAT / UPRAVIT VIDEO -->
     <div id="admin-video-modal" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true">

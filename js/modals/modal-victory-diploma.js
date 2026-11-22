@@ -175,6 +175,22 @@
                 }
             }
 
+            var epilogueKey = "story.epilogue_virtues";
+            var winnerDragons = (winner.stats && winner.stats.dragonsSlain) ? winner.stats.dragonsSlain : 0;
+            var winnerCastles = 0;
+            if (winner.ownedNodes && this.state.board && this.state.board.nodes) {
+                for (var wi = 0; wi < winner.ownedNodes.length; wi++) {
+                    var wnd = this.state.board.nodes[winner.ownedNodes[wi]];
+                    if (wnd && (wnd.level === 3 || wnd.type === "CASTLE")) winnerCastles++;
+                }
+            }
+            if (winType === "slayer_dragons" || winnerDragons > 0) {
+                epilogueKey = "story.epilogue_dragon";
+            } else if (winType === "tycoon_estates" || winnerCastles >= 2) {
+                epilogueKey = "story.epilogue_estates";
+            }
+            subText += '<div class="victory-epilogue-box"><strong>' + tModal("story.epilogue_title", null, "📜 Kronika konce výpravy:") + '</strong>' + tModal(epilogueKey, null, "") + '</div>';
+
             subEl.innerHTML = subText;
         }
 

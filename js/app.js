@@ -1089,6 +1089,9 @@ window.PRS_App = {
         this._safeCall("renderGlossary", this.renderGlossary);
         this._safeCall("renderTilesAtlas", this.renderTilesAtlas);
         this._safeCall("renderSidebarQuickLogPanel", this.renderSidebarQuickLogPanel);
+        if (this.hasGameStarted) {
+            this._safeCall("renderQuestGoalBar", this.renderQuestGoalBar);
+        }
         if (this.lastSavedSessions && typeof this.renderSavedSessionsList === "function") {
             this._safeCall("renderSavedSessionsList", function () { self.renderSavedSessionsList(self.lastSavedSessions); });
         }

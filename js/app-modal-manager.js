@@ -43,7 +43,8 @@
         'catalog-game-modal': 'closeGameCatalogPreview',
         'map-studio-modal': 'closeMapStudioModal',
         'admin-board-modal': 'closeAdminBoardModal',
-        'pwa-install-modal': 'closePwaInstallModal'
+        'pwa-install-modal': 'closePwaInstallModal',
+        'story-decree-modal': 'closeStoryDecreeModal'
     };
 
     var FOCUSABLE_SELECTOR = [
