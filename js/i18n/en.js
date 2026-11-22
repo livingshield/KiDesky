@@ -30,7 +30,6 @@ window.PRS_I18N.en = {
     },
     "ui": {
         "brand_subtitle": "The Princess's Heart",
-        "back_to_kikiai": "← Back to KikiAI",
         "tabs": {
             "welcome": "🏰 Intro & Videos",
             "lobby": "⚔️ Knight's Lounge",

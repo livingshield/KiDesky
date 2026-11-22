@@ -49,15 +49,6 @@
                 max-width: calc(100% - 145px);
             }
 
-            .topbar .back-portal-link {
-                font-size: 0.74rem;
-                padding: 0.22rem 0.45rem;
-                border-radius: 6px;
-                white-space: nowrap;
-                flex-shrink: 0;
-                line-height: 1.2;
-            }
-
             .topbar .brand-title {
                 font-size: 0.88rem;
                 white-space: nowrap;

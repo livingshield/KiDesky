@@ -163,20 +163,6 @@
             gap: 0.9rem;
         }
 
-        .back-portal-link {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.85rem;
-            padding: 0.35rem 0.7rem;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.12);
-            transition: all 0.2s;
-        }
-        .back-portal-link:hover {
-            color: var(--gold-light);
-            border-color: var(--gold);
-        }
-
         .brand-title {
             font-family: 'Cinzel', serif;
             font-size: 1.25rem;

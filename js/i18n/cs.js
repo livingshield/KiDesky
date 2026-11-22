@@ -30,7 +30,6 @@ window.PRS_I18N.cs = {
     },
     "ui": {
         "brand_subtitle": "Princeznino srdce",
-        "back_to_kikiai": "← Zpět na KikiAI",
         "tabs": {
             "welcome": "🏰 Úvod & Videa",
             "lobby": "⚔️ Rytířská herna",
