@@ -95,6 +95,8 @@
         _customHandlers: {},
         _observer: null,
         _keydownBound: false,
+        _backdropGuardBound: false,
+        _mouseDownBackdrop: null,
         _syncScheduled: false,
 
         init: function () {
@@ -103,6 +105,7 @@
 
             this.syncAll();
             this._bindKeydown();
+            this._bindBackdropClickGuard();
             this._observeMutations();
         },
 
@@ -249,7 +252,30 @@
                     return;
                 }
                 var focusables = self._getFocusableElements(modalEl);
-                var target = focusables.length > 0 ? focusables[0] : modalEl;
+                var target = null;
+                var i;
+                for (i = 0; i < focusables.length; i++) {
+                    var el = focusables[i];
+                    var tag = el.tagName ? el.tagName.toLowerCase() : '';
+                    var type = (el.type || '').toLowerCase();
+                    if (tag === 'textarea' || tag === 'select' || (tag === 'input' && type !== 'hidden' && type !== 'file' && type !== 'checkbox' && type !== 'radio' && type !== 'button' && type !== 'submit' && type !== 'reset')) {
+                        target = el;
+                        break;
+                    }
+                }
+                if (!target) {
+                    for (i = 0; i < focusables.length; i++) {
+                        var elBtn = focusables[i];
+                        var isCloseBtn = elBtn.classList && (elBtn.classList.contains('modal-close') || elBtn.classList.contains('btn-icon-danger'));
+                        if (!isCloseBtn) {
+                            target = elBtn;
+                            break;
+                        }
+                    }
+                }
+                if (!target) {
+                    target = focusables.length > 0 ? focusables[0] : modalEl;
+                }
                 if (target && typeof target.focus === 'function') {
                     try { target.focus({ preventScroll: true }); } catch (e) {
                         try { target.focus(); } catch (e2) { /* ignore */ }
@@ -380,6 +406,46 @@
                             first.focus();
                         }
                     }
+                }
+            }, true);
+        },
+
+        _bindBackdropClickGuard: function () {
+            if (this._backdropGuardBound || !document || typeof document.addEventListener !== 'function') return;
+            this._backdropGuardBound = true;
+            var self = this;
+
+            document.addEventListener('mousedown', function (e) {
+                var target = e && e.target;
+                self._mouseDownBackdrop = (target && target.classList && target.classList.contains('modal-backdrop'))
+                    ? target
+                    : null;
+            }, true);
+
+            document.addEventListener('click', function (e) {
+                var target = e && e.target;
+                if (!target || !target.classList || !target.classList.contains('modal-backdrop')) {
+                    self._mouseDownBackdrop = null;
+                    return;
+                }
+
+                var startedOnBackdrop = (self._mouseDownBackdrop === target);
+                self._mouseDownBackdrop = null;
+
+                var hasSelection = false;
+                try {
+                    if (typeof window.getSelection === 'function') {
+                        var sel = window.getSelection();
+                        if (sel && String(sel.toString() || '').length > 0) {
+                            hasSelection = true;
+                        }
+                    }
+                } catch (err) { /* ignore selection probe failure */ }
+
+                if (!startedOnBackdrop || hasSelection) {
+                    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+                    if (typeof e.preventDefault === 'function') e.preventDefault();
                 }
             }, true);
         },

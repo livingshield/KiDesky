@@ -1564,7 +1564,8 @@ window.PRS_App = {
                 return;
             }
 
-            // Ignorujeme zkratky, pokud uživatel píše do formulářového pole nebo contentEditable
+            // Ignorujeme zkratky s modifikátory (Ctrl+V, Ctrl+C, Cmd+V...) nebo když uživatel píše do formulářového pole
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
             var targetEl = e.target;
             var tag = (targetEl && targetEl.tagName) ? targetEl.tagName.toLowerCase() : "";
             if (tag === "input" || tag === "textarea" || tag === "select" || (targetEl && targetEl.isContentEditable)) return;
