@@ -18,7 +18,7 @@
         var sz = sizePx || 28;
         var isDead = !!(p && p.isEliminated);
         var pawnObj = window.PRS_getPawnById ? window.PRS_getPawnById(p ? p.pawnId : null) : null;
-        var img = pawnObj ? pawnObj.img : "assets/pawns/pawn_knight_valiant.png";
+        var img = pawnObj ? pawnObj.img : "assets/pawns/pawn_knight_valiant.webp";
         var isPrem = pawnObj && pawnObj.category === "premium";
         var borderCol = isDead ? "#ef4444" : (isPrem ? "#ffd86b" : (p ? p.color : "#d4af37"));
         var glow = isDead ? "0 0 8px rgba(239, 68, 68, 0.85)" : (isPrem ? ("0 0 8px " + (pawnObj.accentColor || "#ffd86b")) : "0 2px 4px rgba(0,0,0,0.6)");
@@ -291,7 +291,7 @@
                     'onmouseenter="PRS_App.showPlayerTooltip(event, ' + rIdx + ')" ' +
                     'onmousemove="PRS_App.movePlayerTooltip(event)" ' +
                     'onmouseleave="PRS_App.hidePlayerTooltip()" ' +
-                    'title="' + trackTooltip + ' - Klepni pro zobrazení statistik" style="padding:0; overflow:hidden; display:inline-flex; align-items:center; justify-content:center;"><img src="' + (window.PRS_getPawnById && window.PRS_getPawnById(plTrack.pawnId) ? window.PRS_getPawnById(plTrack.pawnId).img : 'assets/pawns/pawn_knight_valiant.png') + '" style="width:100%; height:100%; object-fit:contain;"/></div>';
+                    'title="' + trackTooltip + ' - Klepni pro zobrazení statistik" style="padding:0; overflow:hidden; display:inline-flex; align-items:center; justify-content:center;"><img src="' + (window.PRS_getPawnById && window.PRS_getPawnById(plTrack.pawnId) ? window.PRS_getPawnById(plTrack.pawnId).img : 'assets/pawns/pawn_knight_valiant.webp') + '" style="width:100%; height:100%; object-fit:contain;"/></div>';
             }
 
             raceHtml += '  <div class="race-finish-crown" title="' + finishTitle + '">' + finishIcon + '</div>' +
@@ -882,7 +882,7 @@
 
         if (!bmpUrl && (node.type === "START" || node.type === "CASTLE" || node.code === "START" || (node.code && node.code.indexOf("START") !== -1))) {
 
-            bmpUrl = "assets/tiles/castle.png";
+            bmpUrl = "assets/tiles/castle.webp";
 
         }
 
@@ -1126,11 +1126,11 @@
 
         var imgHtml = bmpUrl
 
-            ? '<img src="' + this.escapeHtml(bmpUrl) + '" alt="' + this.escapeHtml(node.name) + '" onerror="this.onerror=null; this.src=\'assets/tiles/castle.png\';" />'
+            ? '<img src="' + this.escapeHtml(bmpUrl) + '" alt="' + this.escapeHtml(node.name) + '" onerror="this.onerror=null; this.src=\'assets/tiles/castle.webp\';" />'
 
             : ((node.type === "START" || node.type === "CASTLE" || node.code === "START")
 
-                ? '<img src="assets/tiles/castle.png" alt="' + this.escapeHtml(node.name) + '" />'
+                ? '<img src="assets/tiles/castle.webp" alt="' + this.escapeHtml(node.name) + '" />'
 
                 : '<span class="emoji-icon">' + node.icon + '</span>');
 

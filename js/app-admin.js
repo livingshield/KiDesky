@@ -404,7 +404,7 @@
             document.getElementById("admin-vid-desc").value = "";
             document.getElementById("admin-vid-type").value = "mp4";
             document.getElementById("admin-vid-url").value = "";
-            document.getElementById("admin-vid-poster").value = "assets/board/parchment_board_bg.jpg";
+            document.getElementById("admin-vid-poster").value = "assets/board/parchment_board_bg.webp";
             document.getElementById("admin-vid-category").value = "trailer";
             document.getElementById("admin-vid-hero").checked = false;
             document.getElementById("admin-vid-order").value = "10";

@@ -319,6 +319,31 @@
                     window.PRS_BoardBuilder.generateBoardDecorations(restoredState.board, restoredState.board.seed || 1000);
                 }
             }
+            if (restoredState.board && typeof window.PRS_normalizeAssetUrl === "function") {
+                if (Array.isArray(restoredState.board.landmarks)) {
+                    for (var li = 0; li < restoredState.board.landmarks.length; li++) {
+                        var lmk = restoredState.board.landmarks[li];
+                        if (!lmk) continue;
+                        var lSrc = lmk.image || lmk.img;
+                        if (lSrc && typeof lSrc === "string") {
+                            if (window.PRS_isFlippedAssetUrl && window.PRS_isFlippedAssetUrl(lSrc)) {
+                                lmk.isFlipped = true;
+                            }
+                            var lNorm = window.PRS_normalizeAssetUrl(lSrc);
+                            if (lmk.image) lmk.image = lNorm;
+                            if (lmk.img) lmk.img = lNorm;
+                        }
+                    }
+                }
+                if (Array.isArray(restoredState.board.nodes)) {
+                    for (var ni = 0; ni < restoredState.board.nodes.length; ni++) {
+                        var nd = restoredState.board.nodes[ni];
+                        if (nd && nd.castleImg && typeof nd.castleImg === "string") {
+                            nd.castleImg = window.PRS_normalizeAssetUrl(nd.castleImg);
+                        }
+                    }
+                }
+            }
         },
 
         // Vlastnictví automaticky uložené rozehrané partie podle aktivního účtu

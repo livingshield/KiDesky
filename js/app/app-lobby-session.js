@@ -272,7 +272,7 @@
                 p.pawnId = window.PRS_getDefaultPawnIdForPlayer(p, i);
             }
             var pawnObj = window.PRS_getPawnById ? window.PRS_getPawnById(p.pawnId) : null;
-            var pawnImg = pawnObj ? pawnObj.img : "assets/pawns/pawn_knight_valiant.png";
+            var pawnImg = pawnObj ? pawnObj.img : "assets/pawns/pawn_knight_valiant.webp";
             var pawnTitle = pawnObj ? pawnObj.name : "Zvolit figurku";
 
             var optHuman = window.PRS_I18n ? window.PRS_I18n.t("lobby.player_types.human") : "👤 Člověk (u stolu)";

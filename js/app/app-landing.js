@@ -268,7 +268,7 @@
             }
             if (vid) {
                 vid.style.display = "block";
-                if (v.posterUrl) vid.poster = v.posterUrl;
+                if (v.posterUrl) vid.poster = (window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(v.posterUrl) : v.posterUrl);
                 if (vid.src !== v.url) {
                     vid.src = v.url;
                 }
@@ -541,26 +541,26 @@
 
         // 1. Textury herního plánu a dominant
         var bgImg = new Image();
-        bgImg.src = "assets/board/parchment_board_bg.jpg";
+        bgImg.src = "assets/board/parchment_board_bg.webp";
 
         var castleImg = new Image();
-        castleImg.src = "assets/landmarks/royal_castle.png";
+        castleImg.src = "assets/landmarks/royal_castle.webp";
 
         // 2. Královský drak (Červený ohnivý drak U3) pro Dračí sluj
         var dragonImg = new Image();
-        dragonImg.src = "assets/dragons/dragon_red.png";
+        dragonImg.src = "assets/dragons/dragon_red.webp";
 
         // 3. Nová 2.5D figurka rytíře
         var knightPawnImg = new Image();
-        knightPawnImg.src = "assets/pawns/pawn_knight_valiant.png";
+        knightPawnImg.src = "assets/pawns/pawn_knight_valiant.webp";
 
         // 4. Harmonická pětice medailonků na královské pouti
         var questTiles = [
-            { rx: 0.12, ry: 0.58, label: "Start", labelEn: "Start", color: "#10b981", icon: "🚩", src: "assets/tiles/start.png", story: "🚩 1. Startovní rozcestí: Rytíř vyráží s 10 000 zlaťáky do světa", storyEn: "🚩 1. Crossroads Start: Knight departs with 10,000 gold into the realm" },
-            { rx: 0.31, ry: 0.40, label: "Chov koní", labelEn: "Horse Breeding", color: "#f59e0b", icon: "🐎", src: "assets/tiles/kun.jpg", story: "🐎 2. Chov koní & stáje: Budování panství, zvířata a výběr nájmů", storyEn: "🐎 2. Horse Breeding & Stables: Estate building, animals & rent collection" },
-            { rx: 0.50, ry: 0.58, label: "Hrad & Turnaj", labelEn: "Castle & Joust", color: "#0ea5e9", icon: "🏰", src: "assets/tiles/castle.png", story: "🏰 3. Královský turnaj: Klání mistrů ve 4 královských ctnostech", storyEn: "🏰 3. Royal Tournament: Clash of masters in the 4 knightly virtues" },
-            { rx: 0.69, ry: 0.40, label: "Dračí sluj", labelEn: "Dragon Lair", color: "#ef4444", icon: "🐉", src: "assets/tiles/u3_drak.jpg", story: "🐉 4. Dračí sluj: Epický souboj s ohnivým drakem o slavný poklad", storyEn: "🐉 4. Dragon's Lair: Epic battle with the fire dragon for legendary loot" },
-            { rx: 0.88, ry: 0.58, label: "Slavnosti 💖", labelEn: "Celebrations 💖", color: "#ec4899", icon: "💖", src: "assets/tiles/festival.jpg", story: "💖 5. Královské slavnosti: Zisk 30 Princezniných srdcí a vítězství!", storyEn: "💖 5. Royal Celebrations: Claiming 30 Princess Hearts and victory!" }
+            { rx: 0.12, ry: 0.58, label: "Start", labelEn: "Start", color: "#10b981", icon: "🚩", src: "assets/tiles/start.webp", story: "🚩 1. Startovní rozcestí: Rytíř vyráží s 10 000 zlaťáky do světa", storyEn: "🚩 1. Crossroads Start: Knight departs with 10,000 gold into the realm" },
+            { rx: 0.31, ry: 0.40, label: "Chov koní", labelEn: "Horse Breeding", color: "#f59e0b", icon: "🐎", src: "assets/tiles/kun.webp", story: "🐎 2. Chov koní & stáje: Budování panství, zvířata a výběr nájmů", storyEn: "🐎 2. Horse Breeding & Stables: Estate building, animals & rent collection" },
+            { rx: 0.50, ry: 0.58, label: "Hrad & Turnaj", labelEn: "Castle & Joust", color: "#0ea5e9", icon: "🏰", src: "assets/tiles/castle.webp", story: "🏰 3. Královský turnaj: Klání mistrů ve 4 královských ctnostech", storyEn: "🏰 3. Royal Tournament: Clash of masters in the 4 knightly virtues" },
+            { rx: 0.69, ry: 0.40, label: "Dračí sluj", labelEn: "Dragon Lair", color: "#ef4444", icon: "🐉", src: "assets/tiles/u3_drak.webp", story: "🐉 4. Dračí sluj: Epický souboj s ohnivým drakem o slavný poklad", storyEn: "🐉 4. Dragon's Lair: Epic battle with the fire dragon for legendary loot" },
+            { rx: 0.88, ry: 0.58, label: "Slavnosti 💖", labelEn: "Celebrations 💖", color: "#ec4899", icon: "💖", src: "assets/tiles/festival.webp", story: "💖 5. Královské slavnosti: Zisk 30 Princezniných srdcí a vítězství!", storyEn: "💖 5. Royal Celebrations: Claiming 30 Princess Hearts and victory!" }
         ];
 
         for (var i = 0; i < questTiles.length; i++) {

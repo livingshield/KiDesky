@@ -2594,7 +2594,7 @@ window.PRS_I18N.en = {
             "ph_url": "assets/video/RuzeProDanielku.mp4 or https://youtube.com/...",
             "from_yt_title": "Auto-fetch title and thumbnail from YouTube",
             "label_poster": "Preview Poster (Poster URL):",
-            "ph_poster": "assets/board/parchment_board_bg.jpg",
+            "ph_poster": "assets/board/parchment_board_bg.webp",
             "poster_title": "Upload custom poster image",
             "label_order": "Sort order:"
         },

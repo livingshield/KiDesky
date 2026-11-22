@@ -350,8 +350,8 @@
         ];
 
         var landmarks = [
-            { id: "royalCastle", name: royalDef.name || "Královský Hrad", icon: royalDef.icon || "👑", image: royalDef.img || "assets/castles/castle_royal.png", x: 700, y: 390, w: 220, h: 180 },
-            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 }
+            { id: "royalCastle", name: royalDef.name || "Královský Hrad", icon: royalDef.icon || "👑", image: royalDef.img || "assets/castles/castle_royal.webp", x: 700, y: 390, w: 220, h: 180 },
+            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.webp", x: 1085, y: 625, w: 140, h: 120 }
         ];
 
         return {
@@ -478,9 +478,9 @@
                 { code: "DRACI_U3", title: "DRACI", subtitle: "Obtížnost 11–17", icon: "🐉", color: "#f43f5e", x: 1025, y: 495, w: 120, h: 110, count: 20 }
             ],
             landmarks: [
-                { id: "royalCastle", name: "Trojvěžový Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 675, y: 405, w: 230, h: 190 },
-                { id: "dragonLair", name: "Tříhlavá Saň (U3)", icon: "🐲", image: "assets/dragons/dragon_3headed.png", x: 425, y: 330, w: 145, h: 125 },
-                { id: "forestTower", name: "Lesní Bašta (+200 zl.)", icon: "🌲", image: "assets/castles/castle_forest.png", x: 1140, y: 95, w: 130, h: 115 }
+                { id: "royalCastle", name: "Trojvěžový Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.webp", x: 675, y: 405, w: 230, h: 190 },
+                { id: "dragonLair", name: "Tříhlavá Saň (U3)", icon: "🐲", image: "assets/dragons/dragon_3headed.webp", x: 425, y: 330, w: 145, h: 125 },
+                { id: "forestTower", name: "Lesní Bašta (+200 zl.)", icon: "🌲", image: "assets/castles/castle_forest.webp", x: 1140, y: 95, w: 130, h: 115 }
             ],
             biomes: this.buildClassic4599Board().biomes,
             rivers: this.buildClassic4599Board().rivers
@@ -607,8 +607,8 @@
                 { code: "NAHODA_N", title: "NÁHODA", subtitle: "Karty osudu", icon: "❓", color: "#eab308", x: 620, y: 165, w: 85, h: 110, count: 24 }
             ],
             landmarks: [
-                { id: "royalCastle", name: "Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.png", x: 700, y: 320, w: 240, h: 200 },
-                { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 990, y: 430, w: 150, h: 130 }
+                { id: "royalCastle", name: "Královský Hrad", icon: "🏰", image: "assets/landmarks/royal_castle.webp", x: 700, y: 320, w: 240, h: 200 },
+                { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.webp", x: 990, y: 430, w: 150, h: 130 }
             ],
             biomes: full.biomes,
             rivers: full.rivers

@@ -1052,8 +1052,9 @@
             html.push('<div class="bestiary-card" style="margin:0; background:rgba(0,0,0,0.5); border:1px solid rgba(212,175,55,0.4); border-radius:12px; overflow:hidden;">');
 
             if (q.img) {
-                html.push('  <div class="card-media-header" style="cursor:pointer;" onclick="PRS_App.openImageModal(\'' + q.img + '\', \'' + this.escapeHtml(q.name) + '\', \'' + this.escapeHtml(q.desc) + '\')" title="Klikni pro celoobrazovkové zvětšení">');
-                html.push('    <img src="' + q.img + '" alt="' + this.escapeHtml(q.name) + '" class="card-media-img" loading="lazy" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.png\';" />');
+                var qBestImg = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(q.img) : q.img;
+                html.push('  <div class="card-media-header" style="cursor:pointer;" onclick="PRS_App.openImageModal(\'' + qBestImg + '\', \'' + this.escapeHtml(q.name) + '\', \'' + this.escapeHtml(q.desc) + '\')" title="Klikni pro celoobrazovkové zvětšení">');
+                html.push('    <img src="' + qBestImg + '" alt="' + this.escapeHtml(q.name) + '" class="card-media-img" loading="lazy" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.webp\';" />');
                 html.push('    <span class="card-media-badge-left" style="border-color:' + tierColor + '; color:' + tierColor + ';">' + tierTitle + '</span>');
                 html.push('    <span class="card-media-badge-right" style="border-color:rgba(239,68,68,0.6); color:#fca5a5;">⚔️ Obtížnost ' + q.difficulty + '</span>');
                 html.push('  </div>');
@@ -1084,8 +1085,8 @@
                 html.push('    </div>');
             }
 
-            if (q.imgFlip) {
-                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + q.img + '\', \'' + q.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.6rem; width:100%; cursor:pointer;">🔄 Otočit směr pohledu</button>');
+            if (q.canFlip || q.imgFlip || q.img) {
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this)" style="font-size:0.75rem; padding:4px 8px; margin-top:0.6rem; width:100%; cursor:pointer;">🔄 Otočit směr pohledu</button>');
             }
 
             html.push('  </div>');

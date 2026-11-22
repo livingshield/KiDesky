@@ -140,8 +140,8 @@
                 code: "START",
                 name: "Royal START",
                 cat: "Special",
-                img: "assets/tiles/start.png",
-                art: "assets/tiles/castle.jpg",
+                img: "assets/tiles/start.webp",
+                art: "assets/tiles/castle.webp",
                 cost: "—",
                 action: "Grant <strong>+3,000 g.</strong> (landless knights <strong>+5,000 g.</strong>). Nobles, owners of Towns/Castles or skilled dancers (Dance ≥ 2 and court attire) also receive <strong>audience with the King (+0.5 to +1.0 💖)</strong>.",
                 tip: "Acquire court attire early to harvest royal favors on each circuit."
@@ -150,8 +150,8 @@
                 code: "VESNICE",
                 name: "Peasant Village (V1–V12)",
                 cat: "Estate",
-                img: "assets/tiles/village.png",
-                art: "assets/tiles/village.jpg",
+                img: "assets/tiles/village.webp",
+                art: "assets/tiles/village.webp",
                 cost: "1,500 g.",
                 action: "Purchase estate and collect rent (100–300 g.) from passing knights. Upgrades: 1★ Village → 2★ Small Town (+1,500 g.) → 3★ Large Settlement (+1,500 g.). Fully developed villages grant permanent <strong>+0.5 💖</strong> and host livestock.",
                 tip: "Villages form the backbone of steady income. At 3★ they generate high rent and automatic herds."
@@ -160,8 +160,8 @@
                 code: "MĚSTO",
                 name: "Royal Town (M1–M4)",
                 cat: "Estate",
-                img: "assets/tiles/town.png",
-                art: "assets/tiles/town.jpg",
+                img: "assets/tiles/town.webp",
+                art: "assets/tiles/town.webp",
                 cost: "4,000 g.",
                 action: "Wealthy settlement with 500 g. rent and high prestige: grants owner permanent <strong>+0.5 💖</strong> and yields <strong>+1,200 g.</strong> at Tax Collection.",
                 tip: "Town expands herd capacity by +2 and guarantees an audience at START."
@@ -170,8 +170,8 @@
                 code: "HRAD",
                 name: "Noble Castle (C1–C4)",
                 cat: "Estate",
-                img: "assets/tiles/castle.png",
-                art: "assets/tiles/castle.jpg",
+                img: "assets/tiles/castle.webp",
+                art: "assets/tiles/castle.webp",
                 cost: "7,000 g.",
                 action: "Pinnacle of feudal power: permanent <strong>+1.0 💖</strong> and <strong>+1 Charisma</strong> for the owner! Rent 1,000 g., tax payout is a massive <strong>+2,500 g.</strong>",
                 tip: "Fastest way to permanently secure hearts and courtly dominance."
@@ -180,8 +180,8 @@
                 code: "KŮŇ",
                 name: "Horse Breeding (H1–H12)",
                 cat: "Animals",
-                img: "assets/tiles/kun.png",
-                art: "assets/tiles/kun.jpg",
+                img: "assets/tiles/kun.webp",
+                art: "assets/tiles/kun.webp",
                 cost: "600 × level g.",
                 action: "Purchase horse. Unlocks <strong>equestrian movement (trot, canter, gallop)</strong>, allows agility defense in duels, and is required for the <strong>Grand Race</strong>.",
                 tip: "Horses are key to rapid travel. Combine with Hound and Falcon for a Breeding Set (+1.5 💖)."
@@ -190,8 +190,8 @@
                 code: "PES",
                 name: "Hunting Hound (D1–D12)",
                 cat: "Animals",
-                img: "assets/tiles/pes.png",
-                art: "assets/tiles/pes.jpg",
+                img: "assets/tiles/pes.webp",
+                art: "assets/tiles/pes.webp",
                 cost: "500 × level g.",
                 action: "Purchase hunting dog. Loyal companion provides tactical advantage in dragon arenas – close loss by 1–2 points grants a free <strong>🎲 Tactical Reroll of 1 die</strong>!",
                 tip: "Hounds save your life in dragon lairs and protect against the Infirmary."
@@ -200,8 +200,8 @@
                 code: "SOKOL",
                 name: "Hunting Falcon (F1–F12)",
                 cat: "Animals",
-                img: "assets/tiles/sokol.png",
-                art: "assets/tiles/sokol.jpg",
+                img: "assets/tiles/sokol.webp",
+                art: "assets/tiles/sokol.webp",
                 cost: "400 × level g.",
                 action: "Purchase bird of prey. Enables <strong>Falcon Navigation (±1 tile)</strong> during foot maneuvers, landing precisely on targets or dodging traps.",
                 tip: "Falcon navigation is inactive during full horse canter/gallop due to excessive speed."
@@ -210,8 +210,8 @@
                 code: "STAJE",
                 name: "Royal Stables & Livestock Market",
                 cat: "Economy",
-                img: "assets/tiles/kun.png",
-                art: "assets/tiles/kun.jpg",
+                img: "assets/tiles/kun.webp",
+                art: "assets/tiles/kun.webp",
                 cost: "By livestock",
                 action: "Purchase livestock: <strong>🐑 Sheep (500 g.)</strong>, <strong>🐖 Pig (600 g.)</strong>, and <strong>🐄 Cattle (800 g.)</strong>. Herds increase village rents and yield passive income at Tax Collection.",
                 tip: "Herd capacity scales with your villages and towns. Stables add +4 capacity."
@@ -220,8 +220,8 @@
                 code: "MISTR",
                 name: "Master's Guild (MC, MR, MD, MCH, GM)",
                 cat: "Training",
-                img: "assets/tiles/master.png",
-                art: "assets/tiles/master.jpg",
+                img: "assets/tiles/master.webp",
+                art: "assets/tiles/master.webp",
                 cost: "1,000–5,000 g.",
                 action: "Train virtues (Combat, Riding, Dance, Charisma). Roll: 1–3 = rejected, 4–6 = accepted. Successful training grants <strong>Master's Seal</strong>. 3 seals = <strong>Knightly Patronage</strong>!",
                 tip: "Grandmaster (GM) trains any virtue of your choice. Invest in your primary virtue early."
@@ -230,8 +230,8 @@
                 code: "FESTIVAL",
                 name: "Royal Festival (♡ ♡ ♡)",
                 cat: "Contest",
-                img: "assets/tiles/festival.png",
-                art: "assets/tiles/festival.jpg",
+                img: "assets/tiles/festival.webp",
+                art: "assets/tiles/festival.webp",
                 cost: "—",
                 action: "Tournament (Combat + Riding), Castle Ball (Dance + Charisma), or Grand Race (Riding + horses). Primary source of hearts in the game! Winner earns <strong>up to +5 💖 and 1,200 g.</strong>",
                 tip: "If fewer than 2 knights participate, the event is cancelled, but the host receives +800 g. and +0.5 💖 consolation."
@@ -240,8 +240,8 @@
                 code: "U1",
                 name: "Common Beast (Forest Predators)",
                 cat: "Hunting",
-                img: "assets/tiles/u1_zver.png",
-                art: "assets/tiles/u1_zver.jpg",
+                img: "assets/tiles/u1_zver.webp",
+                art: "assets/tiles/u1_zver.webp",
                 cost: "—",
                 action: "Hunt wolves, bears, and boars. Victory yields <strong>1,000–2,500 g.</strong> and <strong>+0.5 to +1.5 💖</strong>. Safe early training for aspiring warriors.",
                 tip: "Use Tactical Stance: Cautious defense protects you from wounds even on defeat."
@@ -250,8 +250,8 @@
                 code: "U2",
                 name: "Mighty Monster (Mythical Fiends)",
                 cat: "Hunting",
-                img: "assets/tiles/u2_monstrum.png",
-                art: "assets/tiles/u2_monstrum.jpg",
+                img: "assets/tiles/u2_monstrum.webp",
+                art: "assets/tiles/u2_monstrum.webp",
                 cost: "—",
                 action: "Battle Chimeras, Trolls, and Golems. Reward: <strong>2,600 g.</strong>, <strong>+1.5 to +2.5 💖</strong>, and 65% trophy drop chance. Tactical retreat available for 400 g.",
                 tip: "Check monster weaknesses in the Bestiary for an automatic +2 power bonus."
@@ -260,8 +260,8 @@
                 code: "U3",
                 name: "Dragon Lair (Legendary Dragons)",
                 cat: "Dragon Slayers",
-                img: "assets/tiles/u3_drak.png",
-                art: "assets/tiles/u3_drak.jpg",
+                img: "assets/tiles/u3_drak.webp",
+                art: "assets/tiles/u3_drak.webp",
                 cost: "—",
                 action: "Duel for honor against one of 20 unique dragons! Reward: <strong>6,000 g.</strong>, <strong>+2.5 to +5.0 💖</strong>, and guaranteed dragon trophy. <strong>Slaying 2 dragons = instant game triumph!</strong>",
                 tip: "Tactical retreat costs 800 g. Retreat if your Combat power and weapons are insufficient."
@@ -270,8 +270,8 @@
                 code: "MERCHANT",
                 name: "Royal Market",
                 cat: "Market",
-                img: "assets/tiles/merchant.png",
-                art: "assets/tiles/merchant.jpg",
+                img: "assets/tiles/merchant.webp",
+                art: "assets/tiles/merchant.webp",
                 cost: "By purchase",
                 action: "Buy equipment packages (weapons, armor, gowns, jewels). Voluntarily sell possessions to the Crown (items for 50% value, estates for 100%).",
                 tip: "Prioritize gear aligned with your chosen victory strategy."
@@ -280,8 +280,8 @@
                 code: "KOVARNA",
                 name: "Guild Forge",
                 cat: "Market",
-                img: "assets/tiles/kovarna.png",
-                art: "assets/tiles/kovarna.jpg",
+                img: "assets/tiles/kovarna.webp",
+                art: "assets/tiles/kovarna.webp",
                 cost: "By weapon",
                 action: "Craft and purchase swords, axes, lances, and plate armor. Weapons boost Combat and give tactical advantages against specific dragons.",
                 tip: "Lances counter Water dragons; heavy armor protects against flame."
@@ -290,8 +290,8 @@
                 code: "KREJCI",
                 name: "Court Tailor",
                 cat: "Market",
-                img: "assets/tiles/krejci.png",
-                art: "assets/tiles/krejci.jpg",
+                img: "assets/tiles/krejci.webp",
+                art: "assets/tiles/krejci.webp",
                 cost: "By garment",
                 action: "Tailor courtly gowns and brocade robes. Boosts Dance and Charisma, vital for triumph at the Castle Ball.",
                 tip: "Attire grants an automatic +2 score bonus at the Castle Ball."
@@ -300,8 +300,8 @@
                 code: "TAVERN",
                 name: "Golden Tankard Tavern",
                 cat: "Services",
-                img: "assets/tiles/tavern.png",
-                art: "assets/tiles/tavern.jpg",
+                img: "assets/tiles/tavern.webp",
+                art: "assets/tiles/tavern.webp",
                 cost: "500 g.",
                 action: "Rest and hospitality. Round of mead for 500 g. Skilled dancers (Dance ≥ 2) earn court admiration and <strong>+1.0 💖</strong> for charming entertainment.",
                 tip: "Diplomats and courtiers convert modest coins into precious hearts here."
@@ -310,8 +310,8 @@
                 code: "TAX",
                 name: "Royal Tax Collector",
                 cat: "Economy",
-                img: "assets/tiles/tax.png",
-                art: "assets/tiles/tax.jpg",
+                img: "assets/tiles/tax.webp",
+                art: "assets/tiles/tax.webp",
                 cost: "—",
                 action: "Collect feudal rents: Villages (500/900/1,400 g.), Towns (1,200 g.), Castles (2,500 g.), and livestock (sheep +120, pig +150, cow +200 g.).",
                 tip: "Knights holding Knightly Patronage (3 master seals) are exempt from all royal tithes."
@@ -320,8 +320,8 @@
                 code: "PRISON",
                 name: "Castle Dungeon",
                 cat: "Penalty",
-                img: "assets/tiles/prison.png",
-                art: "assets/tiles/prison.jpg",
+                img: "assets/tiles/prison.webp",
+                art: "assets/tiles/prison.webp",
                 cost: "1,000 g. bail",
                 action: "Imprisoned for 1 round. Escape options: pay 1,000 g. bail, roll a 6, or immediately play <strong>Royal Amnesty</strong> scroll from your pouch.",
                 tip: "A Royal Amnesty scroll frees you immediately without losing a turn or gold."
@@ -330,8 +330,8 @@
                 code: "HOSPITAL",
                 name: "Royal Infirmary",
                 cat: "Healing",
-                img: "assets/tiles/hospital.png",
-                art: "assets/tiles/hospital.jpg",
+                img: "assets/tiles/hospital.webp",
+                art: "assets/tiles/hospital.webp",
                 cost: "1,000 g.",
                 action: "Recover from critical wounds. Healing elixir for 1,000 g. permanently increases Combat by +1 (if Combat < 2), grants <strong>+0.5 💖 for bravery</strong>, and a protective ward!",
                 tip: "Holders of Knightly Patronage (3 master seals) receive free medical care."
@@ -340,8 +340,8 @@
                 code: "JESTER",
                 name: "Court Jester & Fool",
                 cat: "Special",
-                img: "assets/tiles/jester.png",
-                art: "assets/tiles/jester.jpg",
+                img: "assets/tiles/jester.webp",
+                art: "assets/tiles/jester.webp",
                 cost: "2,000 g. (Jester)",
                 action: "Courtly entertainment. Jester composes satirical ballads against rivals; Fool rewards skilled dancers with <strong>+200 g. × Dance rank</strong>.",
                 tip: "High Dance skill turns a Fool's visit into a handsome royal stipend."
@@ -350,8 +350,8 @@
                 code: "CHANCE",
                 name: "Chance & Royal Boon",
                 cat: "Fate",
-                img: "assets/tiles/chance.png",
-                art: "assets/tiles/chance.jpg",
+                img: "assets/tiles/chance.webp",
+                art: "assets/tiles/chance.webp",
                 cost: "—",
                 action: "Draw a fate card from the realm deck: royal grants, tournament challenges, brigands, riding tests, or <strong>tactical scrolls for your pouch</strong>.",
                 tip: "Pouch holds up to 3 tactical scrolls to play anytime on your turn."
@@ -361,8 +361,8 @@
                 code: "START",
                 name: "Královský START",
                 cat: "Speciální",
-                img: "assets/tiles/start.png",
-                art: "assets/tiles/castle.jpg",
+                img: "assets/tiles/start.webp",
+                art: "assets/tiles/castle.webp",
                 cost: "—",
                 action: "Žold <strong>+3 000 zl.</strong> (nemajetní bezzemci <strong>+5 000 zl.</strong>). Šlechtici, majitelé Města/Hradu nebo zkušení tanečníci (Tanec ≥ 2 a šaty) navíc získávají <strong>audienci u krále (+0,5 až +1,0 💖)</strong>.",
                 tip: "Využij včasný zisk šatů k čerpání královské přízně při každém oběhu plánu."
@@ -371,8 +371,8 @@
                 code: "VESNICE",
                 name: "Poddanská vesnice (V1–V12)",
                 cat: "Panství",
-                img: "assets/tiles/village.png",
-                art: "assets/tiles/village.jpg",
+                img: "assets/tiles/village.webp",
+                art: "assets/tiles/village.webp",
                 cost: "1 500 zl.",
                 action: "Koupě panství a výběr nájmu (100–300 zl.) od projíždějících rytířů. Možnost rozvoje: 1★ Vesnice → 2★ Městečko (+1 500 zl.) → 3★ Velká osada (+1 500 zl.). Plně rozvinutá vesnice dává trvale <strong>+0,5 💖</strong> a chová dobytek.",
                 tip: "Vesnice jsou základem stabilního příjmu. Na 3★ generují vysoký nájem a automatická stáda."
@@ -381,8 +381,8 @@
                 code: "MĚSTO",
                 name: "Královské město (M1–M4)",
                 cat: "Panství",
-                img: "assets/tiles/town.png",
-                art: "assets/tiles/town.jpg",
+                img: "assets/tiles/town.webp",
+                art: "assets/tiles/town.webp",
                 cost: "4 000 zl.",
                 action: "Bohaté sídlo s vysokým nájmem (500 zl.) a stálou prestiží: majiteli uděluje trvale <strong>+0,5 💖</strong> a přináší <strong>+1 200 zl.</strong> při návštěvě Výběrčího daní.",
                 tip: "Město rozšiřuje kapacitu stád o +2 a zaručuje královskou audienci na STARTu."
@@ -391,8 +391,8 @@
                 code: "HRAD",
                 name: "Šlechtický hrad (H1–H4)",
                 cat: "Panství",
-                img: "assets/tiles/castle.png",
-                art: "assets/tiles/castle.jpg",
+                img: "assets/tiles/castle.webp",
+                art: "assets/tiles/castle.webp",
                 cost: "7 000 zl.",
                 action: "Vrchol feudální moci: trvale <strong>+1,0 💖</strong> a <strong>+1 Charisma</strong> pro majitele! Nájem 1 000 zl., výnos u Výběrčího daní činí celých <strong>+2 500 zl.</strong>",
                 tip: "Nejrychlejší způsob, jak si trvale pojistit srdce a získat převahu na královském dvoře."
@@ -401,8 +401,8 @@
                 code: "KŮŇ",
                 name: "Chov koní (K1–K12)",
                 cat: "Zvířata",
-                img: "assets/tiles/kun.png",
-                art: "assets/tiles/kun.jpg",
+                img: "assets/tiles/kun.webp",
+                art: "assets/tiles/kun.webp",
                 cost: "600 × úroveň zl.",
                 action: "Koupě koně. Zpřístupňuje <strong>koňský pohyb (klus, cval, trysk)</strong>, umožňuje obranu obratností v duelech a je nutnou podmínkou účasti ve <strong>Velkém závodě</strong>.",
                 tip: "Kůň je klíč k rychlému pohybu po mapě. V kombinaci se psem a sokolem tvoří Chovnou sadu (+1,5 💖)."
@@ -411,8 +411,8 @@
                 code: "PES",
                 name: "Lovecký pes (P1–P12)",
                 cat: "Zvířata",
-                img: "assets/tiles/pes.png",
-                art: "assets/tiles/pes.jpg",
+                img: "assets/tiles/pes.webp",
+                art: "assets/tiles/pes.webp",
                 cost: "500 × úroveň zl.",
                 action: "Koupě loveckého psa. Věrný společník ti dává taktickou výhodu v aréně draků – při těsné prohře o 1–2 body získáš <strong>🎲 Taktický reroll 1 kostky</strong> zdarma!",
                 tip: "Pes ti zachrání život v aréně draků a chrání tě před převozem do Lazaretu."
@@ -421,8 +421,8 @@
                 code: "SOKOL",
                 name: "Lovecký sokol (S1–S12)",
                 cat: "Zvířata",
-                img: "assets/tiles/sokol.png",
-                art: "assets/tiles/sokol.jpg",
+                img: "assets/tiles/sokol.webp",
+                art: "assets/tiles/sokol.webp",
                 cost: "400 × úroveň zl.",
                 action: "Koupě dravce. Umožňuje <strong>Sokolí navigaci (±1 pole)</strong> při taktickém manévrování pěšky, čímž ti dovolí přesně dosednout na cíl nebo se vyhnout pasti.",
                 tip: "Sokolí navigace nefunguje při plném koňském cvalu a trysku – kůň letí kupředu příliš rychle."
@@ -431,8 +431,8 @@
                 code: "STAJE",
                 name: "Královské stáje & Dobytčí trh",
                 cat: "Ekonomika",
-                img: "assets/tiles/kun.png",
-                art: "assets/tiles/kun.jpg",
+                img: "assets/tiles/kun.webp",
+                art: "assets/tiles/kun.webp",
                 cost: "Dle druhu",
                 action: "Nákup hospodářského dobytka: <strong>🐑 Ovce (500 zl.)</strong>, <strong>🐖 Prase (600 zl.)</strong> a <strong>🐄 Skot (800 zl.)</strong>. Stáda zvyšují nájmy vesnic a generují pasivní výnos u Výběrčího daní.",
                 tip: "Kapacita stád závisí na počtu tvých vesnic a měst. Stáje samy o sobě přidávají +4 místa."
@@ -441,8 +441,8 @@
                 code: "MISTR",
                 name: "Sídlo Mistra (MB, MJ, MT, MCH, VM)",
                 cat: "Výcvik",
-                img: "assets/tiles/master.png",
-                art: "assets/tiles/master.jpg",
+                img: "assets/tiles/master.webp",
+                art: "assets/tiles/master.webp",
                 cost: "1 000–5 000 zl.",
                 action: "Trénink ctností (Boj, Jízda, Tanec, Charisma). Hod kostkou: 1–3 = nepřijat, 4–6 = přijat k výcviku. Úspěšný trénink uděluje <strong>Pečeť mistra</strong>. 3 různé pečetě = <strong>Rytířská záštita</strong>!",
                 tip: "Velmistr (VM) učí jakoukoliv vlastnost dle tvé volby. Investuj do své primární ctnosti co nejdříve."
@@ -451,8 +451,8 @@
                 code: "FESTIVAL",
                 name: "Královská slavnost (♡ ♡ ♡)",
                 cat: "Soutěž",
-                img: "assets/tiles/festival.png",
-                art: "assets/tiles/festival.jpg",
+                img: "assets/tiles/festival.webp",
+                art: "assets/tiles/festival.webp",
                 cost: "—",
                 action: "Turnaj (Boj + Jízda), Zámecký ples (Tanec + Charisma) nebo Velký závod (Jízda + koně). Hlavní zdroj srdcí ve hře! Vítěz získá <strong>až +5 💖 a 1 200 zl.</strong>",
                 tip: "Při účasti méně než 2 rytířů se slavnost nekoná, ale pořadatel dostane útěchu +800 zl. a +0,5 💖."
@@ -461,8 +461,8 @@
                 code: "U1",
                 name: "Běžná stvůra (Lesní dravci)",
                 cat: "Lov",
-                img: "assets/tiles/u1_zver.png",
-                art: "assets/tiles/u1_zver.jpg",
+                img: "assets/tiles/u1_zver.webp",
+                art: "assets/tiles/u1_zver.webp",
                 cost: "—",
                 action: "Lov vlků, medvědů a divočáků. Vítězství přináší <strong>1 000–2 500 zl.</strong> a <strong>+0,5 až +1,5 💖</strong>. Skvělý bezpečný trénink pro začínající válečníky.",
                 tip: "Použij Taktický postoj: Opatrná obrana tě ochrání před zraněním i v případě prohry."
@@ -471,8 +471,8 @@
                 code: "U2",
                 name: "Mocné monstrum (Bájní netvoři)",
                 cat: "Lov",
-                img: "assets/tiles/u2_monstrum.png",
-                art: "assets/tiles/u2_monstrum.jpg",
+                img: "assets/tiles/u2_monstrum.webp",
+                art: "assets/tiles/u2_monstrum.webp",
                 cost: "—",
                 action: "Boj s Chimérami, Trolly a Golemy. Odměna <strong>2 600 zl.</strong>, <strong>+1,5 až +2,5 💖</strong> a 65% šance na unikátní trofej. Lze uplatnit taktický ústup za 400 zl.",
                 tip: "Před bojem zkontroluj slabinu monstra v Bestiáři pro automatický bonus +2 k síle."
@@ -481,8 +481,8 @@
                 code: "U3",
                 name: "Dračí sluj (Legendární draci)",
                 cat: "Drakobijci",
-                img: "assets/tiles/u3_drak.png",
-                art: "assets/tiles/u3_drak.jpg",
+                img: "assets/tiles/u3_drak.webp",
+                art: "assets/tiles/u3_drak.webp",
                 cost: "—",
                 action: "Souboj o čest s jedním z 20 unikátních draků! Odměna <strong>6 000 zl.</strong>, <strong>+2,5 až +5,0 💖</strong> a garantovaná dračí trofej. <strong>Skolení 2 draků = okamžitá výhra v celé hře!</strong>",
                 tip: "Taktický ústup z dračí sluje stojí 800 zl. Pokud nemáš dostatečný Boj a zbraně, raději ustup."
@@ -491,8 +491,8 @@
                 code: "MERCHANT",
                 name: "Královský obchodník",
                 cat: "Trh",
-                img: "assets/tiles/merchant.png",
-                art: "assets/tiles/merchant.jpg",
+                img: "assets/tiles/merchant.webp",
+                art: "assets/tiles/merchant.webp",
                 cost: "Dle nákupu",
                 action: "Nákup balíčků výstroje (zbraně, zbroje, plesové šaty, klenoty). Možnost dobrovolného odprodeje majetku bance (věci za 50 % ceny, nemovitosti za 100 %).",
                 tip: "Nakupuj přednostně věci, které odpovídají tvé zvolené cestě k vítězství."
@@ -501,8 +501,8 @@
                 code: "KOVARNA",
                 name: "Cechovní kovárna",
                 cat: "Trh",
-                img: "assets/tiles/kovarna.png",
-                art: "assets/tiles/kovarna.jpg",
+                img: "assets/tiles/kovarna.webp",
+                art: "assets/tiles/kovarna.webp",
                 cost: "Dle zbraně",
                 action: "Výroba a nákup mečů, seker, kopí a brnění. Zbraně zvyšují Boj a poskytují taktickou výhodu proti specifickým drakům.",
                 tip: "Kopí platí na Vodní draky, těžké brnění na ohnivé plameny."
@@ -511,8 +511,8 @@
                 code: "KREJCI",
                 name: "Zámecký krejčí",
                 cat: "Trh",
-                img: "assets/tiles/krejci.png",
-                art: "assets/tiles/krejci.jpg",
+                img: "assets/tiles/krejci.webp",
+                art: "assets/tiles/krejci.webp",
                 cost: "Dle oděvu",
                 action: "Ušití dvorských šatů a brokátových rouch. Poskytuje bonusy k Tanci a Charismatu, zásadní pro vítězství na Zámeckém plese.",
                 tip: "Šaty ti na Zámeckém plese přinášejí automatický bonus +2 ke skóre."
@@ -521,8 +521,8 @@
                 code: "TAVERN",
                 name: "Krčma U Zlatého korbelu",
                 cat: "Služby",
-                img: "assets/tiles/tavern.png",
-                art: "assets/tiles/tavern.jpg",
+                img: "assets/tiles/tavern.webp",
+                art: "assets/tiles/tavern.webp",
                 cost: "500 zl.",
                 action: "Odpočinek a pohoštění. Runda medoviny za 500 zl. Pro zkušené tanečníky (Tanec ≥ 2) přináší dvorní obdiv a zisk <strong>+1,0 💖</strong> za okouzlující zábavu.",
                 tip: "Diplomaté a tanečníci zde proměňují drobné mince v cenná srdce."
@@ -531,8 +531,8 @@
                 code: "TAX",
                 name: "Výběrčí daní",
                 cat: "Ekonomika",
-                img: "assets/tiles/tax.png",
-                art: "assets/tiles/tax.jpg",
+                img: "assets/tiles/tax.webp",
+                art: "assets/tiles/tax.webp",
                 cost: "—",
                 action: "Výplata feudálních rent: Vesnice (500/900/1 400 zl.), Města (1 200 zl.), Hrady (2 500 zl.) a dobytek (ovce +120, prase +150, kráva +200 zl.).",
                 tip: "Rytíř s Rytířskou záštitou (3 pečetě mistrů) je navíc osvobozen od všech plateb královských desátků."
@@ -541,8 +541,8 @@
                 code: "PRISON",
                 name: "Hradní šatlava",
                 cat: "Trest",
-                img: "assets/tiles/prison.png",
-                art: "assets/tiles/prison.jpg",
+                img: "assets/tiles/prison.webp",
+                art: "assets/tiles/prison.webp",
                 cost: "Kauce 1 000 zl.",
                 action: "Uvěznění na 1 kolo. Možnosti záchrany: zaplacení kauce 1 000 zl., úspěšný útěk (hod kostkou 6), nebo okamžité zahrání svitku <strong>Královská amnestie</strong> z brašny.",
                 tip: "Pokud máš v brašně svitek Královské amnestie, jsi propuštěn okamžitě bez ztráty tahu i peněz."
@@ -551,8 +551,8 @@
                 code: "HOSPITAL",
                 name: "Královský lazaret",
                 cat: "Léčení",
-                img: "assets/tiles/hospital.png",
-                art: "assets/tiles/hospital.jpg",
+                img: "assets/tiles/hospital.webp",
+                art: "assets/tiles/hospital.webp",
                 cost: "1 000 zl.",
                 action: "Zotavení po těžkém zranění. Hojivý elixír za 1 000 zl. trvale zvýší Boj o +1 (pokud Boj < 2), udělí <strong>+0,5 💖 za statečnost</strong> a ochranný amulet proti dalšímu převozu!",
                 tip: "Držitelé Rytířské záštity (3 pečetě mistrů) jsou v lazaretu ošetřeni zcela zdarma."
@@ -561,8 +561,8 @@
                 code: "JESTER",
                 name: "Dvorní Kejklíř & Šašek",
                 cat: "Speciální",
-                img: "assets/tiles/jester.png",
-                art: "assets/tiles/jester.jpg",
+                img: "assets/tiles/jester.webp",
+                art: "assets/tiles/jester.webp",
                 cost: "2 000 zl. (Kejklíř)",
                 action: "Zábava u dvora. Kejklíř skládá posměšnou baladu na protivníky; Šašek odměňuje zkušené tanečníky královským darem <strong>+200 zl. × stupeň Tance</strong>.",
                 tip: "Vysoký Tanec promění návštěvu Šaška ve štědrou královskou rentu."
@@ -571,8 +571,8 @@
                 code: "CHANCE",
                 name: "Náhoda & Královský dar",
                 cat: "Osud",
-                img: "assets/tiles/chance.png",
-                art: "assets/tiles/chance.jpg",
+                img: "assets/tiles/chance.webp",
+                art: "assets/tiles/chance.webp",
                 cost: "—",
                 action: "Tažení osudové karty ze zemského balíčku: královské dotace, turnajové výzvy, lapkové, zkoušky jezdectví i nález <strong>taktických pergamenů do brašny rytíře</strong>.",
                 tip: "Taktické pergameny můžeš uschovat do brašny (kapacita 3) a zahrát je kdykoliv ve svém tahu."
@@ -589,7 +589,7 @@
             var t = tileDefinitions[i];
             html += '<div class="atlas-tile-card" onclick="PRS_App.openTileAtlasModal(\'' + t.code + '\')" style="cursor:pointer;" title="' + cardTitleHint + '">' +
                 '<div style="display:flex; align-items:center; gap:0.75rem;">' +
-                '  <img src="' + t.img + '" alt="' + t.name + '" class="atlas-tile-thumb" onerror="this.src=\'assets/tiles/castle.png\';" />' +
+                '  <img src="' + t.img + '" alt="' + t.name + '" class="atlas-tile-thumb" onerror="this.src=\'assets/tiles/castle.webp\';" />' +
                 '  <div style="flex:1;">' +
                 '    <div style="display:flex; align-items:center; justify-content:space-between; gap:0.35rem;">' +
                 '      <span style="font-size:0.72rem; font-weight:700; color:var(--gold); background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.3); border-radius:4px; padding:1px 6px;">' + t.code + '</span>' +
@@ -641,7 +641,7 @@
         if (content) {
             content.innerHTML = '<div class="tile-atlas-modal-box">' +
                 '  <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; flex-shrink:0;">' +
-                '    <img src="' + t.img + '" alt="' + t.name + '" class="tile-atlas-modal-img" onerror="this.src=\'assets/tiles/castle.png\';" />' +
+                '    <img src="' + t.img + '" alt="' + t.name + '" class="tile-atlas-modal-img" onerror="this.src=\'assets/tiles/castle.webp\';" />' +
                 '    <span style="font-size:0.75rem; font-weight:700; color:var(--gold); background:rgba(212,175,55,0.18); border:1px solid rgba(212,175,55,0.45); border-radius:6px; padding:2px 10px;">' + codeLabel + t.code + '</span>' +
                 '  </div>' +
                 '  <div style="flex:1; min-width:0;">' +
@@ -862,7 +862,7 @@
 
             html.push('<div class="bestiary-card">');
             html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(d.name) + '\', \'' + this.escapeHtml(d.desc) + '\')" title="Klikni pro zvětšení ilustrace">');
-            html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(d.name) + '" class="card-media-img" loading="lazy" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.png\';" />');
+            html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(d.name) + '" class="card-media-img" loading="lazy" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.webp\';" />');
             html.push('    <span class="card-media-badge-left" style="border-color:' + tierColor + '; color:' + tierColor + ';">' + tierTitle + '</span>');
             html.push('    <span class="card-media-badge-right">⚔️ ' + diffLabel + ' ' + d.difficulty + '</span>');
             html.push('  </div>');
@@ -890,8 +890,8 @@
                 html.push('    </div>');
             }
 
-            if (d.imgFlip) {
-                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + d.img + '\', \'' + d.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">' + flipLabel + '</button>');
+            if (d.canFlip || d.imgFlip) {
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this)" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">' + flipLabel + '</button>');
             }
             html.push('  </div>');
             html.push('</div>');
@@ -945,8 +945,8 @@
             html.push('    <div class="card-callout-box" style="border-color:rgba(212,175,55,0.3); color:#fef08a;">');
             html.push('      ' + benefitHtml);
             html.push('    </div>');
-            if (c.imgFlip) {
-                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + c.img + '\', \'' + c.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">' + flipCastleLabel + '</button>');
+            if (c.canFlip || c.imgFlip) {
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this)" style="font-size:0.75rem; padding:4px 8px; margin-top:0.4rem; width:100%; cursor:pointer;">' + flipCastleLabel + '</button>');
             }
             html.push('  </div>');
             html.push('</div>');
@@ -1103,8 +1103,8 @@
             html.push('    <div class="card-media-desc" style="font-size:0.8rem; color:#94a3b8; line-height:1.35; flex:1; margin-bottom:0.5rem;">' + this.escapeHtml(desc) + '</div>');
             html.push('    <div style="font-size:0.72rem; color:#64748b; margin-bottom:0.4rem;">' + clearanceLabel + ' <strong>' + (d.clearance || 35) + ' px</strong></div>');
 
-            if (d.imgFlip) {
-                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this, \'' + d.img + '\', \'' + d.imgFlip + '\')" style="font-size:0.75rem; padding:4px 8px; width:100%; cursor:pointer;">' + flipBtnText + '</button>');
+            if (d.canFlip || d.imgFlip) {
+                html.push('    <button class="rules-subnav-btn" onclick="event.stopPropagation(); PRS_App.toggleCardFlip(this)" style="font-size:0.75rem; padding:4px 8px; width:100%; cursor:pointer;">' + flipBtnText + '</button>');
             }
             html.push('  </div>');
             html.push('</div>');
@@ -1112,22 +1112,18 @@
         container.innerHTML = html.join("");
     },
 
-    // --- INTERAKTIVNÍ ZRCADLENÍ ILUSTRACÍ V KARTÁCH (LÍC / RUB) ---
-    toggleCardFlip: function (btn, normalSrc, flipSrc) {
+    // --- INTERAKTIVNÍ ZRCADLENÍ ILUSTRACÍ V KARTÁCH (CSS scaleX) ---
+    toggleCardFlip: function (btn) {
         var card = btn.closest(".bestiary-card, .castle-card, .decor-card");
         if (!card) return;
         var img = card.querySelector(".card-media-img");
         if (!img) return;
         var tFlip = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
-        if (img.getAttribute("data-is-flipped") === "true") {
-            img.src = normalSrc;
-            img.setAttribute("data-is-flipped", "false");
-            btn.textContent = tFlip("ui.catalog.flip_mirror", "🔄 Otočit zrcadlení");
-        } else {
-            img.src = flipSrc || normalSrc;
-            img.setAttribute("data-is-flipped", "true");
-            btn.textContent = tFlip("ui.catalog.flip_original", "↩️ Původní směr");
-        }
+        var flipped = img.classList.toggle("is-flipped");
+        img.setAttribute("data-is-flipped", flipped ? "true" : "false");
+        btn.textContent = flipped
+            ? tFlip("ui.catalog.flip_original", "↩️ Původní směr")
+            : tFlip("ui.catalog.flip_mirror", "🔄 Otočit zrcadlení");
     },
 
     // --- KONTEXTOVÁ NÁPOVĚDA '?' Z HERNÍ PLOCHY DO KODEXU PRAVIDEL ---

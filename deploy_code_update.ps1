@@ -261,27 +261,36 @@ function Upload-FtpFile {
         Write-Error "CRITICAL VIOLATION: Refusing to upload .exe file: $localFilePath"
         return $false
     }
-    try {
-        $req = [System.Net.FtpWebRequest]::Create($remoteFileUri)
-        $req.Credentials = $credentials
-        $req.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
-        $req.UseBinary = $true
-        $req.KeepAlive = $false
-        $req.EnableSsl = $false
+    $maxAttempts = 3
+    $fileBytes = [System.IO.File]::ReadAllBytes($localFilePath)
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+        try {
+            $req = [System.Net.FtpWebRequest]::Create($remoteFileUri)
+            $req.Credentials = $credentials
+            $req.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
+            $req.UseBinary = $true
+            $req.KeepAlive = $false
+            $req.EnableSsl = $false
 
-        $fileBytes = [System.IO.File]::ReadAllBytes($localFilePath)
-        $req.ContentLength = $fileBytes.Length
-        $stream = $req.GetRequestStream()
-        $stream.Write($fileBytes, 0, $fileBytes.Length)
-        $stream.Close()
-        $resp = $req.GetResponse()
-        $resp.Close()
-        Write-Host "Uploaded: $localFilePath -> $remoteFileUri" -ForegroundColor Green
-        return $true
-    } catch {
-        Write-Warning "Failed uploading $localFilePath to $remoteFileUri : $_"
-        return $false
+            $req.ContentLength = $fileBytes.Length
+            $stream = $req.GetRequestStream()
+            $stream.Write($fileBytes, 0, $fileBytes.Length)
+            $stream.Close()
+            $resp = $req.GetResponse()
+            $resp.Close()
+            Write-Host "Uploaded: $localFilePath -> $remoteFileUri" -ForegroundColor Green
+            return $true
+        } catch {
+            if ($attempt -lt $maxAttempts) {
+                Write-Warning "Retry $attempt/$maxAttempts failed uploading $localFilePath to $remoteFileUri : $_"
+                Start-Sleep -Milliseconds 1500
+            } else {
+                Write-Warning "Failed uploading $localFilePath to $remoteFileUri after $maxAttempts attempts: $_"
+                return $false
+            }
+        }
     }
+    return $false
 }
 
 $uploadedCount = 0

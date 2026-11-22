@@ -16,7 +16,7 @@
             --theme-active-grad: linear-gradient(135deg, #d4af37, #b47d1c);
             --board-filter: none;
             --table-vignette: radial-gradient(circle at 50% 0%, #2b1f13 0%, #0f0b05 85%);
-            --theme-bg-image: url('../assets/backgrounds/bg_theme_light.jpg');
+            --theme-bg-image: url('../assets/backgrounds/bg_theme_light.webp');
         }
 
         :root[data-theme="fire"], body[data-theme="fire"] {
@@ -34,7 +34,7 @@
             --theme-active-grad: linear-gradient(135deg, #ea580c, #b91c1c);
             --board-filter: sepia(0.22) saturate(1.4) hue-rotate(-12deg);
             --table-vignette: radial-gradient(circle at 50% 0%, #3a150c 0%, #120705 85%);
-            --theme-bg-image: url('../assets/backgrounds/bg_theme_fire.jpg');
+            --theme-bg-image: url('../assets/backgrounds/bg_theme_fire.webp');
         }
 
         :root[data-theme="water"], body[data-theme="water"] {
@@ -52,7 +52,7 @@
             --theme-active-grad: linear-gradient(135deg, #0284c7, #0369a1);
             --board-filter: saturate(1.2) hue-rotate(185deg) brightness(0.95);
             --table-vignette: radial-gradient(circle at 50% 0%, #0d2847 0%, #040e1a 85%);
-            --theme-bg-image: url('../assets/backgrounds/bg_theme_water.jpg');
+            --theme-bg-image: url('../assets/backgrounds/bg_theme_water.webp');
         }
 
         :root[data-theme="earth"], body[data-theme="earth"] {
@@ -70,7 +70,7 @@
             --theme-active-grad: linear-gradient(135deg, #059669, #047857);
             --board-filter: sepia(0.2) saturate(1.3) hue-rotate(65deg);
             --table-vignette: radial-gradient(circle at 50% 0%, #15361c 0%, #061209 85%);
-            --theme-bg-image: url('../assets/backgrounds/bg_theme_earth.jpg');
+            --theme-bg-image: url('../assets/backgrounds/bg_theme_earth.webp');
         }
 
         :root[data-theme="air"], body[data-theme="air"] {
@@ -88,7 +88,7 @@
             --theme-active-grad: linear-gradient(135deg, #9333ea, #7e22ce);
             --board-filter: saturate(1.2) hue-rotate(240deg) brightness(0.95);
             --table-vignette: radial-gradient(circle at 50% 0%, #281447 0%, #0a0515 85%);
-            --theme-bg-image: url('../assets/backgrounds/bg_theme_air.jpg');
+            --theme-bg-image: url('../assets/backgrounds/bg_theme_air.webp');
         }
 
         * {

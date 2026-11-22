@@ -536,7 +536,7 @@
 
             var winRate = (neededRoll > 6) ? 0 : Math.round(((7 - Math.max(1, neededRoll)) / 6) * 100);
 
-            var qImg = q.img || ((q.questTier === "U1") ? "assets/tiles/u1_zver.jpg" : ((q.questTier === "U2") ? "assets/tiles/u2_monstrum.jpg" : "assets/tiles/u3_drak.jpg"));
+            var qImg = q.img || ((q.questTier === "U1") ? "assets/tiles/u1_zver.webp" : ((q.questTier === "U2") ? "assets/tiles/u2_monstrum.webp" : "assets/tiles/u3_drak.webp"));
 
             var tierTitle = (q.questTier === "U1") ? "Lesní zvířena" : ((q.questTier === "U2") ? "Temný netvor" : (q.tierGroup === "boss" ? "Legendární Dračí Saň" : "Drak království"));
 
@@ -711,7 +711,7 @@
 
                 '<div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.45rem;">' +
 
-                '  <div class="standing-tile-medallion" style="border-color:#ec4899;"><img src="assets/tiles/festival.jpg" alt="Slavnost" /></div>' +
+                '  <div class="standing-tile-medallion" style="border-color:#ec4899;"><img src="assets/tiles/festival.webp" alt="Slavnost" /></div>' +
 
                 '  <div>' +
 

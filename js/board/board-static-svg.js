@@ -465,9 +465,8 @@
         out.push('  <rect x="0" y="0" width="1400" height="860" rx="22" fill="url(#parchmentGrad)" stroke="' + activePalette.stroke + '" stroke-width="3.5"/>');
 
         if (this.graphicsConfig && this.graphicsConfig.boardBgUrl) {
-
-            out.push('  <image href="' + this.escapeHtml(this.graphicsConfig.boardBgUrl) + '" x="4" y="4" width="1392" height="852" preserveAspectRatio="xMidYMid slice" opacity="0.88" style="filter: var(--board-filter, none);" />');
-
+            var boardBgHref = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(this.graphicsConfig.boardBgUrl) : this.graphicsConfig.boardBgUrl;
+            out.push('  <image href="' + this.escapeHtml(boardBgHref) + '" x="4" y="4" width="1392" height="852" preserveAspectRatio="xMidYMid slice" opacity="0.88" style="filter: var(--board-filter, none);" />');
         }
 
         // Rohové kování desky
@@ -523,34 +522,20 @@
 
             var lmk = landmarks[lm];
 
-            var customLmUrl = "";
+            var rawLmUrl = "";
             if (lmk.id === "royalCastle") {
                 if (this.currentTheme && this.currentTheme !== "light" && this.graphicsConfig && this.graphicsConfig.landmarkBitmaps && this.graphicsConfig.landmarkBitmaps.royalCastle) {
-                    customLmUrl = this.graphicsConfig.landmarkBitmaps.royalCastle;
+                    rawLmUrl = this.graphicsConfig.landmarkBitmaps.royalCastle;
                 } else {
-                    customLmUrl = lmk.image || (this.graphicsConfig && this.graphicsConfig.landmarkBitmaps && this.graphicsConfig.landmarkBitmaps.royalCastle) || "assets/castles/castle_royal.png";
+                    rawLmUrl = lmk.image || (this.graphicsConfig && this.graphicsConfig.landmarkBitmaps && this.graphicsConfig.landmarkBitmaps.royalCastle) || "assets/castles/castle_royal.webp";
                 }
             } else {
-                customLmUrl = lmk.image || ((this.graphicsConfig && this.graphicsConfig.landmarkBitmaps && this.graphicsConfig.landmarkBitmaps[lmk.id]) ? this.graphicsConfig.landmarkBitmaps[lmk.id] : "");
+                rawLmUrl = lmk.image || ((this.graphicsConfig && this.graphicsConfig.landmarkBitmaps && this.graphicsConfig.landmarkBitmaps[lmk.id]) ? this.graphicsConfig.landmarkBitmaps[lmk.id] : "");
             }
 
-            if (customLmUrl && customLmUrl.indexOf(".jpg") !== -1) {
-
-                customLmUrl = customLmUrl.replace(".jpg", ".png");
-
-            }
-
-            // Zrcadlení draka a dominant pokud stojí na pravé polovině plánu (pohled do středu)
-
-            if ((lmk.x > 700 || lmk.isFlipped) && customLmUrl && customLmUrl.indexOf("_flip") === -1) {
-
-                if (customLmUrl.indexOf("dragon") !== -1 || lmk.id === "dragonLair" || customLmUrl.indexOf("castle") !== -1) {
-
-                    customLmUrl = customLmUrl.replace(".png", "_flip.png");
-
-                }
-
-            }
+            var wasFlipUrl = window.PRS_isFlippedAssetUrl ? window.PRS_isFlippedAssetUrl(rawLmUrl) : false;
+            var customLmUrl = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(rawLmUrl) : rawLmUrl;
+            var shouldFlipLm = Boolean(wasFlipUrl || ((lmk.x > 700 || lmk.isFlipped) && customLmUrl && (customLmUrl.indexOf("dragon") !== -1 || lmk.id === "dragonLair" || customLmUrl.indexOf("castle") !== -1)));
 
             out.push('  <g class="board-landmark" transform="translate(' + (lmk.x - lmk.w / 2) + ',' + (lmk.y - lmk.h / 2) + ')">');
 
@@ -560,8 +545,9 @@
                 out.push('    <ellipse cx="' + (lmk.w / 2) + '" cy="' + (lmk.h - 24) + '" rx="' + Math.round(lmk.w * 0.48) + '" ry="' + Math.round(lmk.h * 0.24) + '" fill="url(#' + lmBaseGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
                 out.push('    <ellipse cx="' + (lmk.w / 2) + '" cy="' + (lmk.h - 20) + '" rx="' + Math.round(lmk.w * 0.39) + '" ry="' + Math.round(lmk.h * 0.16) + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
 
-                // Průsvitná 3D izometrická ilustrace hradu nebo draka
-                out.push('    <image href="' + this.escapeHtml(customLmUrl) + '" x="0" y="0" width="' + lmk.w + '" height="' + (lmk.h - 10) + '" preserveAspectRatio="xMidYMid meet"/>');
+                // Průsvitná 3D izometrická ilustrace hradu nebo draka (zrcadlení jen na <image>, popiska zůstává čitelná)
+                var lmFlipAttr = shouldFlipLm ? (' transform="translate(' + lmk.w + ', 0) scale(-1, 1)"') : '';
+                out.push('    <image href="' + this.escapeHtml(customLmUrl) + '" x="0" y="0" width="' + lmk.w + '" height="' + (lmk.h - 10) + '" preserveAspectRatio="xMidYMid meet"' + lmFlipAttr + '/>');
 
                 if (lmk.id === "royalCastle") {
 
@@ -876,27 +862,22 @@
                 var shadRx = Math.round(dec.w * 0.36);
                 var shadRy = Math.max(5, Math.round(dec.h * 0.13));
 
-                var decorUrl = (this.graphicsConfig && this.graphicsConfig.decorBitmaps && this.graphicsConfig.decorBitmaps[dec.catalogId])
+                var rawDecorUrl = (this.graphicsConfig && this.graphicsConfig.decorBitmaps && this.graphicsConfig.decorBitmaps[dec.catalogId])
                     ? this.graphicsConfig.decorBitmaps[dec.catalogId]
-                    : (cat ? (dec.isFlipped && cat.imgFlip ? cat.imgFlip : cat.img) : "");
-
-                if (decorUrl && dec.isFlipped) {
-                    if (cat && cat.imgFlip) {
-                        decorUrl = cat.imgFlip;
-                    } else if (decorUrl.indexOf("_flip") === -1) {
-                        decorUrl = decorUrl.replace(/(\.png)(\?.*)?$/i, "_flip$1$2");
-                    }
-                }
+                    : (cat && cat.img ? cat.img : "");
+                var decorUrl = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(rawDecorUrl) : rawDecorUrl;
+                var decorFlip = Boolean(dec.isFlipped || (window.PRS_isFlippedAssetUrl && window.PRS_isFlippedAssetUrl(rawDecorUrl)));
 
                 if (decorUrl) {
 
                     var sc = dec.scale || 1;
+                    var decFlipAttr = decorFlip ? ' transform="scale(-1, 1)"' : '';
 
                     out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')" onclick="PRS_App.handleDecorClick(\'' + dec.catalogId + '\', ' + dec.x + ', ' + dec.y + ', event)" style="cursor:pointer;">');
                     // Přirozené terénní lůžko a kontaktní stín ukotvující prvek do krajiny
                     out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
                     out.push('      <ellipse cx="0" cy="' + (footY + 2) + '" rx="' + shadRx + '" ry="' + shadRy + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
-                    out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid meet"/>');
+                    out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid meet"' + decFlipAttr + '/>');
                     if (catType === "vegetation" || catType === "settlement" || catType === "agriculture") {
                         var tuftY = footY + Math.round(shadRy * 0.45);
                         var tuftX = Math.round(shadRx * 0.52);
@@ -1164,7 +1145,14 @@
         // Vložení bitmapy nebo procedurální heraldické kresby
         if (bmpUrl) {
             var dSize = r * 2 - 2;
-            out.push('    <image href="' + this.escapeHtml(bmpUrl) + '" x="' + (nd.x - dSize / 2) + '" y="' + (nd.y - dSize / 2) + '" width="' + dSize + '" height="' + dSize + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + clipId + ')" />');
+            var flipTile = (typeof this.shouldFlipTileBitmap === "function") ? this.shouldFlipTileBitmap(nd) : false;
+            if (flipTile) {
+                out.push('    <g transform="translate(' + nd.x + ',' + nd.y + ') scale(-1, 1)">');
+                out.push('      <image href="' + this.escapeHtml(bmpUrl) + '" x="' + (-dSize / 2) + '" y="' + (-dSize / 2) + '" width="' + dSize + '" height="' + dSize + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + clipId + ')" />');
+                out.push('    </g>');
+            } else {
+                out.push('    <image href="' + this.escapeHtml(bmpUrl) + '" x="' + (nd.x - dSize / 2) + '" y="' + (nd.y - dSize / 2) + '" width="' + dSize + '" height="' + dSize + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#' + clipId + ')" />');
+            }
 
             // 3D Medailonový reliéf přes bitmapu (korálkový lem, vnitřní stín a konvexní skleněný odlesk)
             out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r - 1.2) + '" fill="url(#tileInnerShadow)" pointer-events="none"/>');

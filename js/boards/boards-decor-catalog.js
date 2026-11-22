@@ -11,8 +11,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Mohutný solitérní dub s hustou zelenou korunou, poskytující stín pocestným a rytířům na královských loukách.",
         category: "vegetation",
         w: 56, h: 68, clearance: 28,
-        img: "assets/decorations/tree_oak.png",
-        imgFlip: "assets/decorations/tree_oak_flip.png",
+        img: "assets/decorations/tree_oak.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<path d="M-5,14 Q-7,32 -10,36 L10,36 Q7,32 5,14 Z" fill="#6d4c41" stroke="#3e2723" stroke-width="1.2"/>' +
@@ -30,8 +30,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Štíhlá jehličnatá borovice odolávající drsným horským větrům v podhůří i na skalnatých srázech.",
         category: "vegetation",
         w: 48, h: 72, clearance: 25,
-        img: "assets/decorations/tree_pine.png",
-        imgFlip: "assets/decorations/tree_pine_flip.png",
+        img: "assets/decorations/tree_pine.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<rect x="-3" y="16" width="6" height="18" fill="#5d4037" stroke="#3e2723" stroke-width="1"/>' +
@@ -49,8 +49,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Půvabná bělostná bříza se stříbřitou kůrou a jemným listovím, oblíbená v hájích u koňských pastvin.",
         category: "vegetation",
         w: 44, h: 64, clearance: 22,
-        img: "assets/decorations/tree_birch.png?v=202611021708",
-        imgFlip: "assets/decorations/tree_birch_flip.png?v=202611021708",
+        img: "assets/decorations/tree_birch.webp?v=202611021708",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<path d="M-2,12 L-3,32 L3,32 L2,12 Z" fill="#f5f5f4" stroke="#44403c" stroke-width="1"/>' +
@@ -68,8 +68,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Malebné seskupení tří starých dubů tvořící přirozený stinný předěl mezi jednotlivými stezkami.",
         category: "vegetation",
         w: 92, h: 76, clearance: 44,
-        img: "assets/decorations/grove_oak.png",
-        imgFlip: "assets/decorations/grove_oak_flip.png",
+        img: "assets/decorations/grove_oak.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<g transform="translate(-18,-2) scale(0.85)">' +
@@ -95,8 +95,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Hustý borový lesík vonící jehličím a pryskyřicí, lemující odlehlejší kouty a stezky k Dračí sluji.",
         category: "vegetation",
         w: 86, h: 80, clearance: 42,
-        img: "assets/decorations/grove_pine.png",
-        imgFlip: "assets/decorations/grove_pine_flip.png",
+        img: "assets/decorations/grove_pine.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<g transform="translate(-16,-4) scale(0.85)">' +
@@ -129,8 +129,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Prastarý žulový balvan obrostlý mechem a lišejníky, označující skalnaté úseky a stezky odvahy.",
         category: "terrain",
         w: 52, h: 40, clearance: 24,
-        img: "assets/decorations/rock_boulder.png",
-        imgFlip: "assets/decorations/rock_boulder_flip.png",
+        img: "assets/decorations/rock_boulder.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<polygon points="-22,10 -16,-6 4,-14 22,-2 18,12 -8,14" fill="#78716c" stroke="#44403c" stroke-width="1.4"/>' +
@@ -146,8 +146,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Monumentální horský masiv s věčným sněhem na vrcholcích, tvořící velkolepý severní horizont království.",
         category: "terrain",
         w: 120, h: 74, clearance: 55,
-        img: "assets/decorations/mountain_peaks.png",
-        imgFlip: "assets/decorations/mountain_peaks_flip.png",
+        img: "assets/decorations/mountain_peaks.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<polygon points="-40,26 -20,-22 6,26" fill="#475569" stroke="#1e293b" stroke-width="1.5"/>' +
@@ -168,8 +168,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Zlatavý lán zralého pšeničného obilí s úrodnými brázdami, symbol blahobytu a míru v podhradí.",
         category: "agriculture",
         w: 105, h: 60, clearance: 48,
-        img: "assets/decorations/farm_field.png",
-        imgFlip: "assets/decorations/farm_field_flip.png",
+        img: "assets/decorations/farm_field.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<polygon points="-44,4 0,-18 44,-4 0,18" fill="#eab308" stroke="#a16207" stroke-width="1.2" opacity="0.75"/>' +
@@ -186,8 +186,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Trámová dřevěná ohrada lemující šťavnaté pastviny, kde se chovají ušlechtilí královští koně a lovečtí psi.",
         category: "agriculture",
         w: 78, h: 48, clearance: 36,
-        img: "assets/decorations/pasture_fence.png",
-        imgFlip: "assets/decorations/pasture_fence_flip.png",
+        img: "assets/decorations/pasture_fence.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<rect x="-30" y="-8" width="4" height="22" fill="#854d0e" rx="1"/>' +
@@ -205,8 +205,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Dřevěný větrný mlýn s mohutnými plachtovými lopatkami, který mele zrno na otevřených větrných pláních.",
         category: "agriculture",
         w: 68, h: 88, clearance: 34,
-        img: "assets/decorations/windmill.png",
-        imgFlip: "assets/decorations/windmill_flip.png",
+        img: "assets/decorations/windmill.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<polygon points="-14,34 -8,-4 8,-4 14,34" fill="#78350f" stroke="#451a03" stroke-width="1.5"/>' +
@@ -231,8 +231,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Pohádková roubená chalupa s kamennou podezdívkou a šindelovou střechou v srdci královských vsí.",
         category: "settlement",
         w: 70, h: 64, clearance: 35,
-        img: "assets/decorations/cottage_timber.png",
-        imgFlip: "assets/decorations/cottage_timber_flip.png",
+        img: "assets/decorations/cottage_timber.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<rect x="-22" y="2" width="44" height="24" rx="2" fill="#fef3c7" stroke="#78350f" stroke-width="1.4"/>' +
@@ -252,8 +252,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Hluboká návesní studna z kamene s poctivým dřevěným rumpálem a okovem křišťálově čisté vody.",
         category: "settlement",
         w: 42, h: 46, clearance: 22,
-        img: "assets/decorations/village_well.png",
-        imgFlip: "assets/decorations/village_well_flip.png",
+        img: "assets/decorations/village_well.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<ellipse cx="0" cy="12" rx="14" ry="7" fill="#64748b" stroke="#334155" stroke-width="1.4"/>' +
@@ -272,8 +272,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Krytý povoz potulného kupce se sudy a truhlami, nabízející zbraně, vzácná sukna a lektvary z dalekých zemí.",
         category: "settlement",
         w: 68, h: 52, clearance: 32,
-        img: "assets/decorations/merchant_wagon.png",
-        imgFlip: "assets/decorations/merchant_wagon_flip.png",
+        img: "assets/decorations/merchant_wagon.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<circle cx="-16" cy="14" r="6" fill="#78350f" stroke="#451a03" stroke-width="1.4"/>' +
@@ -292,8 +292,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Nádherný královský pavilon v purpurových a zlatých barvách koruny, připravený pro šlechtická klání a slavnosti.",
         category: "settlement",
         w: 78, h: 70, clearance: 38,
-        img: "assets/decorations/tournament_tent.png",
-        imgFlip: "assets/decorations/tournament_tent_flip.png",
+        img: "assets/decorations/tournament_tent.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<polygon points="-26,22 -22,4 22,4 26,22" fill="#991b1b" stroke="#7f1d1d" stroke-width="1.4"/>' +
@@ -311,8 +311,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Dřevěný rozcestník se směrovkami ukazujícími cesty k hradům, vesnicím a nebezpečným stezkám.",
         category: "settlement",
         w: 32, h: 44, clearance: 18,
-        img: "assets/decorations/signpost.png",
-        imgFlip: "assets/decorations/signpost_flip.png",
+        img: "assets/decorations/signpost.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<rect x="-2" y="-12" width="4" height="26" fill="#78350f"/>' +
@@ -328,8 +328,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Klidná lesní tůňka s kvetoucími lekníny, rákosím a průzračnou vodou, kde se zrcadlí koruny stromů.",
         category: "water",
         w: 96, h: 58, clearance: 46,
-        img: "assets/decorations/lake_pond.png",
-        imgFlip: "assets/decorations/lake_pond_flip.png",
+        img: "assets/decorations/lake_pond.webp",
+        canFlip: true,
         renderSVG: function () {
             return '' +
                 '<path d="M-38,0 C-38,-16 -10,-22 16,-18 C38,-14 42,-2 36,10 C30,22 6,24 -18,20 C-34,16 -38,8 -38,0 Z" fill="#0284c7" stroke="#0369a1" stroke-width="1.8" opacity="0.85"/>' +
@@ -348,8 +348,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Pravidelně vysázený sad obsypaný sladkými červenými jablky přinášející osvěžení putujícím družinám.",
         category: "vegetation",
         w: 96, h: 76, clearance: 44,
-        img: "assets/decorations/orchad_apple.png",
-        imgFlip: "assets/decorations/orchad_apple_flip.png"
+        img: "assets/decorations/orchad_apple.webp",
+        canFlip: true
     },
 
     hruskovy_sad: {
@@ -359,8 +359,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Slunný ovocný sad se šťavnatými žlutými hruškami na mírných pahorcích královského panství.",
         category: "vegetation",
         w: 96, h: 76, clearance: 44,
-        img: "assets/decorations/hruskovy_sad.png",
-        imgFlip: "assets/decorations/hruskovy_sad_flip.png"
+        img: "assets/decorations/hruskovy_sad.webp",
+        canFlip: true
     },
 
     orchad_plum: {
@@ -370,8 +370,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Sad starých švestkových stromů s modrými plody, ze kterých vesničané vaří vyhlášená povidla.",
         category: "vegetation",
         w: 96, h: 76, clearance: 44,
-        img: "assets/decorations/orchad_plum.png",
-        imgFlip: "assets/decorations/orchad_plum_flip.png"
+        img: "assets/decorations/orchad_plum.webp",
+        canFlip: true
     },
 
     bush: {
@@ -381,8 +381,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Hustý kvetoucí keř oživující okraje cest a poskytující bezpečný úkryt pro drobnou lesní zvěř.",
         category: "vegetation",
         w: 48, h: 42, clearance: 22,
-        img: "assets/decorations/bush.png",
-        imgFlip: "assets/decorations/bush_flip.png"
+        img: "assets/decorations/bush.webp",
+        canFlip: true
     },
 
     signpost2: {
@@ -392,8 +392,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Otesaný kamenný rozcestník s vyrytými rodovými erby a směry na křižovatkách horských cest.",
         category: "settlement",
         w: 44, h: 54, clearance: 20,
-        img: "assets/decorations/signpost2.png",
-        imgFlip: "assets/decorations/signpost2_flip.png"
+        img: "assets/decorations/signpost2.webp",
+        canFlip: true
     },
 
     grove_pine2: {
@@ -403,8 +403,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Hluboký a neprostupný borový hvozd, v jehož větvích se ozývá tajemné houkání sov a šumění větru.",
         category: "vegetation",
         w: 92, h: 80, clearance: 42,
-        img: "assets/decorations/grove_pine2.png",
-        imgFlip: "assets/decorations/grove_pine2_flip.png"
+        img: "assets/decorations/grove_pine2.webp",
+        canFlip: true
     },
 
     hrad: {
@@ -414,8 +414,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Kamenný strážní hrádek s cimbuřím a střílnami, střežící zemské hranice před nájezdy banditů.",
         category: "civilization",
         w: 80, h: 80, clearance: 40,
-        img: "assets/decorations/hrad.png",
-        imgFlip: "assets/decorations/hrad_flip.png"
+        img: "assets/decorations/hrad.webp",
+        canFlip: true
     },
 
     // --- 6. Vodní toky a mosty ---
@@ -426,8 +426,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Klapající roubený vodní mlýn s proudem vody stékajícím po lopatkách velkého dřevěného kola na zurčícím potoce.",
         category: "agriculture",
         w: 78, h: 84, clearance: 38,
-        img: "assets/decorations/watermill.png",
-        imgFlip: "assets/decorations/watermill_flip.png"
+        img: "assets/decorations/watermill.webp",
+        canFlip: true
     },
 
     swamp_bridge: {
@@ -437,8 +437,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Dřevěná lávka klenoucí se přes zrádný močál mezi orobincem, lekníny a tančícími bludičkami.",
         category: "water",
         w: 84, h: 57, clearance: 38,
-        img: "assets/decorations/swamp_bridge.png",
-        imgFlip: "assets/decorations/swamp_bridge_flip.png"
+        img: "assets/decorations/swamp_bridge.webp",
+        canFlip: true
     },
 
     lake_nymphs: {
@@ -448,8 +448,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Tajemné jezerní rusalky a vodní víly odpočívající na dřevěném molu uprostřed leknínů, lákající pocestné svým líbezným zpěvem.",
         category: "water",
         w: 88, h: 52, clearance: 38,
-        img: "assets/decorations/lake_nymphs.png",
-        imgFlip: "assets/decorations/lake_nymphs_flip.png"
+        img: "assets/decorations/lake_nymphs.webp",
+        canFlip: true
     },
 
     vodnik_pond: {
@@ -459,8 +459,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Zelený hastrman bafající z dýmky na vyvrácené vrbě nad temnou tůní, schovávající hrníčky s dušičkami a chytající ryby do sítě.",
         category: "water",
         w: 88, h: 53, clearance: 38,
-        img: "assets/decorations/vodnik_pond.png",
-        imgFlip: "assets/decorations/vodnik_pond_flip.png"
+        img: "assets/decorations/vodnik_pond.webp",
+        canFlip: true
     },
 
     // --- 7. Strážní objekty a tajemná obydlí ---
@@ -471,8 +471,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Vysoká dřevěná trámová pozorovatelna s žebříkem a pochodní, odkud královské hlídky střeží obchodní stezky a hranice panství.",
         category: "civilization",
         w: 66, h: 84, clearance: 36,
-        img: "assets/decorations/wooden_watchtower.png",
-        imgFlip: "assets/decorations/wooden_watchtower_flip.png"
+        img: "assets/decorations/wooden_watchtower.webp",
+        canFlip: true
     },
 
     ancient_tower_ruin: {
@@ -482,8 +482,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Opuštěná kamenná věž obrostlá břečťanem a mohutnými kořeny prastarého stromu, střežící tajemství dávných dynastií.",
         category: "civilization",
         w: 64, h: 84, clearance: 36,
-        img: "assets/decorations/ancient_tower_ruin.png",
-        imgFlip: "assets/decorations/ancient_tower_ruin_flip.png"
+        img: "assets/decorations/ancient_tower_ruin.webp",
+        canFlip: true
     },
 
     witch_hut: {
@@ -493,8 +493,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Perníková chaloupka s cukrovou polevou a křivým komínem, ze kterého stoupá fialový kouř od bublajícího čarodějného lektvaru.",
         category: "settlement",
         w: 74, h: 84, clearance: 38,
-        img: "assets/decorations/witch_hut.png",
-        imgFlip: "assets/decorations/witch_hut_flip.png"
+        img: "assets/decorations/witch_hut.webp",
+        canFlip: true
     },
 
     // --- 8. Magická místa, ruiny a posvátné bytosti ---
@@ -505,8 +505,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Magický kruh světélkujících hub na lesní mýtině se třpytivým vílím prachem, kde za svitu měsíce tančí lesní víly a bludičky.",
         category: "magic",
         w: 84, h: 67, clearance: 36,
-        img: "assets/decorations/fairy_ring_mushrooms.png",
-        imgFlip: "assets/decorations/fairy_ring_mushrooms_flip.png"
+        img: "assets/decorations/fairy_ring_mushrooms.webp",
+        canFlip: true
     },
 
     druid_monoliths: {
@@ -516,8 +516,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Kruh starobylých mechem obrostlých menhirů s vyrytými zářícími runami a kamenným oltářem, které pulzují zemskou magií.",
         category: "magic",
         w: 84, h: 72, clearance: 38,
-        img: "assets/decorations/druid_monoliths.png",
-        imgFlip: "assets/decorations/druid_monoliths_flip.png"
+        img: "assets/decorations/druid_monoliths.webp",
+        canFlip: true
     },
 
     crystal_golem: {
@@ -527,8 +527,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Monumentální kamenný golem protkaný zářícími magickými krystaly a runovými žilami, probuzený ze staletého spánku v hlubinách země.",
         category: "magic",
         w: 79, h: 84, clearance: 38,
-        img: "assets/decorations/crystal_golem.png",
-        imgFlip: "assets/decorations/crystal_golem_flip.png"
+        img: "assets/decorations/crystal_golem.webp",
+        canFlip: true
     },
 
     phoenix_nest: {
@@ -538,8 +538,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Starobylý kamenný pilíř s hnízdem plným žhnoucího popela a magických vajec, v němž plane vznešený ohnivý pták Fénix.",
         category: "magic",
         w: 82, h: 84, clearance: 38,
-        img: "assets/decorations/phoenix_nest.png",
-        imgFlip: "assets/decorations/phoenix_nest_flip.png"
+        img: "assets/decorations/phoenix_nest.webp",
+        canFlip: true
     },
 
     ancient_ruins: {
@@ -549,8 +549,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Zarostlé kamenné zříceniny s gotickým obloukem, rozpadlými zdmi a polozakopanou truhlou, skrývající dávno zapomenuté poklady.",
         category: "terrain",
         w: 84, h: 79, clearance: 38,
-        img: "assets/decorations/ancient_ruins.png",
-        imgFlip: "assets/decorations/ancient_ruins_flip.png"
+        img: "assets/decorations/ancient_ruins.webp",
+        canFlip: true
     },
 
     ancient_graveyard: {
@@ -560,8 +560,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Starobylý tajemný hřbitov s kamennou zídkou, náhrobky a uschlým stromem opředený rytířskými legendami.",
         category: "settlement",
         w: 84, h: 60, clearance: 38,
-        img: "assets/decorations/ancient_graveyard.png",
-        imgFlip: "assets/decorations/ancient_graveyard_flip.png"
+        img: "assets/decorations/ancient_graveyard.webp",
+        canFlip: true
     },
 
     dryad_sacred_oak: {
@@ -571,8 +571,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Posvátný dub prastarých věků, z jehož kmene vystupuje ochranitelská lesní dryáda obklopená světélky.",
         category: "vegetation",
         w: 65, h: 84, clearance: 36,
-        img: "assets/decorations/dryad_sacred_oak.png",
-        imgFlip: "assets/decorations/dryad_sacred_oak_flip.png"
+        img: "assets/decorations/dryad_sacred_oak.webp",
+        canFlip: true
     },
 
     forest_ent: {
@@ -582,8 +582,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Probuzený strážce hvozdu v podobě obřího oživlého stromu s parožím a mechovým vousem, chránící posvátné lesy království.",
         category: "vegetation",
         w: 66, h: 84, clearance: 36,
-        img: "assets/decorations/forest_ent.png",
-        imgFlip: "assets/decorations/forest_ent_flip.png"
+        img: "assets/decorations/forest_ent.webp",
+        canFlip: true
     },
 
     unicorn_grove: {
@@ -593,8 +593,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Stříbřitá mýtina v hlubokém hvozdu, kde se prochází bájný bílý jednorožec se zlatou hřívou.",
         category: "vegetation",
         w: 84, h: 75, clearance: 38,
-        img: "assets/decorations/unicorn_grove.png",
-        imgFlip: "assets/decorations/unicorn_grove_flip.png"
+        img: "assets/decorations/unicorn_grove.webp",
+        canFlip: true
     },
 
     pegasus_pond: {
@@ -604,8 +604,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Kouzelná lesní studánka, k níž slétá pít sněhobílý okřídlený Pegas s rozpjatými křídly.",
         category: "water",
         w: 84, h: 62, clearance: 38,
-        img: "assets/decorations/pegasus_pond.png",
-        imgFlip: "assets/decorations/pegasus_pond_flip.png"
+        img: "assets/decorations/pegasus_pond.webp",
+        canFlip: true
     },
 
     // --- 9. Doupata a nebezpečné nestvůry ---
@@ -616,8 +616,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Skalní jeskyně plná kostí a trofejí, sloužící jako brloh obrovského divokého medvěda střežícího vstup do jeskyně.",
         category: "quest_lair",
         w: 84, h: 84, clearance: 38,
-        img: "assets/decorations/cave_bear_den.png",
-        imgFlip: "assets/decorations/cave_bear_den_flip.png"
+        img: "assets/decorations/cave_bear_den.webp",
+        canFlip: true
     },
 
     bandit_cave: {
@@ -627,8 +627,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Loupežnické doupě osvětlené plápolajícími pochodněmi, plné otevřených truhel se zlaťáky, drahokamy a zcizenými cennostmi.",
         category: "quest_lair",
         w: 84, h: 82, clearance: 38,
-        img: "assets/decorations/bandit_cave.png",
-        imgFlip: "assets/decorations/bandit_cave_flip.png"
+        img: "assets/decorations/bandit_cave.webp",
+        canFlip: true
     },
 
     griffin_nest: {
@@ -638,8 +638,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Vysoký skalní masiv s obřím hnízdem z větví a kostí, kde na vejcích sedí hrdý skalní gryf střežící blýskavé poklady.",
         category: "quest_lair",
         w: 64, h: 84, clearance: 38,
-        img: "assets/decorations/griffin_nest.png",
-        imgFlip: "assets/decorations/griffin_nest_flip.png"
+        img: "assets/decorations/griffin_nest.webp",
+        canFlip: true
     },
 
     fire_salamander: {
@@ -649,8 +649,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Mystický lávový salamandr vyhřívající se na žhnoucích balvanech u ohořelého stromu, chrlící drobné plaménky a jiskry.",
         category: "quest_lair",
         w: 80, h: 84, clearance: 38,
-        img: "assets/decorations/fire_salamander.png",
-        imgFlip: "assets/decorations/fire_salamander_flip.png"
+        img: "assets/decorations/fire_salamander.webp",
+        canFlip: true
     },
 
     dragon_cave: {
@@ -660,8 +660,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Monumentální skalní jeskyně, v jejímž nitru tvrdě spí červený drak svinutý na obrovské hromadě zlaťáků, pohárů a zbraní padlých rytířů.",
         category: "quest_lair",
         w: 88, h: 61, clearance: 38,
-        img: "assets/decorations/dragon_cave.png",
-        imgFlip: "assets/decorations/dragon_cave_flip.png"
+        img: "assets/decorations/dragon_cave.webp",
+        canFlip: true
     },
 
     basilisk_cave: {
@@ -671,8 +671,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Zlověstná skalní rozsedlina plná zkamenělých těl dobrodruhů, střežená smrtícím ještěřím baziliškem.",
         category: "quest_lair",
         w: 84, h: 57, clearance: 38,
-        img: "assets/decorations/basilisk_cave.png",
-        imgFlip: "assets/decorations/basilisk_cave_flip.png"
+        img: "assets/decorations/basilisk_cave.webp",
+        canFlip: true
     },
 
     snow_troll_cave: {
@@ -682,8 +682,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Mrazivá ledová jeskyně s obřími rampouchy, kde se v závějích ukrývá mocný sněžný troll s kyjem.",
         category: "quest_lair",
         w: 84, h: 56, clearance: 38,
-        img: "assets/decorations/snow_troll_cave.png",
-        imgFlip: "assets/decorations/snow_troll_cave_flip.png"
+        img: "assets/decorations/snow_troll_cave.webp",
+        canFlip: true
     },
 
     swamp_troll: {
@@ -693,8 +693,8 @@ window.PRS_DECOR_CATALOG = {
         desc: "Zavalitý bažinný troll porostlý řasami, který líně odpočívá pod kořeny u kalné tůně.",
         category: "quest_lair",
         w: 84, h: 62, clearance: 38,
-        img: "assets/decorations/swamp_troll.png",
-        imgFlip: "assets/decorations/swamp_troll_flip.png"
+        img: "assets/decorations/swamp_troll.webp",
+        canFlip: true
     },
 
     swamp_hydra: {
@@ -704,7 +704,7 @@ window.PRS_DECOR_CATALOG = {
         desc: "Děsivá pětihlavá ještěří hydra vynořující se z hlubin močálu a chrlící jedovatou mlhu.",
         category: "quest_lair",
         w: 84, h: 56, clearance: 38,
-        img: "assets/decorations/swamp_hydra.png",
-        imgFlip: "assets/decorations/swamp_hydra_flip.png"
+        img: "assets/decorations/swamp_hydra.webp",
+        canFlip: true
     }
 };

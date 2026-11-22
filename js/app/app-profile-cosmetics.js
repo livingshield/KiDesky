@@ -462,7 +462,7 @@
         var pData = (window.PRS_getPawnById ? window.PRS_getPawnById(activePawnId) : null);
         var ghAvatar = document.getElementById("gamehall-pawn-avatar");
         if (ghAvatar && pData) {
-            ghAvatar.src = pData.img || pData.avatarUrl || pData.image || "assets/pawns/pawn_knight_valiant.png";
+            ghAvatar.src = pData.img || pData.avatarUrl || pData.image || "assets/pawns/pawn_knight_valiant.webp";
             ghAvatar.alt = pData.name || "Figurka";
         }
 
@@ -1260,7 +1260,7 @@
         if (type === "CASTLE") {
             var cKey = node.castleKey || "";
             if (!cKey && node.castleImg) {
-                var m = node.castleImg.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpg)/i);
+                var m = node.castleImg.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpe?g|webp)/i);
                 if (m) cKey = m[1];
             }
             if (!cKey && node.estateId && node.estateId.indexOf("H") === 0) {
@@ -1482,7 +1482,7 @@
             var btnSub = isEn ? "🔔 Follow Development &amp; Get Beta Access" : "🔔 Sledovat vývoj &amp; Získat přístup do Beta testu";
             var btnClose = isEn ? "Close Preview" : "Zavřít náhled";
 
-            body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/landmarks/dragon.jpg\');">' +
+            body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/landmarks/dragon.webp\');">' +
                 '  <div class="catalog-modal-banner-overlay"></div>' +
                 '  <div style="position:relative; z-index:2;">' +
                 '    <span class="lp-kicker-badge" style="background:rgba(249,115,22,0.25); border-color:#fb923c; color:#fed7aa;">' + badgeText + '</span>' +
@@ -1527,7 +1527,7 @@
             var mBtnSub = isEn ? "🔔 Follow Development &amp; Get Beta Access" : "🔔 Sledovat vývoj &amp; Získat přístup do Beta testu";
             var mBtnClose = isEn ? "Close Preview" : "Zavřít náhled";
 
-            body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/tiles/merchant.jpg\');">' +
+            body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/tiles/merchant.webp\');">' +
                 '  <div class="catalog-modal-banner-overlay"></div>' +
                 '  <div style="position:relative; z-index:2;">' +
                 '    <span class="lp-kicker-badge" style="background:rgba(56,189,248,0.25); border-color:#38bdf8; color:#bae6fd;">' + mBadgeText + '</span>' +

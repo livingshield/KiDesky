@@ -1260,7 +1260,7 @@ END", conn))
 IF NOT EXISTS (SELECT 1 FROM [prs].[prs_Videos] WHERE [Id] = 1)
 BEGIN
     INSERT INTO [prs].[prs_Videos] ([Title], [Description], [VideoType], [Url], [PosterUrl], [Category], [IsHeroActive], [SortOrder])
-    VALUES (@vt, @vd, N'mp4', N'assets/video/RuzeProDanielku.mp4', N'assets/board/parchment_board_bg.jpg', N'trailer', 1, 10);
+    VALUES (@vt, @vd, N'mp4', N'assets/video/RuzeProDanielku.mp4', N'assets/board/parchment_board_bg.webp', N'trailer', 1, 10);
 END
 ELSE
 BEGIN

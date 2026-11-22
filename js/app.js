@@ -479,37 +479,37 @@ window.PRS_App = {
 
         var themeCastles = {
 
-            light: "assets/castles/castle_royal.png",
+            light: "assets/castles/castle_royal.webp",
 
-            fire: "assets/castles/castle_lava.png",
+            fire: "assets/castles/castle_lava.webp",
 
-            water: "assets/castles/castle_water.png",
+            water: "assets/castles/castle_water.webp",
 
-            earth: "assets/castles/castle_forest.png",
+            earth: "assets/castles/castle_forest.webp",
 
-            air: "assets/castles/castle_wind.png"
+            air: "assets/castles/castle_wind.webp"
 
         };
 
         var themeDragons = {
 
-            light: "assets/dragons/dragon_gold.png",
+            light: "assets/dragons/dragon_gold.webp",
 
-            fire: "assets/dragons/dragon_volcano.png",
+            fire: "assets/dragons/dragon_volcano.webp",
 
-            water: "assets/dragons/dragon_ice.png",
+            water: "assets/dragons/dragon_ice.webp",
 
-            earth: "assets/dragons/dragon_green.png",
+            earth: "assets/dragons/dragon_green.webp",
 
-            air: "assets/dragons/dragon_wind.png"
+            air: "assets/dragons/dragon_wind.webp"
 
         };
 
         if (this.graphicsConfig && this.graphicsConfig.landmarkBitmaps) {
 
-            this.graphicsConfig.landmarkBitmaps.royalCastle = themeCastles[themeName] || "assets/castles/castle_royal.jpg";
+            this.graphicsConfig.landmarkBitmaps.royalCastle = themeCastles[themeName] || "assets/castles/castle_royal.webp";
 
-            this.graphicsConfig.landmarkBitmaps.dragonLair = themeDragons[themeName] || "assets/dragons/dragon_volcano.jpg";
+            this.graphicsConfig.landmarkBitmaps.dragonLair = themeDragons[themeName] || "assets/dragons/dragon_volcano.webp";
 
         }
 

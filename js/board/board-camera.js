@@ -527,113 +527,59 @@
     // ========================================================================,
 
     loadSavedGraphicsConfig: function () {
-
+        var normAsset = window.PRS_normalizeAssetUrl || function (u) { return u; };
         try {
-
             var raw = localStorage.getItem("prs_graphics_config");
-
             if (raw) {
-
                 var parsed = JSON.parse(raw);
-
                 if (parsed && typeof parsed === "object") {
-
-                    if (parsed.environmentBgUrl) this.graphicsConfig.environmentBgUrl = parsed.environmentBgUrl;
-
-                    if (parsed.boardBgUrl) this.graphicsConfig.boardBgUrl = parsed.boardBgUrl;
-
+                    if (parsed.environmentBgUrl) this.graphicsConfig.environmentBgUrl = normAsset(parsed.environmentBgUrl);
+                    if (parsed.boardBgUrl) this.graphicsConfig.boardBgUrl = normAsset(parsed.boardBgUrl);
                     if (parsed.tileBitmapsByType) {
-
                         for (var k in parsed.tileBitmapsByType) {
-
                             var tVal = parsed.tileBitmapsByType[k];
-
                             if (tVal && typeof tVal === "string") {
-
-                                if (tVal.endsWith(".jpg")) tVal = tVal.replace(".jpg", ".png");
-
-                                this.graphicsConfig.tileBitmapsByType[k] = tVal;
-
+                                this.graphicsConfig.tileBitmapsByType[k] = normAsset(tVal);
                             }
-
                         }
-
                     }
-
-                    if (!this.graphicsConfig.tileBitmapsByType.START || this.graphicsConfig.tileBitmapsByType.START.indexOf(".jpg") !== -1 || this.graphicsConfig.tileBitmapsByType.START.indexOf("castle.png") !== -1) {
-
-                        this.graphicsConfig.tileBitmapsByType.START = "assets/tiles/start.png";
-
-                    }
-
-                    if (!this.graphicsConfig.tileBitmapsByType.CASTLE || this.graphicsConfig.tileBitmapsByType.CASTLE.indexOf(".jpg") !== -1) {
-
-                        this.graphicsConfig.tileBitmapsByType.CASTLE = "assets/tiles/castle.png";
-
-                    }
-
                     if (parsed.landmarkBitmaps) {
-
                         for (var lk in parsed.landmarkBitmaps) {
-
                             var lVal = parsed.landmarkBitmaps[lk];
-
                             if (lVal && typeof lVal === "string") {
-
-                                if (lVal.endsWith(".jpg")) lVal = lVal.replace(".jpg", ".png");
-
-                                this.graphicsConfig.landmarkBitmaps[lk] = lVal;
-
+                                this.graphicsConfig.landmarkBitmaps[lk] = normAsset(lVal);
                             }
-
                         }
-
                     }
-
                     if (parsed.decorBitmaps) {
-
                         if (!this.graphicsConfig.decorBitmaps) this.graphicsConfig.decorBitmaps = {};
-
                         for (var dk in parsed.decorBitmaps) {
-
-                            this.graphicsConfig.decorBitmaps[dk] = parsed.decorBitmaps[dk];
-
+                            var dVal = parsed.decorBitmaps[dk];
+                            if (dVal && typeof dVal === "string") {
+                                this.graphicsConfig.decorBitmaps[dk] = normAsset(dVal);
+                            }
                         }
-
                     }
-
                 }
-
             }
-
         } catch (e) { }
-
         if (this.graphicsConfig && this.graphicsConfig.tileBitmapsByType) {
-
-            if (!this.graphicsConfig.tileBitmapsByType.START || this.graphicsConfig.tileBitmapsByType.START.indexOf(".jpg") !== -1) {
-
-                this.graphicsConfig.tileBitmapsByType.START = "assets/tiles/castle.png";
-
+            var curStart = this.graphicsConfig.tileBitmapsByType.START;
+            if (!curStart || curStart.indexOf("castle.") !== -1) {
+                this.graphicsConfig.tileBitmapsByType.START = "assets/tiles/start.webp";
+            } else {
+                this.graphicsConfig.tileBitmapsByType.START = normAsset(curStart);
             }
-
-            if (!this.graphicsConfig.tileBitmapsByType.CASTLE || this.graphicsConfig.tileBitmapsByType.CASTLE.indexOf(".jpg") !== -1) {
-
-                this.graphicsConfig.tileBitmapsByType.CASTLE = "assets/tiles/castle.png";
-
-            }
-
+            this.graphicsConfig.tileBitmapsByType.CASTLE = normAsset(this.graphicsConfig.tileBitmapsByType.CASTLE || "assets/tiles/castle.webp");
         }
-
         this.applyEnvironmentBackground();
-
     },
 
-    
     applyEnvironmentBackground: function () {
 
         if (typeof document === "undefined" || !document.body) return;
 
-        var envUrl = this.graphicsConfig.environmentBgUrl;
+        var envUrl = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(this.graphicsConfig.environmentBgUrl) : this.graphicsConfig.environmentBgUrl;
 
         if (envUrl && this.graphicsConfig.useCustomEnvBg) {
 
@@ -654,57 +600,13 @@
     
     // Vrátí URL bitmapy pro konkrétní kruhové políčko (pokud je nastavena),
 
-    getTileBitmapUrl: function (node) {
-
-        if (!node || !this.graphicsConfig) return "";
-
-        // 1. Explicitní bitmapa hradu definovaná na uzlu plánu (z generátoru)
-        if (node.castleImg && typeof node.castleImg === "string") {
-            var cImg = node.castleImg;
-            if (node.x > 700 && cImg.indexOf("_flip") === -1) {
-                return cImg.replace(".png", "_flip.png");
-            }
-            return cImg;
-        }
-
-        // 2. Přímé mapování podle kódu políčka
-        if (this.graphicsConfig.tileBitmapsByCode && this.graphicsConfig.tileBitmapsByCode[node.code]) {
-
-            return this.graphicsConfig.tileBitmapsByCode[node.code];
-
-        }
-
-        // 3. Specifická tematická mapa pro políčka hradů (H1..H9)
-        if (node.type === "CASTLE") {
-            var castleMap = {
-                H1: "assets/castles/castle_forest.png",
-                H2: "assets/castles/castle_wind.png",
-                H3: "assets/castles/castle_crystal.png",
-                H4: "assets/castles/castle_lava.png",
-                H5: "assets/castles/castle_water.png",
-                H6: "assets/castles/castle_dark.png",
-                H7: "assets/castles/castle_desert.png",
-                H8: "assets/castles/castle_swamp.png",
-                H9: "assets/castles/castle_ice.png"
-            };
-            var cUrl = (node.estateId && castleMap[node.estateId]) || (node.code && castleMap[node.code]);
-            if (cUrl && typeof cUrl === "string") {
-                if (node.x > 700 && cUrl.indexOf("_flip") === -1) return cUrl.replace(".png", "_flip.png");
-                return cUrl;
-            }
-        }
-
-        var byType = this.graphicsConfig.tileBitmapsByType || {};
-
-        var url = "";
-
-        // Normalizace klíče podtypu (česky i anglicky)
+    _resolveTileSubKey: function (node) {
+        if (!node) return "";
         var subKey = (node.subtype || "").toLowerCase();
         if (subKey === "kun") subKey = "horse";
         else if (subKey === "pes") subKey = "dog";
         else if (subKey === "sokol") subKey = "falcon";
 
-        // Pokud je uzel zvíře, ale chybí nebo nesedí subtype, odvodíme z kódu / jména
         var isAnimalType = ((node.type || "").toUpperCase() === "ANIMAL" || node.type === "animal");
         if (isAnimalType && (!subKey || (subKey !== "falcon" && subKey !== "dog" && subKey !== "horse"))) {
             var c = (node.code || "").toUpperCase();
@@ -713,6 +615,46 @@
             else if (c.indexOf("P") === 0 || c.indexOf("D") === 0 || n.indexOf("pes") !== -1 || n.indexOf("dog") !== -1 || n.indexOf("ohař") !== -1 || n.indexOf("chrt") !== -1 || n.indexOf("bígl") !== -1) subKey = "dog";
             else subKey = "horse";
         }
+        return subKey;
+    },
+
+    getTileBitmapUrl: function (node) {
+        if (!node || !this.graphicsConfig) return "";
+        var normAsset = window.PRS_normalizeAssetUrl || function (u) { return u; };
+
+        // 1. Explicitní bitmapa hradu definovaná na uzlu plánu (z generátoru)
+        if (node.castleImg && typeof node.castleImg === "string") {
+            return normAsset(node.castleImg);
+        }
+
+        // 2. Přímé mapování podle kódu políčka
+        if (this.graphicsConfig.tileBitmapsByType && this.graphicsConfig.tileBitmapsByType[node.code]) {
+            return normAsset(this.graphicsConfig.tileBitmapsByType[node.code]);
+        }
+
+        // 3. Specifická tematická mapa pro políčka hradů (H1..H9)
+        if (node.type === "CASTLE") {
+            var castleMap = {
+                H1: "assets/castles/castle_forest.webp",
+                H2: "assets/castles/castle_wind.webp",
+                H3: "assets/castles/castle_crystal.webp",
+                H4: "assets/castles/castle_lava.webp",
+                H5: "assets/castles/castle_water.webp",
+                H6: "assets/castles/castle_dark.webp",
+                H7: "assets/castles/castle_desert.webp",
+                H8: "assets/castles/castle_swamp.webp",
+                H9: "assets/castles/castle_ice.webp"
+            };
+            var cUrl = (node.estateId && castleMap[node.estateId]) || (node.code && castleMap[node.code]);
+            if (cUrl && typeof cUrl === "string") {
+                return normAsset(cUrl);
+            }
+        }
+
+        var byType = this.graphicsConfig.tileBitmapsByType || {};
+        var url = "";
+        var subKey = this._resolveTileSubKey(node);
+        var isAnimalType = ((node.type || "").toUpperCase() === "ANIMAL" || node.type === "animal");
 
         if (subKey && byType[subKey]) {
             url = byType[subKey];
@@ -726,32 +668,27 @@
 
         // Záchranný fallback pro zvířata
         if (!url && isAnimalType) {
-            url = (subKey === "falcon") ? "assets/tiles/sokol.png" : ((subKey === "dog") ? "assets/tiles/pes.png" : "assets/tiles/kun.png");
+            url = (subKey === "falcon") ? "assets/tiles/sokol.webp" : ((subKey === "dog") ? "assets/tiles/pes.webp" : "assets/tiles/kun.webp");
         }
 
         if (!url && (node.type === "START" || node.type === "CASTLE" || node.code === "START" || (node.type || "").toUpperCase() === "START")) {
-
-            url = (node.type === "START" || node.code === "START" || (node.type || "").toUpperCase() === "START") ? "assets/tiles/start.png" : "assets/tiles/castle.png";
-
+            url = (node.type === "START" || node.code === "START" || (node.type || "").toUpperCase() === "START") ? "assets/tiles/start.webp" : "assets/tiles/castle.webp";
         }
 
-        if (url && typeof url === "string") {
+        return url && typeof url === "string" ? normAsset(url) : url;
+    },
 
-            if (url.endsWith(".jpg")) url = url.replace(".jpg", ".png");
-
-            // Na pravé polovině plánu zrcadlit směrová zvířata, hrady a draky
-            if (node.x > 700 && (subKey === "horse" || subKey === "dog" || subKey === "falcon" || node.subtype === "horse" || node.subtype === "dog" || node.subtype === "falcon" || node.subtype === "U3" || node.type === "CASTLE")) {
-
-                var flipUrl = url.replace(".png", "_flip.png");
-
-                return flipUrl;
-
-            }
-
+    shouldFlipTileBitmap: function (node) {
+        if (!node) return false;
+        if (node.castleImg && typeof node.castleImg === "string" && window.PRS_isFlippedAssetUrl && window.PRS_isFlippedAssetUrl(node.castleImg)) {
+            return true;
         }
-
-        return url;
-
+        if (node.x > 700) {
+            if (node.castleImg || node.type === "CASTLE" || node.subtype === "U3") return true;
+            var subKey = this._resolveTileSubKey(node);
+            if (subKey === "horse" || subKey === "dog" || subKey === "falcon") return true;
+        }
+        return false;
     }
     });
 })();

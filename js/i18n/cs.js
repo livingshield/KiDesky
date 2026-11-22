@@ -2594,7 +2594,7 @@ window.PRS_I18N.cs = {
             "ph_url": "assets/video/RuzeProDanielku.mp4 nebo https://youtube.com/...",
             "from_yt_title": "Automaticky načíst název a náhled z YouTube",
             "label_poster": "Náhledový plakát (Poster URL):",
-            "ph_poster": "assets/board/parchment_board_bg.jpg",
+            "ph_poster": "assets/board/parchment_board_bg.webp",
             "poster_title": "Nahrát vlastní obrázek plakátu",
             "label_order": "Pořadí:"
         },

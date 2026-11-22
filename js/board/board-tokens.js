@@ -310,7 +310,7 @@
 
                 // 3. Kovový zkosený podstavec figurky s barvou hráče a případnou prémiovou aurou
                 var pawnObj = window.PRS_getPawnById ? window.PRS_getPawnById(tokenPlayer.pawnId) : null;
-                var pawnImg = pawnObj ? pawnObj.img : 'assets/pawns/pawn_knight_valiant.png';
+                var pawnImg = pawnObj ? pawnObj.img : 'assets/pawns/pawn_knight_valiant.webp';
                 var isPremPawn = pawnObj && pawnObj.category === 'premium';
                 var auraCol = (pawnObj && pawnObj.accentColor) ? pawnObj.accentColor : tokenPlayer.color;
 
@@ -622,7 +622,7 @@
         if (lmk.castleKey) {
             cKey = lmk.castleKey;
         } else if (lmk.image) {
-            var m = lmk.image.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpg)/i);
+            var m = lmk.image.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpe?g|webp)/i);
             if (m) cKey = m[1];
         } else if (lmk.id && lmk.id.indexOf("castle_") === 0) {
             cKey = lmk.id.replace("castle_", "");

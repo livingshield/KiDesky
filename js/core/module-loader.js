@@ -168,8 +168,32 @@
             return this.loadScript('js/app-map-editor.js').then(function () {
                 return window.PRS_MapEditor;
             });
-        }
+        },
+
+        normalizeAssetUrl: normalizeAssetUrl,
+        isFlippedAssetUrl: isFlippedAssetUrl
     };
 
+    function normalizeAssetUrl(url) {
+        if (!url || typeof url !== 'string') return url || '';
+        var m = url.match(/^(?:\.\/)?assets\/(backgrounds|castles|decorations|dragons|env|landmarks|monsters|pawns|tiles)\/([^?#]+?)(?:_flip)?\.(?:png|jpe?g|webp)(\?[^#]*)?(#.*)?$/i);
+        if (m) {
+            return 'assets/' + m[1] + '/' + m[2] + '.webp' + (m[3] || '') + (m[4] || '');
+        }
+        var mb = url.match(/^(?:\.\/)?assets\/board\/parchment_board_bg\.(?:png|jpe?g)(\?[^#]*)?(#.*)?$/i);
+        if (mb) {
+            return 'assets/board/parchment_board_bg.webp' + (mb[1] || '') + (mb[2] || '');
+        }
+        return url;
+    }
+
+    function isFlippedAssetUrl(url) {
+        return typeof url === 'string' && /_flip\.(?:png|jpe?g|webp)(?:[?#]|$)/i.test(url);
+    }
+
+    PRS_ModuleLoader.normalizeAssetUrl = normalizeAssetUrl;
+    PRS_ModuleLoader.isFlippedAssetUrl = isFlippedAssetUrl;
+    window.PRS_normalizeAssetUrl = normalizeAssetUrl;
+    window.PRS_isFlippedAssetUrl = isFlippedAssetUrl;
     window.PRS_ModuleLoader = PRS_ModuleLoader;
 })(window, typeof document !== 'undefined' ? document : null);

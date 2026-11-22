@@ -918,30 +918,30 @@ window.KiDeskyMapGenerator = {
 
     // Kompletní katalog 10 královských a feudálních hradů
     ALL_CASTLES: [
-        { id: "castle_royal", name: "Královský hrad (Sídlo koruny)", nameEn: "Royal Castle (Seat of Crown)", icon: "👑", img: "assets/castles/castle_royal.png", biome: "golden_plains", element: "light" },
-        { id: "castle_forest", name: "Lesní hrad Doubrava", nameEn: "Forest Castle Doubrava", icon: "🌲", img: "assets/castles/castle_forest.png", biome: "forest_realm", element: "earth" },
-        { id: "castle_ice", name: "Ledový palác Věčného mrazu", nameEn: "Ice Palace of Eternal Frost", icon: "❄️", img: "assets/castles/castle_ice.png", biome: "mountain", element: "water" },
-        { id: "castle_lava", name: "Sopečná pevnost Lávový chřtán", nameEn: "Volcanic Stronghold Lava Maw", icon: "🌋", img: "assets/castles/castle_lava.png", biome: "dragon_peaks", element: "fire" },
-        { id: "castle_crystal", name: "Křišťálový zámek Ametyst", nameEn: "Crystal Castle Amethyst", icon: "💎", img: "assets/castles/castle_crystal.png", biome: "magic", element: "light" },
-        { id: "castle_wind", name: "Větrný vzdušný zámek Boreas", nameEn: "Wind Citadel Boreas", icon: "☁️", img: "assets/castles/castle_wind.png", biome: "golden_plains", element: "air" },
-        { id: "castle_water", name: "Vodní citadela Oceán", nameEn: "Water Citadel Ocean", icon: "🌊", img: "assets/castles/castle_water.png", biome: "river_delta", element: "water" },
-        { id: "castle_desert", name: "Pouštní pískovcový palác", nameEn: "Desert Sandstone Palace", icon: "🏜️", img: "assets/castles/castle_desert.png", biome: "golden_plains", element: "earth" },
-        { id: "castle_swamp", name: "Bažinná tvrz Černá tůň", nameEn: "Swamp Fortress Black Mere", icon: "🌫️", img: "assets/castles/castle_swamp.png", biome: "swamp", element: "earth" },
-        { id: "castle_dark", name: "Temný hrad Erebus", nameEn: "Dark Nether Keep Erebus", icon: "🌑", img: "assets/castles/castle_dark.png", biome: "magic", element: "fire" }
+        { id: "castle_royal", name: "Královský hrad (Sídlo koruny)", nameEn: "Royal Castle (Seat of Crown)", icon: "👑", img: "assets/castles/castle_royal.webp", biome: "golden_plains", element: "light" },
+        { id: "castle_forest", name: "Lesní hrad Doubrava", nameEn: "Forest Castle Doubrava", icon: "🌲", img: "assets/castles/castle_forest.webp", biome: "forest_realm", element: "earth" },
+        { id: "castle_ice", name: "Ledový palác Věčného mrazu", nameEn: "Ice Palace of Eternal Frost", icon: "❄️", img: "assets/castles/castle_ice.webp", biome: "mountain", element: "water" },
+        { id: "castle_lava", name: "Sopečná pevnost Lávový chřtán", nameEn: "Volcanic Stronghold Lava Maw", icon: "🌋", img: "assets/castles/castle_lava.webp", biome: "dragon_peaks", element: "fire" },
+        { id: "castle_crystal", name: "Křišťálový zámek Ametyst", nameEn: "Crystal Castle Amethyst", icon: "💎", img: "assets/castles/castle_crystal.webp", biome: "magic", element: "light" },
+        { id: "castle_wind", name: "Větrný vzdušný zámek Boreas", nameEn: "Wind Citadel Boreas", icon: "☁️", img: "assets/castles/castle_wind.webp", biome: "golden_plains", element: "air" },
+        { id: "castle_water", name: "Vodní citadela Oceán", nameEn: "Water Citadel Ocean", icon: "🌊", img: "assets/castles/castle_water.webp", biome: "river_delta", element: "water" },
+        { id: "castle_desert", name: "Pouštní pískovcový palác", nameEn: "Desert Sandstone Palace", icon: "🏜️", img: "assets/castles/castle_desert.webp", biome: "golden_plains", element: "earth" },
+        { id: "castle_swamp", name: "Bažinná tvrz Černá tůň", nameEn: "Swamp Fortress Black Mere", icon: "🌫️", img: "assets/castles/castle_swamp.webp", biome: "swamp", element: "earth" },
+        { id: "castle_dark", name: "Temný hrad Erebus", nameEn: "Dark Nether Keep Erebus", icon: "🌑", img: "assets/castles/castle_dark.webp", biome: "magic", element: "fire" }
     ],
 
 
     // Seznam 9 tematických hradů z katalogu pro procedurální přiřazení
     THEMATIC_CASTLES: [
-        { id: "castle_forest", name: "Lesní hrad Doubrava", nameEn: "Forest Castle Doubrava", icon: "🌲", img: "assets/castles/castle_forest.png", biome: "forest" },
-        { id: "castle_ice", name: "Ledový palác Věčného mrazu", nameEn: "Ice Palace of Eternal Frost", icon: "❄️", img: "assets/castles/castle_ice.png", biome: "mountain" },
-        { id: "castle_lava", name: "Sopečná pevnost Lávový chřtán", nameEn: "Volcanic Stronghold Lava Maw", icon: "🌋", img: "assets/castles/castle_lava.png", biome: "mountain" },
-        { id: "castle_crystal", name: "Křišťálový zámek Ametyst", nameEn: "Crystal Castle Amethyst", icon: "💎", img: "assets/castles/castle_crystal.png", biome: "magic" },
-        { id: "castle_wind", name: "Větrný vzdušný zámek Boreas", nameEn: "Wind Citadel Boreas", icon: "☁️", img: "assets/castles/castle_wind.png", biome: "plains" },
-        { id: "castle_water", name: "Vodní citadela Oceán", nameEn: "Water Citadel Ocean", icon: "🌊", img: "assets/castles/castle_water.png", biome: "water" },
-        { id: "castle_desert", name: "Pouštní pískovcový palác", nameEn: "Desert Sandstone Palace", icon: "🏜️", img: "assets/castles/castle_desert.png", biome: "plains" },
-        { id: "castle_swamp", name: "Bažinná tvrz Černá tůň", nameEn: "Swamp Fortress Black Mere", icon: "🌫️", img: "assets/castles/castle_swamp.png", biome: "swamp" },
-        { id: "castle_dark", name: "Temný hrad Erebus", nameEn: "Dark Nether Keep Erebus", icon: "🌑", img: "assets/castles/castle_dark.png", biome: "magic" }
+        { id: "castle_forest", name: "Lesní hrad Doubrava", nameEn: "Forest Castle Doubrava", icon: "🌲", img: "assets/castles/castle_forest.webp", biome: "forest" },
+        { id: "castle_ice", name: "Ledový palác Věčného mrazu", nameEn: "Ice Palace of Eternal Frost", icon: "❄️", img: "assets/castles/castle_ice.webp", biome: "mountain" },
+        { id: "castle_lava", name: "Sopečná pevnost Lávový chřtán", nameEn: "Volcanic Stronghold Lava Maw", icon: "🌋", img: "assets/castles/castle_lava.webp", biome: "mountain" },
+        { id: "castle_crystal", name: "Křišťálový zámek Ametyst", nameEn: "Crystal Castle Amethyst", icon: "💎", img: "assets/castles/castle_crystal.webp", biome: "magic" },
+        { id: "castle_wind", name: "Větrný vzdušný zámek Boreas", nameEn: "Wind Citadel Boreas", icon: "☁️", img: "assets/castles/castle_wind.webp", biome: "plains" },
+        { id: "castle_water", name: "Vodní citadela Oceán", nameEn: "Water Citadel Ocean", icon: "🌊", img: "assets/castles/castle_water.webp", biome: "water" },
+        { id: "castle_desert", name: "Pouštní pískovcový palác", nameEn: "Desert Sandstone Palace", icon: "🏜️", img: "assets/castles/castle_desert.webp", biome: "plains" },
+        { id: "castle_swamp", name: "Bažinná tvrz Černá tůň", nameEn: "Swamp Fortress Black Mere", icon: "🌫️", img: "assets/castles/castle_swamp.webp", biome: "swamp" },
+        { id: "castle_dark", name: "Temný hrad Erebus", nameEn: "Dark Nether Keep Erebus", icon: "🌑", img: "assets/castles/castle_dark.webp", biome: "magic" }
     ],
 
 

@@ -171,7 +171,8 @@
 
         var winRate = Math.round((winCount / 6) * 100);
 
-        var qImg = this.duelMonsterFlipped ? (q.imgFlip || q.img) : (q.img || "assets/landmarks/dragon.png");
+        var qImgRaw = q.img || "assets/landmarks/dragon.webp";
+        var qImg = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(qImgRaw) : qImgRaw;
 
         var tierTitle = (q.questTier === "U3") ? "Dračí doupě" : (q.questTier === "U2" ? "Temné monstrum" : "Divoká zvěř");
 
@@ -259,7 +260,7 @@
 
         html.push('      <div class="quest-monster-img-wrap">');
 
-        html.push('        <img id="quest-monster-img-el" src="' + qImg + '" alt="' + this.escapeHtml(q.name) + '" class="quest-monster-img ' + (this.duelMonsterFlipped ? 'flipped' : '') + '" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.png\';">');
+        html.push('        <img id="quest-monster-img-el" src="' + qImg + '" alt="' + this.escapeHtml(q.name) + '" class="quest-monster-img ' + (this.duelMonsterFlipped ? 'flipped' : '') + '" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.webp\';">');
 
         html.push('        <button class="quest-flip-btn" onclick="PRS_App.toggleDuelMonsterFlip()" title="Zrcadlově otočit pohled">🔄 Otočit</button>');
 

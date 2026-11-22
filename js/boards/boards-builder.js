@@ -17,7 +17,7 @@ window.PRS_BoardBuilder = {
         if (window.KiDeskyMapGenerator && typeof window.KiDeskyMapGenerator.resolveRoyalCastle === "function") {
             return window.KiDeskyMapGenerator.resolveRoyalCastle(key, theme, seed);
         }
-        return { name: "Královský Hrad", icon: "👑", img: "assets/castles/castle_royal.png" };
+        return { name: "Královský Hrad", icon: "👑", img: "assets/castles/castle_royal.webp" };
     },
 
 
@@ -824,7 +824,7 @@ window.PRS_BoardBuilder = {
         var royalDef = (targetRoyalKey && this.resolveRoyalCastle ? this.resolveRoyalCastle(targetRoyalKey, board.biomeTheme, board.seed) : null) || origRoyal || (this.resolveRoyalCastle ? this.resolveRoyalCastle("auto", board.biomeTheme, board.seed) : null) || {
             name: "Královský Hrad",
             icon: "👑",
-            image: "assets/castles/castle_royal.png"
+            image: "assets/castles/castle_royal.webp"
         };
 
         for (var v = 0; v < validLandmarks.length; v++) {
@@ -853,7 +853,7 @@ window.PRS_BoardBuilder = {
                         id: "royalCastle",
                         name: royalDef.name || "Královský Hrad",
                         icon: royalDef.icon || "👑",
-                        image: royalDef.image || royalDef.img || "assets/castles/castle_royal.png",
+                        image: royalDef.image || royalDef.img || "assets/castles/castle_royal.webp",
                         x: cand.x,
                         y: cand.y,
                         w: cand.w,
@@ -872,7 +872,7 @@ window.PRS_BoardBuilder = {
                         id: "royalCastle",
                         name: royalDef.name || "Královský Hrad",
                         icon: royalDef.icon || "👑",
-                        image: royalDef.image || royalDef.img || "assets/castles/castle_royal.png",
+                        image: royalDef.image || royalDef.img || "assets/castles/castle_royal.webp",
                         x: pocket.x,
                         y: pocket.y,
                         w: pocket.w || 220,
@@ -917,7 +917,7 @@ window.PRS_BoardBuilder = {
                         id: "dragonLair",
                         name: "Dračí sluj (U3)",
                         icon: "🐲",
-                        image: "assets/landmarks/dragon.png",
+                        image: "assets/landmarks/dragon.webp",
                         x: bestSpot.x,
                         y: bestSpot.y,
                         w: dw,
@@ -937,7 +937,7 @@ window.PRS_BoardBuilder = {
             }
         }
         if (!royalImgBase && royalDef) {
-            royalImgBase = (royalDef.image || royalDef.img || "assets/castles/castle_royal.png").toLowerCase();
+            royalImgBase = (royalDef.image || royalDef.img || "assets/castles/castle_royal.webp").toLowerCase();
         }
 
         var allCastlesCatalog = this.ALL_CASTLES || [];
@@ -949,15 +949,15 @@ window.PRS_BoardBuilder = {
         if (freeThematicCastles.length === 0) freeThematicCastles = allCastlesCatalog.slice(0);
 
         var defaultCastleMap = {
-            H1: "assets/castles/castle_forest.png",
-            H2: "assets/castles/castle_wind.png",
-            H3: "assets/castles/castle_crystal.png",
-            H4: "assets/castles/castle_desert.png",
-            H5: "assets/castles/castle_water.png",
-            H6: "assets/castles/castle_ice.png",
-            H7: "assets/castles/castle_lava.png",
-            H8: "assets/castles/castle_swamp.png",
-            H9: "assets/castles/castle_dark.png"
+            H1: "assets/castles/castle_forest.webp",
+            H2: "assets/castles/castle_wind.webp",
+            H3: "assets/castles/castle_crystal.webp",
+            H4: "assets/castles/castle_desert.webp",
+            H5: "assets/castles/castle_water.webp",
+            H6: "assets/castles/castle_ice.webp",
+            H7: "assets/castles/castle_lava.webp",
+            H8: "assets/castles/castle_swamp.webp",
+            H9: "assets/castles/castle_dark.webp"
         };
 
         var castleNodes = [];
@@ -975,15 +975,15 @@ window.PRS_BoardBuilder = {
 
             // Výběr unikátního hradu bez kolize s Královským hradem
             var cImg = cNode.castleImg;
-            var isDup = !cImg || (royalImgBase && royalImgBase.indexOf(cImg.toLowerCase().replace("assets/castles/", "").replace(".png", "").replace("_flip", "")) !== -1);
+            var isDup = !cImg || (royalImgBase && royalImgBase.indexOf(cImg.toLowerCase().replace("assets/castles/", "").replace(/\.(?:png|jpe?g|webp)$/i, "").replace("_flip", "")) !== -1);
             if (isDup) {
                 var prefImg = defaultCastleMap[cKey];
-                var prefDup = prefImg && royalImgBase && royalImgBase.indexOf(prefImg.toLowerCase().replace("assets/castles/", "").replace(".png", "")) !== -1;
+                var prefDup = prefImg && royalImgBase && royalImgBase.indexOf(prefImg.toLowerCase().replace("assets/castles/", "").replace(/\.(?:png|jpe?g|webp)$/i, "")) !== -1;
                 if (prefImg && !prefDup) {
                     cImg = prefImg;
                 } else {
                     var poolPick = freeThematicCastles[ci % freeThematicCastles.length];
-                    cImg = poolPick ? poolPick.img : "assets/castles/castle_forest.png";
+                    cImg = poolPick ? poolPick.img : "assets/castles/castle_forest.webp";
                 }
             }
             cNode.castleImg = cImg;
@@ -1021,7 +1021,7 @@ window.PRS_BoardBuilder = {
             if (bestCSpot && maxCClearance > 45) {
                 var detectedCastleKey = "";
                 if (cImg) {
-                    var mKey = cImg.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpg)/i);
+                    var mKey = cImg.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpe?g|webp)/i);
                     if (mKey) detectedCastleKey = mKey[1];
                 }
                 if (!detectedCastleKey && cKey) {

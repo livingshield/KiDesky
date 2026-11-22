@@ -469,15 +469,15 @@
             }
             var rc = this.getRoyalCastleLandmark();
             if (rc) {
-                var rcImg = rc.image || rc.img || "assets/castles/castle_royal.png";
-                if (rc.isFlipped && rcImg.indexOf("_flip.png") === -1) {
-                    rcImg = rcImg.replace(".png", "_flip.png");
-                }
+                var rcRawImg = rc.image || rc.img || "assets/castles/castle_royal.webp";
+                var rcWasFlip = window.PRS_isFlippedAssetUrl ? window.PRS_isFlippedAssetUrl(rcRawImg) : false;
+                var rcImg = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(rcRawImg) : rcRawImg;
                 var rcScale = rc.scale || 1;
+                var rcFlipAttr = (rc.isFlipped || rcWasFlip) ? ' transform="scale(-1, 1)"' : '';
                 var isCastleSelected = (this.inspectorMode === "castle" || this.activeTool === "castle");
                 out.push('  <g id="me-royal-castle-g" class="me-royal-castle-hit" transform="translate(' + rc.x + ',' + rc.y + ') scale(' + rcScale + ')" style="cursor:grab;" onpointerdown="PRS_MapEditor.onRoyalCastlePointerDown(event)">');
                 out.push('    <circle class="me-royal-castle-aura" cx="0" cy="0" r="44" fill="rgba(212,175,55,0.16)" stroke="' + (isCastleSelected ? '#facc15' : 'rgba(212,175,55,0.65)') + '" stroke-width="' + (isCastleSelected ? '3' : '2') + '"' + (isCastleSelected ? ' stroke-dasharray="6,4"' : '') + '/>');
-                out.push('    <image href="' + rcImg + '" x="-42" y="-48" width="84" height="84" preserveAspectRatio="xMidYMid meet" pointer-events="none"/>');
+                out.push('    <image href="' + rcImg + '" x="-42" y="-48" width="84" height="84" preserveAspectRatio="xMidYMid meet" pointer-events="none"' + rcFlipAttr + '/>');
                 out.push('    <rect x="-56" y="34" width="112" height="16" rx="5" fill="rgba(10,7,5,0.9)" stroke="' + (isCastleSelected ? '#facc15' : 'rgba(212,175,55,0.6)') + '" stroke-width="1" pointer-events="none"/>');
                 out.push('    <text x="0" y="45" text-anchor="middle" fill="#fde68a" font-size="9.5" font-weight="bold" font-family="sans-serif" pointer-events="none">' + this.escapeXml(this.getCastleDisplayName(rc)) + '</text>');
                 out.push('    <circle class="me-royal-castle-hit" cx="0" cy="0" r="48" fill="transparent"/>');
@@ -1549,7 +1549,11 @@
                     lm.id = "royalCastle";
                     if (lm.x === undefined) lm.x = 700;
                     if (lm.y === undefined) lm.y = 365;
-                    lm.image = lm.image || lm.img || "assets/castles/castle_royal.png";
+                    var rawLmImg = lm.image || lm.img || "assets/castles/castle_royal.webp";
+                    if (window.PRS_isFlippedAssetUrl && window.PRS_isFlippedAssetUrl(rawLmImg)) {
+                        lm.isFlipped = true;
+                    }
+                    lm.image = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(rawLmImg) : rawLmImg;
                     lm.img = lm.image;
                     lm.baseW = lm.baseW || lm.w || 220;
                     lm.baseH = lm.baseH || lm.h || 180;
@@ -1570,8 +1574,8 @@
                 baseH: 180,
                 name: "Královský hrad",
                 icon: "👑",
-                image: "assets/castles/castle_royal.png",
-                img: "assets/castles/castle_royal.png",
+                image: "assets/castles/castle_royal.webp",
+                img: "assets/castles/castle_royal.webp",
                 scale: 1,
                 isFlipped: false,
                 customPositioned: false

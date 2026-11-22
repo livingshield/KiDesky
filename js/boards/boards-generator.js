@@ -649,7 +649,7 @@
 
         var landmarks = [
             { id: "royalCastle", name: royalDef.name, icon: royalDef.icon || "👑", image: royalDef.img, x: 700, y: 380, w: 220, h: 180 },
-            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 }
+            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.webp", x: 1085, y: 625, w: 140, h: 120 }
         ];
 
         var normalizedOpts = {
@@ -1436,7 +1436,7 @@
 
         var landmarks = [
             { id: "royalCastle", name: royalDef.name, icon: royalDef.icon || "👑", image: royalDef.img, x: 700, y: 380, w: 220, h: 180 },
-            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.png", x: 1085, y: 625, w: 140, h: 120 }
+            { id: "dragonLair", name: "Dračí sluj (U3)", icon: "🐲", image: "assets/landmarks/dragon.webp", x: 1085, y: 625, w: 140, h: 120 }
         ];
 
         // 9. STATISTIKY A VALIDACE MAPY PRO KONTROLNÍ PANEL
