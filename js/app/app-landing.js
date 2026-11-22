@@ -335,16 +335,16 @@
                     description: tStory("story.video_ch1_desc", "")
                 },
                 {
-                    id: 7,
+                    id: 6,
                     title: tStory("story.video_ch2_title", "Čtyři šampioni nad herním plánem"),
-                    url: "https://www.youtube.com/watch?v=BoDAksZugus",
+                    url: "https://www.youtube.com/watch?v=TTXwxA90gPk",
                     likesCount: 9,
                     description: tStory("story.video_ch2_desc", "")
                 },
                 {
-                    id: 6,
+                    id: 7,
                     title: tStory("story.video_ch3_title", "Únos princezny & Návrat s fanfárami"),
-                    url: "https://www.youtube.com/watch?v=TTXwxA90gPk",
+                    url: "https://www.youtube.com/watch?v=BoDAksZugus",
                     likesCount: 7,
                     description: tStory("story.video_ch3_desc", "")
                 }
@@ -354,8 +354,8 @@
         var resolveChapter = function (v, idx) {
             var u = (v && v.url) ? String(v.url) : "";
             if (u.indexOf("sO-MnlHy_O4") !== -1) return 1;
-            if (u.indexOf("BoDAksZugus") !== -1 || u.indexOf("fPyG8yeCHas") !== -1) return 2;
-            if (u.indexOf("TTXwxA90gPk") !== -1) return 3;
+            if (u.indexOf("TTXwxA90gPk") !== -1) return 2;
+            if (u.indexOf("BoDAksZugus") !== -1 || u.indexOf("fPyG8yeCHas") !== -1) return 3;
             return (idx % 3) + 1;
         };
 
