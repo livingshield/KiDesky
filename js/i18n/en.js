@@ -3341,6 +3341,7 @@ window.PRS_I18N.en = {
         "charge_label": "2. Noble Family Sigil:",
         "btn_confirm": "🛡️ Confirm & Accept Crest",
         "tincture_prefix": "Heraldic tincture:",
+        "motto_quoted": "“{motto}”",
         "names": {
             "lion": "Golden Lion",
             "griffin": "Royal Griffin",
@@ -3375,7 +3376,8 @@ window.PRS_I18N.en = {
             "emerald": "Emerald Green",
             "sapphire": "Sapphire Blue",
             "amethyst": "Amethyst Purple",
-            "obsidian": "Midnight Obsidian"
+            "obsidian": "Midnight Obsidian",
+            "ebony": "Ebony Black"
         },
         "close_title": "Close chamber"
     },

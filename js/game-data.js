@@ -1536,9 +1536,31 @@ window.PRS_HERALDRY_TINCTURES = [
     { key: "ebony", name: "Ebenová čerň", bg: "linear-gradient(135deg, #374151, #111827)", border: "#e5e7eb", text: "#e5e7eb" }
 ];
 
+function _makeTranslatableProp(obj, prop, key) {
+    var rawVal = obj[prop];
+    Object.defineProperty(obj, prop, {
+        get: function () {
+            if (window.PRS_I18n && typeof window.PRS_I18n.t === "function") {
+                return window.PRS_I18n.t(key, null, rawVal);
+            }
+            return rawVal;
+        },
+        set: function (v) { rawVal = v; },
+        configurable: true,
+        enumerable: true
+    });
+}
+
+for (var _hti = 0; _hti < window.PRS_HERALDRY_TINCTURES.length; _hti++) {
+    var _htItem = window.PRS_HERALDRY_TINCTURES[_hti];
+    _makeTranslatableProp(_htItem, "name", "crest.tinctures." + _htItem.key);
+}
+
 window.PRS_HERALDRY_BY_ID = {};
 for (var _hi = 0; _hi < window.PRS_HERALDRY_CATALOG.length; _hi++) {
     var _hItem = window.PRS_HERALDRY_CATALOG[_hi];
+    _makeTranslatableProp(_hItem, "name", "crest.names." + _hItem.id);
+    _makeTranslatableProp(_hItem, "motto", "crest.mottos." + _hItem.id);
     window.PRS_HERALDRY_BY_ID[_hItem.id] = _hItem;
 }
 

@@ -606,9 +606,18 @@
         if (setCrestPreview && window.PRS_renderCrestBadgeHTML) {
             var cObj = window.PRS_getCrestById(crestInfo.crestId);
             var tObj = window.PRS_getTinctureByKey(crestInfo.tincture);
+            var cName = (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t("crest.names." + cObj.id, null, cObj.name)
+                : cObj.name;
+            var cMotto = (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t("crest.mottos." + cObj.id, null, cObj.motto)
+                : cObj.motto;
+            var quotedMotto = (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t("crest.motto_quoted", { motto: cMotto }, "„" + cMotto + "“")
+                : ("„" + cMotto + "“");
             setCrestPreview.innerHTML = window.PRS_renderCrestBadgeHTML(crestInfo.crestId, crestInfo.tincture, 44) +
-                '<div style="margin-left:0.5rem;"><div style="font-weight:700; color:' + tObj.text + '; font-size:0.92rem;">' + this.escapeHtml(cObj.name) + '</div>' +
-                '<div style="font-size:0.75rem; color:#cbd5e1; font-style:italic;">„' + this.escapeHtml(cObj.motto) + '“</div></div>';
+                '<div style="margin-left:0.5rem;"><div style="font-weight:700; color:' + tObj.text + '; font-size:0.92rem;">' + this.escapeHtml(cName) + '</div>' +
+                '<div style="font-size:0.75rem; color:#cbd5e1; font-style:italic;">' + this.escapeHtml(quotedMotto) + '</div></div>';
         }
     },
 
@@ -688,16 +697,27 @@
 
         var curCrest = this._pickerSelectedCrest || "lion";
         var curTincture = this._pickerSelectedTincture || "gold";
-        var isEnCrest = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
 
         var getCrestName = function (cr) {
-            return (window.PRS_I18n ? window.PRS_I18n.t("crest.names." + cr.id) : "") || cr.name;
+            return (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t("crest.names." + cr.id, null, cr.name)
+                : cr.name;
         };
         var getCrestMotto = function (cr) {
-            return (window.PRS_I18n ? window.PRS_I18n.t("crest.mottos." + cr.id) : "") || cr.motto;
+            return (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t("crest.mottos." + cr.id, null, cr.motto)
+                : cr.motto;
         };
         var getTinctureName = function (tc) {
-            return (window.PRS_I18n ? window.PRS_I18n.t("crest.tinctures." + tc.key) : "") || tc.name;
+            return (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t("crest.tinctures." + tc.key, null, tc.name)
+                : tc.name;
+        };
+        var getQuotedMotto = function (cr) {
+            var m = getCrestMotto(cr);
+            return (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t("crest.motto_quoted", { motto: m }, "„" + m + "“")
+                : ("„" + m + "“");
         };
 
         // 1. Grid of crests
@@ -734,13 +754,16 @@
         if (previewWrap && window.PRS_renderCrestBadgeHTML) {
             var cObj = window.PRS_getCrestById(curCrest);
             var tObj = window.PRS_getTinctureByKey(curTincture);
+            var tincPrefix = (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t("crest.tincture_prefix", null, "Heraldická tinktura:")
+                : "Heraldická tinktura:";
             previewWrap.innerHTML =
                 '<div style="display:flex; align-items:center; gap:1.1rem; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.3); border-radius:10px; padding:0.75rem 1.15rem;">' +
                 '  ' + window.PRS_renderCrestBadgeHTML(curCrest, curTincture, 52) +
                 '  <div>' +
-                '    <div style="font-family:\'Cinzel\',serif; font-size:1.1rem; font-weight:700; color:' + tObj.text + ';">' + this.escapeHtml(cObj.name) + '</div>' +
-                '    <div style="font-size:0.8rem; color:#fde68a; font-style:italic; margin-top:2px;">„' + this.escapeHtml(cObj.motto) + '“</div>' +
-                '    <div style="font-size:0.72rem; color:#94a3b8; margin-top:3px;">Heraldická tinktura: <strong>' + this.escapeHtml(tObj.name) + '</strong></div>' +
+                '    <div style="font-family:\'Cinzel\',serif; font-size:1.1rem; font-weight:700; color:' + tObj.text + ';">' + this.escapeHtml(getCrestName(cObj)) + '</div>' +
+                '    <div style="font-size:0.8rem; color:#fde68a; font-style:italic; margin-top:2px;">' + this.escapeHtml(getQuotedMotto(cObj)) + '</div>' +
+                '    <div style="font-size:0.72rem; color:#94a3b8; margin-top:3px;">' + this.escapeHtml(tincPrefix) + ' <strong>' + this.escapeHtml(getTinctureName(tObj)) + '</strong></div>' +
                 '  </div>' +
                 '</div>';
         }

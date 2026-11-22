@@ -1074,6 +1074,11 @@ window.PRS_App = {
         this._safeCall("renderAnnouncement", this.renderAnnouncement);
         this._safeCall("renderCurrentUserCard", this.renderCurrentUserCard);
         this._safeCall("updateUserUI", this.updateUserUI);
+        this._safeCall("updateGameHallCrestUI", this.updateGameHallCrestUI);
+        var crestModal = document.getElementById("crest-picker-modal");
+        if (crestModal && crestModal.style.display !== "none") {
+            this._safeCall("renderCrestPickerModal", this.renderCrestPickerModal);
+        }
         this._safeCall("refreshMapStudioSelectOptions", this.refreshMapStudioSelectOptions);
         this._safeCall("syncMapStudioInputsFromRecipe", this.syncMapStudioInputsFromRecipe);
         this._safeCall("updateMapStudioPreview", this.updateMapStudioPreview);

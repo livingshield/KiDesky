@@ -3341,6 +3341,7 @@ window.PRS_I18N.cs = {
         "charge_label": "2. Šlechtické znamení rodu:",
         "btn_confirm": "🛡️ Potvrdit a přijmout erb",
         "tincture_prefix": "Heraldická tinktura:",
+        "motto_quoted": "„{motto}“",
         "names": {
             "lion": "Zlatý lev",
             "griffin": "Královský gryf",
@@ -3375,7 +3376,8 @@ window.PRS_I18N.cs = {
             "emerald": "Smaragdová zeleň",
             "sapphire": "Safírová modř",
             "amethyst": "Ametystová purpura",
-            "obsidian": "Půlnoční obsidián"
+            "obsidian": "Půlnoční obsidián",
+            "ebony": "Ebenová čerň"
         },
         "close_title": "Zavřít komoru"
     },
