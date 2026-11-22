@@ -25,7 +25,7 @@ hf_cache/
 *.m4a
 *.mp4
 *.mkv
-!assets/audio/*.mp3
+*.mp3
 output/
 test_output/
 

@@ -262,8 +262,13 @@ function Upload-FtpFile {
         return $false
     }
     $maxAttempts = 3
-    $fileBytes = [System.IO.File]::ReadAllBytes($localFilePath)
+    $fileLen = (Get-Item -LiteralPath $localFilePath).Length
+    $bufSize = 65536
+    $buffer = New-Object byte[] $bufSize
     for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+        $fs = $null
+        $reqStream = $null
+        $resp = $null
         try {
             $req = [System.Net.FtpWebRequest]::Create($remoteFileUri)
             $req.Credentials = $credentials
@@ -271,16 +276,25 @@ function Upload-FtpFile {
             $req.UseBinary = $true
             $req.KeepAlive = $false
             $req.EnableSsl = $false
+            $req.Timeout = 600000
+            $req.ReadWriteTimeout = 600000
+            $req.ContentLength = $fileLen
 
-            $req.ContentLength = $fileBytes.Length
-            $stream = $req.GetRequestStream()
-            $stream.Write($fileBytes, 0, $fileBytes.Length)
-            $stream.Close()
+            $fs = [System.IO.File]::OpenRead($localFilePath)
+            $reqStream = $req.GetRequestStream()
+            while (($bytesRead = $fs.Read($buffer, 0, $bufSize)) -gt 0) {
+                $reqStream.Write($buffer, 0, $bytesRead)
+            }
+            $reqStream.Close(); $reqStream = $null
+            $fs.Close(); $fs = $null
             $resp = $req.GetResponse()
-            $resp.Close()
+            $resp.Close(); $resp = $null
             Write-Host "Uploaded: $localFilePath -> $remoteFileUri" -ForegroundColor Green
             return $true
         } catch {
+            if ($reqStream) { try { $reqStream.Dispose() } catch {} }
+            if ($fs) { try { $fs.Dispose() } catch {} }
+            if ($resp) { try { $resp.Close() } catch {} }
             if ($attempt -lt $maxAttempts) {
                 Write-Warning "Retry $attempt/$maxAttempts failed uploading $localFilePath to $remoteFileUri : $_"
                 Start-Sleep -Milliseconds 1500
