@@ -1376,19 +1376,28 @@ window.PRS_App = {
                         aBanner.id = "admin-lazy-loading-banner";
                         aBanner.style.cssText = "padding:1rem; margin:0.5rem 0 1rem; text-align:center; background:rgba(15,23,42,0.85); border:1px solid rgba(212,175,55,0.4); border-radius:10px; color:var(--gold-light); font-size:0.95rem;";
                         aBanner.textContent = tAdm("ui.loading_module", "⏳ Načítám modul...");
-                        admTab.insertBefore(aBanner, navBar || admTab.firstChild);
-                    }
-                    this.ensureAdminLoaded().then(function () {
-                        var b = document.getElementById("admin-lazy-loading-banner");
-                        if (b && b.parentNode) b.parentNode.removeChild(b);
-                        if (selfAdm.initAdminSection) selfAdm.initAdminSection();
-                    }).catch(function () {
-                        var b = document.getElementById("admin-lazy-loading-banner");
-                        if (b) {
-                            b.style.color = "#fca5a5";
-                            b.textContent = tAdm("ui.loading_module_error", "⚠️ Nepodařilo se načíst modul. Zkontroluj připojení a zkus to znovu.");
+                        if (navBar && navBar.parentNode) {
+                            navBar.parentNode.insertBefore(aBanner, navBar);
+                        } else {
+                            admTab.insertBefore(aBanner, admTab.firstChild);
                         }
-                    });
+                    }
+                    if (!this._adminLoadingInProgress) {
+                        this._adminLoadingInProgress = true;
+                        this.ensureAdminLoaded().then(function () {
+                            selfAdm._adminLoadingInProgress = false;
+                            var b = document.getElementById("admin-lazy-loading-banner");
+                            if (b && b.parentNode) b.parentNode.removeChild(b);
+                            if (selfAdm.initAdminSection) selfAdm.initAdminSection();
+                        }).catch(function () {
+                            selfAdm._adminLoadingInProgress = false;
+                            var b = document.getElementById("admin-lazy-loading-banner");
+                            if (b) {
+                                b.style.color = "#fca5a5";
+                                b.textContent = tAdm("ui.loading_module_error", "⚠️ Nepodařilo se načíst modul. Zkontroluj připojení a zkus to znovu.");
+                            }
+                        });
+                    }
                 }
             }
         }

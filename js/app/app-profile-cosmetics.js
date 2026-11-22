@@ -300,6 +300,14 @@
         if (adminNav) {
             adminNav.style.display = isAdmin ? "inline-flex" : "none";
         }
+        if (isAdmin && this.activeTab === "admin" && !this._adminLoadingInProgress) {
+            var admDenied = document.getElementById("admin-guest-denied");
+            if (!this._adminModuleLoaded || (admDenied && admDenied.style.display !== "none")) {
+                if (typeof this.switchTab === "function") {
+                    this.switchTab("admin");
+                }
+            }
+        }
 
         // Prvky přihlášení, profilového menu a odhlášení v horní liště
         var loginBtn = document.getElementById("topbar-login-btn");
