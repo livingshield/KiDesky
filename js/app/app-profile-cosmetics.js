@@ -178,45 +178,116 @@
             });
     },
 
+    toggleProfileMenu: function (ev) {
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+        var menu = document.getElementById("topbar-profile-menu");
+        var trigger = document.getElementById("user-status-badge");
+        if (!menu || !trigger) return;
+
+        var isOpen = (menu.style.display !== "none" && menu.style.display !== "");
+        if (isOpen) {
+            this.closeProfileMenu();
+            return;
+        }
+
+        menu.style.display = "flex";
+        trigger.setAttribute("aria-expanded", "true");
+
+        if (!this._profileMenuBound && typeof document !== "undefined") {
+            this._profileMenuBound = true;
+            var self = this;
+            document.addEventListener("click", function (e) {
+                var m = document.getElementById("topbar-profile-menu");
+                if (!m || m.style.display === "none") return;
+                var wrap = m.closest ? m.closest(".topbar-account-wrap") : m.parentNode;
+                if (wrap && e && e.target && wrap.contains(e.target)) return;
+                self.closeProfileMenu();
+            });
+            document.addEventListener("keydown", function (e) {
+                if (e && e.key === "Escape") {
+                    self.closeProfileMenu();
+                }
+            });
+        }
+    },
+
+    closeProfileMenu: function () {
+        var menu = document.getElementById("topbar-profile-menu");
+        var trigger = document.getElementById("user-status-badge");
+        if (menu) menu.style.display = "none";
+        if (trigger) trigger.setAttribute("aria-expanded", "false");
+    },
+
     updateUserUI: function () {
+
+        var t = function (key, defVal) {
+            return (window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                ? window.PRS_I18n.t(key, null, defVal)
+                : defVal;
+        };
 
         var badgeEl = document.getElementById("user-status-badge");
 
         var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
         var isUnconfirmed = (this.currentUser && this.currentUser.emailConfirmed === false && this.currentUser.role === "Guest");
 
-        var savedNick = "";
-
-        try { savedNick = (localStorage.getItem("prs_player_nickname") || "").trim(); } catch (e) { }
-
         var rawName = "";
         if (isGuest) {
-            rawName = "Host";
+            rawName = t("ui.profile_menu.role_guest", "Host");
         } else {
-            rawName = (this.currentUser.displayName || "").trim() || (this.currentUser.username || "").trim() || "Hráč";
+            rawName = (this.currentUser.displayName || "").trim() || (this.currentUser.username || "").trim() || t("ui.profile_menu.role_player", "Hráč");
         }
 
-        if (rawName && rawName.indexOf("@") !== -1) {
-
+        if (!isGuest && rawName && rawName.indexOf("@") !== -1) {
             rawName = rawName.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); }).trim();
-
-        } else if (rawName && rawName.toLowerCase() === "admin") {
-
+        } else if (!isGuest && rawName && rawName.toLowerCase() === "admin") {
             rawName = "Rytíř Admin";
-
         }
+
+        if (isGuest) {
+            this.userCredits = 0;
+            if (this.currentUser) this.currentUser.credits = 0;
+        } else if (this.currentUser && typeof this.currentUser.credits === "number") {
+            this.userCredits = this.currentUser.credits;
+        }
+        var creditsVal = Number(this.userCredits || 0);
 
         var nameStr = this.escapeHtml(rawName);
-
-        var roleIcon = isGuest ? (isUnconfirmed ? "👤 Host (Čeká na e-mail ✉️)" : "👤 Host") : (this.currentUser.role === "Admin" ? "👑 Admin" : "🛡️ Hráč");
+        var isAdmin = (!isGuest && this.currentUser && this.currentUser.role === "Admin");
+        var roleEmoji = isGuest ? "👤" : (isAdmin ? "👑" : "🛡️");
+        var roleLabel = isGuest
+            ? (isUnconfirmed ? t("ui.profile_menu.guest_unconfirmed", "Host (Čeká na e-mail ✉️)") : t("ui.profile_menu.role_guest", "Host"))
+            : (isAdmin ? t("ui.profile_menu.role_admin", "Admin") : t("ui.profile_menu.role_player", "Hráč"));
+        var roleIcon = roleEmoji + " " + roleLabel;
 
         if (badgeEl) {
             if (isGuest) {
-                badgeEl.innerHTML = roleIcon;
-                badgeEl.title = isUnconfirmed ? "Účet čeká na potvrzení e-mailu. Kliknutím otevřeš podrobnosti." : "Hraješ volně jako Host. Kliknutím se můžeš přihlásit.";
+                badgeEl.innerHTML =
+                    '<span class="profile-trigger-icon" aria-hidden="true">👤</span>' +
+                    '<span class="profile-trigger-name">' + this.escapeHtml(roleLabel) + '</span>' +
+                    '<span class="profile-trigger-caret" aria-hidden="true">▾</span>';
             } else {
-                badgeEl.innerHTML = roleIcon + ": <strong>" + nameStr + "</strong>";
-                badgeEl.title = "Klepnutím otevřete správu rytířského účtu";
+                badgeEl.innerHTML =
+                    '<span class="profile-trigger-icon" aria-hidden="true">' + roleEmoji + '</span>' +
+                    '<span class="profile-trigger-name">' + nameStr + '</span>' +
+                    '<span class="profile-trigger-credits" title="' + this.escapeHtml(t("ui.buttons.credits", "Královská šatna a sbírka figurek")) + '">💎 <span id="top-user-credits">' + String(creditsVal) + '</span></span>' +
+                    '<span class="profile-trigger-caret" aria-hidden="true">▾</span>';
+            }
+            badgeEl.title = t("ui.profile_menu.toggle_title", "Otevřít nabídku účtu a rychlé akce");
+        }
+
+        var menuNameEl = document.getElementById("topbar-profile-menu-name");
+        var menuSubEl = document.getElementById("topbar-profile-menu-sub");
+        if (menuNameEl) {
+            menuNameEl.textContent = isGuest ? ("👤 " + roleLabel) : (roleEmoji + " " + rawName);
+        }
+        if (menuSubEl) {
+            if (isGuest) {
+                menuSubEl.textContent = isUnconfirmed
+                    ? t("ui.profile_menu.guest_unconfirmed_sub", "Účet čeká na potvrzení e-mailu")
+                    : t("ui.profile_menu.guest_sub", "Volný režim bez přihlášení");
+            } else {
+                menuSubEl.textContent = roleLabel + (this.currentUser && this.currentUser.email ? (" • " + this.currentUser.email) : "");
             }
         }
 
@@ -227,17 +298,23 @@
 
         var adminNav = document.getElementById("nav-btn-admin");
         if (adminNav) {
-            adminNav.style.display = (this.currentUser && this.currentUser.role === "Admin") ? "inline-flex" : "none";
+            adminNav.style.display = isAdmin ? "inline-flex" : "none";
         }
 
-        // Tlačítka přihlášení a odhlášení v horní liště
+        // Prvky přihlášení, profilového menu a odhlášení v horní liště
         var loginBtn = document.getElementById("topbar-login-btn");
         var logoutBtn = document.getElementById("topbar-logout-btn");
         var creditsBtn = document.getElementById("topbar-credits-btn");
+        var accountBtn = document.getElementById("topbar-account-settings-btn");
+        var guestLoginItem = document.getElementById("topbar-guest-login-item");
+        var logoutSep = document.getElementById("topbar-menu-logout-sep");
 
         if (loginBtn) loginBtn.style.display = isGuest ? "inline-flex" : "none";
-        if (logoutBtn) logoutBtn.style.display = isGuest ? "none" : "inline-flex";
-        if (creditsBtn) creditsBtn.style.display = isGuest ? "none" : "inline-flex";
+        if (guestLoginItem) guestLoginItem.style.display = isGuest ? "flex" : "none";
+        if (creditsBtn) creditsBtn.style.display = isGuest ? "none" : "flex";
+        if (accountBtn) accountBtn.style.display = isGuest ? "none" : "flex";
+        if (logoutSep) logoutSep.style.display = isGuest ? "none" : "block";
+        if (logoutBtn) logoutBtn.style.display = isGuest ? "none" : "flex";
 
         var navBoardBtn = document.getElementById("nav-btn-board");
         if (navBoardBtn) navBoardBtn.style.display = this.hasGameStarted ? "inline-flex" : "none";
@@ -262,7 +339,7 @@
                 var pEmail = document.getElementById("auth-profile-email-val");
                 if (pEmail) pEmail.textContent = (this.currentUser && this.currentUser.email) || "Neuveden";
                 var pCredits = document.getElementById("auth-profile-credits-val");
-                if (pCredits) pCredits.textContent = String(this.userCredits || 0) + " 💎";
+                if (pCredits) pCredits.textContent = String(creditsVal) + " 💎";
             }
         }
 
@@ -319,15 +396,9 @@
         }
 
         var credEl = document.getElementById("top-user-credits");
-        if (credEl) {
-            if (isGuest) {
-                this.userCredits = 0;
-                if (this.currentUser) this.currentUser.credits = 0;
-            } else if (this.currentUser && typeof this.currentUser.credits === "number") {
-                this.userCredits = this.currentUser.credits;
-            }
-            credEl.textContent = String(this.userCredits || 0);
-        }
+        if (credEl) credEl.textContent = String(creditsVal);
+        var menuCredEl = document.getElementById("topbar-menu-credits-val");
+        if (menuCredEl) menuCredEl.textContent = String(creditsVal);
 
         this.updateGameHallUI();
 

@@ -132,75 +132,118 @@
         .topbar {
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 120;
             display: flex;
             flex-wrap: nowrap;
             align-items: center;
             justify-content: space-between;
-            gap: 0.75rem;
-            padding: 0.6rem 1.25rem;
-            background: rgba(15, 13, 10, 0.95);
+            gap: 0.65rem;
+            padding: 0.42rem 1rem;
+            min-height: 54px;
+            background: rgba(15, 13, 10, 0.96);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-gold);
-            overflow-x: auto;
+            overflow: visible;
             white-space: nowrap;
             max-width: 100vw;
             width: 100%;
             box-sizing: border-box;
-            -webkit-overflow-scrolling: touch;
-        }
-        .topbar::-webkit-scrollbar {
-            height: 3px;
-        }
-        .topbar::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 3px;
         }
 
         .brand-wrap {
             display: flex;
             align-items: center;
-            gap: 0.9rem;
+            flex: 0 0 auto;
+            min-width: 0;
         }
 
         .brand-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.48rem;
+            background: transparent;
+            border: none;
+            padding: 0.15rem 0.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: left;
             font-family: 'Cinzel', serif;
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--gold-light);
-            letter-spacing: 0.5px;
+            transition: opacity 0.18s ease, background 0.18s ease;
         }
-        .brand-title span {
+        .brand-title:hover {
+            background: rgba(212, 175, 55, 0.08);
+        }
+        .brand-emblem {
+            font-size: 1.32rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.08;
+            min-width: 0;
+        }
+        .brand-eyebrow {
+            font-family: inherit;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            opacity: 0.88;
+        }
+        .brand-name {
+            font-family: 'Cinzel', serif;
+            font-size: 0.96rem;
+            font-weight: 800;
             color: var(--pink-heart);
+            letter-spacing: 0.02em;
         }
 
         .nav-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.45rem;
+            display: inline-flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 3px;
+            background: rgba(0, 0, 0, 0.42);
+            border: 1px solid rgba(212, 175, 55, 0.22);
+            border-radius: 12px;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.45);
         }
 
         .nav-tab-btn {
-            background: rgba(255, 255, 255, 0.04);
+            background: transparent;
             color: var(--text-main);
-            border: 1px solid rgba(212, 175, 55, 0.22);
-            padding: 0.48rem 0.95rem;
-            border-radius: 10px;
+            border: 1px solid transparent;
+            height: 32px;
+            padding: 0.32rem 0.68rem;
+            border-radius: 9px;
             font-family: inherit;
-            font-size: 0.9rem;
+            font-size: 0.84rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.32rem;
+            white-space: nowrap;
+            transition: all 0.18s ease;
         }
         .nav-tab-btn:hover {
-            border-color: var(--gold);
             background: rgba(212, 175, 55, 0.12);
+            color: var(--gold-light);
         }
         .nav-tab-btn.active {
             background: linear-gradient(135deg, #d4af37, #b47d1c);
             color: #15110d;
             border-color: var(--gold-light);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.35);
+            font-weight: 700;
+            box-shadow: 0 0 14px rgba(212, 175, 55, 0.32);
+        }
+        .nav-tab-btn.nav-tab-admin:not(.active) {
+            color: var(--gold-light);
+            background: rgba(212, 175, 55, 0.08);
         }
 
         .board-node {
@@ -213,9 +256,223 @@
         .user-bar {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.45rem;
+            font-size: 0.84rem;
+            flex-wrap: nowrap;
+            flex-shrink: 0;
+        }
+
+        .topbar-tools {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .topbar-icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            color: var(--gold-light);
+            font-size: 0.96rem;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            flex-shrink: 0;
+        }
+        .topbar-icon-btn:hover {
+            background: rgba(212, 175, 55, 0.16);
+            border-color: var(--gold);
+        }
+
+        .topbar-divider {
+            width: 1px;
+            height: 22px;
+            background: rgba(212, 175, 55, 0.22);
+            margin: 0 0.08rem;
+            flex-shrink: 0;
+        }
+
+        .topbar-account-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .topbar .topbar-login-compact {
+            height: 34px;
+            padding: 0 0.72rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 999px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.32rem;
+        }
+
+        .topbar .topbar-profile-trigger {
+            height: 34px;
+            padding: 0 0.68rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.38rem;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.42);
+            color: var(--gold-light);
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+        .topbar .topbar-profile-trigger:hover,
+        .topbar .topbar-profile-trigger[aria-expanded="true"] {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: var(--gold);
+        }
+        .profile-trigger-name {
+            max-width: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .profile-trigger-credits {
+            color: #38bdf8;
+            font-weight: 700;
+            padding-left: 0.4rem;
+            border-left: 1px solid rgba(212, 175, 55, 0.28);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+        .profile-trigger-caret {
+            font-size: 0.72rem;
+            opacity: 0.78;
+        }
+
+        .topbar-profile-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 240px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 0.4rem;
+            border-radius: 14px;
+            background: rgba(18, 14, 10, 0.98);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--gold);
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+            z-index: 400;
+        }
+        .topbar-profile-menu-header {
+            padding: 0.45rem 0.6rem 0.52rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+            margin-bottom: 0.2rem;
+        }
+        .topbar-profile-menu-name {
+            font-weight: 700;
             font-size: 0.88rem;
-            flex-wrap: wrap;
+            color: var(--gold-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .topbar-profile-menu-sub {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+        .topbar-menu-item {
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.48rem 0.6rem;
+            border: none;
+            border-radius: 9px;
+            background: transparent;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.83rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .topbar-menu-item:hover {
+            background: rgba(212, 175, 55, 0.14);
+            color: var(--gold-light);
+        }
+        .topbar-menu-icon {
+            width: 1.15rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .topbar-menu-label {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .topbar-menu-badge {
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            padding: 0.1rem 0.42rem;
+            border-radius: 999px;
+        }
+        .topbar-menu-item-install {
+            color: #6ee7b7;
+        }
+        .topbar-menu-item-install:hover {
+            background: rgba(16, 185, 129, 0.16);
+            color: #a7f3d0;
+        }
+        .topbar-menu-item-danger {
+            color: #fca5a5;
+        }
+        .topbar-menu-item-danger:hover {
+            background: rgba(239, 68, 68, 0.16);
+            color: #fecaca;
+        }
+        .topbar-menu-sep {
+            height: 1px;
+            background: rgba(212, 175, 55, 0.16);
+            margin: 0.2rem 0.35rem;
+        }
+
+        @media (max-width: 1180px) and (min-width: 861px) {
+            .topbar {
+                padding: 0.4rem 0.65rem;
+                gap: 0.4rem;
+            }
+            .brand-name {
+                font-size: 0.88rem;
+            }
+            .brand-emblem {
+                font-size: 1.15rem;
+            }
+            .nav-tab-btn {
+                padding: 0.28rem 0.52rem;
+                font-size: 0.78rem;
+                height: 30px;
+            }
+            .profile-trigger-name {
+                max-width: 95px;
+            }
         }
 
         /* --- ELEMENTÁRNÍ PŘEPÍNAČ TÉMAT (ŽIVLY) --- */
@@ -1209,53 +1466,6 @@
 /* ==========================================================================
    ETAPA 3: SDÍLENÉ KOMPONENTOVÉ & UTILITY TŘÍDY (NÁHRADA INLINE STYLŮ)
    ========================================================================== */
-.topbar #topbar-credits-btn {
-    padding: 0.3rem 0.65rem;
-    font-weight: 700;
-    border-color: var(--gold);
-    color: var(--gold-light);
-    align-items: center;
-    gap: 0.35rem;
-}
-.topbar #topbar-pwa-install-btn {
-    padding: 0.3rem 0.7rem;
-    font-size: 0.82rem;
-    font-weight: 700;
-    white-space: nowrap;
-    background: linear-gradient(135deg, #059669, #10b981);
-    border-color: #34d399;
-    align-items: center;
-    gap: 0.35rem;
-}
-.topbar #topbar-achievements-btn,
-.topbar #topbar-cheatsheet-btn {
-    padding: 0.3rem 0.65rem;
-    font-weight: 700;
-    border-color: var(--gold);
-    color: var(--gold-light);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-.topbar #topbar-login-btn {
-    padding: 0.32rem 0.75rem;
-    font-size: 0.82rem;
-    font-weight: 700;
-    white-space: nowrap;
-}
-.topbar #topbar-logout-btn {
-    border-color: rgba(239, 68, 68, 0.5);
-    color: #fca5a5;
-    padding: 0.3rem 0.65rem;
-    font-size: 0.82rem;
-    white-space: nowrap;
-}
-.topbar #topbar-settings-btn {
-    padding: 0.32rem 0.65rem;
-    font-weight: 600;
-    border-color: var(--gold);
-    color: var(--gold-light);
-}
 
 .lp-media-card-pad {
     padding: 1rem;

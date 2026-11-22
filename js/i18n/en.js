@@ -31,11 +31,28 @@ window.PRS_I18N.en = {
     "ui": {
         "brand_subtitle": "The Princess's Heart",
         "tabs": {
-            "welcome": "🏰 Intro & Videos",
-            "lobby": "⚔️ Knight's Lounge",
-            "board": "🎲 Game Table",
-            "rules": "📜 Rules & Catalog",
-            "admin": "🛡️ Administration"
+            "welcome": "🏰 Intro",
+            "welcome_title": "Intro & Videos",
+            "lobby": "⚔️ Lounge",
+            "lobby_title": "Knight's Lounge",
+            "board": "🎲 Table",
+            "board_title": "Game Table",
+            "rules": "📜 Rules",
+            "rules_title": "Rules & Catalog",
+            "admin": "🛡️ Admin",
+            "admin_title": "Administration"
+        },
+        "profile_menu": {
+            "wardrobe": "Royal Wardrobe",
+            "account": "Profile & Account",
+            "role_admin": "Admin",
+            "role_player": "Player",
+            "role_guest": "Guest",
+            "guest_unconfirmed": "Guest (Awaiting email ✉️)",
+            "toggle_title": "Open account menu & quick actions",
+            "guest_sub": "Guest mode (not signed in)",
+            "guest_unconfirmed_sub": "Account awaiting email confirmation",
+            "login_register": "Sign In / Register"
         },
         "theme": {
             "title": "Choose element & kingdom color design",

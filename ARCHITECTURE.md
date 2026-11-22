@@ -22,7 +22,7 @@ Aplikace kombinuje čistý **klientský Vanilla JS / SVG / PWA stack** (bez bund
 KiDesky/
 ├── index.html                  # Aplikační shell, sekvenční <script defer> s ?v=... cache-bustingem
 ├── manifest.json               # PWA manifest
-├── service-worker.js           # Offline/caching strategie (CACHE_NAME = kidesky-cache-v1.9.53)
+├── service-worker.js           # Offline/caching strategie (CACHE_NAME = kidesky-cache-v1.9.54)
 ├── web.config                  # IIS hlavičky, customErrors=RemoteOnly, skrytí backend/, MIME mapy
 ├── appsettings.json            # Šablona konfigurace (SQL, SMTP, Google OAuth, FTP, Gemini)
 ├── deploy_code_update.ps1      # FTP deploy s 64 KB streamingem, retry a před-deploy kontrolou
@@ -50,7 +50,7 @@ KiDesky/
 │   ├── app-i18n.js             # i18n engine: detekce, t(), plural(), translateDOM(), syncUi() (~19.4 KB)
 │   ├── i18n/
 │   │   ├── languages.js        # Dynamický manifest jazyků PRS_I18N_LANGUAGES (~0.7 KB)
-│   │   ├── cs.js / en.js       # Překladové slovníky (2 544 klíčů; ~197.4 KB / ~185.6 KB)
+│   │   ├── cs.js / en.js       # Překladové slovníky (2 559 klíčů; ~197.4 KB / ~185.6 KB)
 │   │   └── rules-cs.js / rules-en.js  # Lazy-loadovaný průvodce (10 kapitol + 6 pojmů; ~43.3 / ~37.1 KB)
 │   ├── game-data.js            # Statická data: figurky, zbrojnice, nestvůry, draci, ctnosti (~114.9 KB)
 │   ├── boards/
@@ -196,7 +196,7 @@ Sdílená abstraktní bázová třída pro router i všechny subhandlery:
 - **Grafika v WebP + SVG/CSS zrcadlení:** Herní obrázky byly zkonvertovány do `.webp` (`tools/optimize-assets-webp.py`) a duplicitní soubory `*_flip.*` byly zrušeny. Zrcadlení doleva/doprava provádí nativní SVG transformace `scale(-1, 1)` nebo CSS třída `.is-flipped`. Zpětnou kompatibilitu u starších URL zajišťuje `PRS_normalizeAssetUrl()`.
 - **Média mimo Git:** Audio stopy (`assets/audio/*.mp3`, 128 kbps CBR) i videa (`*.mp4`, např. `ps_intro_04.mp4` v 720p H.264 CRF 26) jsou v `.gitignore` vyloučeny pomocí pravidel `*.mp3` a `*.mp4` (složku `assets/audio/` udržuje `.gitkeep`), aby se nenafukovala historie repozitáře.
 - **PWA Service Worker (`service-worker.js`):**
-  - `CACHE_NAME` (aktuálně `kidesky-cache-v1.9.53`) se při změně kódu navyšuje společně s `?v=...` u všech stylů/skriptů v `index.html` (kontroluje `predeploy-check.js`).
+  - `CACHE_NAME` (aktuálně `kidesky-cache-v1.9.54`) se při změně kódu navyšuje společně s `?v=...` u všech stylů/skriptů v `index.html` (kontroluje `predeploy-check.js`).
   - `install` přednačte `CORE_ASSETS` a volá `self.skipWaiting()`; `activate` smaže staré verze cache a převezme klienty (`clients.claim()`).
   - **Fetch strategie:**
     - *Bypass (vždy síť):* non-GET požadavky, cizí domény, `api.ashx`, `/api/`, `Range` hlavičky, `/assets/audio/`, `/assets/video/` a přípony `.mp3`, `.wav`, `.ogg`, `.m4a`, `.mp4`, `.webm`.
@@ -252,8 +252,8 @@ node tools/tests/run-all.js --live
 ```
 
 Jednotlivé sady v `run-all.js`:
-1. `tools/predeploy-check.js` – 8 kontrol: 1. zákaz `.exe` souborů, 2. validace JS syntaxe (`node -c`), 3. kontrola kódování UTF-8, 4. kontrola i18n slovníků (`cs`, `en`, parita 2 544 klíčů), 5. konzistence cache-bustingu (`CACHE_NAME`, `?v=`), 6. kolize metod na `window.PRS_App`, 7. bezpečnost tajných souborů v Gitu, 8. kompilace C# backendu přes `csc.exe`.
-2. `tools/tests/test-i18n.js` – parita klíčů `cs`/`en` (2 544 klíčů), pravidla + glosář, všechny `data-i18n*` v `index.html`, dynamické `.prs-lang-select` prvky a ratchet limit pro přímé větvení `getLanguage() ===`.
+1. `tools/predeploy-check.js` – 8 kontrol: 1. zákaz `.exe` souborů, 2. validace JS syntaxe (`node -c`), 3. kontrola kódování UTF-8, 4. kontrola i18n slovníků (`cs`, `en`, parita 2 559 klíčů), 5. konzistence cache-bustingu (`CACHE_NAME`, `?v=`), 6. kolize metod na `window.PRS_App`, 7. bezpečnost tajných souborů v Gitu, 8. kompilace C# backendu přes `csc.exe`.
+2. `tools/tests/test-i18n.js` – parita klíčů `cs`/`en` (2 559 klíčů), pravidla + glosář, všechny `data-i18n*` v `index.html`, dynamické `.prs-lang-select` prvky a ratchet limit pro přímé větvení `getLanguage() ===`.
 3. `tools/tests/test-board-generator.js` *(spouštěn i přes `node test_board_validation.js`)* – validace 3 vestavěných map (`classic_96`, `dragon_4598`, `compact_48`) a 8 procedurálních desek (`dual`, `delta`, `single`, `none`): hranice mapy, 100% BFS dosažitelnost ze `START`, minimální rozestup uzlů, řeky/mosty, `.webp` landmarky a katalog dekorací.
 4. `tools/tests/test-engine-simulation.js` – 10 bezhlavých AI-vs-AI herních simulací v izolovaném VM (`classic`, `slayer`, `tycoon`, `sprint` s boty `Bot_Balanced`, `Bot_Aggressive`, `Bot_Breeder`, `Bot_Noble`), kontrola herních invariantů a test determinismu seedovaného PRNG.
 5. `tools/tests/test-api-contract.js` – lokální kompilace C# backendu přes `tools/test-backend-compile.js`, kontrola shody všech volání `PRS_Api.*` vůči routám `api.ashx`, ověření `web.config` a `api-auth.ashx`; v `--live` režimu navazuje na `tools/test-api-security.js` a `tools/test-etapa4c.js --live`.

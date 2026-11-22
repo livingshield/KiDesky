@@ -426,7 +426,7 @@
             for (var s = 0; s < selects.length; s++) {
                 var sel = selects[s];
                 if (!sel || sel.tagName !== 'SELECT') continue;
-                var isCompact = (sel.id === 'mobile-dock-lang-select');
+                var isCompact = (sel.id === 'mobile-dock-lang-select' || sel.id === 'global-lang-select');
                 var needsRebuild = (sel.options.length !== avail.length);
                 if (!needsRebuild) {
                     for (var o = 0; o < avail.length; o++) {

@@ -31,11 +31,28 @@ window.PRS_I18N.cs = {
     "ui": {
         "brand_subtitle": "Princeznino srdce",
         "tabs": {
-            "welcome": "🏰 Úvod & Videa",
-            "lobby": "⚔️ Rytířská herna",
-            "board": "🎲 Hrací stůl",
-            "rules": "📜 Pravidla & Katalog",
-            "admin": "🛡️ Administrace"
+            "welcome": "🏰 Úvod",
+            "welcome_title": "Úvod & Videa",
+            "lobby": "⚔️ Herna",
+            "lobby_title": "Rytířská herna",
+            "board": "🎲 Stůl",
+            "board_title": "Hrací stůl",
+            "rules": "📜 Pravidla",
+            "rules_title": "Pravidla & Katalog",
+            "admin": "🛡️ Admin",
+            "admin_title": "Administrace"
+        },
+        "profile_menu": {
+            "wardrobe": "Královská šatna",
+            "account": "Profil & Správa účtu",
+            "role_admin": "Admin",
+            "role_player": "Hráč",
+            "role_guest": "Host",
+            "guest_unconfirmed": "Host (Čeká na e-mail ✉️)",
+            "toggle_title": "Otevřít nabídku účtu a rychlé akce",
+            "guest_sub": "Volný režim bez přihlášení",
+            "guest_unconfirmed_sub": "Účet čeká na potvrzení e-mailu",
+            "login_register": "Přihlásit se / Registrovat"
         },
         "theme": {
             "title": "Vyber živel & barevný design království",

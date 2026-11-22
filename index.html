@@ -62,13 +62,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611221325">
+    <link rel="stylesheet" href="css/main.css?v=202611221445">
 
-    <link rel="stylesheet" href="css/board.css?v=202611221325">
+    <link rel="stylesheet" href="css/board.css?v=202611221445">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611221325">
+    <link rel="stylesheet" href="css/modals.css?v=202611221445">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611221325">
+    <link rel="stylesheet" href="css/mobile.css?v=202611221445">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -116,60 +116,102 @@
     <header class="topbar">
 
         <div class="brand-wrap">
-            <div class="brand-title" style="cursor:pointer;" onclick="PRS_App.switchTab('welcome')" title="Návrat na úvodní stránku a videa" data-i18n-title="ui.brand_home_title">🎲 KiDesky: <span data-i18n="ui.brand_subtitle">Princeznino srdce</span></div>
+            <button type="button" class="brand-title" onclick="PRS_App.switchTab('welcome')" title="Návrat na úvodní stránku a videa" data-i18n-title="ui.brand_home_title">
+                <span class="brand-emblem" aria-hidden="true">🎲</span>
+                <span class="brand-text">
+                    <span class="brand-eyebrow">KiDesky</span>
+                    <span class="brand-name" data-i18n="ui.brand_subtitle">Princeznino srdce</span>
+                </span>
+            </button>
         </div>
 
-        <nav class="nav-tabs">
-            <button id="nav-btn-welcome" class="nav-tab-btn active" onclick="PRS_App.switchTab('welcome')" data-i18n="ui.tabs.welcome">🏰 Úvod &amp; Videa</button>
-            <button id="nav-btn-lobby" class="nav-tab-btn" onclick="PRS_App.switchTab('lobby')" data-i18n="ui.tabs.lobby">⚔️ Rytířská herna</button>
-            <button id="nav-btn-board" class="nav-tab-btn" onclick="PRS_App.switchTab('board')" style="display:none;" data-i18n="ui.tabs.board">🎲 Hrací stůl</button>
-            <button id="nav-btn-rules" class="nav-tab-btn" onclick="PRS_App.switchTab('rules')" data-i18n="ui.tabs.rules">📜 Pravidla &amp; Katalog</button>
-            <button id="nav-btn-admin" class="nav-tab-btn" onclick="PRS_App.switchTab('admin')" style="display:none; color:var(--gold-light); border-color:var(--gold);" data-i18n="ui.tabs.admin">🛡️ Administrace</button>
+        <nav class="nav-tabs" aria-label="Hlavní navigace">
+            <button id="nav-btn-welcome" class="nav-tab-btn active" onclick="PRS_App.switchTab('welcome')" data-i18n="ui.tabs.welcome" data-i18n-title="ui.tabs.welcome_title" title="Úvod &amp; Videa">🏰 Úvod</button>
+            <button id="nav-btn-lobby" class="nav-tab-btn" onclick="PRS_App.switchTab('lobby')" data-i18n="ui.tabs.lobby" data-i18n-title="ui.tabs.lobby_title" title="Rytířská herna">⚔️ Herna</button>
+            <button id="nav-btn-board" class="nav-tab-btn" onclick="PRS_App.switchTab('board')" style="display:none;" data-i18n="ui.tabs.board" data-i18n-title="ui.tabs.board_title" title="Hrací stůl">🎲 Stůl</button>
+            <button id="nav-btn-rules" class="nav-tab-btn" onclick="PRS_App.switchTab('rules')" data-i18n="ui.tabs.rules" data-i18n-title="ui.tabs.rules_title" title="Pravidla &amp; Katalog">📜 Pravidla</button>
+            <button id="nav-btn-admin" class="nav-tab-btn nav-tab-admin" onclick="PRS_App.switchTab('admin')" style="display:none;" data-i18n="ui.tabs.admin" data-i18n-title="ui.tabs.admin_title" title="Administrace">🛡️ Admin</button>
         </nav>
 
         <div class="user-bar">
-            <!-- Barevný design & živel království (kompaktní výběr pro všechny obrazovky) -->
-            <div class="topbar-theme-wrap" title="Vyber živel & barevný design království" data-i18n-title="ui.theme.title">
-                <select id="global-element-theme-select" class="topbar-theme-select" onchange="PRS_App.setElementTheme(this.value, true)" aria-label="Barevný design království" data-i18n-aria="ui.theme.aria">
-                    <option value="light" data-i18n="ui.theme.light">👑 Zlato</option>
-                    <option value="fire" data-i18n="ui.theme.fire">🔥 Oheň</option>
-                    <option value="water" data-i18n="ui.theme.water">💧 Voda</option>
-                    <option value="earth" data-i18n="ui.theme.earth">🌿 Země</option>
-                    <option value="air" data-i18n="ui.theme.air">⚡ Bouře</option>
-                </select>
+            <div class="topbar-tools">
+                <!-- Rychlý tahák do kapsy -->
+                <button id="topbar-cheatsheet-btn" type="button" class="topbar-icon-btn" onclick="PRS_App.openCheatSheetModal()" title="Rychlý tahák do kapsy (A4 tisk &amp; přehled pravidel)" data-i18n-title="ui.buttons.cheatsheet_title" data-i18n-aria="ui.buttons.cheatsheet_title" aria-label="Rychlý tahák do kapsy">📜</button>
+
+                <!-- Barevný design & živel království -->
+                <div class="topbar-theme-wrap" title="Vyber živel & barevný design království" data-i18n-title="ui.theme.title">
+                    <select id="global-element-theme-select" class="topbar-theme-select" onchange="PRS_App.setElementTheme(this.value, true)" aria-label="Barevný design království" data-i18n-aria="ui.theme.aria">
+                        <option value="light" data-i18n="ui.theme.light">👑 Zlato</option>
+                        <option value="fire" data-i18n="ui.theme.fire">🔥 Oheň</option>
+                        <option value="water" data-i18n="ui.theme.water">💧 Voda</option>
+                        <option value="earth" data-i18n="ui.theme.earth">🌿 Země</option>
+                        <option value="air" data-i18n="ui.theme.air">⚡ Bouře</option>
+                    </select>
+                </div>
+
+                <!-- Výběr jazyka hry (kompaktní CZ / EN / další) -->
+                <div class="topbar-lang-wrap" title="Jazyk hry / Game language" data-i18n-title="ui.theme.lang_select_title">
+                    <select id="global-lang-select" class="topbar-lang-select prs-lang-select" onchange="PRS_I18n.setLanguage(this.value)" aria-label="Jazyk hry / Game Language" data-i18n-aria="ui.theme.lang_select_title">
+                        <option value="cs">🇨🇿 CZ</option>
+                        <option value="en">🇬🇧 EN</option>
+                    </select>
+                </div>
+
+                <!-- Nastavení -->
+                <button id="topbar-settings-btn" type="button" class="topbar-icon-btn" onclick="PRS_App.openSettingsModal()" title="Nastavení hry, zvuku a grafiky" data-i18n-title="ui.buttons.settings_title" data-i18n-aria="ui.buttons.settings_title" aria-label="Nastavení hry, zvuku a grafiky">⚙️</button>
             </div>
 
-            <!-- Tlačítko figurek/kreditů (pouze pro přihlášené) -->
-            <button id="topbar-credits-btn" type="button" class="btn-secondary" onclick="PRS_App.openPawnShopModal(0)" title="Královská šatna a sbírka figurek" data-i18n-title="ui.buttons.credits" style="display:none;">💎 <span id="top-user-credits" style="color:#38bdf8;">250</span></button>
+            <span class="topbar-divider" aria-hidden="true"></span>
 
-            <!-- Tlačítko PWA instalace na mobil / PC -->
-            <button id="topbar-pwa-install-btn" type="button" class="btn-gold-lg" onclick="PRS_App.promptPwaInstall()" title="Nainstalovat hru na plochu mobilu nebo počítače" data-i18n-title="ui.buttons.install_title" style="display:none;">📲 <span class="hide-on-mobile" data-i18n="ui.buttons.install">Instalovat</span></button>
+            <div class="topbar-account-wrap">
+                <!-- Rychlé přihlášení (pouze pro Hosta) -->
+                <button id="topbar-login-btn" type="button" class="btn-gold-lg topbar-login-compact" onclick="PRS_App.openAuthModal()" data-i18n="ui.buttons.login">🔑 Přihlásit se</button>
 
-            <!-- Tlačítko Síň slávy & Úspěchy -->
-            <button id="topbar-achievements-btn" type="button" class="btn-secondary" onclick="PRS_App.openAchievementsModal()" title="Rytířská síň slávy a královské odznaky" data-i18n-title="ui.buttons.hall_of_fame_title">🏆 <span class="hide-on-mobile" data-i18n="ui.buttons.hall_of_fame">Síň slávy</span></button>
+                <!-- Profil & rychlé menu -->
+                <button type="button" id="user-status-badge" class="user-pill topbar-profile-trigger" onclick="PRS_App.toggleProfileMenu(event)" aria-haspopup="menu" aria-expanded="false" title="Otevřít nabídku účtu a rychlé akce" data-i18n-title="ui.profile_menu.toggle_title">
+                    <span class="profile-trigger-icon" aria-hidden="true">👤</span>
+                    <span class="profile-trigger-name" data-i18n="ui.profile_menu.role_guest">Host</span>
+                    <span class="profile-trigger-caret" aria-hidden="true">▾</span>
+                </button>
 
-            <!-- Tlačítko Tahák do kapsy -->
-            <button id="topbar-cheatsheet-btn" type="button" class="btn-secondary" onclick="PRS_App.openCheatSheetModal()" title="Rychlý tahák do kapsy (A4 tisk &amp; přehled pravidel)" data-i18n-title="ui.buttons.cheatsheet_title">📜 <span class="hide-on-mobile" data-i18n="ui.buttons.cheatsheet">Tahák</span></button>
+                <!-- Rozbalovací profilové menu -->
+                <div id="topbar-profile-menu" class="topbar-profile-menu" role="menu" style="display:none;">
+                    <div class="topbar-profile-menu-header">
+                        <div id="topbar-profile-menu-name" class="topbar-profile-menu-name">👤 Host</div>
+                        <div id="topbar-profile-menu-sub" class="topbar-profile-menu-sub" data-i18n="ui.profile_menu.guest_sub">Volný režim bez přihlášení</div>
+                    </div>
 
-            <!-- Profil rytíře -->
-            <div id="user-status-badge" class="user-pill" onclick="PRS_App.openAuthModal()" title="Kliknutím zobrazíš účet a rytířský profil" data-i18n-title="ui.buttons.guest_title">👤 Host</div>
+                    <button id="topbar-credits-btn" type="button" class="topbar-menu-item" role="menuitem" style="display:none;" onclick="PRS_App.closeProfileMenu(); PRS_App.openPawnShopModal(0);" title="Královská šatna a sbírka figurek" data-i18n-title="ui.buttons.credits">
+                        <span class="topbar-menu-icon" aria-hidden="true">🎭</span>
+                        <span class="topbar-menu-label" data-i18n="ui.profile_menu.wardrobe">Královská šatna</span>
+                        <span class="topbar-menu-badge">💎 <span id="topbar-menu-credits-val">0</span></span>
+                    </button>
 
-            <!-- Tlačítko Přihlásit se (pro Hosta) -->
-            <button id="topbar-login-btn" type="button" class="btn-gold-lg" onclick="PRS_App.openAuthModal()" data-i18n="ui.buttons.login">🔑 Přihlásit se</button>
+                    <button id="topbar-achievements-btn" type="button" class="topbar-menu-item" role="menuitem" onclick="PRS_App.closeProfileMenu(); PRS_App.openAchievementsModal();" title="Rytířská síň slávy a královské odznaky" data-i18n-title="ui.buttons.hall_of_fame_title">
+                        <span class="topbar-menu-icon" aria-hidden="true">🏆</span>
+                        <span class="topbar-menu-label" data-i18n="ui.buttons.hall_of_fame">Síň slávy</span>
+                    </button>
 
-            <!-- Tlačítko Odhlásit se (pro přihlášeného) -->
-            <button id="topbar-logout-btn" type="button" class="btn-secondary" onclick="PRS_App.logoutUser()" title="Odhlásit se a přejít do režimu Hosta" data-i18n-title="ui.buttons.logout_title" style="display:none;" data-i18n="ui.buttons.logout">🚪 Odhlásit</button>
+                    <button id="topbar-account-settings-btn" type="button" class="topbar-menu-item" role="menuitem" style="display:none;" onclick="PRS_App.closeProfileMenu(); PRS_App.openAuthModal();">
+                        <span class="topbar-menu-icon" aria-hidden="true">👤</span>
+                        <span class="topbar-menu-label" data-i18n="ui.profile_menu.account">Profil &amp; Správa účtu</span>
+                    </button>
 
-            <!-- Výběr jazyka hry (CZ / EN / další) -->
-            <div class="topbar-lang-wrap" title="Jazyk hry / Game language" data-i18n-title="ui.theme.lang_select_title">
-                <select id="global-lang-select" class="topbar-lang-select prs-lang-select" onchange="PRS_I18n.setLanguage(this.value)" aria-label="Jazyk hry / Game Language" data-i18n-aria="ui.theme.lang_select_title">
-                    <option value="cs">🇨🇿 Čeština</option>
-                    <option value="en">🇬🇧 English</option>
-                </select>
+                    <button id="topbar-guest-login-item" type="button" class="topbar-menu-item" role="menuitem" onclick="PRS_App.closeProfileMenu(); PRS_App.openAuthModal();">
+                        <span class="topbar-menu-icon" aria-hidden="true">🔑</span>
+                        <span class="topbar-menu-label" data-i18n="ui.profile_menu.login_register">Přihlásit se / Registrovat</span>
+                    </button>
+
+                    <button id="topbar-pwa-install-btn" type="button" class="topbar-menu-item topbar-menu-item-install" role="menuitem" style="display:none;" onclick="PRS_App.closeProfileMenu(); PRS_App.promptPwaInstall();" title="Nainstalovat hru na plochu mobilu nebo počítače" data-i18n-title="ui.buttons.install_title">
+                        <span class="topbar-menu-icon" aria-hidden="true">📲</span>
+                        <span class="topbar-menu-label" data-i18n="ui.buttons.install">Instalovat</span>
+                    </button>
+
+                    <div id="topbar-menu-logout-sep" class="topbar-menu-sep" style="display:none;"></div>
+
+                    <button id="topbar-logout-btn" type="button" class="topbar-menu-item topbar-menu-item-danger" role="menuitem" style="display:none;" onclick="PRS_App.closeProfileMenu(); PRS_App.logoutUser();" title="Odhlásit se a přejít do režimu Hosta" data-i18n-title="ui.buttons.logout_title" data-i18n="ui.buttons.logout">🚪 Odhlásit</button>
+                </div>
             </div>
-
-            <!-- Nastavení -->
-            <button id="topbar-settings-btn" class="btn-secondary" onclick="PRS_App.openSettingsModal()" title="Nastavení hry, zvuku a grafiky" data-i18n-title="ui.buttons.settings_title">⚙️</button>
         </div>
 
     </header>
@@ -3003,48 +3045,48 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/languages.js?v=202611221325" defer></script>
-    <script src="js/core/module-loader.js?v=202611221325" defer></script>
-    <script src="js/app-i18n.js?v=202611221325" defer></script>
-    <script src="js/game-data.js?v=202611221325" defer></script>
-    <script src="js/boards/boards-decor-catalog.js?v=202611221325" defer></script>
-    <script src="js/boards/boards-geometry.js?v=202611221325" defer></script>
-    <script src="js/boards/boards-generator.js?v=202611221325" defer></script>
-    <script src="js/boards/boards-builder.js?v=202611221325" defer></script>
-    <script src="js/boards/boards-presets.js?v=202611221325" defer></script>
-    <script src="js/engine/engine-state.js?v=202611221325" defer></script>
-    <script src="js/engine/engine-movement.js?v=202611221325" defer></script>
-    <script src="js/engine/engine-economy.js?v=202611221325" defer></script>
-    <script src="js/engine/engine-actions.js?v=202611221325" defer></script>
-    <script src="js/game-combat-ai.js?v=202611221325" defer></script>
-    <script src="js/app-audio.js?v=202611221325" defer></script>
-    <script src="js/app-dialog.js?v=202611221325" defer></script>
-    <script src="js/app-api.js?v=202611221325" defer></script>
-    <script src="js/app-modal-manager.js?v=202611221325" defer></script>
-    <script src="js/app.js?v=202611221325" defer></script>
-    <script src="js/app/app-music-ui.js?v=202611221325" defer></script>
-    <script src="js/app/app-landing.js?v=202611221325" defer></script>
-    <script src="js/app/app-profile-cosmetics.js?v=202611221325" defer></script>
-    <script src="js/app/app-lobby-session.js?v=202611221325" defer></script>
-    <script src="js/app/app-map-studio.js?v=202611221325" defer></script>
-    <script src="js/board/board-camera.js?v=202611221325" defer></script>
-    <script src="js/board/board-rivers.js?v=202611221325" defer></script>
-    <script src="js/board/board-static-svg.js?v=202611221325" defer></script>
-    <script src="js/board/board-tokens.js?v=202611221325" defer></script>
-    <script src="js/board/board-ambient.js?v=202611221325" defer></script>
-    <script src="js/hud/hud-mobile-dock.js?v=202611221325" defer></script>
-    <script src="js/hud/hud-inspector.js?v=202611221325" defer></script>
-    <script src="js/hud/hud-advisor.js?v=202611221325" defer></script>
-    <script src="js/hud/hud-action-panel.js?v=202611221325" defer></script>
-    <script src="js/hud/hud-turn-actions.js?v=202611221325" defer></script>
-    <script src="js/modals/modal-victory-diploma.js?v=202611221325" defer></script>
-    <script src="js/modals/modal-armory.js?v=202611221325" defer></script>
-    <script src="js/modals/modal-combat.js?v=202611221325" defer></script>
-    <script src="js/modals/modal-festival-chance.js?v=202611221325" defer></script>
-    <script src="js/modals/modal-cheatsheet.js?v=202611221325" defer></script>
-    <script src="js/app-online.js?v=202611221325" defer></script>
-    <script src="js/app-saves.js?v=202611221325" defer></script>
-    <script src="js/app-musicwidget.js?v=202611221325" defer></script>
+    <script src="js/i18n/languages.js?v=202611221445" defer></script>
+    <script src="js/core/module-loader.js?v=202611221445" defer></script>
+    <script src="js/app-i18n.js?v=202611221445" defer></script>
+    <script src="js/game-data.js?v=202611221445" defer></script>
+    <script src="js/boards/boards-decor-catalog.js?v=202611221445" defer></script>
+    <script src="js/boards/boards-geometry.js?v=202611221445" defer></script>
+    <script src="js/boards/boards-generator.js?v=202611221445" defer></script>
+    <script src="js/boards/boards-builder.js?v=202611221445" defer></script>
+    <script src="js/boards/boards-presets.js?v=202611221445" defer></script>
+    <script src="js/engine/engine-state.js?v=202611221445" defer></script>
+    <script src="js/engine/engine-movement.js?v=202611221445" defer></script>
+    <script src="js/engine/engine-economy.js?v=202611221445" defer></script>
+    <script src="js/engine/engine-actions.js?v=202611221445" defer></script>
+    <script src="js/game-combat-ai.js?v=202611221445" defer></script>
+    <script src="js/app-audio.js?v=202611221445" defer></script>
+    <script src="js/app-dialog.js?v=202611221445" defer></script>
+    <script src="js/app-api.js?v=202611221445" defer></script>
+    <script src="js/app-modal-manager.js?v=202611221445" defer></script>
+    <script src="js/app.js?v=202611221445" defer></script>
+    <script src="js/app/app-music-ui.js?v=202611221445" defer></script>
+    <script src="js/app/app-landing.js?v=202611221445" defer></script>
+    <script src="js/app/app-profile-cosmetics.js?v=202611221445" defer></script>
+    <script src="js/app/app-lobby-session.js?v=202611221445" defer></script>
+    <script src="js/app/app-map-studio.js?v=202611221445" defer></script>
+    <script src="js/board/board-camera.js?v=202611221445" defer></script>
+    <script src="js/board/board-rivers.js?v=202611221445" defer></script>
+    <script src="js/board/board-static-svg.js?v=202611221445" defer></script>
+    <script src="js/board/board-tokens.js?v=202611221445" defer></script>
+    <script src="js/board/board-ambient.js?v=202611221445" defer></script>
+    <script src="js/hud/hud-mobile-dock.js?v=202611221445" defer></script>
+    <script src="js/hud/hud-inspector.js?v=202611221445" defer></script>
+    <script src="js/hud/hud-advisor.js?v=202611221445" defer></script>
+    <script src="js/hud/hud-action-panel.js?v=202611221445" defer></script>
+    <script src="js/hud/hud-turn-actions.js?v=202611221445" defer></script>
+    <script src="js/modals/modal-victory-diploma.js?v=202611221445" defer></script>
+    <script src="js/modals/modal-armory.js?v=202611221445" defer></script>
+    <script src="js/modals/modal-combat.js?v=202611221445" defer></script>
+    <script src="js/modals/modal-festival-chance.js?v=202611221445" defer></script>
+    <script src="js/modals/modal-cheatsheet.js?v=202611221445" defer></script>
+    <script src="js/app-online.js?v=202611221445" defer></script>
+    <script src="js/app-saves.js?v=202611221445" defer></script>
+    <script src="js/app-musicwidget.js?v=202611221445" defer></script>
     <script>
         (function () {
             function bootApp() {

@@ -1073,6 +1073,7 @@ window.PRS_App = {
 
         this._safeCall("renderAnnouncement", this.renderAnnouncement);
         this._safeCall("renderCurrentUserCard", this.renderCurrentUserCard);
+        this._safeCall("updateUserUI", this.updateUserUI);
         this._safeCall("refreshMapStudioSelectOptions", this.refreshMapStudioSelectOptions);
         this._safeCall("syncMapStudioInputsFromRecipe", this.syncMapStudioInputsFromRecipe);
         this._safeCall("updateMapStudioPreview", this.updateMapStudioPreview);
@@ -1203,6 +1204,8 @@ window.PRS_App = {
     victoryModalShown: false,
 
     switchTab: function (tabId) {
+
+        if (typeof this.closeProfileMenu === "function") this.closeProfileMenu();
 
         if (tabId === "balance") {
             this.switchTab("admin");
