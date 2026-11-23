@@ -125,9 +125,6 @@ window.PRS_I18N.en = {
             "lang_section_desc": "Select the language for UI, dialogues, and texts:"
         },
         "common": {
-        "close_notice": "Close notice",
-        "realm": "Realm of KiDesky",
-        "hearts_count": "hearts",
             "gold": "g.",
             "gold_short": "g.",
             "hearts": "Hearts",
@@ -1824,7 +1821,11 @@ window.PRS_I18N.en = {
         "human_tag": "(Player)",
         "stat_strength": "⚔️ Combat Strength",
         "stat_riding": "🏇 Riding Skill",
-        "stat_dance": "💃 Court Dance"
+        "stat_dance": "💃 Court Dance",
+        "close_notice": "Close notice",
+        "realm": "Realm of KiDesky",
+        "hearts_count": "hearts",
+        "saved": "SAVED"
     },
     "animals": {
         "horse": "Horse",

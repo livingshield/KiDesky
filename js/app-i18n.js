@@ -310,13 +310,29 @@
         },
 
         /**
+         * Získá BCP 47 kód lokalizace pro aktivní jazyk
+         */
+        getLocale: function () {
+            var locMap = { 'cs': 'cs-CZ', 'sk': 'sk-SK', 'pl': 'pl-PL', 'en': 'en-US' };
+            return locMap[this._lang] || 'cs-CZ';
+        },
+
+        /**
          * Zformátuje číslo podle aktivního jazyka (oddělovače tisíců)
          * @param {number} num
          */
         formatNumber: function (num) {
             if (typeof num !== 'number' || isNaN(num)) return num;
-            var loc = (this._lang === 'en') ? 'en-US' : (this._lang === 'cs' ? 'cs-CZ' : undefined);
-            return num.toLocaleString(loc);
+            return num.toLocaleString(this.getLocale());
+        },
+
+        /**
+         * Zformátuje datum podle aktivního jazyka
+         * @param {Date|string|number} date
+         */
+        formatDate: function (date) {
+            var d = date ? (date instanceof Date ? date : new Date(date)) : new Date();
+            return d.toLocaleDateString(this.getLocale());
         },
 
         /**
@@ -324,7 +340,7 @@
          * @param {number} amount
          */
         formatGold: function (amount) {
-            var curr = this.t('common.gold_symbol', null, (this._lang === 'en' ? 'g.' : 'zl.'));
+            var curr = this.t('common.gold_symbol', null, (this._lang === 'en' ? 'g.' : (this._lang === 'pl' ? 'zł.' : 'zl.')));
             return this.formatNumber(amount) + ' ' + curr;
         },
 
@@ -347,15 +363,23 @@
         /**
          * Podpora pro množná čísla
          * @param {number} count
-         * @param {Object} forms - pro CS: {one, few, many}, pro EN: {one, other}
+         * @param {Object} forms - pro CS/SK/PL: {one, few, many}, pro EN: {one, other}
          */
         plural: function (count, forms) {
             if (!forms) return '';
             var num = Math.abs(Number(count) || 0);
 
-            if (this._lang === 'cs') {
+            if (this._lang === 'cs' || this._lang === 'sk') {
                 if (num === 1) return forms.one || forms.other || '';
                 if (num >= 2 && num <= 4) return forms.few || forms.other || forms.many || '';
+                return forms.many || forms.other || '';
+            } else if (this._lang === 'pl') {
+                if (num === 1) return forms.one || forms.other || '';
+                var mod10 = num % 10;
+                var mod100 = num % 100;
+                if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+                    return forms.few || forms.other || forms.many || '';
+                }
                 return forms.many || forms.other || '';
             } else {
                 if (num === 1) return forms.one || '';

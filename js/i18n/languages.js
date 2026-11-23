@@ -22,6 +22,22 @@
             short: 'EN',
             file: 'js/i18n/en.js',
             rulesFile: 'js/i18n/rules-en.js'
+        },
+        {
+            code: 'sk',
+            name: 'Slovenčina',
+            flag: '🇸🇰',
+            short: 'SK',
+            file: 'js/i18n/sk.js',
+            rulesFile: 'js/i18n/rules-sk.js'
+        },
+        {
+            code: 'pl',
+            name: 'Polski',
+            flag: '🇵🇱',
+            short: 'PL',
+            file: 'js/i18n/pl.js',
+            rulesFile: 'js/i18n/rules-pl.js'
         }
     ];
 })(window);

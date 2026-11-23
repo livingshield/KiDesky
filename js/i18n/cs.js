@@ -125,9 +125,6 @@ window.PRS_I18N.cs = {
             "lang_section_desc": "Vyber jazyk uživatelského rozhraní, dialogů a textů:"
         },
         "common": {
-        "close_notice": "Zavřít oznámení",
-        "realm": "Království",
-        "hearts_count": "srdcí",
             "gold": "zl.",
             "gold_short": "zl.",
             "hearts": "Srdcí",
@@ -1824,7 +1821,11 @@ window.PRS_I18N.cs = {
         "human_tag": "(Hráč)",
         "stat_strength": "⚔️ Bojová síla",
         "stat_riding": "🏇 Jezdecké umění",
-        "stat_dance": "💃 Dvorní tanec"
+        "stat_dance": "💃 Dvorní tanec",
+        "close_notice": "Zavřít oznámení",
+        "realm": "Království",
+        "hearts_count": "srdcí",
+        "saved": "ULOŽENO"
     },
     "animals": {
         "horse": "Kůň",
