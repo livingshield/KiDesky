@@ -101,9 +101,8 @@
         var winner = this.state.players[winIdx];
 
         var subEl = document.getElementById("victory-winner-subtitle");
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var tModal = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
-        var currGold = isEn ? "g." : "zl.";
+        var currGold = tModal("common.gold", null, "zl.");
         var titleEl = document.querySelector("#victory-modal .victory-title");
         var crownEl = document.querySelector("#victory-modal .victory-crown-icon");
 
@@ -395,10 +394,9 @@
         var self = this;
         var fb = document.getElementById("victory-cloud-feedback");
         var btn = document.getElementById("btn-save-hall-of-fame");
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var tModal = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
-        if (fb) fb.textContent = tModal("modals.endgame.hall_saving", null, isEn ? "Recording victory in Hall of Fame on database..." : "Zapisuji vítězství do Síně slávy na MSSQL databázi...");
+        if (fb) fb.textContent = tModal("modals.endgame.hall_saving", null, "Zapisuji vítězství do Síně slávy na MSSQL databázi...");
         if (btn) btn.disabled = true;
 
         var winIdx = (this.state.winnerIndex !== null) ? this.state.winnerIndex : 0;
@@ -407,7 +405,7 @@
         var payload = {
             sessionGuid: this.state.sessionGuid || ("v_" + Date.now()),
             roomCode: (this.state.sessionGuid ? this.state.sessionGuid.substring(0, 6).toUpperCase() : "VICTORY"),
-            title: (isEn ? "The Princess's Heart - Victory: " : "Princeznino srdce - Vítězství: ") + winner.name,
+            title: tModal("modals.victory.title_save_prefix", null, "Princeznino srdce - Vítězství: ") + winner.name,
             boardCode: this.state.board.code,
             status: "Finished",
             currentTurnPlayer: winIdx,
@@ -576,7 +574,6 @@
             ctx.fill();
         });
 
-        var isEnDip = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var tDip = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
         // 3. Záhlaví a koruna

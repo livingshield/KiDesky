@@ -49,14 +49,14 @@
         var winColor = winner ? winner.color : "var(--gold-light)";
         var winRound = this.state.originalWinRound || this.state.roundNumber || 1;
 
-        var isEnEndless = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+
         var tHudE = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
         var bannerTitle = tHudE("hud.endless_banner_title", {
             color: winColor,
             name: this.escapeHtml(winName),
             round: winRound
-        }, '🏆 ' + (isEnEndless ? 'GAME FINISHED • WINNER: ' : 'HRA JE DOHRÁNA • VÍTĚZ: ') + '<strong style="color:' + winColor + ';">' + this.escapeHtml(winName) + '</strong> (' + (isEnEndless ? 'Round ' + winRound : winRound + '. kolo') + ')!');
+        }, '🏆 ' + 'HRA JE DOHRÁNA • VÍTĚZ: ' + '<strong style="color:' + winColor + ';">' + this.escapeHtml(winName) + '</strong> (' + winRound + '. kolo' + ')!');
 
         var bannerDesc = tHudE("hud.endless_banner_desc", null, isEnEndless ?
             '♾️ <em>Endless free play mode: continue building, breeding, and completing remaining goals for the joy of the game.</em>' :
@@ -349,25 +349,25 @@
 
         // 1. Závod o Princeznino srdce (Race Track)
 
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tInspR = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         if (raceEl) {
 
             var scen = (this.state.config && this.state.config.scenario) ? this.state.config.scenario : "classic";
-            var raceHeaderTitle = isEn ? '🏆 RACE FOR THE PRINCESS\'S HEART' : '🏆 ZÁVOD O PRINCEZNINO SRDCE';
-            var raceGoalBadge = '<span style="color:#f472b6;">' + (isEn ? 'Goal: ' : 'Cíl: ') + target + ' ❤️</span>';
+            var raceHeaderTitle = tInspR("inspector.race_title_" + scen, null, "🏆 ZÁVOD O PRINCEZNINO SRDCE");
+            var raceGoalBadge = '<span style="color:#f472b6;">' + tInspR("inspector.race_goal_" + scen, { target: target }, "Cíl: " + target + " ❤️") + '</span>';
             var finishIcon = '👑🏰';
-            var finishTitle = isEn ? 'Royal Castle & Princess' : 'Královský hrad & Princezna';
+            var finishTitle = tInspR("inspector.race_finish_title_" + scen, null, "Královský hrad & Princezna");
 
             if (scen === "slayer") {
-                raceHeaderTitle = isEn ? '🐉 SCENARIO: DRAGON SLAYERS' : '🐉 SCÉNÁŘ: LOVCI DRAKŮ';
-                raceGoalBadge = '<span style="color:#ef4444; font-weight:800;">' + (isEn ? 'Goal: 2 dragons in Dragon Lairs (U3) 🐉' : 'Cíl: 2 draci v Dračích slujích (U3) 🐉') + '</span>';
+
+
                 finishIcon = '🐉👑';
-                finishTitle = isEn ? 'Slain Dragon & Royal Triumph' : 'Skolený drak & Královský triumf';
+
             } else if (scen === "tycoon") {
-                raceHeaderTitle = isEn ? '🏰 SCENARIO: FEUDAL TYCOON' : '🏰 SCÉNÁŘ: FEUDÁLNÍ MAGNÁT';
-                raceGoalBadge = '<span style="color:#f59e0b; font-weight:800;">' + (isEn ? 'Goal: 3 towns + 1 castle 🏰' : 'Cíl: 3 města + 1 hrad 🏰') + '</span>';
+
+
                 finishIcon = '🏰👑';
-                finishTitle = isEn ? 'Feudal Estates' : 'Feudální panství';
+
             }
 
             var raceHtml = '<div class="princess-race-header">' +
@@ -467,13 +467,13 @@
                     'title="Kliknutím zobrazíš podrobné statistiky a výbavu rytíře ' + this.escapeHtml(p.name) + '">';
                     var pDispName = (this.getPlayerDisplayName ? this.getPlayerDisplayName(p) : (window.PRS_App && window.PRS_App.getPlayerDisplayName ? window.PRS_App.getPlayerDisplayName(p) : p.name));
                     var botTag = (p.type !== "Human")
-                        ? '<small class="bot-tag">' + (isEn ? 'AI' : 'PC') + '</small>'
-                        : '<small class="bot-tag" style="background:#0284c7;color:#fff;">' + (isEn ? 'Player' : 'Hráč') + '</small>';
+                        ? '<small class="bot-tag">' + (window.PRS_I18n ? window.PRS_I18n.t("common.bot_tag", null, "(PC)").replace(/[()]/g, "") : "PC") + '</small>'
+                        : '<small class="bot-tag" style="background:#0284c7;color:#fff;">' + (window.PRS_I18n ? window.PRS_I18n.t("inspector.player_tag", null, "Hráč") : "Hráč") + '</small>';
                     var inspBadge = isInspected
-                        ? (' <span style="font-size:0.72rem; color:#fde047; font-weight:600; margin-left:4px;">👁️ ' + (isEn ? 'Inspected' : 'Zobrazen') + '</span>')
+                        ? (' <span style="font-size:0.72rem; color:#fde047; font-weight:600; margin-left:4px;">' + (window.PRS_I18n ? window.PRS_I18n.t("inspector.race_inspected", null, "👁️ Zobrazen") : "👁️ Zobrazen") + '</span>')
                         : '';
-                    var goldTxt = p.gold.toLocaleString(isEn ? "en-US" : "cs-CZ") + (isEn ? ' g.' : ' zl.');
-                    var breedTxt = (isEn ? '🐎 Breeding: +' : '🐎 Chov: +') + p.breedingHearts + ' ❤️';
+                    var goldTxt = window.PRS_I18n ? window.PRS_I18n.formatGold(p.gold) : (p.gold + " zl.");
+                    var breedTxt = window.PRS_I18n ? window.PRS_I18n.t("inspector.race_breeding", { hearts: p.breedingHearts }, "🐎 Chov: +" + p.breedingHearts + " ❤️") : ("🐎 Chov: +" + p.breedingHearts + " ❤️");
 
                     html += '<div class="hp-header">' +
 
@@ -881,7 +881,7 @@
         var logs = this.state.log || [];
 
         var recent = logs.slice(Math.max(0, logs.length - 8)).reverse();
-        var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
+        var tChron = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
         var html = [];
 
@@ -889,15 +889,15 @@
 
         html.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; padding-bottom:0.4rem; border-bottom:1px solid rgba(212,175,55,0.25);">');
 
-        html.push('    <div style="font-family:\'Cinzel\',serif; font-size:0.98rem; font-weight:700; color:#fef08a;">' + (isEn ? '📜 Royal Chronicle' : '📜 Královská kronika') + '</div>');
+        html.push('    <div style="font-family:\'Cinzel\',serif; font-size:0.98rem; font-weight:700; color:#fef08a;">' + tChron("inspector.chronicle_title", null, "📜 Královská kronika") + '</div>');
 
-        html.push('    <a href="#board-lower-dashboard" onclick="event.preventDefault(); document.getElementById(\\\'board-lower-dashboard\\\').scrollIntoView({behavior:\\\'smooth\\\'});" style="font-size:0.75rem; color:#38bdf8; text-decoration:none;">' + (isEn ? "All records ↓" : "Všechny záznamy ↓") + '</a>');
+        html.push('    <a href="#board-lower-dashboard" onclick="event.preventDefault(); document.getElementById(\\\'board-lower-dashboard\\\').scrollIntoView({behavior:\\\'smooth\\\'});" style="font-size:0.75rem; color:#38bdf8; text-decoration:none;">' + tChron("inspector.chronicle_all_link", null, "Všechny záznamy ↓") + '</a>');
 
         html.push('  </div>');
 
         if (recent.length === 0) {
 
-            html.push('  <div style="font-size:0.8rem; color:#94a3b8; font-style:italic; padding:0.6rem 0; text-align:center;">' + (isEn ? 'The chronicle is silent for now. Roll the dice to begin the adventure!' : 'Kronika zatím mlčí. Hodem kostkou začne dobrodružství!') + '</div>');
+            html.push('  <div style="font-size:0.8rem; color:#94a3b8; font-style:italic; padding:0.6rem 0; text-align:center;">' + tChron("inspector.chronicle_empty", null, "Kronika zatím mlčí. Hodem kostkou začne dobrodružství!") + '</div>');
 
         } else {
 
@@ -1015,7 +1015,7 @@
 
         if (!node) return;
 
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tNodeI = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
         var isMyCurrentStandingTile = (inspectId === p.nodeId);
 
@@ -1029,7 +1029,7 @@
 
         var price = window.PRS_GameEngine.getNodePrice(this.state, node);
 
-        var ownerText = isEn ? "Unclaimed (No owner)" : "Volné (Nikdo nevlastní)";
+        var ownerText = tNodeI("inspector.unclaimed_tile", null, "Volné (Nikdo nevlastní)");
 
         var ownerBadge = "";
 
@@ -1061,41 +1061,33 @@
 
         if (node.type === "START") {
 
-            description = isEn
-                ? "Royal Castle Start. Passing or landing grants royal pay of <strong>+3,000 g.</strong> and revives from death."
-                : "Královský hradní Start. Při průchodu nebo vstupu získáváš královský žold <strong>+3 000 zl.</strong> a zotavuješ se z úmrtí.";
+            description = tNodeI("inspector.start_desc", null, "Královský hradní Start. Při průchodu nebo vstupu získáváš královský žold <strong>+3 000 zl.</strong> a zotavuješ se z úmrtí.");
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(212,175,55,0.25);">' + (isEn ? "👑 Royal Gate" : "👑 Královská brána") + '</span>';
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(212,175,55,0.25);">' + tNodeI("inspector.royal_gate_pill", null, "👑 Královská brána") + '</span>';
 
         } else if (node.type === "ANIMAL") {
 
-            var animalName = (node.subtype === "horse" ? (isEn ? "Horse" : "Kůň") : (node.subtype === "dog" ? (isEn ? "Dog" : "Pes") : (isEn ? "Falcon" : "Sokol")));
+            var animalName = node.subtype === "horse" ? tNodeI("inspector.animal_horse", null, "Kůň") : (node.subtype === "dog" ? tNodeI("inspector.animal_dog", null, "Pes") : tNodeI("inspector.animal_falcon", null, "Sokol"));
 
             if (isOwnedByMe) {
 
-                description = isEn
-                    ? ("Your animal (" + animalName + " from set #" + node.setId + "). Rivals landing here pay rent of 20% / 40% / 80% of set value.")
-                    : ("Tvé zvíře (" + animalName + " ze sady č. " + node.setId + "). Pokud na něj vstoupí soupeř, zaplatí ti nájemné 20 % / 40 % / 80 % ceny sady.");
+                description = tNodeI("inspector.your_beast_desc", { animal: animalName, setId: node.setId }, "Tvé zvíře (" + animalName + " ze sady č. " + node.setId + "). Pokud na něj vstoupí soupeř, zaplatí ti nájemné 20 % / 40 % / 80 % ceny sady.");
 
-                statusPill = '<span class="standing-tile-badge" style="background:rgba(34,197,94,0.25); color:#86efac; border-color:#22c55e;">' + (isEn ? "🛡️ Your Beast" : "🛡️ Tvé zvíře") + '</span>';
+                statusPill = '<span class="standing-tile-badge" style="background:rgba(34,197,94,0.25); color:#86efac; border-color:#22c55e;">' + tNodeI("inspector.your_beast_pill", null, "🛡️ Tvé zvíře") + '</span>';
 
             } else if (isOwnedByOther) {
 
                 var rent = Math.round(price * 0.2);
+                var rentFmt = window.PRS_I18n ? window.PRS_I18n.formatGold(rent) : (rent + " zl.");
+                description = tNodeI("inspector.enemy_beast_desc", { owner: ownerBadge, rent: rentFmt }, "Zvíře vlastní " + ownerBadge + ". Za stoupnutí na toto pole platíš majiteli nájemné (cca <strong>" + rentFmt + "</strong>).");
 
-                description = isEn
-                    ? ("Animal owned by " + ownerBadge + ". Landing here incurs rent payment (approx. <strong>" + rent + " g.</strong>).")
-                    : ("Zvíře vlastní " + ownerBadge + ". Za stoupnutí na toto pole platíš majiteli nájemné (cca <strong>" + rent + " zl.</strong>).");
-
-                statusPill = '<span class="standing-tile-badge" style="background:rgba(239,68,68,0.25); color:#fca5a5; border-color:#ef4444;">' + (isEn ? "💸 Rival Property" : "💸 Cizí majetek") + '</span>';
+                statusPill = '<span class="standing-tile-badge" style="background:rgba(239,68,68,0.25); color:#fca5a5; border-color:#ef4444;">' + tNodeI("inspector.enemy_beast_pill", null, "💸 Cizí majetek") + '</span>';
 
             } else {
 
-                description = isEn
-                    ? ("Unclaimed animal (" + animalName + " from set #" + node.setId + "). Horse required for Race & Tournament; Dog and Falcon for Tournament and breeding bonus (up to +3 💖).")
-                    : ("Volné zvíře (" + animalName + " ze sady č. " + node.setId + "). Kůň je nutný pro Závod a Turnaj, Pes a Sokol pro Turnaj a chovatelskou prémii (až +3 💖).");
+                description = tNodeI("inspector.free_beast_desc", { animal: animalName, setId: node.setId }, "Volné zvíře (" + animalName + " ze sady č. " + node.setId + "). Kůň je nutný pro Závod a Turnaj, Pes a Sokol pro Turnaj a chovatelskou prémii (až +3 💖).");
 
-                statusPill = '<span class="standing-tile-badge" style="background:rgba(212,175,55,0.25);">' + (isEn ? ("🛒 Buy: " + price + " g.") : ("🛒 Koupě: " + price + " zl.")) + '</span>';
+                statusPill = '<span class="standing-tile-badge" style="background:rgba(212,175,55,0.25);">' + tNodeI("inspector.buy_pill", { price: (window.PRS_I18n ? window.PRS_I18n.formatGold(price) : (price + " zl.")) }, "🛒 Koupě: " + price + " zl.") + '</span>';
 
             }
 
@@ -1105,149 +1097,149 @@
 
             if (isOwnedByMe) {
 
-                description = isEn
-                    ? ("Your village at level <strong>" + lvl + "/3</strong> (" + "★".repeat(lvl) + "). Generates a steady tribute of <strong>" + (lvl === 1 ? '500' : (lvl === 2 ? '900' : '1,400')) + " g.</strong> upon Tax Collector visits.")
-                    : ("Tvá vesnice na úrovni <strong>" + lvl + "/3</strong> (" + "★".repeat(lvl) + "). Při návštěvě Výběrčího daní (VD) ti přináší stálý výnos <strong>" + (lvl === 1 ? '500' : (lvl === 2 ? '900' : '1 400')) + " zl.</strong>");
+                var yldStr = window.PRS_I18n ? window.PRS_I18n.formatGold(lvl === 1 ? 500 : (lvl === 2 ? 900 : 1400)) : ((lvl === 1 ? "500" : (lvl === 2 ? "900" : "1 400")) + " zl.");
+                description = window.PRS_I18n ? window.PRS_I18n.t("inspector.village_owned_desc", { lvl: lvl, stars: "★".repeat(lvl), yield: yldStr }, "Tvá vesnice") : "Tvá vesnice";
 
-                statusPill = '<span class="standing-tile-badge" style="background:rgba(34,197,94,0.25); color:#86efac; border-color:#22c55e;">' + (isEn ? "🏘️ Your Village" : "🏘️ Tvá vesnice") + '</span>';
+
+
+                statusPill = '<span class="standing-tile-badge" style="background:rgba(34,197,94,0.25); color:#86efac; border-color:#22c55e;">' + tNodeI("inspector.your_village_pill", null, "🏘️ Tvá vesnice") + '</span>';
 
             } else if (isOwnedByOther) {
 
-                description = isEn
-                    ? ("Village owned by " + ownerBadge + ". Generates gold for the owner whenever anyone lands on the Tax Collector.")
-                    : ("Vesnici vlastní " + ownerBadge + ". Přináší majiteli zlaťáky pokaždé, když kdokoliv stoupne na Výběrčího daní.");
+                description = window.PRS_I18n ? window.PRS_I18n.t("inspector.village_enemy_desc", { owner: ownerBadge, level: (node.level || 1), rent: ((node.level || 1) * 200 + 100) }, "Vesnice v majetku soupeře") : "Vesnice v majetku soupeře";
 
-                statusPill = '<span class="standing-tile-badge" style="background:rgba(239,68,68,0.25); color:#fca5a5; border-color:#ef4444;">' + (isEn ? "🏘️ Rival Estate" : "🏘️ Panství soupeře") + '</span>';
+
+
+                statusPill = '<span class="standing-tile-badge" style="background:rgba(239,68,68,0.25); color:#fca5a5; border-color:#ef4444;">' + tNodeI("inspector.enemy_village_pill", null, "🏘️ Panství soupeře") + '</span>';
 
             } else {
 
-                description = isEn
-                    ? ("Unclaimed village. Can be purchased for <strong>" + price + " g.</strong> and upgraded twice. Tax yield: 500 / 900 / 1,400 g.")
-                    : ("Volná vesnice. Lze ji koupit za <strong>" + price + " zl.</strong> a následně dvakrát povýšit. Daňový výnos: 500 / 900 / 1 400 zl.");
+                description = window.PRS_I18n ? window.PRS_I18n.t("inspector.village_free_desc", { price: price }, "Volná vesnice.") : "Volná vesnice.";
 
-                statusPill = '<span class="standing-tile-badge" style="background:rgba(212,175,55,0.25);">' + (isEn ? ("🛒 Buy: " + price + " g.") : ("🛒 Koupě: " + price + " zl.")) + '</span>';
+
+
+                statusPill = '<span class="standing-tile-badge" style="background:rgba(212,175,55,0.25);">' + (window.PRS_I18n ? window.PRS_I18n.t("inspector.buy_pill", { price: window.PRS_I18n.formatGold(price) }, "🛒 Koupě: " + price + " zl.") : ("🛒 Koupě: " + price + " zl.")) + '</span>';
 
             }
 
         } else if (node.type === "TOWN") {
 
-            description = isOwnedByMe
-                ? (isEn ? "Your fortified town. Generates a steady tax yield of <strong>1,200 g.</strong> upon Tax Collector visits." : "Tvé opevněné město. Přináší stálý daňový výnos <strong>1 200 zl.</strong> u Výběrčího daní.")
-                : (isEn ? ("Royal town. Price: " + price + " g., yield: 1,200 g. Owner: " + (ownerBadge || "None")) : ("Královské město. Cena: " + price + " zl., výnos: 1 200 zl. Vlastník: " + (ownerBadge || "Nikdo")));
+            description = isOwnedByMe ? tNodeI("inspector.town_standing_desc", null, "Tvé opevněné město.") : tNodeI("inspector.town_other_desc", { price: price, owner: (ownerBadge || "Nikdo") }, "Královské město.");
 
             statusPill = isOwnedByMe
-                ? ('<span class="standing-tile-badge" style="background:rgba(34,197,94,0.25); color:#86efac;">' + (isEn ? "🏙️ Your Town" : "🏙️ Tvé město") + '</span>')
-                : ('<span class="standing-tile-badge">' + (isEn ? ("🏙️ Town: " + price + " g.") : ("🏙️ Město: " + price + " zl.")) + '</span>');
+                ? ('<span class="standing-tile-badge" style="background:rgba(34,197,94,0.25); color:#86efac;">' + tNodeI("inspector.your_town_pill", null, "🏙️ Tvé město") + '</span>')
+                : ('<span class="standing-tile-badge">' + tNodeI("inspector.town_price_pill", { price: (window.PRS_I18n ? window.PRS_I18n.formatGold(price) : (price + " zl.")) }, "🏙️ Město: " + price + " zl.") + '</span>');
 
         } else if (node.type === "CASTLE") {
 
-            description = isEn
-                ? ("Mighty castle. Yields <strong>2,500 g.</strong> tax income and grants <strong>+1 Charisma</strong> to its owner. Owner: " + (ownerBadge || "None"))
-                : ("Pevný hrad. Přináší daňový výnos <strong>2 500 zl.</strong> a majiteli trvale propůjčuje <strong>+1 Charisma</strong>. Vlastník: " + (ownerBadge || "Nikdo"));
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.castle_desc", { owner: (ownerBadge || "Nikdo") }, "Pevný hrad.") : "Pevný hrad.";
+
+
 
             statusPill = isOwnedByMe
-                ? ('<span class="standing-tile-badge" style="background:rgba(34,197,94,0.25); color:#86efac;">' + (isEn ? "🏯 Your Castle" : "🏯 Tvůj hrad") + '</span>')
-                : ('<span class="standing-tile-badge">' + (isEn ? ("🏯 Castle: " + price + " g.") : ("🏯 Hrad: " + price + " zl.")) + '</span>');
+                ? ('<span class="standing-tile-badge" style="background:rgba(34,197,94,0.25); color:#86efac;">' + tNodeI("inspector.your_castle_pill", null, "🏯 Tvůj hrad") + '</span>')
+                : ('<span class="standing-tile-badge">' + tNodeI("inspector.castle_price_pill", { price: (window.PRS_I18n ? window.PRS_I18n.formatGold(price) : (price + " zl.")) }, "🏯 Hrad: " + price + " zl.") + '</span>');
 
         } else if (node.type === "MASTER") {
 
-            var skName = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(node.skill, true) : (isEn ? "Any virtue (Grandmaster)" : "Libovolná vlastnost (Velmistr)");
+            var skName = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(node.skill, true) : tNodeI("inspector.any_virtue", null, "Libovolná vlastnost (Velmistr)");
 
-            description = isEn
-                ? ("Master's Guild (" + skName + "). Rolling <strong>4, 5, or 6</strong> admits you to apprentice training for the next level (1,000–5,000 g.).")
-                : ("Sídlo Mistra (" + skName + "). Pokud hodíš <strong>4, 5 nebo 6</strong>, mistr tě přijme do výcviku na další úroveň (1 000–5 000 zl.).");
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.master_guild_desc", { skill: skName }, "Sídlo Mistra (" + skName + ").") : "Sídlo Mistra (" + skName + ").";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(147,51,234,0.25); color:#d8b4fe; border-color:#a855f7;">' + (isEn ? "🎓 Training (roll 4–6)" : "🎓 Výcvik (hod 4–6)") + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(147,51,234,0.25); color:#d8b4fe; border-color:#a855f7;">' + tNodeI("inspector.training_roll", null, "🎓 Výcvik (hod 4–6)") + '</span>';
 
         } else if (node.type === "MERCHANT") {
 
-            description = isEn
-                ? "Royal Market. Buy item packages of tiers 1, 2, and 3 (weapons, armor, garments) and sell unwanted gear at favorable rates (1/2 for items, 100% for buildings)."
-                : "Královský trh. Můžeš zde nakupovat balíčky Věcí 1., 2. a 3. stupně (zbraně, zbroj, šaty) a prodávat nepotřebný majetek za výhodnější kurz (1/2 za věci, 100 % za budovy).";
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.market_desc", null, "Královský trh.") : "Královský trh.";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(16,185,129,0.25); color:#6ee7b7; border-color:#10b981;">' + (isEn ? "⚖️ Royal Market" : "⚖️ Královský trh") + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(16,185,129,0.25); color:#6ee7b7; border-color:#10b981;">' + tNodeI("inspector.royal_market", null, "⚖️ Královský trh") + '</span>';
 
         } else if (node.type === "QUEST") {
 
             var qName = (this.getNodeDisplayName ? this.getNodeDisplayName(node) : (window.PRS_App && window.PRS_App.getNodeDisplayName ? window.PRS_App.getNodeDisplayName(node) : (node.name || "")));
 
-            description = isEn
-                ? ("Combat Quest (" + qName + "). Duel beasts, monsters, or a dragon. Victory brings gold and chronicle honors.")
-                : ("Bojový úkol (" + qName + "). Zde se utkáš v souboji kostkou se zvěří, monstrem nebo drakem. Vítězství přináší zlato a zápis do kroniky.");
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.quest_field_desc", { name: qName }, "Bojový úkol (" + qName + ").") : "Bojový úkol (" + qName + ").";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(220,38,38,0.25); color:#fca5a5; border-color:#ef4444;">' + (isEn ? "⚔️ Combat Quest" : "⚔️ Bojový úkol") + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(220,38,38,0.25); color:#fca5a5; border-color:#ef4444;">' + tNodeI("inspector.combat_quest", null, "⚔️ Bojový úkol") + '</span>';
 
         } else if (node.type === "FESTIVAL") {
 
-            description = isEn
-                ? "Royal Festival Grounds (Tournament, Ball, Race). Earn the most <strong>Princess Hearts 💖</strong> on the score track here!"
-                : "Místo konání Královských Slavností (Turnaj, Ples, Závod). Zde získáváš nejvíce <strong>Srdcí princezny 💖</strong> do Bodové osy!";
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.festival_field_desc", null, "Místo konání Královských Slavností.") : "Místo konání Královských Slavností.";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(236,72,153,0.25); color:#fbcfe8; border-color:#ec4899;">' + (isEn ? "💖 Royal Festival" : "💖 Slavnost princezny") + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(236,72,153,0.25); color:#fbcfe8; border-color:#ec4899;">' + tNodeI("inspector.royal_festival", null, "💖 Slavnost princezny") + '</span>';
 
         } else if (node.type === "TAX") {
 
-            description = isEn
-                ? "Royal Tax Collector. Landing here immediately collects taxes from all your villages, towns, and castles!"
-                : "Královský výběrčí daní. Hráč, který sem vstoupí, okamžitě získá zlaťáky ze všech svých vesnic, měst a hradů!";
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.tax_desc", null, "Královský výběrčí daní.") : "Královský výběrčí daní.";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(234,179,8,0.25); color:#fef08a; border-color:#eab308;">' + (isEn ? "👑 Tax Collection" : "👑 Výběr daní") + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(234,179,8,0.25); color:#fef08a; border-color:#eab308;">' + tNodeI("inspector.tax_collection", null, "👑 Výběr daní") + '</span>';
 
         } else if (node.type === "BONUS") {
 
             var bGold = node.bonusGold || 200;
 
-            description = isEn
-                ? ("Royal Premium Road. Landing here immediately awards a bonus of <strong>+" + bGold + " g.</strong>")
-                : ("Královská prémiová cesta. Hráč při vstupu okamžitě získává bonus <strong>+" + bGold + " zl.</strong>");
+            var bGoldStr = window.PRS_I18n ? window.PRS_I18n.formatGold(bGold) : (bGold + " zl.");
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.bonus_field_desc", { gold: bGoldStr }, "Královská prémiová cesta.") : "Královská prémiová cesta.";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(234,179,8,0.25); color:#fef08a;">' + (isEn ? ("💰 Bonus +" + bGold + " g.") : ("💰 Bonus +" + bGold + " zl.")) + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(234,179,8,0.25); color:#fef08a;">' + tNodeI("inspector.bonus_pill", { gold: (window.PRS_I18n ? window.PRS_I18n.formatGold(bGold) : (bGold + " zl.")) }, "💰 Bonus +" + bGold + " zl.") + '</span>';
 
         } else if (node.type === "JESTER") {
 
             var jName = (this.getNodeDisplayName ? this.getNodeDisplayName(node) : (window.PRS_App && window.PRS_App.getNodeDisplayName ? window.PRS_App.getNodeDisplayName(node) : (node.name || "")));
 
-            description = isEn
-                ? ("Jester (" + jName + "). Each owned jester increases rent paid by opponents landing on any of your jesters.")
-                : ("Kejklíř (" + jName + "). Každý vlastněný kejklíř zvyšuje nájemné, které ti soupeři platí při vstupu na tvé kejklíře.");
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.jester_field_desc", { name: jName }, "Kejklíř (" + jName + ").") : "Kejklíř (" + jName + ").";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(168,85,247,0.25); color:#e9d5ff;">' + (isEn ? ("🃏 Jester: " + price + " g.") : ("🃏 Kejklíř: " + price + " zl.")) + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(168,85,247,0.25); color:#e9d5ff;">' + tNodeI("inspector.jester_pill", { price: (window.PRS_I18n ? window.PRS_I18n.formatGold(price) : (price + " zl.")) }, "🃏 Kejklíř: " + price + " zl.") + '</span>';
 
         } else if (node.type === "CHANCE") {
 
-            description = isEn
-                ? "Tile of Fate (Chance). Draw a random card with an unforeseen event or royal decree."
-                : "Pole osudu (Náhoda). Taháš náhodnou kartu s nečekanou událostí nebo královským ediktem.";
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.chance_field_desc", null, "Pole osudu (Náhoda).") : "Pole osudu (Náhoda).";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(59,130,246,0.25); color:#bfdbfe;">' + (isEn ? "❓ Chance Card" : "❓ Karta Náhody") + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(59,130,246,0.25); color:#bfdbfe;">' + tNodeI("inspector.chance_pill", null, "❓ Karta Náhody") + '</span>';
 
         } else if (node.type === "PRISON") {
 
-            description = isEn
-                ? "Royal Dungeon. Detained knights must pay 1,000 g. bail, attempt escape (roll 6), or serve their sentence."
-                : "Královská šatlava. Zadržení rytíři zde musí složit kauci 1 000 zl., pokusit se o útěk (kostka 6), nebo si odsedět trest.";
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.dungeon_field_desc", null, "Královská šatlava.") : "Královská šatlava.";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(113,113,122,0.25); color:#e4e4e7; border-color:#71717a;">' + (isEn ? "⛓️ Royal Dungeon" : "⛓️ Královská šatlava") + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(113,113,122,0.25); color:#e4e4e7; border-color:#71717a;">' + tNodeI("inspector.prison_pill", null, "⛓️ Královská šatlava") + '</span>';
 
         } else if (node.type === "HOSPITAL") {
 
-            description = isEn
-                ? "Royal Infirmary. Knights heal after fierce battles with monsters and dragons, and can purchase a Healing Elixir (+1 Combat, +0.5 💖 for 800 g.)."
-                : "Královský lazaret (Špitál). Zde se léčí rytíři po těžkých soubojích s monstry a drakem, a mohou zakoupit Hojivý lektvar (+1 Boj, +0.5 💖 za 800 zl.).";
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.infirmary_field_desc", null, "Královský lazaret.") : "Královský lazaret.";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(2,132,199,0.25); color:#7dd3fc; border-color:#0284c7;">' + (isEn ? "🏥 Royal Infirmary" : "🏥 Královský lazaret") + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(2,132,199,0.25); color:#7dd3fc; border-color:#0284c7;">' + tNodeI("inspector.hospital_pill", null, "🏥 Královský lazaret") + '</span>';
 
         } else if (node.type === "TAVERN") {
 
-            description = isEn
-                ? "Golden Tankard Tavern. Gamble with the barkeep for coin (500 g. bet) or buy a round for fame (+0.5 💖 for 400 g.)."
-                : "Hostinec U Zlatého korbelu. Rytíři zde hrají kostky s krčmářem o zlaťáky (sázka 500 zl.) nebo zvou společnost na rundu pro zvýšení slávy (+0.5 💖 za 400 zl.).";
+            description = window.PRS_I18n ? window.PRS_I18n.t("inspector.tavern_field_desc", null, "Hostinec U Zlatého korbelu.") : "Hostinec U Zlatého korbelu.";
 
-            statusPill = '<span class="standing-tile-badge" style="background:rgba(217,119,6,0.25); color:#fde68a; border-color:#d97706;">' + (isEn ? "🍺 Tankard Tavern" : "🍺 Krčma U Korbelu") + '</span>';
+
+
+            statusPill = '<span class="standing-tile-badge" style="background:rgba(217,119,6,0.25); color:#fde68a; border-color:#d97706;">' + tNodeI("inspector.tavern_pill", null, "🍺 Krčma U Korbelu") + '</span>';
 
         } else {
 
-            description = isEn ? "Special landmark on the royal route." : "Speciální místo na královské trase.";
+            description = tNodeI("inspector.special_landmark", null, "Speciální místo na královské trase.");
 
             statusPill = '<span class="standing-tile-badge">' + node.code + '</span>';
 
@@ -1255,13 +1247,13 @@
 
         var headerTag = isMyCurrentStandingTile
 
-            ? '<span class="standing-tile-badge" style="background:rgba(212,175,55,0.25); color:var(--gold-light); border-color:var(--gold);">' + (isEn ? "📍 YOU ARE STANDING HERE" : "📍 ZDE PRÁVĚ STOJÍŠ") + ' (' + node.code + ')</span>'
+            ? '<span class="standing-tile-badge" style="background:rgba(212,175,55,0.25); color:var(--gold-light); border-color:var(--gold);">' + tNodeI("inspector.standing_here", null, "📍 ZDE PRÁVĚ STOJÍŠ") + ' (' + node.code + ')</span>'
 
             : '<div style="display:flex; justify-content:space-between; align-items:center; width:100%;">' +
 
-                '<span class="standing-tile-badge" style="background:rgba(56,189,248,0.2); color:#7dd3fc; border-color:#38bdf8;">' + (isEn ? "🔍 INSPECTING TILE" : "🔍 PROZKOUMÁVÁŠ POLE") + ' (' + node.code + ')</span>' +
+                '<span class="standing-tile-badge" style="background:rgba(56,189,248,0.2); color:#7dd3fc; border-color:#38bdf8;">' + tNodeI("inspector.inspecting_tile", null, "🔍 PROZKOUMÁVÁŠ POLE") + ' (' + node.code + ')</span>' +
 
-                '<button class="btn-secondary" style="padding:0.12rem 0.45rem; font-size:0.75rem;" onclick="PRS_App.inspectNode(' + p.nodeId + ')">' + (isEn ? "🎯 Back to my tile" : "🎯 Zpět na mé pole") + '</button>' +
+                '<button class="btn-secondary" style="padding:0.12rem 0.45rem; font-size:0.75rem;" onclick="PRS_App.inspectNode(' + p.nodeId + ')">' + tNodeI("inspector.btn_back_to_mine", null, "🎯 Zpět na mé pole") + '</button>' +
 
               '</div>';
 
@@ -1277,7 +1269,7 @@
 
         var merchantBtnHtml = (node.type === "MERCHANT")
 
-            ? '<button class="btn-action-buy" style="margin-top:0.45rem; width:100%; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:0.4rem;" onclick="PRS_App.openArmoryModal()">' + (isEn ? "🛒 Open Royal Armory &amp; Market" : "🛒 Otevřít Královskou zbrojnici &amp; Trh") + '</button>'
+            ? '<button class="btn-action-buy" style="margin-top:0.45rem; width:100%; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:0.4rem;" onclick="PRS_App.openArmoryModal()">' + tNodeI("inspector.open_armory_btn", null, "🛒 Otevřít Královskou zbrojnici &amp; Trh") + '</button>'
 
             : '';
 
@@ -1289,7 +1281,7 @@
             '    <div class="standing-tile-meta">' +
             '      <div style="display:flex; align-items:center; justify-content:space-between; gap:0.4rem; margin-bottom:2px;">' +
             '        ' + headerTag +
-            '        <button class="btn-help-bubble" onclick="PRS_App.openTileHelp(\'' + (node.type || '') + '\', \'' + (node.code || '') + '\')" title="' + (isEn ? "Read rules and tips for this tile in the Codex" : "Přečíst pravidla a tipy k tomuto poli v Kodexu") + '">' + (isEn ? "❓ Help" : "❓ Nápověda") + '</button>' +
+            '        <button class="btn-help-bubble" onclick="PRS_App.openTileHelp(\'' + (node.type || '') + '\', \'' + (node.code || '') + '\')" title="' + tNodeI("inspector.help_bubble_title", null, "Přečíst pravidla a tipy k tomuto poli v Kodexu") + '">' + tNodeI("inspector.help_bubble_btn", null, "❓ Nápověda") + '</button>' +
             '      </div>' +
             '      <div class="standing-tile-title">' + node.icon + ' ' + this.escapeHtml(renderedTitle) + '</div>' +
             '    </div>' +
@@ -1297,13 +1289,13 @@
 
             '  <div class="standing-tile-body">' +
 
-            '    <div style="margin-bottom:0.35rem;">' + description + (advisorEval ? ('<div class="inspected-tile-advisor-tip" style="margin-top:0.45rem; padding:0.3rem 0.55rem; background:rgba(212,175,55,0.12); border-left:3px solid var(--gold); border-radius:4px; font-size:0.75rem; color:#fef08a; line-height:1.35;">💡 <strong>' + (isEn ? "Advisor on this tile:" : "Rádce k tomuto poli:") + '</strong> ' + this.escapeHtml(advisorEval) + '</div>') : '') + '</div>' +
+            '    <div style="margin-bottom:0.35rem;">' + description + (advisorEval ? ('<div class="inspected-tile-advisor-tip" style="margin-top:0.45rem; padding:0.3rem 0.55rem; background:rgba(212,175,55,0.12); border-left:3px solid var(--gold); border-radius:4px; font-size:0.75rem; color:#fef08a; line-height:1.35;">💡 <strong>' + tNodeI("inspector.advisor_tip_label", null, "Rádce k tomuto poli:") + '</strong> ' + this.escapeHtml(advisorEval) + '</div>') : '') + '</div>' +
 
             '    <div class="standing-tile-status-row">' +
 
             '      <span>' + statusPill + '</span>' +
 
-            '      <span style="color:var(--text-muted); font-size:0.78rem;">' + (isEn ? ("Position: " + (node.id + 1) + " / " + this.state.board.nodes.length) : ("Pozice: " + (node.id + 1) + " / " + this.state.board.nodes.length)) + '</span>' +
+            '      <span style="color:var(--text-muted); font-size:0.78rem;">' + tNodeI("inspector.position", { pos: (node.id + 1), total: this.state.board.nodes.length }, "Pozice: " + (node.id + 1) + " / " + this.state.board.nodes.length) + '</span>' +
 
             '    </div>' +
 
@@ -1380,16 +1372,16 @@
         var el = document.getElementById("board-card-decks-container");
         if (!el || !this.state) return;
 
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var t = window.PRS_I18n ? function(k, d) { return window.PRS_I18n.t(k, null, d); } : function(k, d) { return d; };
+        var fmtG = window.PRS_I18n ? function(n) { return window.PRS_I18n.formatGold(n); } : function(n) { return n + " zl."; };
 
         var decks = [
-            { code: "VECI_1", title: t("decks_row.deck_items1", "VĚCI 1"), subtitle: isEn ? "2,500 g." : "2 500 zl.", icon: "🗡️", color: "#60a5fa", count: 9 },
-            { code: "VECI_2", title: t("decks_row.deck_items2", "VĚCI 2"), subtitle: isEn ? "7,000 g." : "7 000 zl.", icon: "⚔️", color: "#a855f7", count: 7 },
-            { code: "VECI_3", title: t("decks_row.deck_items3", "VĚCI 3"), subtitle: isEn ? "12,000 g." : "12 000 zl.", icon: "👑", color: "#f59e0b", count: 4 },
-            { code: "ZVER_U1", title: t("decks_row.deck_beasts", "ZVĚŘ (U1)"), subtitle: isEn ? "Difficulty 4–6" : "Obtížnost 4–6", icon: "🐗", color: "#4ade80", count: 4 },
-            { code: "MONSTRA_U2", title: t("decks_row.deck_monsters", "MONSTRA (U2)"), subtitle: isEn ? "Difficulty 8–10" : "Obtížnost 8–10", icon: "👹", color: "#fb923c", count: 4 },
-            { code: "DRACI_U3", title: t("decks_row.deck_dragons", "DRACI (U3)"), subtitle: isEn ? "Difficulty 11–17" : "Obtížnost 11–17", icon: "🐉", color: "#f43f5e", count: 20 },
+            { code: "VECI_1", title: t("decks_row.deck_items1", "VĚCI 1"), subtitle: fmtG(2500), icon: "🗡️", color: "#60a5fa", count: 9 },
+            { code: "VECI_2", title: t("decks_row.deck_items2", "VĚCI 2"), subtitle: fmtG(7000), icon: "⚔️", color: "#a855f7", count: 7 },
+            { code: "VECI_3", title: t("decks_row.deck_items3", "VĚCI 3"), subtitle: fmtG(12000), icon: "👑", color: "#f59e0b", count: 4 },
+            { code: "ZVER_U1", title: t("decks_row.deck_beasts", "ZVĚŘ (U1)"), subtitle: t("decks_row.diff_4_6", "Obtížnost 4–6"), icon: "🐗", color: "#4ade80", count: 4 },
+            { code: "MONSTRA_U2", title: t("decks_row.deck_monsters", "MONSTRA (U2)"), subtitle: t("decks_row.diff_8_10", "Obtížnost 8–10"), icon: "👹", color: "#fb923c", count: 4 },
+            { code: "DRACI_U3", title: t("decks_row.deck_dragons", "DRACI (U3)"), subtitle: (window.PRS_I18n ? window.PRS_I18n.t("decks_row.diff_11_17", null, "Obtížnost 11–17") : "Obtížnost 11–17"), icon: "🐉", color: "#f43f5e", count: 20 },
             { code: "NAHODA_N", title: t("decks_row.deck_chance", "NÁHODA"), subtitle: t("decks_row.chance_sub", "Karty osudu"), icon: "❓", color: "#eab308", count: 24 },
             { code: "SLAVNOST_S", title: t("decks_row.deck_festivals", "SLAVNOSTI"), subtitle: t("decks_row.festivals_sub", "Turnaj & ples"), icon: "🎪", color: "#ec4899", count: 3 }
         ];
@@ -1440,7 +1432,7 @@
     // KRÁLOVSKÝ RÁDCE & TAKTICKÝ NAŠEPTÁVAČ (BOD 7)
     // ========================================================================
     renderLowerKnightDetail: function () {
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tKDetail = window.PRS_I18n ? function(k, p, d) { return window.PRS_I18n.t(k, p, d); } : function(k, p, d) { return d; };
 
         var el = document.getElementById("lower-inspected-knight-detail");
 
@@ -1474,13 +1466,13 @@
 
             '      <div>' +
 
-            '        <h3 style="margin:0; font-family:\'Cinzel\',serif; color:' + p.color + '; font-size:1.25rem;">' + this.escapeHtml(p.name) + ' ' + (p.type !== "Human" ? '<small class="bot-tag">PC</small>' : ('<small class="bot-tag" style="background:#0284c7;color:#fff;">' + (isEn ? "Player" : "Hráč") + '</small>')) + '</h3>' +
+            '        <h3 style="margin:0; font-family:\'Cinzel\',serif; color:' + p.color + '; font-size:1.25rem;">' + this.escapeHtml(p.name) + ' ' + (p.type !== "Human" ? '<small class="bot-tag">PC</small>' : ('<small class="bot-tag" style="background:#0284c7;color:#fff;">' + tKDetail("inspector.player_human_badge", null, "Hráč") + '</small>')) + '</h3>' +
 
             '        <div style="font-size:0.82rem; color:var(--text-muted); margin-top:2px;">' +
 
-            (isTurn ? ('<strong style="color:#fbbf24;">⚔️ ' + (isEn ? "Active turn" : "Právě na tahu") + '</strong> • ') : '') +
+            (isTurn ? ('<strong style="color:#fbbf24;">⚔️ ' + tKDetail("inspector.active_turn_badge", null, "Právě na tahu") + '</strong> • ') : '') +
 
-            (isEn ? "Standing on: <strong>" : "Stojí na poli: <strong>") + (currNode ? this.escapeHtml((this.getNodeDisplayName ? this.getNodeDisplayName(currNode) : currNode.name)) : (isEn ? "Unknown" : "Neznámé")) + '</strong> (' + (isEn ? "Tile #" : "Pole #") + p.nodeId + ')' +
+            tKDetail("inspector.standing_at", null, "Stojí na poli: ") + '<strong>' + (currNode ? this.escapeHtml((this.getNodeDisplayName ? this.getNodeDisplayName(currNode) : currNode.name)) : tKDetail("inspector.standing_unknown", null, "Neznámé")) + '</strong> (' + tKDetail("hud.crossroads_tile_prefix", { id: p.nodeId }, "Pole #" + p.nodeId) + ')' +
 
             '        </div>' +
 
@@ -1500,9 +1492,9 @@
 
             '    </div>' +
 
-            '    <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.8rem; border-color:var(--gold); color:var(--gold-light);" onclick="window.scrollTo({top:0, behavior:\'smooth\'}); PRS_App.centerOnActivePlayer();" title="' + (isEn ? "Scroll up to board and highlight pawn" : "Přejít nahoru k hernímu plánu a ukázat figurku") + '">' +
+            '    <button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.8rem; border-color:var(--gold); color:var(--gold-light);" onclick="window.scrollTo({top:0, behavior:\'smooth\'}); PRS_App.centerOnActivePlayer();" title="' + (window.PRS_I18n ? window.PRS_I18n.t("inspector.scroll_show_pawn_title", null, "Přejít nahoru k hernímu plánu a ukázat figurku") : "Přejít nahoru k hernímu plánu a ukázat figurku") + '">' +
 
-            '      ' + (isEn ? "🎯 Show on board ↑" : "🎯 Ukázat na desce ↑") +
+            '      ' + (window.PRS_I18n ? window.PRS_I18n.t("inspector.show_on_board_btn", null, "🎯 Ukázat na desce ↑") : "🎯 Ukázat na desce ↑") +
 
             '    </button>' +
 
@@ -1516,7 +1508,7 @@
 
             '  <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:0.45rem 0.65rem; text-align:center;">' +
 
-            '    ' + '<div style="font-size:0.74rem; color:var(--text-muted);">' + (isEn ? "⚔️ Combat Strength" : "⚔️ Bojová síla") + '</div>' + '' +
+            '    ' + '<div style="font-size:0.74rem; color:var(--text-muted);">' + tKDetail("common.stat_strength", null, "⚔️ Bojová síla") + '</div>' + '' +
 
             '    <div style="font-size:1.15rem; font-weight:bold; color:#fca5a5;">' + st.combat + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.combat + '/5)</small></div>' +
 
@@ -1524,7 +1516,7 @@
 
             '  <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(56,189,248,0.3); border-radius:8px; padding:0.45rem 0.65rem; text-align:center;">' +
 
-            '    ' + '<div style="font-size:0.74rem; color:var(--text-muted);">' + (isEn ? "🏇 Riding Skill" : "🏇 Jezdecké umění") + '</div>' + '' +
+            '    ' + '<div style="font-size:0.74rem; color:var(--text-muted);">' + tKDetail("common.stat_riding", null, "🏇 Jezdecké umění") + '</div>' + '' +
 
             '    <div style="font-size:1.15rem; font-weight:bold; color:#7dd3fc;">' + st.riding + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.riding + '/5)</small></div>' +
 
@@ -1532,7 +1524,7 @@
 
             '  <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(244,114,182,0.3); border-radius:8px; padding:0.45rem 0.65rem; text-align:center;">' +
 
-            '    ' + '<div style="font-size:0.74rem; color:var(--text-muted);">' + (isEn ? "💃 Court Dance" : "💃 Dvorní tanec") + '</div>' + '' +
+            '    ' + '<div style="font-size:0.74rem; color:var(--text-muted);">' + tKDetail("common.stat_dance", null, "💃 Dvorní tanec") + '</div>' + '' +
 
             '    <div style="font-size:1.15rem; font-weight:bold; color:#f472b6;">' + st.dance + ' <small style="font-size:0.73rem; color:var(--text-muted); font-weight:normal;">(' + p.skills.dance + '/5)</small></div>' +
 
@@ -1652,7 +1644,7 @@
 
     
     renderPlayersStandings: function () {
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tStand = window.PRS_I18n ? function(k, p, d) { return window.PRS_I18n.t(k, p, d); } : function(k, p, d) { return d; };
 
         var el = document.getElementById("all-players-standings-box");
 
@@ -1671,7 +1663,7 @@
 
         var html = '<div class="standings-card">' +
             '  <div class="standings-header">' +
-            '    ' + '<span>' + (isEn ? '🏆 KNIGHTS STANDINGS &amp; RACE' : '🏆 STAV RYTÍŘŮ &amp; ZÁVOD') + '</span>' + '' +
+            '    ' + '<span>' + tStand("inspector.standings_title", null, "🏆 STAV RYTÍŘŮ &amp; ZÁVOD") + '</span>' + '' +
             '    ' + headerStatus +
             '  </div>' +
             '  <div class="standings-list">';
@@ -1730,7 +1722,6 @@
 
     
     showPlayerTooltip: function (e, playerIndex) {
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var tip = document.getElementById("player-hover-tooltip");
         if (!tip || !this.state || !this.state.players[playerIndex]) return;
 

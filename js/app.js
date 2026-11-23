@@ -155,37 +155,32 @@ window.PRS_App = {
     getPlayerDisplayName: function (player) {
         if (!player) return "";
         var name = (typeof player === "string") ? player : (player.name || "");
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        if (isEn) {
-            name = name.replace(/\s*\(Ty\)$/i, " (You)").replace(/\s*\(PC\)$/i, " (AI)");
-            name = name.replace(/^Černý Baron/i, "Black Baron")
-                       .replace(/^Zikmund z Chovu/i, "Sigismund the Breeder")
-                       .replace(/^Kněžna Eliška/i, "Princess Eliška")
-                       .replace(/^Červený rytíř/i, "Red Knight")
-                       .replace(/^Modrý rytíř/i, "Blue Knight")
-                       .replace(/^Zelený rytíř/i, "Green Knight")
-                       .replace(/^Zlatý rytíř/i, "Golden Knight")
-                       .replace(/^Fialový rytíř/i, "Purple Knight")
-                       .replace(/^Stříbrný rytíř/i, "Silver Knight")
-                       .replace(/^Železný Strážce/i, "Iron Sentinel")
-                       .replace(/^Baron z Růže/i, "Baron of the Rose")
-                       .replace(/^Strážce Hvozdů/i, "Warden of the Wilds")
-                       .replace(/^Čarodějka Astrida/i, "Astrida the Sorceress");
-        } else {
-            name = name.replace(/\s*\(You\)$/i, " (Ty)").replace(/\s*\(AI\)$/i, " (PC)");
-            name = name.replace(/^Black Baron/i, "Černý Baron")
-                       .replace(/^Sigismund the Breeder/i, "Zikmund z Chovu")
-                       .replace(/^Princess Eliška/i, "Kněžna Eliška")
-                       .replace(/^Red Knight/i, "Červený rytíř")
-                       .replace(/^Blue Knight/i, "Modrý rytíř")
-                       .replace(/^Green Knight/i, "Zelený rytíř")
-                       .replace(/^Golden Knight/i, "Zlatý rytíř")
-                       .replace(/^Purple Knight/i, "Fialový rytíř")
-                       .replace(/^Silver Knight/i, "Stříbrný rytíř")
-                       .replace(/^Iron Sentinel/i, "Železný Strážce")
-                       .replace(/^Baron of the Rose/i, "Baron z Růže")
-                       .replace(/^Warden of the Wilds/i, "Strážce Hvozdů")
-                       .replace(/^Astrida the Sorceress/i, "Čarodějka Astrida");
+        var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var youTag = t("common.you_tag", null, "(Ty)");
+        var botTag = t("common.bot_tag", null, "(PC)");
+        name = name.replace(/\s*\((?:Ty|You)\)$/i, " " + youTag).replace(/\s*\((?:PC|AI)\)$/i, " " + botTag);
+        var botMap = {
+            "Černý Baron": "Černý Baron", "Black Baron": "Černý Baron",
+            "Zikmund z Chovu": "Zikmund z Chovu", "Sigismund the Breeder": "Zikmund z Chovu",
+            "Kněžna Eliška": "Kněžna Eliška", "Princess Eliška": "Kněžna Eliška",
+            "Červený rytíř": "Červený rytíř", "Red Knight": "Červený rytíř",
+            "Modrý rytíř": "Modrý rytíř", "Blue Knight": "Modrý rytíř",
+            "Zelený rytíř": "Zelený rytíř", "Green Knight": "Zelený rytíř",
+            "Zlatý rytíř": "Zlatý rytíř", "Golden Knight": "Zlatý rytíř",
+            "Fialový rytíř": "Fialový rytíř", "Purple Knight": "Fialový rytíř",
+            "Stříbrný rytíř": "Stříbrný rytíř", "Silver Knight": "Stříbrný rytíř",
+            "Železný Strážce": "Železný Strážce", "Iron Sentinel": "Železný Strážce",
+            "Baron z Růže": "Baron z Růže", "Baron of the Rose": "Baron z Růže",
+            "Strážce Hvozdů": "Strážce Hvozdů", "Warden of the Wilds": "Strážce Hvozdů",
+            "Čarodějka Astrida": "Čarodějka Astrida", "Astrida the Sorceress": "Čarodějka Astrida"
+        };
+        for (var raw in botMap) {
+            if (name.indexOf(raw) === 0) {
+                var canonKey = botMap[raw];
+                var translated = t("custom_names.bot_names." + canonKey, null, raw);
+                name = name.replace(raw, translated);
+                break;
+            }
         }
         return name;
     },

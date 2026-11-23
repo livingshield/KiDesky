@@ -16,7 +16,7 @@ const path = require('path');
 const vm = require('vm');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const MAX_HARDCODED_LANG_CHECKS = 56;
+const MAX_HARDCODED_LANG_CHECKS = 0;
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);

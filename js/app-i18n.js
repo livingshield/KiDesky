@@ -310,6 +310,25 @@
         },
 
         /**
+         * Zformátuje číslo podle aktivního jazyka (oddělovače tisíců)
+         * @param {number} num
+         */
+        formatNumber: function (num) {
+            if (typeof num !== 'number' || isNaN(num)) return num;
+            var loc = (this._lang === 'en') ? 'en-US' : (this._lang === 'cs' ? 'cs-CZ' : undefined);
+            return num.toLocaleString(loc);
+        },
+
+        /**
+         * Zformátuje částku ve zlatých s jednotkou podle aktivního jazyka
+         * @param {number} amount
+         */
+        formatGold: function (amount) {
+            var curr = this.t('common.gold_symbol', null, (this._lang === 'en' ? 'g.' : 'zl.'));
+            return this.formatNumber(amount) + ' ' + curr;
+        },
+
+        /**
          * Pomocná funkce pro vyřešení vnořeného klíče v objektu
          */
         _resolveKey: function (obj, key) {

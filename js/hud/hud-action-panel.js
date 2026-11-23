@@ -50,28 +50,28 @@
 
             }
 
-            var isEnGameOver = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+
             var tHudG = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
             var headTitle = tHudG("hud.game_over_banner_title", {
                 badge: (winP ? winP.badge : "👑"),
                 name: this.escapeHtml(winP ? winP.name : "Vítěz")
-            }, isEnGameOver ? ("👑 Royal Wedding! The winner is " + (winP ? winP.badge : "👑") + " " + this.escapeHtml(winP ? winP.name : "Winner") + "!") : ("👑 Královská svatba! Vítězem je " + (winP ? winP.badge : "👑") + " " + this.escapeHtml(winP ? winP.name : "Vítěz") + "!"));
+            }, ("👑 Královská svatba! Vítězem je " + (winP ? winP.badge : "👑") + " " + this.escapeHtml(winP ? winP.name : "Vítěz") + "!"));
 
             var descText = "";
             if (this.state.winType === "slayer_dragons") {
-                descText = tHudG("hud.game_over_banner_slayer", { round: this.state.roundNumber }, isEnGameOver ? ("Slain 2 feared dragons of the realm in " + this.state.roundNumber + " rounds and claims the hand of the princess.") : ("Skolil 2 obávané draky království za " + this.state.roundNumber + " kol a získává ruku princezny."));
+                descText = tHudG("hud.game_over_banner_slayer", { round: this.state.roundNumber }, ("Skolil 2 obávané draky království za " + this.state.roundNumber + " kol a získává ruku princezny."));
             } else if (this.state.winType === "tycoon_estates") {
-                descText = tHudG("hud.game_over_banner_tycoon", { round: this.state.roundNumber }, isEnGameOver ? ("Captured 3 towns and the royal castle in " + this.state.roundNumber + " rounds and wins the hand of the princess.") : ("Ovládl 3 města a královský hrad za " + this.state.roundNumber + " kol a získává ruku princezny."));
+                descText = tHudG("hud.game_over_banner_tycoon", { round: this.state.roundNumber }, ("Ovládl 3 města a královský hrad za " + this.state.roundNumber + " kol a získává ruku princezny."));
             } else {
                 var heartsVal = winP ? winP.totalHearts : 30;
-                descText = tHudG("hud.game_over_banner_default", { hearts: heartsVal, round: this.state.roundNumber }, isEnGameOver ? ("Earned a total of <strong>" + heartsVal + " 💖</strong> in " + this.state.roundNumber + " rounds and wins the hand of the princess.") : ("Získal celkem <strong>" + heartsVal + " 💖</strong> za " + this.state.roundNumber + " kol a získává ruku princezny."));
+                descText = tHudG("hud.game_over_banner_default", { hearts: heartsVal, round: this.state.roundNumber }, ("Získal celkem <strong>" + heartsVal + " 💖</strong> za " + this.state.roundNumber + " kol a získává ruku princezny."));
             }
 
-            var btnEndless = tHudG("hud.game_over_banner_endless", null, isEnGameOver ? "♾️ Continue in Endless Mode" : "♾️ Pokračovat v nekonečné hře");
-            var btnEndlessTitle = tHudG("hud.game_over_banner_endless_title", null, isEnGameOver ? "Continue playing freely on the current board" : "Pokračovat ve volné hře na stávajícím herním plánu");
-            var btnCeremony = tHudG("hud.game_over_banner_ceremony", null, isEnGameOver ? "👑 Open Ceremony &amp; Hall of Fame" : "👑 Otevřít ceremoniál &amp; Síň slávy");
-            var btnNewG = tHudG("hud.endless_banner_new_game", null, isEnGameOver ? "🔄 New Game" : "🔄 Nová partie");
+            var btnEndless = tHudG("hud.game_over_banner_endless", null, "♾️ Pokračovat v nekonečné hře");
+            var btnEndlessTitle = tHudG("hud.game_over_banner_endless_title", null, "Pokračovat ve volné hře na stávajícím herním plánu");
+            var btnCeremony = tHudG("hud.game_over_banner_ceremony", null, "👑 Otevřít ceremoniál &amp; Síň slávy");
+            var btnNewG = tHudG("hud.endless_banner_new_game", null, "🔄 Nová partie");
 
             el.innerHTML = '<div class="action-card victory-banner">' +
                 '<h3>' + headTitle + '</h3>' +
@@ -166,7 +166,6 @@
 
         // Trvalé stabilní zobrazení tahu bota - tlačítko je nahoře na pevné pozici, text pod ním
         if (isBot && this.autoBotEnabled) {
-            var isEnBotTurn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var pDisplayName = (window.PRS_App && window.PRS_App.getPlayerDisplayName) ? window.PRS_App.getPlayerDisplayName(player) : player.name;
             var botRoll = this.state.lastRoll;
             var botLandedNode = (this.state.board && this.state.board.nodes) ? this.state.board.nodes[player.nodeId] : null;
@@ -174,11 +173,11 @@
 
             var botStatusText = "";
             if (this.state.phase === "ROLL") {
-                botStatusText = isEnBotTurn ? "Preparing to roll the dice..." : "Připravuje se k hodu kostkou...";
+                botStatusText = window.PRS_I18n ? window.PRS_I18n.t("hud.bot_turn_preparing", null, "Připravuje se k hodu kostkou...") : "Připravuje se k hodu kostkou...";
             } else if (botRoll) {
-                botStatusText = isEnBotTurn
-                    ? ("Rolled <strong>" + botRoll + "</strong>" + (botLandedNode ? (" and arrived at tile <strong>" + this.escapeHtml(botLandedName) + "</strong>.") : "."))
-                    : ("Hodil <strong>" + botRoll + "</strong>" + (botLandedNode ? (" a dorazil na pole <strong>" + this.escapeHtml(botLandedName) + "</strong>.") : "."));
+                botStatusText = botLandedNode
+                    ? (window.PRS_I18n ? window.PRS_I18n.t("hud.bot_turn_rolled", { roll: botRoll, name: this.escapeHtml(botLandedName) }) : ("Hodil <strong>" + botRoll + "</strong> a dorazil na pole <strong>" + this.escapeHtml(botLandedName) + "</strong>."))
+                    : ("Hodil <strong>" + botRoll + "</strong>.");
             } else {
                 botStatusText = isEnBotTurn ? "Making moves across the realm..." : "Provádí tah královstvím...";
             }
@@ -260,9 +259,8 @@
 
             var targetHearts = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30;
 
-            var isHudEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var tHud = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
-            var hudCurr = isHudEn ? "g." : "zl.";
+            var hudCurr = window.PRS_I18n ? window.PRS_I18n.t("common.gold_symbol", null, "zl.") : "zl.";
 
             var treasuryBannerHtml = '<div class="turn-active-treasury-banner">' +
 
@@ -344,19 +342,18 @@
 
                 var targetHigh = window.PRS_GameEngine.getTargetNodeForBranch(this.state, pbc.junctionNodeId, "high", pbc.remainingSteps);
 
-                var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
                 var getNdName = function(node, fallback) {
                     if (!node) return fallback;
                     return (window.PRS_App && window.PRS_App.getNodeDisplayName) ? window.PRS_App.getNodeDisplayName(node) : node.name;
                 };
 
-                var lowName = getNdName(branchLowNode, isEn ? "Outer Path" : "Vnější cesta");
-                var highName = getNdName(branchHighNode, isEn ? "Royal Path" : "Královská stezka");
-                var targetLowName = getNdName(targetLow, (isEn ? "Tile #" : "Pole #") + pbc.branchLow);
-                var targetHighName = getNdName(targetHigh, (isEn ? "Tile #" : "Pole #") + pbc.branchHigh);
+                var lowName = getNdName(branchLowNode, window.PRS_I18n ? window.PRS_I18n.t("hud.outer_path", null, "Vnější cesta") : "Vnější cesta");
+                var highName = getNdName(branchHighNode, window.PRS_I18n ? window.PRS_I18n.t("hud.royal_path", null, "Královská stezka") : "Královská stezka");
+                var targetLowName = getNdName(targetLow, window.PRS_I18n ? window.PRS_I18n.t("hud.crossroads_tile_prefix", { id: pbc.branchLow }, "Pole #" + pbc.branchLow) : ("Pole #" + pbc.branchLow));
+                var targetHighName = getNdName(targetHigh, window.PRS_I18n ? window.PRS_I18n.t("hud.crossroads_tile_prefix", { id: pbc.branchHigh }, "Pole #" + pbc.branchHigh) : ("Pole #" + pbc.branchHigh));
                 var junctionName = getNdName(junctionNode, "");
 
-                var branchTitle = isEn ? "🔀 Crossroads Route Choice!" : "🔀 Volba trasy na rozcestí!";
+                var branchTitle = window.PRS_I18n ? window.PRS_I18n.t("hud.crossroads_title", null, "🔀 Volba trasy na rozcestí!") : "🔀 Volba trasy na rozcestí!";
                 var branchPrompt = isEn
                     ? ("You are standing on <strong>" + this.escapeHtml(junctionName) + "</strong>. You have <strong>" + pbc.remainingSteps + "</strong> steps remaining. Which path will you take?")
                     : ("Stojíš na poli <strong>" + this.escapeHtml(junctionName) + "</strong>. Zbývá ti ještě <strong>" + pbc.remainingSteps + "</strong> kroků. Kudy se vydáš?");
@@ -411,10 +408,8 @@
             var canAfford = (player.gold || 0) >= bPrice;
             var remGold = (player.gold || 0) - bPrice;
             var isProc = this.isActionProcessing || this.isSavingSession;
-            var isEnBuy = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var currGBuy = isEnBuy ? "g." : "zl.";
-            var priceFmt = bPrice.toLocaleString(isEnBuy ? "en-US" : "cs-CZ") + " " + currGBuy;
-            var remFmt = remGold.toLocaleString(isEnBuy ? "en-US" : "cs-CZ") + " " + currGBuy;
+            var priceFmt = window.PRS_I18n ? window.PRS_I18n.formatGold(bPrice) : (bPrice + " zl.");
+            var remFmt = window.PRS_I18n ? window.PRS_I18n.formatGold(remGold) : (remGold + " zl.");
             var buyLabel = isProc
                 ? (window.PRS_I18n ? window.PRS_I18n.t("hud.buying_tile_proc") : "⏳ Kupuji pole...")
                 : ((window.PRS_I18n ? window.PRS_I18n.t("hud.buy_tile_label", { price: priceFmt }) : ("📜 Koupit toto pole (" + priceFmt + ")")) +
@@ -830,9 +825,7 @@
         }
 
         // Šatlava (Vězení)
-        var isEnAction = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var actGoldUnit = isEnAction ? "g." : "zl.";
-        var actLoc = isEnAction ? "en-US" : "cs-CZ";
+        var tActH = window.PRS_I18n ? function(k, p, d) { return window.PRS_I18n.t(k, p, d); } : function(k, p, d) { return d; };
 
         if (pa.canPayPrisonBail || pa.canAttemptPrisonEscape || pa.canServeSentence) {
 
@@ -846,23 +839,23 @@
 
                 '  <div>' +
 
-                '    <span class="standing-tile-badge" style="background:rgba(113,113,122,0.3); color:#e4e4e7; border-color:#71717a;">' + (isEnAction ? "⛓️ Dungeon &amp; Prison" : "⛓️ Žalář &amp; Vězení") + '</span>' +
+                '    <span class="standing-tile-badge" style="background:rgba(113,113,122,0.3); color:#e4e4e7; border-color:#71717a;">' + tActH("hud.prison_badge", null, "⛓️ Žalář &amp; Vězení") + '</span>' +
 
-                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#f4f4f5;">' + (isEnAction ? "Royal Prison" : "Královská Šatlava") + '</div>' +
+                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#f4f4f5;">' + tActH("hud.prison_title", null, "Královská Šatlava") + '</div>' +
 
                 '  </div>' +
 
                 '</div>' +
 
-                '<p style="font-size:0.84rem; color:#d4d4d8; margin-bottom:0.6rem;">' + (isEnAction ? "The knight is imprisoned! Choose how to secure release:" : "Rytíř je uvězněn! Vyber si způsob propuštění:") + '</p>' +
+                '<p style="font-size:0.84rem; color:#d4d4d8; margin-bottom:0.6rem;">' + tActH("hud.prison_desc", null, "Rytíř je uvězněn! Vyber si způsob propuštění:") + '</p>' +
 
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
 
-                '  <button class="btn-action-prison" ' + (!canAffordBail ? 'disabled' : '') + ' onclick="PRS_App.handlePayPrisonBail()">' + (isEnAction ? ("🔓 Post bail (" + (pa.bailCost || 1000) + " g.) – Immediate release") : ("🔓 Složit kauci (" + (pa.bailCost || 1000) + " zl.) – Okamžité propuštění")) + '</button>' +
+                '  <button class="btn-action-prison" ' + (!canAffordBail ? 'disabled' : '') + ' onclick="PRS_App.handlePayPrisonBail()">' + tActH("hud.prison_bail_btn", { cost: (window.PRS_I18n ? window.PRS_I18n.formatGold(pa.bailCost || 1000) : ((pa.bailCost || 1000) + " zl.")) }, "🔓 Složit kauci (" + (pa.bailCost || 1000) + " zl.) – Okamžité propuštění") + '</button>' +
 
-                '  <button class="btn-action-prison" onclick="PRS_App.handlePrisonEscape()">' + (isEnAction ? "🏃‍♂️ Attempt night escape (Roll 🎲 6 – gain +500 g. / else stay)" : "🏃‍♂️ Pokus o noční útěk (Hoď 🎲 6 – zisk +500 zl. / jinak zůstáváš)") + '</button>' +
+                '  <button class="btn-action-prison" onclick="PRS_App.handlePrisonEscape()">' + tActH("hud.prison_escape_btn", null, "🏃‍♂️ Pokus o noční útěk (Hoď 🎲 6 – zisk +500 zl. / jinak zůstáváš)") + '</button>' +
 
-                '  <button class="btn-action-prison" style="background:#27272a; border-color:#52525b;" onclick="PRS_App.handleServePrisonSentence()">' + (isEnAction ? "⚖️ Serve sentence (royal bailiff will release you)" : "⚖️ Odpykat trest (královský rychtář tě propustí)") + '</button>' +
+                '  <button class="btn-action-prison" style="background:#27272a; border-color:#52525b;" onclick="PRS_App.handleServePrisonSentence()">' + tActH("hud.prison_sentence_btn", null, "⚖️ Odpykat trest (královský rychtář tě propustí)") + '</button>' +
 
                 '</div>' +
 
@@ -884,21 +877,21 @@
 
                 '  <div>' +
 
-                '    <span class="standing-tile-badge" style="background:rgba(2,132,199,0.3); color:#7dd3fc; border-color:#0284c7;">' + (isEnAction ? "🏥 Infirmary" : "🏥 Lazaret") + '</span>' +
+                '    <span class="standing-tile-badge" style="background:rgba(2,132,199,0.3); color:#7dd3fc; border-color:#0284c7;">' + tActH("hud.hospital_badge", null, "🏥 Lazaret") + '</span>' +
 
-                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#f0f9ff;">' + (isEnAction ? "Royal Infirmary &amp; Healer" : "Královský Lazaret &amp; Ranhojič") + '</div>' +
+                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#f0f9ff;">' + tActH("hud.hospital_title", null, "Královský Lazaret &amp; Ranhojič") + '</div>' +
 
                 '  </div>' +
 
                 '</div>' +
 
-                '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:0.6rem;">' + (isEnAction ? "Wounded knights gather strength here for forthcoming contests:" : "Zranění rytíři zde nabírají síly do dalších klání:") + '</p>' +
+                '<p style="font-size:0.84rem; color:#bae6fd; margin-bottom:0.6rem;">' + tActH("hud.hospital_desc", null, "Zranění rytíři zde nabírají síly do dalších klání:") + '</p>' +
 
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
 
-                '  <button class="btn-action-hospital" ' + (!canAffordElix ? 'disabled' : '') + ' onclick="PRS_App.handleBuyHospitalElixir()">' + (isEnAction ? ("🧪 Purchase Healing Elixir (+1 Combat, +0.5 💖 for " + (pa.elixirCost || 800) + " g.)") : ("🧪 Zakoupit Hojivý lektvar (+1 Boj, +0.5 💖 za " + (pa.elixirCost || 800) + " zl.)")) + '</button>' +
+                '  <button class="btn-action-hospital" ' + (!canAffordElix ? 'disabled' : '') + ' onclick="PRS_App.handleBuyHospitalElixir()">' + tActH("hud.hospital_elixir_btn", { cost: (window.PRS_I18n ? window.PRS_I18n.formatGold(pa.elixirCost || 800) : ((pa.elixirCost || 800) + " zl.")) }, "🧪 Zakoupit Hojivý lektvar (+1 Boj, +0.5 💖 za " + (pa.elixirCost || 800) + " zl.)") + '</button>' +
 
-                '  <button class="btn-action-hospital" style="background:#0369a1; border-color:#0284c7;" onclick="PRS_App.handleRestHospital()">' + (isEnAction ? "🌿 Rest for free with the herbalist" : "🌿 Zdarma odpočívat u bylinkáře") + '</button>' +
+                '  <button class="btn-action-hospital" style="background:#0369a1; border-color:#0284c7;" onclick="PRS_App.handleRestHospital()">' + tActH("hud.hospital_rest_btn", null, "🌿 Zdarma odpočívat u bylinkáře") + '</button>' +
 
                 '</div>' +
 
@@ -916,8 +909,7 @@
 
             var canToast = pa.canToastPlayer;
 
-            var isEnEnc = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var encCurrG = isEnEnc ? "g." : "zl.";
+            var encCurrG = window.PRS_I18n ? window.PRS_I18n.t("common.gold_symbol", null, "zl.") : "zl.";
             var encTitle = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_title", { badge: enc.badge, name: this.escapeHtml(enc.name) }) : ("🤺 Setkání rytířů: " + enc.badge + " " + this.escapeHtml(enc.name));
             var encDesc = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_desc") : "Na tomto poli stojí soupeř. Zvol rytířský duel cti, nebo ukaž dvorskou noblesu přátelským přípitkem:";
             var duelLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.knight_encounter_duel", { stake: enc.duelStake + " " + encCurrG }) : ("⚔️ Rytířský duel cti (Sázka " + enc.duelStake + " zl. & 0.5 💖)");
@@ -1197,14 +1189,17 @@
         var summaryRaw = pa.summary || "";
         if (pa.summaryMeta && window.PRS_I18n) {
             summaryRaw = window.PRS_I18n.t(pa.summaryMeta.key, pa.summaryMeta.params, pa.summary);
-        } else if (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en" && summaryRaw) {
-            summaryRaw = summaryRaw.replace(/Pole je volné ke koupi za\s*(\d+)\s*zl\./gi, "Tile is available for purchase for $1 g.");
+        } else if (summaryRaw && window.PRS_I18n) {
+            var mBuy = summaryRaw.match(/Pole je volné ke koupi za\s*(\d+)\s*zl\./i);
+            if (mBuy) {
+                var cFmt = window.PRS_I18n.formatGold(parseInt(mBuy[1], 10));
+                summaryRaw = window.PRS_I18n.t("hud.tile_free_to_buy", { cost: cFmt }, summaryRaw);
+            }
         }
         var encounterHtml = this.parseTurnEncounter(summaryRaw);
 
         var targetHeartsAction = (this.state.config && this.state.config.targetHearts) ? this.state.config.targetHearts : 30;
-        var isEnActPanel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var actGoldStr = player.gold.toLocaleString(isEnActPanel ? "en-US" : "cs-CZ") + " " + (isEnActPanel ? "g." : "zl.");
+        var actGoldStr = window.PRS_I18n ? window.PRS_I18n.formatGold(player.gold) : (player.gold + " zl.");
 
         var actTreasuryHtml = '<div class="turn-active-treasury-banner">' +
             '<div style="display:flex; justify-content:space-between; align-items:center;">' +

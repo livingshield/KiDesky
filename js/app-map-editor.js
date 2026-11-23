@@ -1653,34 +1653,15 @@
 
         getCastleDisplayName: function (rc) {
             if (!rc) return "";
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var catalog = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ALL_CASTLES) || [];
             var rawName = rc.name || "";
-            if (isEn) {
-                var cEnMap = {
-                    "Královský hrad": "Royal Castle (Seat of the Crown)",
-                    "Lesní hrad Doubrava": "Forest Castle Doubrava",
-                    "Ledový palác Věčného mrazu": "Ice Palace of Eternal Frost",
-                    "Sopečná pevnost Lávový chřtán": "Volcanic Stronghold Lava Maw",
-                    "Křišťálový zámek Ametyst": "Crystal Castle Amethyst",
-                    "Větrný vzdušný zámek Boreas": "Wind Citadel Boreas",
-                    "Vodní citadela Oceán": "Water Citadel Ocean",
-                    "Pouštní pískovcový palác": "Desert Sandstone Palace",
-                    "Bažinná tvrz Černá tůň": "Swamp Fortress Black Mere",
-                    "Temný hrad Erebus": "Dark Nether Keep Erebus"
-                };
-                for (var k in cEnMap) {
-                    if (rawName.indexOf(k) !== -1) return cEnMap[k];
+            for (var i = 0; i < catalog.length; i++) {
+                var c = catalog[i];
+                if (c.id === rc.skinId || c.id === rc.selectedKey || c.name === rawName || (c.img && (rc.image === c.img || rc.img === c.img))) {
+                    return c.name || rawName;
                 }
-                for (var i = 0; i < catalog.length; i++) {
-                    var c = catalog[i];
-                    if (c.id === rc.skinId || c.id === rc.selectedKey || c.name === rawName || (c.img && (rc.image === c.img || rc.img === c.img))) {
-                        return c.nameEn || c.name || "Royal Castle";
-                    }
-                }
-                return rawName.replace(/^Královský hrad/i, "Royal Castle");
             }
-            return rawName || "Královský hrad";
+            return rawName || (window.PRS_I18n ? window.PRS_I18n.t("custom_names.castles.castle_royal", null, "Královský hrad") : "Královský hrad");
         },
 
         applyRoyalCastleSkin: function (castleId) {
@@ -1702,8 +1683,7 @@
             rc.image = found.img;
             rc.img = found.img;
             rc.icon = found.icon || "👑";
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            if (!rc.customNameEdited) rc.name = isEn ? (found.nameEn || found.name) : found.name;
+            if (!rc.customNameEdited) rc.name = found.name;
             rc.customPositioned = true;
             if (this.board) this.board.royalCastle = found.id;
             this.renderCanvas();
@@ -2180,7 +2160,7 @@
             var bodyRiver = document.getElementById("me-insp-body-river");
             var titleEl = document.getElementById("me-insp-title");
             var idEl = document.getElementById("me-insp-id");
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            
 
             var hideAll = function () {
                 if (bodyNode) bodyNode.style.display = "none";
@@ -2215,7 +2195,7 @@
                 box.style.display = "block";
                 hideAll();
                 if (bodyEdge) bodyEdge.style.display = "block";
-                if (titleEl) titleEl.textContent = isEn ? "🔗 Path Inspector" : "🔗 Inspektor cesty";
+                if (titleEl) titleEl.textContent = tEd("map_editor.path_inspector_title", null, "🔗 Inspektor cesty");
                 if (idEl) idEl.textContent = "#" + nFrom.id + " ➔ #" + nTo.id;
 
                 if (bodyEdge) {
@@ -2223,24 +2203,24 @@
                     var isJunc = nFrom.next.length >= 2;
                     var roleTxt = isJunc
                         ? (idxInNext === 0
-                            ? (isEn ? "🔵 Primary direction (dice 1–3)" : "🔵 Hlavní směr (kostka 1–3)")
+                            ? tEd("map_editor.path_primary_dir", null, "🔵 Hlavní směr (kostka 1–3)")
                             : (idxInNext === 1
-                                ? (isEn ? "🟠 Side branch (dice 4–6)" : "🟠 Boční větev (kostka 4–6)")
-                                : (isEn ? "⚪ Secondary link" : "⚪ Vedlejší propojení")))
-                        : (isEn ? "Single outgoing path" : "Jediná výstupní cesta");
+                                ? tEd("map_editor.path_side_branch", null, "🟠 Boční větev (kostka 4–6)")
+                                : tEd("map_editor.path_secondary_link", null, "⚪ Vedlejší propojení")))
+                        : tEd("map_editor.path_single_outgoing", null, "Jediná výstupní cesta");
                     var html = [];
                     html.push('<div style="font-size:0.74rem; color:#e2e8f0; background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.25); border-radius:6px; padding:0.45rem; margin-bottom:0.45rem;">');
-                    html.push('  <div style="margin-bottom:3px;"><strong>' + (isEn ? 'From:' : 'Od:') + '</strong> #' + nFrom.id + ' ' + this.escapeXml(nFrom.name || nFrom.code || "") + '</div>');
-                    html.push('  <div style="margin-bottom:4px;"><strong>' + (isEn ? 'To:' : 'Do:') + '</strong> #' + nTo.id + ' ' + this.escapeXml(nTo.name || nTo.code || "") + '</div>');
+                    html.push('  <div style="margin-bottom:3px;"><strong>' + tEd("map_editor.path_from", null, "Od:") + '</strong> #' + nFrom.id + ' ' + this.escapeXml(nFrom.name || nFrom.code || "") + '</div>');
+                    html.push('  <div style="margin-bottom:4px;"><strong>' + tEd("map_editor.path_to", null, "Do:") + '</strong> #' + nTo.id + ' ' + this.escapeXml(nTo.name || nTo.code || "") + '</div>');
                     html.push('  <div style="font-size:0.7rem; color:#fde68a;">' + roleTxt + '</div>');
                     html.push('</div>');
                     html.push('<div style="display:flex; flex-direction:column; gap:0.35rem;">');
-                    html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.reverseEdgeDirection(' + nFrom.id + ', ' + nTo.id + ')">' + (isEn ? ('🔄 Reverse direction (#' + nTo.id + ' ➔ #' + nFrom.id + ')') : ('🔄 Obrátit směr (#' + nTo.id + ' ➔ #' + nFrom.id + ')')) + '</button>');
+                    html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.reverseEdgeDirection(' + nFrom.id + ', ' + nTo.id + ')">' + tEd("map_editor.path_reverse_btn", { from: nFrom.id, to: nTo.id }, "🔄 Obrátit směr (#" + nTo.id + " ➔ #" + nFrom.id + ")") + '</button>');
                     if (isJunc) {
-                        html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + nFrom.id + ')">' + (isEn ? '🔀 Swap junction priority (1–3 ⇄ 4–6)' : '🔀 Prohodit prioritu rozcestí (1–3 ⇄ 4–6)') + '</button>');
+                        html.push('  <button type="button" class="btn-secondary" style="font-size:0.73rem; padding:0.3rem 0.5rem; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + nFrom.id + ')">' + tEd("map_editor.path_swap_junc_btn", null, "🔀 Prohodit prioritu rozcestí (1–3 ⇄ 4–6)") + '</button>');
                     }
-                    html.push('  <button type="button" class="btn-icon-danger" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.removeEdge(' + nFrom.id + ', ' + nTo.id + ')">' + (isEn ? '✂️ Remove path (Delete)' : '✂️ Odebrat cestu (Delete)') + '</button>');
-                    html.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.5rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()">' + (isEn ? '🧭 Auto-orient branches' : '🧭 Automaticky srovnat větve') + '</button>');
+                    html.push('  <button type="button" class="btn-icon-danger" style="font-size:0.73rem; padding:0.3rem 0.5rem;" onclick="PRS_MapEditor.removeEdge(' + nFrom.id + ', ' + nTo.id + ')">' + tEd("map_editor.path_remove_btn", null, "✂️ Odebrat cestu (Delete)") + '</button>');
+                    html.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.5rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()">' + tEd("map_editor.path_auto_orient_btn", null, "🧭 Automaticky srovnat větve") + '</button>');
                     html.push('</div>');
                     bodyEdge.innerHTML = html.join("\n");
                 }
@@ -2257,8 +2237,8 @@
                 box.style.display = "block";
                 hideAll();
                 if (bodyCastle) bodyCastle.style.display = "block";
-                if (titleEl) titleEl.textContent = isEn ? "🏰 Royal Castle" : "🏰 Hlavní hrad";
-                if (idEl) idEl.textContent = isEn ? "Royal" : "Královský";
+                if (titleEl) titleEl.textContent = tEd("map_editor.castle_inspector_title", null, "🏰 Hlavní hrad");
+                if (idEl) idEl.textContent = tEd("map_editor.castle_badge_royal", null, "Královský");
 
                 if (bodyCastle) {
                     var catalog = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ALL_CASTLES) || [];
@@ -2266,32 +2246,32 @@
                     for (var ci = 0; ci < catalog.length; ci++) {
                         var c = catalog[ci];
                         var isSelSkin = (rc.skinId === c.id || rc.selectedKey === c.id || rc.image === c.img || rc.img === c.img);
-                        var cName = isEn ? (c.nameEn || c.name) : c.name;
+                        var cName = c.name;
                         opts.push('<option value="' + c.id + '"' + (isSelSkin ? ' selected' : '') + '>' + this.escapeXml((c.icon || "🏰") + " " + cName) + '</option>');
                     }
                     var scalePct = Math.round((rc.scale || 1) * 100);
                     var cHtml = [];
                     cHtml.push('<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#cbd5e1; background:rgba(0,0,0,0.4); border-radius:6px; padding:4px 8px; margin-bottom:0.4rem;">');
-                    cHtml.push('  <span>' + (isEn ? 'Map coordinates:' : 'Souřadnice na mapě:') + '</span>');
+                    cHtml.push('  <span>' + tEd("map_editor.castle_coords_label", null, "Souřadnice na mapě:") + '</span>');
                     cHtml.push('  <strong id="me-insp-castle-coords" style="color:#fde68a; font-family:monospace;">[' + Math.round(rc.x) + ', ' + Math.round(rc.y) + ']</strong>');
                     cHtml.push('</div>');
                     cHtml.push('<div style="margin-bottom:0.35rem;">');
-                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Castle appearance (skin):' : 'Podoba (skin) hradu:') + '</label>');
+                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + tEd("map_editor.castle_skin_label", null, "Podoba (skin) hradu:") + '</label>');
                     cHtml.push('  <select class="prs-select" style="width:100%; font-size:0.74rem; padding:0.25rem;" onchange="PRS_MapEditor.applyRoyalCastleSkin(this.value)">' + opts.join("") + '</select>');
                     cHtml.push('</div>');
                     cHtml.push('<div style="margin-bottom:0.35rem;">');
-                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + (isEn ? 'Castle name:' : 'Název hradu:') + '</label>');
+                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:block; margin-bottom:2px;">' + tEd("map_editor.castle_name_label", null, "Název hradu:") + '</label>');
                     cHtml.push('  <input type="text" class="prs-input" style="width:100%; font-size:0.74rem; padding:0.25rem 0.4rem;" value="' + this.escapeXml(this.getCastleDisplayName(rc)) + '" onchange="PRS_MapEditor.applyRoyalCastleName(this.value)" />');
                     cHtml.push('</div>');
                     cHtml.push('<div style="margin-bottom:0.45rem;">');
-                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>' + (isEn ? 'Castle scale:' : 'Velikost hradu:') + '</span><strong id="me-insp-castle-scale-val" style="color:#fef08a;">' + scalePct + '%</strong></label>');
+                    cHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>' + tEd("map_editor.castle_scale_label", null, "Velikost hradu:") + '</span><strong id="me-insp-castle-scale-val" style="color:#fef08a;">' + scalePct + '%</strong></label>');
                     cHtml.push('  <input type="range" min="0.75" max="1.30" step="0.05" value="' + (rc.scale || 1) + '" style="width:100%;" oninput="var el=document.getElementById(\'me-insp-castle-scale-val\'); if(el) el.textContent=Math.round(this.value*100)+\'%\';" onchange="PRS_MapEditor.applyRoyalCastleScale(this.value)" />');
                     cHtml.push('</div>');
                     cHtml.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem; margin-bottom:0.35rem;">');
-                    cHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.toggleRoyalCastleFlip()">' + (isEn ? ('↔️ Flip ' + (rc.isFlipped ? '(✓)' : '')) : ('↔️ Zrcadlit ' + (rc.isFlipped ? '(✓)' : ''))) + '</button>');
-                    cHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.resetRoyalCastlePosition()">' + (isEn ? '🎯 Map center' : '🎯 Střed mapy') + '</button>');
+                    cHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.toggleRoyalCastleFlip()">' + tEd("map_editor.castle_flip_btn", { checked: (rc.isFlipped ? "(✓)" : "") }, "↔️ Zrcadlit " + (rc.isFlipped ? "(✓)" : "")) + '</button>');
+                    cHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.72rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.resetRoyalCastlePosition()">' + tEd("map_editor.castle_center_btn", null, "🎯 Střed mapy") + '</button>');
                     cHtml.push('</div>');
-                    cHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">' + (isEn ? '🌿 Recalculate Bridges & Decors' : '🌿 Přepočítat mosty & dekorace') + '</button>');
+                    cHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">' + tEd("map_editor.castle_recalc_decor_btn", null, "🌿 Přepočítat mosty & dekorace") + '</button>');
                     bodyCastle.innerHTML = cHtml.join("\n");
                 }
                 return;
@@ -2302,20 +2282,20 @@
                 box.style.display = "block";
                 hideAll();
                 if (bodyRiver) bodyRiver.style.display = "block";
-                if (titleEl) titleEl.textContent = isEn ? "🌊 River Editor" : "🌊 Editor řeky";
+                if (titleEl) titleEl.textContent = tEd("map_editor.river_inspector_title", null, "🌊 Editor řeky");
                 var rivers = (this.board && Array.isArray(this.board.rivers)) ? this.board.rivers : [];
-                if (idEl) idEl.textContent = rivers.length > 0 ? ((isEn ? "Branch " : "Větev ") + (this.selectedRiverIdx + 1) + "/" + rivers.length) : (isEn ? "No river" : "Bez řeky");
+                if (idEl) idEl.textContent = rivers.length > 0 ? tEd("map_editor.river_branch_label", { current: this.selectedRiverIdx + 1, total: rivers.length }, "Větev " + (this.selectedRiverIdx + 1) + "/" + rivers.length) : tEd("map_editor.river_no_river", null, "Bez řeky");
 
                 if (bodyRiver) {
                     var rHtml = [];
                     rHtml.push('<div style="margin-bottom:0.4rem;">');
-                    rHtml.push('  <div style="font-size:0.68rem; color:#cbd5e1; margin-bottom:3px;">' + (isEn ? 'Quick course presets:' : 'Rychlé šablony toku:') + '</div>');
+                    rHtml.push('  <div style="font-size:0.68rem; color:#cbd5e1; margin-bottom:3px;">' + tEd("map_editor.river_presets_label", null, "Rychlé šablony toku:") + '</div>');
                     rHtml.push('  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'single\')">' + (isEn ? '🌊 Main' : '🌊 Hlavní') + '</button>');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'dual\')">' + (isEn ? '🌿 Confluence' : '🌿 Soutok') + '</button>');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'island\')">' + (isEn ? '🏝️ Island' : '🏝️ Ostrov') + '</button>');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'delta\')">' + (isEn ? '🔻 Delta' : '🔻 Delta') + '</button>');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px; border-color:#64748b; color:#94a3b8;" onclick="PRS_MapEditor.applyRiverPreset(\'none\')">' + (isEn ? '🏜️ No River' : '🏜️ Bez řeky') + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'single\')">' + tEd("map_editor.river_preset_main", null, "🌊 Hlavní") + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'dual\')">' + tEd("map_editor.river_preset_confluence", null, "🌿 Soutok") + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'island\')">' + tEd("map_editor.river_preset_island", null, "🏝️ Ostrov") + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'delta\')">' + tEd("map_editor.river_preset_delta", null, "🔻 Delta") + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px; border-color:#64748b; color:#94a3b8;" onclick="PRS_MapEditor.applyRiverPreset(\'none\')">' + tEd("map_editor.river_preset_none", null, "🏜️ Bez řeky") + '</button>');
                     rHtml.push('  </div>');
                     rHtml.push('</div>');
 
@@ -2326,27 +2306,27 @@
                         rHtml.push('<div style="display:flex; gap:3px; margin-bottom:0.4rem; overflow-x:auto;">');
                         for (var ri = 0; ri < rivers.length; ri++) {
                             var isActiveRiv = (ri === this.selectedRiverIdx);
-                            var bName = (rivers[ri].isTributary ? (isEn ? 'Tributary ' : 'Přítok ') : (isEn ? 'River ' : 'Řeka ')) + (ri + 1);
+                            var bName = rivers[ri].isTributary ? tEd("map_editor.river_tab_tributary", { num: ri + 1 }, "Přítok " + (ri + 1)) : tEd("map_editor.river_tab_river", { num: ri + 1 }, "Řeka " + (ri + 1));
                             rHtml.push('<button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 6px;' + (isActiveRiv ? ' border-color:#facc15; background:rgba(250,204,21,0.18); color:#fef08a;' : '') + '" onclick="PRS_MapEditor.selectRiverIndex(' + ri + ')">' + bName + '</button>');
                         }
                         rHtml.push('</div>');
 
-                        rHtml.push('<div id="me-insp-river-pt-info" style="font-size:0.68rem; color:#bae6fd; background:rgba(14,165,233,0.12); border-radius:5px; padding:3px 6px; margin-bottom:0.35rem;">' + (isEn ? 'Drag blue anchors (with Alt without handles) or yellow curve handles.' : 'Táhni modré kotvy (s Alt bez táhel) nebo žluté úchyty.') + '</div>');
+                        rHtml.push('<div id="me-insp-river-pt-info" style="font-size:0.68rem; color:#bae6fd; background:rgba(14,165,233,0.12); border-radius:5px; padding:3px 6px; margin-bottom:0.35rem;">' + tEd("map_editor.river_hint_drag", null, "Táhni modré kotvy (s Alt bez táhel) nebo žluté úchyty.") + '</div>');
                         rHtml.push('<div style="margin-bottom:0.4rem;">');
-                        rHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>' + (isEn ? 'Selected course width:' : 'Šířka vybraného toku:') + '</span><strong id="me-insp-river-w-val" style="color:#38bdf8;">' + curW + ' px</strong></label>');
+                        rHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>' + tEd("map_editor.river_width_label", null, "Šířka vybraného toku:") + '</span><strong id="me-insp-river-w-val" style="color:#38bdf8;">' + curW + ' px</strong></label>');
                         rHtml.push('  <input type="range" min="24" max="54" step="2" value="' + Math.max(24, Math.min(54, curW)) + '" style="width:100%;" oninput="var el=document.getElementById(\'me-insp-river-w-val\'); if(el) el.textContent=this.value+\' px\';" onchange="PRS_MapEditor.applyRiverWidth(this.value)" />');
                         rHtml.push('</div>');
 
                         rHtml.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem; margin-bottom:0.35rem;">');
-                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverMeander()">' + (isEn ? '〰️ Add Meander' : '〰️ Přidat zákrut') + '</button>');
-                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverTributary()">' + (isEn ? '➕ Add Tributary' : '➕ Přidat přítok') + '</button>');
-                        rHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.flipSelectedRiverHorizontally()">' + (isEn ? '↔️ Flip X' : '↔️ Překlopit X') + '</button>');
-                        rHtml.push('  <button type="button" class="btn-icon-danger" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedRiver()">' + (isEn ? '🗑️ Delete Branch' : '🗑️ Smazat větev') + '</button>');
+                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverMeander()">' + tEd("map_editor.river_btn_meander", null, "〰️ Přidat zákrut") + '</button>');
+                        rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverTributary()">' + tEd("map_editor.river_btn_tributary", null, "➕ Přidat přítok") + '</button>');
+                        rHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.flipSelectedRiverHorizontally()">' + tEd("map_editor.river_btn_flip", null, "↔️ Překlopit X") + '</button>');
+                        rHtml.push('  <button type="button" class="btn-icon-danger" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedRiver()">' + tEd("map_editor.river_btn_delete", null, "🗑️ Smazat větev") + '</button>');
                         rHtml.push('</div>');
                     } else {
-                        rHtml.push('<button type="button" class="btn-secondary" style="width:100%; font-size:0.72rem; padding:0.3rem; margin-bottom:0.35rem;" onclick="PRS_MapEditor.addRiverTributary()">' + (isEn ? '➕ Create New River Bed' : '➕ Založit nové koryto řeky') + '</button>');
+                        rHtml.push('<button type="button" class="btn-secondary" style="width:100%; font-size:0.72rem; padding:0.3rem; margin-bottom:0.35rem;" onclick="PRS_MapEditor.addRiverTributary()">' + tEd("map_editor.river_btn_create_bed", null, "➕ Založit nové koryto řeky") + '</button>');
                     }
-                    rHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">' + (isEn ? '🌿 Recalculate Bridges & Decors' : '🌿 Přepočítat mosty & dekorace') + '</button>');
+                    rHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">' + tEd("map_editor.river_btn_recalc", null, "🌿 Přepočítat mosty & dekorace") + '</button>');
                     bodyRiver.innerHTML = rHtml.join("\n");
                 }
                 return;
@@ -2367,7 +2347,7 @@
             box.style.display = "block";
             hideAll();
             if (bodyNode) bodyNode.style.display = "block";
-            if (titleEl) titleEl.textContent = isEn ? "⚙️ Tile Inspector" : "⚙️ Inspektor políčka";
+            if (titleEl) titleEl.textContent = tEd("map_editor.tile_inspector_title", null, "⚙️ Inspektor políčka");
 
             var coordsEl = document.getElementById("me-insp-coords");
             var typeSel = document.getElementById("me-insp-type");
@@ -2397,14 +2377,14 @@
                     tierWrap.style.display = "block";
                     tierSel.innerHTML = "";
                     for (var a = 1; a <= 14; a++) {
-                        tierSel.innerHTML += '<option value="' + a + '"' + ((node.animalLevel || 1) === a ? ' selected' : '') + '>' + (isEn ? ('Level ' + a) : ('Úroveň ' + a)) + '</option>';
+                        tierSel.innerHTML += '<option value="' + a + '"' + ((node.animalLevel || 1) === a ? ' selected' : '') + '>' + tEd("map_editor.tile_level_opt", { level: a }, "Úroveň " + a) + '</option>';
                     }
                 } else if (isMaster) {
                     tierWrap.style.display = "block";
-                    tierSel.innerHTML = '<option value="1"' + ((node.masterTier || 1) === 1 ? ' selected' : '') + '>' + (isEn ? 'Tier I (Basic +1)' : 'Stupeň I (Základní +1)') + '</option>' +
-                                        '<option value="2"' + ((node.masterTier || 1) === 2 ? ' selected' : '') + '>' + (isEn ? 'Tier II (Advanced +2)' : 'Stupeň II (Pokročilý +2)') + '</option>' +
-                                        '<option value="3"' + ((node.masterTier || 1) === 3 ? ' selected' : '') + '>' + (isEn ? 'Tier III (Seals & Aegis)' : 'Stupeň III (Pečetě & Záštita)') + '</option>' +
-                                        '<option value="4"' + ((node.masterTier || 1) === 4 ? ' selected' : '') + '>' + (isEn ? 'Tier IV (Duels for 1.5 💖)' : 'Stupeň IV (Duely o 1.5 💖)') + '</option>';
+                    tierSel.innerHTML = '<option value="1"' + ((node.masterTier || 1) === 1 ? ' selected' : '') + '>' + tEd("map_editor.tile_master_tier1", null, "Stupeň I (Základní +1)") + '</option>' +
+                                        '<option value="2"' + ((node.masterTier || 1) === 2 ? ' selected' : '') + '>' + tEd("map_editor.tile_master_tier2", null, "Stupeň II (Pokročilý +2)") + '</option>' +
+                                        '<option value="3"' + ((node.masterTier || 1) === 3 ? ' selected' : '') + '>' + tEd("map_editor.tile_master_tier3", null, "Stupeň III (Pečetě & Záštita)") + '</option>' +
+                                        '<option value="4"' + ((node.masterTier || 1) === 4 ? ' selected' : '') + '>' + tEd("map_editor.tile_master_tier4", null, "Stupeň IV (Duely o 1.5 💖)") + '</option>';
                 } else {
                     tierWrap.style.display = "none";
                 }
@@ -2425,12 +2405,12 @@
 
                 eHtml.push('<div style="border-top:1px solid rgba(212,175,55,0.2); padding-top:0.35rem; margin-bottom:0.4rem;">');
                 eHtml.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">');
-                eHtml.push('    <span style="font-size:0.7rem; color:#fde68a; font-weight:bold;">' + (isEn ? '🛤️ Node Paths & Directions' : '🛤️ Cesty a směry uzlu') + '</span>');
-                eHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 5px; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()" title="' + (isEn ? 'Automatically align side branches and junctions' : 'Automaticky srovnat boční větve a rozcestí') + '">' + (isEn ? '🧭 Align' : '🧭 Srovnat') + '</button>');
+                eHtml.push('    <span style="font-size:0.7rem; color:#fde68a; font-weight:bold;">' + tEd("map_editor.tile_paths_title", null, "🛤️ Cesty a směry uzlu") + '</span>');
+                eHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 5px; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.autoOrientSideBranches()" title="' + tEd("map_editor.tile_paths_align_title", null, "Automaticky srovnat boční větve a rozcestí") + '">' + tEd("map_editor.tile_paths_align_btn", null, "🧭 Srovnat") + '</button>');
                 eHtml.push('  </div>');
 
                 if (outList.length === 0) {
-                    eHtml.push('  <div style="font-size:0.68rem; color:#fca5a5; background:rgba(153,27,27,0.35); border:1px solid rgba(248,113,113,0.5); border-radius:5px; padding:3px 6px; margin-bottom:4px;">' + (isEn ? '⚠️ Dead end — tile has no outgoing direction!' : '⚠️ Slepá cesta — pole nemá žádný výstupní směr!') + '</div>');
+                    eHtml.push('  <div style="font-size:0.68rem; color:#fca5a5; background:rgba(153,27,27,0.35); border:1px solid rgba(248,113,113,0.5); border-radius:5px; padding:3px 6px; margin-bottom:4px;">' + tEd("map_editor.tile_dead_end_warn", null, "⚠️ Slepá cesta — pole nemá žádný výstupní směr!") + '</div>');
                 } else {
                     var isNodeJunc = outList.length >= 2;
                     for (var oi = 0; oi < outList.length; oi++) {
@@ -2442,28 +2422,28 @@
                         eHtml.push('  <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; font-size:0.68rem; color:#e2e8f0; background:rgba(0,0,0,0.38); padding:2px 5px; border-radius:4px; margin-bottom:3px;">');
                         eHtml.push('    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + jBadge + '➔ #' + tgt.id + ' ' + this.escapeXml(tgt.name || tgt.code || "") + '</span>');
                         eHtml.push('    <span style="display:flex; gap:3px; flex-shrink:0;">');
-                        eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + node.id + ', ' + tgt.id + ')" title="' + (isEn ? 'Reverse direction' : 'Obrátit směr') + '">🔄</button>');
-                        eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + node.id + ', ' + tgt.id + ')" title="' + (isEn ? 'Remove path' : 'Odebrat cestu') + '">🗑️</button>');
+                        eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + node.id + ', ' + tgt.id + ')" title="' + tEd("map_editor.tile_reverse_title", null, "Obrátit směr") + '">🔄</button>');
+                        eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + node.id + ', ' + tgt.id + ')" title="' + tEd("map_editor.tile_remove_title", null, "Odebrat cestu") + '">🗑️</button>');
                         eHtml.push('    </span>');
                         eHtml.push('  </div>');
                     }
                     if (isNodeJunc) {
-                        eHtml.push('  <button type="button" class="btn-secondary" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem; margin-bottom:4px; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + node.id + ')">' + (isEn ? '🔀 Swap 1–3 ⇄ 4–6' : '🔀 Prohodit 1–3 ⇄ 4–6') + '</button>');
+                        eHtml.push('  <button type="button" class="btn-secondary" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem; margin-bottom:4px; border-color:#f59e0b; color:#fde68a;" onclick="PRS_MapEditor.swapJunctionBranchPriority(' + node.id + ')">' + tEd("map_editor.tile_swap_priority_btn", null, "🔀 Prohodit 1–3 ⇄ 4–6") + '</button>');
                     }
                 }
 
                 for (var ii = 0; ii < inList.length; ii++) {
                     var inc = inList[ii];
                     eHtml.push('  <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; font-size:0.67rem; color:#94a3b8; background:rgba(0,0,0,0.25); padding:2px 5px; border-radius:4px; margin-bottom:3px;">');
-                    eHtml.push('    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + (isEn ? '⬅️ from #' : '⬅️ z #') + inc.id + ' ' + this.escapeXml(inc.name || inc.code || "") + '</span>');
+                    eHtml.push('    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + tEd("map_editor.tile_incoming_from", null, "⬅️ z #") + inc.id + ' ' + this.escapeXml(inc.name || inc.code || "") + '</span>');
                     eHtml.push('    <span style="display:flex; gap:3px; flex-shrink:0;">');
-                    eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + inc.id + ', ' + node.id + ')" title="' + (isEn ? 'Reverse direction' : 'Obrátit směr') + '">🔄</button>');
-                    eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + inc.id + ', ' + node.id + ')" title="' + (isEn ? 'Remove path' : 'Odebrat cestu') + '">🗑️</button>');
+                    eHtml.push('      <button type="button" class="btn-zoom" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.reverseEdgeDirection(' + inc.id + ', ' + node.id + ')" title="' + tEd("map_editor.tile_reverse_title", null, "Obrátit směr") + '">🔄</button>');
+                    eHtml.push('      <button type="button" class="btn-icon-danger" style="font-size:0.65rem; padding:1px 4px;" onclick="PRS_MapEditor.removeEdge(' + inc.id + ', ' + node.id + ')" title="' + tEd("map_editor.tile_remove_title", null, "Odebrat cestu") + '">🗑️</button>');
                     eHtml.push('    </span>');
                     eHtml.push('  </div>');
                 }
 
-                eHtml.push('  <button type="button" class="btn-zoom" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem;" onclick="PRS_MapEditor.setTool(\'link\'); PRS_MapEditor.linkSourceNodeId = ' + node.id + '; PRS_MapEditor.updateStatusHelp(); PRS_MapEditor.renderCanvas();">' + (isEn ? ('🔗 Add / remove path from #' + node.id) : ('🔗 Přidat / odebrat cestu z #' + node.id)) + '</button>');
+                eHtml.push('  <button type="button" class="btn-zoom" style="width:100%; font-size:0.69rem; padding:0.22rem 0.4rem;" onclick="PRS_MapEditor.setTool(\'link\'); PRS_MapEditor.linkSourceNodeId = ' + node.id + '; PRS_MapEditor.updateStatusHelp(); PRS_MapEditor.renderCanvas();">' + tEd("map_editor.tile_link_toggle_btn", { id: node.id }, "🔗 Přidat / odebrat cestu z #" + node.id) + '</button>');
                 eHtml.push('</div>');
                 edgesWrap.innerHTML = eHtml.join("\n");
             }
@@ -3321,7 +3301,6 @@
 
         openRouteShapeModal: function () {
             var self = this;
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var archetypes = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES)
                 ? window.KiDeskyMapGenerator.ROUTE_ARCHETYPES
                 : {};
@@ -3331,8 +3310,8 @@
             for (var i = 0; i < keys.length; i++) {
                 var k = keys[i];
                 var a = archetypes[k];
-                var aName = isEn ? (a.nameEn || a.name) : a.name;
-                var aDesc = isEn ? (a.descEn || a.desc) : a.desc;
+                var aName = a.name;
+                var aDesc = a.desc;
                 optionsHtml += '<button type="button" class="btn-gold-lg" style="text-align:left; padding:0.5rem 0.8rem; display:flex; flex-direction:column; gap:2px;" onclick="PRS_MapEditor.applyProceduralShape(\'' + k + '\')">' +
                     '<div style="font-weight:700; color:#fef08a;">' + aName + '</div>' +
                     '<div style="font-size:0.72rem; color:#cbd5e1; opacity:0.85;">' + aDesc + '</div>' +
@@ -3364,7 +3343,6 @@
             if (!this.board || !this.board.nodes || this.board.nodes.length < 3) return;
             if (!window.KiDeskyMapGenerator || typeof window.KiDeskyMapGenerator.applyArchetypeToNodes !== "function") return;
 
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var tShape = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
             this.pushUndoState("Změna tvaru trasy na " + shapeKey);
             window.KiDeskyMapGenerator.applyArchetypeToNodes(this.board, shapeKey);
@@ -3373,7 +3351,7 @@
             this.renderCanvas();
 
             var aObj = (window.KiDeskyMapGenerator.ROUTE_ARCHETYPES && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES[shapeKey]) || {};
-            var aName = isEn ? (aObj.nameEn || aObj.name || shapeKey) : (aObj.name || shapeKey);
+            var aName = aObj.name || shapeKey;
             if (window.KiDeskyToast) {
                 window.KiDeskyToast.show(tShape("map_editor.modals.toast_shape_applied", { name: aName }, "✨ Nová trasa (" + aName + ") vygenerována! Lze vrátit pomocí ↩️ Zpět (Ctrl+Z)"), "good");
             }

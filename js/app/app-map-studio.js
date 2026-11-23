@@ -110,7 +110,6 @@
     },
 
     refreshMapStudioSelectOptions: function () {
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
 
         var updateSelect = function (id, mapping) {
             var sel = document.getElementById(id);
@@ -248,8 +247,7 @@
         var grid = document.getElementById("ms-animal-levels-grid");
         if (!grid || !this.customBoardRecipe) return;
         var activeLevels = this.customBoardRecipe.animalLevels || [1, 2, 3, 4, 5, 6];
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var trioHint = isEn ? "(+F+D)" : "(+S+P)";
+        var trioHint = (window.PRS_I18n ? window.PRS_I18n.t("map_studio.trio_hint", null, "(+S+P)") : "(+S+P)");
         var ribbonColors = {
             1: "#2563eb", 2: "#059669", 3: "#d97706", 4: "#7c3aed",
             5: "#dc2626", 6: "#0891b2", 7: "#ea580c", 8: "#4f46e5",
@@ -300,12 +298,11 @@
         if (!grid || !this.customBoardRecipe) return;
         var r = this.customBoardRecipe;
         var defs = this.MAP_STUDIO_COUNTERS_DEF;
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var html = "";
         for (var i = 0; i < defs.length; i++) {
             var d = defs[i];
             var val = (r[d.key] !== undefined) ? r[d.key] : 0;
-            var dLabel = isEn ? (d.labelEn || d.label) : d.label;
+            var dLabel = (window.PRS_I18n && d.key) ? window.PRS_I18n.t("map_studio.counters." + d.key, null, d.label) : d.label;
             html += '<div style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:rgba(15,23,42,0.55); border:1px solid rgba(212,175,55,0.18); border-radius:6px; padding:3px 6px;">' +
                 '<span style="font-size:0.71rem; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + this.escapeHtml(dLabel) + '">' + dLabel + '</span>' +
                 '<div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">' +
@@ -611,16 +608,13 @@
         if (bSel) bSel.value = "saved_map_" + idx;
 
         if (this.state && this.state.turnNumber > 0) {
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var tmplName = item.name || (isEn ? "Custom Map" : "Vlastní plán");
-            var msg = isEn
-                ? ("Starting a quest on template \"" + tmplName + "\" requires restarting the match.\nDo you wish to start playing?")
-                : ("Spuštění výpravy na šabloně „" + tmplName + "“ vyžaduje restart partie.\nPřeješ si začít hrát?");
+            var tmplName = item.name || (window.PRS_I18n ? window.PRS_I18n.t("map_studio.default_custom_map_name", null, "Vlastní plán") : "Vlastní plán");
+            var msg = window.PRS_I18n ? window.PRS_I18n.t("map_studio.start_quest_template_msg", { name: tmplName }) : ("Spuštění výpravy na šabloně „" + tmplName + "“ vyžaduje restart partie.\nPřeješ si začít hrát?");
             var conf = await KiDeskyDialog.confirm(msg, {
-                title: isEn ? "Start Quest on Selected Map" : "Zahájení výpravy na vybraném plánu",
+                title: window.PRS_I18n ? window.PRS_I18n.t("map_studio.start_quest_template_title", null, "Zahájení výpravy na vybraném plánu") : "Zahájení výpravy na vybraném plánu",
                 icon: "🗺️",
-                confirmText: isEn ? "⚔️ Start Game" : "⚔️ Zahájit hru",
-                cancelText: isEn ? "Back" : "Zpět"
+                confirmText: window.PRS_I18n ? window.PRS_I18n.t("map_studio.start_quest_template_confirm", null, "⚔️ Zahájit hru") : "⚔️ Zahájit hru",
+                cancelText: window.PRS_I18n ? window.PRS_I18n.t("map_studio.start_quest_template_cancel", null, "Zpět") : "Zpět"
             });
             if (!conf) return;
         }
@@ -690,8 +684,6 @@
             container.innerHTML = window.KiDeskyMapGenerator.renderMiniPreviewSVG(board, 580, 360);
         }
 
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-
         // Titulek a odznaky
         var elTitle = document.getElementById("ms-preview-title");
         var elBadge = document.getElementById("ms-preview-badge");
@@ -700,14 +692,10 @@
 
         if (elTitle) {
             var rawName = board.name || ("Vlastní království #" + this.mapStudioSeed);
-            if (isEn && board.nameEn) {
-                elTitle.textContent = board.nameEn;
-            } else if (isEn && /Dračí království\s*#/i.test(rawName)) {
-                elTitle.textContent = rawName.replace(/Dračí království\s*#/i, "Dragon Realm #")
-                                             .replace(/(\d+)\s*polí\b/gi, "$1 tiles");
-            } else if (isEn && /Vlastní království\s*#/i.test(rawName)) {
-                elTitle.textContent = rawName.replace(/Vlastní království\s*#/i, "Custom Realm #")
-                                             .replace(/(\d+)\s*polí\b/gi, "$1 tiles");
+            if (this.formatBoardDisplayName) {
+                elTitle.textContent = this.formatBoardDisplayName(rawName);
+            } else if (window.PRS_App && window.PRS_App.formatBoardDisplayName) {
+                elTitle.textContent = window.PRS_App.formatBoardDisplayName(rawName);
             } else {
                 elTitle.textContent = rawName;
             }
@@ -785,17 +773,16 @@
         this.customBoardRecipe.seed = newSeed;
 
         if (this.state && this.state.turnNumber > 0) {
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var bName = this._currentMapStudioBoard.name || newSeed;
             var nodeCount = this._currentMapStudioBoard.nodes ? this._currentMapStudioBoard.nodes.length : 96;
-            var msg = isEn
-                ? ("Starting a new quest on a custom dynamic map requires restarting the match.\nDo you wish to start playing on map \"" + bName + "\" (" + nodeCount + " tiles)?")
+            var msg = window.PRS_I18n
+                ? window.PRS_I18n.t("map_studio.start_quest_dyn_msg", { name: bName, count: nodeCount })
                 : ("Spuštění nové výpravy na vlastním dynamickém plánu vyžaduje restart partie.\nPřeješ si začít hrát na plánu „" + bName + "“ (" + nodeCount + " polí)?");
             var conf = await KiDeskyDialog.confirm(msg, {
-                title: isEn ? "Start Quest on Custom Map" : "Zahájení výpravy na vlastním plánu",
+                title: window.PRS_I18n ? window.PRS_I18n.t("map_studio.start_quest_dyn_title", null, "Zahájení výpravy na vlastním plánu") : "Zahájení výpravy na vlastním plánu",
                 icon: "🗺️",
-                confirmText: isEn ? "⚔️ Start Game on this Map" : "⚔️ Zahájit hru na tomto plánu",
-                cancelText: isEn ? "Back to Quest" : "Zpět k partii"
+                confirmText: window.PRS_I18n ? window.PRS_I18n.t("map_studio.start_quest_dyn_confirm", null, "⚔️ Zahájit hru na tomto plánu") : "⚔️ Zahájit hru na tomto plánu",
+                cancelText: window.PRS_I18n ? window.PRS_I18n.t("map_studio.start_quest_dyn_cancel", null, "Zpět k partii") : "Zpět k partii"
             });
             if (!conf) return;
         }

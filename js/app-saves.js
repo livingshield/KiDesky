@@ -37,15 +37,15 @@
         // Otevře modální okno pro uložení aktuální hry
         formatBoardDisplayName: function (name) {
             if (!name) return "";
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            if (!isEn) return name;
-            return name.replace(/Dračí království/gi, "Dragon Realm")
-                       .replace(/Královská divočina/gi, "Royal Wilderness")
-                       .replace(/Královská delta/gi, "Royal Delta")
-                       .replace(/Rytířské kolbiště/gi, "Knight's Arena")
-                       .replace(/Vlastní plán/gi, "Custom Map")
-                       .replace(/Náhodné království/gi, "Procedural Realm")
-                       .replace(/polí/gi, "tiles");
+            var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+            var mapNames = ["Dračí království", "Královská divočina", "Královská delta", "Rytířské kolbiště", "Vlastní plán", "Náhodné království", "Vlastní království"];
+            for (var i = 0; i < mapNames.length; i++) {
+                var raw = mapNames[i];
+                if (name.indexOf(raw) !== -1) {
+                    name = name.replace(new RegExp(raw, "gi"), t("custom_names.map_names." + raw, null, raw));
+                }
+            }
+            return name;
         },
 
         openSaveGameModal: function () {
@@ -71,9 +71,9 @@
             var turnNum = this.state.turnNumber || 0;
             var activeP = (this.state.players && this.state.players[this.state.currentPlayerIndex]) ? this.state.players[this.state.currentPlayerIndex].name : tSave("saves.unknown_player", null, "Neznámý");
 
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var currGold = tSave("common.gold", null, "zl.");
-            var timeStr = new Date().toLocaleTimeString(isEn ? "en-US" : "cs-CZ", { hour: "2-digit", minute: "2-digit" });
+            var timeLocale = tSave("ui.locale", null, "cs-CZ");
+            var timeStr = new Date().toLocaleTimeString(timeLocale, { hour: "2-digit", minute: "2-digit" });
             var defaultTitle = tSave("saves.default_title", { mode: modeName, round: roundNum, time: timeStr }, modeName + " – Kolo " + roundNum + " (" + timeStr + ")");
             if (titleInput) {
                 titleInput.value = defaultTitle;
@@ -92,7 +92,7 @@
                     var pl = this.state.players[i];
                     playersHtml.push(
                         '<span class="save-game-player-chip" style="border-left:3px solid ' + (pl.color || '#d4af37') + ';">' +
-                        this.escapeHtml(this.getPlayerDisplayName ? this.getPlayerDisplayName(pl) : pl.name) + ' (' + (pl.totalHearts || 0) + ' 💖, ' + (pl.gold || 0).toLocaleString(isEn ? 'en-US' : 'cs-CZ') + ' ' + currGold + ')' +
+                        this.escapeHtml(this.getPlayerDisplayName ? this.getPlayerDisplayName(pl) : pl.name) + ' (' + (pl.totalHearts || 0) + ' 💖, ' + (pl.gold || 0).toLocaleString(timeLocale) + ' ' + currGold + ')' +
                         '</span>'
                     );
                 }
@@ -920,7 +920,6 @@
             var container = document.getElementById("saved-games-container");
             if (!container) return;
 
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var tList = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
             var currStr = tList("common.gold", null, "zl.");
 
@@ -1173,7 +1172,6 @@
             var countEl = document.getElementById("gh-saved-count");
             if (countEl) countEl.textContent = String(totalCount);
 
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var tRec = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
             var recentBox = document.getElementById("gamehall-recent-save-box");
             if (recentBox) {
@@ -1184,8 +1182,8 @@
 
                 if (useAutosave) {
                     var curPlayerName = activeMeta.currentPlayerName || "";
-                    if (isEn && curPlayerName.indexOf("(Ty)") !== -1) {
-                        curPlayerName = curPlayerName.replace(/\s*\(Ty\)/gi, " " + tRec("common.you_tag", null, "(You)"));
+                    if (curPlayerName.indexOf("(Ty)") !== -1 || curPlayerName.indexOf("(You)") !== -1) {
+                        curPlayerName = curPlayerName.replace(/\s*\((?:Ty|You)\)/gi,/\s*\(Ty\)/gi, " " + tRec("common.you_tag", null, "(You)"));
                     }
                     var headerTxt = tRec("saves.last_played", null, "⚔️ Poslední rozehraná hra");
                     var questTxt = tRec("saves.active_quest", { round: activeMeta.roundNumber, turn: activeMeta.turnNumber }, "Rozehraná výprava – Kolo " + activeMeta.roundNumber + " (Tah #" + activeMeta.turnNumber + ")");

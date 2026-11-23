@@ -578,17 +578,17 @@
         // 6. Tlačítko pro založení online místnosti (Host se může připojit, ale nemůže ji založit)
         var createRoomBtn = document.getElementById("btn-create-online-room");
         if (createRoomBtn) {
-            var isEnNow = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+            var tBtn = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
             if (isGuest) {
-                createRoomBtn.innerHTML = isEnNow ? "🔒 Create New Online Room (Sign-in required)" : "🔒 Založit novou Online místnost (vyžaduje přihlášení)";
+                createRoomBtn.innerHTML = tBtn("lobby.room_create_guest", null, "🔒 Založit novou Online místnost (vyžaduje přihlášení)");
                 createRoomBtn.style.borderColor = "rgba(212,175,55,0.45)";
                 createRoomBtn.style.color = "var(--gold-light)";
-                createRoomBtn.title = isEnNow ? "As a Guest you can join a friend's table via 6-digit code. Sign in to host a table." : "Jako Host se můžeš připojit ke stolu kamaráda přes 6místný kód. Pro založení nového stolu se přihlas.";
+                createRoomBtn.title = tBtn("lobby.room_create_guest_title", null, "Jako Host se můžeš připojit ke stolu kamaráda přes 6místný kód. Pro založení nového stolu se přihlas.");
             } else {
-                createRoomBtn.innerHTML = isEnNow ? "☁️ Create New Online Room & get friend invite code" : "☁️ Založit novou Online místnost a získat kód pro přátele";
+                createRoomBtn.innerHTML = tBtn("lobby.room_create_user", null, "☁️ Založit novou Online místnost a získat kód pro přátele");
                 createRoomBtn.style.borderColor = "#38bdf8";
                 createRoomBtn.style.color = "#bae6fd";
-                createRoomBtn.title = isEnNow ? "Creates a new online game and generates a 6-digit invite code" : "Založí novou online hru a vygeneruje 6místný kód pro přátele";
+                createRoomBtn.title = tBtn("lobby.room_create_user_title", null, "Založí novou online hru a vygeneruje 6místný kód pro přátele");
             }
         }
 
@@ -948,7 +948,7 @@
         var slotInfoEl = document.getElementById("pawn-shop-slot-info");
         if (!grid) return;
 
-        var isEn = (typeof window !== "undefined" && window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
+        var tPawn = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
         var isGuest = (!this.currentUser || this.currentUser.role === "Guest");
         if (isGuest) {
@@ -963,16 +963,12 @@
 
         if (slotInfoEl) {
             if (isGuest) {
-                slotInfoEl.innerHTML = isEn
-                    ? '👤 Playing as <strong>Guest</strong>: <strong>6 basic knights</strong> are available for free. Premium figures and crystals 💎 are for registered accounts.'
-                    : '👤 Hraješ jako <strong>Host</strong>: máš zdarma k dispozici <strong>6 základních rytířů</strong>. Prémiové figurky a krystaly 💎 jsou pro přihlášené účty.';
+                slotInfoEl.innerHTML = tPawn("lobby.pawn_guest_info", null, "👤 Hraješ jako <strong>Host</strong>: máš zdarma k dispozici <strong>6 základních rytířů</strong>. Prémiové figurky a krystaly 💎 jsou pro přihlášené účty.");
             } else if (targetPlayer) {
                 var pName = this.getPlayerDisplayName ? this.getPlayerDisplayName(targetPlayer) : targetPlayer.name;
-                slotInfoEl.innerHTML = isEn
-                    ? ('Selecting pawn for slot <strong>#' + (slotIdx + 1) + ': ' + this.escapeHtml(pName) + '</strong>')
-                    : ('Vybíráš figurku pro slot <strong>#' + (slotIdx + 1) + ': ' + this.escapeHtml(pName) + '</strong>');
+                slotInfoEl.innerHTML = tPawn("lobby.pawn_slot_info", { slot: slotIdx + 1, name: this.escapeHtml(pName) }, "Vybíráš figurku pro slot <strong>#" + (slotIdx + 1) + ": " + this.escapeHtml(pName) + "</strong>");
             } else {
-                slotInfoEl.innerHTML = isEn ? 'Selecting your primary personal pawn' : 'Vybíráš svou hlavní osobní figurku';
+                slotInfoEl.innerHTML = tPawn("lobby.pawn_personal_info", null, "Vybíráš svou hlavní osobní figurku");
             }
         }
 
@@ -1287,162 +1283,20 @@
 
     getUnifiedNodeDisplayName: function (node) {
         if (!node) return "";
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        if (!isEn) return node.name || node.code || "";
-
-        var type = node.type;
-        var name = node.name || "";
+        var name = node.name || node.code || "";
         var code = node.code || "";
-
+        var type = node.type;
+        var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         if (type === "START" || code === "START") {
-            return "Royal Castle Start";
+            return t("standing_card.pill_start", null, name);
         }
-
-        if (type === "ANIMAL") {
-            var setId = node.setId || (code && code.match(/\d+/) ? parseInt(code.match(/\d+/)[0], 10) : 1);
-            var subtype = node.subtype || "";
-            var animalType = (subtype === "horse" || code.startsWith("K")) ? "Horse" : ((subtype === "dog" || code.startsWith("P")) ? "Dog" : "Falcon");
-            var breedsEn = {
-                1: { horse: "Dapple Gray", falcon: "Kestrel", dog: "Pointer" },
-                2: { horse: "Bay Horse", falcon: "Sparrowhawk", dog: "Beagle" },
-                3: { horse: "Black Steed", falcon: "Hobby", dog: "Greyhound" },
-                4: { horse: "Chestnut", falcon: "Saker", dog: "Bloodhound" },
-                5: { horse: "White Steed", falcon: "Royal Hobby", dog: "Tracker" },
-                6: { horse: "Dun Horse", falcon: "Peregrine Falcon", dog: "Wolfhound" },
-                7: { horse: "Dappled Gray", falcon: "Kite", dog: "Great Dane" },
-                8: { horse: "Friesian", falcon: "Osprey", dog: "Hound King" },
-                9: { horse: "Andalusian", falcon: "Goshawk", dog: "Hunting Hound" },
-                10: { horse: "Warhorse", falcon: "Royal Falcon", dog: "Royal Hound" },
-                11: { horse: "Star Stallion", falcon: "White Saker", dog: "Silver Pointer" },
-                12: { horse: "Sovereign Steed", falcon: "Phoenix Falcon", dog: "Golden Hound" },
-                13: { horse: "Golden Palomino", falcon: "Golden Eagle", dog: "Northern Wolfhound" },
-                14: { horse: "Shadow Steed", falcon: "Night Falcon", dog: "Castle Gargoyle" }
-            };
-            var bInfo = breedsEn[setId] || breedsEn[1];
-            var breedStr = (subtype === "horse" || code.startsWith("K")) ? bInfo.horse : ((subtype === "dog" || code.startsWith("P")) ? bInfo.dog : bInfo.falcon);
-            return animalType + " " + setId + " (" + breedStr + ")";
-        }
-
-        if (type === "VILLAGE") {
-            var vMap = {
-                "Králova Lhota": "King's Lhota", "Lhotka": "Little Lhota", "Březová": "Birchwood", "Dubina": "Oak Vale",
-                "Skalice": "Rockford", "Meziříčí": "Riverbend", "Slunečná": "Sunny", "Podhradí": "Castlefold",
-                "Větrná": "Windy", "Zlatá Olešnice": "Golden Alder", "Rovensko": "Flatland", "Chlumec": "Hillcrest",
-                "Lipnice": "Lindendale", "Studánka": "Springfield", "Osek": "Ashwood", "Hvozd": "Deep Forest",
-                "Kamenice": "Stoney", "Jabloňov": "Applegrove", "Borová": "Pinewood", "Blatná": "Marshfield",
-                "Dobříš": "Goodhaven", "Rožmitál": "Rosendale", "Třeboňsko": "Lakehurst", "Bystřička": "Brookside"
-            };
-            var match = name.match(/Vesnice\s+(\d+)\s*\(([^)]+)\)/);
-            if (match) {
-                var num = match[1];
-                var czName = match[2];
-                var enName = vMap[czName] || czName;
-                return "Village " + num + " (" + enName + ")";
+        var mapNames = ["Dračí království", "Královská divočina", "Královská delta", "Rytířské kolbiště", "Vlastní plán", "Náhodné království", "Vlastní království"];
+        for (var i = 0; i < mapNames.length; i++) {
+            var raw = mapNames[i];
+            if (name.indexOf(raw) !== -1) {
+                name = name.replace(new RegExp(raw, "gi"), t("custom_names.map_names." + raw, null, raw));
             }
-            return name.replace(/^Vesnice/i, "Village");
         }
-
-        if (type === "TOWN") {
-            var tMap = {
-                "Královo Pole": "King's Field", "Stříbratec": "Silverton", "Zlatov": "Goldtown", "Mečov": "Swordhaven",
-                "Železný Brod": "Ironford", "Korunní Město": "Crown City", "Sokolov": "Falconreach", "Hvězdomír": "Starwatch",
-                "Lví Brod": "Lionford", "Sluneční Hradec": "Sun Keep", "Velehrad": "Grand Stronghold", "Křišťálov": "Crystaltown",
-                "Jantarové Město": "Amber City", "Bílý Kámen": "Whitestone"
-            };
-            var matchT = name.match(/Město\s+(\d+)\s*\(([^)]+)\)/);
-            if (matchT) {
-                var numT = matchT[1];
-                var czNameT = matchT[2];
-                var enNameT = tMap[czNameT] || czNameT;
-                return "Town " + numT + " (" + enNameT + ")";
-            }
-            return name.replace(/^Město/i, "Town");
-        }
-
-        if (type === "CASTLE") {
-            var cKey = node.castleKey || "";
-            if (!cKey && node.castleImg) {
-                var m = node.castleImg.match(/castle_([a-z0-9_]+?)(?:_flip)?\.(?:png|jpe?g|webp)/i);
-                if (m) cKey = m[1];
-            }
-            if (!cKey && node.estateId && node.estateId.indexOf("H") === 0) {
-                cKey = "H" + node.estateId.replace("H", "");
-            }
-            var cName = (cKey && window.PRS_I18n) ? window.PRS_I18n.t("castles." + cKey + ".name") : "";
-            if (cName && cName !== ("castles." + cKey + ".name")) {
-                var prefix = isEn ? "Castle " : "Hrad ";
-                var num = node.estateId ? node.estateId.replace("H", "") : (node.code ? node.code.replace("H", "") : "");
-                return prefix + (num ? (num + " ") : "") + "(" + cName + ")";
-            }
-
-            var cMap = {
-                "Doubrava": "Doubrava Castle",
-                "Věčného mrazu": "Eternal Frost",
-                "Lávový chřtán": "Lava Maw",
-                "Ametyst": "Amethyst",
-                "Boreas": "Boreas",
-                "Oceán": "Ocean",
-                "Pískovcový": "Sandstone",
-                "Černá tůň": "Black Mere",
-                "Erebus": "Erebus",
-                "Královský hrad": "Royal Castle",
-                "Královská citadela": "Royal Citadel"
-            };
-            var matchC = name.match(/Hrad\s+(\d+)\s*\(([^)]+)\)/);
-            if (matchC) {
-                var numC = matchC[1];
-                var czC = matchC[2];
-                for (var ck in cMap) {
-                    if (czC.indexOf(ck) !== -1) return "Castle " + numC + " (" + cMap[ck] + ")";
-                }
-                return "Castle " + numC + " (" + czC + ")";
-            }
-            return name.replace(/^Hrad/i, "Castle");
-        }
-
-        if (type === "QUEST") {
-            if (node.subtype === "U3") return "Dragon's Lair (U3)";
-            if (node.subtype === "U2") return "Monster Den (U2)";
-            if (node.subtype === "U1") return "Wild Beast Hunt (U1)";
-            return name.replace(/^Úkol\b/i, "Quest");
-        }
-
-        if (type === "MASTER") {
-            if (name.indexOf("Boje") !== -1) return "Master of Combat";
-            if (name.indexOf("Jízdy") !== -1) return "Master of Riding";
-            if (name.indexOf("Tance") !== -1) return "Master of Dance";
-            if (name.indexOf("Charismatu") !== -1) return "Master of Charisma";
-            if (name.indexOf("Velmistr") !== -1) return "Grandmaster";
-            return name;
-        }
-
-        if (type === "BUILDING") {
-            if (name.indexOf("stáje") !== -1) return "Royal Stables";
-            if (name.indexOf("kovárna") !== -1) return "Guild Forge";
-            if (name.indexOf("sokolník") !== -1) return "Royal Falconer";
-            if (name.indexOf("Psovod") !== -1) return "Dog Handler & Pack";
-            if (name.indexOf("krejčí") !== -1) return "Court Tailor";
-            return name;
-        }
-
-        if (type === "FESTIVAL") {
-            if (name.indexOf("Turnaj") !== -1) return "FESTIVAL: Royal Tournament ♡";
-            if (name.indexOf("Ples") !== -1) return "FESTIVAL: Castle Ball ♡";
-            if (name.indexOf("Závod") !== -1) return "FESTIVAL: Grand Race ♡";
-            return name;
-        }
-
-        if (type === "JESTER") {
-            return name.replace(/^Kejklíř/i, "Jester");
-        }
-
-        if (type === "TAX") return "Tax Collector";
-        if (type === "MERCHANT") return "Royal Market";
-        if (type === "CHANCE") return "Card of Chance";
-        if (type === "PRISON") return "Royal Dungeon";
-        if (type === "HOSPITAL") return "Royal Infirmary";
-        if (type === "TAVERN") return "Golden Tankard Tavern";
-
         return name;
     },
 
@@ -1563,26 +1417,24 @@
         var body = document.getElementById("catalog-game-modal-body");
         if (!body) return;
 
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tCat = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
         if (gameKey === "dragon_dungeon") {
-            var badgeText = isEn ? "🔨 In Development • KiDesky Edition" : "🔨 V přípravě • Edice KiDesky";
-            var titleText = isEn ? "🐉 Conquest of Dragon Mountain" : "🐉 Dobytí Dračí Hory";
-            var subtitleText = isEn ? "Cooperative dungeon crawler for 1–4 players" : "Kooperativní dungeon crawler pro 1–4 hráče";
-            var pill1 = isEn ? "👥 1–4 Heroes (Co-op)" : "👥 1–4 Hrdinové (Kooperace)";
-            var pill2 = isEn ? "⏱️ 60–90 minutes" : "⏱️ 60–90 minut";
-            var pill3 = isEn ? "🗺️ Modular dungeon board" : "🗺️ Modulární podzemní deska";
-            var pill4 = isEn ? "🎲 Tactical dice battles" : "🎲 Kostkové taktické souboje";
-            var hStory = isEn ? "Story Background &amp; Rules" : "Příběhové pozadí &amp; Pravidla";
-            var pStory = isEn
-                ? "Deep within Black Rock, the ancient dragon Vermithrax has awakened and his minions infest the surrounding lands. Players are not rivals, but a united party of valiant heroes. Each player chooses a unique class: <strong>Warrior</strong> (tank & crushing strikes), <strong>Mage</strong> (area fire & lightning magic), <strong>Rogue</strong> (chest unlocking & critical hits), or <strong>Cleric</strong> (healing & sacred warding)."
-                : "Hluboko v nitru Černé skály procitl prastarý drak Vermithrax a jeho služebníci zamořili okolní kraje. Hráči netvoří soupeře, nýbrž společnou družinu odvážných hrdinů. Každý hráč si volí unikátní třídu: <strong>Válečníka</strong> (tank a drtivé údery), <strong>Kouzelníka</strong> (plošná magie ohně a blesků), <strong>Zlodějku</strong> (odemykání truhel a kritické zásahy) nebo <strong>Klerika</strong> (léčení a posvátná ochrana).";
-            var hMech = isEn ? "Game Mechanics" : "Herní mechaniky";
-            var li1 = isEn ? "<strong>Modular dungeon:</strong> Each descent into the lair randomly generates new halls, traps, and relic chests." : "<strong>Modulární podzemí:</strong> Každé sestoupení do sluje náhodně generuje nové sály, pasti a truhly s relikviemi.";
-            var li2 = isEn ? "<strong>Dragon boss fight:</strong> Multi-phase final encounter requiring coordinated team strategy." : "<strong>Boss fight s drakem:</strong> Vícefázový závěrečný souboj vyžadující sehranou týmovou strategii.";
-            var li3 = isEn ? "<strong>Shared life pool:</strong> If one hero falls and is not revived in time, the entire quest fails!" : "<strong>Sdílená zásoba životů:</strong> Padne-li jeden hrdina a není včas oživen, celá výprava prohrává!";
-            var btnSub = isEn ? "🔔 Follow Development &amp; Get Beta Access" : "🔔 Sledovat vývoj &amp; Získat přístup do Beta testu";
-            var btnClose = isEn ? "Close Preview" : "Zavřít náhled";
+            var badgeText = tCat("beta_games.dragon_dungeon.badge", null, "🔨 V přípravě • Edice KiDesky");
+            var titleText = tCat("beta_games.dragon_dungeon.title", null, "🐉 Dobytí Dračí Hory");
+            var subtitleText = tCat("beta_games.dragon_dungeon.subtitle", null, "Kooperativní dungeon crawler pro 1–4 hráče");
+            var pill1 = tCat("beta_games.dragon_dungeon.pill_heroes", null, "👥 1–4 Hrdinové (Kooperace)");
+            var pill2 = tCat("beta_games.dragon_dungeon.pill_time", null, "⏱️ 60–90 minut");
+            var pill3 = tCat("beta_games.dragon_dungeon.pill_board", null, "🗺️ Modulární podzemní deska");
+            var pill4 = tCat("beta_games.dragon_dungeon.pill_combat", null, "🎲 Kostkové taktické souboje");
+            var hStory = tCat("beta_games.dragon_dungeon.story_header", null, "Příběhové pozadí &amp; Pravidla");
+            var pStory = tCat("beta_games.dragon_dungeon.story_p1", null, "Hluboko v nitru Černé skály procitl prastarý drak Vermithrax...");
+            var hMech = tCat("beta_games.dragon_dungeon.mechanics_header", null, "Herní mechaniky");
+            var li1 = tCat("beta_games.dragon_dungeon.mechanics_li1", null, "Modulární podzemí...");
+            var li2 = tCat("beta_games.dragon_dungeon.mechanics_li2", null, "Kooperativní boj...");
+            var li3 = tCat("beta_games.dragon_dungeon.mechanics_li3", null, "Sdílená zásoba životů...");
+            var btnSub = tCat("beta_games.dragon_dungeon.btn_subscribe", null, "🔔 Sledovat vývoj &amp; Získat přístup do Beta testu");
+            var btnClose = tCat("beta_games.dragon_dungeon.btn_back", null, "Zavřít náhled");
 
             body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/landmarks/dragon.webp\');">' +
                 '  <div class="catalog-modal-banner-overlay"></div>' +
@@ -1664,20 +1516,17 @@
     },
 
     subscribeGameNewsletter: function (gameKey) {
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var gName = (gameKey === "dragon_dungeon")
-            ? (isEn ? "Conquest of Dragon Mountain" : "Dobytí Dračí Hory")
-            : (isEn ? "Merchants of the Realm" : "Obchodníci Království");
+        var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var gKey = (gameKey === "dragon_dungeon") ? "dragon_dungeon" : "merchants";
+        var gName = t("beta_games." + gKey + ".name", null, (gKey === "dragon_dungeon" ? "Dobytí Dračí Hory" : "Obchodníci Království"));
         if (window.PRS_Audio) window.PRS_Audio.playCoin();
-        var alertMsg = isEn
-            ? ("Thank you for your interest in <strong>" + gName + "</strong>!<br><br>Your knight profile has been registered among priority applicants for the upcoming closed Beta testing.")
-            : ("Děkujeme za tvůj zájem o hru <strong>" + gName + "</strong>!<br><br>Tvůj rytířský profil byl zaznamenán mezi přednostní zájemce pro nadcházející uzavřené Beta testování.");
-        var alertTitle = isEn ? "Beta Testing Application Accepted" : "Přihláška k testování přijata";
+        var alertMsg = t("beta_games.dialog.alert_msg", { name: gName }, "Děkujeme za tvůj zájem o hru <strong>" + gName + "</strong>!<br><br>Tvůj rytířský profil byl zaznamenán mezi přednostní zájemce pro nadcházející uzavřené Beta testování.");
+        var alertTitle = t("beta_games.dialog.alert_title", null, "Přihláška k testování přijata");
         KiDeskyDialog.alert(alertMsg, {
             title: alertTitle,
             icon: "📜",
             allowHtml: true
         });
     }
-    });
+});
 })();

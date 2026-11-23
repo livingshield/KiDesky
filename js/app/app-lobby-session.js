@@ -539,7 +539,6 @@
         if (bSel) bSel.value = "procedural";
 
         if (this.state && this.state.turnNumber > 0) {
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             var msg = window.PRS_I18n ? window.PRS_I18n.t("dialogs.new_realm.msg", { seed: newSeed }) : ("Generování nového světa vyžaduje novou partii.\nPřeješ si vygenerovat nové království (Seed #" + newSeed + ") a začít novou hru?");
             var conf = await KiDeskyDialog.confirm(msg, {
                 title: window.PRS_I18n ? window.PRS_I18n.t("dialogs.new_realm.title") : "Nové království",
@@ -586,20 +585,14 @@
     },
 
     refreshBoardTemplateSelects: function () {
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
-        var tilesWord = isEn ? "tiles" : "polí";
+        var tilesWord = t("lobby.map_tiles_suffix", null, "polí");
 
-        var defaultTemplates = isEn ? [
-            { templateCode: "classic_96", name: "Royal Wilderness 96 (Grand Map)", nodeCount: 96 },
-            { templateCode: "dragon_4598", name: "Dragon Trail (Medium Map – 64 tiles)", nodeCount: 64 },
-            { templateCode: "delta_84", name: "Royal Delta & Islands (Map – 84 tiles)", nodeCount: 84 },
-            { templateCode: "compact_48", name: "Knight's Jousting Grounds (Fast Game – 48 tiles)", nodeCount: 48 }
-        ] : [
-            { templateCode: "classic_96", name: "Královská divočina 96 (Velký plán)", nodeCount: 96 },
-            { templateCode: "dragon_4598", name: "Dračí stezka (Střední plán – 64 polí)", nodeCount: 64 },
-            { templateCode: "delta_84", name: "Královská delta & Ostrovy (Plán – 84 polí)", nodeCount: 84 },
-            { templateCode: "compact_48", name: "Rytířské kolbiště (Rychlá hra – 48 polí)", nodeCount: 48 }
+        var defaultTemplates = [
+            { templateCode: "classic_96", name: t("lobby.board_template_grand", null, "Královská divočina 96 (Velký plán)"), nodeCount: 96 },
+            { templateCode: "dragon_4598", name: t("lobby.board_template_medium", null, "Dračí stezka (Střední plán – 64 polí)"), nodeCount: 64 },
+            { templateCode: "delta_84", name: t("lobby.board_template_islands", null, "Královská delta & Ostrovy (Plán – 84 polí)"), nodeCount: 84 },
+            { templateCode: "compact_48", name: t("lobby.board_template_fast", null, "Rytířské kolbiště (Rychlá hra – 48 polí)"), nodeCount: 48 }
         ];
 
         var list = (window.PRS_BoardBuilder && window.PRS_BoardBuilder.getActiveTemplatesList) ? window.PRS_BoardBuilder.getActiveTemplatesList() : defaultTemplates;
@@ -621,11 +614,10 @@
             for (var i = 0; i < list.length; i++) {
                 var tmpl = list[i];
                 var tName = tmpl.name;
-                if (isEn) {
-                    if (tmpl.templateCode === "classic_96") tName = "Royal Wilderness 96 (Grand Map)";
-                    else if (tmpl.templateCode === "dragon_4598") tName = "Dragon Trail (Medium Map – 64 tiles)";
-                    else if (tmpl.templateCode === "delta_84") tName = "Royal Delta & Islands (Map – 84 tiles)";
-                    else if (tmpl.templateCode === "compact_48") tName = "Knight's Jousting Grounds (Fast Game – 48 tiles)";
+                var tmplKey = "lobby.board_options." + tmpl.templateCode;
+                var trName = t(tmplKey, null, null);
+                if (trName && trName !== tmplKey) {
+                    tName = trName;
                 }
                 var label = (prefix ? (prefix + tName) : tName) + (tmpl.nodeCount ? (" (" + tmpl.nodeCount + " " + tilesWord + ")") : "");
                 html += '<option value="' + self.escapeHtml(tmpl.templateCode) + '">' + self.escapeHtml(label) + '</option>';
@@ -637,12 +629,8 @@
                 html += '<optgroup label="' + self.escapeHtml(t("ui.board_bar.saved_group", null, "⭐ Moje uložené dynamické plány:")) + '">';
                 for (var s = 0; s < savedMaps.length; s++) {
                     var sm = savedMaps[s];
-                    var smName = sm.name || ((isEn ? "Custom Map #" : "Vlastní plán #") + (sm.seed || s + 1));
+                    var smName = sm.name || (t("custom_names.map_names.Vlastní plán", null, "Vlastní plán") + " #" + (sm.seed || s + 1));
                     var cleanSmName = smName.replace(/\s*\(\d+\s*(?:polí|tiles)?\)/gi, "");
-                    if (isEn) {
-                        cleanSmName = cleanSmName.replace(/Dračí království\s*#/gi, "Dragon Realm #")
-                                                 .replace(/Vlastní království\s*#/gi, "Custom Realm #");
-                    }
                     var smLabel = (prefix ? prefix : "") + "⭐ " + cleanSmName + " (" + (sm.nodeCount || 96) + " " + tilesWord + ")";
                     html += '<option value="saved_map_' + s + '">' + self.escapeHtml(smLabel) + '</option>';
                 }
@@ -653,8 +641,8 @@
             html += '<optgroup label="' + self.escapeHtml(t("ui.board_bar.studio_group", null, "🛠️ Tvůrce & Generátor:")) + '">';
             var dynName = t("ui.board_bar.custom_dynamic", null, "🛠️ Vlastní dynamický plán (Map Studio)");
             var rndName = t("ui.board_bar.random_realm", null, "🎲 Náhodné království (Procedurální)");
-            html += '<option value="custom_dynamic">' + (prefix ? (prefix + (isEn ? "Custom Dynamic (Map Studio)" : "Vlastní dynamický (Map Studio)")) : dynName) + '</option>';
-            html += '<option value="procedural">' + (prefix ? (prefix + (isEn ? "Random Realm" : "Náhodné království")) : rndName) + '</option>';
+            html += '<option value="custom_dynamic">' + (prefix ? (prefix + dynName) : dynName) + '</option>';
+            html += '<option value="procedural">' + (prefix ? (prefix + rndName) : rndName) + '</option>';
             html += '</optgroup>';
 
             sel.innerHTML = html;
@@ -680,16 +668,13 @@
         }
 
         if (this.state && this.state.turnNumber > 0) {
-
-            var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-            var msg = isEn
-                ? "You cannot switch maps in an active game without restarting.\nDo you really want to end the current game and start a new one on the selected map?"
-                : "V rozehrané partii nelze měnit mapu bez restartu hry.\nPřeješ si opravdu ukončit aktuální partii a začít novou hru na zvoleném plánu?";
+            var tSwitch = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+            var msg = tSwitch("dialogs.switch_map_warning", null, "V rozehrané partii nelze měnit mapu bez restartu hry.\nPřeješ si opravdu ukončit aktuální partii a začít novou hru na zvoleném plánu?");
             var conf = await KiDeskyDialog.confirm(msg, {
-                title: isEn ? "Change Realm Map" : "Změna mapy království",
+                title: tSwitch("dialogs.switch_map_title", null, "Změna mapy království"),
                 icon: "🗺️",
-                confirmText: isEn ? "🗺️ Switch Map & Restart" : "🗺️ Změnit mapu",
-                cancelText: isEn ? "Keep Current" : "Ponechat stávající"
+                confirmText: tSwitch("dialogs.switch_map_confirm", null, "🗺️ Změnit mapu"),
+                cancelText: tSwitch("dialogs.switch_map_cancel", null, "Ponechat stávající")
             });
 
             if (!conf) {
