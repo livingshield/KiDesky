@@ -941,10 +941,9 @@
     
     openIntrigueModal: function (type) {
         var self = this;
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var tInt = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var currG = tInt("common.gold", null, "zl.");
-        var localeStr = isEn ? "en-US" : "cs-CZ";
+        var localeStr = tInt("ui.locale", null, "cs-CZ");
         var modal = this.getGenericModal();
         if (!modal) return;
         var p = self.state.players[self.state.currentPlayerIndex];
@@ -1197,10 +1196,9 @@
     
     openFestivalChallengeModal: function () {
         var self = this;
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var tFest = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var currG = tFest("common.gold", null, "zl.");
-        var stakeLocale = isEn ? "en-US" : "cs-CZ";
+        var stakeLocale = tFest("ui.locale", null, "cs-CZ");
         var modal = this.getGenericModal();
         if (!modal || !self.state) return;
         var p = self.state.players[self.state.currentPlayerIndex];
@@ -1280,10 +1278,9 @@
 
         if (!modal || !bodyEl) return;
 
-        var isEnDuel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var tDuel = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var currDuelG = tDuel("common.gold", null, "zl.");
-        var duelLocale = isEnDuel ? "en-US" : "cs-CZ";
+        var duelLocale = tDuel("ui.locale", null, "cs-CZ");
         var isFestival = (category === "festival" || res.type === "festival_challenge");
 
         if (titleEl) {
@@ -1352,7 +1349,7 @@
         html.push('  <div class="duel-vs-divider">');
         html.push('    <div style="font-size:1.6rem;">⚔️</div>');
         html.push('    <div class="duel-vs-text">VS</div>');
-        html.push('    <div style="font-size:0.72rem; color:#cbd5e1; font-weight:bold;">' + stakeText + res.stake.toLocaleString(isEnDuel ? "en-US" : "cs-CZ") + ' ' + currDuelG + '</div>');
+        html.push('    <div style="font-size:0.72rem; color:#cbd5e1; font-weight:bold;">' + stakeText + res.stake.toLocaleString(duelLocale) + ' ' + currDuelG + '</div>');
         html.push('  </div>');
 
         // Bojovník 2 (Obránce / Rival)

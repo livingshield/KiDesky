@@ -30,6 +30,7 @@ window.PRS_I18N.en = {
     },
     "ui": {
         "brand_subtitle": "The Princess's Heart",
+        "locale": "en-US",
         "tabs": {
             "welcome": "🏰 Intro",
             "welcome_title": "Intro & Videos",
@@ -579,6 +580,44 @@ window.PRS_I18N.en = {
             "hospital_transfer": "🏥 In Life & Death mode, severely wounded knight {name} is urgently rushed to the Royal Infirmary!",
             "continue_btn": "⚔️ Continue game",
             "bot_auto_close": "(BOT duel – closing in 0.5s...)"
+        },
+        "turn_nav": {
+          "dest_label": "Destination: ",
+          "ped_title": "Riding Training: Rolled {roll}!",
+          "ped_sub": "Thanks to your knightly agility and Riding training, you can take a swift advance (+{bonus} {unit})!",
+          "ped_sprint_btn": "⚡ Swift Advance: {tiles} {unit} (+{bonus})",
+          "ped_base_btn": "🚶 Standard March: {tiles} {unit}",
+          "horse_sprint_name": "Royal Sprint",
+          "horse_gallop_name": "Horse Gallop",
+          "horse_trot_name": "Horse Trot",
+          "horse_gallop_sub": "Thanks to Riding mastery ({jz}/5) and your horse, you can choose between a fast gallop or a precise maneuver.",
+          "horse_trot_sub": "Horse Trot (Riding {jz}/5): Choose from either die (full gallop d1+d2 requires Riding ≥ 2).",
+          "horse_falcon_prefix": "Falcon navigation (±1 tile)",
+          "horse_falcon_suffix": "can be used during tactical maneuvers (during full gallop or sprint, the horse charges too fast for falcon scouting).",
+          "horse_rolled_title": "{header}: Rolled {d1} and {d2}!",
+          "horse_sprint_opt": "👑 Royal Sprint ({tiles} {unit}: {sum}+2)",
+          "horse_direct_sprint_tag": "(direct sprint – no falcon)",
+          "horse_gallop_opt": "⚡ Full Gallop ({tiles} {unit})",
+          "horse_direct_gallop_tag": "(direct gallop – no falcon)",
+          "horse_maneuver_opt": "🎯 Tactical Maneuver ({tiles} {unit})",
+          "horse_falcon_tag": "🦅 + Falcon navigation (±1)",
+          "intel_lock": "🔒 Owner intel requires 2+ falcons or Falconer",
+          "intel_neutral": "🏳️ Neutral / action tile",
+          "intel_own": "👑 Your estate",
+          "intel_upgrade": " · Upgrade possible",
+          "intel_rent": "Rent: ",
+          "intel_no_rent": "🤝 No rent",
+          "intel_owner": "Owner: ",
+          "intel_price": "Price: ",
+          "intel_available": "Available for purchase",
+          "scout_lvl3": "🦅 Falcon Scout (Lv. 3/3 – Owners & Prices)",
+          "scout_lvl2": "🦅 Falcon Scout (Lv. 2/3 – Owners)",
+          "scout_lvl1": "🦅 Falcon Scout (Lv. 1/3 – Basic)",
+          "falcon_title": "Falcon Navigation: Rolled {roll}!",
+          "falcon_sub": "Your falcon circles above the landscape, granting you the power to adjust your reach by ±1 tile!",
+          "falcon_minus": "◀️ Adjustment: {tiles} {unit} (-1)",
+          "falcon_base": "🎯 Original roll: {tiles} {unit} (no change)",
+          "falcon_plus": "▶️ Adjustment: {tiles} {unit} (+1)"
         }
     },
     "engine": {
@@ -1680,6 +1719,9 @@ window.PRS_I18N.en = {
         "bot_tag": "(AI)",
         "gold": "g.",
         "hearts": "💖",
+        "tile_one": "tile",
+        "tile_few": "tiles",
+        "tile_many": "tiles",
         "refresh": "🔄 Refresh",
         "close": "✕ Close",
         "cancel": "Cancel",
@@ -1877,7 +1919,29 @@ window.PRS_I18N.en = {
         "fallback_v1_desc": "Official story trailer: saving the princess, dragon lairs and royal festivals.",
         "fallback_v2_title": "The Princess's Heart – Multiplayer Gameplay",
         "fallback_v2_badge": "⚔️ Gameplay & Rules",
-        "fallback_v2_desc": "Overview of the board map, core mechanics, estate building and online quests."
+        "fallback_v2_desc": "Overview of the board map, core mechanics, estate building and online quests.",
+        "showcase_tiles": {
+          "start": {
+                    "label": "Start",
+                    "story": "🚩 1. Crossroads Start: Knight departs with 10,000 gold into the realm"
+          },
+          "horses": {
+                    "label": "Horse Breeding",
+                    "story": "🐎 2. Horse Breeding & Stables: Estate building, animals & rent collection"
+          },
+          "castle": {
+                    "label": "Castle & Joust",
+                    "story": "🏰 3. Royal Tournament: Clash of masters in the 4 knightly virtues"
+          },
+          "dragon": {
+                    "label": "Dragon Lair",
+                    "story": "🐉 4. Dragon's Lair: Epic battle with the fire dragon for legendary loot"
+          },
+          "festival": {
+                    "label": "Celebrations 💖",
+                    "story": "💖 5. Royal Celebrations: Claiming 30 Princess Hearts and victory!"
+          }
+        }
     },
     "lobby": {
         "room_code_placeholder": "E.g. K7M4P9",
@@ -3486,6 +3550,8 @@ window.PRS_I18N.en = {
         "modal_title": "🎵 Royal Music Player",
         "play_btn": "▶️ Play",
         "pause_btn": "⏸️ Pause",
+        "label_playing": "Music: {title}",
+        "label_off": "Music: Off",
         "repertoire_label": "📜 Royal Music Repertoire:",
         "bgm_volume_label": "🎵 Music Volume",
         "sfx_volume_label": "🔊 Sound Effects Volume",
@@ -3567,5 +3633,9 @@ window.PRS_I18N.en = {
         "epilogue_dragon": "As a legendary dragonslayer, they laid the dragon's head at the princess's feet. The queen draped the ruby necklace around their neck as the kingdom erupted in fanfare.",
         "epilogue_estates": "As the realm's foremost lord of estates and noble breeds, they forged a prosperous domain of towns and castles, earning the princess's hand and the royal seal.",
         "epilogue_virtues": "Through knightly virtues, courtly grace, and fearless valor, they won every heart at court, receiving the ruby necklace to thunderous applause beside the princess."
+    },
+    "cheatsheet": {
+        "page1_html": "<div class=\"cs-page cs-page-1\">  <div class=\"cs-header\">    <h2 class=\"cs-header-title\">👑 PRINCESS'S HEART • QUICK POCKET CHEATSHEET</h2>    <div class=\"cs-header-sub\">Original strategic &amp; RPG board game • Tabletop reference guide</div>    <div class=\"cs-meta-bar\">      <span class=\"cs-pill\">🎯 Goal: 30 💖 Princess Hearts OR 2 slain dragons 🐉</span>      <span class=\"cs-pill\">💰 Start: 10,000 g.</span>      <span class=\"cs-pill\">🏁 START: +3,000 g. (+5,000 g. landless)</span>    </div>  </div>  <div class=\"cs-grid\">    <div class=\"cs-col\">      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🔄</span> TURN CYCLE IN 4 STEPS</div>        <div class=\"cs-step-list\">          <div class=\"cs-step-item\">            <div class=\"cs-step-num\">1</div>            <div><strong>Dice Roll &amp; Movement:</strong> Standard 1d6 (1–6). <em>Cautious Step</em> (1–4 tiles). 🐎 On horseback: <em>Trot</em> (+1), <em>Canter</em> (+2, Riding ≥ 2), <em>Steed Gallop</em> (2d6 choice, Riding ≥ 4 + horse).</div>          </div>          <div class=\"cs-step-item\">            <div class=\"cs-step-num\">2</div>            <div><strong>Crossroads &amp; Falcon:</strong> Roll 1–3 turn left/up, 4–6 straight/right. 🦅 <em>Falcon Navigation</em> (falcon breeding) allows adjusting landing by ±1 tile (reveals owners and rents).</div>          </div>          <div class=\"cs-step-item\">            <div class=\"cs-step-num\">3</div>            <div><strong>Tile Action:</strong> Buy unowned estate / pay rent to owner / train with a master / duel rival knight on tile / attend festival or purchase gear at merchant.</div>          </div>          <div class=\"cs-step-item\">            <div class=\"cs-step-num\">4</div>            <div><strong>End of Turn:</strong> Play tactical scrolls from pouch (capacity 3/3), manage active gear in backpack, pass turn to next knight.</div>          </div>        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>⚔️</span> 4 VIRTUES, MASTERS &amp; DUELS</div>        <div style=\"font-size:0.75rem; margin-bottom:0.35rem;\">          <strong>⚔️ Combat:</strong> weapons, dragon beasts, duels • <strong>🏇 Riding:</strong> speed, race speed<br/>          <strong>💃 Dance:</strong> court ball, agility • <strong>✨ Charisma:</strong> audience, heart multiplier 💖        </div>        <div style=\"font-size:0.73rem; background:rgba(212,175,55,0.08); padding:0.35rem 0.5rem; border-radius:5px; border:1px solid rgba(212,175,55,0.2);\">          <strong>🎓 Master Training:</strong> Fee 1k / 2k / 3k / 4k / 5k g. Practice roll <strong>4, 5, 6</strong> succeeds (+1 rank). Grandmaster grants <strong>+1.5 💖</strong> and 1,500 g.<br/>          <strong>⚔️ Knight Duel on Tile:</strong> Landing on a rival's tile allows challenging them: Knight Power + 1d6. Victory = loot gold or <strong>+1 💖</strong>!        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🎒</span> POUCH &amp; SCROLLS (MAX 3 PCS)</div>        <div style=\"font-size:0.73rem; display:flex; flex-direction:column; gap:0.25rem;\">          <div><strong>⚡ Lightning Speed:</strong> Dice roll is automatically 6 (or +3 to landing).</div>          <div><strong>🕊️ Royal Amnesty:</strong> Pay no rent on rival tile / rescue from Infirmary.</div>          <div><strong>🦁 Lion's Might:</strong> +3 combat power in any battle or duel.</div>          <div><strong>🐑 Golden Fleece:</strong> Doubles tax collection at Start or rent from rival.</div>          <div><strong>🍀 Lady Luck:</strong> Re-roll any unfavorable dice.</div>        </div>      </div>    </div>    <div class=\"cs-col\">      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🏰</span> ESTATE PRICE LIST &amp; NOBLE BREEDING</div>        <table class=\"cs-table\">          <thead>            <tr><th>Estate Type</th><th>Buy Price</th><th>Tax</th><th>Rent/Toll</th><th>Bonus</th></tr>          </thead>          <tbody>            <tr><td><strong>🦅 Falcon (1–4)</strong></td><td>400–1,600 g.</td><td>—</td><td>20/40/80 %</td><td><strong>+4.0 💖</strong>, ±1 navigation</td></tr>            <tr><td><strong>🐕 Dog (1–4)</strong></td><td>500–2,000 g.</td><td>—</td><td>20/40/80 %</td><td><strong>+2.5 💖</strong>, defense</td></tr>            <tr><td><strong>🐎 Horse (1–4)</strong></td><td>600–2,400 g.</td><td>—</td><td>20/40/80 %</td><td><strong>+1.5 💖</strong>, Trot/Gallop</td></tr>            <tr><td><strong>🏡 Village 1★</strong></td><td>2,000 g.</td><td>500 g.</td><td>300 g.</td><td>Breeding: max 3 beasts</td></tr>            <tr><td><strong>🏡 Village 2★/3★</strong></td><td>+1.5k / +1.5k</td><td>900/1400</td><td>500/800</td><td>Higher yields</td></tr>            <tr><td><strong>🏛️ Town</strong></td><td>4,500 g.</td><td>1,200 g.</td><td>700 g.</td><td>Breeding: max 2 beasts</td></tr>            <tr><td><strong>🏰 Castle</strong></td><td>8,000 g.</td><td>2,500 g.</td><td>1,500 g.</td><td><strong>+1 ✨ Charisma</strong></td></tr>            <tr><td><strong>⚒️ Crafts/Guilds</strong></td><td>2.5k–3.0k</td><td>600–800</td><td>350–400</td><td>Smithy/Stables/Tailor</td></tr>          </tbody>        </table>        <div style=\"font-size:0.7rem; color:#fde047; margin-top:0.35rem;\">          🌾 <strong>Livestock:</strong> 🐑 Sheep (500 g., tax +120, rent +50) • 🐖 Pig (600 g., tax +150, rent +75) • 🐄 Cow (800 g., tax +200, rent +100)        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🎪</span> FESTIVALS, AUDIENCE &amp; DRAGON QUESTS</div>        <div style=\"font-size:0.73rem; display:flex; flex-direction:column; gap:0.25rem;\">          <div><strong>⚔️ Tournament:</strong> Combat + Riding + 1d6. Prize: 1,500 / 800 / 400 g. + 💖 hearts.</div>          <div><strong>💃 Court Ball:</strong> Dance + Charisma + 1d6 (Dress +2). Prize: 1,500 / 800 / 400 g. + 💖.</div>          <div><strong>🏇 Royal Steed Race:</strong> 2× Riding + 1d6 (+1 per horse). Prizes: up to 1,500 g. + 💖.</div>          <div><strong>🐉 Dragon Hunt:</strong> U1 (diff 6–8), U2 (9–11), U3 (12–14). <strong>2 dragons = victory!</strong></div>          <div><strong>🏥 Infirmary:</strong> Treat wounds for 500 g. or roll 5–6 when resting (skip turn).</div>          <div><strong>💸 Bankruptcy:</strong> Sell gear at 50–70%, King waives debt in exchange for 💖 hearts.</div>        </div>      </div>      <div class=\"cs-box\" style=\"padding:0.45rem 0.65rem;\">        <div style=\"display:flex; justify-content:space-between; align-items:center; font-size:0.71rem; color:var(--text-muted);\">          <span>⌨️ <strong>Hotkeys:</strong> [Space] Roll/Move • [T] Cheatsheet • [B] Pouch • [M] Music • [Esc] Close</span>        </div>      </div>    </div>  </div>  <div class=\"cs-footer\">KiDesky: The Princess's Heart © 2026 • 1-Page A4 Pocket Rules Cheatsheet • ekobio.org/apps/KiDesky</div></div>",
+        "page2_html": "<div class=\"cs-page cs-page-2\">  <div class=\"cs-header\">    <h2 class=\"cs-header-title\">🛡️ REFERENCE GUIDE • ARMORY &amp; BESTIARY</h2>    <div class=\"cs-header-sub\">Beast weaknesses, armory gear, trophies, and cartographic legend</div>  </div>  <div class=\"cs-grid\">    <div class=\"cs-col\">      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🐉</span> BEAST WEAKNESSES IN COMBAT (+2 POWER)</div>        <div style=\"font-size:0.73rem; display:flex; flex-direction:column; gap:0.35rem;\">          <div><strong>🛡️ Plate Armor:</strong> Deflects crushing blows from heavy brute monsters (<em>Black Knight, Clay Golem, Stone Giant, Cyclops</em>).</div>          <div><strong>🗡️ Lance / Spear:</strong> Pierces armored hides and airborne dives (<em>Cliff Harpy, Forest Griffin, Manticore</em>).</div>          <div><strong>💧 Water / Frost:</strong> Extinguishes fiery beasts (<em>Lava Lizard, Fire Drake, Volcanic Serpent</em>).</div>          <div><strong>🔥 Fire / Flame:</strong> Melts frozen tissues of northern monsters (<em>Frost Wraith, Polar Dragon, Ice Wurm</em>).</div>          <div><strong>✨ Holy Relics:</strong> Consecrated light scorches dark and undead fiends (<em>Undead Lord, Shadow Dragon, Forest Apparition</em>).</div>          <div><strong>💃 Dance &amp; Jewels:</strong> Noble grace entrances gemstone creatures (<em>Ruby Dragon, Sacred Golden Stag</em>).</div>        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🏆</span> UNIQUE HUNTING TROPHIES</div>        <div style=\"font-size:0.72rem; display:flex; flex-direction:column; gap:0.3rem;\">          <div><strong>🪶 Harpy Razor Talon:</strong> +3 ⚔️ Combat, +2 🏇 Riding, +1 💃 Dance (7,500 g.)</div>          <div><strong>🗿 Clay Golem Core:</strong> +4 ⚔️ Combat, +3 ✨ Charisma, -2 💃 Dance (8,200 g.)</div>          <div><strong>🐺 Silver-Forged Alpha Fang:</strong> +4 ⚔️ Combat, +2 🏇 Riding, +1 ✨ Charisma (8,500 g.)</div>          <div><strong>🐙 Deep Sea Kraken Tentacle:</strong> +4 ⚔️ Combat, +2 🏇 Riding, +3 ✨ Charisma (9,000 g.)</div>          <div><strong>🩸 Manticore Stinger:</strong> +4 ⚔️ Combat, +3 🏇 Riding, +1 ✨ Charisma (9,500 g.)</div>          <div><strong>💀 Crown of the Undead Lord:</strong> +5 ⚔️ Combat, +4 ✨ Charisma (11,000 g.)</div>          <div><strong>💎 Ruby Dragon Heart:</strong> +5 ⚔️ Combat, +3 💃 Dance, +4 ✨ Charisma (14,000 g.)</div>        </div>      </div>    </div>    <div class=\"cs-col\">      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🛒</span> MERCHANT ARMORY &amp; GEAR</div>        <div style=\"font-size:0.72rem; display:flex; flex-direction:column; gap:0.25rem;\">          <div><strong>🗡️ Weapons:</strong> Short Dagger (+1⚔️, 1.2k) • Broadsword (+2⚔️, 2.5k) • Knight's Halberd (+3⚔️, 4.5k) • Runed Blade (+4⚔️ +1🏇, 7k) • Sacred Excalibur (+5⚔️ +2✨, 12k).</div>          <div><strong>🛡️ Armor:</strong> Leather Armor (+1⚔️ +1🏇, 2k) • Chainmail (+2⚔️, 3k) • Full Plate (+3⚔️, 4.5k) • Silver Shield (+4⚔️ +2🏇 +1✨, 7k) • Dragonscale Armor (+5⚔️ +2✨, 12k).</div>          <div><strong>👗 Dresses &amp; Robes:</strong> Buckler &amp; Velvet (+2💃, 2.5k) • Silk Gown (+3💃, 4.5k) • Gold-Woven Raiment (+4💃 +2✨, 7k).</div>          <div><strong>💍 Jewelry:</strong> Ring of Courage (+1✨, 2k) • Amulet of Wisdom (+2✨, 4k) • Diamond Necklace (+3✨ +1💃, 7k).</div>        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🗺️</span> CARTOGRAPHIC LEGEND &amp; CODES</div>        <div style=\"font-size:0.71rem; display:grid; grid-template-columns:1fr 1fr; gap:0.25rem;\">          <div><code>START</code> Realm Starting Gate</div>          <div><code>SHOP</code> Armory &amp; Market</div>          <div><code>MB, MJ</code> Master of Combat, Riding</div>          <div><code>MT, MCH</code> Master of Dance, Charisma</div>          <div><code>V1–V10</code> Villages (upgrades 1–3★)</div>          <div><code>M1–M5</code> Royal Fortified Towns</div>          <div><code>H1–H2</code> Stronghold Castles (+1✨)</div>          <div><code>S1–S4</code> Noble Falcons (+4💖)</div>          <div><code>P1–P4</code> Hunting Hounds (+2.5💖)</div>          <div><code>K1–K4</code> Noble Steeds (+1.5💖)</div>          <div><code>U1–U3</code> Monster &amp; Dragon Lairs</div>          <div><code>CHANCE</code> Fortune Chest &amp; Scrolls</div>        </div>      </div>    </div>  </div>  <div class=\"cs-footer\">KiDesky: The Princess's Heart © 2026 • Full Reference Manual (Page 2/2)</div></div>"
     }
 };

@@ -3816,28 +3816,32 @@ body[data-active-tab="board"] #topbar-announcement-banner {
    ========================================================================== */
 @media (orientation: landscape) and (max-height: 540px) {
     .board-workspace {
-        grid-template-columns: minmax(0, 1fr) minmax(225px, 265px);
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 285px);
         gap: 0.35rem;
         align-items: stretch;
         max-height: calc(100vh - 42px);
+        max-height: calc(100dvh - 42px);
     }
     .svg-board-container {
         height: auto;
-        max-height: calc(100vh - 70px);
+        max-height: calc(100vh - 76px);
+        max-height: calc(100dvh - 76px);
         width: 100%;
         margin: 0 auto;
     }
     #prs-board-svg {
         height: auto;
-        max-height: calc(100vh - 70px);
+        max-height: calc(100vh - 76px);
+        max-height: calc(100dvh - 76px);
     }
     .board-right-sidebar {
         display: flex;
         flex-direction: column;
         max-height: calc(100vh - 42px);
+        max-height: calc(100dvh - 42px);
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        min-width: 220px;
+        min-width: 235px;
         padding-right: 2px;
     }
     .board-bottom-bar {

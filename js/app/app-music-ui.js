@@ -211,10 +211,9 @@
 
         if (headBtnLabel) {
 
-            var isEnMusicLabel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             headBtnLabel.textContent = isPlaying
-                ? ((isEnMusicLabel ? "Music: " : "Hudba: ") + tr.title)
-                : (isEnMusicLabel ? "Music: Off" : "Hudba: Vyp");
+                ? (window.PRS_I18n ? window.PRS_I18n.t("music.label_playing", { title: tr.title }, "Hudba: " + tr.title) : ("Hudba: " + tr.title))
+                : (window.PRS_I18n ? window.PRS_I18n.t("music.label_off", null, "Hudba: Vyp") : "Hudba: Vyp");
 
         }
 
@@ -244,10 +243,9 @@
 
         if (modPlayBtn) {
 
-            var isEnMusic = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
             modPlayBtn.innerHTML = isPlaying
-                ? (window.PRS_I18n ? window.PRS_I18n.t("music.pause_btn") : (isEnMusic ? "⏸️ Pause" : "⏸️ Pozastavit"))
-                : (window.PRS_I18n ? window.PRS_I18n.t("music.play_btn") : (isEnMusic ? "▶️ Play" : "▶️ Přehrát"));
+                ? (window.PRS_I18n ? window.PRS_I18n.t("music.pause_btn", null, "⏸️ Pozastavit") : "⏸️ Pozastavit")
+                : (window.PRS_I18n ? window.PRS_I18n.t("music.play_btn", null, "▶️ Přehrát") : "▶️ Přehrát");
 
             modPlayBtn.className = isPlaying ? "btn-secondary" : "btn-primary";
 

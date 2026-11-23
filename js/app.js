@@ -821,7 +821,7 @@ window.PRS_App = {
 
         }
 
-        var isMobileLandscape = isTouch && (h <= 540) && (w < 1050);
+        var isMobileLandscape = (h <= 540) && (w < 1050) && (isTouch || h <= 500);
 
         var device = "desktop";
 

@@ -7,7 +7,7 @@
  *  3. 100% rules & glossary parity (guide >= 10 chapters, glossary >= 6 cards) + balanced HTML
  *  4. 100% resolution of all data-i18n* attributes in index.html across all languages
  *  5. Dynamic <select class="...prs-lang-select..."> controls (including #mobile-dock-lang-select)
- *  6. Ratchet guard on getLanguage() === occurrences in js/ (<= 76 baseline)
+ *  6. Ratchet guard on getLanguage() === occurrences in js/ (<= 56 baseline)
  */
 'use strict';
 
@@ -16,7 +16,7 @@ const path = require('path');
 const vm = require('vm');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const MAX_HARDCODED_LANG_CHECKS = 76;
+const MAX_HARDCODED_LANG_CHECKS = 56;
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);

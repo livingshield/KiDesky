@@ -30,6 +30,7 @@ window.PRS_I18N.cs = {
     },
     "ui": {
         "brand_subtitle": "Princeznino srdce",
+        "locale": "cs-CZ",
         "tabs": {
             "welcome": "🏰 Úvod",
             "welcome_title": "Úvod & Videa",
@@ -579,6 +580,44 @@ window.PRS_I18N.cs = {
             "hospital_transfer": "🏥 V režimu Na život a smrt je těžce zraněný rytíř {name} urychleně převezen do Královského lazaretu!",
             "continue_btn": "⚔️ Pokračovat ve hře",
             "bot_auto_close": "(BOT duel – zavře se za 0,5 s...)"
+        },
+        "turn_nav": {
+          "dest_label": "Cíl: ",
+          "ped_title": "Výcvik Jízdy: Hod {roll}!",
+          "ped_sub": "Díky své rytířské mrštnosti a výcviku Jízdy můžeš vyrazit svižným přesunem (+{bonus} {unit})!",
+          "ped_sprint_btn": "⚡ Rychlý přesun: {tiles} {unit} (+{bonus})",
+          "ped_base_btn": "🚶 Běžný krok: {tiles} {unit}",
+          "horse_sprint_name": "Královský trysk",
+          "horse_gallop_name": "Koňský cval",
+          "horse_trot_name": "Koňský klus",
+          "horse_gallop_sub": "Díky mistrovství Jízdy ({jz}/5) a koni máš volbu mezi bleskovým cvalem či přesným manévrem.",
+          "horse_trot_sub": "Koňský klus (Jízda {jz}/5): Volíš z obou kostek (plný cval d1+d2 vyžaduje Jízdu ≥ 2).",
+          "horse_falcon_prefix": "Sokolí navigaci (±1 pole)",
+          "horse_falcon_suffix": "můžeš využít při taktických manévrech (při plném cvalu či trysku kůň pádí příliš rychle na navigaci sokolem).",
+          "horse_rolled_title": "{header}: Padlo {d1} a {d2}!",
+          "horse_sprint_opt": "👑 Královský trysk ({tiles} {unit}: {sum}+2)",
+          "horse_direct_sprint_tag": "(přímý trysk – bez sokola)",
+          "horse_gallop_opt": "⚡ Plný cval ({tiles} {unit})",
+          "horse_direct_gallop_tag": "(přímý cval – bez sokola)",
+          "horse_maneuver_opt": "🎯 Taktický manévr ({tiles} {unit})",
+          "horse_falcon_tag": "🦅 + Sokolí navigace (±1)",
+          "intel_lock": "🔒 Průzkum vlastníka od 2 sokolů nebo se Sokolníkem",
+          "intel_neutral": "🏳️ Neutrální / akční pole",
+          "intel_own": "👑 Tvé panství",
+          "intel_upgrade": " · Povýšení možné",
+          "intel_rent": "Nájem: ",
+          "intel_no_rent": "🤝 Bez nájmu",
+          "intel_owner": "Vlastník: ",
+          "intel_price": "Cena: ",
+          "intel_available": "Volné k nákupu",
+          "scout_lvl3": "🦅 Sokolí průzkum (Úr. 3/3 – Vlastníci & Ceny)",
+          "scout_lvl2": "🦅 Sokolí průzkum (Úr. 2/3 – Vlastníci)",
+          "scout_lvl1": "🦅 Sokolí průzkum (Úr. 1/3 – Základní)",
+          "falcon_title": "Sokolí navigace: Hod {roll}!",
+          "falcon_sub": "Tvůj sokol krouží nad krajinou a dává ti možnost upravit výsledný doskok o ±1 pole!",
+          "falcon_minus": "◀️ Úprava: {tiles} {unit} (-1)",
+          "falcon_base": "🎯 Původní hod: {tiles} {unit} (bez změny)",
+          "falcon_plus": "▶️ Úprava: {tiles} {unit} (+1)"
         }
     },
     "engine": {
@@ -1680,6 +1719,9 @@ window.PRS_I18N.cs = {
         "bot_tag": "(PC)",
         "gold": "zl.",
         "hearts": "💖",
+        "tile_one": "pole",
+        "tile_few": "pole",
+        "tile_many": "polí",
         "refresh": "🔄 Obnovit",
         "close": "✕ Zavřít",
         "cancel": "Zrušit",
@@ -1877,7 +1919,29 @@ window.PRS_I18N.cs = {
         "fallback_v1_desc": "Oficiální příběhová upoutávka: záchrana princezny, dračí sluj a královské slavnosti.",
         "fallback_v2_title": "Intro první princezna - youtube multi",
         "fallback_v2_badge": "⚔️ Hratelnost & Pravidla",
-        "fallback_v2_desc": "Ukázka deskového plánu, herní mechaniky, budování panství a online výpravy."
+        "fallback_v2_desc": "Ukázka deskového plánu, herní mechaniky, budování panství a online výpravy.",
+        "showcase_tiles": {
+          "start": {
+                    "label": "Start",
+                    "story": "🚩 1. Startovní rozcestí: Rytíř vyráží s 10 000 zlaťáky do světa"
+          },
+          "horses": {
+                    "label": "Chov koní",
+                    "story": "🐎 2. Chov koní & stáje: Budování panství, zvířata a výběr nájmů"
+          },
+          "castle": {
+                    "label": "Hrad & Turnaj",
+                    "story": "🏰 3. Královský turnaj: Klání mistrů ve 4 královských ctnostech"
+          },
+          "dragon": {
+                    "label": "Dračí sluj",
+                    "story": "🐉 4. Dračí sluj: Epický souboj s ohnivým drakem o slavný poklad"
+          },
+          "festival": {
+                    "label": "Slavnosti 💖",
+                    "story": "💖 5. Královské slavnosti: Zisk 30 Princezniných srdcí a vítězství!"
+          }
+        }
     },
     "lobby": {
         "room_code_placeholder": "Např. K7M4P9",
@@ -3486,6 +3550,8 @@ window.PRS_I18N.cs = {
         "modal_title": "🎵 Královský hudební přehrávač",
         "play_btn": "▶️ Přehrát",
         "pause_btn": "⏸️ Pozastavit",
+        "label_playing": "Hudba: {title}",
+        "label_off": "Hudba: Vyp",
         "repertoire_label": "📜 Královský repertoár skladeb:",
         "bgm_volume_label": "🎵 Hlasitost hudby",
         "sfx_volume_label": "🔊 Hlasitost zvukových efektů",
@@ -3567,5 +3633,9 @@ window.PRS_I18N.cs = {
         "epilogue_dragon": "Jako legendární drakobijec položil drakovu hlavu princezně k nohám. Královna mu kolem krku zavěsila rubínový náhrdelník a celé království slavilo návrat hrdiny.",
         "epilogue_estates": "Jako nejmocnější správce panství a chovů vybudoval kvetoucí říši od vesnic až po nedobytné hrady. Královský dvůr mu svěřil ruku princezny i pečeť trůnu.",
         "epilogue_virtues": "Ušlechtilostí ctností, leskem dvorních slavností i statečným srdcem si podmanil celý dvůr. Za zvuku fanfár přijal rubínové srdce a objal princeznu před jásajícím královstvím."
+    },
+    "cheatsheet": {
+        "page1_html": "<div class=\"cs-page cs-page-1\">  <div class=\"cs-header\">    <h2 class=\"cs-header-title\">👑 PRINCEZNINO SRDCE • RYCHLÝ TAHÁK DO KAPSY</h2>    <div class=\"cs-header-sub\">Autorská strategická &amp; RPG desková hra • Referenční příručka na herní stůl</div>    <div class=\"cs-meta-bar\">      <span class=\"cs-pill\">🎯 Cíl: 30 💖 Srdcí Princezny NEBO 2 skolené saně 🐉</span>      <span class=\"cs-pill\">💰 Start: 10 000 zl.</span>      <span class=\"cs-pill\">🏁 START: +3 000 zl. (+5 000 zl. bez panství)</span>    </div>  </div>  <div class=\"cs-grid\">    <div class=\"cs-col\">      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🔄</span> SMYČKA TAHU VE 4 KROCÍCH</div>        <div class=\"cs-step-list\">          <div class=\"cs-step-item\">            <div class=\"cs-step-num\">1</div>            <div><strong>Hod kostkou &amp; Chůze:</strong> Standard 1d6 (1–6). <em>Opatrný krok</em> (1–4 políčka). 🐎 Na koni: <em>Klus</em> (+1), <em>Cval</em> (+2, Jízda ≥ 2), <em>Trysk</em> (2d6, Jízda ≥ 4 + kůň).</div>          </div>          <div class=\"cs-step-item\">            <div class=\"cs-step-num\">2</div>            <div><strong>Rozcestí &amp; Sokol:</strong> Hod 1–3 odbočka vlevo/nahoru, 4–6 rovně/vpravo. 🦅 <em>Sokolí navigace</em> (chov sokolů) umožní upravit dopad o ±1 pole (odhalí vlastníky a nájmy).</div>          </div>          <div class=\"cs-step-item\">            <div class=\"cs-step-num\">3</div>            <div><strong>Akce pole:</strong> Nákup volného panství / platba nájmu majiteli / výcvik u mistra / souboj s rytířem na poli / účast na slavnosti či nákup na trhu.</div>          </div>          <div class=\"cs-step-item\">            <div class=\"cs-step-num\">4</div>            <div><strong>Konec tahu:</strong> Zahrání pergamenů z brašny (kapacita 3/3), správa aktivní výstroje v batohu, předání tahu dalšímu hráči.</div>          </div>        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>⚔️</span> 4 CTNOSTI, MISTŘI &amp; DUELY</div>        <div style=\"font-size:0.75rem; margin-bottom:0.35rem;\">          <strong>⚔️ Boj:</strong> zbraně, dračí stvůry, duely • <strong>🏇 Jízda:</strong> rychlost, dostihy<br/>          <strong>💃 Tanec:</strong> dvorský bál, obratnost • <strong>✨ Charisma:</strong> audience, násobič zisku 💖        </div>        <div style=\"font-size:0.73rem; background:rgba(212,175,55,0.08); padding:0.35rem 0.5rem; border-radius:5px; border:1px solid rgba(212,175,55,0.2);\">          <strong>🎓 Výcvik u Mistra:</strong> Poplatek 1k / 2k / 3k / 4k / 5k zl. Cvičný hod <strong>4, 5, 6</strong> uspěje (+1 stupeň). Velmistr dá <strong>+1,5 💖</strong> a 1 500 zl.<br/>          <strong>⚔️ Duel rytířů na poli:</strong> Vstoupíš-li na pole soupeře, můžeš ho vyzvat: Síla rytíře + 1d6. Výhra = zisk zlata nebo <strong>+1 💖</strong>!        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🎒</span> BRAŠNA &amp; PERGAMENY (MAX 3 KS)</div>        <div style=\"font-size:0.73rem; display:flex; flex-direction:column; gap:0.25rem;\">          <div><strong>⚡ Blesková rychlost:</strong> Hod kostkou je automaticky 6 (nebo +3 k doskoku).</div>          <div><strong>🕊️ Královská amnestie:</strong> Neplatíš nájem na poli soupeře / záchrana ze Špitálu.</div>          <div><strong>🦁 Síla lva:</strong> +3 k bojové síle v libovolném souboji či duelu.</div>          <div><strong>🐑 Zlaté rouno:</strong> Zdvojnásobí výběr daní na Startu nebo nájemné od soupeře.</div>          <div><strong>🍀 Přízeň štěstěny:</strong> Možnost přehodit jakoukoliv nepříznivou kostku.</div>        </div>      </div>    </div>    <div class=\"cs-col\">      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🏰</span> CENÍK PANSTVÍ A ŠLECHTIČTÍ CHOVANCI</div>        <table class=\"cs-table\">          <thead>            <tr><th>Typ panství</th><th>Cena nákupu</th><th>Daň</th><th>Mýtné/Nájem</th><th>Bonus</th></tr>          </thead>          <tbody>            <tr><td><strong>🦅 Sokol (1–4)</strong></td><td>400–1 600 zl.</td><td>—</td><td>20/40/80 %</td><td><strong>+4,0 💖</strong>, navigace ±1</td></tr>            <tr><td><strong>🐕 Pes (1–4)</strong></td><td>500–2 000 zl.</td><td>—</td><td>20/40/80 %</td><td><strong>+2,5 💖</strong>, obrana</td></tr>            <tr><td><strong>🐎 Kůň (1–4)</strong></td><td>600–2 400 zl.</td><td>—</td><td>20/40/80 %</td><td><strong>+1,5 💖</strong>, Klus/Trysk</td></tr>            <tr><td><strong>🏡 Vesnice 1★</strong></td><td>2 000 zl.</td><td>500 zl.</td><td>300 zl.</td><td>Chov: max 3 zvířata</td></tr>            <tr><td><strong>🏡 Vesnice 2★/3★</strong></td><td>+1.5k / +1.5k</td><td>900/1400</td><td>500/800</td><td>Vyšší výnosy</td></tr>            <tr><td><strong>🏛️ Město</strong></td><td>4 500 zl.</td><td>1 200 zl.</td><td>700 zl.</td><td>Chov: max 2 zvířata</td></tr>            <tr><td><strong>🏰 Hrad</strong></td><td>8 000 zl.</td><td>2 500 zl.</td><td>1 500 zl.</td><td><strong>+1 ✨ Charisma</strong></td></tr>            <tr><td><strong>⚒️ Živnosti</strong></td><td>2.5k–3.0k</td><td>600–800</td><td>350–400</td><td>Kovárna/Stáje/Krejčí</td></tr>          </tbody>        </table>        <div style=\"font-size:0.7rem; color:#fde047; margin-top:0.35rem;\">          🌾 <strong>Hospodářský chov:</strong> 🐑 Ovce (500 zl., daň +120, nájem +50) • 🐖 Prase (600 zl., daň +150, nájem +75) • 🐄 Kráva (800 zl., daň +200, nájem +100)        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🎪</span> SLAVNOSTI, AUDIENCE &amp; DRAČÍ VÝZVY</div>        <div style=\"font-size:0.73rem; display:flex; flex-direction:column; gap:0.25rem;\">          <div><strong>⚔️ Turnaj:</strong> Boj + Jízda + 1d6. Výhra: 1 500 / 800 / 400 zl. + 💖 srdce.</div>          <div><strong>💃 Dvorský bál:</strong> Tanec + Charisma + 1d6 (Šaty +2). Výhra: 1 500 / 800 / 400 zl. + 💖.</div>          <div><strong>🏇 Královské dostihy:</strong> 2× Jízda + 1d6 (+1 za každého koně). Ceny: až 1 500 zl. + 💖.</div>          <div><strong>🐉 Lov draků:</strong> U1 (obtížnost 6–8), U2 (9–11), U3 (12–14). <strong>2 draci = výhra!</strong></div>          <div><strong>🏥 Špitál:</strong> Ošetření za 500 zl. nebo hod 5–6 při čekání (vynechání tahu).</div>          <div><strong>💸 Bankrot:</strong> Prodej za 50–70 %, král dluh odpustí za cenu ztráty 💖 srdcí.</div>        </div>      </div>      <div class=\"cs-box\" style=\"padding:0.45rem 0.65rem;\">        <div style=\"display:flex; justify-content:space-between; align-items:center; font-size:0.71rem; color:var(--text-muted);\">          <span>⌨️ <strong>Klávesy:</strong> [Mezerník] Hod/Tah • [T] Tahák • [B] Brašna • [M] Hudba • [Esc] Zavřít</span>        </div>      </div>    </div>  </div>  <div class=\"cs-footer\">KiDesky: Princeznino srdce © 2026 • Rychlý tahák pravidel na 1 list A4 • ekobio.org/apps/KiDesky</div></div>",
+        "page2_html": "<div class=\"cs-page cs-page-2\">  <div class=\"cs-header\">    <h2 class=\"cs-header-title\">🛡️ REFERENČNÍ PŘÍRUČKA • VÝZBROJ &amp; BESTIÁŘ</h2>    <div class=\"cs-header-sub\">Slabiny nestvůr, zbrojnice, trofeje a kartografická legenda</div>  </div>  <div class=\"cs-grid\">    <div class=\"cs-col\">      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🐉</span> SLABINY BESTIÍ V BOJI (+2 K SÍLE)</div>        <div style=\"font-size:0.73rem; display:flex; flex-direction:column; gap:0.35rem;\">          <div><strong>🛡️ Plátová zbroj:</strong> Odrazí drtivé údery tupých a těžkých monster (<em>Černý rytíř, Hliněný Golem, Skalní obr, Kyklop</em>).</div>          <div><strong>🗡️ Dřevce / Kopí:</strong> Prokláto klenuté tělo a útok ze vzduchu (<em>Skalní krvežíznivá Harpyje, Lesní Gryf, Mantikora</em>).</div>          <div><strong>💧 Voda / Chlad:</strong> Uhasí žár a oslabí plamenné netvory (<em>Lávový ještěr, Ohnivý drak, Sopečná saň</em>).</div>          <div><strong>🔥 Oheň / Žár:</strong> Roztaví zmrzlé tkáně severských monster (<em>Mrazivý přízrak, Polární drak, Ledový červ</em>).</div>          <div><strong>✨ Svaté relikvie:</strong> Posvěcené světlo spálí temná a hnilobná stvoření (<em>Nemrtvý pán, Stínový drak, Přízrak hvozdu</em>).</div>          <div><strong>💃 Tanec &amp; Klenoty:</strong> Vznešený dojem dojme drahokamové bytosti (<em>Rubínový drak, Zlatý posvátný jelen</em>).</div>        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🏆</span> PŘEHLED UNIKÁTNÍCH TROFEJÍ Z LOVU</div>        <div style=\"font-size:0.72rem; display:flex; flex-direction:column; gap:0.3rem;\">          <div><strong>🪶 Ostrý pařát skalní harpyje:</strong> +3 ⚔️ Boj, +2 🏇 Jízda, +1 💃 Tanec (cena 7 500 zl.)</div>          <div><strong>🗿 Šém hliněného Golema:</strong> +4 ⚔️ Boj, +3 ✨ Charisma, -2 💃 Tanec (cena 8 200 zl.)</div>          <div><strong>🐺 Stříbrem kovaný tesák Alfy:</strong> +4 ⚔️ Boj, +2 🏇 Jízda, +1 ✨ Charisma (cena 8 500 zl.)</div>          <div><strong>🐙 Chapadlo z mořských hlubin:</strong> +4 ⚔️ Boj, +2 🏇 Jízda, +3 ✨ Charisma (cena 9 000 zl.)</div>          <div><strong>🩸 Bodák pouštní mantikory:</strong> +4 ⚔️ Boj, +3 🏇 Jízda, +1 ✨ Charisma (cena 9 500 zl.)</div>          <div><strong>💀 Koruna Nemrtvého pána:</strong> +5 ⚔️ Boj, +4 ✨ Charisma (cena 11 000 zl.)</div>          <div><strong>💎 Planoucí srdce Rubínového draka:</strong> +5 ⚔️ Boj, +3 💃 Tanec, +4 ✨ Charisma (cena 14 000 zl.)</div>        </div>      </div>    </div>    <div class=\"cs-col\">      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🛒</span> ARSENÁL ZBROJNICE &amp; VÝBAVA</div>        <div style=\"font-size:0.72rem; display:flex; flex-direction:column; gap:0.25rem;\">          <div><strong>🗡️ Zbraně:</strong> Lovecká dýka (+1⚔️, 1.2k) • Široký meč (+2⚔️, 2.5k) • Rytířská halapartna (+3⚔️, 4.5k) • Runová čepel (+4⚔️ +1🏇, 7k) • Posvátná čepel (+5⚔️ +2✨, 12k).</div>          <div><strong>🛡️ Zbroje:</strong> Kožená zbroj (+1⚔️ +1🏇, 2k) • Kroužková košile (+2⚔️, 3k) • Plátová zbroj (+3⚔️, 4.5k) • Stříbrný erbovní štít (+4⚔️ +2🏇 +1✨, 7k) • Dračí brnění (+5⚔️ +2✨, 12k).</div>          <div><strong>👗 Šaty &amp; Róby:</strong> Pukléř &amp; samet (+2💃, 2.5k) • Hedvábná róba (+3💃, 4.5k) • Zlatotkané roucho (+4💃 +2✨, 7k).</div>          <div><strong>💍 Klenoty:</strong> Prsten odvahy (+1✨, 2k) • Amulet moudrosti (+2✨, 4k) • Diamantový náhrdelník (+3✨ +1💃, 7k).</div>        </div>      </div>      <div class=\"cs-box\">        <div class=\"cs-box-title\"><span>🗺️</span> KARTOGRAFICKÉ ZKRATKY &amp; LEGENDA</div>        <div style=\"font-size:0.71rem; display:grid; grid-template-columns:1fr 1fr; gap:0.25rem;\">          <div><code>START</code> Startovní brána království</div>          <div><code>OBCHOD</code> Zbrojnice &amp; výkup bance</div>          <div><code>MB, MJ</code> Mistr Boje, Mistr Jízdy</div>          <div><code>MT, MCH</code> Mistr Tance, Mistr Charismatu</div>          <div><code>V1–V10</code> Vesnice (povyšování 1–3★)</div>          <div><code>M1–M5</code> Královská města</div>          <div><code>H1–H2</code> Majestátní hrady (+1✨)</div>          <div><code>S1–S4</code> Šlechtičtí sokoli (+4💖)</div>          <div><code>P1–P4</code> Lovečtí psi (+2.5💖)</div>          <div><code>K1–K4</code> Ušlechtilí koně (+1.5💖)</div>          <div><code>U1–U3</code> Doupata nestvůr a draků</div>          <div><code>NÁHODA</code> Královská truhla &amp; Pergameny</div>        </div>      </div>    </div>  </div>  <div class=\"cs-footer\">KiDesky: Princeznino srdce © 2026 • Kompletní referenční příručka (Strana 2/2)</div></div>"
     }
 };

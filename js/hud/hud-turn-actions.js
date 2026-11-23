@@ -10,6 +10,19 @@
     
     // --- HERNÍ AKCE Z UI & ANIMACE KROKOVÁNÍ ---,
 
+    _formatTileUnit: function (count) {
+        var n = Math.abs(Number(count) || 0);
+        if (window.PRS_I18n) {
+            return window.PRS_I18n.plural(n, {
+                one: window.PRS_I18n.t("common.tile_one", null, "pole"),
+                few: window.PRS_I18n.t("common.tile_few", null, "pole"),
+                many: window.PRS_I18n.t("common.tile_many", null, "polí"),
+                other: window.PRS_I18n.t("common.tile_many", null, "polí")
+            });
+        }
+        return (n >= 1 && n <= 4) ? "pole" : "polí";
+    },
+
     getDiceGlyph: function (roll) {
 
         var glyphs = { 1: "⚀", 2: "⚁", 3: "⚂", 4: "⚃", 5: "⚄", 6: "⚅" };
@@ -398,26 +411,20 @@
             return;
         }
 
-        var isEnPed = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tNav = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var getNdName = function(node) {
             if (!node) return "";
             return (window.PRS_App && window.PRS_App.getNodeDisplayName) ? window.PRS_App.getNodeDisplayName(node) : node.name;
         };
         var targetSprintName = getNdName(targetSprint);
         var targetBaseName = getNdName(targetBase);
-        var destLabel = isEnPed ? "Destination: " : "Cíl: ";
+        var destLabel = tNav("modals.turn_nav.dest_label", null, "Cíl: ");
 
-        var titleStr = isEnPed ? ("Riding Training: Rolled " + baseRoll + "!") : ("Výcvik Jízdy: Hod " + baseRoll + "!");
-        var subStr = isEnPed
-            ? ("Thanks to your knightly agility and Riding training, you can take a swift advance (+" + jzBonus + (jzBonus === 1 ? " tile" : " tiles") + ")!")
-            : ("Díky své rytířské mrštnosti a výcviku Jízdy můžeš vyrazit svižným přesunem (+" + jzBonus + (jzBonus === 1 ? " pole" : " pole") + ")!");
+        var titleStr = tNav("modals.turn_nav.ped_title", { roll: baseRoll }, "Výcvik Jízdy: Hod " + baseRoll + "!");
+        var subStr = tNav("modals.turn_nav.ped_sub", { bonus: jzBonus, unit: self._formatTileUnit(jzBonus) }, "Díky své rytířské mrštnosti a výcviku Jízdy můžeš vyrazit svižným přesunem (+" + jzBonus + " pole)!");
 
-        var sprintBtnText = isEnPed
-            ? ("⚡ Swift Advance: " + sprintRoll + " tiles (+" + jzBonus + ")")
-            : ("⚡ Rychlý přesun: " + sprintRoll + " polí (+" + jzBonus + ")");
-        var baseBtnText = isEnPed
-            ? ("🚶 Standard March: " + baseRoll + " tiles")
-            : ("🚶 Běžný krok: " + baseRoll + " polí");
+        var sprintBtnText = tNav("modals.turn_nav.ped_sprint_btn", { tiles: sprintRoll, unit: self._formatTileUnit(sprintRoll), bonus: jzBonus }, "⚡ Rychlý přesun: " + sprintRoll + " polí (+" + jzBonus + ")");
+        var baseBtnText = tNav("modals.turn_nav.ped_base_btn", { tiles: baseRoll, unit: self._formatTileUnit(baseRoll) }, "🚶 Běžný krok: " + baseRoll + " polí");
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
 
@@ -488,17 +495,17 @@
 
         }
 
-        var isEnHorse = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
+        var tHorse = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var headerTitle = canSprint
-            ? (isEnHorse ? "Royal Sprint" : "Královský trysk")
-            : (canGallop ? (isEnHorse ? "Horse Gallop" : "Koňský cval") : (isEnHorse ? "Horse Trot" : "Koňský klus"));
+            ? tHorse("modals.turn_nav.horse_sprint_name", null, "Královský trysk")
+            : (canGallop ? tHorse("modals.turn_nav.horse_gallop_name", null, "Koňský cval") : tHorse("modals.turn_nav.horse_trot_name", null, "Koňský klus"));
 
         var headerSub = canGallop
-            ? (isEnHorse ? ("Thanks to Riding mastery (" + jz + "/5) and your horse, you can choose between a fast gallop or a precise maneuver.") : ("Díky mistrovství Jízdy (" + jz + "/5) a koni máš volbu mezi bleskovým cvalem či přesným manévrem."))
-            : (isEnHorse ? ("Horse Trot (Riding " + jz + "/5): Choose from either die (full gallop d1+d2 requires Riding ≥ 2).") : ("Koňský klus (Jízda " + jz + "/5): Volíš z obou kostek (plný cval d1+d2 vyžaduje Jízdu ≥ 2)."));
+            ? tHorse("modals.turn_nav.horse_gallop_sub", { jz: jz }, "Díky mistrovství Jízdy (" + jz + "/5) a koni máš volbu mezi bleskovým cvalem či přesným manévrem.")
+            : tHorse("modals.turn_nav.horse_trot_sub", { jz: jz }, "Koňský klus (Jízda " + jz + "/5): Volíš z obou kostek (plný cval d1+d2 vyžaduje Jízdu ≥ 2).");
 
         if (hasFalcon) {
-            headerSub += "<br><span style='color:#7dd3fc; font-size:0.8rem;'>🦅 <strong>" + (isEnHorse ? "Falcon navigation (±1 tile)" : "Sokolí navigaci (±1 pole)") + "</strong> " + (isEnHorse ? "can be used during tactical maneuvers (during full gallop or sprint, the horse charges too fast for falcon scouting)." : "můžeš využít při taktických manévrech (při plném cvalu či trysku kůň pádí příliš rychle na navigaci sokolem).") + "</span>";
+            headerSub += "<br><span style='color:#7dd3fc; font-size:0.8rem;'>🦅 <strong>" + tHorse("modals.turn_nav.horse_falcon_prefix", null, "Sokolí navigaci (±1 pole)") + "</strong> " + tHorse("modals.turn_nav.horse_falcon_suffix", null, "můžeš využít při taktických manévrech (při plném cvalu či trysku kůň pádí příliš rychle na navigaci sokolem).") + "</span>";
         }
 
         var getNdName = function(node) {
@@ -510,18 +517,18 @@
         var targetSumName = getNdName(targetSum);
         var targetD1Name = getNdName(targetD1);
         var targetD2Name = getNdName(targetD2);
-        var destLabel = isEnHorse ? "Destination: " : "Cíl: ";
+        var destLabel = tHorse("modals.turn_nav.dest_label", null, "Cíl: ");
+        var rolledTitle = tHorse("modals.turn_nav.horse_rolled_title", { header: headerTitle, d1: d1, d2: d2 }, headerTitle + ": Padlo " + d1 + " a " + d2 + "!");
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid var(--gold); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
             '<div style="font-size:2rem; margin-bottom:0.3rem;">🏇 🎲 🎲</div>' +
-            '<h3 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + headerTitle + (isEnHorse ? (': Rolled ' + d1 + ' and ' + d2 + '!') : (': Padlo ' + d1 + ' a ' + d2 + '!')) + '</h3>' +
+            '<h3 style="font-family:\'Cinzel\',serif; color:var(--gold-light); margin:0 0 0.5rem 0;">' + rolledTitle + '</h3>' +
             '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.1rem;">' + headerSub + '</div>' +
             '<div style="display:flex; flex-direction:column; gap:0.6rem;">';
 
         if (canSprint && targetSprint) {
-            var sprintTitle = isEnHorse
-                ? ("👑 Royal Sprint (" + sprintSum + " tiles: " + sum + "+2)" + (hasFalcon ? ' <small style="font-size:0.75rem; color:#fbcfe8; font-weight:600;">(direct sprint – no falcon)</small>' : ''))
-                : ("👑 Královský trysk (" + sprintSum + " polí: " + sum + "+2)" + (hasFalcon ? ' <small style="font-size:0.75rem; color:#fbcfe8; font-weight:600;">(přímý trysk – bez sokola)</small>' : ''));
+            var sprintTitle = tHorse("modals.turn_nav.horse_sprint_opt", { tiles: sprintSum, unit: self._formatTileUnit(sprintSum), sum: sum }, "👑 Královský trysk (" + sprintSum + " polí: " + sum + "+2)") +
+                (hasFalcon ? (' <small style="font-size:0.75rem; color:#fbcfe8; font-weight:600;">' + tHorse("modals.turn_nav.horse_direct_sprint_tag", null, "(přímý trysk – bez sokola)") + '</small>') : '');
             html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #7c3aed, #4f46e5); border:2px solid #c084fc; color:#ffffff;" onclick="PRS_App.confirmHorseRoll(' + sprintSum + ', false)">' +
                 '    <div style="font-weight:800; font-size:0.96rem; color:#f5d0fe;">' + sprintTitle + '</div>' +
                 '    <div style="font-size:0.84rem; color:#e9d5ff; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#ffffff;">' + self.escapeHtml(targetSprintName) + '</strong></div>' +
@@ -529,9 +536,8 @@
         }
 
         if (canGallop && targetSum) {
-            var gallopTitle = isEnHorse
-                ? ("⚡ Full Gallop (" + sum + " tiles)" + (hasFalcon ? ' <small style="font-size:0.75rem; color:#78350f; font-weight:700;">(direct gallop – no falcon)</small>' : ''))
-                : ("⚡ Plný cval (" + sum + " polí)" + (hasFalcon ? ' <small style="font-size:0.75rem; color:#78350f; font-weight:700;">(přímý cval – bez sokola)</small>' : ''));
+            var gallopTitle = tHorse("modals.turn_nav.horse_gallop_opt", { tiles: sum, unit: self._formatTileUnit(sum) }, "⚡ Plný cval (" + sum + " polí)") +
+                (hasFalcon ? (' <small style="font-size:0.75rem; color:#78350f; font-weight:700;">' + tHorse("modals.turn_nav.horse_direct_gallop_tag", null, "(přímý cval – bez sokola)") + '</small>') : '');
             html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #f59e0b, #d97706); border:2px solid #fbbf24; color:#291201;" onclick="PRS_App.confirmHorseRoll(' + sum + ', false)">' +
                 '    <div style="font-weight:800; font-size:0.96rem; color:#451a03;">' + gallopTitle + '</div>' +
                 '    <div style="font-size:0.84rem; color:#291201; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#1e0d00;">' + self.escapeHtml(targetSumName) + '</strong></div>' +
@@ -539,10 +545,9 @@
         }
 
         var scoutLevel = hasFalcon ? self.getFalconScoutLevel(player) : 0;
+        var falconTagHtml = hasFalcon ? (' <span style="color:#38bdf8; font-size:0.8rem; font-weight:600;">' + tHorse("modals.turn_nav.horse_falcon_tag", null, "🦅 + Sokolí navigace (±1)") + '</span>') : '';
 
-        var man1Title = isEnHorse
-            ? ("🎯 Tactical Maneuver (" + d1 + " " + (d1 === 1 ? "tile" : "tiles") + ")" + (hasFalcon ? ' <span style="color:#38bdf8; font-size:0.8rem; font-weight:600;">🦅 + Falcon navigation (±1)</span>' : ''))
-            : ("🎯 Taktický manévr (" + d1 + " " + (d1 === 1 ? 'pole' : (d1 < 5 ? 'pole' : 'polí')) + ')' + (hasFalcon ? ' <span style="color:#38bdf8; font-size:0.8rem; font-weight:600;">🦅 + Sokolí navigace (±1)</span>' : ''));
+        var man1Title = tHorse("modals.turn_nav.horse_maneuver_opt", { tiles: d1, unit: self._formatTileUnit(d1) }, "🎯 Taktický manévr (" + d1 + " pole)") + falconTagHtml;
 
         html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #1e293b, #334155); border:2px solid #64748b; color:#f8fafc;" onclick="PRS_App.confirmHorseRoll(' + d1 + ', ' + hasFalcon + ')">' +
             '    <div style="font-weight:800; font-size:0.96rem; color:#f8fafc;">' + man1Title + '</div>' +
@@ -551,9 +556,7 @@
             '  </button>';
 
         if (targetD2) {
-            var man2Title = isEnHorse
-                ? ("🎯 Tactical Maneuver (" + d2 + " " + (d2 === 1 ? "tile" : "tiles") + ")" + (hasFalcon ? ' <span style="color:#38bdf8; font-size:0.8rem; font-weight:600;">🦅 + Falcon navigation (±1)</span>' : ''))
-                : ("🎯 Taktický manévr (" + d2 + " " + (d2 < 5 ? 'pole' : 'polí') + ')' + (hasFalcon ? ' <span style="color:#38bdf8; font-size:0.8rem; font-weight:600;">🦅 + Sokolí navigace (±1)</span>' : ''));
+            var man2Title = tHorse("modals.turn_nav.horse_maneuver_opt", { tiles: d2, unit: self._formatTileUnit(d2) }, "🎯 Taktický manévr (" + d2 + " pole)") + falconTagHtml;
             html += '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #1e293b, #334155); border:2px solid #64748b; color:#f8fafc;" onclick="PRS_App.confirmHorseRoll(' + d2 + ', ' + hasFalcon + ')">' +
                 '    <div style="font-weight:800; font-size:0.96rem; color:#f8fafc;">' + man2Title + '</div>' +
                 '    <div style="font-size:0.84rem; color:#cbd5e1; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#ffffff;">' + self.escapeHtml(targetD2Name) + '</strong></div>' +
@@ -623,25 +626,25 @@
     
     renderFalconTargetIntelHtml: function (player, targetNode, scoutLevel, moveRoll, isGold) {
         if (!targetNode || !this.state || !window.PRS_GameEngine) return "";
-        var isEnIntel = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
-        var currIntel = isEnIntel ? "g." : "zl.";
-        var locIntel = isEnIntel ? "en-US" : "cs-CZ";
+        var tInt = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
+        var currIntel = tInt("common.gold", "zl.");
+        var locIntel = tInt("ui.locale", "cs-CZ");
 
         if (scoutLevel < 2) {
             var lockColor = isGold ? "#78350f" : "#cbd5e1";
-            return '<div style="font-size:0.75rem; color:' + lockColor + '; font-weight:600; margin-top:3px;">' + (isEnIntel ? "🔒 Owner intel requires 2+ falcons or Falconer" : "🔒 Průzkum vlastníka od 2 sokolů nebo se Sokolníkem") + '</div>';
+            return '<div style="font-size:0.75rem; color:' + lockColor + '; font-weight:600; margin-top:3px;">' + tInt("modals.turn_nav.intel_lock", "🔒 Průzkum vlastníka od 2 sokolů nebo se Sokolníkem") + '</div>';
         }
         var eng = window.PRS_GameEngine;
         var isBuyable = eng.isPurchasableNode ? eng.isPurchasableNode(targetNode) : false;
         if (!isBuyable) {
             var neutralColor = isGold ? "#5c3d18" : "#94a3b8";
-            return '<div style="font-size:0.75rem; color:' + neutralColor + '; font-weight:600; margin-top:3px;">' + (isEnIntel ? "🏳️ Neutral / action tile" : "🏳️ Neutrální / akční pole") + '</div>';
+            return '<div style="font-size:0.75rem; color:' + neutralColor + '; font-weight:600; margin-top:3px;">' + tInt("modals.turn_nav.intel_neutral", "🏳️ Neutrální / akční pole") + '</div>';
         }
         if (targetNode.owner === player.index) {
             var vStars = (targetNode.type === "VILLAGE") ? " (" + (targetNode.villageLevel || 1) + "★)" : "";
-            var upgHint = (scoutLevel >= 3 && targetNode.type === "VILLAGE" && (targetNode.villageLevel || 1) < 3) ? (isEnIntel ? " · Upgrade possible" : " · Povýšení možné") : "";
+            var upgHint = (scoutLevel >= 3 && targetNode.type === "VILLAGE" && (targetNode.villageLevel || 1) < 3) ? tInt("modals.turn_nav.intel_upgrade", " · Povýšení možné") : "";
             var ownColor = isGold ? "#14532d" : "#86efac";
-            return '<div style="font-size:0.75rem; color:' + ownColor + '; font-weight:700; margin-top:3px;">' + (isEnIntel ? ("👑 Your estate" + vStars + upgHint) : ("👑 Tvé panství" + vStars + upgHint)) + '</div>';
+            return '<div style="font-size:0.75rem; color:' + ownColor + '; font-weight:700; margin-top:3px;">' + tInt("modals.turn_nav.intel_own", "👑 Tvé panství") + vStars + upgHint + '</div>';
         }
         if (targetNode.owner !== null && targetNode.owner !== undefined && this.state.players && this.state.players[targetNode.owner]) {
             var ownerObj = this.state.players[targetNode.owner];
@@ -651,19 +654,19 @@
                 var rentColor = isGold ? "#991b1b" : "#fca5a5";
                 var noRentColor = isGold ? "#451a03" : "#cbd5e1";
                 rentStr = (rentVal > 0)
-                    ? (' · <span style="color:' + rentColor + '; font-weight:700;">💸 ' + (isEnIntel ? "Rent: " : "Nájem: ") + rentVal.toLocaleString(locIntel) + ' ' + currIntel + '</span>')
-                    : (' · <span style="color:' + noRentColor + ';">' + (isEnIntel ? "🤝 No rent" : "🤝 Bez nájmu") + '</span>');
+                    ? (' · <span style="color:' + rentColor + '; font-weight:700;">💸 ' + tInt("modals.turn_nav.intel_rent", "Nájem: ") + rentVal.toLocaleString(locIntel) + ' ' + currIntel + '</span>')
+                    : (' · <span style="color:' + noRentColor + ';">' + tInt("modals.turn_nav.intel_no_rent", "🤝 Bez nájmu") + '</span>');
             }
             var ownerTextColor = isGold ? "#7f1d1d" : (ownerObj.color || '#fca5a5');
-            return '<div style="font-size:0.75rem; margin-top:3px; color:' + ownerTextColor + '; font-weight:700;">🛡️ ' + (isEnIntel ? "Owner: " : "Vlastník: ") + (ownerObj.badge || '') + ' ' + this.escapeHtml(ownerObj.name) + rentStr + '</div>';
+            return '<div style="font-size:0.75rem; margin-top:3px; color:' + ownerTextColor + '; font-weight:700;">🛡️ ' + tInt("modals.turn_nav.intel_owner", "Vlastník: ") + (ownerObj.badge || '') + ' ' + this.escapeHtml(ownerObj.name) + rentStr + '</div>';
         }
         var priceStr = "";
         if (scoutLevel >= 3 && eng.getNodePrice) {
             var pVal = eng.getNodePrice(this.state, targetNode);
-            if (pVal > 0) priceStr = ' · 💰 ' + (isEnIntel ? "Price: " : "Cena: ") + pVal.toLocaleString(locIntel) + ' ' + currIntel;
+            if (pVal > 0) priceStr = ' · 💰 ' + tInt("modals.turn_nav.intel_price", "Cena: ") + pVal.toLocaleString(locIntel) + ' ' + currIntel;
         }
         var availColor = isGold ? "#5c3d18" : "#fde68a";
-        return '<div style="font-size:0.75rem; color:' + availColor + '; font-weight:700; margin-top:3px;">🏷️ ' + (isEnIntel ? "Available for purchase" : "Volné k nákupu") + priceStr + '</div>';
+        return '<div style="font-size:0.75rem; color:' + availColor + '; font-weight:700; margin-top:3px;">🏷️ ' + tInt("modals.turn_nav.intel_available", "Volné k nákupu") + priceStr + '</div>';
     },
 
     
@@ -681,10 +684,11 @@
 
         var targetPlus = window.PRS_GameEngine.getTargetNodeForRoll(self.state, player, plusRoll);
 
+        var tFalc = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var scoutLevel = self.getFalconScoutLevel(player);
         var scoutBadgeText = scoutLevel >= 3
-            ? "🦅 Sokolí průzkum (Úr. 3/3 – Vlastníci & Ceny)"
-            : (scoutLevel === 2 ? "🦅 Sokolí průzkum (Úr. 2/3 – Vlastníci)" : "🦅 Sokolí průzkum (Úr. 1/3 – Základní)");
+            ? tFalc("modals.turn_nav.scout_lvl3", null, "🦅 Sokolí průzkum (Úr. 3/3 – Vlastníci & Ceny)")
+            : (scoutLevel === 2 ? tFalc("modals.turn_nav.scout_lvl2", null, "🦅 Sokolí průzkum (Úr. 2/3 – Vlastníci)") : tFalc("modals.turn_nav.scout_lvl1", null, "🦅 Sokolí průzkum (Úr. 1/3 – Základní)"));
 
         var modal = (this.getGenericModal ? this.getGenericModal() : document.getElementById("generic-modal"));
         if (!modal) {
@@ -692,7 +696,6 @@
             return;
         }
 
-        var isEnFalcon = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var getNdName = function(node) {
             if (!node) return "";
             return (window.PRS_App && window.PRS_App.getNodeDisplayName) ? window.PRS_App.getNodeDisplayName(node) : node.name;
@@ -701,29 +704,28 @@
         var targetBaseName = getNdName(targetBase);
         var targetPlusName = getNdName(targetPlus);
 
-        var destLabel = isEnFalcon ? "Destination: " : "Cíl: ";
-        var baseLabel = isEnFalcon
-            ? ("🎯 Original roll: " + baseRoll + " tiles (no change)")
-            : ("🎯 Původní hod: " + baseRoll + " polí (bez změny)");
-        var plusLabel = isEnFalcon
-            ? ("▶️ Adjustment: " + plusRoll + " tiles (+1)")
-            : ("▶️ Úprava: " + plusRoll + " polí (+1)");
+        var destLabel = tFalc("modals.turn_nav.dest_label", null, "Cíl: ");
+        var minusLabel = tFalc("modals.turn_nav.falcon_minus", { tiles: minusRoll, unit: self._formatTileUnit(minusRoll) }, "◀️ Úprava: " + minusRoll + " polí (-1)");
+        var baseLabel = tFalc("modals.turn_nav.falcon_base", { tiles: baseRoll, unit: self._formatTileUnit(baseRoll) }, "🎯 Původní hod: " + baseRoll + " polí (bez změny)");
+        var plusLabel = tFalc("modals.turn_nav.falcon_plus", { tiles: plusRoll, unit: self._formatTileUnit(plusRoll) }, "▶️ Úprava: " + plusRoll + " polí (+1)");
+        var falconTitle = tFalc("modals.turn_nav.falcon_title", { roll: baseRoll }, "Sokolí navigace: Hod " + baseRoll + "!");
+        var falconSub = tFalc("modals.turn_nav.falcon_sub", null, "Tvůj sokol krouží nad krajinou a dává ti možnost upravit výsledný doskok o ±1 pole!");
 
         var html = '<div class="tactical-modal-box" style="padding:1.4rem; text-align:center; max-width:440px; margin:auto; background:linear-gradient(180deg, #1e1b4b, #0f172a); border:2px solid #38bdf8; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.8);">' +
 
                 '<div style="font-size:2rem; margin-bottom:0.3rem;">🦅 🎯</div>' +
 
-                '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.4rem 0;">' + (isEnFalcon ? ("Falcon Navigation: Rolled " + baseRoll + "!") : ("Sokolí navigace: Hod " + baseRoll + "!")) + '</h3>' +
+                '<h3 style="font-family:\'Cinzel\',serif; color:#7dd3fc; margin:0 0 0.4rem 0;">' + falconTitle + '</h3>' +
 
                 '<div style="display:inline-block; font-size:0.74rem; color:#bae6fd; background:rgba(56,189,248,0.14); border:1px solid rgba(56,189,248,0.35); border-radius:999px; padding:0.15rem 0.65rem; margin-bottom:0.55rem;">' + scoutBadgeText + '</div>' +
 
-                '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.05rem;">' + (isEnFalcon ? "Your falcon circles above the landscape, granting you the power to adjust your reach by ±1 tile!" : "Tvůj sokol krouží nad krajinou a dává ti možnost upravit výsledný doskok o ±1 pole!") + '</div>' +
+                '<div style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1.05rem;">' + falconSub + '</div>' +
 
                 '<div style="display:flex; flex-direction:column; gap:0.6rem;">' +
 
                 (targetMinus ? '  <button class="btn-gold-lg" style="text-align:left; padding:0.8rem 1.1rem; background:linear-gradient(135deg, #0369a1, #0284c7); border:2px solid #38bdf8; color:#f0f9ff;" onclick="PRS_App.confirmFalconRoll(' + minusRoll + ')">' +
 
-                '    <div style="font-weight:800; font-size:0.96rem; color:#e0f2fe;">' + (isEnFalcon ? ("◀️ Adjustment: " + minusRoll + " tiles (-1)") : ("◀️ Úprava: " + minusRoll + " polí (-1)")) + '</div>' +
+                '    <div style="font-weight:800; font-size:0.96rem; color:#e0f2fe;">' + minusLabel + '</div>' +
 
                 '    <div style="font-size:0.84rem; color:#bae6fd; font-weight:600; margin-top:3px;">' + destLabel + '<strong style="color:#ffffff;">' + self.escapeHtml(targetMinusName) + '</strong></div>' +
                 self.renderFalconTargetIntelHtml(player, targetMinus, scoutLevel, minusRoll, false) +

@@ -438,9 +438,9 @@
 
         var ownerText = "";
 
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
-        var currStr = isEn ? "g." : "zl.";
+        var currStr = t("common.gold", null, "zl.");
+        var locStr = t("ui.locale", null, "cs-CZ");
 
         if (nd.owner !== null && this.state.players[nd.owner]) {
 
@@ -448,7 +448,7 @@
 
             var curRent = window.PRS_GameEngine.calculateNodeRent(this.state, nd, activePlayer);
 
-            var rentFormatted = curRent.toLocaleString(isEn ? "en-US" : "cs-CZ") + " " + currStr;
+            var rentFormatted = curRent.toLocaleString(locStr) + " " + currStr;
 
             ownerText = '<div class="prs-tooltip-meta">' + t("tooltips.owner", { color: ownerP.color, name: this.escapeHtml(ownerP.name) }, '👑 Vlastník: <strong style="color:' + ownerP.color + '">' + this.escapeHtml(ownerP.name) + '</strong>') + '</div>' +
 
@@ -456,13 +456,13 @@
 
         } else if (nd.price) {
 
-            var priceFormatted = nd.price.toLocaleString(isEn ? "en-US" : "cs-CZ") + " " + currStr;
+            var priceFormatted = nd.price.toLocaleString(locStr) + " " + currStr;
 
             if (nd.rent) {
 
                 var rentVal = Array.isArray(nd.rent) ? (nd.rent[nd.villageLevel || 1] || nd.rent[0]) : (typeof nd.rent === "object" ? nd.rent[nd.villageLevel || 1] : nd.rent);
 
-                var rFormatted = (rentVal || 0).toLocaleString(isEn ? "en-US" : "cs-CZ") + " " + currStr;
+                var rFormatted = (rentVal || 0).toLocaleString(locStr) + " " + currStr;
 
                 ownerText = '<div class="prs-tooltip-meta">' + t("tooltips.price_rent", { price: priceFormatted, rent: rFormatted }, '💰 Cena: <strong>' + priceFormatted + '</strong> | Základní nájem: <strong>' + rFormatted + '</strong>') + '</div>';
 
@@ -614,7 +614,6 @@
 
     getLandmarkDisplayName: function (lmk) {
         if (!lmk) return "";
-        var isEn = window.PRS_I18n && window.PRS_I18n.getLanguage() === "en";
         if (lmk.id === "royalCastle") {
             return window.PRS_I18n ? window.PRS_I18n.t("castles.royal.name", null, lmk.name || "Královský Hrad") : (lmk.name || "Královský Hrad");
         }

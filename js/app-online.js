@@ -632,8 +632,8 @@ openAuthModal: function () {
             html.push('  <div style="margin:0.25rem 0;">' + (this.getPlayerPawnAvatarHtml ? this.getPlayerPawnAvatarHtml(pl, 52) : ('<div style="font-size:1.8rem;">' + pl.badge + '</div>')) + '</div>');
             html.push('  <div style="font-size:1rem; font-weight:bold; color:' + pl.color + '; margin-bottom:0.2rem;">' + this.escapeHtml(pl.name) + '</div>');
             var currG = (window.PRS_I18n ? window.PRS_I18n.t("common.gold") : "zl.");
-        var isEnGrid = (window.PRS_I18n && window.PRS_I18n.getLanguage() === "en");
-        html.push('  <div style="font-size:0.85rem; color:#f472b6; font-weight:bold; margin-bottom:0.5rem;">' + pl.totalHearts + ' 💖 • ' + pl.gold.toLocaleString(isEnGrid ? "en-US" : "cs-CZ") + ' ' + currG + '</div>');
+            var locGrid = (window.PRS_I18n ? window.PRS_I18n.t("ui.locale", null, "cs-CZ") : "cs-CZ");
+            html.push('  <div style="font-size:0.85rem; color:#f472b6; font-weight:bold; margin-bottom:0.5rem;">' + pl.totalHearts + ' 💖 • ' + pl.gold.toLocaleString(locGrid) + ' ' + currG + '</div>');
             html.push('  <div style="display:flex; justify-content:center; gap:0.4rem; font-size:0.76rem; margin-bottom:0.75rem; color:var(--text-muted); background:rgba(0,0,0,0.3); border-radius:6px; padding:0.25rem;">');
             html.push('    <span>⚔️' + (st.combat || 0) + '</span>');
             html.push('    <span>🏇' + (st.riding || 0) + '</span>');
