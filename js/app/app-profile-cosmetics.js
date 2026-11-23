@@ -1287,10 +1287,67 @@
         var name = node.name || node.code || "";
         var code = node.code || "";
         var type = node.type;
+        var dict = (window.PRS_I18n && typeof window.PRS_I18n.getDict === "function") ? window.PRS_I18n.getDict() : ((window.PRS_I18N && window.PRS_I18n) ? window.PRS_I18N[window.PRS_I18n.getLanguage()] : null);
+        var nodeNames = (dict && dict.custom_names && dict.custom_names.node_names) ? dict.custom_names.node_names : null;
         var t = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+
+        // 1. Přímý překlad přes slovník custom_names.node_names
+        if (nodeNames && nodeNames[name]) {
+            return nodeNames[name];
+        }
+
+        // 2. Kontrola odbočky s příponou (např. " – Odbočka", " - Odbočka")
+        if (nodeNames && (name.indexOf(" – Odbočka") !== -1 || name.indexOf(" - Odbočka") !== -1)) {
+            var baseName = name.replace(/\s*[-–]\s*Odbočka.*/i, "").trim();
+            if (nodeNames[baseName]) {
+                var juncSuffix = (dict && dict.custom_names && dict.custom_names.junction_suffix) || t("custom_names.junction_suffix", null, " – Odbočka");
+                return nodeNames[baseName] + juncSuffix;
+            }
+        }
+
+        // 3. START pole
         if (type === "START" || code === "START") {
+            if (nodeNames && nodeNames["START (+3 000 zl.)"]) return nodeNames["START (+3 000 zl.)"];
             return t("standing_card.pill_start", null, name);
         }
+
+        // 4. Fallbacky podle typu políčka
+        if (type === "CHANCE") return (nodeNames && nodeNames["Náhoda"]) || "Náhoda";
+        if (type === "TAX") return (nodeNames && nodeNames["Výběrčí daní"]) || "Výběrčí daní";
+        if (type === "HOSPITAL") return (nodeNames && nodeNames["Královský lazaret"]) || "Královský lazaret";
+        if (type === "PRISON") return (nodeNames && nodeNames["Královská šatlava"]) || "Královská šatlava";
+        if (type === "TAVERN") return (nodeNames && nodeNames["Krčma U Zlatého korbelu"]) || "Krčma U Zlatého korbelu";
+        if (type === "MERCHANT") return (nodeNames && nodeNames["Obchodník"]) || "Obchodník";
+
+        // 5. Chovná zvířata – vyhledání v katalogu podle sady a podtypu
+        if (type === "ANIMAL" && node.subtype) {
+            var animalKind = node.subtype === "horse" ? t("animals.horse", null, "Kůň") : (node.subtype === "dog" ? t("animals.dog", null, "Pes") : t("animals.falcon", null, "Sokol"));
+            var setN = node.setId || (node.code && node.code.match(/\d+/) ? parseInt(node.code.match(/\d+/)[0], 10) : 0);
+            if (window.PRS_BOARD_GEOMETRY && window.PRS_BOARD_GEOMETRY.ANIMAL_SETS_CATALOG && setN >= 1 && setN <= 14) {
+                var setDef = window.PRS_BOARD_GEOMETRY.ANIMAL_SETS_CATALOG[setN - 1];
+                if (setDef && setDef[node.subtype]) {
+                    var baseAnimalName = setDef[node.subtype];
+                    if (nodeNames && nodeNames[baseAnimalName]) return nodeNames[baseAnimalName];
+                }
+            }
+            return animalKind + (setN ? (" " + setN) : "");
+        }
+
+        // 6. Bojové úkoly
+        if (type === "QUEST") {
+            if (node.subtype === "U3") return (nodeNames && nodeNames["Dračí sluj (U3)"]) || "Dračí sluj (U3)";
+            if (node.subtype === "U2") return (nodeNames && nodeNames["Souboj s monstrem (U2)"]) || "Souboj s monstrem (U2)";
+            return (nodeNames && nodeNames["Lov zvěře (U1)"]) || "Lov zvěře (U1)";
+        }
+
+        // 7. Slavnosti
+        if (type === "FESTIVAL") {
+            if (node.subtype === "tournament") return (nodeNames && nodeNames["SLAVNOST: Královský Turnaj ♡"]) || "SLAVNOST: Turnaj ♡";
+            if (node.subtype === "ball") return (nodeNames && nodeNames["SLAVNOST: Ples ♡"]) || "SLAVNOST: Ples ♡";
+            if (node.subtype === "race") return (nodeNames && nodeNames["SLAVNOST: Velký Závod ♡"]) || "SLAVNOST: Závod ♡";
+        }
+
+        // 8. Šablony map
         var mapNames = ["Dračí království", "Královská divočina", "Královská delta", "Rytířské kolbiště", "Vlastní plán", "Náhodné království", "Vlastní království"];
         for (var i = 0; i < mapNames.length; i++) {
             var raw = mapNames[i];
