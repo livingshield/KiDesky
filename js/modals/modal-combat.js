@@ -41,11 +41,59 @@
     
     closeQuestDuelModal: function () {
 
+        var finalizedRerollLoss = false;
+
+        if (this.state && this.state.pendingAction && this.state.pendingAction.canTacticalReroll && window.PRS_GameEngine && window.PRS_GameEngine.finalizeQuestLoss) {
+
+            window.PRS_GameEngine.finalizeQuestLoss(this.state);
+
+            finalizedRerollLoss = true;
+
+        }
+
         var modal = document.getElementById("quest-duel-modal");
 
         if (modal) modal.style.display = "none";
 
         this.updateBodyModalClass();
+
+        if (finalizedRerollLoss) {
+
+            this.renderGameScreen();
+
+            this.saveSessionAuto();
+
+        }
+
+    },
+
+    declineTacticalReroll: function () {
+
+        this.closeQuestDuelModal();
+
+    },
+
+    _notifyQuestDuelOutcome: function (res) {
+
+        if (res && res.won) {
+
+            if (window.PRS_Audio) window.PRS_Audio.playFanfare();
+
+            if (this.showPawnToast && this.state) {
+
+                var curr = window.PRS_I18n ? window.PRS_I18n.t("ui.currency", null, "zl.") : "zl.";
+
+                var toastTxt = "+" + res.goldWon.toLocaleString("cs-CZ") + " " + curr + (res.heartsWon > 0 ? (" | +" + res.heartsWon + " 💖") : "") + (res.trophyWon ? (" | 🏆 " + res.trophyWon.icon) : "");
+
+                this.showPawnToast(this.state.currentPlayerIndex, toastTxt, "🏆", "#86efac");
+
+            }
+
+        } else {
+
+            if (window.PRS_Audio) window.PRS_Audio.playOminous();
+
+        }
 
     },
 
@@ -541,15 +589,7 @@
 
             self.isDuelRolling = false;
 
-            if (res && res.won) {
-
-                if (window.PRS_Audio) window.PRS_Audio.playFanfare();
-
-            } else {
-
-                if (window.PRS_Audio) window.PRS_Audio.playOminous();
-
-            }
+            self._notifyQuestDuelOutcome(res);
 
             self.renderDuelCeremony(res);
 
@@ -635,28 +675,32 @@
             html.push('  </p>');
 
             if (res.canTacticalReroll) {
+                var pendingNote = window.PRS_I18n ? window.PRS_I18n.t("engine.quest_reroll_pending_note", null, "⏳ Trest za porážku se uplatní až v případě, že nevyužiješ opravný hod nebo i druhý hod selže.") : "⏳ Trest za porážku se uplatní až v případě, že nevyužiješ opravný hod nebo i druhý hod selže.";
+                var declineLbl = window.PRS_I18n ? window.PRS_I18n.t("engine.quest_reroll_decline_btn", null, "⚔️ Přijmout porážku a ustoupit") : "⚔️ Přijmout porážku a ustoupit";
                 html.push('  <div style="background:rgba(245,158,11,0.22); border:1.5px dashed #f59e0b; border-radius:10px; padding:0.55rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto;">');
                 html.push('    <div style="font-weight:bold; color:#fef08a; font-size:0.88rem; margin-bottom:0.2rem;">🎯 Šance na taktický opravný hod!</div>');
                 html.push('    <div style="font-size:0.78rem; color:#fde68a; margin-bottom:0.45rem;">Prohrál jsi o pouhé ' + (res.difficulty - res.totalPower) + ' body! Zkušenosti a zvířata ti dávají druhou šanci.</div>');
-                html.push('    <button class="quest-btn-roll-action" style="background:linear-gradient(135deg, #f59e0b, #d97706); font-size:0.88rem; padding:0.4rem 1rem; margin:0;" onclick="PRS_App.executeTacticalReroll()">🎲 Taktický opravný hod (Reroll 1 kostky)</button>');
+                html.push('    <button id="quest-tactical-reroll-btn" class="quest-btn-roll-action" style="background:linear-gradient(135deg, #f59e0b, #d97706); font-size:0.88rem; padding:0.4rem 1rem; margin:0;" onclick="PRS_App.executeTacticalReroll(this)">🎲 Taktický opravný hod (Reroll 1 kostky)</button>');
                 html.push('  </div>');
-            }
-
-            if (res.preventedHospital) {
-                html.push('  <div style="background:rgba(16,185,129,0.18); border:1.5px solid #10b981; border-radius:8px; padding:0.5rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto; color:#86efac; font-size:0.84rem;">');
-                html.push('    🧪 <strong>Záchrana lektvarem!</strong> Díky elixíru z Lazaretu neutrpěl rytíř fatální zranění a nemusí do Špitálu.');
-                html.push('  </div>');
-            } else if (q.questTier === "U1") {
-                html.push('  <div style="background:rgba(239,68,68,0.18); border:1.5px solid #ef4444; border-radius:8px; padding:0.5rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto; color:#fca5a5; font-size:0.84rem;">');
-                html.push('    🐗 Zvíře uniklo do hlubokého lesa. Ošetření lehkých ran stálo rytíře zlaťáky.');
-                html.push('  </div>');
+                html.push('  <div style="background:rgba(148,163,184,0.14); border:1px solid rgba(148,163,184,0.35); border-radius:8px; padding:0.45rem 0.75rem; max-width:440px; margin:0 auto 0.5rem auto; color:#cbd5e1; font-size:0.8rem;">' + this.escapeHtml(pendingNote) + '</div>');
+                html.push('  <button class="quest-btn-continue" onclick="PRS_App.declineTacticalReroll()">' + this.escapeHtml(declineLbl) + '</button>');
             } else {
-                html.push('  <div style="background:rgba(239,68,68,0.22); border:1.5px solid #ef4444; border-radius:8px; padding:0.5rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto; color:#fca5a5; font-size:0.84rem;">');
-                html.push('    🏥 Raněný rytíř byl převezen do Královského lazaretu (Špitál), kde se 1 tah léčí ze svých zranění.');
-                html.push('  </div>');
-            }
+                if (res.preventedHospital) {
+                    html.push('  <div style="background:rgba(16,185,129,0.18); border:1.5px solid #10b981; border-radius:8px; padding:0.5rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto; color:#86efac; font-size:0.84rem;">');
+                    html.push('    🧪 <strong>Záchrana lektvarem!</strong> Díky elixíru z Lazaretu neutrpěl rytíř fatální zranění a nemusí do Špitálu.');
+                    html.push('  </div>');
+                } else if (q.questTier === "U1") {
+                    html.push('  <div style="background:rgba(239,68,68,0.18); border:1.5px solid #ef4444; border-radius:8px; padding:0.5rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto; color:#fca5a5; font-size:0.84rem;">');
+                    html.push('    🐗 Zvíře uniklo do hlubokého lesa. Ošetření lehkých ran stálo rytíře zlaťáky.');
+                    html.push('  </div>');
+                } else {
+                    html.push('  <div style="background:rgba(239,68,68,0.22); border:1.5px solid #ef4444; border-radius:8px; padding:0.5rem 0.8rem; max-width:440px; margin:0 auto 0.5rem auto; color:#fca5a5; font-size:0.84rem;">');
+                    html.push('    🏥 Raněný rytíř byl převezen do Královského lazaretu (Špitál), kde se 1 tah léčí ze svých zranění.');
+                    html.push('  </div>');
+                }
 
-            html.push('  <button class="quest-btn-continue" onclick="PRS_App.closeQuestDuelModal()">⚔️ Ustoupit z bojiště (Pokračovat)</button>');
+                html.push('  <button class="quest-btn-continue" onclick="PRS_App.closeQuestDuelModal()">⚔️ Ustoupit z bojiště (Pokračovat)</button>');
+            }
         }
 
         html.push('</div>');
@@ -691,13 +735,13 @@
     },
 
     
-    executeTacticalReroll: function () {
+    executeTacticalReroll: function (btnEl) {
 
         if (this.isDuelRolling) return;
 
         this.isDuelRolling = true;
 
-        var btn = event && event.target;
+        var btn = btnEl || document.getElementById("quest-tactical-reroll-btn");
 
         if (btn) {
 
@@ -731,15 +775,7 @@
 
             self.isDuelRolling = false;
 
-            if (res && res.won) {
-
-                if (window.PRS_Audio) window.PRS_Audio.playFanfare();
-
-            } else {
-
-                if (window.PRS_Audio) window.PRS_Audio.playOminous();
-
-            }
+            self._notifyQuestDuelOutcome(res);
 
             self.renderDuelCeremony(res);
 

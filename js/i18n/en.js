@@ -603,6 +603,9 @@ window.PRS_I18N.en = {
         "duel_win_log": "⚔️ DUEL VICTORY! {badge} {player} defeated {opponentBadge} {opponent}!",
         "duel_loss_log": "⚔️ DUEL DEFEAT! {badge} {player} was bested by knight {opponentBadge} {opponent}!",
         "quest_win_log": "🏆 MONSTER SLAIN! {badge} {player} defeated {monster}!",
+        "quest_win_reward_log": "🏆 MONSTER SLAIN! {badge} {player} defeated {monster} (+{gold} g.{heartsPart}{extraPart})!",
+        "quest_reroll_decline_btn": "⚔️ Accept Defeat & Retreat",
+        "quest_reroll_pending_note": "⏳ Defeat penalty is only applied if you decline the reroll or fail the second roll.",
         "quest_loss_log": "💀 DEFEAT IN BATTLE! {badge} {player} was defeated by {monster}!",
         "falcon_nav_log": "🦅 {badge} {player} adjusts landing by {offset} tiles to **{node}** via falcon scout navigation!"
     },

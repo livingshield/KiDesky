@@ -633,15 +633,17 @@
 
         var pa = state.pendingAction;
 
-        if (!pa || !pa.canResolveQuest || !pa.questCard) return null;
+        tactics = tactics || {};
+
+        var isRerollAttempt = Boolean(tactics.isReroll && pa && pa.canTacticalReroll);
+
+        if (!pa || (!pa.canResolveQuest && !isRerollAttempt) || !pa.questCard) return null;
 
         var player = state.players[state.currentPlayerIndex];
 
         var q = pa.questCard;
 
         var stats = this.getEffectiveStats(state, player);
-
-        tactics = tactics || {};
 
         var tacticBonus = 0;
 
@@ -710,8 +712,11 @@
         var totalPower = roll + stats.combat + animalBonus + horseBonus + tacticBonus + weaknessBonus + stanceBonus;
 
         pa.canResolveQuest = false;
+        pa.canTacticalReroll = false;
 
         var won = totalPower >= q.difficulty;
+
+        var offerReroll = false;
 
         var trophyItemWon = null;
 
@@ -813,24 +818,30 @@
 
             pa.summary = rewardMsg;
 
+            var heartsPart = q.hearts > 0 ? (", +" + q.hearts + " 💖") : "";
+            var extraParts = [];
+            if (trophyItemWon) extraParts.push("🏆 " + trophyItemWon.icon + " " + trophyItemWon.name);
+            if (lootWon) extraParts.push("🎁 " + lootWon.icon + " " + lootWon.name);
+            var extraPart = extraParts.length > 0 ? (", " + extraParts.join(", ")) : "";
+
             this.addLog(state, rewardMsg, "quest_win", {
-                key: "engine.quest_win_log",
+                key: "engine.quest_win_reward_log",
                 params: {
                     badge: player.badge,
                     player: player.name,
-                    monster: q.icon + " " + q.name
+                    monster: q.icon + " " + q.name,
+                    gold: q.gold.toLocaleString("cs-CZ"),
+                    heartsPart: heartsPart,
+                    extraPart: extraPart
                 }
             });
 
         } else {
 
-            player.stats.questsLost++;
+            // Taktický opravný hod pro lidského hráče: trest za porážku se odloží do rozhodnutí o rerollu
+            var canReroll = (!player.isBot && stance === "tactical" && (q.difficulty - totalPower <= 2) && (stats.dogs > 0 || stats.falcons > 0 || stats.combat >= 2));
 
-            // Kontrola taktického Rerollu (při taktickém postoji, prohře o 1-2 body a přítomnosti psa/sokola či Boj >= 2)
-
-            var canReroll = (stance === "tactical" && (q.difficulty - totalPower <= 2) && (stats.dogs > 0 || stats.falcons > 0 || stats.combat >= 2));
-
-            if (canReroll && !tactics.isReroll) {
+            if (canReroll && !tactics.isReroll && !tactics.skipRerollOffer) {
 
                 pa.canTacticalReroll = true;
 
@@ -840,105 +851,19 @@
 
                 pa.lastDuelPower = totalPower;
 
-            }
+                offerReroll = true;
 
-            if (stance === "defensive") {
-
-                // Opatrná obrana: hráč neutrpí žádnou ztrátu srdcí ani vězení/lazaret
-
-                preventedHospital = true;
-
-                var defLossMsg = "🛡️ Opatrný ústup za štítem! " + player.badge + " " + player.name + " včas kryl svůj ústup před **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + "). Díky obrannému postoji neutrpěl žádnou ztrátu srdcí ani zranění!";
-
-                pa.summary = defLossMsg;
-
-                this.addLog(state, defLossMsg, "quest_loss", {
-                    key: "engine.quest_loss_log",
-                    params: {
-                        badge: player.badge,
-                        player: player.name,
-                        monster: q.icon + " " + q.name
-                    }
-                });
-
-            } else if (tactics.elixir || player.hasElixirToken) {
-
-                // Pojistka elixírem z Lazaretu - hráč neutrpí těžké zranění
-                var usedToken = !!player.hasElixirToken;
-                if (usedToken) player.hasElixirToken = false;
-                var elixCost = usedToken ? 0 : Math.min(player.gold, 500);
-
-                if (elixCost > 0) player.gold -= elixCost;
-
-                preventedHospital = true;
-
-                var elixLossMsg = "🧪 Záchrana hojivým elixírem! " + player.badge + " " + player.name + " podlehl bestii **" + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + "), ale díky ochrannému elixíru z Lazaretu neutrpěl těžká zranění a nemusí do Špitálu!";
-
-                pa.summary = elixLossMsg;
-
-                this.addLog(state, elixLossMsg, "quest_loss");
-
-            } else if (q.questTier === "U1") {
-
-                var failCost = Math.min(player.gold, (state.config.quests.u1FailCost || 500) * (stance === "aggressive" ? 2 : 1));
-
-                player.gold -= failCost;
-
-                var u1Msg = "🐗 Lov se nezdařil! **" + q.name + "** unikl (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + ")." + (stance === "aggressive" ? " Kvůli dravému výpadu tě ošetření ran stálo dvojnásobek: -" + failCost + " zl." : " Ošetření ran stojí -" + failCost + " zl.");
-
-                pa.summary = u1Msg;
-
-                this.addLog(state, u1Msg, "quest_loss");
+                pa.summary = "⏳ Těsná porážka (" + totalPower + " vs. " + q.difficulty + ") — můžeš využít taktický opravný hod!";
 
             } else {
 
-                // Dravý útok na U2/U3: ztráta 2 Srdcí
+                player.stats.questsLost++;
 
-                var heartsLost = (stance === "aggressive") ? 2.0 : 1.0;
+                var lossOutcome = this.applyQuestLossPenalty(state, player, q, totalPower, roll, stance, tactics);
 
-                player.permanentHearts = Math.max(0, player.permanentHearts - heartsLost);
+                preventedHospital = lossOutcome.preventedHospital;
 
-                // Zranění v boji na U2/U3 -> převoz do Královského lazaretu (Špitál) k ošetření
-
-                var hospitalNode = null;
-
-                for (var h = 0; h < state.board.nodes.length; h++) {
-
-                    if (state.board.nodes[h].type === "HOSPITAL") {
-
-                        hospitalNode = state.board.nodes[h];
-
-                        break;
-
-                    }
-
-                }
-
-                if (hospitalNode) {
-
-                    player.nodeId = hospitalNode.id;
-
-                    player.skipTurns = 1;
-
-                    var hospLossMsg = "💀 PORÁŽKA V BOJI! " + player.badge + " " + player.name + " podlehl v souboji s **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + ")." + (stance === "aggressive" ? " Dravý výpad způsobil kritické zranění: **-" + heartsLost + " 💖**!" : " Rytíř ztratil **-" + heartsLost + " 💖**.") + " Těžce raněný byl převezen do **" + hospitalNode.name + "**, kde se 1 tah léčí!";
-
-                    pa.summary = hospLossMsg;
-
-                    this.addLog(state, hospLossMsg, "quest_loss");
-
-                } else {
-
-                    player.nodeId = 0;
-
-                    player.skipTurns = 1;
-
-                    var deathMsg = "💀 PORÁŽKA V BOJI! " + player.badge + " " + player.name + " podlehl v souboji s **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + ")." + (stance === "aggressive" ? " Kritické zranění: **-" + heartsLost + " 💖**!" : " Ztráta **-" + heartsLost + " 💖**.") + " Rytíř byl odnesen na **START** a vynechává 1 tah!";
-
-                    pa.summary = deathMsg;
-
-                    this.addLog(state, deathMsg, "quest_loss");
-
-                }
+                pa.summary = lossOutcome.summary;
 
             }
 
@@ -988,8 +913,149 @@
 
             stanceName: stanceName,
 
-            canTacticalReroll: (stance === "tactical" && !won && (q.difficulty - totalPower <= 2) && (stats.dogs > 0 || stats.falcons > 0 || stats.combat >= 2))
+            canTacticalReroll: Boolean(offerReroll)
 
+        };
+
+    },
+
+    // Aplikace trestu za prohraný souboj s monstrem či drakem (využíváno okamžitě i při odmítnutí rerollu),
+    applyQuestLossPenalty: function (state, player, q, totalPower, roll, stance, tactics) {
+
+        tactics = tactics || {};
+
+        var preventedHospital = false;
+
+        var summary = "";
+
+        if (stance === "defensive") {
+
+            // Opatrná obrana: hráč neutrpí žádnou ztrátu srdcí ani vězení/lazaret
+            preventedHospital = true;
+
+            summary = "🛡️ Opatrný ústup za štítem! " + player.badge + " " + player.name + " včas kryl svůj ústup před **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + "). Díky obrannému postoji neutrpěl žádnou ztrátu srdcí ani zranění!";
+
+            this.addLog(state, summary, "quest_loss", {
+                key: "engine.quest_loss_log",
+                params: {
+                    badge: player.badge,
+                    player: player.name,
+                    monster: q.icon + " " + q.name
+                }
+            });
+
+        } else if (tactics.elixir || player.hasElixirToken) {
+
+            // Pojistka elixírem z Lazaretu - hráč neutrpí těžké zranění
+            var usedToken = !!player.hasElixirToken;
+
+            if (usedToken) player.hasElixirToken = false;
+
+            var elixCost = usedToken ? 0 : Math.min(player.gold, 500);
+
+            if (elixCost > 0) player.gold -= elixCost;
+
+            preventedHospital = true;
+
+            summary = "🧪 Záchrana hojivým elixírem! " + player.badge + " " + player.name + " podlehl bestii **" + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + "), ale díky ochrannému elixíru z Lazaretu neutrpěl těžká zranění a nemusí do Špitálu!";
+
+            this.addLog(state, summary, "quest_loss");
+
+        } else if (q.questTier === "U1") {
+
+            var failCost = Math.min(player.gold, (state.config.quests.u1FailCost || 500) * (stance === "aggressive" ? 2 : 1));
+
+            player.gold -= failCost;
+
+            summary = "🐗 Lov se nezdařil! **" + q.name + "** unikl (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + ")." + (stance === "aggressive" ? " Kvůli dravému výpadu tě ošetření ran stálo dvojnásobek: -" + failCost + " zl." : " Ošetření ran stojí -" + failCost + " zl.");
+
+            this.addLog(state, summary, "quest_loss");
+
+        } else {
+
+            // Dravý útok na U2/U3: ztráta 2 Srdcí
+            var heartsLost = (stance === "aggressive") ? 2.0 : 1.0;
+
+            player.permanentHearts = Math.max(0, player.permanentHearts - heartsLost);
+
+            // Zranění v boji na U2/U3 -> převoz do Královského lazaretu (Špitál) k ošetření
+            var hospitalNode = null;
+
+            for (var h = 0; h < state.board.nodes.length; h++) {
+
+                if (state.board.nodes[h].type === "HOSPITAL") {
+
+                    hospitalNode = state.board.nodes[h];
+
+                    break;
+
+                }
+
+            }
+
+            if (hospitalNode) {
+
+                player.nodeId = hospitalNode.id;
+
+                player.skipTurns = 1;
+
+                summary = "💀 PORÁŽKA V BOJI! " + player.badge + " " + player.name + " podlehl v souboji s **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + ")." + (stance === "aggressive" ? " Dravý výpad způsobil kritické zranění: **-" + heartsLost + " 💖**!" : " Rytíř ztratil **-" + heartsLost + " 💖**.") + " Těžce raněný byl převezen do **" + hospitalNode.name + "**, kde se 1 tah léčí!";
+
+                this.addLog(state, summary, "quest_loss");
+
+            } else {
+
+                player.nodeId = 0;
+
+                player.skipTurns = 1;
+
+                summary = "💀 PORÁŽKA V BOJI! " + player.badge + " " + player.name + " podlehl v souboji s **" + q.icon + " " + q.name + "** (Síla " + totalPower + " vs. " + q.difficulty + ", hod " + roll + ")." + (stance === "aggressive" ? " Kritické zranění: **-" + heartsLost + " 💖**!" : " Ztráta **-" + heartsLost + " 💖**.") + " Rytíř byl odnesen na **START** a vynechává 1 tah!";
+
+                this.addLog(state, summary, "quest_loss");
+
+            }
+
+        }
+
+        return {
+            preventedHospital: preventedHospital,
+            summary: summary
+        };
+
+    },
+
+    // Dokončení odložené porážky po nevyužití taktického opravného hodu,
+    finalizeQuestLoss: function (state) {
+
+        var pa = state && state.pendingAction;
+
+        if (!pa || !pa.canTacticalReroll || !pa.questCard) return null;
+
+        var player = state.players[state.currentPlayerIndex];
+
+        var q = pa.questCard;
+
+        var lastTactics = pa.lastDuelTactics || {};
+
+        var stance = lastTactics.stance || "tactical";
+
+        var totalPower = pa.lastDuelPower || 0;
+
+        var roll = pa.lastDuelRoll || 1;
+
+        pa.canTacticalReroll = false;
+
+        player.stats.questsLost++;
+
+        var pen = this.applyQuestLossPenalty(state, player, q, totalPower, roll, stance, lastTactics);
+
+        pa.summary = pen.summary;
+
+        this.recalculateBreedingAndVictory(state);
+
+        return {
+            preventedHospital: pen.preventedHospital,
+            summary: pen.summary
         };
 
     },

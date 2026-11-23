@@ -603,6 +603,9 @@ window.PRS_I18N.cs = {
         "duel_win_log": "⚔️ VÍTĚZSTVÍ V DUELU! {badge} {player} porazil {opponentBadge} {opponent}!",
         "duel_loss_log": "⚔️ PORÁŽKA V DUELU! {badge} {player} podlehl rytíři {opponentBadge} {opponent}!",
         "quest_win_log": "🏆 VÍTĚZSTVÍ NAD NESTVŮROU! {badge} {player} skolil {monster}!",
+        "quest_win_reward_log": "🏆 VÍTĚZSTVÍ NAD NESTVŮROU! {badge} {player} skolil {monster} (+{gold} zl.{heartsPart}{extraPart})!",
+        "quest_reroll_decline_btn": "⚔️ Přijmout porážku a ustoupit",
+        "quest_reroll_pending_note": "⏳ Trest za porážku se uplatní až v případě, že nevyužiješ opravný hod nebo i druhý hod selže.",
         "quest_loss_log": "💀 PORÁŽKA V SOUBOJI! {badge} {player} nestačil na {monster}!",
         "falcon_nav_log": "🦅 {badge} {player} díky sokolí navigaci upravuje přistání o {offset} pole na **{node}**!"
     },

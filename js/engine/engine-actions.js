@@ -1083,6 +1083,10 @@
 
         if (state.phase === "GAME_OVER") return;
 
+        if (state.pendingAction && state.pendingAction.canTacticalReroll && this.finalizeQuestLoss) {
+            this.finalizeQuestLoss(state);
+        }
+
         state.pendingAction = null;
 
         state.turnNumber++;
