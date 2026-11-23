@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kidesky-cache-v1.9.69';
+const CACHE_NAME = 'kidesky-cache-v1.9.70';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -13,8 +13,12 @@ const CORE_ASSETS = [
   './js/core/module-loader.js',
   './js/i18n/cs.js',
   './js/i18n/en.js',
+  './js/i18n/sk.js',
+  './js/i18n/pl.js',
   './js/i18n/rules-cs.js',
   './js/i18n/rules-en.js',
+  './js/i18n/rules-sk.js',
+  './js/i18n/rules-pl.js',
   './js/app-i18n.js',
   './js/game-data.js',
   './js/boards/boards-decor-catalog.js',

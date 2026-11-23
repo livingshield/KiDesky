@@ -549,227 +549,136 @@
 
     
     renderSidebarPropertyPanel: function () {
-
         var el = document.getElementById("sidebar-player-property-panel");
-
         if (!el || !this.state || !this.state.players || !this.state.players[this.state.currentPlayerIndex]) return;
 
         var inspIdx = (this.inspectedPlayerIndex !== null && this.inspectedPlayerIndex !== undefined) ? this.inspectedPlayerIndex : this.state.currentPlayerIndex;
-
         var player = this.state.players[inspIdx] || this.state.players[this.state.currentPlayerIndex];
-
         if (!player) return;
 
         var isMyTurn = (player.index === this.state.currentPlayerIndex && player.type === "Human");
-
         var nodes = this.state.board.nodes || [];
-
         var sortedOwnedIds = (window.PRS_GameEngine && window.PRS_GameEngine.getSortedOwnedNodes)
             ? window.PRS_GameEngine.getSortedOwnedNodes(player, this.state)
             : (player.ownedNodes || []);
 
         var owned = [];
-
         for (var i = 0; i < sortedOwnedIds.length; i++) {
-
             var nd = nodes[sortedOwnedIds[i]];
-
             if (nd) owned.push(nd);
-
         }
 
         var stats = window.PRS_GameEngine.getEffectiveStats(this.state, player);
-
         var econ = window.PRS_GameEngine.calculatePlayerEconomySummary ? window.PRS_GameEngine.calculatePlayerEconomySummary(this.state, player) : null;
-
         var totalTaxYield = econ ? econ.totalTaxYield : 0;
-
         var totalRentSum = econ ? econ.totalRentSum : 0;
-
         var startStipend = econ ? econ.startStipend : 3000;
-
         var grandYield = econ ? econ.estimatedRoundYield : 0;
-
         var villageCount = econ ? econ.villages : stats.ownedVillages;
-
         var cityCount = econ ? econ.towns : stats.ownedTowns;
-
         var castleCount = econ ? econ.castles : stats.ownedCastles;
-
         var craftCount = econ ? econ.craftsAndJesters : ((stats.ownedBuildings || 0) + (stats.ownedJesters || 0));
-
         var animalTotal = econ ? econ.animalsTotal : (stats.horses + stats.dogs + stats.falcons);
-
         var estCfg = (this.state.config && this.state.config.estates) ? this.state.config.estates : {};
 
+        var tEst = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var fmtG = window.PRS_I18n ? function (v) { return window.PRS_I18n.formatGold(v); } : function (v) { return v + " zl."; };
+        var pDisplayName = this.escapeHtml(this.getPlayerDisplayName ? this.getPlayerDisplayName(player) : (player.name || ""));
+
         var html = [];
-
         html.push('<div class="property-panel-card">');
-
         html.push('  <div class="property-header-banner" style="align-items:flex-start;">');
-
         html.push('    <div style="display:flex; align-items:center; gap:0.5rem;">');
-
         html.push('      ' + this.getPlayerPawnAvatarHtml(player, 34));
-
         html.push('      <div>');
-
-        html.push('        <div style="font-family:\'Cinzel\',serif; font-size:1.02rem; font-weight:700; color:#fef08a;">' + this.escapeHtml(player.name) + '</div>');
-
-        html.push('        <div style="font-size:0.74rem; color:#cbd5e1;">Držená pole na mapě: <strong>' + owned.length + ' polí</strong></div>');
-
+        html.push('        <div style="font-family:\'Cinzel\',serif; font-size:1.02rem; font-weight:700; color:#fef08a;">' + pDisplayName + '</div>');
+        html.push('        <div style="font-size:0.74rem; color:#cbd5e1;">' + tEst("estates.tiles_held", { count: owned.length }, "Držená pole na mapě: <strong>" + owned.length + " polí</strong>") + '</div>');
         html.push('      </div>');
-
         html.push('    </div>');
-
-        html.push('    <div class="property-yield-badge" title="Součet výnosu daní u Výběrčího (' + totalTaxYield.toLocaleString("cs-CZ") + ' zl.) a potenciálu mýtného ze všech držených polí (' + totalRentSum.toLocaleString("cs-CZ") + ' zl.)">💰 +' + grandYield.toLocaleString("cs-CZ") + ' zl. / okruh</div>');
-
+        html.push('    <div class="property-yield-badge" title="' + this.escapeHtml(tEst("estates.round_yield_title", { tax: fmtG(totalTaxYield), rent: fmtG(totalRentSum) }, "Součet výnosu daní u Výběrčího (" + fmtG(totalTaxYield) + ") a potenciálu mýtného ze všech držených polí (" + fmtG(totalRentSum) + ")")) + '">' + tEst("estates.round_yield_badge", { gold: fmtG(grandYield) }, "💰 +" + fmtG(grandYield) + " / okruh") + '</div>');
         html.push('  </div>');
 
         // Přehledný rozpis ekonomiky a zlatých za kolo
         html.push('  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.35rem; margin-bottom:0.65rem; background:rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.22); border-radius:8px; padding:0.42rem 0.5rem; text-align:center;">');
-
-        html.push('    <div title="Zisk vyplacený pokaždé, když kdokoliv stoupne na Výběrčího daní (vesnice + města + hrady + hospodářský chov)">');
-
-        html.push('      <div style="font-size:0.66rem; color:#94a3b8; text-transform:uppercase;">👑 Výnos daní (VD)</div>');
-
-        html.push('      <div style="font-size:0.86rem; font-weight:800; color:#fde047;">+' + totalTaxYield.toLocaleString("cs-CZ") + ' zl.</div>');
-
+        html.push('    <div title="' + this.escapeHtml(tEst("estates.tax_yield_title", null, "Zisk vyplacený pokaždé, když kdokoliv stoupne na Výběrčího daní (vesnice + města + hrady + hospodářský chov)")) + '">');
+        html.push('      <div style="font-size:0.66rem; color:#94a3b8; text-transform:uppercase;">' + tEst("estates.tax_yield_label", null, "👑 VÝNOS DANÍ (VD)") + '</div>');
+        html.push('      <div style="font-size:0.86rem; font-weight:800; color:#fde047;">+' + fmtG(totalTaxYield) + '</div>');
         html.push('    </div>');
-
-        html.push('    <div title="Součet aktuálního nájemného (mýtného) ze všech tvých vlastněných polí na mapě">');
-
-        html.push('      <div style="font-size:0.66rem; color:#94a3b8; text-transform:uppercase;">🛡️ Součet mýtného</div>');
-
-        html.push('      <div style="font-size:0.86rem; font-weight:800; color:#4ade80;">+' + totalRentSum.toLocaleString("cs-CZ") + ' zl.</div>');
-
+        html.push('    <div title="' + this.escapeHtml(tEst("estates.toll_sum_title", null, "Součet aktuálního nájemného (mýtného) ze všech tvých vlastněných polí na mapě")) + '">');
+        html.push('      <div style="font-size:0.66rem; color:#94a3b8; text-transform:uppercase;">' + tEst("estates.toll_sum_label", null, "🛡️ SOUČET MÝTNÉHO") + '</div>');
+        html.push('      <div style="font-size:0.86rem; font-weight:800; color:#4ade80;">+' + fmtG(totalRentSum) + '</div>');
         html.push('    </div>');
-
-        html.push('    <div title="Královský žold vyplacený při každém průchodu nebo zastavení na poli START">');
-
-        html.push('      <div style="font-size:0.66rem; color:#94a3b8; text-transform:uppercase;">🚩 Žold na STARTu</div>');
-
-        html.push('      <div style="font-size:0.86rem; font-weight:800; color:#38bdf8;">+' + startStipend.toLocaleString("cs-CZ") + ' zl.</div>');
-
+        html.push('    <div title="' + this.escapeHtml(tEst("estates.stipend_title", null, "Královský žold vyplacený při každém průchodu nebo zastavení na poli START")) + '">');
+        html.push('      <div style="font-size:0.66rem; color:#94a3b8; text-transform:uppercase;">' + tEst("estates.stipend_label", null, "🚩 ŽOLD NA STARTU") + '</div>');
+        html.push('      <div style="font-size:0.86rem; font-weight:800; color:#38bdf8;">+' + fmtG(startStipend) + '</div>');
         html.push('    </div>');
-
         html.push('  </div>');
 
         // Seznam sídel, živností a šlechtických chovů
         html.push('  <div style="font-size:0.78rem; font-weight:700; color:#fca5a5; margin-bottom:0.4rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">');
-
-        html.push('    <span>🏰 Sídla, Panství &amp; Mýtné (' + owned.length + '):</span>');
-
-        html.push('    <small style="color:#cbd5e1; font-weight:600; font-size:0.7rem;">🏡 ' + villageCount + ' ves. • 🏛️ ' + cityCount + ' měst • 🏰 ' + castleCount + ' hradů • ⚒️ ' + craftCount + ' živn. • 🐾 ' + animalTotal + ' zvířat</small>');
-
+        html.push('    <span>' + tEst("estates.estates_section_title", { count: owned.length }, "🏰 Sídla, Panství &amp; Mýtné (" + owned.length + "):") + '</span>');
+        html.push('    <small style="color:#cbd5e1; font-weight:600; font-size:0.7rem;">' + tEst("estates.estates_counts", { villages: villageCount, towns: cityCount, castles: castleCount, crafts: craftCount, animals: animalTotal }, "🏡 " + villageCount + " ves. • 🏛️ " + cityCount + " měst • 🏰 " + castleCount + " hradů • ⚒️ " + craftCount + " živn. • 🐾 " + animalTotal + " zvířat") + '</small>');
         html.push('  </div>');
 
         if (owned.length === 0) {
-
-            html.push('  <div style="font-size:0.8rem; color:#94a3b8; font-style:italic; padding:0.6rem 0; text-align:center;">Zatím nevlastníš žádná pole království.</div>');
-
+            html.push('  <div style="font-size:0.8rem; color:#94a3b8; font-style:italic; padding:0.6rem 0; text-align:center;">' + tEst("estates.empty_estates", null, "Zatím nevlastníš žádná pole království.") + '</div>');
         } else {
-
             html.push('  <div class="property-list" style="max-height:215px; overflow-y:auto;">');
-
             for (var o = 0; o < owned.length; o++) {
-
                 var pNode = owned[o];
-
                 var icon = pNode.icon || "🏘️";
-
                 var rentVal = window.PRS_GameEngine.calculateNodeRent(this.state, pNode, player, 4);
-
-                var catLabel = "Panství";
-
+                var catLabel = tEst("estates.cat_domain", null, "Panství");
                 var extraTaxInfo = "";
-
                 if (pNode.type === "VILLAGE") {
-
                     var vLvl = pNode.villageLevel || 1;
-
                     var vTax = (estCfg.villageTaxYield && estCfg.villageTaxYield[vLvl - 1]) || 500;
-
-                    catLabel = "Vesnice (" + "★".repeat(vLvl) + " " + vLvl + "/3)";
-
-                    extraTaxInfo = ' &bull; <span style="color:#fde047;">Daň: +' + vTax.toLocaleString("cs-CZ") + ' zl.</span>';
-
+                    catLabel = tEst("estates.cat_village", { stars: "★".repeat(vLvl), lvl: vLvl }, "Vesnice (" + "★".repeat(vLvl) + " " + vLvl + "/3)");
+                    extraTaxInfo = ' &bull; <span style="color:#fde047;">' + tEst("estates.tax_label", { val: fmtG(vTax) }, "Daň: +" + fmtG(vTax)) + '</span>';
                 } else if (pNode.type === "TOWN") {
-
                     var tTax = estCfg.townTaxYield || 1200;
-
-                    catLabel = "Královské město";
-
-                    extraTaxInfo = ' &bull; <span style="color:#fde047;">Daň: +' + tTax.toLocaleString("cs-CZ") + ' zl.</span>';
-
+                    catLabel = tEst("estates.cat_town", null, "Královské město");
+                    extraTaxInfo = ' &bull; <span style="color:#fde047;">' + tEst("estates.tax_label", { val: fmtG(tTax) }, "Daň: +" + fmtG(tTax)) + '</span>';
                 } else if (pNode.type === "CASTLE") {
-
                     var cTax = estCfg.castleTaxYield || 2500;
-
-                    catLabel = "Pevný hrad (+1 Charisma)";
-
-                    extraTaxInfo = ' &bull; <span style="color:#fde047;">Daň: +' + cTax.toLocaleString("cs-CZ") + ' zl.</span>';
-
+                    catLabel = tEst("estates.cat_castle", null, "Pevný hrad (+1 Charisma)");
+                    extraTaxInfo = ' &bull; <span style="color:#fde047;">' + tEst("estates.tax_label", { val: fmtG(cTax) }, "Daň: +" + fmtG(cTax)) + '</span>';
                 } else if (pNode.type === "ANIMAL") {
-
                     var countInSet = 0;
-
                     for (var si = 0; si < owned.length; si++) {
-
                         if (owned[si].type === "ANIMAL" && owned[si].setId === pNode.setId) countInSet++;
-
                     }
-
-                    var aTypeLabel = pNode.subtype === "horse" ? "Chov koní" : (pNode.subtype === "dog" ? "Chov psů" : "Chov sokolů");
-
-                    catLabel = aTypeLabel + " (Sada #" + pNode.setId + " • " + countInSet + "/3 ks)";
-
+                    var aTypeLabel = pNode.subtype === "horse" ? tEst("estates.cat_horse_breed", null, "Chov koní") : (pNode.subtype === "dog" ? tEst("estates.cat_dog_breed", null, "Chov psů") : tEst("estates.cat_falcon_breed", null, "Chov sokolů"));
+                    catLabel = tEst("estates.cat_animal_set", { breed: aTypeLabel, setId: pNode.setId, count: countInSet }, aTypeLabel + " (Sada #" + pNode.setId + " • " + countInSet + "/3 ks)");
                 } else if (pNode.type === "BUILDING") {
-
-                    var bName = pNode.subtype === "stables" ? "Královské stáje (+1 Jízda)" :
-                               (pNode.subtype === "forge" ? "Kovárna (+1 Boj)" :
-                               (pNode.subtype === "tailor" ? "Krejčovská dílna (+1 Tanec)" :
-                               (pNode.subtype === "falconer" ? "Sokolník" :
-                               (pNode.subtype === "doghandler" ? "Psovod" : "Živnost"))));
-
-                    catLabel = "Živnost: " + bName;
-
+                    var bName = pNode.subtype === "stables" ? tEst("estates.cat_building_stables", null, "Královské stáje (+1 Jízda)") :
+                               (pNode.subtype === "forge" ? tEst("estates.cat_building_forge", null, "Kovárna (+1 Boj)") :
+                               (pNode.subtype === "tailor" ? tEst("estates.cat_building_tailor", null, "Krejčovská dílna (+1 Tanec)") :
+                               (pNode.subtype === "falconer" ? tEst("estates.cat_building_falconer", null, "Sokolník") :
+                               (pNode.subtype === "doghandler" ? tEst("estates.cat_building_doghandler", null, "Psovod") : tEst("estates.cat_building_generic", null, "Živnost")))));
+                    catLabel = bName;
                 } else if (pNode.type === "JESTER") {
-
-                    catLabel = "Královský kejklíř (hod × 100 zl.)";
-
+                    catLabel = tEst("estates.cat_jester", null, "Královský kejklíř (hod × 100 zl.)");
                 }
 
+                var pNodeTitle = (this.getNodeDisplayName ? this.getNodeDisplayName(pNode) : (window.PRS_App && window.PRS_App.getNodeDisplayName ? window.PRS_App.getNodeDisplayName(pNode) : pNode.name));
+
                 html.push('    <div class="property-item-row">');
-
                 html.push('      <div class="property-item-left">');
-
                 html.push('        <span style="font-size:1.15rem;">' + icon + '</span>');
-
                 html.push('        <div>');
-
-                html.push('          <div style="font-weight:700; color:#f8fafc; font-size:0.84rem;">' + this.escapeHtml(pNode.name) + '</div>');
-
-                html.push('          <div style="font-size:0.71rem; color:#cbd5e1;">' + catLabel + ' &bull; <span style="color:#4ade80; font-weight:700;">Nájem: ' + rentVal.toLocaleString("cs-CZ") + ' zl.</span>' + extraTaxInfo + '</div>');
-
+                html.push('          <div style="font-weight:700; color:#f8fafc; font-size:0.84rem;">' + this.escapeHtml(pNodeTitle) + '</div>');
+                html.push('          <div style="font-size:0.71rem; color:#cbd5e1;">' + catLabel + ' &bull; <span style="color:#4ade80; font-weight:700;">' + tEst("estates.rent_label", { val: fmtG(rentVal) }, "Nájem: " + fmtG(rentVal)) + '</span>' + extraTaxInfo + '</div>');
                 html.push('        </div>');
-
                 html.push('      </div>');
 
                 if (pNode.type === "VILLAGE" && (pNode.villageLevel || 1) < 3 && isMyTurn) {
-
                     var uPrice = (estCfg.villagePrices && estCfg.villagePrices[pNode.villageLevel || 1]) || 1500;
-
-                    html.push('      <button class="rules-subnav-btn" style="font-size:0.68rem; padding:3px 7px; white-space:nowrap;" onclick="PRS_App.handleUpgradeVillage(' + pNode.id + ')" title="Povýšit vesnici na vyšší stupeň">★ Povýšit (' + uPrice + ' zl.)</button>');
-
+                    html.push('      <button class="rules-subnav-btn" style="font-size:0.68rem; padding:3px 7px; white-space:nowrap;" onclick="PRS_App.handleUpgradeVillage(' + pNode.id + ')" title="' + this.escapeHtml(tEst("estates.upgrade_btn_title", null, "Povýšit vesnici na vyšší stupeň")) + '">' + tEst("estates.upgrade_btn", { price: fmtG(uPrice) }, "★ Povýšit (" + fmtG(uPrice) + ")") + '</button>');
                 }
-
                 html.push('    </div>');
-
             }
-
             html.push('  </div>');
-
         }
 
         // Chov zvířat a stáje (Šlechtický chov + Hospodářský chov na vesnicích)
@@ -780,50 +689,31 @@
         var extraLivestock = econ ? econ.extraLivestockCount : (stats.extraLivestockCount || 0);
 
         html.push('  <div style="font-size:0.78rem; font-weight:700; color:#fca5a5; margin-top:0.65rem; margin-bottom:0.25rem; display:flex; justify-content:space-between; align-items:center;">');
-
-        html.push('    <span>🐎 Šlechtický &amp; Hospodářský chov zvěře:</span>');
-
-        html.push('    <small style="color:#f472b6; font-weight:700;">Sady K+P+S: ' + completeSets + ' (Celkem +' + breedHearts + ' 💖)</small>');
-
+        html.push('    <span>' + tEst("estates.breeding_section_title", null, "🐎 Šlechtický &amp; Hospodářský chov zvěře:") + '</span>');
+        html.push('    <small style="color:#f472b6; font-weight:700;">' + tEst("estates.breeding_sets_summary", { sets: completeSets, hearts: breedHearts }, "Sady K+P+S: " + completeSets + " (Celkem +" + breedHearts + " 💖)") + '</small>');
         html.push('  </div>');
 
         html.push('  <div class="property-animal-grid">');
-
-        html.push('    <div class="property-animal-slot" title="Šlechtický chov koní z herních polí (umožňuje Koňský cval 2d6 a účast v Závodě a Turnaji)"><span class="property-animal-icon">🐴</span><span class="property-animal-qty">' + (stats.horses || 0) + ' koní</span><small style="font-size:0.62rem; color:#94a3b8; display:block;">Šlechtický chov</small></div>');
-
-        html.push('    <div class="property-animal-slot" title="Šlechtický chov loveckých psů z herních polí (bonus k lovu zvěře U1 a Turnaji)"><span class="property-animal-icon">🐕</span><span class="property-animal-qty">' + (stats.dogs || 0) + ' psů</span><small style="font-size:0.62rem; color:#94a3b8; display:block;">Šlechtický chov</small></div>');
-
-        html.push('    <div class="property-animal-slot" title="Šlechtický chov loveckých sokolů z herních polí (umožňuje Sokolí navigaci ±1 pole při pěší chůzi či taktickém manévru na koni)"><span class="property-animal-icon">🦅</span><span class="property-animal-qty">' + (stats.falcons || 0) + ' sokolů</span><small style="font-size:0.62rem; color:#94a3b8; display:block;">Šlechtický chov</small></div>');
-
-        html.push('    <div class="property-animal-slot" title="Hospodářský skot z velkých osad (3★), dokoupených stád a karet Náhody: každá kráva dává +200 zl. u Výběrčího daní a +100 zl. k nájmu vesnic"><span class="property-animal-icon">🐄</span><span class="property-animal-qty">' + (stats.cattle || 0) + ' krav</span><small style="font-size:0.62rem; color:#fde047; display:block;">Výnos +200 zl./ks</small></div>');
-
-        html.push('    <div class="property-animal-slot" title="Hospodářský chov ovcí z vesnic (1★+), dokoupených stád a karet Náhody: každá ovce dává +120 zl. u Výběrčího daní a +50 zl. k nájmu vesnic"><span class="property-animal-icon">🐑</span><span class="property-animal-qty">' + (stats.sheep || 0) + ' ovcí</span><small style="font-size:0.62rem; color:#fde047; display:block;">Výnos +120 zl./ks</small></div>');
-
-        html.push('    <div class="property-animal-slot" title="Hospodářský chov vepřů z městeček (2★+), dokoupených stád a karet Náhody: každé prase dává +150 zl. u Výběrčího daní a +75 zl. k nájmu vesnic"><span class="property-animal-icon">🐖</span><span class="property-animal-qty">' + (stats.pigs || 0) + ' prasat</span><small style="font-size:0.62rem; color:#fde047; display:block;">Výnos +150 zl./ks</small></div>');
-
+        html.push('    <div class="property-animal-slot" title="' + this.escapeHtml(tEst("estates.slot_horses_title", null, "Šlechtický chov koní z herních polí (umožňuje Koňský cval 2d6 a účast v Závodě a Turnaji)")) + '"><span class="property-animal-icon">🐴</span><span class="property-animal-qty">' + tEst("estates.slot_horses_qty", { count: stats.horses || 0 }, (stats.horses || 0) + " koní") + '</span><small style="font-size:0.62rem; color:#94a3b8; display:block;">' + tEst("estates.slot_noble_tag", null, "Šlechtický chov") + '</small></div>');
+        html.push('    <div class="property-animal-slot" title="' + this.escapeHtml(tEst("estates.slot_dogs_title", null, "Šlechtický chov loveckých psů z herních polí (bonus k lovu zvěře U1 a Turnaji)")) + '"><span class="property-animal-icon">🐕</span><span class="property-animal-qty">' + tEst("estates.slot_dogs_qty", { count: stats.dogs || 0 }, (stats.dogs || 0) + " psů") + '</span><small style="font-size:0.62rem; color:#94a3b8; display:block;">' + tEst("estates.slot_noble_tag", null, "Šlechtický chov") + '</small></div>');
+        html.push('    <div class="property-animal-slot" title="' + this.escapeHtml(tEst("estates.slot_falcons_title", null, "Šlechtický chov loveckých sokolů z herních polí (umožňuje Sokolí navigaci ±1 pole při pěší chůzi či taktickém manévru na koni)")) + '"><span class="property-animal-icon">🦅</span><span class="property-animal-qty">' + tEst("estates.slot_falcons_qty", { count: stats.falcons || 0 }, (stats.falcons || 0) + " sokolů") + '</span><small style="font-size:0.62rem; color:#94a3b8; display:block;">' + tEst("estates.slot_noble_tag", null, "Šlechtický chov") + '</small></div>');
+        html.push('    <div class="property-animal-slot" title="' + this.escapeHtml(tEst("estates.slot_cattle_title", null, "Hospodářský skot z velkých osad (3★), dokoupených stád a karet Náhody: každá kráva dává +200 zl. u Výběrčího daní a +100 zl. k nájmu vesnic")) + '"><span class="property-animal-icon">🐄</span><span class="property-animal-qty">' + tEst("estates.slot_cattle_qty", { count: stats.cattle || 0 }, (stats.cattle || 0) + " krav") + '</span><small style="font-size:0.62rem; color:#fde047; display:block;">' + tEst("estates.slot_cattle_yield", { val: fmtG(200) }, "Výnos +" + fmtG(200) + "/ks") + '</small></div>');
+        html.push('    <div class="property-animal-slot" title="' + this.escapeHtml(tEst("estates.slot_sheep_title", null, "Hospodářský chov ovcí z vesnic (1★+), dokoupených stád a karet Náhody: každá ovce dává +120 zl. u Výběrčího daní a +50 zl. k nájmu vesnic")) + '"><span class="property-animal-icon">🐑</span><span class="property-animal-qty">' + tEst("estates.slot_sheep_qty", { count: stats.sheep || 0 }, (stats.sheep || 0) + " ovcí") + '</span><small style="font-size:0.62rem; color:#fde047; display:block;">' + tEst("estates.slot_sheep_yield", { val: fmtG(120) }, "Výnos +" + fmtG(120) + "/ks") + '</small></div>');
+        html.push('    <div class="property-animal-slot" title="' + this.escapeHtml(tEst("estates.slot_pigs_title", null, "Hospodářský chov vepřů z městeček (2★+), dokoupených stád a karet Náhody: každé prase dává +150 zl. u Výběrčího daní a +75 zl. k nájmu vesnic")) + '"><span class="property-animal-icon">🐖</span><span class="property-animal-qty">' + tEst("estates.slot_pigs_qty", { count: stats.pigs || 0 }, (stats.pigs || 0) + " prasat") + '</span><small style="font-size:0.62rem; color:#fde047; display:block;">' + tEst("estates.slot_pigs_yield", { val: fmtG(150) }, "Výnos +" + fmtG(150) + "/ks") + '</small></div>');
         html.push('  </div>');
 
         // Panel rozvoje venkovského chovu (Krávy, Ovce, Prasata)
         html.push('  <div style="margin-top:0.45rem; background:rgba(15,23,42,0.65); border:1px solid rgba(212,175,55,0.22); border-radius:8px; padding:0.45rem 0.55rem; font-size:0.72rem; color:#cbd5e1;">');
-
         html.push('    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">');
-
-        html.push('      <span>🌾 <strong>Pastviny &amp; Hospodářský dvůr:</strong></span>');
-
-        html.push('      <span style="color:#fde047; font-weight:700;">Daň z chovu: +' + livestockTaxBonus.toLocaleString("cs-CZ") + ' zl.</span>');
-
+        html.push('      <span>🌾 <strong>' + tEst("estates.pastures_title", null, "Pastviny &amp; Hospodářský dvůr:") + '</strong></span>');
+        html.push('      <span style="color:#fde047; font-weight:700;">' + tEst("estates.livestock_tax_bonus", { val: fmtG(livestockTaxBonus) }, "Daň z chovu: +" + fmtG(livestockTaxBonus)) + '</span>');
         html.push('    </div>');
 
         if (livestockCap <= 0) {
-
-            html.push('    <div style="color:#94a3b8; font-size:0.7rem; line-height:1.35;">Kup na mapě <strong>Vesnici</strong> (automaticky chová 1★ 🐑, 2★ +🐖, 3★ +🐄), <strong>Město</strong> nebo <strong>Stáje</strong>, abys odemkl pastviny pro dokoupení dobytka! Dobytek lze získat i z Karet Náhody.</div>');
-
+            html.push('    <div style="color:#94a3b8; font-size:0.7rem; line-height:1.35;">' + tEst("estates.pastures_locked", null, "Kup na mapě <strong>Vesnici</strong> (automaticky chová 1★ 🐑, 2★ +🐖, 3★ +🐄), <strong>Město</strong> nebo <strong>Stáje</strong>, abys odemkl pastviny pro dokoupení dobytka! Dobytek lze získat i z Karet Náhody.") + '</div>');
         } else {
-
             var canBuyMore = isMyTurn && (extraLivestock < livestockCap);
-
-            html.push('    <div style="color:#94a3b8; font-size:0.69rem; margin-bottom:0.35rem;">Přikoupený dobytek na pastvinách: <strong>' + extraLivestock + ' / ' + livestockCap + ' ks</strong> (zvyšuje daně u VD i nájem vesnic):</div>');
-
+            html.push('    <div style="color:#94a3b8; font-size:0.69rem; margin-bottom:0.35rem;">' + tEst("estates.pastures_count", { cur: extraLivestock, cap: livestockCap }, "Přikoupený dobytek na pastvinách: <strong>" + extraLivestock + " / " + livestockCap + " ks</strong> (zvyšuje daně u VD i nájem vesnic):") + '</div>');
             if (isMyTurn) {
                 var lsCfgHud = (this.state && this.state.config && this.state.config.livestock) ? this.state.config.livestock : {};
                 var sPr = (lsCfgHud.sheepPrice !== undefined) ? Number(lsCfgHud.sheepPrice) : 500;
@@ -831,25 +721,15 @@
                 var cPr = (lsCfgHud.cattlePrice !== undefined) ? Number(lsCfgHud.cattlePrice) : 800;
 
                 html.push('    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.3rem;">');
-
-                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < sPr ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;sheep&quot;)" title="Přikoupit ovci">+🐑 Ovce (' + sPr + ')</button>');
-
-                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < pPr ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;pigs&quot;)" title="Přikoupit prase">+🐖 Prase (' + pPr + ')</button>');
-
-                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < cPr ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;cattle&quot;)" title="Přikoupit krávu">+🐄 Kráva (' + cPr + ')</button>');
-
+                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < sPr ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;sheep&quot;)" title="' + this.escapeHtml(tEst("estates.buy_sheep_title", null, "Přikoupit ovci")) + '">' + tEst("estates.buy_sheep_btn", { price: sPr }, "+🐑 Ovce (" + sPr + ")") + '</button>');
+                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < pPr ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;pigs&quot;)" title="' + this.escapeHtml(tEst("estates.buy_pigs_title", null, "Přikoupit prase")) + '">' + tEst("estates.buy_pigs_btn", { price: pPr }, "+🐖 Prase (" + pPr + ")") + '</button>');
+                html.push('      <button type="button" class="rules-subnav-btn" ' + (!canBuyMore || player.gold < cPr ? 'disabled style="opacity:0.45; font-size:0.67rem; padding:3px 4px;"' : 'style="font-size:0.67rem; padding:3px 4px; cursor:pointer;"') + ' onclick="PRS_App.handleBuyLivestock(&quot;cattle&quot;)" title="' + this.escapeHtml(tEst("estates.buy_cattle_title", null, "Přikoupit krávu")) + '">' + tEst("estates.buy_cattle_btn", { price: cPr }, "+🐄 Kráva (" + cPr + ")") + '</button>');
                 html.push('    </div>');
-
             }
-
         }
-
         html.push('  </div>');
-
         html.push('</div>');
-
         el.innerHTML = html.join("");
-
     },
 
     

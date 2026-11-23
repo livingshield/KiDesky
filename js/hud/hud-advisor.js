@@ -892,15 +892,14 @@
         if (!player) return "";
         var invList = player.inventory || [];
         var actBuffs = [];
-        if (player.activeScrolls) {
-            if (player.activeScrolls.bonusRoll) actBuffs.push('⚡ +' + player.activeScrolls.bonusRoll + ' k hodu');
-            if (player.activeScrolls.forcedRoll) actBuffs.push('⭐ Zaručená ' + player.activeScrolls.forcedRoll);
-            if (player.activeScrolls.combatBonus) actBuffs.push('🧪 +' + player.activeScrolls.combatBonus + ' Boj');
-            if (player.activeScrolls.rentImmunity) actBuffs.push('👑 Ochrana nájmu');
-            if (player.activeScrolls.doubleBreeding) actBuffs.push('🐑 2x Chov');
-        }
-
         var tPouch = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        if (player.activeScrolls) {
+            if (player.activeScrolls.bonusRoll) actBuffs.push(tPouch("pouch.buff_roll", { val: player.activeScrolls.bonusRoll }, '⚡ +' + player.activeScrolls.bonusRoll + ' k hodu'));
+            if (player.activeScrolls.forcedRoll) actBuffs.push(tPouch("pouch.buff_forced", { val: player.activeScrolls.forcedRoll }, '⭐ Zaručená ' + player.activeScrolls.forcedRoll));
+            if (player.activeScrolls.combatBonus) actBuffs.push(tPouch("pouch.buff_combat", { val: player.activeScrolls.combatBonus }, '🧪 +' + player.activeScrolls.combatBonus + ' Boj'));
+            if (player.activeScrolls.rentImmunity) actBuffs.push(tPouch("pouch.buff_rent", null, '👑 Ochrana nájmu'));
+            if (player.activeScrolls.doubleBreeding) actBuffs.push(tPouch("pouch.buff_breeding", null, '🐑 2x Chov'));
+        }
 
         // Pokud jsme v rychlém panelu akcí tahu a brašna je prázdná:
         // Vykreslíme elegantní jednořádkový status proužek (nezabírá zbytečně výšku)
