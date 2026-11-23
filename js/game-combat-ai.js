@@ -417,13 +417,15 @@
 
         }
 
+        var tCbt = window.PRS_I18n ? function (k, p2, d) { return window.PRS_I18n.t(k, p2, d); } : function (k, p2, d) { return d; };
+
         // 1. Zvířata & jezdecké umění
 
         if (w === "dogs") {
 
             if (stats.dogs > 0 || tactics.hounds) {
 
-                return { exploited: true, reason: "Lovečtí psi odlákali pozornost bestie" };
+                return { exploited: true, reason: tCbt("combat.weakness_dogs", null, "Lovečtí psi odlákali pozornost bestie") };
 
             }
 
@@ -431,7 +433,7 @@
 
             if (stats.falcons > 0 || tactics.hounds) {
 
-                return { exploited: true, reason: "Lovecký sokol vystopoval zranitelná místa" };
+                return { exploited: true, reason: tCbt("combat.weakness_falcon", null, "Lovecký sokol vystopoval zranitelná místa") };
 
             }
 
@@ -439,7 +441,7 @@
 
             if (stats.horses > 0 || tactics.charge || stats.riding >= 2) {
 
-                return { exploited: true, reason: "Drtivý nájezd z plné jízdy na koni zlomil obranu" };
+                return { exploited: true, reason: tCbt("combat.weakness_horse", null, "Drtivý nájezd z plné jízdy na koni zlomil obranu") };
 
             }
 
@@ -447,7 +449,7 @@
 
             if ((stats.dogs > 0 && stats.falcons > 0) || (stats.horses > 0 && stats.dogs > 0)) {
 
-                return { exploited: true, reason: "Kombinace vycvičených zvířat dokonale zmátla draka" };
+                return { exploited: true, reason: tCbt("combat.weakness_animals", null, "Kombinace vycvičených zvířat dokonale zmátla draka") };
 
             }
 
@@ -455,13 +457,13 @@
 
             var hasSpear = hasItemMatching(function (it) {
 
-                return it.id === "it1_3" || it.id === "it2_2" || /kopí|dřevce/i.test(it.name);
+                return it.id === "it1_3" || it.id === "it2_2" || /kopí|dřevce|spear|lance|włóczni|kopija/i.test(it.name);
 
             });
 
             if ((stats.horses > 0 || stats.dogs > 0) && (hasSpear || stats.combat >= 4)) {
 
-                return { exploited: true, reason: "Mistrovská koordinace jízdy na koni a turnajového kopí" };
+                return { exploited: true, reason: tCbt("combat.weakness_animals_spear", null, "Mistrovská koordinace jízdy na koni a turnajového kopí") };
 
             }
 
@@ -473,19 +475,19 @@
 
             var spearIt = hasItemMatching(function (it) {
 
-                return it.id === "it1_3" || it.id === "it2_2" || /kopí|dřevce/i.test(it.name);
+                return it.id === "it1_3" || it.id === "it2_2" || /kopí|dřevce|spear|lance|włóczni|kopija/i.test(it.name);
 
             });
 
             if (spearIt) {
 
-                return { exploited: true, reason: "Dlouhé " + spearIt.name + " udrželo nestvůru v bezpečném odstupu" };
+                return { exploited: true, reason: tCbt("combat.weakness_spear_item", { item: spearIt.name }, "Dlouhé " + spearIt.name + " udrželo nestvůru v bezpečném odstupu") };
 
             }
 
             if (stats.combat >= 3 && stats.riding >= 2) {
 
-                return { exploited: true, reason: "Rytířské ovládnutí jezdeckého kopí a manévrů" };
+                return { exploited: true, reason: tCbt("combat.weakness_spear_skill", null, "Rytířské ovládnutí jezdeckého kopí a manévrů") };
 
             }
 
@@ -499,9 +501,9 @@
 
             if (armorIt || stats.hasArmor) {
 
-                var aName = armorIt ? armorIt.name : "Pevná zbroj";
+                var aName = armorIt ? armorIt.name : tCbt("combat.armor_fallback", null, "Pevná zbroj");
 
-                return { exploited: true, reason: aName + " odrazila drtivý úder" };
+                return { exploited: true, reason: tCbt("combat.weakness_armor", { item: aName }, aName + " odrazila drtivý úder") };
 
             }
 
@@ -509,13 +511,13 @@
 
             var waterIt = hasItemMatching(function (it) {
 
-                return it.id === "trophy_water" || it.id === "it2_3" || it.id === "it2_4" || it.id === "it3_2" || /voda|vodní|chlad|jezero/i.test(it.name);
+                return it.id === "trophy_water" || it.id === "it2_3" || it.id === "it2_4" || it.id === "it3_2" || /voda|vodní|chlad|jezero|water|aquatic|woda|wodn/i.test(it.name);
 
             });
 
             if (waterIt || stats.hasArmor) {
 
-                return { exploited: true, reason: "Ochranné brnění a vodní perla zchladily spalující žár" };
+                return { exploited: true, reason: tCbt("combat.weakness_water_armor", null, "Ochranné brnění a vodní perla zchladily spalující žár") };
 
             }
 
@@ -527,7 +529,7 @@
 
             var fireIt = hasItemMatching(function (it) {
 
-                return it.id === "trophy_red" || it.id === "trophy_volcano" || /oheň|ohniv|žár|plam|láva/i.test(it.name);
+                return it.id === "trophy_red" || it.id === "trophy_volcano" || /oheň|ohniv|žár|plam|láva|fire|flame|lava|ogień|ognist/i.test(it.name);
 
             });
 
@@ -535,7 +537,7 @@
 
             if (fireIt || curTheme === "fire" || stats.combat >= 4) {
 
-                return { exploited: true, reason: "Žhavé plameny a sopečný žár roztavily ledový krunýř" };
+                return { exploited: true, reason: tCbt("combat.weakness_fire", null, "Žhavé plameny a sopečný žár roztavily ledový krunýř") };
 
             }
 
@@ -543,7 +545,7 @@
 
             var iceIt = hasItemMatching(function (it) {
 
-                return it.id === "trophy_ice" || /led|mraz|rampouch/i.test(it.name);
+                return it.id === "trophy_ice" || /led|mraz|rampouch|ice|frost|lód|mróz|ľad/i.test(it.name);
 
             });
 
@@ -551,7 +553,7 @@
 
             if (iceIt || curTheme2 === "water" || stats.combat >= 4) {
 
-                return { exploited: true, reason: "Mrazivý chlad a ledové krystaly zchladily lávovou tlamu" };
+                return { exploited: true, reason: tCbt("combat.weakness_ice", null, "Mrazivý chlad a ledové krystaly zchladily lávovou tlamu") };
 
             }
 
@@ -563,7 +565,7 @@
 
             if (tactics.elixir || player.gold >= 500) {
 
-                return { exploited: true, reason: "Hojivý lektvar z Lazaretu neutralizoval jedovatý dech" };
+                return { exploited: true, reason: tCbt("combat.weakness_elixir", null, "Hojivý lektvar z Lazaretu neutralizoval jedovatý dech") };
 
             }
 
@@ -575,7 +577,7 @@
 
             if (stats.dance >= 2 || stats.hasDress) {
 
-                return { exploited: true, reason: "Půvabný taneční krok a dvorský šat okouzlily hravého draka" };
+                return { exploited: true, reason: tCbt("combat.weakness_dance", null, "Půvabný taneční krok a dvorský šat okouzlily hravého draka") };
 
             }
 
@@ -583,7 +585,7 @@
 
             if (stats.charisma >= 3 || stats.hasJewel) {
 
-                return { exploited: true, reason: "Vznešené charisma rytíře dojalo drahokamového draka" };
+                return { exploited: true, reason: tCbt("combat.weakness_charisma", null, "Vznešené charisma rytíře dojalo drahokamového draka") };
 
             }
 
@@ -595,7 +597,7 @@
 
             if (stats.combat >= 3 || stats.riding >= 3) {
 
-                return { exploited: true, reason: "Nezlomná rytířská odvaha pronikla mlhou stínů" };
+                return { exploited: true, reason: tCbt("combat.weakness_courage", null, "Nezlomná rytířská odvaha pronikla mlhou stínů") };
 
             }
 
@@ -603,13 +605,13 @@
 
             var holyIt = hasItemMatching(function (it) {
 
-                return it.id === "trophy_stag" || it.id === "it3_4" || it.id === "it1_9" || it.id === "it3_2" || it.id === "it3_1" || it.id === "trophy_gold" || /svat|klenot|světlo|zlat/i.test(it.name);
+                return it.id === "trophy_stag" || it.id === "it3_4" || it.id === "it1_9" || it.id === "it3_2" || it.id === "it3_1" || it.id === "trophy_gold" || /svat|klenot|světlo|zlat|holy|light|gold|święt|światł|złot|svät/i.test(it.name);
 
             });
 
             if (holyIt || stats.charisma >= 3) {
 
-                return { exploited: true, reason: "Zářící posvátné světlo relikvií spálilo stínovou temnotu" };
+                return { exploited: true, reason: tCbt("combat.weakness_light", null, "Zářící posvátné světlo relikvií spálilo stínovou temnotu") };
 
             }
 
@@ -617,7 +619,7 @@
 
             if (stats.combat >= 2 && stats.riding >= 2 && stats.dance >= 2 && stats.charisma >= 2) {
 
-                return { exploited: true, reason: "Dokonalé ovládnutí všech 4 rytířských ctností (Boj, Jízda, Tanec, Charisma)" };
+                return { exploited: true, reason: tCbt("combat.weakness_mastery", null, "Dokonalé ovládnutí všech 4 rytířských ctností (Boj, Jízda, Tanec, Charisma)") };
 
             }
 
@@ -645,25 +647,27 @@
 
         var stats = this.getEffectiveStats(state, player);
 
+        var tCbt2 = window.PRS_I18n ? function (k, p2, d) { return window.PRS_I18n.t(k, p2, d); } : function (k, p2, d) { return d; };
+
         var tacticBonus = 0;
 
-        var tacticName = "Běžný útok";
+        var tacticName = tCbt2("combat.tactic_normal", null, "Běžný útok");
 
         if (tactics.charge && stats.horses > 0) {
 
             tacticBonus += 1;
 
-            tacticName = "🏇 Útok z plné jízdy (+1 k síle)";
+            tacticName = tCbt2("combat.tactic_charge", null, "🏇 Útok z plné jízdy (+1 k síle)");
 
         } else if (tactics.hounds && (stats.dogs > 0 || stats.falcons > 0)) {
 
             tacticBonus += 1;
 
-            tacticName = "🐕 Lovecká smečka odlákala pozornost (+1 k síle)";
+            tacticName = tCbt2("combat.tactic_hounds", null, "🐕 Lovecká smečka odlákala pozornost (+1 k síle)");
 
         } else if (tactics.elixir) {
 
-            tacticName = "🧪 Hojivý elixír z Lazaretu (Pojistka proti Špitálu)";
+            tacticName = tCbt2("combat.tactic_elixir", null, "🧪 Hojivý elixír z Lazaretu (Pojistka proti Špitálu)");
 
         }
 
@@ -673,19 +677,19 @@
 
         var stanceBonus = 0;
 
-        var stanceName = "🎯 Taktický manévr";
+        var stanceName = tCbt2("combat.stance_tactical", null, "🎯 Taktický manévr");
 
         if (stance === "aggressive") {
 
             stanceBonus = 2;
 
-            stanceName = "⚔️ Dravý útok (+2 k síle, při prohře -2 💖 nebo 2× pokuta)";
+            stanceName = tCbt2("combat.stance_aggressive", null, "⚔️ Dravý útok (+2 k síle, při prohře -2 💖 nebo 2× pokuta)");
 
         } else if (stance === "defensive") {
 
             stanceBonus = -1;
 
-            stanceName = "🛡️ Opatrná obrana (-1 k síle, při prohře 0 ztráta srdcí & bezpečný ústup)";
+            stanceName = tCbt2("combat.stance_defensive", null, "🛡️ Opatrná obrana (-1 k síle, při prohře 0 ztráta srdcí & bezpečný ústup)");
 
         }
 

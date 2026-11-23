@@ -898,302 +898,224 @@
 
     
     getCardZoneInfo: function (code) {
+        var tZone = window.PRS_I18n ? function (k, p2, d) { return window.PRS_I18n.t(k, p2, d); } : function (k, p2, d) { return d; };
+        var fmtGoldZ = function (n) { return window.PRS_I18n ? window.PRS_I18n.formatGold(n) : (n.toLocaleString("cs-CZ") + " zl."); };
+        var btnPreviewLbl = tZone("decks_row.zone.btn_preview", null, "🔍 Náhled");
+        var btnDetailLbl = tZone("decks_row.zone.btn_detail", null, "🔍 Detail");
+        var itemsHeader = tZone("decks_row.zone.items_header", null, "Přehled předmětů v balíčku (klikni pro detail karty):");
 
-        var title = "Balíček karet";
-
+        var title = tZone("decks_row.zone.default_title", null, "Balíček karet");
         var html = [];
 
         if (code === "VECI_1") {
-
-            title = "🛡️ Balíček VĚCI 1 (Základní výzbroj)";
-
+            title = tZone("decks_row.zone.veci1_title", null, "🛡️ Balíček VĚCI 1 (Základní výzbroj)");
             var items1 = (window.PRS_ITEMS || []).filter(function (it) { return it.tier === 1; });
 
             html.push('<div style="margin-bottom:0.8rem; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:0.75rem;">');
-
-            html.push('  <strong>Cena balíčku: 2 500 zl.</strong> | Obsahuje 9 základních zbraní, zbrojí a dvorských šperků.');
-
-            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Lze nakupovat u Kováře, Obchodníka nebo v záložce Zbrojnice. Poskytují bonusy k Boji (+2 až +3), Jízdě na koni či Tanci a Charismatu.</p>');
-
+            html.push('  ' + tZone("decks_row.zone.veci1_summary", { price: fmtGoldZ(2500), count: items1.length }, "<strong>Cena balíčku: " + fmtGoldZ(2500) + "</strong> | Obsahuje " + items1.length + " základních zbraní, zbrojí a dvorských šperků."));
+            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">' + tZone("decks_row.zone.veci1_desc", null, "Lze nakupovat u Kováře, Obchodníka nebo v záložce Zbrojnice. Poskytují bonusy k Boji (+2 až +3), Jízdě na koni či Tanci a Charismatu.") + '</p>');
             html.push('</div>');
-
-            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:var(--gold-light); font-size:0.88rem;">Přehled předmětů v balíčku (klikni pro detail karty):</div>');
-
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:var(--gold-light); font-size:0.88rem;">' + itemsHeader + '</div>');
             html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
 
             for (var i = 0; i < items1.length; i++) {
-
                 var it = items1[i];
-
                 html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'item\', \'' + it.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(212,175,55,0.3); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'var(--gold)\'; this.style.background=\'rgba(212,175,55,0.15)\'" onmouseout="this.style.borderColor=\'rgba(212,175,55,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
                 html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
                 html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong></span>');
-                html.push('    <span style="font-size:0.72rem; color:var(--gold-light);">🔍 Náhled</span>');
+                html.push('    <span style="font-size:0.72rem; color:var(--gold-light);">' + btnPreviewLbl + '</span>');
                 html.push('  </div>');
                 html.push('  <div style="font-size:0.75rem; color:#fef08a; margin-top:2px;">' + (it.combat ? "⚔️+" + it.combat + " " : "") + (it.riding ? "🏇+" + it.riding + " " : "") + (it.dance ? "💃+" + it.dance + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
                 html.push('</div>');
-
             }
-
             html.push('</div>');
 
         } else if (code === "VECI_2") {
-
-            title = "⚔️ Balíček VĚCI 2 (Rytířská výzbroj)";
-
+            title = tZone("decks_row.zone.veci2_title", null, "⚔️ Balíček VĚCI 2 (Rytířská výzbroj)");
             var items2 = (window.PRS_ITEMS || []).filter(function (it) { return it.tier === 2; });
 
             html.push('<div style="margin-bottom:0.8rem; background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:8px; padding:0.75rem;">');
-
-            html.push('  <strong>Cena balíčku: 7 000 zl.</strong> | Obsahuje 7 elitních zbraní, plátových zbrojí a brokátových rouch.');
-
-            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Zásadní pro souboje s monstry U2 a prestiž u královského dvora. Dávají souhrnné bonusy až +7 k vlastnostem.</p>');
-
+            html.push('  ' + tZone("decks_row.zone.veci2_summary", { price: fmtGoldZ(7000), count: items2.length }, "<strong>Cena balíčku: " + fmtGoldZ(7000) + "</strong> | Obsahuje " + items2.length + " elitních zbraní, plátových zbrojí a brokátových rouch."));
+            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">' + tZone("decks_row.zone.veci2_desc", null, "Zásadní pro souboje s monstry U2 a prestiž u královského dvora. Dávají souhrnné bonusy až +7 k vlastnostem.") + '</p>');
             html.push('</div>');
-
-            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#c084fc; font-size:0.88rem;">Přehled předmětů v balíčku (klikni pro detail karty):</div>');
-
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#c084fc; font-size:0.88rem;">' + itemsHeader + '</div>');
             html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
 
             for (var i = 0; i < items2.length; i++) {
-
                 var it = items2[i];
-
                 html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'item\', \'' + it.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(168,85,247,0.3); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'#c084fc\'; this.style.background=\'rgba(168,85,247,0.15)\'" onmouseout="this.style.borderColor=\'rgba(168,85,247,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
                 html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
                 html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong></span>');
-                html.push('    <span style="font-size:0.72rem; color:#d8b4fe;">🔍 Náhled</span>');
+                html.push('    <span style="font-size:0.72rem; color:#d8b4fe;">' + btnPreviewLbl + '</span>');
                 html.push('  </div>');
                 html.push('  <div style="font-size:0.75rem; color:#e9d5ff; margin-top:2px;">' + (it.combat ? "⚔️+" + it.combat + " " : "") + (it.riding ? "🏇+" + it.riding + " " : "") + (it.dance ? "💃+" + it.dance + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
                 html.push('</div>');
-
             }
-
             html.push('</div>');
 
         } else if (code === "VECI_3") {
-
-            title = "👑 Balíček VĚCI 3 (Legendární královské relikvie)";
-
+            title = tZone("decks_row.zone.veci3_title", null, "👑 Balíček VĚCI 3 (Legendární královské relikvie)");
             var items3 = (window.PRS_ITEMS || []).filter(function (it) { return it.tier === 3 && it.slot !== "trophy"; });
 
             html.push('<div style="margin-bottom:0.8rem; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:0.75rem;">');
-
-            html.push('  <strong>Cena balíčku: 12 000 zl.</strong> | Obsahuje 4 ultimátní klenoty a meče Dračích bijců.');
-
-            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Nejvzácnější královské relikvie dávající až +13 k celkovým vlastnostem, nezbytné pro porážku nejmocnějších draků U3.</p>');
-
+            html.push('  ' + tZone("decks_row.zone.veci3_summary", { price: fmtGoldZ(12000), count: items3.length }, "<strong>Cena balíčku: " + fmtGoldZ(12000) + "</strong> | Obsahuje " + items3.length + " ultimátní klenoty a meče Dračích bijců."));
+            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">' + tZone("decks_row.zone.veci3_desc", null, "Nejvzácnější královské relikvie dávající až +13 k celkovým vlastnostem, nezbytné pro porážku nejmocnějších draků U3.") + '</p>');
             html.push('</div>');
-
-            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#facc15; font-size:0.88rem;">Přehled předmětů v balíčku (klikni pro detail karty):</div>');
-
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#facc15; font-size:0.88rem;">' + itemsHeader + '</div>');
             html.push('<div style="display:grid; grid-template-columns:1fr; gap:0.45rem;">');
 
             for (var i = 0; i < items3.length; i++) {
-
                 var it = items3[i];
-
                 html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'item\', \'' + it.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:0.5rem 0.75rem; font-size:0.85rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'#facc15\'; this.style.background=\'rgba(245,158,11,0.15)\'" onmouseout="this.style.borderColor=\'rgba(245,158,11,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
                 html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
-                html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> (' + it.price.toLocaleString("cs-CZ") + ' zl.)</span>');
-                html.push('    <span style="font-size:0.75rem; color:#fde047;">🔍 Náhled</span>');
+                html.push('    <span>' + it.icon + ' <strong>' + this.escapeHtml(it.name) + '</strong> (' + fmtGoldZ(it.price) + ')</span>');
+                html.push('    <span style="font-size:0.75rem; color:#fde047;">' + btnPreviewLbl + '</span>');
                 html.push('  </div>');
                 html.push('  <div style="color:#fef08a; font-size:0.8rem; margin-top:2px;">' + (it.combat ? "⚔️+" + it.combat + " " : "") + (it.riding ? "🏇+" + it.riding + " " : "") + (it.dance ? "💃+" + it.dance + " " : "") + (it.charisma ? "✨+" + it.charisma : "") + '</div>');
                 html.push('</div>');
-
             }
-
             html.push('</div>');
 
         } else if (code === "ZVER_U1") {
-
-            title = "🐗 Balíček ZVĚŘ (Úkoly U1 - Lovecký revír)";
-
+            title = tZone("decks_row.zone.u1_title", null, "🐗 Balíček ZVĚŘ (Úkoly U1 - Lovecký revír)");
             var q1 = (window.PRS_QUESTS && window.PRS_QUESTS.U1) ? window.PRS_QUESTS.U1 : [];
 
             html.push('<div style="margin-bottom:0.8rem; background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); border-radius:8px; padding:0.75rem;">');
-
-            html.push('  <strong>Obtížnost: 4–6</strong> | Odměna: 1 200 – 2 600 zl. + 0.5–1.5 💖 Srdce.');
-
-            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Lovečtí psi a sokoli usnadňují ulovení zvěře. Poražením každého zvířete získáte unikátní loveckou trofej do 5. slotu výbavy.</p>');
-
+            html.push('  ' + tZone("decks_row.zone.u1_summary", { curr: tZone("common.gold_short", null, "zl.") }, "<strong>Obtížnost: 4–6</strong> | Odměna: 1 200 – 2 600 zl. + 0.5–1.5 💖 Srdce."));
+            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">' + tZone("decks_row.zone.u1_desc", null, "Lovečtí psi a sokoli usnadňují ulovení zvěře. Poražením každého zvířete získáte unikátní loveckou trofej do 5. slotu výbavy.") + '</p>');
             html.push('</div>');
-
-            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#86efac; font-size:0.88rem;">Seznam ' + q1.length + ' zvířat v revíru (klikni pro detail karty):</div>');
-
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#86efac; font-size:0.88rem;">' + tZone("decks_row.zone.u1_list_header", { count: q1.length }, "Seznam " + q1.length + " zvířat v revíru (klikni pro detail karty):") + '</div>');
             html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
 
             for (var i = 0; i < q1.length; i++) {
-
                 var z = q1[i];
-
                 html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'quest\', \'' + z.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(74,222,128,0.3); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'#4ade80\'; this.style.background=\'rgba(74,222,128,0.15)\'" onmouseout="this.style.borderColor=\'rgba(74,222,128,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
                 html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
                 html.push('    <span>' + z.icon + ' <strong>' + this.escapeHtml(z.name) + '</strong></span>');
-                html.push('    <span style="font-size:0.72rem; color:#86efac;">🔍 Náhled</span>');
+                html.push('    <span style="font-size:0.72rem; color:#86efac;">' + btnPreviewLbl + '</span>');
                 html.push('  </div>');
                 html.push('  <div style="display:flex; justify-content:space-between; margin-top:2px; font-size:0.75rem;">');
-                html.push('    <span style="color:#4ade80;">⚔️ Obtížnost ' + z.difficulty + '</span>');
-                html.push('    <span style="color:var(--gold-light);">+' + z.gold + ' zl.</span>');
+                html.push('    <span style="color:#4ade80;">⚔️ ' + tZone("ui.catalog.difficulty", null, "Obtížnost") + ' ' + z.difficulty + '</span>');
+                html.push('    <span style="color:var(--gold-light);">+' + fmtGoldZ(z.gold) + '</span>');
                 html.push('  </div>');
                 html.push('</div>');
-
             }
-
             html.push('</div>');
 
         } else if (code === "MONSTRA_U2") {
-
-            title = "👹 Balíček MONSTRA (Úkoly U2 - Nebezpečné zkoušky)";
-
+            title = tZone("decks_row.zone.u2_title", null, "👹 Balíček MONSTRA (Úkoly U2 - Nebezpečné zkoušky)");
             var q2 = (window.PRS_QUESTS && window.PRS_QUESTS.U2) ? window.PRS_QUESTS.U2 : [];
 
             html.push('<div style="margin-bottom:0.8rem; background:rgba(251,146,60,0.1); border:1px solid rgba(251,146,60,0.3); border-radius:8px; padding:0.75rem;">');
-
-            html.push('  <strong>Obtížnost: 8–15</strong> | Odměna: 3 000 – 12 000 zl. + 1–5 💖 + Předmět výbavy.');
-
-            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Skalní obři, vlkodlaci, loupeživí rytíři, titáni a čarodějové. Poražení vám přinese trvalé srdce princezny a mocnou relikvii.</p>');
-
+            html.push('  ' + tZone("decks_row.zone.u2_summary", { curr: tZone("common.gold_short", null, "zl.") }, "<strong>Obtížnost: 8–15</strong> | Odměna: 3 000 – 12 000 zl. + 1–5 💖 + Předmět výbavy."));
+            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">' + tZone("decks_row.zone.u2_desc", null, "Skalní obři, vlkodlaci, loupeživí rytíři, titáni a čarodějové. Poražení vám přinese trvalé srdce princezny a mocnou relikvii.") + '</p>');
             html.push('</div>');
-
-            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#fdba74; font-size:0.88rem;">Seznam ' + q2.length + ' monster v balíčku (klikni pro detail karty):</div>');
-
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#fdba74; font-size:0.88rem;">' + tZone("decks_row.zone.u2_list_header", { count: q2.length }, "Seznam " + q2.length + " monster v balíčku (klikni pro detail karty):") + '</div>');
             html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
 
             for (var i = 0; i < q2.length; i++) {
-
                 var m = q2[i];
                 var mCol = (m.difficulty >= 12) ? "#ec4899" : "#fb923c";
-
                 html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'quest\', \'' + m.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid ' + mCol + '44; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'' + mCol + '\'; this.style.background=\'' + mCol + '22\'" onmouseout="this.style.borderColor=\'' + mCol + '44\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
                 html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
                 html.push('    <span>' + m.icon + ' <strong>' + this.escapeHtml(m.name) + '</strong></span>');
-                html.push('    <span style="font-size:0.72rem; color:' + mCol + ';">🔍 Náhled</span>');
+                html.push('    <span style="font-size:0.72rem; color:' + mCol + ';">' + btnPreviewLbl + '</span>');
                 html.push('  </div>');
                 html.push('  <div style="display:flex; justify-content:space-between; margin-top:2px; font-size:0.75rem;">');
-                html.push('    <span style="color:' + mCol + ';">⚔️ Obtížnost ' + m.difficulty + '</span>');
-                html.push('    <span style="color:var(--gold-light);">+' + m.gold + ' zl.</span>');
+                html.push('    <span style="color:' + mCol + ';">⚔️ ' + tZone("ui.catalog.difficulty", null, "Obtížnost") + ' ' + m.difficulty + '</span>');
+                html.push('    <span style="color:var(--gold-light);">+' + fmtGoldZ(m.gold) + '</span>');
                 html.push('  </div>');
                 html.push('</div>');
-
             }
-
             html.push('</div>');
 
         } else if (code === "DRACI_U3") {
-
-            title = "🐉 Balíček DRACI (Úkoly U3 - Dračí sluje)";
-
+            title = tZone("decks_row.zone.u3_title", null, "🐉 Balíček DRACI (Úkoly U3 - Dračí sluje)");
             var q3 = (window.PRS_QUESTS && window.PRS_QUESTS.U3) ? window.PRS_QUESTS.U3 : [];
 
             html.push('<div style="margin-bottom:0.8rem; background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); border-radius:8px; padding:0.75rem;">');
-
-            html.push('  <strong>Obtížnost: 11–17</strong> | Odměna: 6 000 – 16 000 zl. + 2.5–6.0 💖 Srdcí princezny.');
-
-            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Království ohrožuje 20 unikátních draků a saní. Každý má svou zranitelnost (kopí, psi, lektvary, oheň či mráz) a zanechává legendární poklad.</p>');
-
+            html.push('  ' + tZone("decks_row.zone.u3_summary", { curr: tZone("common.gold_short", null, "zl.") }, "<strong>Obtížnost: 11–17</strong> | Odměna: 6 000 – 16 000 zl. + 2.5–6.0 💖 Srdcí princezny."));
+            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">' + tZone("decks_row.zone.u3_desc", { count: q3.length }, "Království ohrožuje " + q3.length + " unikátních draků a saní. Každý má svou zranitelnost (kopí, psi, lektvary, oheň či mráz) a zanechává legendární poklad.") + '</p>');
             html.push('</div>');
-
-            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#fda4af; font-size:0.88rem;">Seznam ' + q3.length + ' draků v balíčku (klikni pro detail karty):</div>');
-
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#fda4af; font-size:0.88rem;">' + tZone("decks_row.zone.u3_list_header", { count: q3.length }, "Seznam " + q3.length + " draků v balíčku (klikni pro detail karty):") + '</div>');
             html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem; margin-bottom:0.8rem;">');
 
             for (var i = 0; i < q3.length; i++) {
-
                 var d = q3[i];
                 var dCol = (d.tierGroup === "young") ? "#60a5fa" : (d.tierGroup === "elemental" ? "#c084fc" : "#f43f5e");
-
                 html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'quest\', \'' + d.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid ' + dCol + '44; border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'' + dCol + '\'; this.style.background=\'' + dCol + '22\'" onmouseout="this.style.borderColor=\'' + dCol + '44\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
                 html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
                 html.push('    <span>' + d.icon + ' <strong>' + this.escapeHtml(d.name) + '</strong></span>');
-                html.push('    <span style="font-size:0.72rem; color:' + dCol + ';">🔍 Náhled</span>');
+                html.push('    <span style="font-size:0.72rem; color:' + dCol + ';">' + btnPreviewLbl + '</span>');
                 html.push('  </div>');
                 html.push('  <div style="display:flex; justify-content:space-between; margin-top:2px; font-size:0.75rem;">');
                 html.push('    <span style="color:' + dCol + ';">⚔️ ' + d.difficulty + '</span>');
-                html.push('    <span style="color:var(--gold-light);">+' + d.gold + ' zl. | 💖+' + d.hearts + '</span>');
+                html.push('    <span style="color:var(--gold-light);">+' + fmtGoldZ(d.gold) + ' | 💖+' + d.hearts + '</span>');
                 html.push('  </div>');
                 html.push('</div>');
-
             }
-
             html.push('</div>');
 
             html.push('<div style="text-align:center; margin-top:0.4rem;">');
-
-            html.push('  <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal(); PRS_App.switchTab(\'rules\'); PRS_App.switchRulesSubtab(\'dragons\');" style="cursor:pointer; padding:0.45rem 1rem;">🐉 Prohlédnout kompletní Dračí Bestiář v pravidlech (21)</button>');
-
+            html.push('  <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal(); PRS_App.switchTab(\'rules\'); PRS_App.switchRulesSubtab(\'dragons\');" style="cursor:pointer; padding:0.45rem 1rem;">' + tZone("decks_row.zone.u3_bestiary_btn", { count: q3.length }, "🐉 Prohlédnout kompletní Dračí Bestiář v pravidlech (" + q3.length + ")") + '</button>');
             html.push('</div>');
 
         } else if (code === "NAHODA_N") {
-
-            title = "❓ Balíček NÁHODA (24 karet královského osudu)";
-
-            html.push('<div style="margin-bottom:0.8rem; background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.3); border-radius:8px; padding:0.75rem;">');
-
-            html.push('  <strong>Celkem 24 autentických královských událostí.</strong>');
-
-            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Královská přízeň (+1 💖), loupežnická přepadení, milostné sonety, dary od královny matky, opravy zbrojí i nálezy pokladů na rozcestí.</p>');
-
-            html.push('</div>');
-
+            title = tZone("decks_row.zone.chance_title", null, "❓ Balíček NÁHODA (24 karet královského osudu)");
             var chList = (window.PRS_CHANCE_CARDS && window.PRS_CHANCE_CARDS.length) ? window.PRS_CHANCE_CARDS : [];
 
-            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#fef08a; font-size:0.88rem;">Výběr karet osudu (klikni pro detail karty):</div>');
-
+            html.push('<div style="margin-bottom:0.8rem; background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.3); border-radius:8px; padding:0.75rem;">');
+            html.push('  <strong>' + tZone("decks_row.zone.chance_summary", { count: chList.length || 24 }, "Celkem " + (chList.length || 24) + " autentických královských událostí.") + '</strong>');
+            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">' + tZone("decks_row.zone.chance_desc", null, "Královská přízeň (+1 💖), loupežnická přepadení, milostné sonety, dary od královny matky, opravy zbrojí i nálezy pokladů na rozcestí.") + '</p>');
+            html.push('</div>');
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#fef08a; font-size:0.88rem;">' + tZone("decks_row.zone.chance_list_header", null, "Výběr karet osudu (klikni pro detail karty):") + '</div>');
             html.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem;">');
 
             for (var i = 0; i < Math.min(12, chList.length); i++) {
-
                 var ch = chList[i];
                 var cCol = ch.category === "positive" ? "#4ade80" : (ch.category === "negative" ? "#f87171" : "#facc15");
+                var catTxtZ = ch.category === "positive"
+                    ? tZone("decks_row.zone.chance_pos", null, "Přízeň dvora (+)")
+                    : (ch.category === "negative"
+                        ? tZone("decks_row.zone.chance_neg", null, "Neštěstí (-)")
+                        : tZone("decks_row.zone.chance_challenge", null, "Zkouška (!)"));
 
                 html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'chance\', \'' + ch.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(234,179,8,0.25); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.82rem; cursor:pointer; transition:all 0.15s ease;" onmouseover="this.style.borderColor=\'#eab308\'; this.style.background=\'rgba(234,179,8,0.15)\'" onmouseout="this.style.borderColor=\'rgba(234,179,8,0.25)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
                 html.push('  <div style="display:flex; justify-content:space-between; align-items:center;">');
                 html.push('    <span>' + ch.icon + ' <strong>' + this.escapeHtml(ch.title) + '</strong></span>');
-                html.push('    <span style="font-size:0.72rem; color:#fde047;">🔍 Detail</span>');
+                html.push('    <span style="font-size:0.72rem; color:#fde047;">' + btnDetailLbl + '</span>');
                 html.push('  </div>');
-                html.push('  <div style="font-size:0.74rem; color:' + cCol + '; margin-top:2px;">' + (ch.category === 'positive' ? 'Přízeň dvora (+)' : (ch.category === 'negative' ? 'Neštěstí (-)' : 'Zkouška (!)')) + '</div>');
+                html.push('  <div style="font-size:0.74rem; color:' + cCol + '; margin-top:2px;">' + catTxtZ + '</div>');
                 html.push('</div>');
-
             }
-
             html.push('</div>');
 
         } else if (code === "SLAVNOST_S") {
-
-            title = "🎪 Balíček SLAVNOSTI (Královská klání)";
+            title = tZone("decks_row.zone.fest_title", null, "🎪 Balíček SLAVNOSTI (Královská klání)");
 
             html.push('<div style="margin-bottom:0.8rem; background:rgba(236,72,153,0.1); border:1px solid rgba(236,72,153,0.3); border-radius:8px; padding:0.75rem;">');
-
-            html.push('  <strong>Královský turnaj, Dvorský ples a Závod koní.</strong>');
-
-            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">Hráči porovnávají své ctnosti: Turnaj (Boj a Jízda), Ples (Tanec a Charisma), Závod (Jízda a Boj). Tři nejlepší získávají peněžité ceny až 1 500 zl.!</p>');
-
+            html.push('  <strong>' + tZone("decks_row.zone.fest_summary", null, "Královský turnaj, Dvorský ples a Závod koní.") + '</strong>');
+            html.push('  <p style="margin:0.35rem 0 0; font-size:0.82rem; color:#cbd5e1;">' + tZone("decks_row.zone.fest_desc", { prize: fmtGoldZ(1500) }, "Hráči porovnávají své ctnosti: Turnaj (Boj a Jízda), Ples (Tanec a Charisma), Závod (Jízda a Boj). Tři nejlepší získávají peněžité ceny až " + fmtGoldZ(1500) + "!") + '</p>');
             html.push('</div>');
 
+            var prizeUpTo = tZone("decks_row.zone.fest_prize_upto", { prize: fmtGoldZ(1500) }, "až " + fmtGoldZ(1500));
             var festList = [
-                { id: "fest_tournament", title: "Královský rytířský turnaj", icon: "⚔️", subtitle: "Boj & Jízda", prize: "až 1 500 zl." },
-                { id: "fest_ball", title: "Dvorský ples u princezny", icon: "💃", subtitle: "Tanec & Charisma", prize: "až 1 500 zl." },
-                { id: "fest_race", title: "Velký královský dostih", icon: "🏇", subtitle: "Jízda & Boj", prize: "až 1 500 zl." }
+                { id: "fest_tournament", title: tZone("modals.card_preview.fest_tournament.title", null, "Královský rytířský turnaj"), icon: "⚔️", subtitle: tZone("skills.combat", null, "Boj") + " & " + tZone("skills.riding", null, "Jízda"), prize: prizeUpTo },
+                { id: "fest_ball", title: tZone("modals.card_preview.fest_ball.title", null, "Dvorský ples u princezny"), icon: "💃", subtitle: tZone("skills.dance", null, "Tanec") + " & " + tZone("skills.charisma", null, "Charisma"), prize: prizeUpTo },
+                { id: "fest_race", title: tZone("modals.card_preview.fest_race.title", null, "Velký královský dostih"), icon: "🏇", subtitle: tZone("skills.riding", null, "Jízda") + " & " + tZone("skills.combat", null, "Boj"), prize: prizeUpTo }
             ];
 
-            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#f472b6; font-size:0.88rem;">Královské slavnosti (klikni pro detail):</div>');
-
+            html.push('<div style="font-weight:bold; margin-bottom:0.45rem; color:#f472b6; font-size:0.88rem;">' + tZone("decks_row.zone.fest_list_header", null, "Královské slavnosti (klikni pro detail):") + '</div>');
             html.push('<div style="display:grid; grid-template-columns:1fr; gap:0.5rem; margin-bottom:0.8rem;">');
 
             for (var i = 0; i < festList.length; i++) {
-
                 var f = festList[i];
-
                 html.push('<div class="deck-item-interactive" onclick="PRS_App.openCardPreview(\'festival\', \'' + f.id + '\')" style="background:rgba(0,0,0,0.45); border:1px solid rgba(236,72,153,0.3); border-radius:6px; padding:0.55rem 0.75rem; font-size:0.85rem; cursor:pointer; transition:all 0.15s ease; display:flex; justify-content:space-between; align-items:center;" onmouseover="this.style.borderColor=\'#ec4899\'; this.style.background=\'rgba(236,72,153,0.15)\'" onmouseout="this.style.borderColor=\'rgba(236,72,153,0.3)\'; this.style.background=\'rgba(0,0,0,0.45)\'">');
                 html.push('  <div>' + f.icon + ' <strong>' + this.escapeHtml(f.title) + '</strong><br/><span style="color:#f472b6; font-size:0.78rem;">' + f.subtitle + '</span></div>');
-                html.push('  <div style="text-align:right;"><span style="color:var(--gold-light); font-weight:bold; font-size:0.84rem;">' + f.prize + '</span><br/><span style="font-size:0.74rem; color:#f9a8d4;">🔍 Náhled</span></div>');
+                html.push('  <div style="text-align:right;"><span style="color:var(--gold-light); font-weight:bold; font-size:0.84rem;">' + f.prize + '</span><br/><span style="font-size:0.74rem; color:#f9a8d4;">' + btnPreviewLbl + '</span></div>');
                 html.push('</div>');
-
             }
-
             html.push('</div>');
-
         }
         return { title: title, bodyHTML: html.join("") };
 

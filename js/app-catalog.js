@@ -72,24 +72,25 @@
             container.classList.add("rules-mode-" + this.rulesVisualMode);
         }
 
+        var tVis = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
         var btnArt = document.getElementById("btn-rules-mode-art");
         var btnScheme = document.getElementById("btn-rules-mode-scheme");
         if (btnArt) {
             if (this.rulesVisualMode === "art") {
                 btnArt.classList.add("active");
-                btnArt.textContent = "🎨 Malovaný (aktivní)";
+                btnArt.textContent = tVis("rules.mode_art_active", "🎨 Malovaný (aktivní)");
             } else {
                 btnArt.classList.remove("active");
-                btnArt.textContent = "🎨 Malovaný";
+                btnArt.textContent = tVis("rules.mode_art", "🎨 Malovaný");
             }
         }
         if (btnScheme) {
             if (this.rulesVisualMode === "scheme") {
                 btnScheme.classList.add("active");
-                btnScheme.textContent = "📐 Schéma (aktivní)";
+                btnScheme.textContent = tVis("rules.mode_scheme_active", "📐 Schéma (aktivní)");
             } else {
                 btnScheme.classList.remove("active");
-                btnScheme.textContent = "📐 Schéma";
+                btnScheme.textContent = tVis("rules.mode_scheme", "📐 Schéma");
             }
         }
     },
@@ -133,234 +134,118 @@
         var container = document.getElementById("rules-atlas-grid-container");
         if (!container) return;
 
+        var tAtlas = window.PRS_I18n ? function (k, d) { return window.PRS_I18n.t(k, null, d); } : function (k, d) { return d; };
+        var makeTile = function (code, key, img, art, defName, defCat, defCost, defAction, defTip) {
+            var p = "ui.catalog.atlas_tiles." + key + ".";
+            return {
+                code: code,
+                badge: tAtlas(p + "code", code),
+                name: tAtlas(p + "name", defName),
+                cat: tAtlas(p + "cat", defCat),
+                img: img,
+                art: art,
+                cost: tAtlas(p + "cost", defCost),
+                action: tAtlas(p + "action", defAction),
+                tip: tAtlas(p + "tip", defTip)
+            };
+        };
+
         var tileDefinitions = [
-            {
-                code: "START",
-                name: "Královský START",
-                cat: "Speciální",
-                img: "assets/tiles/start.webp",
-                art: "assets/tiles/castle.webp",
-                cost: "—",
-                action: "Žold <strong>+3 000 zl.</strong> (nemajetní bezzemci <strong>+5 000 zl.</strong>). Šlechtici, majitelé Města/Hradu nebo zkušení tanečníci (Tanec ≥ 2 a šaty) navíc získávají <strong>audienci u krále (+0,5 až +1,0 💖)</strong>.",
-                tip: "Využij včasný zisk šatů k čerpání královské přízně při každém oběhu plánu."
-            },
-            {
-                code: "VESNICE",
-                name: "Poddanská vesnice (V1–V12)",
-                cat: "Panství",
-                img: "assets/tiles/village.webp",
-                art: "assets/tiles/village.webp",
-                cost: "1 500 zl.",
-                action: "Koupě panství a výběr nájmu (100–300 zl.) od projíždějících rytířů. Možnost rozvoje: 1★ Vesnice → 2★ Městečko (+1 500 zl.) → 3★ Velká osada (+1 500 zl.). Plně rozvinutá vesnice dává trvale <strong>+0,5 💖</strong> a chová dobytek.",
-                tip: "Vesnice jsou základem stabilního příjmu. Na 3★ generují vysoký nájem a automatická stáda."
-            },
-            {
-                code: "MĚSTO",
-                name: "Královské město (M1–M4)",
-                cat: "Panství",
-                img: "assets/tiles/town.webp",
-                art: "assets/tiles/town.webp",
-                cost: "4 000 zl.",
-                action: "Bohaté sídlo s vysokým nájmem (500 zl.) a stálou prestiží: majiteli uděluje trvale <strong>+0,5 💖</strong> a přináší <strong>+1 200 zl.</strong> při návštěvě Výběrčího daní.",
-                tip: "Město rozšiřuje kapacitu stád o +2 a zaručuje královskou audienci na STARTu."
-            },
-            {
-                code: "HRAD",
-                name: "Šlechtický hrad (H1–H4)",
-                cat: "Panství",
-                img: "assets/tiles/castle.webp",
-                art: "assets/tiles/castle.webp",
-                cost: "7 000 zl.",
-                action: "Vrchol feudální moci: trvale <strong>+1,0 💖</strong> a <strong>+1 Charisma</strong> pro majitele! Nájem 1 000 zl., výnos u Výběrčího daní činí celých <strong>+2 500 zl.</strong>",
-                tip: "Nejrychlejší způsob, jak si trvale pojistit srdce a získat převahu na královském dvoře."
-            },
-            {
-                code: "KŮŇ",
-                name: "Chov koní (K1–K12)",
-                cat: "Zvířata",
-                img: "assets/tiles/kun.webp",
-                art: "assets/tiles/kun.webp",
-                cost: "600 × úroveň zl.",
-                action: "Koupě koně. Zpřístupňuje <strong>koňský pohyb (klus, cval, trysk)</strong>, umožňuje obranu obratností v duelech a je nutnou podmínkou účasti ve <strong>Velkém závodě</strong>.",
-                tip: "Kůň je klíč k rychlému pohybu po mapě. V kombinaci se psem a sokolem tvoří Chovnou sadu (+1,5 💖)."
-            },
-            {
-                code: "PES",
-                name: "Lovecký pes (P1–P12)",
-                cat: "Zvířata",
-                img: "assets/tiles/pes.webp",
-                art: "assets/tiles/pes.webp",
-                cost: "500 × úroveň zl.",
-                action: "Koupě loveckého psa. Věrný společník ti dává taktickou výhodu v aréně draků – při těsné prohře o 1–2 body získáš <strong>🎲 Taktický reroll 1 kostky</strong> zdarma!",
-                tip: "Pes ti zachrání život v aréně draků a chrání tě před převozem do Lazaretu."
-            },
-            {
-                code: "SOKOL",
-                name: "Lovecký sokol (S1–S12)",
-                cat: "Zvířata",
-                img: "assets/tiles/sokol.webp",
-                art: "assets/tiles/sokol.webp",
-                cost: "400 × úroveň zl.",
-                action: "Koupě dravce. Umožňuje <strong>Sokolí navigaci (±1 pole)</strong> při taktickém manévrování pěšky, čímž ti dovolí přesně dosednout na cíl nebo se vyhnout pasti.",
-                tip: "Sokolí navigace nefunguje při plném koňském cvalu a trysku – kůň letí kupředu příliš rychle."
-            },
-            {
-                code: "STAJE",
-                name: "Královské stáje & Dobytčí trh",
-                cat: "Ekonomika",
-                img: "assets/tiles/kun.webp",
-                art: "assets/tiles/kun.webp",
-                cost: "Dle druhu",
-                action: "Nákup hospodářského dobytka: <strong>🐑 Ovce (500 zl.)</strong>, <strong>🐖 Prase (600 zl.)</strong> a <strong>🐄 Skot (800 zl.)</strong>. Stáda zvyšují nájmy vesnic a generují pasivní výnos u Výběrčího daní.",
-                tip: "Kapacita stád závisí na počtu tvých vesnic a měst. Stáje samy o sobě přidávají +4 místa."
-            },
-            {
-                code: "MISTR",
-                name: "Sídlo Mistra (MB, MJ, MT, MCH, VM)",
-                cat: "Výcvik",
-                img: "assets/tiles/master.webp",
-                art: "assets/tiles/master.webp",
-                cost: "1 000–5 000 zl.",
-                action: "Trénink ctností (Boj, Jízda, Tanec, Charisma). Hod kostkou: 1–3 = nepřijat, 4–6 = přijat k výcviku. Úspěšný trénink uděluje <strong>Pečeť mistra</strong>. 3 různé pečetě = <strong>Rytířská záštita</strong>!",
-                tip: "Velmistr (VM) učí jakoukoliv vlastnost dle tvé volby. Investuj do své primární ctnosti co nejdříve."
-            },
-            {
-                code: "FESTIVAL",
-                name: "Královská slavnost (♡ ♡ ♡)",
-                cat: "Soutěž",
-                img: "assets/tiles/festival.webp",
-                art: "assets/tiles/festival.webp",
-                cost: "—",
-                action: "Turnaj (Boj + Jízda), Zámecký ples (Tanec + Charisma) nebo Velký závod (Jízda + koně). Hlavní zdroj srdcí ve hře! Vítěz získá <strong>až +5 💖 a 1 200 zl.</strong>",
-                tip: "Při účasti méně než 2 rytířů se slavnost nekoná, ale pořadatel dostane útěchu +800 zl. a +0,5 💖."
-            },
-            {
-                code: "U1",
-                name: "Běžná stvůra (Lesní dravci)",
-                cat: "Lov",
-                img: "assets/tiles/u1_zver.webp",
-                art: "assets/tiles/u1_zver.webp",
-                cost: "—",
-                action: "Lov vlků, medvědů a divočáků. Vítězství přináší <strong>1 000–2 500 zl.</strong> a <strong>+0,5 až +1,5 💖</strong>. Skvělý bezpečný trénink pro začínající válečníky.",
-                tip: "Použij Taktický postoj: Opatrná obrana tě ochrání před zraněním i v případě prohry."
-            },
-            {
-                code: "U2",
-                name: "Mocné monstrum (Bájní netvoři)",
-                cat: "Lov",
-                img: "assets/tiles/u2_monstrum.webp",
-                art: "assets/tiles/u2_monstrum.webp",
-                cost: "—",
-                action: "Boj s Chimérami, Trolly a Golemy. Odměna <strong>2 600 zl.</strong>, <strong>+1,5 až +2,5 💖</strong> a 65% šance na unikátní trofej. Lze uplatnit taktický ústup za 400 zl.",
-                tip: "Před bojem zkontroluj slabinu monstra v Bestiáři pro automatický bonus +2 k síle."
-            },
-            {
-                code: "U3",
-                name: "Dračí sluj (Legendární draci)",
-                cat: "Drakobijci",
-                img: "assets/tiles/u3_drak.webp",
-                art: "assets/tiles/u3_drak.webp",
-                cost: "—",
-                action: "Souboj o čest s jedním z 20 unikátních draků! Odměna <strong>6 000 zl.</strong>, <strong>+2,5 až +5,0 💖</strong> a garantovaná dračí trofej. <strong>Skolení 2 draků = okamžitá výhra v celé hře!</strong>",
-                tip: "Taktický ústup z dračí sluje stojí 800 zl. Pokud nemáš dostatečný Boj a zbraně, raději ustup."
-            },
-            {
-                code: "MERCHANT",
-                name: "Královský obchodník",
-                cat: "Trh",
-                img: "assets/tiles/merchant.webp",
-                art: "assets/tiles/merchant.webp",
-                cost: "Dle nákupu",
-                action: "Nákup balíčků výstroje (zbraně, zbroje, plesové šaty, klenoty). Možnost dobrovolného odprodeje majetku bance (věci za 50 % ceny, nemovitosti za 100 %).",
-                tip: "Nakupuj přednostně věci, které odpovídají tvé zvolené cestě k vítězství."
-            },
-            {
-                code: "KOVARNA",
-                name: "Cechovní kovárna",
-                cat: "Trh",
-                img: "assets/tiles/kovarna.webp",
-                art: "assets/tiles/kovarna.webp",
-                cost: "Dle zbraně",
-                action: "Výroba a nákup mečů, seker, kopí a brnění. Zbraně zvyšují Boj a poskytují taktickou výhodu proti specifickým drakům.",
-                tip: "Kopí platí na Vodní draky, těžké brnění na ohnivé plameny."
-            },
-            {
-                code: "KREJCI",
-                name: "Zámecký krejčí",
-                cat: "Trh",
-                img: "assets/tiles/krejci.webp",
-                art: "assets/tiles/krejci.webp",
-                cost: "Dle oděvu",
-                action: "Ušití dvorských šatů a brokátových rouch. Poskytuje bonusy k Tanci a Charismatu, zásadní pro vítězství na Zámeckém plese.",
-                tip: "Šaty ti na Zámeckém plese přinášejí automatický bonus +2 ke skóre."
-            },
-            {
-                code: "TAVERN",
-                name: "Krčma U Zlatého korbelu",
-                cat: "Služby",
-                img: "assets/tiles/tavern.webp",
-                art: "assets/tiles/tavern.webp",
-                cost: "500 zl.",
-                action: "Odpočinek a pohoštění. Runda medoviny za 500 zl. Pro zkušené tanečníky (Tanec ≥ 2) přináší dvorní obdiv a zisk <strong>+1,0 💖</strong> za okouzlující zábavu.",
-                tip: "Diplomaté a tanečníci zde proměňují drobné mince v cenná srdce."
-            },
-            {
-                code: "TAX",
-                name: "Výběrčí daní",
-                cat: "Ekonomika",
-                img: "assets/tiles/tax.webp",
-                art: "assets/tiles/tax.webp",
-                cost: "—",
-                action: "Výplata feudálních rent: Vesnice (500/900/1 400 zl.), Města (1 200 zl.), Hrady (2 500 zl.) a dobytek (ovce +120, prase +150, kráva +200 zl.).",
-                tip: "Rytíř s Rytířskou záštitou (3 pečetě mistrů) je navíc osvobozen od všech plateb královských desátků."
-            },
-            {
-                code: "PRISON",
-                name: "Hradní šatlava",
-                cat: "Trest",
-                img: "assets/tiles/prison.webp",
-                art: "assets/tiles/prison.webp",
-                cost: "Kauce 1 000 zl.",
-                action: "Uvěznění na 1 kolo. Možnosti záchrany: zaplacení kauce 1 000 zl., úspěšný útěk (hod kostkou 6), nebo okamžité zahrání svitku <strong>Královská amnestie</strong> z brašny.",
-                tip: "Pokud máš v brašně svitek Královské amnestie, jsi propuštěn okamžitě bez ztráty tahu i peněz."
-            },
-            {
-                code: "HOSPITAL",
-                name: "Královský lazaret",
-                cat: "Léčení",
-                img: "assets/tiles/hospital.webp",
-                art: "assets/tiles/hospital.webp",
-                cost: "1 000 zl.",
-                action: "Zotavení po těžkém zranění. Hojivý elixír za 1 000 zl. trvale zvýší Boj o +1 (pokud Boj < 2), udělí <strong>+0,5 💖 za statečnost</strong> a ochranný amulet proti dalšímu převozu!",
-                tip: "Držitelé Rytířské záštity (3 pečetě mistrů) jsou v lazaretu ošetřeni zcela zdarma."
-            },
-            {
-                code: "JESTER",
-                name: "Dvorní Kejklíř & Šašek",
-                cat: "Speciální",
-                img: "assets/tiles/jester.webp",
-                art: "assets/tiles/jester.webp",
-                cost: "2 000 zl. (Kejklíř)",
-                action: "Zábava u dvora. Kejklíř skládá posměšnou baladu na protivníky; Šašek odměňuje zkušené tanečníky královským darem <strong>+200 zl. × stupeň Tance</strong>.",
-                tip: "Vysoký Tanec promění návštěvu Šaška ve štědrou královskou rentu."
-            },
-            {
-                code: "CHANCE",
-                name: "Náhoda & Královský dar",
-                cat: "Osud",
-                img: "assets/tiles/chance.webp",
-                art: "assets/tiles/chance.webp",
-                cost: "—",
-                action: "Tažení osudové karty ze zemského balíčku: královské dotace, turnajové výzvy, lapkové, zkoušky jezdectví i nález <strong>taktických pergamenů do brašny rytíře</strong>.",
-                tip: "Taktické pergameny můžeš uschovat do brašny (kapacita 3) a zahrát je kdykoliv ve svém tahu."
-            }
+            makeTile("START", "start", "assets/tiles/start.webp", "assets/tiles/castle.webp",
+                "Královský START", "Speciální", "—",
+                "Žold <strong>+3 000 zl.</strong> (nemajetní bezzemci <strong>+5 000 zl.</strong>). Šlechtici, majitelé Města/Hradu nebo zkušení tanečníci (Tanec ≥ 2 a šaty) navíc získávají <strong>audienci u krále (+0,5 až +1,0 💖)</strong>.",
+                "Využij včasný zisk šatů k čerpání královské přízně při každém oběhu plánu."),
+            makeTile("VESNICE", "village", "assets/tiles/village.webp", "assets/tiles/village.webp",
+                "Poddanská vesnice (V1–V12)", "Panství", "1 500 zl.",
+                "Koupě panství a výběr nájmu (100–300 zl.) od projíždějících rytířů. Možnost rozvoje: 1★ Vesnice → 2★ Městečko (+1 500 zl.) → 3★ Velká osada (+1 500 zl.). Plně rozvinutá vesnice dává trvale <strong>+0,5 💖</strong> a chová dobytek.",
+                "Vesnice jsou základem stabilního příjmu. Na 3★ generují vysoký nájem a automatická stáda."),
+            makeTile("MĚSTO", "town", "assets/tiles/town.webp", "assets/tiles/town.webp",
+                "Královské město (M1–M4)", "Panství", "4 000 zl.",
+                "Bohaté sídlo s vysokým nájmem (500 zl.) a stálou prestiží: majiteli uděluje trvale <strong>+0,5 💖</strong> a přináší <strong>+1 200 zl.</strong> při návštěvě Výběrčího daní.",
+                "Město rozšiřuje kapacitu stád o +2 a zaručuje královskou audienci na STARTu."),
+            makeTile("HRAD", "castle", "assets/tiles/castle.webp", "assets/tiles/castle.webp",
+                "Šlechtický hrad (H1–H4)", "Panství", "7 000 zl.",
+                "Vrchol feudální moci: trvale <strong>+1,0 💖</strong> a <strong>+1 Charisma</strong> pro majitele! Nájem 1 000 zl., výnos u Výběrčího daní činí celých <strong>+2 500 zl.</strong>",
+                "Nejrychlejší způsob, jak si trvale pojistit srdce a získat převahu na královském dvoře."),
+            makeTile("KŮŇ", "horse", "assets/tiles/kun.webp", "assets/tiles/kun.webp",
+                "Chov koní (K1–K12)", "Zvířata", "600 × úroveň zl.",
+                "Koupě koně. Zpřístupňuje <strong>koňský pohyb (klus, cval, trysk)</strong>, umožňuje obranu obratností v duelech a je nutnou podmínkou účasti ve <strong>Velkém závodě</strong>.",
+                "Kůň je klíč k rychlému pohybu po mapě. V kombinaci se psem a sokolem tvoří Chovnou sadu (+1,5 💖)."),
+            makeTile("PES", "dog", "assets/tiles/pes.webp", "assets/tiles/pes.webp",
+                "Lovecký pes (P1–P12)", "Zvířata", "500 × úroveň zl.",
+                "Koupě loveckého psa. Věrný společník ti dává taktickou výhodu v aréně draků – při těsné prohře o 1–2 body získáš <strong>🎲 Taktický reroll 1 kostky</strong> zdarma!",
+                "Pes ti zachrání život v aréně draků a chrání tě před převozem do Lazaretu."),
+            makeTile("SOKOL", "falcon", "assets/tiles/sokol.webp", "assets/tiles/sokol.webp",
+                "Lovecký sokol (S1–S12)", "Zvířata", "400 × úroveň zl.",
+                "Koupě dravce. Umožňuje <strong>Sokolí navigaci (±1 pole)</strong> při taktickém manévrování pěšky, čímž ti dovolí přesně dosednout na cíl nebo se vyhnout pasti.",
+                "Sokolí navigace nefunguje při plném koňském cvalu a trysku – kůň letí kupředu příliš rychle."),
+            makeTile("STAJE", "stables", "assets/tiles/kun.webp", "assets/tiles/kun.webp",
+                "Královské stáje & Dobytčí trh", "Ekonomika", "Dle druhu",
+                "Nákup hospodářského dobytka: <strong>🐑 Ovce (500 zl.)</strong>, <strong>🐖 Prase (600 zl.)</strong> a <strong>🐄 Skot (800 zl.)</strong>. Stáda zvyšují nájmy vesnic a generují pasivní výnos u Výběrčího daní.",
+                "Kapacita stád závisí na počtu tvých vesnic a měst. Stáje samy o sobě přidávají +4 místa."),
+            makeTile("MISTR", "master", "assets/tiles/master.webp", "assets/tiles/master.webp",
+                "Sídlo Mistra (MB, MJ, MT, MCH, VM)", "Výcvik", "1 000–5 000 zl.",
+                "Trénink ctností (Boj, Jízda, Tanec, Charisma). Hod kostkou: 1–3 = nepřijat, 4–6 = přijat k výcviku. Úspěšný trénink uděluje <strong>Pečeť mistra</strong>. 3 různé pečetě = <strong>Rytířská záštita</strong>!",
+                "Velmistr (VM) učí jakoukoliv vlastnost dle tvé volby. Investuj do své primární ctnosti co nejdříve."),
+            makeTile("FESTIVAL", "festival", "assets/tiles/festival.webp", "assets/tiles/festival.webp",
+                "Královská slavnost (♡ ♡ ♡)", "Soutěž", "—",
+                "Turnaj (Boj + Jízda), Zámecký ples (Tanec + Charisma) nebo Velký závod (Jízda + koně). Hlavní zdroj srdcí ve hře! Vítěz získá <strong>až +5 💖 a 1 200 zl.</strong>",
+                "Při účasti méně než 2 rytířů se slavnost nekoná, ale pořadatel dostane útěchu +800 zl. a +0,5 💖."),
+            makeTile("U1", "u1", "assets/tiles/u1_zver.webp", "assets/tiles/u1_zver.webp",
+                "Běžná stvůra (Lesní dravci)", "Lov", "—",
+                "Lov vlků, medvědů a divočáků. Vítězství přináší <strong>1 000–2 500 zl.</strong> a <strong>+0,5 až +1,5 💖</strong>. Skvělý bezpečný trénink pro začínající válečníky.",
+                "Použij Taktický postoj: Opatrná obrana tě ochrání před zraněním i v případě prohry."),
+            makeTile("U2", "u2", "assets/tiles/u2_monstrum.webp", "assets/tiles/u2_monstrum.webp",
+                "Mocné monstrum (Bájní netvoři)", "Lov", "—",
+                "Boj s Chimérami, Trolly a Golemy. Odměna <strong>2 600 zl.</strong>, <strong>+1,5 až +2,5 💖</strong> a 65% šance na unikátní trofej. Lze uplatnit taktický ústup za 400 zl.",
+                "Před bojem zkontroluj slabinu monstra v Bestiáři pro automatický bonus +2 k síle."),
+            makeTile("U3", "u3", "assets/tiles/u3_drak.webp", "assets/tiles/u3_drak.webp",
+                "Dračí sluj (Legendární draci)", "Drakobijci", "—",
+                "Souboj o čest s jedním z 20 unikátních draků! Odměna <strong>6 000 zl.</strong>, <strong>+2,5 až +5,0 💖</strong> a garantovaná dračí trofej. <strong>Skolení 2 draků = okamžitá výhra v celé hře!</strong>",
+                "Taktický ústup z dračí sluje stojí 800 zl. Pokud nemáš dostatečný Boj a zbraně, raději ustup."),
+            makeTile("MERCHANT", "merchant", "assets/tiles/merchant.webp", "assets/tiles/merchant.webp",
+                "Královský obchodník", "Trh", "Dle nákupu",
+                "Nákup balíčků výstroje (zbraně, zbroje, plesové šaty, klenoty). Možnost dobrovolného odprodeje majetku bance (věci za 50 % ceny, nemovitosti za 100 %).",
+                "Nakupuj přednostně věci, které odpovídají tvé zvolené cestě k vítězství."),
+            makeTile("KOVARNA", "forge", "assets/tiles/kovarna.webp", "assets/tiles/kovarna.webp",
+                "Cechovní kovárna", "Trh", "Dle zbraně",
+                "Výroba a nákup mečů, seker, kopí a brnění. Zbraně zvyšují Boj a poskytují taktickou výhodu proti specifickým drakům.",
+                "Kopí platí na Vodní draky, těžké brnění na ohnivé plameny."),
+            makeTile("KREJCI", "tailor", "assets/tiles/krejci.webp", "assets/tiles/krejci.webp",
+                "Zámecký krejčí", "Trh", "Dle oděvu",
+                "Ušití dvorských šatů a brokátových rouch. Poskytuje bonusy k Tanci a Charismatu, zásadní pro vítězství na Zámeckém plese.",
+                "Šaty ti na Zámeckém plese přinášejí automatický bonus +2 ke skóre."),
+            makeTile("TAVERN", "tavern", "assets/tiles/tavern.webp", "assets/tiles/tavern.webp",
+                "Krčma U Zlatého korbelu", "Služby", "500 zl.",
+                "Odpočinek a pohoštění. Runda medoviny za 500 zl. Pro zkušené tanečníky (Tanec ≥ 2) přináší dvorní obdiv a zisk <strong>+1,0 💖</strong> za okouzlující zábavu.",
+                "Diplomaté a tanečníci zde proměňují drobné mince v cenná srdce."),
+            makeTile("TAX", "tax", "assets/tiles/tax.webp", "assets/tiles/tax.webp",
+                "Výběrčí daní", "Ekonomika", "—",
+                "Výplata feudálních rent: Vesnice (500/900/1 400 zl.), Města (1 200 zl.), Hrady (2 500 zl.) a dobytek (ovce +120, prase +150, kráva +200 zl.).",
+                "Rytíř s Rytířskou záštitou (3 pečetě mistrů) je navíc osvobozen od všech plateb královských desátků."),
+            makeTile("PRISON", "prison", "assets/tiles/prison.webp", "assets/tiles/prison.webp",
+                "Hradní šatlava", "Trest", "Kauce 1 000 zl.",
+                "Uvěznění na 1 kolo. Možnosti záchrany: zaplacení kauce 1 000 zl., úspěšný útěk (hod kostkou 6), nebo okamžité zahrání svitku <strong>Královská amnestie</strong> z brašny.",
+                "Pokud máš v brašně svitek Královské amnestie, jsi propuštěn okamžitě bez ztráty tahu i peněz."),
+            makeTile("HOSPITAL", "hospital", "assets/tiles/hospital.webp", "assets/tiles/hospital.webp",
+                "Královský lazaret", "Léčení", "1 000 zl.",
+                "Zotavení po těžkém zranění. Hojivý elixír za 1 000 zl. trvale zvýší Boj o +1 (pokud Boj < 2), udělí <strong>+0,5 💖 za statečnost</strong> a ochranný amulet proti dalšímu převozu!",
+                "Držitelé Rytířské záštity (3 pečetě mistrů) jsou v lazaretu ošetřeni zcela zdarma."),
+            makeTile("JESTER", "jester", "assets/tiles/jester.webp", "assets/tiles/jester.webp",
+                "Dvorní Kejklíř & Šašek", "Speciální", "2 000 zl. (Kejklíř)",
+                "Zábava u dvora. Kejklíř skládá posměšnou baladu na protivníky; Šašek odměňuje zkušené tanečníky královským darem <strong>+200 zl. × stupeň Tance</strong>.",
+                "Vysoký Tanec promění návštěvu Šaška ve štědrou královskou rentu."),
+            makeTile("CHANCE", "chance", "assets/tiles/chance.webp", "assets/tiles/chance.webp",
+                "Náhoda & Královský dar", "Osud", "—",
+                "Tažení osudové karty ze zemského balíčku: královské dotace, turnajové výzvy, lapkové, zkoušky jezdectví i nález <strong>taktických pergamenů do brašny rytíře</strong>.",
+                "Taktické pergameny můžeš uschovat do brašny (kapacita 3) a zahrát je kdykoliv ve svém tahu.")
         ];
 
         this.atlasTileDefinitions = tileDefinitions;
 
-        var isEn = window.PRS_I18n ? window.PRS_I18n._lang === "en" : false;
-        var cardTitleHint = isEn ? "Click to inspect large tile illustration and full rules" : "Kliknutím otevřeš velký detail s ilustrací a přesnými pravidly";
-        var priceLabel = isEn ? "Cost: " : "Cena: ";
+        var cardTitleHint = tAtlas("ui.catalog.atlas_card_hint", "Kliknutím otevřeš velký detail s ilustrací a přesnými pravidly");
+        var priceLabel = tAtlas("ui.catalog.price_label", "Cena:") + " ";
+        var tipPrefix = tAtlas("ui.catalog.tip_prefix", "💡 Tip:");
 
         var html = '<div class="atlas-tiles-grid">';
         for (var i = 0; i < tileDefinitions.length; i++) {
@@ -370,7 +255,7 @@
                 '  <img src="' + t.img + '" alt="' + t.name + '" class="atlas-tile-thumb" onerror="this.src=\'assets/tiles/castle.webp\';" />' +
                 '  <div style="flex:1;">' +
                 '    <div style="display:flex; align-items:center; justify-content:space-between; gap:0.35rem;">' +
-                '      <span style="font-size:0.72rem; font-weight:700; color:var(--gold); background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.3); border-radius:4px; padding:1px 6px;">' + t.code + '</span>' +
+                '      <span style="font-size:0.72rem; font-weight:700; color:var(--gold); background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.3); border-radius:4px; padding:1px 6px;">' + t.badge + '</span>' +
                 '      <span style="font-size:0.75rem; color:#94a3b8;">' + t.cat + '</span>' +
                 '    </div>' +
                 '    <div style="font-weight:700; font-size:0.92rem; color:var(--gold-light); margin-top:2px;">' + t.name + '</div>' +
@@ -378,7 +263,7 @@
                 '  </div>' +
                 '</div>' +
                 '<div style="font-size:0.82rem; color:#e2e8f0; line-height:1.45; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.45rem;">' + t.action + '</div>' +
-                '<div style="font-size:0.78rem; color:#93c5fd; background:rgba(59,130,246,0.1); border-left:3px solid #60a5fa; padding:0.35rem 0.55rem; border-radius:0 4px 4px 0;"><strong>💡 Tip:</strong> ' + t.tip + '</div>' +
+                '<div style="font-size:0.78rem; color:#93c5fd; background:rgba(59,130,246,0.1); border-left:3px solid #60a5fa; padding:0.35rem 0.55rem; border-radius:0 4px 4px 0;"><strong>' + tipPrefix + '</strong> ' + t.tip + '</div>' +
                 '</div>';
         }
         html += '</div>';
@@ -584,63 +469,36 @@
         var trophyLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.trophy_after_defeat")) || "Trofej po porážce:";
         var flipLabel = (window.PRS_I18n && window.PRS_I18n.t("ui.catalog.flip_view")) || "🔄 Otočit směr pohledu draka";
 
-        var wMap = {
-            dogs: "Lovečtí psi odlákají pozornost (+2 k síle se psy v chovu nebo taktikou smečky)",
-            falcon: "Sokol útočí na zranitelná místa (+2 k síle se sokolem v chovu)",
-            animals: "Pes i sokol matou draka v boji (+2 k síle při vlastnictví psa a sokola)",
-            horse: "Útok z plné jízdy na koni (+2 k síle s koněm v chovu nebo taktikou nájezdu)",
-            dance: "Hravého draka lze okouzlit tancem (+2 k síle s Tancem ≥ 2 nebo slavnostním šatem)",
-            elixir: "Hojivý lektvar neutralizuje dech (+2 k síle s lektvarem / taktikou pojistky)",
-            water_armor: "Vodní perla či pevná zbroj tlumí žár (+2 k síle se zbrojí či vodní relikvií)",
-            ice: "Mrazivé zbraně oslabují sopečného draka (+2 k síle s mrazivou zbraní / relikvií)",
-            fire: "Oheň taví led a krystaly (+2 k síle s ohnivou zbraní / relikvií / tématem)",
-            armor: "Pevná rytířská zbroj svádí blesky (+2 k síle s nasazenou zbrojí)",
-            light: "Posvěcené relikvie rozhánějí temnotu (+2 k síle se světelnou relikvií / klenotem)",
-            charisma: "Vznešené charisma draka uchlácholí (+2 k síle s Charismatem ≥ 3 nebo klenotem)",
-            holy: "Svaté relikvie zaženou nemrtvého (+2 k síle s posvátnou relikvií)",
-            courage: "Pevná vůle a odvaha pronikne mlhou (+2 k síle s Bojem ≥ 3 či Jízdou ≥ 3)",
-            mastery: "Zkouška všech 4 ctností (+2 k síle při všech ctnostech ≥ 2)",
-            animals_and_spear: "Koordinace koně, zvířat a kopí (+2 k síle s koněm, zvířaty a kopím)"
+        var zoomBestiaryTitle = tBest("ui.catalog.zoom_title", null, "Klikni pro zvětšení ilustrace");
+        var defaultTiers = {
+            u1: "Tier U1 (Lesní zvěř)",
+            u2_epic: "Tier U2+ (Mýtický titán)",
+            u2: "Tier U2 (Bájné monstrum)",
+            young: "Tier A (Mladý drak)",
+            elemental: "Tier B (Živlový drak)",
+            boss: "Tier C (Legendární Boss)"
         };
-
-        var wMapEn = {
-            dogs: "Hunting hounds distract attention (+2 strength with hounds or pack tactics)",
-            falcon: "Hunting falcon strikes vulnerable spots (+2 strength with falcon)",
-            animals: "Hounds and falcon confuse dragon in battle (+2 strength with hound & falcon)",
-            horse: "Mounted charge at full gallop (+2 strength with steed or charge tactic)",
-            dance: "Playful dragon enchanted by noble dance (+2 strength with Dance ≥ 2 or court robe)",
-            elixir: "Healing elixir neutralizes breath (+2 strength with elixir / insurance tactic)",
-            water_armor: "Water pearl or heavy plate dampens heat (+2 strength with armor or water relic)",
-            ice: "Glacial weapons counter volcanic dragon (+2 strength with frost weapon / relic)",
-            fire: "Fire melts ice and crystals (+2 strength with fire weapon / relic / theme)",
-            armor: "Heavy plate armor grounds lightning strikes (+2 strength with equipped armor)",
-            light: "Consecrated relics dispel darkness (+2 strength with light relic / jewel)",
-            charisma: "Noble charisma pacifies the dragon (+2 strength with Charisma ≥ 3 or jewel)",
-            holy: "Holy relics banish undead (+2 strength with sacred relic)",
-            courage: "Steadfast courage cuts through mist (+2 strength with Combat ≥ 3 or Riding ≥ 3)",
-            mastery: "Mastery test of all 4 virtues (+2 strength with all virtues ≥ 2)",
-            animals_and_spear: "Coordinating horse, animals, and spear (+2 strength with steed, animals, and spear)"
-        };
-        var isEn = window.PRS_I18n ? window.PRS_I18n._lang === "en" : false;
-        var activeWMap = isEn ? wMapEn : wMap;
 
         var html = [];
         for (var i = 0; i < filtered.length; i++) {
             var d = filtered[i];
-            var tierTitle = (d.id && d.id.indexOf("u1_") === 0) ? (isEn ? "Tier U1 (Forest Beasts)" : "Tier U1 (Lesní zvěř)") :
-                            (d.id && d.id.indexOf("u2_") === 0 && d.difficulty >= 12 ? (isEn ? "Tier U2+ (Mythic Titan)" : "Tier U2+ (Mýtický titán)") :
-                            (d.id && d.id.indexOf("u2_") === 0 ? (isEn ? "Tier U2 (Mythical Monster)" : "Tier U2 (Bájné monstrum)") :
-                            (d.tierGroup === "young" ? (isEn ? "Tier A (Young Dragon)" : "Tier A (Mladý drak)") :
-                            (d.tierGroup === "elemental" ? (isEn ? "Tier B (Elemental Dragon)" : "Tier B (Živlový drak)") : (isEn ? "Tier C (Legendary Boss)" : "Tier C (Legendární Boss)")))));
-            var tierColor = (d.id && d.id.indexOf("u1_") === 0) ? "#10b981" :
-                            (d.id && d.id.indexOf("u2_") === 0 && d.difficulty >= 12 ? "#ec4899" :
-                            (d.id && d.id.indexOf("u2_") === 0 ? "#f59e0b" :
-                            (d.tierGroup === "young" ? "#60a5fa" :
-                            (d.tierGroup === "elemental" ? "#a855f7" : "#e11d48"))));
+            var tierKey = (d.id && d.id.indexOf("u1_") === 0) ? "u1" :
+                          (d.id && d.id.indexOf("u2_") === 0 && d.difficulty >= 12 ? "u2_epic" :
+                          (d.id && d.id.indexOf("u2_") === 0 ? "u2" :
+                          (d.tierGroup === "young" ? "young" :
+                          (d.tierGroup === "elemental" ? "elemental" : "boss"))));
+            var tierTitle = tBest("bestiary.tiers." + tierKey, null, defaultTiers[tierKey]);
+            var tierColor = (tierKey === "u1") ? "#10b981" :
+                            (tierKey === "u2_epic" ? "#ec4899" :
+                            (tierKey === "u2" ? "#f59e0b" :
+                            (tierKey === "young" ? "#60a5fa" :
+                            (tierKey === "elemental" ? "#a855f7" : "#e11d48"))));
             var trophyDef = d.trophyId && window.PRS_TROPHIES ? window.PRS_TROPHIES[d.trophyId] : null;
+            var weakDesc = d.weakness ? tBest("bestiary.weaknesses." + d.weakness, null, "") : "";
+            if (weakDesc === ("bestiary.weaknesses." + d.weakness)) weakDesc = "";
 
             html.push('<div class="bestiary-card">');
-            html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(d.name) + '\', \'' + this.escapeHtml(d.desc) + '\')" title="Klikni pro zvětšení ilustrace">');
+            html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(d.name) + '\', \'' + this.escapeHtml(d.desc) + '\')" title="' + zoomBestiaryTitle + '">');
             html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(d.name) + '" class="card-media-img" loading="lazy" onerror="this.onerror=null; this.src=\'assets/landmarks/dragon.webp\';" />');
             html.push('    <span class="card-media-badge-left" style="border-color:' + tierColor + '; color:' + tierColor + ';">' + tierTitle + '</span>');
             html.push('    <span class="card-media-badge-right">⚔️ ' + diffLabel + ' ' + d.difficulty + '</span>');
@@ -652,9 +510,9 @@
             html.push('      💰 ' + rewardLabel + ' +' + d.gold.toLocaleString(locale) + ' ' + curr + ' &nbsp;|&nbsp; 💖 +' + d.hearts + ' ' + heartsLabel + '</div>');
             html.push('    <div class="card-media-desc">' + this.escapeHtml(d.desc) + '</div>');
 
-            if (d.weakness && activeWMap[d.weakness]) {
+            if (weakDesc) {
                 html.push('    <div class="card-callout-box" style="border-color:rgba(253,224,71,0.35); color:#fef08a; background:rgba(212,175,55,0.12); font-size:0.8rem;">');
-                html.push('      🎯 <strong>' + weaknessLabel + '</strong> ' + activeWMap[d.weakness]);
+                html.push('      🎯 <strong>' + weaknessLabel + '</strong> ' + weakDesc);
                 html.push('    </div>');
             }
 
@@ -765,7 +623,7 @@
             if (!trophies.hasOwnProperty(k)) continue;
             var t = trophies[k];
             if (filter === "beasts" && t.source.indexOf("U1") === -1) continue;
-            if (filter === "monsters" && t.source.indexOf("U2") === -1 && t.source.indexOf("Náhoda") === -1) continue;
+            if (filter === "monsters" && t.source.indexOf("U2") === -1 && t.source.indexOf("Náhoda") === -1 && k !== "trophy_robbers") continue;
             if (filter === "dragons" && t.source.indexOf("U3") === -1) continue;
             list.push(t);
         }
@@ -780,10 +638,13 @@
             if (tr.dance) statChips.push('<span class="armory-stat-chip ' + (tr.dance > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">💃 ' + (tr.dance > 0 ? '+' : '') + tr.dance + ' ' + sDance + '</span>');
             if (tr.charisma) statChips.push('<span class="armory-stat-chip ' + (tr.charisma > 0 ? 'armory-stat-pos' : 'armory-stat-neg') + '">✨ ' + (tr.charisma > 0 ? '+' : '') + tr.charisma + ' ' + sCharisma + '</span>');
 
+            var trTierText = tTroph("ui.catalog.tier_num_label", { tier: tr.tier || 1 }, (tr.tier || 1) + ". stupeň");
+            var trSourceFallback = tTroph("skills.combat", null, "Boj");
+
             html.push('<div class="trophy-item-card ' + tierClass + '">');
             html.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">');
-            html.push('    <span class="armory-badge-tier" style="background:rgba(212,175,55,0.18); color:var(--gold-light); font-size:0.75rem;">' + (isEn ? ('Tier ' + (tr.tier || 1)) : ((tr.tier || 1) + '. stupeň')) + '</span>');
-            html.push('    <span style="font-size:0.75rem; color:#9ca3af; font-style:italic;">' + this.escapeHtml(tr.source || (isEn ? 'Battle' : 'Boj')) + '</span>');
+            html.push('    <span class="armory-badge-tier" style="background:rgba(212,175,55,0.18); color:var(--gold-light); font-size:0.75rem;">' + trTierText + '</span>');
+            html.push('    <span style="font-size:0.75rem; color:#9ca3af; font-style:italic;">' + this.escapeHtml(tr.source || trSourceFallback) + '</span>');
             html.push('  </div>');
 
             html.push('  <div style="font-weight:bold; font-size:0.95rem; color:#f8fafc; margin-bottom:0.35rem;">' + tr.icon + ' ' + this.escapeHtml(tr.name) + '</div>');

@@ -1608,11 +1608,14 @@ window.PRS_renderCrestBadgeHTML = function (crestId, tinctureKey, size) {
 // BILINGVÁLNÍ DYNAMICKÉ PŘEKLADY KATALOGŮ (i18n Getters pro KiDesky)
 // ============================================================================
 function makeTranslatableItem(item) {
-    if (!item || !item.id) return item;
+    if (!item || !item.id || item._prsI18nWrapped) return item;
+    item._prsI18nWrapped = true;
     var rawName = item.name;
     var rawDesc = item.desc || "";
+    var rawSource = item.source || "";
     var id = item.id;
     var isTrophy = item.slot === "trophy" || (typeof id === "string" && id.indexOf("trophy_") === 0);
+    var sourceLookup = null;
 
     Object.defineProperty(item, 'name', {
         get: function () {
@@ -1647,6 +1650,48 @@ function makeTranslatableItem(item) {
         configurable: true,
         enumerable: true
     });
+
+    if (rawSource) {
+        Object.defineProperty(item, 'source', {
+            get: function () {
+                if (window.PRS_I18n) {
+                    if (isTrophy) {
+                        var trSrc = window.PRS_I18n.t('trophies.' + id + '.source');
+                        if (trSrc && trSrc !== ('trophies.' + id + '.source')) return trSrc;
+                    }
+                    var itSrc = window.PRS_I18n.t('items.' + id + '.source');
+                    if (itSrc && itSrc !== ('items.' + id + '.source')) return itSrc;
+                    if (id === 'trophy_robbers') {
+                        return window.PRS_I18n.t('cards.ch_17.title', null, 'Přepadení loupežníky') +
+                            ' (' + window.PRS_I18n.t('decks_row.deck_chance', null, 'Náhoda') + ')';
+                    }
+                    if (sourceLookup === null) {
+                        sourceLookup = false;
+                        if (window.PRS_QUESTS) {
+                            var tiers = ['U1', 'U2', 'U3'];
+                            for (var ti = 0; ti < tiers.length && !sourceLookup; ti++) {
+                                var list = window.PRS_QUESTS[tiers[ti]] || [];
+                                for (var qi = 0; qi < list.length; qi++) {
+                                    if (list[qi] && list[qi].trophyId === id) {
+                                        var tBadge = (tiers[ti] === 'U2' && list[qi].difficulty >= 12) ? 'U2+' : tiers[ti];
+                                        sourceLookup = { quest: list[qi], tierBadge: tBadge };
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (sourceLookup && sourceLookup.quest) {
+                        return sourceLookup.quest.name + ' (' + sourceLookup.tierBadge + ')';
+                    }
+                }
+                return rawSource;
+            },
+            set: function (v) { rawSource = v; sourceLookup = null; },
+            configurable: true,
+            enumerable: true
+        });
+    }
 
     return item;
 }
@@ -1822,6 +1867,14 @@ window.PRS_makeTranslatableCastle = makeTranslatableCastle;
                 makeTranslatableCastle(window.PRS_CASTLES[ck], ck);
             }
         }
+    }
+    if (window.PRS_PAWNS_CATALOG && window.PRS_PAWNS_CATALOG.length) {
+        window.PRS_PAWNS_CATALOG.forEach(function (pw) {
+            if (!pw || !pw.id) return;
+            _makeTranslatableProp(pw, "name", "wardrobe.pawns." + pw.id + ".name");
+            _makeTranslatableProp(pw, "title", "wardrobe.pawns." + pw.id + ".title");
+            _makeTranslatableProp(pw, "desc", "wardrobe.pawns." + pw.id + ".desc");
+        });
     }
 })();
 

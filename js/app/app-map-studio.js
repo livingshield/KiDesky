@@ -257,25 +257,26 @@
         var setsCatalog = (window.KiDeskyMapGenerator && (window.KiDeskyMapGenerator.ANIMAL_SETS_CATALOG || window.KiDeskyMapGenerator.ANIMAL_SETS))
             ? (window.KiDeskyMapGenerator.ANIMAL_SETS_CATALOG || window.KiDeskyMapGenerator.ANIMAL_SETS)
             : [];
+        var tMs = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var curr = tMs("common.gold_short", null, "zl.");
         var html = "";
         for (var lvl = 1; lvl <= 14; lvl++) {
             var isSelected = activeLevels.indexOf(lvl) !== -1;
             var sDef = setsCatalog[lvl - 1] || {
-                horse: "Kůň " + lvl, falcon: "Sokol " + lvl, dog: "Pes " + lvl,
-                horseEn: "Horse " + lvl, falconEn: "Falcon " + lvl, dogEn: "Dog " + lvl
+                horse: "Kůň " + lvl, falcon: "Sokol " + lvl, dog: "Pes " + lvl
             };
-            var horseName = isEn ? (sDef.horseEn || sDef.horse) : sDef.horse;
-            var falconName = isEn ? (sDef.falconEn || sDef.falcon) : sDef.falcon;
-            var dogName = isEn ? (sDef.dogEn || sDef.dog) : sDef.dog;
-            var priceText = isEn
-                ? ("Price " + (lvl * 400) + "/" + (lvl * 500) + "/" + (lvl * 600) + " g.")
-                : ("Cena " + (lvl * 400) + "/" + (lvl * 500) + "/" + (lvl * 600) + " zl.");
+            var horseName = tMs("custom_names.node_names." + sDef.horse, null, sDef.horse);
+            var falconName = tMs("custom_names.node_names." + sDef.falcon, null, sDef.falcon);
+            var dogName = tMs("custom_names.node_names." + sDef.dog, null, sDef.dog);
+            var priceText = tMs("map_studio.animal_price_fmt", {
+                p1: lvl * 400, p2: lvl * 500, p3: lvl * 600, curr: curr
+            }, "Cena " + (lvl * 400) + "/" + (lvl * 500) + "/" + (lvl * 600) + " " + curr);
             var col = ribbonColors[lvl] || "#2563eb";
             var bg = isSelected ? "rgba(16,185,129,0.18)" : "rgba(15,23,42,0.55)";
             var border = isSelected ? "#34d399" : "rgba(255,255,255,0.12)";
             var textCol = isSelected ? "#f8fafc" : "#94a3b8";
 
-            html += '<div onclick="PRS_App.toggleMapStudioAnimalLevel(' + lvl + ')" style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:' + bg + '; border:1px solid ' + border + '; border-radius:6px; padding:4px 6px; cursor:pointer; user-select:none; transition:all 0.15s;" title="Level ' + lvl + ': ' + this.escapeHtml(horseName + ' • ' + falconName + ' • ' + dogName) + ' (' + priceText + ')">' +
+            html += '<div onclick="PRS_App.toggleMapStudioAnimalLevel(' + lvl + ')" style="display:flex; align-items:center; justify-content:space-between; gap:4px; background:' + bg + '; border:1px solid ' + border + '; border-radius:6px; padding:4px 6px; cursor:pointer; user-select:none; transition:all 0.15s;" title="' + this.escapeHtml(tMs("map_studio.animal_level_prefix", { lvl: lvl }, "Level " + lvl) + ': ' + horseName + ' • ' + falconName + ' • ' + dogName + ' (' + priceText + ')') + '">' +
                 '<div style="display:flex; align-items:center; gap:5px; min-width:0;">' +
                     '<span style="width:14px; height:14px; border-radius:50%; background:' + col + '; color:#fff; font-size:0.62rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid rgba(255,255,255,0.5);">' + lvl + '</span>' +
                     '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.7rem; color:' + textCol + '; font-weight:' + (isSelected ? '700' : '500') + ';">' +
@@ -289,7 +290,7 @@
 
         var sumBadge = document.getElementById("ms-animal-summary-badge");
         if (sumBadge) {
-            sumBadge.textContent = isEn ? (activeLevels.length + " trios = " + (activeLevels.length * 3) + " tiles") : (activeLevels.length + " trojic = " + (activeLevels.length * 3) + " polí");
+            sumBadge.textContent = tMs("map_studio.animal_summary_badge", { count: activeLevels.length, tiles: activeLevels.length * 3 }, activeLevels.length + " trojic = " + (activeLevels.length * 3) + " polí");
         }
     },
 
@@ -700,15 +701,19 @@
                 elTitle.textContent = rawName;
             }
         }
+        var tMsPrev = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         if (elBadge) {
             var aCnt = (this.customBoardRecipe.animalLevels || []).length;
             var shapeObj = (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES && window.KiDeskyMapGenerator.ROUTE_ARCHETYPES[board.routeShape]);
-            var shapeName = shapeObj ? (isEn ? (shapeObj.nameEn || shapeObj.name) : shapeObj.name) : (isEn ? "Procedural Route" : "Procedurální trasa");
-            if (isEn) {
-                elBadge.textContent = board.nodes.length + " tiles • " + aCnt + " animal trios • " + (this.customBoardRecipe.branches || 0) + " branches • " + shapeName;
-            } else {
-                elBadge.textContent = board.nodes.length + " polí • " + aCnt + " trojic zvířat • " + (this.customBoardRecipe.branches || 0) + " větví • " + shapeName;
-            }
+            var shapeKey = board.routeShape ? ("map_studio.select_options.shape_" + board.routeShape) : null;
+            var shapeFallback = shapeObj ? shapeObj.name : tMsPrev("map_studio.procedural_route", null, "Procedurální trasa");
+            var shapeName = (shapeKey && window.PRS_I18n && window.PRS_I18n.t(shapeKey) !== shapeKey)
+                ? window.PRS_I18n.t(shapeKey)
+                : shapeFallback;
+            elBadge.textContent = board.nodes.length + " " + tMsPrev("map_studio.stats.tiles", null, "polí") +
+                " • " + aCnt + " " + tMsPrev("map_studio.stats.trios", null, "trojic zvířat") +
+                " • " + (this.customBoardRecipe.branches || 0) + " " + tMsPrev("map_studio.stats.branches", null, "větví") +
+                " • " + shapeName;
         }
         if (elInput && document.activeElement !== elInput) {
             elInput.value = String(this.mapStudioSeed);
@@ -717,46 +722,30 @@
         if (elStats) {
             var r = this.customBoardRecipe;
             var brCnt = (board.bridges && board.bridges.length) ? board.bridges.length : 0;
-            var tTierLabel = (r.masterTier === 5) ? "RPG I→IV" : ("Stupeň " + (["I", "II", "III", "IV"][(r.masterTier || 2) - 1] || "II"));
+            var romanTiers = ["I", "II", "III", "IV"];
+            var tTierLabel = (r.masterTier === 5) ? "RPG I→IV" : (tMsPrev("map_studio.stats.tier_prefix", null, "Stupeň") + " " + (romanTiers[(r.masterTier || 2) - 1] || "II"));
 
             var warnings = [];
-            if (r.questsU3 < 2) warnings.push(isEn ? "At least 2x Dragon U3 recommended for Dragon Slayers scenario" : "Pro scénář Lovci draků doporučeno alespoň 2× Drak U3");
-            if (r.towns < 3 || r.castles < 1) warnings.push(isEn ? "3x Town + 1x Castle recommended for Tycoon scenario" : "Pro scénář Magnát doporučeno 3× Město + 1× Hrad");
+            if (r.questsU3 < 2) warnings.push(tMsPrev("map_studio.stats.warn_slayer", null, "Pro scénář Lovci draků doporučeno alespoň 2× Drak U3"));
+            if (r.towns < 3 || r.castles < 1) warnings.push(tMsPrev("map_studio.stats.warn_tycoon", null, "Pro scénář Magnát doporučeno 3× Město + 1× Hrad"));
 
             var validHtml = warnings.length === 0
-                ? (isEn ? ' • <span style="color:#4ade80; font-weight:700;">✓ All scenarios achievable</span>' : ' • <span style="color:#4ade80; font-weight:700;">✓ Všechny scénáře splnitelné</span>')
-                : (' • <span style="color:#f87171;" title="' + this.escapeHtml(warnings.join(" | ")) + '">⚠️ ' + (isEn ? 'Scenario warning' : 'Upozornění ke scénářům') + '</span>');
+                ? (' • <span style="color:#4ade80; font-weight:700;">✓ ' + tMsPrev("map_studio.stats.all_scenarios", null, "Všechny scénáře splnitelné") + '</span>')
+                : (' • <span style="color:#f87171;" title="' + this.escapeHtml(warnings.join(" | ")) + '">⚠️ ' + tMsPrev("map_studio.stats.warn_badge", null, "Upozornění ke scénářům") + '</span>');
 
-            if (isEn) {
-                var tTierLabelEn = (r.masterTier === 5) ? "RPG I→IV" : ("Tier " + (["I", "II", "III", "IV"][(r.masterTier || 2) - 1] || "II"));
-                elStats.innerHTML =
-                    '<span>🏯 ' + r.castles + ' Castles</span> • ' +
-                    '<span>🏙️ ' + r.towns + ' Towns</span> • ' +
-                    '<span>🏘️ ' + r.villages + ' Villages</span> • ' +
-                    '<span>🃏 ' + r.jesters + ' Jesters</span> • ' +
-                    '<span>⚒️ ' + r.buildings + ' Trades</span> • ' +
-                    '<span>🐗 ' + r.questsU1 + ' U1</span> • ' +
-                    '<span>👹 ' + r.questsU2 + ' U2</span> • ' +
-                    '<span>🐲 ' + r.questsU3 + ' Dragons U3</span> • ' +
-                    '<span>🧙‍♂️ ' + r.masters + ' Masters (' + tTierLabelEn + ')</span> • ' +
-                    '<span>💖 ' + r.festivals + ' Festivals</span> • ' +
-                    '<span>🌉 ' + brCnt + ' bridges</span>' +
-                    validHtml;
-            } else {
-                elStats.innerHTML =
-                    '<span>🏯 ' + r.castles + ' Hrady</span> • ' +
-                    '<span>🏙️ ' + r.towns + ' Města</span> • ' +
-                    '<span>🏘️ ' + r.villages + ' Vesnice</span> • ' +
-                    '<span>🃏 ' + r.jesters + ' Kejklíři</span> • ' +
-                    '<span>⚒️ ' + r.buildings + ' Živnosti</span> • ' +
-                    '<span>🐗 ' + r.questsU1 + ' U1</span> • ' +
-                    '<span>👹 ' + r.questsU2 + ' U2</span> • ' +
-                    '<span>🐲 ' + r.questsU3 + ' Draci U3</span> • ' +
-                    '<span>🧙‍♂️ ' + r.masters + ' Mistři (' + tTierLabel + ')</span> • ' +
-                    '<span>💖 ' + r.festivals + ' Slavnosti</span> • ' +
-                    '<span>🌉 ' + brCnt + ' mostů</span>' +
-                    validHtml;
-            }
+            elStats.innerHTML =
+                '<span>🏯 ' + r.castles + ' ' + tMsPrev("map_studio.stats.castles", null, "Hrady") + '</span> • ' +
+                '<span>🏙️ ' + r.towns + ' ' + tMsPrev("map_studio.stats.towns", null, "Města") + '</span> • ' +
+                '<span>🏘️ ' + r.villages + ' ' + tMsPrev("map_studio.stats.villages", null, "Vesnice") + '</span> • ' +
+                '<span>🃏 ' + r.jesters + ' ' + tMsPrev("map_studio.stats.jesters", null, "Kejklíři") + '</span> • ' +
+                '<span>⚒️ ' + r.buildings + ' ' + tMsPrev("map_studio.stats.buildings", null, "Živnosti") + '</span> • ' +
+                '<span>🐗 ' + r.questsU1 + ' U1</span> • ' +
+                '<span>👹 ' + r.questsU2 + ' U2</span> • ' +
+                '<span>🐲 ' + r.questsU3 + ' ' + tMsPrev("map_studio.stats.dragons", null, "Draci U3") + '</span> • ' +
+                '<span>🧙‍♂️ ' + r.masters + ' ' + tMsPrev("map_studio.stats.masters", null, "Mistři") + ' (' + tTierLabel + ')</span> • ' +
+                '<span>💖 ' + r.festivals + ' ' + tMsPrev("map_studio.stats.festivals", null, "Slavnosti") + '</span> • ' +
+                '<span>🌉 ' + brCnt + ' ' + tMsPrev("map_studio.stats.bridges", null, "mostů") + '</span>' +
+                validHtml;
         }
     },
 

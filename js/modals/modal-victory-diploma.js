@@ -655,7 +655,7 @@
         ctx.fillText(tDip("modals.diploma.issued_in", null, "Dáno v sídelním městě království KiDesky"), w / 2, 445);
         ctx.font = "bold 13px 'Cinzel', serif";
         ctx.fillStyle = "#451a03";
-        var dateFormatted = data.date || (window.PRS_I18n ? (typeof window.PRS_I18n.formatDate === "function" ? window.PRS_I18n.formatDate() : new Date().toLocaleDateString(window.PRS_I18n._lang === "en" ? "en-US" : "cs-CZ")) : new Date().toLocaleDateString("cs-CZ"));
+        var dateFormatted = data.date || (window.PRS_I18n ? (typeof window.PRS_I18n.formatDate === "function" ? window.PRS_I18n.formatDate() : new Date().toLocaleDateString(window.PRS_I18n.getLocale ? window.PRS_I18n.getLocale() : "cs-CZ")) : new Date().toLocaleDateString("cs-CZ"));
         ctx.fillText(tDip("modals.diploma.date_label", { date: dateFormatted }, "Datum: " + dateFormatted), w / 2, 468);
         ctx.font = "11px 'Outfit', sans-serif";
         ctx.fillStyle = "#854d0e";
@@ -695,7 +695,8 @@
         link.click();
         document.body.removeChild(link);
         if (this.showToast) {
-            this.showToast("💾 Královský diplom vítěze byl úspěšně stažen do tvého zařízení!", "success");
+            var _tDip = window.PRS_I18n ? function (k, p2, d) { return window.PRS_I18n.t(k, p2, d); } : function (k, p2, d) { return d; };
+            this.showToast(_tDip("modals.diploma.download_toast", null, "💾 Královský diplom vítěze byl úspěšně stažen do tvého zařízení!"), "success");
         }
     }
     });

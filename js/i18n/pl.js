@@ -26,7 +26,103 @@ window.PRS_I18N.pl = {
     "modal_title": "Garderoba królewska & Figurki kolekcjonerskie",
     "credits_title": "Twój stan królewskich kryształów do odblokowywania pionków premium",
     "slot_info_default": "Wybierz pionek dla swojego rycerza lub odblokuj unikalnych czempionów premium z animowaną aurą!",
-    "close_title": "Zamknij garderobę"
+    "close_title": "Zamknij garderobę",
+    "badge_basic": "🛡️ Podstawowa",
+    "badge_bot": "🤖 Bot PC",
+    "badge_premium": "💎 Premium",
+    "btn_registered_only": "🔒 Dla zalogowanych",
+    "btn_select": "🎭 Wybierz pionek",
+    "btn_selected": "✅ Wybrany obecnie",
+    "btn_unlock": "🔓 Odblokuj ({price} 💎)",
+    "status_pc_only": "🔒 Tylko dla PC",
+    "status_unlocked": "✓ Odblokowano",
+    "pawns": {
+      "knight_valiant": {
+        "name": "Sir Roland",
+        "title": "Rycerz Królewskiej Korony",
+        "desc": "Szlachetny królewski paladyn w lśniącej złoto-srebrnej zbroi z herbem lwa na ramieniu."
+      },
+      "knight_tourney": {
+        "name": "Baron Róży",
+        "title": "Mistrz Turniejów",
+        "desc": "Niezwyciężony mistrz walk na kopie z pióropuszem z czerwonych róż i zdobionym hełmem."
+      },
+      "lady_huntress": {
+        "name": "Lady Sylwa",
+        "title": "Królewska Łowczyni",
+        "desc": "Dostojna pani puszczy w zielonym aksamicie z sokołem myśliwskim na ramieniu i łukiem."
+      },
+      "lord_diplomat": {
+        "name": "Książę Armand",
+        "title": "Mistrz Dworu Królewskiego",
+        "desc": "Charyzmatyczny dworzanin i dyplomata w purpurowym płaszczu ze złotym łańcuchem i szpadą."
+      },
+      "knight_warden": {
+        "name": "Strażnik Puszczy",
+        "title": "Szmaragdowy Rycerz",
+        "desc": "Pradawny obrońca królewskich lasów w koronie z poroża jelenia i dębowym płaszczu."
+      },
+      "lady_sorceress": {
+        "name": "Czarodziejka Astrida",
+        "title": "Gwiezdna Dama",
+        "desc": "Tajemnicza szlachcianka i astrolożka z diademem gwiazdozbiorów oraz lśniącym kryształem."
+      },
+      "bot_aggressive": {
+        "name": "Czarny Baron",
+        "title": "Wojownik PC (Pogromca smoków)",
+        "desc": "Groźny żelazny baron w rogatym czarnym hełmie z żarzącą się czerwienią przyłbicą."
+      },
+      "bot_breeder": {
+        "name": "Zygmunt z Hodowli",
+        "title": "Hodowca PC (Pan stadnin)",
+        "desc": "Zamożny zarządca królewskich zwierzyńców w futrzanym płaszczu ze złotym rogiem."
+      },
+      "bot_noble": {
+        "name": "Księżna Elżbieta",
+        "title": "Dworzanin PC (Dyplomacja & Bal)",
+        "desc": "Dumna księżna w wysokiej złotej koronie, perłach i z dworskim koronkowym wachlarzem."
+      },
+      "bot_balanced": {
+        "name": "Żelazny Strażnik",
+        "title": "Rycerz PC (Automat Królewski)",
+        "desc": "Mechaniczny rycerski golem z kutego mosiądzu i stali napędzany królewskimi runami."
+      },
+      "bot_easy": {
+        "name": "Giermek Witek",
+        "title": "Giermek PC (Ostrożny nowicjusz)",
+        "desc": "Młody uśmiechnięty giermek w przeszywanicy z drewnianą tarczą i przekrzywionym hełmem."
+      },
+      "prem_dragon_lord": {
+        "name": "Smoczy Wódz",
+        "title": "Legendarny Władca Płomieni",
+        "desc": "Epicki wódz w smoczej zbroi łuskowej z ognistymi skrzydłami i płonącą aurą na planszy."
+      },
+      "prem_ice_queen": {
+        "name": "Lodowa Królowa",
+        "title": "Władczyni Północnych Szczytów",
+        "desc": "Majestatyczna królowa w koronie z kryształów lodu, otoczona mroźną kryształową poświatą."
+      },
+      "prem_shadow_assassin": {
+        "name": "Rycerz Cieni",
+        "title": "Widmowy Mistrz Nocy",
+        "desc": "Tajemniczy wojownik w mrocznym kapturze otoczony fioletową mgłą z runicznymi sztyletami."
+      },
+      "prem_golden_king": {
+        "name": "Złoty Król Słońca",
+        "title": "Suwerenny Władca",
+        "desc": "Olśniewający monarcha w szczerozłotej zbroi z aureolą promieni słonecznych i złotym blaskiem."
+      },
+      "prem_unicorn_rider": {
+        "name": "Jeździec Jednorożca",
+        "title": "Niebiański Czempion",
+        "desc": "Srebrny paladyn u boku baśniowego jednorożca otoczonego tęczową gwiezdną aurą."
+      },
+      "prem_phoenix_paladin": {
+        "name": "Paladyn Feniksa",
+        "title": "Nieśmiertelny Strażnik Serca",
+        "desc": "Najwyższy pionek premium ze złotymi skrzydłami ognistego feniksa i iskrzącą koroną."
+      }
+    }
   },
   "ui": {
     "brand_subtitle": "Serce Księżniczki",
@@ -229,7 +325,188 @@ window.PRS_I18N.pl = {
       "trophy_tier3_label": "Smocze trofeum U3",
       "trophy_tier_label": "Trofeum U{tier}",
       "castle_benefit_html": "🏰 <strong>Korzyść włości:</strong> Dochód z podatków +2 500 zł., czynsz 1 500 zł., na stałe +1 Charyzma i audiencja u księżniczki.",
-      "flip_castle_label": "🔄 Odwróć widok zamku"
+      "flip_castle_label": "🔄 Odwróć widok zamku",
+      "atlas_card_hint": "Kliknij, aby otworzyć pełne szczegóły z ilustracją i dokładnymi zasadami",
+      "tip_prefix": "💡 Wskazówka:",
+      "tier_num_label": "Poziom {tier}",
+      "atlas_tiles": {
+        "start": {
+          "code": "START",
+          "name": "Królewski START",
+          "cat": "Specjalne",
+          "cost": "—",
+          "action": "Żołd <strong>+3 000 zł.</strong> (bezrolni <strong>+5 000 zł.</strong>). Szlachcice, właściciele Miasta/Zamku lub wprawni tancerze (Taniec ≥ 2 i strój) zyskują <strong>audiencję u króla (+0,5 do +1,0 💖)</strong>.",
+          "tip": "Zdobądź wczesny strój balowy, by zyskać łaskę króla przy każdym okrążeniu."
+        },
+        "village": {
+          "code": "WIOSKA",
+          "name": "Wioska wasalna (V1–V12)",
+          "cat": "Włości",
+          "cost": "1 500 zł.",
+          "action": "Zakup włości i pobór czynszu (100–300 zł.) od rycerzy. Rozbudowa: 1★ Wioska → 2★ Miasteczko (+1 500 zł.) → 3★ Wielka osada (+1 500 zł.). Wioska 3★ daje trwale <strong>+0,5 💖</strong> i hoduje bydło.",
+          "tip": "Wioski są podstawą stałego dochodu; na 3★ zapewniają wysoki czynsz i darmowe stada."
+        },
+        "town": {
+          "code": "MIASTO",
+          "name": "Królewskie miasto (M1–M4)",
+          "cat": "Włości",
+          "cost": "4 000 zł.",
+          "action": "Bogata siedziba z wysokim czynszem (500 zł.) i prestiżem: daje trwale <strong>+0,5 💖</strong> oraz <strong>+1 200 zł.</strong> przy wizycie Poborcy podatków.",
+          "tip": "Miasto zwiększa limit stad o +2 i gwarantuje królewską audiencję na STARCIE."
+        },
+        "castle": {
+          "code": "ZAMEK",
+          "name": "Zamek szlachecki (H1–H4)",
+          "cat": "Włości",
+          "cost": "7 000 zł.",
+          "action": "Szczyt potęgi feudalnej: trwale <strong>+1,0 💖</strong> oraz <strong>+1 Charyzmy</strong>! Czynsz 1 000 zł., a dochód u Poborcy podatków wynosi aż <strong>+2 500 zł.</strong>",
+          "tip": "Najszybszy sposób na trwałe zdobycie serc i przewagę na królewskim dworze."
+        },
+        "horse": {
+          "code": "KOŃ",
+          "name": "Hodowla koni (K1–K12)",
+          "cat": "Zwierzęta",
+          "cost": "600 × poziom zł.",
+          "action": "Zakup wierzchowca. Odblokowuje <strong>ruch konny (kłus, galop, cwał)</strong>, obronę zwinnością w pojedynkach i udział w <strong>Wielkim wyścigu</strong>.",
+          "tip": "Koń przyspiesza podróż po mapie, a z psem i sokołem tworzy Zestaw Hodowlany (+1,5 💖)."
+        },
+        "dog": {
+          "code": "PIES",
+          "name": "Pies myśliwski (P1–P12)",
+          "cat": "Zwierzęta",
+          "cost": "500 × poziom zł.",
+          "action": "Zakup psa gończego. Zapewnia przewagę w smoczej arenie — przy minimalnej porażce o 1–2 punkty daje darmowy <strong>🎲 Taktyczny przerzut 1 kości</strong>!",
+          "tip": "Pies ratuje życie w leżach smoków i chroni przed trafieniem do Lazaretu."
+        },
+        "falcon": {
+          "code": "SOKÓŁ",
+          "name": "Sokół myśliwski (S1–S12)",
+          "cat": "Zwierzęta",
+          "cost": "400 × poziom zł.",
+          "action": "Zakup drapieżnika. Odblokowuje <strong>Nawigację Sokoła (±1 pole)</strong> przy pieszym marszu, ułatwiając trafienie w cel lub ominięcie pułapki.",
+          "tip": "Nawigacja Sokoła nie działa w pełnym galopie ani cwale — koń pędzi zbyt szybko."
+        },
+        "stables": {
+          "code": "STAJNIE",
+          "name": "Królewskie stajnie & Targ bydła",
+          "cat": "Ekonomia",
+          "cost": "Wg gatunku",
+          "action": "Zakup inwentarza: <strong>🐑 Owca (500 zł.)</strong>, <strong>🐖 Świnia (600 zł.)</strong> i <strong>🐄 Bydło (800 zł.)</strong>. Zwierzęta zwiększają czynsz wiosek i podatki u Poborcy.",
+          "tip": "Liczba miejsc zależy od Wiosek i Miast; same Stajnie dodają +4 miejsca."
+        },
+        "master": {
+          "code": "MISTRZ",
+          "name": "Siedziba Mistrza (MB, MJ, MT, MCH, VM)",
+          "cat": "Trening",
+          "cost": "1 000–5 000 zł.",
+          "action": "Trening cnót (Walka, Jazda, Taniec, Charyzma). Rzut 4–6 zapewnia przyjęcie na naukę i <strong>Pieczęć Mistrza</strong>. 3 różne pieczęcie = <strong>Opieka Rycerska</strong>!",
+          "tip": "Arcymistrz (VM) uczy dowolnej wybranej cechy. Rozwijaj główną cnotę jak najwcześniej."
+        },
+        "festival": {
+          "code": "FESTYN",
+          "name": "Królewski festyn (♡ ♡ ♡)",
+          "cat": "Zawody",
+          "cost": "—",
+          "action": "Turniej (Walka + Jazda), Bal dworski (Taniec + Charyzma) lub Wielki wyścig (Jazda + konie). Główne źródło serc: zwycięzca zdobywa <strong>do +5 💖 i 1 200 zł.</strong>",
+          "tip": "Gdy stawi się mniej niż 2 rycerzy, festyn się nie odbywa, a gospodarz dostaje +800 zł. i +0,5 💖."
+        },
+        "u1": {
+          "code": "U1",
+          "name": "Dzika zwierzyna (Leśne drapieżniki)",
+          "cat": "Łowy",
+          "cost": "—",
+          "action": "Polowanie na wilki, niedźwiedzie i dziki. Wygrana daje <strong>1 000–2 500 zł.</strong> oraz <strong>+0,5 do +1,5 💖</strong>. Świetny trening na start.",
+          "tip": "Postawa Obronna chroni przed utratą serc nawet w razie przegranej."
+        },
+        "u2": {
+          "code": "U2",
+          "name": "Potężny potwór (Baśniowe bestie)",
+          "cat": "Łowy",
+          "cost": "—",
+          "action": "Walka z Chimerami, Trollami i Golemami. Nagroda <strong>2 600 zł.</strong>, <strong>+1,5 do +2,5 💖</strong> oraz 65% szansy na trofeum. Odwrót kosztuje 400 zł.",
+          "tip": "Sprawdź słabość potwora w Bestiariuszu, aby zyskać automatycznie +2 siły."
+        },
+        "u3": {
+          "code": "U3",
+          "name": "Smocza jama (Legendarne smoki)",
+          "cat": "Pogromcy smoków",
+          "cost": "—",
+          "action": "Pojedynek z jednym z 20 unikalnych smoków! Nagroda <strong>6 000 zł.</strong>, <strong>+2,5 do +5,0 💖</strong> i gwarantowane trofeum. <strong>Pokonanie 2 smoków = natychmiastowe zwycięstwo!</strong>",
+          "tip": "Taktyczny odwrót kosztuje 800 zł. Przygotuj wysoką Walkę i oręż przed atakiem."
+        },
+        "merchant": {
+          "code": "KUPIEC",
+          "name": "Królewski kupiec",
+          "cat": "Rynek",
+          "cost": "Wg zakupu",
+          "action": "Zakup pakietów ekwipunku (broń, zbroje, suknie, klejnoty) lub sprzedaż przedmiotów (50%) i włości (100%).",
+          "tip": "Kupuj wyposażenie wspierające wybraną przez ciebie drogę do zwycięstwa."
+        },
+        "forge": {
+          "code": "KUŹNIA",
+          "name": "Kuźnia cechowa",
+          "cat": "Rynek",
+          "cost": "Wg broni",
+          "action": "Wyrób i zakup mieczy, toporów, kopii i zbroi. Oręż zwiększa Walkę i wykorzystuje słabości smoków.",
+          "tip": "Kopia działa na smoki wodne, a ciężka zbroja chroni przed ogniem."
+        },
+        "tailor": {
+          "code": "KRAWIEC",
+          "name": "Krawiec dworski",
+          "cat": "Rynek",
+          "cost": "Wg stroju",
+          "action": "Szycie dworskich szat i płaszczy z brokatu, dających premie do Tańca i Charyzmy na Bal dworski.",
+          "tip": "Strój balowy automatycznie dodaje +2 punkty do wyniku na Balu."
+        },
+        "tavern": {
+          "code": "KARCZMA",
+          "name": "Karczma Pod Złotym Kuflem",
+          "cat": "Usługi",
+          "cost": "500 zł.",
+          "action": "Odpoczynek i uczta. Kolejka miodu za 500 zł. zapewnia wprawnym tancerzom (Taniec ≥ 2) uznanie dworu i <strong>+1,0 💖</strong>.",
+          "tip": "Dyplomaci i tancerze zamieniają tu nadmiar złota na cenne serca."
+        },
+        "tax": {
+          "code": "PODATKI",
+          "name": "Poborca podatków",
+          "cat": "Ekonomia",
+          "cost": "—",
+          "action": "Wypłata rent: Wioski (500/900/1 400 zł.), Miasta (1 200 zł.), Zamki (2 500 zł.) oraz inwentarz (owce +120, świnie +150, bydło +200 zł.).",
+          "tip": "Rycerz z Opieką Rycerską (3 Pieczęcie) jest zwolniony ze wszystkich królewskich danin."
+        },
+        "prison": {
+          "code": "LOCH",
+          "name": "Zamkowy loch",
+          "cat": "Kara",
+          "cost": "Kaucja 1 000 zł.",
+          "action": "Uwięzienie na 1 turę. Wyjście po wpłacie 1 000 zł. kaucji, wyrzuceniu 6 oczek lub zagraniu zwoju <strong>Królewska amnestia</strong>.",
+          "tip": "Zwój Królewskiej amnestii uwalnia natychmiast bez straty tury i złota."
+        },
+        "hospital": {
+          "code": "LAZARET",
+          "name": "Królewski lazaret",
+          "cat": "Leczenie",
+          "cost": "1 000 zł.",
+          "action": "Powrót do zdrowia po ranach. Eliksir za 1 000 zł. trwale podnosi Walkę o +1 (gdy < 2) i daje <strong>+0,5 💖 za odwagę</strong> oraz ochronę.",
+          "tip": "Posiadacze Opieki Rycerskiej leczeni są całkowicie za darmo."
+        },
+        "jester": {
+          "code": "BŁAZEN",
+          "name": "Dworski Kuglarz & Błazen",
+          "cat": "Specjalne",
+          "cost": "2 000 zł. (Błazen)",
+          "action": "Dworska rozrywka. Kuglarz układa kpiącą balladę o rywalach; Błazen nagradza tancerzy kwotą <strong>+200 zł. × poziom Tańca</strong>.",
+          "tip": "Wysoki Taniec zamienia wizytę u Błazna w hojną pensję królewską."
+        },
+        "chance": {
+          "code": "SZANSA",
+          "name": "Szansa & Królewski Dar",
+          "cat": "Los",
+          "cost": "—",
+          "action": "Dobranie karty losu z talii: dotacje, wyzwania, rozbójnicy, próby jazdy oraz <strong>zwoje taktyczne do torby rycerza</strong>.",
+          "tip": "Schowaj zwoje w torbie (limit 3) i użyj ich w kluczowym momencie tury."
+        }
+      }
     },
     "board_bar": {
       "back_landing": "🏰 ← Wróć do strony głównej",
@@ -579,7 +856,8 @@ window.PRS_I18N.pl = {
       "modal_subtitle": "Oficjalny dokument królewski z pieczęcią i podpisem kanclerza",
       "close_title": "Zamknij diplom",
       "behalf_of": "W imieniu korony i dworu:",
-      "chancellor_title": "Najwyższy Kanclerz Królestwa"
+      "chancellor_title": "Najwyższy Kanclerz Królestwa",
+      "download_toast": "💾 Królewski Dyplom Zwycięzcy został pobrany na Twoje urządzenie!"
     },
     "online_role": {
       "free_play": "🛋️ Graj bez blokady (Wszyscy gracze / Hot-Seat)"
@@ -612,7 +890,24 @@ window.PRS_I18N.pl = {
       "title": "Przewodnik po grze: Serce Księżniczki",
       "subtitle": "Krok po kroku do czci, bogactwa i ręki księżniczki",
       "prev_btn": "← Poprzedni",
-      "next_btn": "Dalej →"
+      "next_btn": "Dalej →",
+      "step1_badge": "Krok 1 z 4 • Podstawowa zasada",
+      "step1_title": "Poruszanie się po królestwie i zakup majątków",
+      "step1_desc": "Rzucasz kością (1–6) i wędrujesz po planszy. Gdy staniesz na wolnej <strong>Wsi</strong>, <strong>Mieście</strong>, <strong>Zamku</strong> lub <strong>Warsztacie</strong>, możesz kupić majątek, pobierać myto od rywali i otrzymywać stałe podatki.",
+      "step1_tip": "💡 Wskazówka dla początkujących: Wsie i zamki w pierwszej połowie gry zapewniają stały dopływ złota na ekwipunek i polowania.",
+      "step2_badge": "Krok 2 z 4 • Zwierzęta i Miłość",
+      "step2_title": "Szlachecka hodowla i Serca Księżniczki",
+      "step2_desc": "Na polach <strong>Koni (K)</strong>, <strong>Psów (P)</strong> i <strong>Sokołów (S)</strong> kupujesz szlachetne zwierzęta z zestawów 1–14. Ukompletowanie pełnej trójki jednego zestawu (K+P+S) daje dodatkowe <strong>+1 💖 Serce Księżniczki</strong> oraz silniejszy atak!",
+      "step2_tip": "💡 Wskazówka dla początkujących: Koń odblokowuje ruch Galopem (2d6), a psy i sokoły pomagają w zadaniach łowieckich T1–T3.",
+      "step3_badge": "Krok 3 z 4 • Rozwój feudalny",
+      "step3_title": "Ulepszanie siedzib, pastwiska i zbrojownia",
+      "step3_desc": "Własne <strong>Wsie</strong> możesz ulepszyć do poziomu ⭐3 (wyższy podatek i myto). Przy Miastach i Zamkach budujesz <strong>Pastwiska</strong> dla owiec, świń i bydła. U Kowala lub w Zbrojowni kupujesz <strong>broń, zbroje i klejnoty</strong>.",
+      "step3_tip": "💡 Wskazówka dla początkujących: Bydło hodowlane i ulepszone wsie przy wizycie Poborcy Podatków (VD) sfinansują nowy ekwipunek.",
+      "step4_badge": "Krok 4 z 4 • Wyprawy i Trofea",
+      "step4_title": "Zadania bojowe, święta i droga do zwycięstwa",
+      "step4_desc": "Pokonuj <strong>Zwierzynę (T1)</strong>, <strong>Potwory (T2)</strong> i <strong>Smoki (T3)</strong>, by zdobyć złoto, trofea i cenne 💖 Serca Księżniczki. Zwycięża ten, kto jako pierwszy zbierze wymaganą liczbę serc i dotrze do <strong>Zamku Królewskiego</strong>!",
+      "step4_tip": "💡 <em>Złota zasada rycerza:</em> Sprawdzaj słabości potworów i smoków — dobrze dobrany pies, sokół, włócznia czy eliksir odmienią każdą walkę!",
+      "finish_btn": "Rozumiem, ruszajmy do gry! 🎲"
     },
     "knight_duel_default_title": "Rycerski pojedynek honoru",
     "knight_duel_default_sub": "Wynik bezpośredniego pojedynku na polu",
@@ -740,7 +1035,262 @@ window.PRS_I18N.pl = {
     "armory_equipped": "Założone",
     "armory_owned": "W posiadaniu",
     "armory_req_virtue": "Wymaga cnoty: {virtue}",
-    "cheatsheet_subtitle": "Zasady gry, cnoty rycerskie, walka, hodowla zwierząt i ekonomia królestwa"
+    "cheatsheet_subtitle": "Zasady gry, cnoty rycerskie, walka, hodowla zwierząt i ekonomia królestwa",
+    "card_preview": {
+      "default_title": "Szczegóły karty",
+      "weakness_usable": "🎯 <strong>Słabość / Można użyć:</strong> ",
+      "item_tier": "Przedmiot {tier}",
+      "rare_price": "Rzadki relikt",
+      "item_default_desc": "Ekwipunek lub klejnot dworski królewskiego rycerza.",
+      "knight_slot": "<strong>Slot rycerza:</strong> ",
+      "slot_universal": "Uniwersalny",
+      "cat_positive": "✨ Łaska dworu (+)",
+      "cat_negative": "⛈️ Zły los (-)",
+      "cat_challenge": "⚖️ Próba cnoty (!)",
+      "rated_virtues": "⚔️ <strong>Oceniane cnoty:</strong> ",
+      "winner_prizes": "💰 <strong>Nagrody dla zwycięzców:</strong> ",
+      "fest_tournament": {
+        "title": "⚔️ Królewski Turniej",
+        "desc": "Rycerze ścierają się w turnieju na kopie. Wymaga zbroi i ducha walki.",
+        "virtues": "Walka + Jazda konna + Rzut kością",
+        "prizes": "1. miejsce: 2 000 zł • 2. miejsce: 1 000 zł • 3. miejsce: 500 zł"
+      },
+      "fest_ball": {
+        "title": "💃 Bal Dworski",
+        "desc": "Uroczysty bal w sali królewskiej na oczach samej Księżniczki i całego dworu.",
+        "virtues": "Taniec + Charyzma + Rzut kością",
+        "prizes": "1. miejsce: 1 800 zł • 2. miejsce: 900 zł • 3. miejsce: 450 zł"
+      },
+      "fest_race": {
+        "title": "🏇 Królewski Wyścig Konny",
+        "desc": "Ekscytujący wyścig najszybszych jeźdźców i szlachetnych rumaków w królestwie.",
+        "virtues": "Jazda konna + Walka + Rzut kością",
+        "prizes": "1. miejsce: 1 600 zł • 2. miejsce: 800 zł • 3. miejsce: 400 zł"
+      },
+      "fest_default": {
+        "title": "🎪 Królewskie Święto",
+        "desc": "Uroczyste zawody w obecności dworu królewskiego.",
+        "virtues": "Cnoty rycerza + Rzut kością",
+        "prizes": "Złoto i prestiż dla trzech najlepszych"
+      }
+    },
+    "chance_modal": {
+      "seal_title": "Pieczęć Królewskiego Losu",
+      "seal_desc": "Na rozdrożu dogonił Cię królewski posłaniec z zapieczętowanym listem. Złam pieczęć, aby poznać wyrok losu.",
+      "seal_btn": "✉️ Złam pieczęć losu!",
+      "card_badge": "KARTA SZANSY",
+      "dilemma_label": "⚔️ Wybór na miejscu",
+      "scroll_hint": "📜 Możesz użyć tego pomyślnego zwoju od razu albo schować go do torby na bardziej odpowiednią chwilę.",
+      "btn_store": "🎒 Schowaj do torby ({count}/{max})",
+      "bag_full": "🎒 Torba jest pełna ({count}/{max})",
+      "btn_use_now": "⚡ Użyj teraz",
+      "btn_end_turn": "Przyjmij los i zakończ turę ▶",
+      "scroll_stored_toast": "🎒 Zwój „{title}” został schowany do Twojej torby rycerskiej.",
+      "scroll_activated_toast": "⚡ Użyto zwoju „{title}”!"
+    },
+    "festival_modal": {
+      "tournament": {
+        "title": "⚔️ KRÓLEWSKI TURNIEJ",
+        "sub": "Królewski turniej rycerski na kopie oraz w walce wręcz.",
+        "req": "Udział wymaga co najmniej 1 broni/zbroi lub własnego konia.",
+        "formula": "Walka + Jazda konna + Premia za pełną zbroję + Rzut kością",
+        "prizes": "🥇 2 000 zł • 🥈 1 000 zł • 🥉 500 zł"
+      },
+      "ball": {
+        "title": "💃 BAL DWORSKI",
+        "sub": "Wspaniały bal na dworze królewskim pełen muzyki, elegancji i etykiety.",
+        "req": "Piękny strój dworski albo podstawowa Charyzma lub Taniec co najmniej 3.",
+        "formula": "Taniec + Charyzma + Premia za strój + Rzut kością",
+        "prizes": "🥇 1 800 zł • 🥈 900 zł • 🥉 450 zł"
+      },
+      "race": {
+        "title": "🏇 WYŚCIG KONNY",
+        "sub": "Królewska gonitwa o miano najszybszego jeźdźca i najlepszego rumaka w królestwie.",
+        "req": "Udział wymaga posiadania co najmniej jednego konia.",
+        "formula": "Jazda konna + Walka + Liczba koni + Rzut kością",
+        "prizes": "🥇 1 600 zł • 🥈 800 zł • 🥉 400 zł"
+      },
+      "default": {
+        "title": "🎪 KRÓLEWSKIE ŚWIĘTO",
+        "sub": "Uroczyste zawody z udziałem czołowych rycerzy królestwa.",
+        "req": "Spełnienie wymogów królewskich zawodów.",
+        "formula": "Wybrane cnoty + Rzut kością",
+        "prizes": "Nagrody w złocie dla trzech najlepszych"
+      },
+      "bonus_set_tag": "⚔️ +3 pełna zbroja",
+      "bonus_dress_tag": "👗 +3 strój dworski",
+      "bonus_horses": "🐎 +{val} konie",
+      "bonus_base": "Podstawa {base}",
+      "reason_tournament": "Brak zbroi, broni lub konia",
+      "reason_ball": "Brak stroju, charyzmy i tańca (min. 3)",
+      "reason_race": "Nie posiada żadnego konia",
+      "label_req": "<strong>Warunek udziału:</strong>",
+      "label_formula": "<strong>Punktacja:</strong>",
+      "label_prizes": "<strong>Nagrody:</strong>",
+      "cancelled_title": "Święto odwołane (za mało uczestników)",
+      "cancelled_desc": "Zakwalifikowało się zaledwie <strong>{count}</strong> rycerzy. Ponieważ zawody wymagają co najmniej 2 uczestników, dwór docenia gotowość organizatora: <strong>{organizer}</strong>.",
+      "cancelled_hearts": "💖 +0.5 Serca Księżniczki dla organizatora za gotowość",
+      "btn_accept_gift": "👑 Przyjmij uznanie dworu i kontynuuj",
+      "qualified_header": "⚔️ Zakwalifikowani uczestnicy ({count})",
+      "host_badge": "👑 Gospodarz",
+      "ready_badge": "Gotowy",
+      "spectators_header": "👀 Tylko na widowni (brak kwalifikacji)",
+      "btn_start_contest": "🎺 Rozpocznij królewskie zawody i rzuć kością! 🎲",
+      "ceremony_title": "WYNIKI KRÓLEWSKICH ZAWODÓW",
+      "ceremony_sub": "Herold ogłosił końcową klasyfikację na oczach Księżniczki.",
+      "medal_1": "🥇 1. miejsce",
+      "medal_2": "🥈 2. miejsce",
+      "medal_3": "🥉 3. miejsce",
+      "medal_nth": "{place}. miejsce",
+      "roll_score_line": "Rzut kością: <strong>🎲 {roll}</strong> • Łączny wynik: <strong>{score}</strong>",
+      "points_badge": "{score} pkt",
+      "btn_continue_victory": "🏆 Odbierz nagrody i kontynuuj ▶"
+    },
+    "armory_view": {
+      "knight_label": "⚔️ Rycerz:",
+      "purse_label": "Sakwa:",
+      "status_can_shop": "🏰 Jesteś u Kowala / na targu — możesz kupować!",
+      "status_at_merchant": "🛒 Stoisz u Kupca!",
+      "status_browse": "📜 Przegląd katalogu (zakup możliwy u Kowala/Kupca)",
+      "sell_rate_label": "⚖️ Kurs skupu:",
+      "sell_rate_merchant": "Stoisz na targu! Skup ekwipunku <strong>{itemPct}%</strong>, majątków <strong>{bldPct}%</strong> (wraz z ulepszeniami i pastwiskami).",
+      "sell_rate_road": "W trasie poza targiem awaryjny skup wynosi <strong>{itemPct}%</strong> za ekwipunek i <strong>{bldPct}%</strong> za majątki.",
+      "sell_empty": "Nie masz żadnego ekwipunku ani majątków na sprzedaż.",
+      "unknown_item": "Nieznany przedmiot",
+      "tier_short": "Poz. {tier}",
+      "btn_sell_item": "Sprzedaj przedmiot",
+      "estate_badge": "Majątek",
+      "invested_total": "Łącznie zainwestowano: {val}",
+      "btn_sell_node": "Sprzedaj posiadłość",
+      "tier_upper": "POZIOM {tier}",
+      "pack_1_name": "Podstawowy pakiet (Rzeczy 1)",
+      "pack_1_desc": "Losuje losową kartę z talii RZECZY 1 (podstawowa broń, zbroja lub klejnoty).",
+      "pack_2_name": "Pakiet rycerski (Rzeczy 2)",
+      "pack_2_desc": "Losuje losową kartę z talii RZECZY 2 (zbroja płytowa, ostre miecze, brokat).",
+      "pack_3_name": "Pakiet królewski (Rzeczy 3)",
+      "pack_3_desc": "Losuje losową legendarną kartę z talii RZECZY 3 (Zabójcy Smoków i korony).",
+      "btn_merchant_only": "🔒 Tylko u Kupca",
+      "btn_no_gold": "🪙 Za mało złota",
+      "btn_buy_pack": "🎁 Losuj za {price}",
+      "pastures_title": "🌾 Pastwiska i Zwierzęta Hodowlane:",
+      "livestock_tax_gain": "Zysk z podatków VD: {val}",
+      "livestock_capacity": "Zapełnienie pastwisk: <strong>{count} / {cap}</strong> szt. (🐄 Bydło: {cattle} • 🐑 Owce: {sheep} • 🐖 Świnie: {pigs})",
+      "livestock_hint": "Pastwiska budujesz w swoich Miastach i Zamkach. Zwierzęta można kupić w stajniach na mapie, na targu lub u Kupca.",
+      "badge_livestock": "Hodowla",
+      "slot_animal": "Zwierzę",
+      "sheep_name": "Stado owiec",
+      "sheep_desc": "Szlachetne stado wełniane. Zwiększa dochód z podatków VD o +{tax} oraz myto siedziby o +{rent}.",
+      "pigs_name": "Stado świń",
+      "pigs_desc": "Dochodowa hodowla na królewskie uczty. Dodaje +{tax} do podatków VD i +{rent} do myta.",
+      "cattle_name": "Stado bydła",
+      "cattle_desc": "Najcenniejsze stado hodowlane w królestwie. Przynosi +{tax} do podatków VD i +{rent} do myta.",
+      "chip_per_tax": "+{val} / podatek",
+      "chip_per_rent": "+{val} / myto",
+      "btn_no_pastures": "⛔ Brak pastwisk",
+      "btn_no_pastures_title": "Najpierw zbuduj pastwisko przy swoim Mieście lub Zamku.",
+      "btn_pastures_full": "⛔ Pastwiska pełne",
+      "btn_pastures_full_title": "Pojemność pastwisk jest pełna; zbuduj kolejne.",
+      "btn_at_merchant_stables": "🔒 Tylko u Kupca / Stajni",
+      "btn_at_merchant_stables_title": "Zwierzęta hodowlane można kupić na targu, u Kupca lub w stajniach.",
+      "btn_low_gold": "🪙 Za mało złota",
+      "btn_buy_animal": "{icon} Kup stado",
+      "btn_owned": "✅ Posiadane",
+      "btn_market_only": "🔒 Tylko na targu",
+      "btn_buy_item": "🛒 Kup ekwipunek"
+    },
+    "quest_duel": {
+      "tier_u1": "T1 • Polowanie na zwierzynę",
+      "tier_u2": "T2 • Próba Honoru",
+      "tier_u3": "T3 • Smocze Leże",
+      "w_dogs": "Psy myśliwskie (+2)",
+      "w_falcon": "Sokoły łowieckie (+2)",
+      "w_falcons": "Sokoły / Kusze (+2)",
+      "w_horse": "Własny koń (+2)",
+      "w_animals": "Zwierzęta hodowlane K/P/S (+2)",
+      "w_animals_and_spear": "Zwierzęta i długa włócznia (+2)",
+      "w_spear": "Długa włócznia / Pika (+2)",
+      "w_armor": "Zbroja płytowa / Tarcza (+2)",
+      "w_water_armor": "Wodna zbroja / Tarcza (+2)",
+      "w_fire": "Ognista broń / Magia (+2)",
+      "w_ice": "Lodowe ostrze / Ochrona (+2)",
+      "w_elixir": "Eliksir alchemiczny (+2)",
+      "w_dance": "Taniec i zwinność (+2)",
+      "w_charisma": "Wysoka charyzma (+2)",
+      "w_light": "Światło i srebrne ostrze (+2)",
+      "w_crystal": "Broń przebijająca / Włócznia (+2)",
+      "w_undead": "Srebro / Święcona zbroja (+2)",
+      "w_holy": "Święta relikwia (+2)",
+      "w_dragon_slayer": "Zabójca Smoków / Sprzęt T3 (+2)",
+      "w_mastery": "Wysokie mistrzostwo walki (+2)",
+      "w_default": "Przewaga bojowa",
+      "possible_trophy": "Możliwe trofeum: {name}",
+      "trophy_bonus_slot": "Premia do 5. slotu: {bonus}",
+      "flip_title": "Odwróć kartę, aby poznać szczegóły wyprawy!",
+      "flip_btn": "🃏 Odwróć kartę!",
+      "weakness_label": "Słabość / Przydatny ekwipunek:",
+      "weakness_exploited_title": "Wykorzystano słabość! (+2 do siły)",
+      "weakness_beast_title": "Możesz wykupić zwierzę!",
+      "weakness_locked_hint": "Nie posiadasz wymaganego przedmiotu ani zwierzęcia — ta słabość nie działa.",
+      "static_power": "Bazowa siła rycerza",
+      "part_horse": "Koń: +{val}",
+      "part_beasts": "Zwierzęta: +{val}",
+      "part_tactic": "Taktyka: {val}",
+      "part_weakness": "Słabość: +{val}",
+      "part_stance": "Postawa: {val}",
+      "difficulty_small": "Trudność",
+      "needed_roll_label": "Wymagany rzut kością:",
+      "impossible_without_roll": "Nieosiągalne (min. rzut > 6)",
+      "win_chance_label": "Szansa powodzenia:",
+      "stance_header": "⚔️ Wybierz postawę bojową rycerza:",
+      "stance_aggressive_title": "Agresywne natarcie",
+      "stance_aggressive_badge": "+2 Siła | Ryzyko",
+      "stance_aggressive_desc": "Dodaje +2 do siły walki, ale podwaja karę w złocie przy porażce.",
+      "stance_tactical_title": "Taktyczne skupienie",
+      "stance_tactical_badge": "Zrównoważona",
+      "stance_tactical_desc": "Klasyczny styl rycerski bez kar i dodatkowego ryzyka straty.",
+      "stance_defensive_title": "Ostrożna garda",
+      "stance_defensive_badge": "-1 Siła | Bezpiecznie",
+      "stance_defensive_desc": "Zmniejsza siłę o -1, ale chroni przed opłatą za leczenie w szpitalu po porażce.",
+      "tactic_header": "🛡️ Przygotowanie i taktyka przed walką:",
+      "tactic_normal_name": "Standardowe starcie",
+      "tactic_normal_desc": "Walka z obecnym ekwipunkiem bez dodatkowych kosztów.",
+      "tactic_charge_name": "Szarża konna (Koń)",
+      "tactic_charge_desc": "Wykorzystujesz impet swoich koni (+2 do siły ataku).",
+      "tactic_hounds_name": "Wypuścić psy i sokoły",
+      "tactic_hounds_desc": "Zwierzęta myśliwskie otaczają wroga (+2 siły, w T1 aż +3!).",
+      "tactic_elixir_name": "Smoczy eliksir ({price})",
+      "tactic_elixir_desc": "Kupiony eliksir alchemiczny: daje +3 do siły i chroni przed karą za porażkę.",
+      "btn_roll_action": "⚔️ Ruszyć do walki i rzucić kością! 🎲",
+      "rolling_btn": "🎲 Kość się toczy...",
+      "rerolling_btn": "🎲 Ponowny rzut...",
+      "animal_fallback": "zwierzę",
+      "buyout_toast": "🐾 Wykupiono „{name}” z zastawu za {price}!",
+      "buyout_pawn_toast": "🐾 Zdobyto kartę zastawu „{name}”! Możesz ją później wykupić.",
+      "ceremony_win_banner": "🏆 CHWALEBNE ZWYCIĘSTWO W WALCE!",
+      "ceremony_win_sub": "{badge} • Bohater <strong>{player}</strong> pokonał: <strong>{quest}</strong>!",
+      "ceremony_roll_stats": "Rzut kością: <strong>🎲 {roll}</strong> • Łączna siła: <strong>{power}</strong> (vs. {diff})",
+      "ceremony_stance_label": "Postawa:",
+      "ceremony_tactic_label": "Taktyka:",
+      "ceremony_weakness_win": "🎯 Wykorzystana słabość (+2): {reason}",
+      "ceremony_trophy_won": "🏅 Nowe trofeum w kolekcji: {name}",
+      "ceremony_trophy_default_desc": "Rzadkie trofeum łowieckie lub wojenne podnoszące prestiż rycerza.",
+      "ceremony_trophy_auto_equipped": "✅ Automatycznie założono w 5. slocie (Trofeum)",
+      "ceremony_btn_equip_trophy": "🎖️ Załóż to trofeum teraz",
+      "ceremony_loot_found": "💎 Znaleziony łup: {item}",
+      "ceremony_win_continue": "⚔️ Odbierz nagrodę i kontynuuj ▶",
+      "ceremony_loss_banner": "💥 ODWRÓT Z POLA BITWY",
+      "ceremony_loss_sub": "Starcie z <strong>{quest}</strong> zakończyło się niepowodzeniem. Rzut: <strong>🎲 {roll}</strong> • Siła: <strong>{power}</strong> (wymagane {diff}).",
+      "ceremony_weakness_loss": "🎯 Słabość ({reason}) dała +2, lecz wciąż zabrakło niewiele.",
+      "reroll_title": "🍀 Szansa na odwrócenie losu (Przerzut taktyczny)!",
+      "reroll_desc": "Twój ekwipunek i taktyka pozwalają na ponowny rzut kością do celu {diff}.",
+      "reroll_btn": "🎲 Rzuć kością ponownie!",
+      "loss_saved_elixir": "🧪 Smoczy eliksir złagodził skutki porażki — uniknąłeś kary!",
+      "loss_u1": "🌿 Zwierzyna uciekła w zarośla. Rycerz odniósł lekkie rany.",
+      "loss_hospital": "🏥 Zostałeś przewieziony do Szpitala Królewskiego na rekonwalescencję.",
+      "loss_retreat_continue": "🩹 Wycofaj się i zakończ turę ▶",
+      "trophy_equipped_box": "✅ Trofeum założone w 5. slocie rycerza!",
+      "trophy_equipped_toast": "🎖️ Trofeum zostało założone!"
+    }
   },
   "engine": {
     "start_title": "👑 Królewska fanfara trębaczy! Gra „Serce Księżniczki” się rozpoczyna.",
@@ -1862,7 +2412,11 @@ window.PRS_I18N.pl = {
     "hearts_count": "serc",
     "saved": "ZAPISANO",
     "stat_combat": "⚔️ Walka",
-    "stat_charisma": "✨ Charyzma"
+    "stat_charisma": "✨ Charyzma",
+    "gold_short": "zł.",
+    "guest": "Gość",
+    "hearts_singular": "Serce",
+    "hearts_singular_princezna": "Serce Księżniczki"
   },
   "animals": {
     "horse": "Koń",
@@ -2035,7 +2589,29 @@ window.PRS_I18N.pl = {
     "text_festival_invite": "Królewski festyn w pełnym toku! Wykorzystaj swoje talenty, aby zdobyć Serce księżniczki.",
     "text_tax_warning": "Poborca podatków odbiera dziesięcinę od rycerzy bez ziemi i wypłaca zyski właścicielom majątków.",
     "text_hospital_care": "Królewski lazaret opatrzy twoje rany i przywróci siły do kolejnych bitew.",
-    "text_prison_sentence": "Królewska wieża więzienna! Odsiedź wyrok, zapłać kaucję lub spróbuj szczęśliwego rzutu."
+    "text_prison_sentence": "Królewska wieża więzienna! Odsiedź wyrok, zapłać kaucję lub spróbuj szczęśliwego rzutu.",
+    "eval_animal_own": "Twoje własne zwierzę (zestaw nr {setId}).",
+    "eval_animal_rival": "Należy do rywala. Postój na nim będzie kosztował czynsz.",
+    "eval_animal_complete": "Kluczowe pole! Zakup skompletuje zestaw nr {setId} (3/3, korona 👑 + 1.5 💖).",
+    "eval_animal_pair": "Zdobędziesz parę (2/3 w zestawie nr {setId}).",
+    "eval_animal_free": "Wolne zwierzę do hodowli (cena {price}).",
+    "eval_town_own": "Twoje miasto z dochodem podatkowym 1 200 zł.",
+    "eval_town_rival": "Miasto rywala. Przynosi mu podatki przy każdym poborze.",
+    "eval_tycoon_goal": "Cel scenariusza Magnat!",
+    "eval_town_free": "Wolne miasto za {price} (+1 200 zł. podatku).",
+    "eval_castle_own": "Twój zamek (+2 500 zł. podatku i +1 Charyzmy).",
+    "eval_castle_rival": "Zamek rywala. Uważaj na wysoki czynsz.",
+    "eval_castle_free": "Wolny zamek za {price} (+2 500 zł. podatku i +1 Charyzmy).",
+    "eval_village_own": "Twoja wioska poziomu {lvl}★. Można ją rozbudować.",
+    "eval_village_rival": "Wioska rywala.",
+    "eval_village_free": "Wolna wioska za {price}. Stabilne źródło podatków.",
+    "eval_slayer_goal": "Cel scenariusza Pogromcy smoków!",
+    "eval_quest_u3": "Niebezpieczna Smocza jama z królewskim skarbem.",
+    "eval_quest_u2": "Leże potwora. Wymaga solidnego uzbrojenia.",
+    "eval_quest_u1": "Leśna zwierzyna. Dobry cel na łatwe łowy z psami lub sokołem.",
+    "eval_virtue_fallback": "Cnota",
+    "eval_master": "Mistrz cnoty ({skill}). Podnosi poziom cechy.",
+    "eval_festival": "Królewskie festyny. Świetne miejsce do zdobycia Serc Księżniczki 💖."
   },
   "pouch": {
     "title": "Torba na pergaminy",
@@ -2538,7 +3114,9 @@ window.PRS_I18N.pl = {
     "calc_and": "i",
     "calc_place_1": "🥇 1. Miejsce (Wysoka szansa na triumf)",
     "calc_place_2": "🥈 2. Miejsce (Czołówka królestwa)",
-    "calc_place_3": "🥉 3. Miejsce (Będzie zacięta walka)"
+    "calc_place_3": "🥉 3. Miejsce (Będzie zacięta walka)",
+    "mode_art_active": "🎨 Malowany (aktywny)",
+    "mode_scheme_active": "📐 Schemat (aktywny)"
   },
   "saves": {
     "last_played": "⚔️ Ostatnia rozpoczęta gra",
@@ -2587,7 +3165,23 @@ window.PRS_I18N.pl = {
     "code_prefix": "Kod: ",
     "default_royal_map": "Królewska plansza",
     "recent_map_prefix": "Plansza: ",
-    "recent_tpl_tiles_suffix": " pól)"
+    "recent_tpl_tiles_suffix": " pól)",
+    "autosave_title": "🟢 Ostatnia rozgrywana wyprawa (Autozapis)",
+    "btn_continue_game": "▶️ Kontynuuj grę",
+    "btn_continue_short": "▶️ Kontynuuj",
+    "btn_delete_save_title": "Usuń ten zapis gry",
+    "empty_active_desc": "Możesz rozpocząć nową wyprawę na jednym z zapisanych szablonów powyżej!",
+    "empty_active_title": "Brak rozpoczętych partii",
+    "empty_saves_btn": "⚡ Rozpocznij nową wyprawę Solo",
+    "empty_saves_desc": "Podczas dowolnej gry (Solo AI, Hot-Seat lub Online) kliknij przycisk <strong>💾 Zapisz grę</strong> na górnym pasku stołu, aby móc ją wczytać w dowolnym momencie.",
+    "empty_saves_title": "Nie masz jeszcze zapisanych wypraw",
+    "goal_prefix": "Cel: ",
+    "saved_boards_header": "Moje zapisane szablony plansz ({count})",
+    "saved_boards_hint": "Rozpocznij nową partię na tym szablonie lub otwórz go w Map Studio",
+    "tpl_chip_edit_title": "Edytuj w Map Studio",
+    "tpl_chip_play_title": "Zagraj na tym szablonie planszy",
+    "tpl_chip_remove_title": "Usuń",
+    "unknown_time": "Nieznany czas"
   },
   "lower_dashboard": {
     "title": "Sala Rycerzy & Królewska Kronika",
@@ -2632,7 +3226,35 @@ window.PRS_I18N.pl = {
     "filter_young": "Młode smoki (5)",
     "filter_elemental": "Smoki żywiołów (9)",
     "filter_boss": "Smoczy bossowie (6)",
-    "tactical_tip": "<strong>Premia taktyczna w walce:</strong> Każda bestia i smok ma w Bestiariuszu opisaną swoją słabość. Jeśli do Areny Walki staniesz z odpowiednim ekwipunkiem, cnotą, żywiołem lub zwierzętami, automatycznie zyskasz w walce <strong>premię +2 do siły bojowej (🎯 Wykorzystana słabość)</strong>!"
+    "tactical_tip": "<strong>Premia taktyczna w walce:</strong> Każda bestia i smok ma w Bestiariuszu opisaną swoją słabość. Jeśli do Areny Walki staniesz z odpowiednim ekwipunkiem, cnotą, żywiołem lub zwierzętami, automatycznie zyskasz w walce <strong>premię +2 do siły bojowej (🎯 Wykorzystana słabość)</strong>!",
+    "tiers": {
+      "u1": "Poziom U1 (Leśna zwierzyna)",
+      "u2_epic": "Poziom U2+ (Mityczny tytan)",
+      "u2": "Poziom U2 (Baśniowy potwór)",
+      "young": "Poziom A (Młody smok)",
+      "elemental": "Poziom B (Smok żywiołów)",
+      "boss": "Poziom C (Legendarny Boss)"
+    },
+    "weaknesses": {
+      "dogs": "Psy myśliwskie odwracają uwagę (+2 siły z psami w hodowli)",
+      "falcon": "Sokół atakuje słabe punkty (+2 siły z sokołem w hodowli)",
+      "falcons": "Sokół myśliwski tropi kryjówkę / odpiera atak z powietrza (+2 siły)",
+      "animals": "Pies i sokół dezorientują wroga w walce (+2 siły przy posiadaniu obu)",
+      "animals_and_spear": "Połączenie konia/psa oraz kopii turniejowej (+2 siły)",
+      "horse": "Szarża konna w pełnym galopie (+2 siły z koniem w hodowli)",
+      "dance": "Można oczarować pełnym gracji tańcem (+2 siły przy Tańcu ≥ 2)",
+      "elixir": "Eliksir uzdrawiający neutralizuje oddech i jad (+2 siły z eliksirem)",
+      "water_armor": "Wodna perła lub solidna zbroja tłumi żar (+2 siły)",
+      "ice": "Lodowa broń osłabia wroga (+2 siły z bronią lub relikwią mrozu)",
+      "fire": "Ogień topi lód, kryształy i sieci (+2 siły z ognistą bronią lub relikwią)",
+      "armor": "Solidna zbroja rycerska ściąga błyskawice i odbija ciosy (+2 siły)",
+      "light": "Święte relikwie rozpraszają mrok i upiory (+2 siły)",
+      "charisma": "Szlachetna charyzma ułagadza rywala (+2 siły przy Charyzmie ≥ 3)",
+      "holy": "Święte relikwie przepędzają nieumarłego i łamią klątwę (+2 siły)",
+      "courage": "Niezłomna wola i odwaga przenika mgłę (+2 siły przy Walce ≥ 3 lub Jeździe ≥ 3)",
+      "mastery": "Próba wszystkich 4 cnót (+2 siły przy wszystkich cnotach ≥ 2)",
+      "spear": "Długa kopia rycerska utrzymuje rywala na bezpieczny dystans (+2 siły)"
+    }
   },
   "castles_gallery": {
     "title": "🏰 Galeria zamków królewskich i rodowych",
@@ -3115,7 +3737,11 @@ window.PRS_I18N.pl = {
       "all_scenarios": "Wszystkie scenariusze możliwe do ukończenia",
       "trios": "trojic zwierząt",
       "branches": "Rozdroża",
-      "tiles": "pól"
+      "tiles": "pól",
+      "tier_prefix": "Poziom",
+      "warn_badge": "Uwagi do scenariuszy",
+      "warn_slayer": "Dla scenariusza Pogromcy Smoków zalecane min. 2× Smok U3",
+      "warn_tycoon": "Dla scenariusza Magnat zalecane 3× Miasto + 1× Zamek"
     },
     "select_options": {
       "shape_auto": "🎲 Według seeda (Automatyczny miks)",
@@ -3156,7 +3782,15 @@ window.PRS_I18N.pl = {
     "start_quest_template_msg": "Rozpoczynasz wyprawę na szablonie: {name}",
     "start_quest_template_confirm": "⚔️ Rozpocznij grę",
     "start_quest_template_cancel": "Wstecz",
-    "default_custom_map_name": "Własna plansza"
+    "default_custom_map_name": "Własna plansza",
+    "animal_level_prefix": "Poziom {lvl}",
+    "animal_price_fmt": "Cena {p1}/{p2}/{p3} {curr}",
+    "animal_summary_badge": "{count} trójek = {tiles} pól",
+    "procedural_route": "Trasa proceduralna",
+    "start_quest_dyn_cancel": "Wróć do gry",
+    "start_quest_dyn_confirm": "⚔️ Rozpocznij grę na tej planszy",
+    "start_quest_dyn_msg": "Rozpoczęcie nowej wyprawy na dynamicznej planszy wymaga restartu partii.\nCzy chcesz zagrać na planszy „{name}” ({count} pól)?",
+    "start_quest_dyn_title": "Rozpoczęcie wyprawy na własnej planszy"
   },
   "settings": {
     "title": "Ustawienia gry i królestwa",
@@ -3287,7 +3921,15 @@ window.PRS_I18N.pl = {
     "toll_label": "Czynsz: {amount} {curr}",
     "estates_header": "🏰 Włości i hodowle ({count} pól):",
     "farming_sub": "🌾 Hodowla: 🐄{cattle} 🐑{sheep} 🐖{pigs}",
-    "no_estates": "🏰 Rycerz nie ma jeszcze włości ani stajni. Kupuj pola w całym królestwie!"
+    "no_estates": "🏰 Rycerz nie ma jeszcze włości ani stajni. Kupuj pola w całym królestwie!",
+    "level_short": "Poz. {lvl}/3",
+    "pill_horses": "Konie: {count}",
+    "pill_dogs": "Psy myśliwskie: {count}",
+    "pill_falcons": "Sokoły: {count}",
+    "pill_villages": "Wioski: {count}",
+    "pill_towns": "Miasta: {count}",
+    "pill_castles": "Zamki: {count}",
+    "pill_crafts": "Rzemiosła cechowe i kuglarze: {count}"
   },
   "decks_row": {
     "header_title": "Królewskie talie kart &amp; Skarbiec",
@@ -3308,14 +3950,96 @@ window.PRS_I18N.pl = {
     "festivals_sub": "Turniej &amp; bal",
     "diff_4_6": "Trudność 4–6",
     "diff_8_10": "Trudność 8–10",
-    "diff_11_17": "Trudność 11–17"
+    "diff_11_17": "Trudność 11–17",
+    "zone": {
+      "default_title": "Talia kart",
+      "btn_preview": "🔍 Podgląd",
+      "btn_detail": "🔍 Szczegóły",
+      "items_header": "Przegląd przedmiotów w talii (kliknij, aby zobaczyć szczegóły):",
+      "veci1_title": "🛡️ Talia RZECZY 1 (Podstawowy ekwipunek)",
+      "veci1_summary": "<strong>Cena pakietu: {price}</strong> | Zawiera {count} podstawowych broni, zbroi i klejnotów dworskich.",
+      "veci1_desc": "Można kupić u Kowala, Kupca lub w zakładce Zbrojownia. Zapewniają premie do Walki (+2 do +3), Jazdy konnej, Tańca i Charyzmy.",
+      "veci2_title": "⚔️ Talia RZECZY 2 (Rycerski ekwipunek)",
+      "veci2_summary": "<strong>Cena pakietu: {price}</strong> | Zawiera {count} elitarnych broni, zbroi płytowych i brokatowych szat.",
+      "veci2_desc": "Niezbędne do walk z potworami T2 i prestiżu na dworze królewskim. Dają łączne premie do cech aż +7.",
+      "veci3_title": "👑 Talia RZECZY 3 (Legendarne relikwie królewskie)",
+      "veci3_summary": "<strong>Cena pakietu: {price}</strong> | Zawiera {count} najpotężniejszych klejnotów i mieczy Zabójców Smoków.",
+      "veci3_desc": "Najrzadsze relikwie królewskie dające aż +13 do łącznych cech, niezbędne do pokonania najpotężniejszych smoków T3.",
+      "u1_title": "🐗 Talia ZWIERZYNA (Zadania T1 - Łowisko)",
+      "u1_summary": "<strong>Trudność: 4–6</strong> | Nagroda: 1 200 – 2 600 {curr} + 0.5–1.5 💖 Serca.",
+      "u1_desc": "Psy myśliwskie i sokoły ułatwiają polowanie. Pokonanie każdego zwierzęcia daje unikalne trofeum łowieckie do 5. slotu ekwipunku.",
+      "u1_list_header": "Lista {count} zwierząt na łowisku (kliknij, aby zobaczyć szczegóły):",
+      "u2_title": "👹 Talia POTWORY (Zadania T2 - Niebezpieczne próby)",
+      "u2_summary": "<strong>Trudność: 8–15</strong> | Nagroda: 3 000 – 12 000 {curr} + 1–5 💖 + Przedmiot ekwipunku.",
+      "u2_desc": "Skalni olbrzymi, wilkołaki, rycerze-rozbójnicy, tytani i czarodzieje. Pokonanie ich przynosi trwałe serca księżniczki i potężną relikwię.",
+      "u2_list_header": "Lista {count} potworów w talii (kliknij, aby zobaczyć szczegóły):",
+      "u3_title": "🐉 Talia SMOKI (Zadania T3 - Smocze leża)",
+      "u3_summary": "<strong>Trudność: 11–17</strong> | Nagroda: 6 000 – 16 000 {curr} + 2.5–6.0 💖 Serc Księżniczki.",
+      "u3_desc": "Królestwu zagraża {count} unikalnych smoków i żmijów. Każdy ma swoją słabość (włócznie, psy, eliksiry, ogień lub mróz) i pozostawia legendarny skarb.",
+      "u3_list_header": "Lista {count} smoków w talii (kliknij, aby zobaczyć szczegóły):",
+      "u3_bestiary_btn": "🐉 Zobacz pełny Smoczy Bestiariusz w zasadach ({count})",
+      "chance_title": "❓ Talia SZANSA (24 karty królewskiego losu)",
+      "chance_summary": "Łącznie {count} autentycznych wydarzeń królewskich.",
+      "chance_desc": "Królewska łaska (+1 💖), zasadzki rozbójników, sonety miłosne, dary od Królowej Matki, naprawy zbroi i skarby na rozdrożach.",
+      "chance_list_header": "Wybór kart losu (kliknij, aby zobaczyć szczegóły):",
+      "chance_pos": "Łaska dworu (+)",
+      "chance_neg": "Nieszczęście (-)",
+      "chance_challenge": "Próba (!)",
+      "fest_title": "🎪 Talia ŚWIĘTA (Królewskie turnieje)",
+      "fest_summary": "Królewski Turniej, Bal Dworski i Wyścig Konny.",
+      "fest_desc": "Gracze porównują swoje cnoty: Turniej (Walka i Jazda), Bal (Taniec i Charyzma), Wyścig (Jazda i Walka). Trzej najlepsi zdobywają nagrody pieniężne do {prize}!",
+      "fest_prize_upto": "do {prize}",
+      "fest_list_header": "Królewskie święta (kliknij, aby zobaczyć szczegóły):"
+    }
   },
   "dice": {
     "click_to_roll": "Kliknij kość, aby rzucić!"
   },
   "achievements": {
     "modal_title": "🏆 Rycerska Galeria Sław &amp; Osiągnięcia",
-    "modal_close": "Zamknij Galerię Sław"
+    "modal_close": "Zamknij Galerię Sław",
+    "badge_first_game_name": "🥉 Pierwszy krok",
+    "badge_first_game_title": "Pierwszy krok",
+    "badge_first_game_desc": "Rozegraj pierwszą partię w królestwie Serca Księżniczki.",
+    "badge_slayer_name": "🐉 Pogromca smoków",
+    "badge_slayer_title": "Pogromca smoków",
+    "badge_slayer_desc": "Pokonaj groźnego smoka w jego niebezpiecznej jamie.",
+    "badge_castle_lord_name": "🏰 Pan zamków",
+    "badge_castle_lord_title": "Pan zamków",
+    "badge_castle_lord_desc": "Wznieś przynajmniej 2 okazałe zamki na swoich włościach.",
+    "badge_breeder_name": "🐎 Wielki hodowca",
+    "badge_breeder_title": "Wielki hodowca",
+    "badge_breeder_desc": "Zdobądź pełny zestaw koni oraz min. 3 stada zwierząt gospodarskich.",
+    "badge_ball_master_name": "💃 Mistrz balów",
+    "badge_ball_master_title": "Mistrz balów",
+    "badge_ball_master_desc": "Zdobądź na Festynach ponad 15 Serc Księżniczki.",
+    "badge_champion_name": "👑 Królewski zwycięzca",
+    "badge_champion_title": "Królewski zwycięzca",
+    "badge_champion_desc": "Wygraj partię i zdobądź rękę księżniczki oraz królewską koronę.",
+    "badge_grandmaster_name": "🌟 Smocza legenda",
+    "badge_grandmaster_title": "Smocza legenda",
+    "badge_grandmaster_desc": "Osiągnij min. 3 sławne zwycięstwa lub pokonaj 3 smoki.",
+    "newly_unlocked_title": "Nowa królewska odznaka",
+    "newly_unlocked_msg": "Gratulacje! Zdobyłeś nową królewską odznakę:<br><br><strong style='color:#fde68a; font-size:1.15rem;'>{names}</strong><br><br>Znajdziesz ją w swojej Rycerskiej Sali Chwały.",
+    "rank_grandmaster": "Smoczy Arcymistrz",
+    "rank_champion": "Rycerz Czempion",
+    "rank_squire": "Honorowy Giermek",
+    "title_label": "Tytuł:",
+    "treasury_label": "Skarbiec:",
+    "stat_games": "Partii",
+    "stat_wins": "Zwycięstw",
+    "stat_dragons": "Smoków",
+    "stat_hearts": "Serc łącznie",
+    "stat_record": "Rekord partii",
+    "tab_badges": "🏆 Królewskie odznaki ({unlocked} / {total})",
+    "tab_history": "📜 Historia wypraw ({count})",
+    "history_empty_title": "Brak zapisanej historii partii",
+    "history_empty_desc": "Rozegraj partię przy stole gry, a twoje wyniki i uroczyste dyplomy trafią tutaj do kroniki królestwa.",
+    "winner_fallback": "Zwycięzca",
+    "rounds_label": "{count} rund",
+    "btn_diploma": "📜 Królewski dyplom",
+    "status_unlocked": "✨ Odblokowano",
+    "status_locked": "🔒 Zablokowano"
   },
   "dialogs": {
     "new_realm": {
@@ -3929,7 +4653,32 @@ window.PRS_I18N.pl = {
   "combat": {
     "intrigue_ballad_success_summary": "Prześmiewcza ballada odniosła sukces! Rywal {name} stracił -{penalty} 💖.",
     "intrigue_ballad_fail_summary": "Prześmiewcza ballada spaliła na panewce. Rywal {name} zdobył +0,25 💖.",
-    "intrigue_customs_summary": "Kontrola celna nałożona na {name} (1 runda bez czynszu)."
+    "intrigue_customs_summary": "Kontrola celna nałożona na {name} (1 runda bez czynszu).",
+    "armor_fallback": "Solidna zbroja",
+    "tactic_normal": "Zwykły atak",
+    "tactic_charge": "🏇 Szarża konna w pełnym galopie (+1 siły)",
+    "tactic_hounds": "🐕 Sfora myśliwska odwróciła uwagę (+1 siły)",
+    "tactic_elixir": "🧪 Eliksir leczniczy z Lazaretu (Ochrona przed Szpitalem)",
+    "stance_tactical": "🎯 Manewr taktyczny",
+    "stance_aggressive": "⚔️ Zaciekły atak (+2 siły, przy przegranej -2 💖 lub 2× kara)",
+    "stance_defensive": "🛡️ Ostrożna obrona (-1 siły, 0 straty serc i bezpieczny odwrót)",
+    "weakness_dogs": "Psy myśliwskie odwróciły uwagę bestii",
+    "weakness_falcon": "Sokół myśliwski wyśledził słabe punkty",
+    "weakness_horse": "Druzgocąca szarża konna przełamała obronę",
+    "weakness_animals": "Wytresowane zwierzęta całkowicie zmyliły smoka",
+    "weakness_animals_spear": "Mistrzowska współpraca wierzchowca i kopii turniejowej",
+    "weakness_spear_item": "Długa {item} utrzymała potwora na bezpieczny dystans",
+    "weakness_spear_skill": "Rycerskie opanowanie kopii konnej i manewrów",
+    "weakness_armor": "{item} odbiła druzgocący cios",
+    "weakness_water_armor": "Pancerz ochronny i wodna perła schłodziły palący żar",
+    "weakness_fire": "Gorące płomienie i żar wulkanu stopiły lodowy pancerz",
+    "weakness_ice": "Mroźny chłód i kryształy lodu ostudziły lawową paszczę",
+    "weakness_elixir": "Eliksir z Lazaretu zneutralizował trujący oddech",
+    "weakness_dance": "Pełen gracji taniec i dworski strój oczarowały smoka",
+    "weakness_charisma": "Szlachetna charyzma rycerza wzruszyła smoka klejnotów",
+    "weakness_courage": "Niezłomna rycerska odwaga przeniknęła mgłę cieni",
+    "weakness_light": "Jaśniejące święte światło relikwii spaliło mrok cieni",
+    "weakness_mastery": "Perfekcyjne opanowanie wszystkich 4 cnót rycerskich (Walka, Jazda, Taniec, Charyzma)"
   },
   "story": {
     "kicker": "📜 Historia królestwa & Cel gry",
@@ -4206,7 +4955,14 @@ window.PRS_I18N.pl = {
       "🐉 Dračí soutěska": "🐉 Smoczy Wąwóz",
       "🐍 Hadovitá magistrála": "🐍 Wężowa Magistrala",
       "👑 Královská rovnováha": "👑 Równowaga Królewska",
-      "🧙‍♂️ Turnaj čtyř mistrů": "🧙‍♂️ Turniej Czterech Mistrzów"
+      "🧙‍♂️ Turnaj čtyř mistrů": "🧙‍♂️ Turniej Czterech Mistrzów",
+      "Sokol 6 (Sokol stěhovavý)": "Sokół 6 (Wędrowny)",
+      "Kůň 13 (Zlatý palomino)": "Koń 13 (Złoty palomino)",
+      "Sokol 13 (Skalní orel)": "Sokół 13 (Orzeł przedni)",
+      "Pes 13 (Severní vlkodav)": "Pies 13 (Wilczarz Północy)",
+      "Kůň 14 (Stínový oř)": "Koń 14 (Rumak Cienia)",
+      "Sokol 14 (Noční raroh)": "Sokół 14 (Nocny Raróg)",
+      "Pes 14 (Hradní chrlič)": "Pies 14 (Zamkowy Gargulec)"
     }
   },
   "beta_games": {

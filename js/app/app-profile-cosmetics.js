@@ -984,7 +984,6 @@
 
         var catalog = window.PRS_PAWNS_CATALOG || [];
         var html = [];
-        var isEn = window.PRS_I18n ? window.PRS_I18n._lang === "en" : false;
         for (var i = 0; i < catalog.length; i++) {
             var pw = catalog[i];
             if (cat !== "all" && pw.category !== cat) continue;
@@ -996,37 +995,37 @@
 
             var catBadge = "";
             if (isPrem) {
-                catBadge = '<span class="pawn-card-badge premium">' + (isEn ? '💎 Premium' : '💎 Prémiová') + '</span>';
+                catBadge = '<span class="pawn-card-badge premium">' + tPawn("wardrobe.badge_premium", null, "💎 Prémiová") + '</span>';
             } else if (isBot) {
-                catBadge = '<span class="pawn-card-badge bot">🤖 PC Bot</span>';
+                catBadge = '<span class="pawn-card-badge bot">' + tPawn("wardrobe.badge_bot", null, "🤖 PC Bot") + '</span>';
             } else {
-                catBadge = '<span class="pawn-card-badge basic">' + (isEn ? '🛡️ Basic' : '🛡️ Základní') + '</span>';
+                catBadge = '<span class="pawn-card-badge basic">' + tPawn("wardrobe.badge_basic", null, "🛡️ Základní") + '</span>';
             }
 
             var actionBtn = "";
             if (isSelected) {
-                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; border-color:#86efac;">' + (isEn ? '✅ Currently Selected' : '✅ Právě zvoleno') + '</button>';
+                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; border-color:#86efac;">' + tPawn("wardrobe.btn_selected", null, "✅ Právě zvoleno") + '</button>';
             } else if (unlocked) {
-                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.selectPawnForSlot(&quot;' + pw.id + '&quot;)">' + (isEn ? '🎭 Select Pawn' : '🎭 Zvolit figurku') + '</button>';
+                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.selectPawnForSlot(&quot;' + pw.id + '&quot;)">' + tPawn("wardrobe.btn_select", null, "🎭 Zvolit figurku") + '</button>';
             } else if (isGuest) {
-                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; opacity:0.85; border-color:rgba(212,175,55,0.4);" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">' + (isEn ? '🔒 For Registered' : '🔒 Pro přihlášené') + '</button>';
+                actionBtn = '<button type="button" class="btn-secondary" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; opacity:0.85; border-color:rgba(212,175,55,0.4);" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">' + tPawn("wardrobe.btn_registered_only", null, "🔒 Pro přihlášené") + '</button>';
             } else {
                 var canAfford = (this.userCredits >= pw.priceCredits);
-                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; ' + (!canAfford ? 'opacity:0.65;' : '') + '" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">' + (isEn ? ('🔓 Unlock (' + pw.priceCredits + ' 💎)') : ('🔓 Odemknout (' + pw.priceCredits + ' 💎)')) + '</button>';
+                actionBtn = '<button type="button" class="btn-gold-lg" style="width:100%; padding:0.35rem 0.5rem; font-size:0.78rem; ' + (!canAfford ? 'opacity:0.65;' : '') + '" onclick="PRS_App.unlockPremiumPawn(&quot;' + pw.id + '&quot;)">' + tPawn("wardrobe.btn_unlock", { price: pw.priceCredits }, "🔓 Odemknout (" + pw.priceCredits + " 💎)") + '</button>';
             }
 
             var statusBadge = "";
             if (unlocked) {
-                statusBadge = '<span style="font-size:0.72rem; color:#86efac;">' + (isEn ? '✓ Unlocked' : '✓ Odemčeno') + '</span>';
+                statusBadge = '<span style="font-size:0.72rem; color:#86efac;">' + tPawn("wardrobe.status_unlocked", null, "✓ Odemčeno") + '</span>';
             } else if (isBot) {
-                statusBadge = '<span style="font-size:0.72rem; color:#9ca3af;">' + (isEn ? '🔒 PC Only' : '🔒 Pouze pro PC') + '</span>';
+                statusBadge = '<span style="font-size:0.72rem; color:#9ca3af;">' + tPawn("wardrobe.status_pc_only", null, "🔒 Pouze pro PC") + '</span>';
             } else {
                 statusBadge = '<span style="font-size:0.74rem; color:#fde047; font-weight:700;">🔒 ' + (pw.priceCredits || 150) + ' 💎</span>';
             }
 
-            var pName = (isEn && pw.nameEn) ? pw.nameEn : pw.name;
-            var pTitle = (isEn && pw.titleEn) ? pw.titleEn : (pw.title || "");
-            var pDesc = (isEn && pw.descEn) ? pw.descEn : (pw.desc || "");
+            var pName = pw.name;
+            var pTitle = pw.title || "";
+            var pDesc = pw.desc || "";
 
             html.push('<div class="pawn-shop-card ' + (isSelected ? 'selected' : '') + ' ' + (isPrem ? 'premium-card' : '') + '" style="border-color:' + (isSelected ? '#22c55e' : (isPrem ? pw.accentColor : 'rgba(212,175,55,0.3)')) + ';">');
             html.push('  <div class="pawn-card-top">' + catBadge + statusBadge + '</div>');
@@ -1220,20 +1219,21 @@
                     try { localStorage.setItem("prs_user", JSON.stringify(self.currentUser)); } catch (e) { }
                 }
                 if (res.stats.newlyUnlocked && res.stats.newlyUnlocked.length > 0) {
+                    var _tAch = window.PRS_I18n ? function (k, p2, d) { return window.PRS_I18n.t(k, p2, d); } : function (k, p2, d) { return d; };
                     var names = {
-                        first_game: "🥉 První krok",
-                        slayer: "🐉 Drakobijce",
-                        castle_lord: "🏰 Pán hradů",
-                        breeder: "🐎 Velkochovatel",
-                        ball_master: "💃 Mistr bálů",
-                        champion: "👑 Královský vítěz",
-                        grandmaster: "🌟 Dračí legenda"
+                        first_game: _tAch("achievements.badge_first_game_name", null, "🥉 První krok"),
+                        slayer: _tAch("achievements.badge_slayer_name", null, "🐉 Drakobijce"),
+                        castle_lord: _tAch("achievements.badge_castle_lord_name", null, "🏰 Pán hradů"),
+                        breeder: _tAch("achievements.badge_breeder_name", null, "🐎 Velkochovatel"),
+                        ball_master: _tAch("achievements.badge_ball_master_name", null, "💃 Mistr bálů"),
+                        champion: _tAch("achievements.badge_champion_name", null, "👑 Královský vítěz"),
+                        grandmaster: _tAch("achievements.badge_grandmaster_name", null, "🌟 Dračí legenda")
                     };
                     var unlNames = res.stats.newlyUnlocked.map(function (k) { return names[k] || k; }).join(", ");
                     if (window.PRS_Audio) window.PRS_Audio.playFanfare();
                     setTimeout(function () {
-                        KiDeskyDialog.alert("Gratulujeme! Získal jsi nový královský odznak:<br><br><strong style='color:#fde68a; font-size:1.15rem;'>" + self.escapeHtml(unlNames) + "</strong><br><br>Najdeš ho ve své Rytířské síni slávy.", {
-                            title: "Nový královský odznak",
+                        KiDeskyDialog.alert(_tAch("achievements.newly_unlocked_msg", { names: self.escapeHtml(unlNames) }, "Gratulujeme! Získal jsi nový královský odznak:<br><br><strong style='color:#fde68a; font-size:1.15rem;'>" + self.escapeHtml(unlNames) + "</strong><br><br>Najdeš ho ve své Rytířské síni slávy."), {
+                            title: _tAch("achievements.newly_unlocked_title", null, "Nový královský odznak"),
                             icon: "🏆",
                             allowHtml: true
                         });
@@ -1361,7 +1361,9 @@
     renderAchievementsModalContent: function () {
         var body = document.getElementById("achievements-modal-body");
         if (!body) return;
-        var u = this.currentUser || { displayName: "Host", role: "Guest", credits: 0 };
+        var tAch = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+        var guestLabel = tAch("common.guest", null, "Host");
+        var u = this.currentUser || { displayName: guestLabel, role: "Guest", credits: 0 };
         var played = u.gamesPlayed || 0;
         var won = u.gamesWon || 0;
         var dragons = u.dragonsSlain || 0;
@@ -1373,13 +1375,13 @@
         } catch (e) { console.warn("[KiDesky] Invalid achievementsJson:", e); }
 
         var badges = [
-            { id: "first_game", icon: "🥉", title: "První krok", desc: "Zahraj svou první partii v království Princeznina srdce." },
-            { id: "slayer", icon: "🐉", title: "Drakobijce", desc: "Skol obávaného draka v jeho nebezpečné sluji." },
-            { id: "castle_lord", icon: "🏰", title: "Pán hradů", desc: "Postav alespoň 2 majestátní hrady na svých panstvích." },
-            { id: "breeder", icon: "🐎", title: "Velkochovatel", desc: "Vlastni kompletní sadu koní a alespoň 3 stáda užitkového dobytka." },
-            { id: "ball_master", icon: "💃", title: "Mistr bálů", desc: "Získej na jedněch Slavnostech přes 15 Princezniných srdcí." },
-            { id: "champion", icon: "👑", title: "Královský vítěz", desc: "Zvítěz v partii a získej ruku princezny i královskou korunu." },
-            { id: "grandmaster", icon: "🌟", title: "Dračí legenda", desc: "Dosáhni alespoň 3 slavných vítězství nebo skol 3 draky." }
+            { id: "first_game", icon: "🥉", title: tAch("achievements.badge_first_game_title", null, "První krok"), desc: tAch("achievements.badge_first_game_desc", null, "Zahraj svou první partii v království Princeznina srdce.") },
+            { id: "slayer", icon: "🐉", title: tAch("achievements.badge_slayer_title", null, "Drakobijce"), desc: tAch("achievements.badge_slayer_desc", null, "Skol obávaného draka v jeho nebezpečné sluji.") },
+            { id: "castle_lord", icon: "🏰", title: tAch("achievements.badge_castle_lord_title", null, "Pán hradů"), desc: tAch("achievements.badge_castle_lord_desc", null, "Postav alespoň 2 majestátní hrady na svých panstvích.") },
+            { id: "breeder", icon: "🐎", title: tAch("achievements.badge_breeder_title", null, "Velkochovatel"), desc: tAch("achievements.badge_breeder_desc", null, "Vlastni kompletní sadu koní a alespoň 3 stáda užitkového dobytka.") },
+            { id: "ball_master", icon: "💃", title: tAch("achievements.badge_ball_master_title", null, "Mistr bálů"), desc: tAch("achievements.badge_ball_master_desc", null, "Získej na jedněch Slavnostech přes 15 Princezniných srdcí.") },
+            { id: "champion", icon: "👑", title: tAch("achievements.badge_champion_title", null, "Královský vítěz"), desc: tAch("achievements.badge_champion_desc", null, "Zvítěz v partii a získej ruku princezny i královskou korunu.") },
+            { id: "grandmaster", icon: "🌟", title: tAch("achievements.badge_grandmaster_title", null, "Dračí legenda"), desc: tAch("achievements.badge_grandmaster_desc", null, "Dosáhni alespoň 3 slavných vítězství nebo skol 3 draky.") }
         ];
 
         var activeTab = this._achievementsSubtab || "badges";
@@ -1388,56 +1390,58 @@
             hist = JSON.parse(localStorage.getItem("prs_game_history") || "[]");
         } catch (e) { }
 
+        var rankLabel = won >= 3 ? tAch("achievements.rank_grandmaster", null, "Dračí velmistr") : (won >= 1 ? tAch("achievements.rank_champion", null, "Rytíř šampion") : tAch("achievements.rank_squire", null, "Čestný panoš"));
         var html = '<div class="achievements-profile-header">' +
             '  <div class="achievements-avatar-badge">' + (u.role === "Admin" ? '👑' : '🛡️') + '</div>' +
             '  <div>' +
-            '    <div style="font-family:\'Cinzel\',serif; font-size:1.25rem; font-weight:700; color:var(--gold-light);">' + this.escapeHtml(u.displayName || u.username || "Host") + '</div>' +
+            '    <div style="font-family:\'Cinzel\',serif; font-size:1.25rem; font-weight:700; color:var(--gold-light);">' + this.escapeHtml(u.displayName || u.username || guestLabel) + '</div>' +
             '    <div style="font-size:0.8rem; color:#94a3b8; display:flex; gap:0.5rem; align-items:center; margin-top:0.15rem;">' +
-            '      <span>Titul: <strong style="color:#fde68a;">' + (won >= 3 ? "Dračí velmistr" : (won >= 1 ? "Rytíř šampion" : "Čestný panoš")) + '</strong></span> • ' +
-            '      <span>Pokladnice: <strong style="color:#38bdf8;">' + (u.credits || 0) + ' 💎</strong></span>' +
+            '      <span>' + tAch("achievements.title_label", null, "Titul:") + ' <strong style="color:#fde68a;">' + rankLabel + '</strong></span> • ' +
+            '      <span>' + tAch("achievements.treasury_label", null, "Pokladnice:") + ' <strong style="color:#38bdf8;">' + (u.credits || 0) + ' 💎</strong></span>' +
             '    </div>' +
             '  </div>' +
             '</div>';
 
         html += '<div class="achievements-stats-grid">' +
-            '  <div class="ach-stat-box"><div class="ach-stat-val">' + played + '</div><div class="ach-stat-lbl">Partií</div></div>' +
-            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#22c55e;">' + won + '</div><div class="ach-stat-lbl">Vítězství</div></div>' +
-            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#f97316;">' + dragons + '</div><div class="ach-stat-lbl">Draků</div></div>' +
-            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#ec4899;">' + (Math.round(hearts * 10) / 10) + '</div><div class="ach-stat-lbl">Srdcí celkem</div></div>' +
-            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#38bdf8;">' + (Math.round(highest * 10) / 10) + '</div><div class="ach-stat-lbl">Rekord partie</div></div>' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val">' + played + '</div><div class="ach-stat-lbl">' + tAch("achievements.stat_games", null, "Partií") + '</div></div>' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#22c55e;">' + won + '</div><div class="ach-stat-lbl">' + tAch("achievements.stat_wins", null, "Vítězství") + '</div></div>' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#f97316;">' + dragons + '</div><div class="ach-stat-lbl">' + tAch("achievements.stat_dragons", null, "Draků") + '</div></div>' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#ec4899;">' + (Math.round(hearts * 10) / 10) + '</div><div class="ach-stat-lbl">' + tAch("achievements.stat_hearts", null, "Srdcí celkem") + '</div></div>' +
+            '  <div class="ach-stat-box"><div class="ach-stat-val" style="color:#38bdf8;">' + (Math.round(highest * 10) / 10) + '</div><div class="ach-stat-lbl">' + tAch("achievements.stat_record", null, "Rekord partie") + '</div></div>' +
             '</div>';
 
         // Přepínač podzáložek: Odznaky vs. Historie výprav
         html += '<div style="display:flex; gap:0.5rem; margin:1rem 0 0.85rem; border-bottom:1px solid rgba(212,175,55,0.25); padding-bottom:0.55rem;">' +
-            '  <button type="button" class="rules-subnav-btn ' + (activeTab === "badges" ? "active" : "") + '" onclick="PRS_App.setAchievementsSubtab(\'badges\')" style="padding:0.35rem 0.85rem; font-size:0.84rem;">🏆 Královské odznaky (' + achList.length + ' / ' + badges.length + ')</button>' +
-            '  <button type="button" class="rules-subnav-btn ' + (activeTab === "history" ? "active" : "") + '" onclick="PRS_App.setAchievementsSubtab(\'history\')" style="padding:0.35rem 0.85rem; font-size:0.84rem;">📜 Historie výprav (' + hist.length + ')</button>' +
+            '  <button type="button" class="rules-subnav-btn ' + (activeTab === "badges" ? "active" : "") + '" onclick="PRS_App.setAchievementsSubtab(\'badges\')" style="padding:0.35rem 0.85rem; font-size:0.84rem;">' + tAch("achievements.tab_badges", { unlocked: achList.length, total: badges.length }, "🏆 Královské odznaky (" + achList.length + " / " + badges.length + ")") + '</button>' +
+            '  <button type="button" class="rules-subnav-btn ' + (activeTab === "history" ? "active" : "") + '" onclick="PRS_App.setAchievementsSubtab(\'history\')" style="padding:0.35rem 0.85rem; font-size:0.84rem;">' + tAch("achievements.tab_history", { count: hist.length }, "📜 Historie výprav (" + hist.length + ")") + '</button>' +
             '</div>';
 
         if (activeTab === "history") {
             if (hist.length === 0) {
                 html += '<div style="text-align:center; padding:2rem 1rem; color:var(--text-muted); font-size:0.9rem; background:rgba(0,0,0,0.25); border-radius:8px; border:1px dashed rgba(212,175,55,0.2);">' +
                     '  <div style="font-size:2rem; margin-bottom:0.4rem;">📜</div>' +
-                    '  <strong style="color:var(--gold-light);">Žádná zaznamenaná historie partií</strong>' +
-                    '  <div style="margin-top:0.25rem;">Odehraj partii na herním stole a tvoje výsledky i slavnostní diplomy se uloží sem do kroniky království.</div>' +
+                    '  <strong style="color:var(--gold-light);">' + tAch("achievements.history_empty_title", null, "Žádná zaznamenaná historie partií") + '</strong>' +
+                    '  <div style="margin-top:0.25rem;">' + tAch("achievements.history_empty_desc", null, "Odehraj partii na herním stole a tvoje výsledky i slavnostní diplomy se uloží sem do kroniky království.") + '</div>' +
                     '</div>';
             } else {
                 html += '<div style="display:flex; flex-direction:column; gap:0.75rem; max-height:48vh; overflow-y:auto; padding-right:0.35rem;">';
                 for (var hi = hist.length - 1; hi >= 0; hi--) {
                     var hItem = hist[hi];
+                    var hBoard = this.formatBoardDisplayName ? this.formatBoardDisplayName(hItem.boardName || "") : (hItem.boardName || "");
                     html += '<div style="background:rgba(0,0,0,0.4); border:1px solid rgba(212,175,55,0.25); border-radius:8px; padding:0.75rem 0.95rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">' +
                         '  <div>' +
                         '    <div style="display:flex; align-items:center; gap:0.45rem;">' +
                         '      <span style="font-size:1.1rem;">👑</span>' +
-                        '      <strong style="color:' + (hItem.winnerColor || 'var(--gold-light)') + '; font-size:0.96rem;">' + (hItem.winnerBadge || '🛡️') + ' ' + this.escapeHtml(hItem.winnerName || 'Vítěz') + '</strong>' +
+                        '      <strong style="color:' + (hItem.winnerColor || 'var(--gold-light)') + '; font-size:0.96rem;">' + (hItem.winnerBadge || '🛡️') + ' ' + this.escapeHtml(hItem.winnerName || tAch("achievements.winner_fallback", null, "Vítěz")) + '</strong>' +
                         '      <span style="font-size:0.82rem; color:#ec4899; font-weight:700;">' + hItem.winnerHearts + ' 💖</span>' +
                         '    </div>' +
                         '    <div style="font-size:0.78rem; color:#94a3b8; margin-top:0.2rem;">' +
                         '      <span>📅 ' + this.escapeHtml(hItem.date) + '</span> • ' +
-                        '      <span>🗺️ ' + this.escapeHtml(hItem.boardName) + '</span> • ' +
-                        '      <span>⏳ ' + hItem.roundNumber + ' kol</span>' +
+                        '      <span>🗺️ ' + this.escapeHtml(hBoard) + '</span> • ' +
+                        '      <span>⏳ ' + tAch("achievements.rounds_label", { count: hItem.roundNumber }, hItem.roundNumber + " kol") + '</span>' +
                         '    </div>' +
                         '  </div>' +
-                        '  <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.65rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.openWinnerDiplomaModal(' + hi + ')">📜 Královský diplom</button>' +
+                        '  <button type="button" class="btn-secondary" style="font-size:0.78rem; padding:0.3rem 0.65rem; border-color:var(--gold); color:var(--gold-light);" onclick="PRS_App.openWinnerDiplomaModal(' + hi + ')">' + tAch("achievements.btn_diploma", null, "📜 Královský diplom") + '</button>' +
                         '</div>';
                 }
                 html += '</div>';
@@ -1452,7 +1456,7 @@
                     '  <div style="flex:1;">' +
                     '    <div class="ach-badge-title">' + b.title + '</div>' +
                     '    <div class="ach-badge-desc">' + b.desc + '</div>' +
-                    '    <div class="ach-badge-status ' + (isUnl ? 'unlocked-tag' : 'locked-tag') + '">' + (isUnl ? (isEn ? '✨ Unlocked' : '✨ Odemčeno') : (isEn ? '🔒 Locked' : '🔒 Zamčeno')) + '</div>' +
+                    '    <div class="ach-badge-status ' + (isUnl ? 'unlocked-tag' : 'locked-tag') + '">' + (isUnl ? tAch("achievements.status_unlocked", null, "✨ Odemčeno") : tAch("achievements.status_locked", null, "🔒 Zamčeno")) + '</div>' +
                     '  </div>' +
                     '</div>';
             }
@@ -1521,23 +1525,21 @@
                 '  <button class="btn-secondary" style="padding:0.65rem 1rem;" onclick="PRS_App.closeGameCatalogPreview()">' + btnClose + '</button>' +
                 '</div>';
         } else {
-            var mBadgeText = isEn ? "📐 Draft Concept • KiDesky Edition" : "📐 Koncept v návrhu • Edice KiDesky";
-            var mTitleText = isEn ? "⚖️ Merchants of the Realm" : "⚖️ Obchodníci Království";
-            var mSubtitleText = isEn ? "Strategic economic board game for 2–5 merchants" : "Strategická ekonomická desková hra pro 2–5 kupců";
-            var mPill1 = isEn ? "👥 2–5 Merchants" : "👥 2–5 Kupců";
-            var mPill2 = isEn ? "⏱️ 45–75 minutes" : "⏱️ 45–75 minut";
-            var mPill3 = isEn ? "⛵ Trade Routes &amp; Guilds" : "⛵ Obchodní stezky &amp; Cechy";
-            var mPill4 = isEn ? "🪙 Market Price Fluctuation" : "🪙 Fluktuace tržních cen";
-            var mHStory = isEn ? "Story Background &amp; Rules" : "Příběhové pozadí &amp; Pravidla";
-            var mPStory = isEn
-                ? "Vast empires are linked by caravan trails and naval convoys. As head of a merchant guild, you buy silk, amber, rare spices, and royal wines cheaply in harbors and sell them for multipliers in inland metropolises with high demand."
-                : "Rozlehlé říše propojují karavanní stezky a námořní konvoje. Jako představený kupeckého cechu nakupuješ levně hedvábí, jantar, vzácné koření a královská vína v přístavech a prodáváš je za násobky ve vnitrozemských metropolích s vysokou poptávkou.";
-            var mHMech = isEn ? "Game Mechanics" : "Herní mechaniky";
-            var mLi1 = isEn ? "<strong>Dynamic supply &amp; demand market:</strong> As soon as a merchant floods a city with spices, the price drops for everyone!" : "<strong>Živý trh s nabídkou a poptávkou:</strong> Jakmile kupec zaplaví město kořením, jeho cena klesá pro všechny!";
-            var mLi2 = isEn ? "<strong>Guild warehouse construction:</strong> Build trading posts along trade routes and collect toll fees from rivals." : "<strong>Výstavba cechovních skladů:</strong> Možnost stavět faktorie podél obchodních tras a vybírat celní poplatky od soupeřů.";
-            var mLi3 = isEn ? "<strong>Pirates and robber knights:</strong> Travel risks mitigated by hiring mercenary escorts." : "<strong>Piráti a loupeživí rytíři:</strong> Riziko na cestách snižované najímáním žoldnéřských eskort.";
-            var mBtnSub = isEn ? "🔔 Follow Development &amp; Get Beta Access" : "🔔 Sledovat vývoj &amp; Získat přístup do Beta testu";
-            var mBtnClose = isEn ? "Close Preview" : "Zavřít náhled";
+            var mBadgeText = tCat("beta_games.merchants.badge", null, "🧭 Strategická hra • V přípravě");
+            var mTitleText = tCat("beta_games.merchants.title", null, "⚖️ Obchodníci Království");
+            var mSubtitleText = tCat("beta_games.merchants.subtitle", null, "Ekonomická a cechovní strategie ze světa KiDesky");
+            var mPill1 = tCat("beta_games.merchants.pill_players", null, "👥 2–5 Obchodníků");
+            var mPill2 = tCat("beta_games.merchants.pill_time", null, "⏱️ 45–75 minut");
+            var mPill3 = tCat("beta_games.merchants.pill_routes", null, "🚢 Námořní &amp; Karavanní trasy");
+            var mPill4 = tCat("beta_games.merchants.pill_economy", null, "🪙 Tržní nabídka &amp; Poptávka");
+            var mHStory = tCat("beta_games.merchants.story_header", null, "Koncept hry &amp; Pravidla");
+            var mPStory = tCat("beta_games.merchants.story_p1", null, "Vstup do role mocného cechovního mistra...");
+            var mHMech = tCat("beta_games.merchants.mechanics_header", null, "Klíčové prvky");
+            var mLi1 = tCat("beta_games.merchants.mechanics_li1", null, "Fluktuace cen");
+            var mLi2 = tCat("beta_games.merchants.mechanics_li2", null, "Monopol a cechy");
+            var mLi3 = tCat("beta_games.merchants.mechanics_li3", null, "Královské zakázky");
+            var mBtnSub = tCat("beta_games.merchants.btn_subscribe", null, "📜 Mám zájem o testování (Přihlásit se k odběru novinek)");
+            var mBtnClose = tCat("beta_games.merchants.btn_back", null, "Zavřít");
 
             body.innerHTML = '<div class="catalog-modal-banner" style="background-image:linear-gradient(to top, rgba(10,7,4,0.95), rgba(10,7,4,0.2)), url(\'assets/tiles/merchant.webp\');">' +
                 '  <div class="catalog-modal-banner-overlay"></div>' +

@@ -226,22 +226,29 @@
 
                 var upgBtn = "";
 
+                var currUnitP = tAdvP("common.gold_short", null, "zl.");
+                var uCostStr = window.PRS_I18n ? window.PRS_I18n.formatNumber(uCost) : uCost;
                 if (nd.type === "VILLAGE" && nd.villageLevel < 3 && isCurTurn) {
 
                     var uCost = this.state.config.estates.villagePrices[nd.villageLevel] || 1500;
+                    uCostStr = window.PRS_I18n ? window.PRS_I18n.formatNumber(uCost) : uCost;
 
-                    upgBtn = '<button class="btn-upg-mini" onclick="PRS_App.handleUpgradeVillage(' + nd.id + ')">★ Povýšit (' + uCost + ' zl.)</button>';
+                    upgBtn = '<button class="btn-upg-mini" onclick="PRS_App.handleUpgradeVillage(' + nd.id + ')">' + tAdvP("knight_tab.upgrade_btn", { cost: uCostStr, curr: currUnitP }, "★ Povýšit (" + uCostStr + " " + currUnitP + ")") + '</button>';
 
                 }
+
+                var ndNameDisp = this.translateDynamicName ? this.translateDynamicName(nd.name) : nd.name;
+                var rentFmt = window.PRS_I18n ? window.PRS_I18n.formatNumber(rentVal) : rentVal.toLocaleString("cs-CZ");
+                var bSellFmt = window.PRS_I18n ? window.PRS_I18n.formatNumber(bSellVal) : bSellVal;
 
                 nodesHtml += '<div class="asset-chip">' +
 
                     '<div>' +
-                    '  <div>' + nd.icon + ' <strong>' + this.escapeHtml(nd.name) + '</strong>' + (nd.type === "VILLAGE" ? ' (Úr. ' + nd.villageLevel + '/3)' : '') + '</div>' +
-                    '  <div style="font-size:0.68rem; color:#86efac;">Mýtné: ' + rentVal.toLocaleString("cs-CZ") + ' zl.</div>' +
+                    '  <div>' + nd.icon + ' <strong>' + this.escapeHtml(ndNameDisp) + '</strong>' + (nd.type === "VILLAGE" ? (' (' + tAdvP("knight_tab.level_short", { lvl: nd.villageLevel }, 'Úr. ' + nd.villageLevel + '/3') + ')') : '') + '</div>' +
+                    '  <div style="font-size:0.68rem; color:#86efac;">' + tAdvP("knight_tab.toll_label", { amount: rentFmt, curr: currUnitP }, "Mýtné: " + rentFmt + " " + currUnitP) + '</div>' +
                     '</div>' +
 
-                    '<div style="display:flex; gap:4px; align-items:center;">' + upgBtn + '<button class="btn-sell-mini" onclick="PRS_App.handleSellAsset(\'node\', ' + nd.id + ', null, ' + inspIdx + ')">Prodat +' + bSellVal + ' zl.</button></div>' +
+                    '<div style="display:flex; gap:4px; align-items:center;">' + upgBtn + '<button class="btn-sell-mini" onclick="PRS_App.handleSellAsset(\'node\', ' + nd.id + ', null, ' + inspIdx + ')">' + tAdvP("knight_tab.sell_btn", { amount: bSellFmt, curr: currUnitP }, "Prodat +" + bSellFmt + " " + currUnitP) + '</button></div>' +
 
                     '</div>';
 
@@ -251,7 +258,7 @@
 
         } else {
 
-            nodesHtml = '<div class="fiefs-empty-hint">🏰 Rytíř zatím nevlastní panství ani stáje. Kupuj pole po království!</div>';
+            nodesHtml = '<div class="fiefs-empty-hint">' + tAdvP("knight_tab.no_estates", null, "🏰 Rytíř zatím nevlastní panství ani stáje. Kupuj pole po království!") + '</div>';
 
         }
 
@@ -265,7 +272,7 @@
 
             tabContentHtml = '<div style="margin-top:0.45rem; padding-top:0.45rem; border-top:1px solid rgba(212,175,55,0.2);">' +
 
-                '<div style="font-size:0.78rem; color:var(--gold-light); font-weight:700; margin-bottom:0.35rem;">🎒 Rytířská výbava:</div>' +
+                '<div style="font-size:0.78rem; color:var(--gold-light); font-weight:700; margin-bottom:0.35rem;">' + tAdvP("knight_tab.equipment_header", null, "🎒 Rytířská výbava:") + '</div>' +
 
                 itemsHtml +
 
@@ -276,25 +283,25 @@
             tabContentHtml = '<div style="margin-top:0.45rem; padding-top:0.45rem; border-top:1px solid rgba(212,175,55,0.2);">' +
 
                 '<div style="font-size:0.78rem; color:var(--gold-light); font-weight:700; margin-bottom:0.35rem; display:flex; justify-content:space-between; align-items:center;">' +
-                '  <span>🏰 Panství a chovy (' + p.ownedNodes.length + ' polí):</span>' +
-                '  <small style="color:#fde047; font-size:0.7rem;">🌾 Chov: 🐄' + (st.cattle || 0) + ' 🐑' + (st.sheep || 0) + ' 🐖' + (st.pigs || 0) + '</small>' +
+                '  <span>' + tAdvP("knight_tab.estates_header", { count: p.ownedNodes.length }, "🏰 Panství a chovy (" + p.ownedNodes.length + " polí):") + '</span>' +
+                '  <small style="color:#fde047; font-size:0.7rem;">' + tAdvP("knight_tab.farming_sub", { cattle: (st.cattle || 0), sheep: (st.sheep || 0), pigs: (st.pigs || 0) }, "🌾 Chov: 🐄" + (st.cattle || 0) + " 🐑" + (st.sheep || 0) + " 🐖" + (st.pigs || 0)) + '</small>' +
                 '</div>' +
 
                 '<div class="fiefs-summary-pills" style="margin-bottom:0.4rem; flex-wrap:wrap;">' +
 
-                '  <span class="fief-pill ' + (horseCount > 0 ? 'active' : '') + '" title="Koně: ' + horseCount + '">🐎 ' + horseCount + '</span>' +
+                '  <span class="fief-pill ' + (horseCount > 0 ? 'active' : '') + '" title="' + tAdvP("knight_tab.pill_horses", { count: horseCount }, "Koně: " + horseCount) + '">🐎 ' + horseCount + '</span>' +
 
-                '  <span class="fief-pill ' + (dogCount > 0 ? 'active' : '') + '" title="Lovečtí psi: ' + dogCount + '">🐕 ' + dogCount + '</span>' +
+                '  <span class="fief-pill ' + (dogCount > 0 ? 'active' : '') + '" title="' + tAdvP("knight_tab.pill_dogs", { count: dogCount }, "Lovečtí psi: " + dogCount) + '">🐕 ' + dogCount + '</span>' +
 
-                '  <span class="fief-pill ' + (falconCount > 0 ? 'active' : '') + '" title="Sokoli: ' + falconCount + '">🦅 ' + falconCount + '</span>' +
+                '  <span class="fief-pill ' + (falconCount > 0 ? 'active' : '') + '" title="' + tAdvP("knight_tab.pill_falcons", { count: falconCount }, "Sokoli: " + falconCount) + '">🦅 ' + falconCount + '</span>' +
 
-                '  <span class="fief-pill ' + (villageCount > 0 ? 'active' : '') + '" title="Vesnice: ' + villageCount + '">🏡 ' + villageCount + '</span>' +
+                '  <span class="fief-pill ' + (villageCount > 0 ? 'active' : '') + '" title="' + tAdvP("knight_tab.pill_villages", { count: villageCount }, "Vesnice: " + villageCount) + '">🏡 ' + villageCount + '</span>' +
 
-                '  <span class="fief-pill ' + (townCount > 0 ? 'active' : '') + '" title="Města: ' + townCount + '">🏛️ ' + townCount + '</span>' +
+                '  <span class="fief-pill ' + (townCount > 0 ? 'active' : '') + '" title="' + tAdvP("knight_tab.pill_towns", { count: townCount }, "Města: " + townCount) + '">🏛️ ' + townCount + '</span>' +
 
-                '  <span class="fief-pill ' + (castleCount > 0 ? 'active' : '') + '" title="Hrady: ' + castleCount + '">🏰 ' + castleCount + '</span>' +
+                '  <span class="fief-pill ' + (castleCount > 0 ? 'active' : '') + '" title="' + tAdvP("knight_tab.pill_castles", { count: castleCount }, "Hrady: " + castleCount) + '">🏰 ' + castleCount + '</span>' +
 
-                '  <span class="fief-pill ' + (craftCount > 0 ? 'active' : '') + '" title="Řemeslné živnosti a kejklíři: ' + craftCount + '">⚒️ ' + craftCount + '</span>' +
+                '  <span class="fief-pill ' + (craftCount > 0 ? 'active' : '') + '" title="' + tAdvP("knight_tab.pill_crafts", { count: craftCount }, "Řemeslné živnosti a kejklíři: " + craftCount) + '">⚒️ ' + craftCount + '</span>' +
 
                 '</div>' +
 
@@ -313,9 +320,11 @@
             for (var scI = 0; scI < invList.length; scI++) {
                 var sc = invList[scI];
                 var canUse = (inspIdx === this.state.currentPlayerIndex && p.type === "Human" && this.state.phase !== "GAME_OVER");
+                var scTit = (sc.id && window.PRS_I18n && window.PRS_I18n.t("cards." + sc.id + ".title") !== ("cards." + sc.id + ".title")) ? window.PRS_I18n.t("cards." + sc.id + ".title") : sc.title;
+                var scTxt = (sc.id && window.PRS_I18n && window.PRS_I18n.t("cards." + sc.id + ".text") !== ("cards." + sc.id + ".text")) ? window.PRS_I18n.t("cards." + sc.id + ".text") : sc.text;
                 invHtml += '  <button type="button" class="btn-secondary" style="padding:0.2rem 0.45rem; font-size:0.75rem; border-color:var(--gold); color:#fef08a; display:inline-flex; align-items:center; gap:0.25rem;' + (canUse ? ' cursor:pointer;' : ' opacity:0.8;') + '" ' +
-                    (canUse ? 'onclick="PRS_App.handleUseInventoryScroll(' + scI + ')"' : '') + ' title="' + this.escapeHtml(sc.text) + '">' +
-                    sc.icon + ' ' + this.escapeHtml(sc.title) + (canUse ? ' <span style="color:#4ade80; font-weight:bold;">▶</span>' : '') +
+                    (canUse ? 'onclick="PRS_App.handleUseInventoryScroll(' + scI + ')"' : '') + ' title="' + this.escapeHtml(scTxt) + '">' +
+                    sc.icon + ' ' + this.escapeHtml(scTit) + (canUse ? ' <span style="color:#4ade80; font-weight:bold;">▶</span>' : '') +
                     '</button>';
             }
             invHtml += '</div>';
@@ -329,11 +338,11 @@
         // Aktivní svitky v platnosti
         var actBuffs = [];
         if (p.activeScrolls) {
-            if (p.activeScrolls.bonusRoll) actBuffs.push('⚡ +' + p.activeScrolls.bonusRoll + ' k hodu');
-            if (p.activeScrolls.forcedRoll) actBuffs.push('⭐ Zaručená ' + p.activeScrolls.forcedRoll);
-            if (p.activeScrolls.combatBonus) actBuffs.push('🧪 +' + p.activeScrolls.combatBonus + ' Boj');
-            if (p.activeScrolls.rentImmunity) actBuffs.push('👑 Ochrana nájmu');
-            if (p.activeScrolls.doubleBreeding) actBuffs.push('🐑 2x Chov');
+            if (p.activeScrolls.bonusRoll) actBuffs.push(tAdvP("pouch.buff_roll", { val: p.activeScrolls.bonusRoll }, '⚡ +' + p.activeScrolls.bonusRoll + ' k hodu'));
+            if (p.activeScrolls.forcedRoll) actBuffs.push(tAdvP("pouch.buff_forced", { val: p.activeScrolls.forcedRoll }, '⭐ Zaručená ' + p.activeScrolls.forcedRoll));
+            if (p.activeScrolls.combatBonus) actBuffs.push(tAdvP("pouch.buff_combat", { val: p.activeScrolls.combatBonus }, '🧪 +' + p.activeScrolls.combatBonus + ' Boj'));
+            if (p.activeScrolls.rentImmunity) actBuffs.push(tAdvP("pouch.buff_rent", null, '👑 Ochrana nájmu'));
+            if (p.activeScrolls.doubleBreeding) actBuffs.push(tAdvP("pouch.buff_breeding", null, '🐑 2x Chov'));
         }
         if (actBuffs.length > 0) {
             invHtml += '<div style="margin-top:0.3rem; font-size:0.73rem; color:#86efac; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); border-radius:4px; padding:0.2rem 0.45rem;">' +
@@ -426,47 +435,49 @@
     
     getAdvisorTileEvaluation: function (node, player) {
         if (!node || !player || !this.state) return "";
+        var tAdvE = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var cfg = this.state.config || {};
         var scen = cfg.scenario || "classic";
         var price = (window.PRS_GameEngine && window.PRS_GameEngine.getNodePrice) ? window.PRS_GameEngine.getNodePrice(this.state, node) : (node.price || 600);
+        var priceStr = window.PRS_I18n ? window.PRS_I18n.formatGold(price) : (price.toLocaleString("cs-CZ") + " zl.");
         if (node.type === "ANIMAL") {
             var owned = 0;
             for (var i = 0; i < player.ownedNodes.length; i++) {
                 var oN = this.state.board.nodes[player.ownedNodes[i]];
                 if (oN && oN.type === "ANIMAL" && oN.setId === node.setId) owned++;
             }
-            if (node.owner === player.index) return "Tvé vlastní zvíře (sada č. " + node.setId + ").";
-            if (node.owner !== null && node.owner !== undefined) return "Patří soupeři. Stoupnutí tě bude stát nájemné.";
-            if (owned === 2) return "Klíčové pole! Koupí završíš sadu č. " + node.setId + " na 3/3 (korunka 👑 + 1.5 💖).";
-            if (owned === 1) return "Koupí získáš pár (2/3 v sadě č. " + node.setId + ").";
-            return "Volné zvíře do chovu (cena " + price.toLocaleString("cs-CZ") + " zl.).";
+            if (node.owner === player.index) return tAdvE("advisor.eval_animal_own", { setId: node.setId }, "Tvé vlastní zvíře (sada č. " + node.setId + ").");
+            if (node.owner !== null && node.owner !== undefined) return tAdvE("advisor.eval_animal_rival", null, "Patří soupeři. Stoupnutí tě bude stát nájemné.");
+            if (owned === 2) return tAdvE("advisor.eval_animal_complete", { setId: node.setId }, "Klíčové pole! Koupí završíš sadu č. " + node.setId + " na 3/3 (korunka 👑 + 1.5 💖).");
+            if (owned === 1) return tAdvE("advisor.eval_animal_pair", { setId: node.setId }, "Koupí získáš pár (2/3 v sadě č. " + node.setId + ").");
+            return tAdvE("advisor.eval_animal_free", { price: priceStr }, "Volné zvíře do chovu (cena " + priceStr + ").");
         }
         if (node.type === "TOWN") {
-            if (node.owner === player.index) return "Tvé město s daňovým výnosem 1 200 zl.";
-            if (node.owner !== null) return "Město soupeře. Přináší mu daně z každého výběru.";
-            return (scen === "tycoon" ? "Cíl scénáře Magnát! " : "") + "Volné město za " + price.toLocaleString("cs-CZ") + " zl. (+1 200 zl. daň).";
+            if (node.owner === player.index) return tAdvE("advisor.eval_town_own", null, "Tvé město s daňovým výnosem 1 200 zl.");
+            if (node.owner !== null) return tAdvE("advisor.eval_town_rival", null, "Město soupeře. Přináší mu daně z každého výběru.");
+            return (scen === "tycoon" ? (tAdvE("advisor.eval_tycoon_goal", null, "Cíl scénáře Magnát!") + " ") : "") + tAdvE("advisor.eval_town_free", { price: priceStr }, "Volné město za " + priceStr + " (+1 200 zl. daň).");
         }
         if (node.type === "CASTLE") {
-            if (node.owner === player.index) return "Tvůj hrad (+2 500 zl. daň a +1 Charisma).";
-            if (node.owner !== null) return "Hrad soupeře. Pozor na vysoký nájem.";
-            return (scen === "tycoon" ? "Cíl scénáře Magnát! " : "") + "Volný hrad za " + price.toLocaleString("cs-CZ") + " zl. (+2 500 zl. daň a +1 Charisma).";
+            if (node.owner === player.index) return tAdvE("advisor.eval_castle_own", null, "Tvůj hrad (+2 500 zl. daň a +1 Charisma).");
+            if (node.owner !== null) return tAdvE("advisor.eval_castle_rival", null, "Hrad soupeře. Pozor na vysoký nájem.");
+            return (scen === "tycoon" ? (tAdvE("advisor.eval_tycoon_goal", null, "Cíl scénáře Magnát!") + " ") : "") + tAdvE("advisor.eval_castle_free", { price: priceStr }, "Volný hrad za " + priceStr + " (+2 500 zl. daň a +1 Charisma).");
         }
         if (node.type === "VILLAGE") {
-            if (node.owner === player.index) return "Tvá vesnice úrovně " + (node.villageLevel || 1) + "★. Lze ji povýšit.";
-            if (node.owner !== null) return "Vesnice soupeře.";
-            return "Volná vesnice za " + price.toLocaleString("cs-CZ") + " zl. Stabilní zdroj daní.";
+            if (node.owner === player.index) return tAdvE("advisor.eval_village_own", { lvl: (node.villageLevel || 1) }, "Tvá vesnice úrovně " + (node.villageLevel || 1) + "★. Lze ji povýšit.");
+            if (node.owner !== null) return tAdvE("advisor.eval_village_rival", null, "Vesnice soupeře.");
+            return tAdvE("advisor.eval_village_free", { price: priceStr }, "Volná vesnice za " + priceStr + ". Stabilní zdroj daní.");
         }
         if (node.type === "QUEST") {
-            if (node.subtype === "U3") return (scen === "slayer" ? "Cíl scénáře Lovci draků! " : "") + "Nebezpečná Dračí sluj s královským pokladem.";
-            if (node.subtype === "U2") return "Doupě monstra. Vyžaduje solidní bojovou výbavu.";
-            return "Lesní zvěř. Vhodný cíl pro lehký lov se psy či sokoly.";
+            if (node.subtype === "U3") return (scen === "slayer" ? (tAdvE("advisor.eval_slayer_goal", null, "Cíl scénáře Lovci draků!") + " ") : "") + tAdvE("advisor.eval_quest_u3", null, "Nebezpečná Dračí sluj s královským pokladem.");
+            if (node.subtype === "U2") return tAdvE("advisor.eval_quest_u2", null, "Doupě monstra. Vyžaduje solidní bojovou výbavu.");
+            return tAdvE("advisor.eval_quest_u1", null, "Lesní zvěř. Vhodný cíl pro lehký lov se psy či sokoly.");
         }
         if (node.type === "MASTER") {
-            var skLabel = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(node.skill, true) : "Ctnost";
-            return "Mistr ctnosti (" + skLabel + "). Zvyšuje úroveň vlastnosti.";
+            var skLabel = (window.PRS_SKILLS && window.PRS_SKILLS.getName) ? window.PRS_SKILLS.getName(node.skill, true) : tAdvE("advisor.eval_virtue_fallback", null, "Ctnost");
+            return tAdvE("advisor.eval_master", { skill: skLabel }, "Mistr ctnosti (" + skLabel + "). Zvyšuje úroveň vlastnosti.");
         }
         if (node.type === "FESTIVAL") {
-            return "Královské slavnosti. Skvělé místo pro zisk Princezniných srdcí 💖.";
+            return tAdvE("advisor.eval_festival", null, "Královské slavnosti. Skvělé místo pro zisk Princezniných srdcí 💖.");
         }
         return "";
     },
@@ -476,6 +487,7 @@
         if (!player && this.state && Array.isArray(this.state.players)) { player = this.state.players[this.state.currentPlayerIndex || 0]; }
         if (!phase && this.state) { phase = this.state.phase; }
         if (!this.state || !player) return null;
+        var tAdvTop = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var cfg = this.state.config || {};
         var scen = cfg.scenario || "classic";
         var effStats = window.PRS_GameEngine.getEffectiveStats ? window.PRS_GameEngine.getEffectiveStats(this.state, player) : player.skills;
@@ -483,28 +495,31 @@
         // 1. ZVLÁŠTNÍ PŘÍPAD: DLUH A LIKVIDACE
         if (pa && pa.debt && pa.debt > 0) {
             var debtAmt = (typeof pa.debt === "number" && !isNaN(pa.debt)) ? pa.debt : 0;
+            var debtStr = window.PRS_I18n ? window.PRS_I18n.formatGold(debtAmt) : (debtAmt.toLocaleString("cs-CZ") + " zl.");
             return {
                 icon: "⚠️",
-                title: "Královský rádce",
-                badge: "Hrozba dluhu",
+                title: tAdvTop("advisor.title", null, "Královský rádce"),
+                badge: tAdvTop("advisor.badge_debt", null, "Hrozba dluhu"),
                 badgeClass: "advisor-warn",
-                text: "Dlužíš věřitelům **" + debtAmt.toLocaleString("cs-CZ") + " zl.**! Královská rada ti doporučuje nejprve prodat **samostatná zvířata bez sady**, a chránit svá **města, hrady a kompletní 3/3 chovy**, které ti zajišťují stálý zlaťákový i prestižní příjem.",
-                actionPrompt: "Vyber majetek k prodeji za 50–75 % ceny níže."
+                text: tAdvTop("advisor.debt_text", { debt: debtStr }, "Dlužíš věřitelům **" + debtStr + "**! Královská rada ti doporučuje nejprve prodat **samostatná zvířata bez sady**, a chránit svá **města, hrady a kompletní 3/3 chovy**, které ti zajišťují stálý zlaťákový i prestižní příjem."),
+                actionPrompt: tAdvTop("advisor.debt_prompt", null, "Vyber majetek k prodeji za 50–75 % ceny níže.")
             };
         }
 
         // 2. ŠATLAVA A ŠPITÁL
         if (pa && pa.isImprisoned) {
-            var canBail = player.gold >= (cfg.prisonBail || 1000);
+            var bailVal = cfg.prisonBail || 1000;
+            var canBail = player.gold >= bailVal;
+            var bailStr = window.PRS_I18n ? window.PRS_I18n.formatGold(bailVal) : (bailVal + " zl.");
             return {
                 icon: "⛓️",
-                title: "Královský rádce",
-                badge: "Šatlava",
+                title: tAdvTop("advisor.title", null, "Královský rádce"),
+                badge: tAdvTop("advisor.badge_prison", null, "Šatlava"),
                 badgeClass: "advisor-warn",
                 text: canBail
-                    ? "Jsi ve vězení! Máš dostatek zlaťáků na složení kauce (**" + (cfg.prisonBail || 1000) + " zl.**). Doporučuji kauci zaplatit hned, ať neztrácíš cenné tahy!"
-                    : "Jsi uvězněn a chybí ti zlato na kauci. Zkus štěstí hodem na útěk (hod 5–6 ti vrátí svobodu), nebo vyčkej 2 kola.",
-                actionPrompt: canBail ? "Zvol 'Složit kauci a odejít'." : "Zvol 'Pokusit se o útěk'."
+                    ? tAdvTop("advisor.prison_can_bail", { bail: bailStr }, "Jsi ve vězení! Máš dostatek zlaťáků na složení kauce (**" + bailStr + "**). Doporučuji kauci zaplatit hned, ať neztrácíš cenné tahy!")
+                    : tAdvTop("advisor.prison_no_bail", null, "Jsi uvězněn a chybí ti zlato na kauci. Zkus štěstí hodem na útěk (hod 5–6 ti vrátí svobodu), nebo vyčkej 2 kola."),
+                actionPrompt: canBail ? tAdvTop("advisor.prison_bail_prompt", null, "Zvol 'Složit kauci a odejít'.") : tAdvTop("advisor.prison_escape_prompt", null, "Zvol 'Pokusit se o útěk'.")
             };
         }
 
@@ -572,13 +587,15 @@
             if (hasMissingAnimalInReach) {
                 var opp = opportunities.find(function (o) { return o.isTrioCompleter; });
                 if (opp && opp.node) {
+                    var oppNameDisp = this.translateDynamicName ? this.translateDynamicName(opp.node.name) : opp.node.name;
+                    var cHint = (curMode !== "cautious" && opp.roll <= 4) ? tAdvTop("advisor.trio_cautious_hint", null, " Zvaž přepnutí na **Opatrný krok 🚶 (1–4)** pro vyšší šanci na přesný hod.") : "";
                     return {
-                    icon: "👑",
-                    title: "Královský rádce",
-                    badge: "Šlechtický chov",
-                    badgeClass: "advisor-good",
-                    text: "Při hodu **" + opp.roll + "** máš na dosah volné zvíře **" + this.escapeHtml(opp.node.name) + "**, které zkompletuje tvou chovnou sadu na **3/3** a zajistí ti korunu 👑 a **+1.5 💖**!" + (curMode !== "cautious" && opp.roll <= 4 ? " Zvaž přepnutí na **Opatrný krok 🚶 (1–4)** pro vyšší šanci na přesný hod." : ""),
-                    actionPrompt: "Hoď kostkou a usiluj o číslo " + opp.roll + "!"
+                        icon: "👑",
+                        title: tAdvTop("advisor.title", null, "Královský rádce"),
+                        badge: tAdvTop("advisor.badge_trio", null, "Šlechtický chov"),
+                        badgeClass: "advisor-good",
+                        text: tAdvTop("advisor.trio_text", { roll: opp.roll, name: this.escapeHtml(oppNameDisp), cautiousHint: cHint }, "Při hodu **" + opp.roll + "** máš na dosah volné zvíře **" + this.escapeHtml(oppNameDisp) + "**, které zkompletuje tvou chovnou sadu na **3/3** a zajistí ti korunu 👑 a **+1.5 💖**!" + cHint),
+                        actionPrompt: tAdvTop("advisor.trio_prompt", { roll: opp.roll }, "Hoď kostkou a usiluj o číslo " + opp.roll + "!")
                     };
                 }
             }
@@ -603,18 +620,19 @@
             var tAdv = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
             if (opportunities.length > 0) {
                 var op = opportunities[0];
+                var opNodeName = op.node ? (this.translateDynamicName ? this.translateDynamicName(op.node.name) : op.node.name) : "";
                 var opDesc = op.isEstate
-                    ? tAdv("advisor.op_desc_estate", { name: this.escapeHtml(op.node.name) }, "volné sídlo **" + this.escapeHtml(op.node.name) + "**")
+                    ? tAdv("advisor.op_desc_estate", { name: this.escapeHtml(opNodeName) }, "volné sídlo **" + this.escapeHtml(opNodeName) + "**")
                     : (op.isFestival
                         ? tAdv("advisor.op_desc_festival", null, "královské Slavnosti 💖")
-                        : tAdv("advisor.op_desc_tile", { name: this.escapeHtml(op.node.name) }, "pole **" + this.escapeHtml(op.node.name) + "**"));
+                        : tAdv("advisor.op_desc_tile", { name: this.escapeHtml(opNodeName) }, "pole **" + this.escapeHtml(opNodeName) + "**"));
                 return {
                     icon: "💡",
                     title: tAdv("advisor.title", null, "Královský rádce"),
-                    badge: tAdv("advisor.badge_reach", null, "Taktický dosah"),
+                    badge: tAdv("advisor.badge_opportunity", null, "Taktický dosah"),
                     badgeClass: "advisor-tip",
-                    text: tAdv("advisor.text_reach", { roll: op.roll, target: opDesc }, "Před tebou na hodu **" + op.roll + "** leží " + opDesc + ". Cesta je volná a příznivá pro tvůj další postup."),
-                    actionPrompt: tAdv("advisor.prompt_reach", null, "Hoď kostkou a vykroč na cestu.")
+                    text: tAdv("advisor.opportunity_text", { roll: op.roll, desc: opDesc }, "Před tebou na hodu **" + op.roll + "** leží " + opDesc + ". Cesta je volná a příznivá pro tvůj další postup."),
+                    actionPrompt: tAdv("advisor.opportunity_prompt", null, "Hoď kostkou a vykroč na cestu.")
                 };
             }
 
@@ -646,7 +664,7 @@
                 title: tAdv("advisor.title", null, "Královský rádce"),
                 badge: tAdv("advisor.badge_march", null, "Královský pochod"),
                 badgeClass: "advisor-tip",
-                text: tAdv("advisor.text_march", { gold: pGoldStrAdv, hearts: player.totalHearts }, "Máš k dispozici **" + pGoldStrAdv + "** a **" + player.totalHearts + " 💖**. Cesta před tebou je přehledná, zvol tempo pochodu a vyraz vstříc dobrodružství."),
+                text: tAdv("advisor.text_march", { gold: pGoldStrAdv, hearts: player.totalHearts + " 💖" }, "Máš k dispozici **" + pGoldStrAdv + "** a **" + player.totalHearts + " 💖**. Cesta před tebou je přehledná, zvol tempo pochodu a vyraz vstříc dobrodružství."),
                 actionPrompt: tAdv("advisor.prompt_march", null, "Klepni na kostku pro hod.")
             };
         }
@@ -716,7 +734,7 @@
                             actionPrompt: tAdvA("advisor.prompt_buy", null, "Klepni na Koupit toto pole.")
                         };
                     } else {
-                        var subDesc = currNode.subtype === "horse" ? tAdvA("advisor.sub_horse", null, "Kůň – nutný pro cval a závody") : (currNode.subtype === "pes" ? tAdvA("advisor.sub_dog", null, "Pes – bonus k lovu monster") : tAdvA("advisor.sub_falcon", null, "Sokol – bonus k turnajům"));
+                        var subDesc = currNode.subtype === "horse" ? tAdvA("advisor.sub_horse", null, "Kůň – nutný pro cval a závody") : ((currNode.subtype === "dog" || currNode.subtype === "pes") ? tAdvA("advisor.sub_dog", null, "Pes – bonus k lovu monster") : tAdvA("advisor.sub_falcon", null, "Sokol – bonus k turnajům"));
                         return {
                             icon: "🐎",
                             title: tAdvA("advisor.title", null, "Královský rádce"),
@@ -958,7 +976,7 @@
 
         if (actBuffs.length > 0) {
             html += '<div style="margin-top:0.3rem; font-size:0.7rem; color:#86efac; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.35); border-radius:5px; padding:0.2rem 0.45rem;">' +
-                '✨ Aktivní: <strong>' + actBuffs.join(', ') + '</strong>' +
+                tPouch("pouch.active_buffs", { buffs: actBuffs.join(', ') }, '✨ Aktivní: <strong>' + actBuffs.join(', ') + '</strong>') +
                 '</div>';
         }
 

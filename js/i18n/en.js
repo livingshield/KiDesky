@@ -29,7 +29,103 @@ window.PRS_I18N["en"] = {
     "modal_title": "Royal Wardrobe & Collectible Pawns",
     "credits_title": "Your Royal Credits balance for unlocking premium pawns",
     "slot_info_default": "Choose a pawn for your knight or unlock unique premium champions with animated auras!",
-    "close_title": "Close wardrobe"
+    "close_title": "Close wardrobe",
+    "badge_basic": "🛡️ Basic",
+    "badge_bot": "🤖 AI Bot",
+    "badge_premium": "💎 Premium",
+    "btn_registered_only": "🔒 For Registered",
+    "btn_select": "🎭 Select Pawn",
+    "btn_selected": "✅ Currently Selected",
+    "btn_unlock": "🔓 Unlock ({price} 💎)",
+    "status_pc_only": "🔒 AI Only",
+    "status_unlocked": "✓ Unlocked",
+    "pawns": {
+      "knight_valiant": {
+        "name": "Sir Roland",
+        "title": "Knight of the Royal Crown",
+        "desc": "Noble royal paladin in radiant gold-and-silver armor bearing the lion crest upon his shoulder."
+      },
+      "knight_tourney": {
+        "name": "Baron of the Rose",
+        "title": "Tournament Champion",
+        "desc": "Undefeated master of jousting with a plume of red roses and an ornate tournament helm."
+      },
+      "lady_huntress": {
+        "name": "Lady Sylva",
+        "title": "Royal Huntress",
+        "desc": "Noble mistress of the deep woods in green velvet with a hunting falcon upon her shoulder and bow."
+      },
+      "lord_diplomat": {
+        "name": "Duke Armand",
+        "title": "Master of the Royal Court",
+        "desc": "Charismatic courtier and diplomat in a purple cloak with golden chain and ceremonial rapier."
+      },
+      "knight_warden": {
+        "name": "Warden of the Wilds",
+        "title": "Emerald Knight",
+        "desc": "Vigilant guardian of frontier forests clad in hardened moss-green scale armor."
+      },
+      "lady_sorceress": {
+        "name": "Astrida the Sorceress",
+        "title": "Star Lady",
+        "desc": "Mystic astronomer reading celestial signs, weaving starlight into defensive charms."
+      },
+      "bot_aggressive": {
+        "name": "Black Baron",
+        "title": "AI Warrior (Dragon Slayer)",
+        "desc": "Ferocious armored warlord hunting beasts and dragons with ruthless precision."
+      },
+      "bot_breeder": {
+        "name": "Sigismund the Breeder",
+        "title": "AI Breeder (Lord of Stables)",
+        "desc": "Master equestrian amassing noble studs, falcons, and hound kennels for passive rent dominance."
+      },
+      "bot_noble": {
+        "name": "Princess Eliška",
+        "title": "AI Courtier (Diplomacy & Ball)",
+        "desc": "Court lady focusing on grand balls, audiences, and social graces to gather Princess's Hearts."
+      },
+      "bot_balanced": {
+        "name": "Iron Sentinel",
+        "title": "AI Knight (Royal Automaton)",
+        "desc": "Balanced tactical knight building steady estate holdings and adapting to dice outcomes."
+      },
+      "bot_easy": {
+        "name": "Squire Vítek",
+        "title": "AI Squire (Cautious Novice)",
+        "desc": "Cautious beginner knight focusing on simple village trades and safe movement."
+      },
+      "prem_dragon_lord": {
+        "name": "Dragon Warlord",
+        "title": "Legendary Flame Master",
+        "desc": "Ancient warlord bonded with primordial fire, radiating molten ember aura."
+      },
+      "prem_ice_queen": {
+        "name": "Frost Queen",
+        "title": "Sovereign of the Northern Peaks",
+        "desc": "Majestic monarch of eternal ice adorned in glacier crystal crown and glacial aura."
+      },
+      "prem_shadow_assassin": {
+        "name": "Shadow Knight",
+        "title": "Phantom Master of Night",
+        "desc": "Silent prowler enveloped in swirling obsidian mist and phantom daggers."
+      },
+      "prem_golden_king": {
+        "name": "Golden Sun King",
+        "title": "Sovereign Monarch",
+        "desc": "Radiant ruler in pure polished solar gold, surrounded by blinding divine corona."
+      },
+      "prem_unicorn_rider": {
+        "name": "Unicorn Cavalier",
+        "title": "Celestial Champion",
+        "desc": "Pure-hearted champion atop a blessed unicorn radiating prismatic starlight."
+      },
+      "prem_phoenix_paladin": {
+        "name": "Phoenix Paladin",
+        "title": "Immortal Heart Guardian",
+        "desc": "Holy crusader imbued with rebirth flames, sporting glorious incandescent wings."
+      }
+    }
   },
   "ui": {
     "brand_subtitle": "The Princess's Heart",
@@ -232,7 +328,188 @@ window.PRS_I18N["en"] = {
       "trophy_tier3_label": "Dragon Trophy U3",
       "trophy_tier_label": "Trophy U{tier}",
       "castle_benefit_html": "🏰 <strong>Estate Benefit:</strong> Tax income +2,500 g., rent 1,500 g., permanent +1 Charisma and audience with the Princess.",
-      "flip_castle_label": "🔄 Flip Castle View"
+      "flip_castle_label": "🔄 Flip Castle View",
+      "atlas_card_hint": "Click to open full detail with illustration and exact rules",
+      "tip_prefix": "💡 Tip:",
+      "tier_num_label": "Tier {tier}",
+      "atlas_tiles": {
+        "start": {
+          "code": "START",
+          "name": "Royal START",
+          "cat": "Special",
+          "cost": "—",
+          "action": "Stipend <strong>+3,000 g.</strong> (landless peasants <strong>+5,000 g.</strong>). Nobles, Town/Castle owners, or skilled dancers (Dance ≥ 2 with dress) gain <strong>royal audience (+0.5 to +1.0 💖)</strong>.",
+          "tip": "Acquire formal attire early to claim royal favor every time you pass START."
+        },
+        "village": {
+          "code": "VILLAGE",
+          "name": "Vassal Village (V1–V12)",
+          "cat": "Estate",
+          "cost": "1,500 g.",
+          "action": "Buy estate and collect rent (100–300 g.) from passing knights. Upgrades: 1★ Village → 2★ Borough (+1,500 g.) → 3★ Grand Settlement (+1,500 g.). A 3★ village grants permanent <strong>+0.5 💖</strong> and raises livestock.",
+          "tip": "Villages provide steady tax income and free pastures at 3★."
+        },
+        "town": {
+          "code": "TOWN",
+          "name": "Royal Town (M1–M4)",
+          "cat": "Estate",
+          "cost": "4,000 g.",
+          "action": "Prosperous town with high rent (500 g.) and prestige: grants permanent <strong>+0.5 💖</strong> and pays <strong>+1,200 g.</strong> whenever the Tax Collector triggers.",
+          "tip": "Towns add +2 pasture capacity and guarantee royal audience at START."
+        },
+        "castle": {
+          "code": "CASTLE",
+          "name": "Noble Castle (H1–H4)",
+          "cat": "Estate",
+          "cost": "7,000 g.",
+          "action": "Pinnacle of feudal power: permanent <strong>+1.0 💖</strong> and <strong>+1 Charisma</strong>! Rent 1,000 g., Tax Collector payout <strong>+2,500 g.</strong>",
+          "tip": "Fastest way to secure lasting hearts and royal court dominance."
+        },
+        "horse": {
+          "code": "HORSE",
+          "name": "Horse Breeding (K1–K12)",
+          "cat": "Beasts",
+          "cost": "600 × tier g.",
+          "action": "Buy a steed. Unlocks <strong>mounted movement (trot, canter, gallop)</strong>, agility defense in duels, and entry into the <strong>Grand Race</strong>.",
+          "tip": "A horse accelerates map travel and completes a Breeding Trio (+1.5 💖) with a dog and falcon."
+        },
+        "dog": {
+          "code": "DOG",
+          "name": "Hunting Dog (P1–P12)",
+          "cat": "Beasts",
+          "cost": "500 × tier g.",
+          "action": "Buy a hound. Gives a tactical edge in the dragon arena — on a narrow loss by 1–2 points, gain a free <strong>🎲 Tactical Die Reroll</strong>!",
+          "tip": "Hounds save you from defeat in dragon lairs and hospital stays."
+        },
+        "falcon": {
+          "code": "FALCON",
+          "name": "Hunting Falcon (S1–S12)",
+          "cat": "Beasts",
+          "cost": "400 × tier g.",
+          "action": "Buy a bird of prey. Grants <strong>Falcon Navigation (±1 tile)</strong> on foot maneuvers to land cleanly on targets or dodge traps.",
+          "tip": "Falcon navigation cannot steer at full gallop or canter — horses move too fast."
+        },
+        "stables": {
+          "code": "STABLES",
+          "name": "Royal Stables & Livestock Market",
+          "cat": "Economy",
+          "cost": "By species",
+          "action": "Buy farm livestock: <strong>🐑 Sheep (500 g.)</strong>, <strong>🐖 Pig (600 g.)</strong>, and <strong>🐄 Cattle (800 g.)</strong>. Boosts village rent and passive Tax Collector payouts.",
+          "tip": "Pasture capacity scales with your Villages and Towns; Stables themselves add +4 slots."
+        },
+        "master": {
+          "code": "MASTER",
+          "name": "Virtue Master (MB, MJ, MT, MCH, VM)",
+          "cat": "Training",
+          "cost": "1,000–5,000 g.",
+          "action": "Train virtues (Combat, Riding, Dance, Charisma). Roll 4–6 to succeed and earn a <strong>Master Seal</strong>. 3 distinct seals grant <strong>Knight's Ward</strong>!",
+          "tip": "The Grandmaster (VM) teaches any virtue of your choice. Train your primary skill early."
+        },
+        "festival": {
+          "code": "FESTIVAL",
+          "name": "Royal Festival (♡ ♡ ♡)",
+          "cat": "Contest",
+          "cost": "—",
+          "action": "Tournament (Combat + Riding), Court Ball (Dance + Charisma), or Grand Race (Riding + steeds). Primary source of hearts: winner earns <strong>up to +5 💖 and 1,200 g.</strong>",
+          "tip": "If fewer than 2 knights qualify, the organizer still receives a royal gift of +800 g. and +0.5 💖."
+        },
+        "u1": {
+          "code": "U1",
+          "name": "Wild Beast (Forest Predators)",
+          "cat": "Hunt",
+          "cost": "—",
+          "action": "Hunt wolves, bears, and boars. Victory grants <strong>1,000–2,500 g.</strong> and <strong>+0.5 to +1.5 💖</strong>. Great early training for warriors.",
+          "tip": "Defensive Stance protects you from losing hearts even on defeat."
+        },
+        "u2": {
+          "code": "U2",
+          "name": "Mighty Monster (Fabled Fiends)",
+          "cat": "Hunt",
+          "cost": "—",
+          "action": "Battle Chimeras, Trolls, and Golems. Reward <strong>2,600 g.</strong>, <strong>+1.5 to +2.5 💖</strong>, and 65% trophy chance. Tactical retreat costs 400 g.",
+          "tip": "Check the monster's weakness in the Bestiary beforehand for an automatic +2 combat bonus."
+        },
+        "u3": {
+          "code": "U3",
+          "name": "Dragon Lair (Legendary Dragons)",
+          "cat": "Dragon Slayers",
+          "cost": "—",
+          "action": "Face one of 20 unique dragons! Reward <strong>6,000 g.</strong>, <strong>+2.5 to +5.0 💖</strong>, and a guaranteed dragon trophy. <strong>Slaying 2 dragons = instant victory!</strong>",
+          "tip": "Retreating from a dragon lair costs 800 g. Make sure your Combat and gear are ready."
+        },
+        "merchant": {
+          "code": "MERCHANT",
+          "name": "Royal Merchant",
+          "cat": "Market",
+          "cost": "By purchase",
+          "action": "Buy gear packs (weapons, armor, dresses, jewels) or liquidate items (50%) and estates (100%).",
+          "tip": "Prioritize gear matching your chosen victory path."
+        },
+        "forge": {
+          "code": "FORGE",
+          "name": "Guild Forge",
+          "cat": "Market",
+          "cost": "By weapon",
+          "action": "Craft and buy swords, axes, lances, and armor. Weapons boost Combat and exploit dragon weaknesses.",
+          "tip": "Lances counter water dragons; heavy armor resists fiery breath."
+        },
+        "tailor": {
+          "code": "TAILOR",
+          "name": "Court Tailor",
+          "cat": "Market",
+          "cost": "By attire",
+          "action": "Tailor court gowns and brocade cloaks granting Dance and Charisma bonuses essential for winning the Court Ball.",
+          "tip": "Formal attire automatically grants +2 score at the Court Ball."
+        },
+        "tavern": {
+          "code": "TAVERN",
+          "name": "Golden Tankard Tavern",
+          "cat": "Services",
+          "cost": "500 g.",
+          "action": "Rest and feast. Buying a round of mead for 500 g. earns experienced dancers (Dance ≥ 2) court acclaim and <strong>+1.0 💖</strong>.",
+          "tip": "Diplomats and dancers convert spare coin directly into hearts here."
+        },
+        "tax": {
+          "code": "TAXES",
+          "name": "Tax Collector",
+          "cat": "Economy",
+          "cost": "—",
+          "action": "Feudal payout: Villages (500/900/1,400 g.), Towns (1,200 g.), Castles (2,500 g.), plus livestock (+120/+150/+200 g.).",
+          "tip": "Knights holding the Knight's Ward (3 Master Seals) are exempt from royal tithes."
+        },
+        "prison": {
+          "code": "PRISON",
+          "name": "Castle Dungeon",
+          "cat": "Penalty",
+          "cost": "1,000 g. Bail",
+          "action": "1-round detention. Escape by paying 1,000 g. bail, rolling a 6, or playing a <strong>Royal Amnesty</strong> scroll.",
+          "tip": "Keep a Royal Amnesty scroll in your pouch to walk free immediately without losing a turn."
+        },
+        "hospital": {
+          "code": "HOSPITAL",
+          "name": "Royal Infirmary",
+          "cat": "Healing",
+          "cost": "1,000 g.",
+          "action": "Recover from heavy wounds. A healing elixir (1,000 g.) permanently raises Combat +1 (if < 2) and grants <strong>+0.5 💖 for valor</strong> plus protective ward.",
+          "tip": "Holders of the Knight's Ward are treated completely free of charge."
+        },
+        "jester": {
+          "code": "JESTER",
+          "name": "Court Jester & Minstrel",
+          "cat": "Special",
+          "cost": "2,000 g. (Jester)",
+          "action": "Court entertainment. Composes mocking ballads against rivals; rewards skilled dancers with <strong>+200 g. × Dance level</strong>.",
+          "tip": "High Dance turns every Jester visit into generous royal coin."
+        },
+        "chance": {
+          "code": "CHANCE",
+          "name": "Chance & Royal Favor",
+          "cat": "Fate",
+          "cost": "—",
+          "action": "Draw a fate card from the royal deck: grants, challenges, highwaymen, riding trials, or <strong>tactical scrolls for your pouch</strong>.",
+          "tip": "Store tactical scrolls in your pouch (up to 3) and unleash them whenever needed."
+        }
+      }
     },
     "board_bar": {
       "back_landing": "🏰 ← Back to Intro",
@@ -582,7 +859,8 @@ window.PRS_I18N["en"] = {
       "modal_subtitle": "Official royal decree with seal and chancellor's signature",
       "close_title": "Close diploma",
       "behalf_of": "On behalf of the Crown and Court:",
-      "chancellor_title": "High Royal Chancellor"
+      "chancellor_title": "High Royal Chancellor",
+      "download_toast": "💾 Royal Winner Diploma has been downloaded to your device!"
     },
     "online_role": {
       "free_play": "🛋️ Play without lock (All Players / Hot-Seat)"
@@ -615,7 +893,24 @@ window.PRS_I18N["en"] = {
       "title": "Game Tutorial: The Princess's Heart",
       "subtitle": "Step by step to honor, wealth and the Princess's hand",
       "prev_btn": "← Previous",
-      "next_btn": "Next →"
+      "next_btn": "Next →",
+      "step1_badge": "Step 1 of 4 • Basic Principle",
+      "step1_title": "Moving Through the Kingdom & Buying Estates",
+      "step1_desc": "Roll the die (1–6) and travel across the board. When you land on an unowned <strong>Village</strong>, <strong>Town</strong>, <strong>Castle</strong>, or <strong>Craft</strong>, you can purchase it to collect tolls from rivals and earn steady taxes.",
+      "step1_tip": "💡 Beginner tip: Villages and castles secure steady gold income in the early game for gear and hunting.",
+      "step2_badge": "Step 2 of 4 • Beasts & Love",
+      "step2_title": "Noble Breeding & Princess Hearts",
+      "step2_desc": "On <strong>Horse (K)</strong>, <strong>Dog (P)</strong>, and <strong>Falcon (S)</strong> tiles you buy noble beasts from Sets 1–14. Completing a full trio of the same set (K+P+S) earns an extra <strong>+1 💖 Princess Heart</strong> and stronger combat!",
+      "step2_tip": "💡 Beginner tip: Owning a horse unlocks Gallop movement (2d6), and dogs & falcons aid in hunting quests T1–T3.",
+      "step3_badge": "Step 3 of 4 • Feudal Growth",
+      "step3_title": "Upgrading Estates, Pastures & Armory",
+      "step3_desc": "You can upgrade your <strong>Villages</strong> up to ⭐3 (higher tax & toll). At Towns and Castles you build <strong>Pastures</strong> for sheep, pigs, and cattle. At the Blacksmith or Armory you buy <strong>weapons, armor, and courtly jewels</strong>.",
+      "step3_tip": "💡 Beginner tip: Livestock cattle and upgraded villages will fund new equipment when the Tax Collector (VD) pays out.",
+      "step4_badge": "Step 4 of 4 • Quests & Trophies",
+      "step4_title": "Combat Quests, Festivals & Path to Victory",
+      "step4_desc": "Defeat <strong>Beasts (T1)</strong>, <strong>Monsters (T2)</strong>, and <strong>Dragons (T3)</strong> for gold, trophies, and precious 💖 Princess Hearts. Victory goes to whoever reaches the target hearts first and arrives at the <strong>Royal Castle</strong>!",
+      "step4_tip": "💡 <em>Knight's Golden Rule:</em> Watch monster & dragon weaknesses — the right dog, falcon, spear, or elixir can turn any duel around!",
+      "finish_btn": "Got it, let's play! 🎲"
     },
     "knight_duel_default_title": "Knight's Duel of Honor",
     "knight_duel_default_sub": "Outcome of direct encounter on the tile",
@@ -743,7 +1038,262 @@ window.PRS_I18N["en"] = {
     "armory_equipped": "Equipped",
     "armory_owned": "Owned",
     "armory_req_virtue": "Requires virtue: {virtue}",
-    "cheatsheet_subtitle": "Overview of rules, knightly virtues, combat, animal breeding, and kingdom economy"
+    "cheatsheet_subtitle": "Overview of rules, knightly virtues, combat, animal breeding, and kingdom economy",
+    "card_preview": {
+      "default_title": "Card Details",
+      "weakness_usable": "🎯 <strong>Weakness / Usable:</strong> ",
+      "item_tier": "Item {tier}",
+      "rare_price": "Rare Relic",
+      "item_default_desc": "Equipment or courtly jewel of a royal knight.",
+      "knight_slot": "<strong>Knight Slot:</strong> ",
+      "slot_universal": "Universal",
+      "cat_positive": "✨ Court Favor (+)",
+      "cat_negative": "⛈️ Twist of Fate (-)",
+      "cat_challenge": "⚖️ Trial of Virtue (!)",
+      "rated_virtues": "⚔️ <strong>Rated virtues:</strong> ",
+      "winner_prizes": "💰 <strong>Winner prizes:</strong> ",
+      "fest_tournament": {
+        "title": "⚔️ Royal Tournament",
+        "desc": "Knights clash in a royal jousting tournament. Requires armor and martial spirit.",
+        "virtues": "Combat + Riding + Dice Roll",
+        "prizes": "1st: 2,000 gp • 2nd: 1,000 gp • 3rd: 500 gp"
+      },
+      "fest_ball": {
+        "title": "💃 Royal Court Ball",
+        "desc": "A grand ball in the royal hall before the Princess and the entire court.",
+        "virtues": "Dance + Charisma + Dice Roll",
+        "prizes": "1st: 1,800 gp • 2nd: 900 gp • 3rd: 450 gp"
+      },
+      "fest_race": {
+        "title": "🏇 Royal Horse Race",
+        "desc": "An exciting race of the kingdom's fastest riders and noble steeds.",
+        "virtues": "Riding + Combat + Dice Roll",
+        "prizes": "1st: 1,600 gp • 2nd: 800 gp • 3rd: 400 gp"
+      },
+      "fest_default": {
+        "title": "🎪 Royal Festival",
+        "desc": "A festive contest in the presence of the royal court.",
+        "virtues": "Knight Attributes + Dice Roll",
+        "prizes": "Gold and prestige for the top three"
+      }
+    },
+    "chance_modal": {
+      "seal_title": "Seal of Royal Fate",
+      "seal_desc": "A royal courier caught up with you at the crossroads carrying a sealed scroll. Break the seal to reveal your fate.",
+      "seal_btn": "✉️ Break the Seal of Fate!",
+      "card_badge": "CHANCE CARD",
+      "dilemma_label": "⚔️ On-the-spot Choice",
+      "scroll_hint": "📜 You may use this favorable scroll immediately, or store it in your pouch for a better moment.",
+      "btn_store": "🎒 Store in Pouch ({count}/{max})",
+      "bag_full": "🎒 Pouch is full ({count}/{max})",
+      "btn_use_now": "⚡ Use Now",
+      "btn_end_turn": "Accept Fate & End Turn ▶",
+      "scroll_stored_toast": "🎒 Scroll \"{title}\" has been stored in your knight's pouch.",
+      "scroll_activated_toast": "⚡ Used scroll \"{title}\"!"
+    },
+    "festival_modal": {
+      "tournament": {
+        "title": "⚔️ ROYAL TOURNAMENT",
+        "sub": "A royal jousting and single-combat tournament of knights.",
+        "req": "Entry requires at least 1 weapon/armor item or owning a horse.",
+        "formula": "Combat + Riding + Full Armor Set Bonus + Dice Roll",
+        "prizes": "🥇 2,000 gp • 🥈 1,000 gp • 🥉 500 gp"
+      },
+      "ball": {
+        "title": "💃 ROYAL COURT BALL",
+        "sub": "A magnificent royal ball filled with music, elegance, and court etiquette.",
+        "req": "Fine court attire, or base Charisma or Dance of at least 3.",
+        "formula": "Dance + Charisma + Attire Bonus + Dice Roll",
+        "prizes": "🥇 1,800 gp • 🥈 900 gp • 🥉 450 gp"
+      },
+      "race": {
+        "title": "🏇 ROYAL HORSE RACE",
+        "sub": "The royal steeplechase for the kingdom's fastest rider and finest steed.",
+        "req": "Entry requires owning at least one riding horse.",
+        "formula": "Riding + Combat + Horse Count + Dice Roll",
+        "prizes": "🥇 1,600 gp • 🥈 800 gp • 🥉 400 gp"
+      },
+      "default": {
+        "title": "🎪 ROYAL FESTIVAL",
+        "sub": "A festive contest attended by the kingdom's foremost knights.",
+        "req": "Meeting the royal contest entry requirements.",
+        "formula": "Selected Virtues + Dice Roll",
+        "prizes": "Gold prizes for the top three"
+      },
+      "bonus_set_tag": "⚔️ +3 full armor",
+      "bonus_dress_tag": "👗 +3 court dress",
+      "bonus_horses": "🐎 +{val} horses",
+      "bonus_base": "Base {base}",
+      "reason_tournament": "Lacks armor, weapon, or horse",
+      "reason_ball": "Lacks dress, charisma, or dance (min. 3)",
+      "reason_race": "Owns no horse",
+      "label_req": "<strong>Entry condition:</strong>",
+      "label_formula": "<strong>Scoring:</strong>",
+      "label_prizes": "<strong>Prizes:</strong>",
+      "cancelled_title": "Festival Cancelled (Not Enough Entrants)",
+      "cancelled_desc": "Only <strong>{count}</strong> knights qualified. Since the contest requires at least 2 entrants, the court still honors organizer <strong>{organizer}</strong>'s readiness.",
+      "cancelled_hearts": "💖 +0.5 Princess Heart for organizer readiness",
+      "btn_accept_gift": "👑 Accept Court Recognition & Continue",
+      "qualified_header": "⚔️ Qualified Entrants ({count})",
+      "host_badge": "👑 Host",
+      "ready_badge": "Ready",
+      "spectators_header": "👀 Spectators Only (unqualified)",
+      "btn_start_contest": "🎺 Begin Royal Contest & Roll Dice! 🎲",
+      "ceremony_title": "ROYAL CONTEST RESULTS",
+      "ceremony_sub": "The herald proclaimed the final standings before the Princess.",
+      "medal_1": "🥇 1st place",
+      "medal_2": "🥈 2nd place",
+      "medal_3": "🥉 3rd place",
+      "medal_nth": "{place}th place",
+      "roll_score_line": "Dice roll: <strong>🎲 {roll}</strong> • Total score: <strong>{score}</strong>",
+      "points_badge": "{score} pts",
+      "btn_continue_victory": "🏆 Claim Prizes & Continue ▶"
+    },
+    "armory_view": {
+      "knight_label": "⚔️ Knight:",
+      "purse_label": "Purse:",
+      "status_can_shop": "🏰 At the Blacksmith / Market — shopping is open!",
+      "status_at_merchant": "🛒 Standing at the Merchant!",
+      "status_browse": "📜 Catalog preview (buy when visiting Blacksmith/Merchant)",
+      "sell_rate_label": "⚖️ Trade-in Rate:",
+      "sell_rate_merchant": "You are at the market! Gear buyout <strong>{itemPct}%</strong>, estates <strong>{bldPct}%</strong> (incl. upgrades & pastures).",
+      "sell_rate_road": "On the road away from markets, emergency buyout is <strong>{itemPct}%</strong> for gear and <strong>{bldPct}%</strong> for estates.",
+      "sell_empty": "You have no gear or estates available to sell.",
+      "unknown_item": "Unknown Item",
+      "tier_short": "Tier {tier}",
+      "btn_sell_item": "Sell Item",
+      "estate_badge": "Estate",
+      "invested_total": "Total invested: {val}",
+      "btn_sell_node": "Sell Estate",
+      "tier_upper": "TIER {tier}",
+      "pack_1_name": "Basic Gear Pack (Items 1)",
+      "pack_1_desc": "Draws a random card from the ITEMS 1 deck (basic weapons, armor, or jewels).",
+      "pack_2_name": "Knightly Gear Pack (Items 2)",
+      "pack_2_desc": "Draws a random card from the ITEMS 2 deck (plate armor, sharp swords, brocade).",
+      "pack_3_name": "Royal Relic Pack (Items 3)",
+      "pack_3_desc": "Draws a random legendary card from the ITEMS 3 deck (Dragonslayers & crowns).",
+      "btn_merchant_only": "🔒 Merchant Only",
+      "btn_no_gold": "🪙 Not Enough Gold",
+      "btn_buy_pack": "🎁 Draw for {price}",
+      "pastures_title": "🌾 Pastures & Farm Livestock:",
+      "livestock_tax_gain": "Tax Collector Yield: {val}",
+      "livestock_capacity": "Pasture capacity: <strong>{count} / {cap}</strong> head (🐄 Cattle: {cattle} • 🐑 Sheep: {sheep} • 🐖 Pigs: {pigs})",
+      "livestock_hint": "Build pastures in your Towns and Castles. Buy livestock at map stables, markets, or right here at the Merchant.",
+      "badge_livestock": "Livestock",
+      "slot_animal": "Beast",
+      "sheep_name": "Flock of Sheep",
+      "sheep_desc": "Fine wool flock. Increases Tax Collector income by +{tax} and estate toll by +{rent}.",
+      "pigs_name": "Drove of Pigs",
+      "pigs_desc": "Profitable swine breeding for royal banquets. Adds +{tax} to VD taxes and +{rent} to tolls.",
+      "cattle_name": "Herd of Cattle",
+      "cattle_desc": "The kingdom's most valuable farm herd. Grants +{tax} to VD taxes and +{rent} to tolls.",
+      "chip_per_tax": "+{val} / tax",
+      "chip_per_rent": "+{val} / toll",
+      "btn_no_pastures": "⛔ No Pastures",
+      "btn_no_pastures_title": "Build a pasture at one of your Towns or Castles first.",
+      "btn_pastures_full": "⛔ Pastures Full",
+      "btn_pastures_full_title": "Pasture capacity is full; build more pastures.",
+      "btn_at_merchant_stables": "🔒 Merchant / Stables Only",
+      "btn_at_merchant_stables_title": "Livestock can be bought at the market, Merchant, or stables.",
+      "btn_low_gold": "🪙 Low Gold",
+      "btn_buy_animal": "{icon} Buy Herd",
+      "btn_owned": "✅ Owned",
+      "btn_market_only": "🔒 Market Only",
+      "btn_buy_item": "🛒 Buy Gear"
+    },
+    "quest_duel": {
+      "tier_u1": "T1 • Beast Hunt",
+      "tier_u2": "T2 • Trial of Honor",
+      "tier_u3": "T3 • Dragon Lair",
+      "w_dogs": "Hunting Dogs (+2)",
+      "w_falcon": "Hunting Falcons (+2)",
+      "w_falcons": "Falcons / Crossbow (+2)",
+      "w_horse": "Owned Horse (+2)",
+      "w_animals": "Bred Animals H/D/F (+2)",
+      "w_animals_and_spear": "Beasts & Long Spear (+2)",
+      "w_spear": "Long Spear / Pike (+2)",
+      "w_armor": "Plate Armor / Shield (+2)",
+      "w_water_armor": "Water Armor / Shield (+2)",
+      "w_fire": "Fiery Weapon / Magic (+2)",
+      "w_ice": "Frost Blade / Ward (+2)",
+      "w_elixir": "Alchemical Elixir (+2)",
+      "w_dance": "Dance & Agility (+2)",
+      "w_charisma": "High Charisma (+2)",
+      "w_light": "Light & Silver Blade (+2)",
+      "w_crystal": "Piercing Weapon / Spear (+2)",
+      "w_undead": "Silver / Blessed Armor (+2)",
+      "w_holy": "Sacred Relic (+2)",
+      "w_dragon_slayer": "Dragonslayer / T3 Gear (+2)",
+      "w_mastery": "High Combat Mastery (+2)",
+      "w_default": "Combat Superiority",
+      "possible_trophy": "Possible Trophy: {name}",
+      "trophy_bonus_slot": "5th Slot Bonus: {bonus}",
+      "flip_title": "Flip the card to reveal quest details!",
+      "flip_btn": "🃏 Flip Card!",
+      "weakness_label": "Weakness / Usable Equipment:",
+      "weakness_exploited_title": "Weakness Exploited! (+2 Power)",
+      "weakness_beast_title": "Available for Beast Buyout!",
+      "weakness_locked_hint": "Required item or beast not owned — weakness not active.",
+      "static_power": "Knight Base Power",
+      "part_horse": "Horse: +{val}",
+      "part_beasts": "Beasts: +{val}",
+      "part_tactic": "Tactic: {val}",
+      "part_weakness": "Weakness: +{val}",
+      "part_stance": "Stance: {val}",
+      "difficulty_small": "Difficulty",
+      "needed_roll_label": "Required Dice Roll:",
+      "impossible_without_roll": "Impossible (min. roll > 6)",
+      "win_chance_label": "Win Chance:",
+      "stance_header": "⚔️ Choose Knight's Combat Stance:",
+      "stance_aggressive_title": "Aggressive Assault",
+      "stance_aggressive_badge": "+2 Power | Risk",
+      "stance_aggressive_desc": "Grants +2 combat power, but doubles gold penalty on defeat.",
+      "stance_tactical_title": "Tactical Focus",
+      "stance_tactical_badge": "Balanced",
+      "stance_tactical_desc": "Classic knightly style without penalties or extra loss risk.",
+      "stance_defensive_title": "Defensive Guard",
+      "stance_defensive_badge": "-1 Power | Safe",
+      "stance_defensive_desc": "Reduces power by -1, but avoids hospital healing fees on defeat.",
+      "tactic_header": "🛡️ Pre-combat Preparation & Tactics:",
+      "tactic_normal_name": "Standard Clash",
+      "tactic_normal_desc": "Fight with current equipment at no extra cost.",
+      "tactic_charge_name": "Cavalry Charge (Horse)",
+      "tactic_charge_desc": "Uses your horses' momentum (+2 attack power).",
+      "tactic_hounds_name": "Unleash Dogs & Falcons",
+      "tactic_hounds_desc": "Hunting companions surround the foe (+2 power, +3 at T1!).",
+      "tactic_elixir_name": "Dragon Elixir ({price})",
+      "tactic_elixir_desc": "Purchased alchemical potion: grants +3 power and shields from loss penalty.",
+      "btn_roll_action": "⚔️ Charge into Battle & Roll Dice! 🎲",
+      "rolling_btn": "🎲 Rolling dice...",
+      "rerolling_btn": "🎲 Rerolling...",
+      "animal_fallback": "beast",
+      "buyout_toast": "🐾 Redeemed \"{name}\" from pawn for {price}!",
+      "buyout_pawn_toast": "🐾 Claimed pawn ticket for \"{name}\"! You can redeem it later.",
+      "ceremony_win_banner": "🏆 GLORIOUS COMBAT VICTORY!",
+      "ceremony_win_sub": "{badge} • Hero <strong>{player}</strong> defeated <strong>{quest}</strong>!",
+      "ceremony_roll_stats": "Dice roll: <strong>🎲 {roll}</strong> • Total power: <strong>{power}</strong> (vs. {diff})",
+      "ceremony_stance_label": "Stance:",
+      "ceremony_tactic_label": "Tactic:",
+      "ceremony_weakness_win": "🎯 Exploited weakness (+2): {reason}",
+      "ceremony_trophy_won": "🏅 New Trophy Collected: {name}",
+      "ceremony_trophy_default_desc": "A rare hunting or war trophy boosting the knight's prestige.",
+      "ceremony_trophy_auto_equipped": "✅ Automatically equipped in 5th slot (Trophy)",
+      "ceremony_btn_equip_trophy": "🎖️ Equip This Trophy Now",
+      "ceremony_loot_found": "💎 Gear Loot Found: {item}",
+      "ceremony_win_continue": "⚔️ Claim Rewards & Continue ▶",
+      "ceremony_loss_banner": "💥 RETREAT FROM BATTLE",
+      "ceremony_loss_sub": "Duel against <strong>{quest}</strong> failed. Roll: <strong>🎲 {roll}</strong> • Power: <strong>{power}</strong> (needed {diff}).",
+      "ceremony_weakness_loss": "🎯 Weakness ({reason}) gave +2, yet it was still not quite enough.",
+      "reroll_title": "🍀 Chance to Turn the Tide (Tactical Reroll)!",
+      "reroll_desc": "Your gear and tactics allow a one-time dice reroll to reach {diff}.",
+      "reroll_btn": "🎲 Reroll the Dice!",
+      "loss_saved_elixir": "🧪 The Dragon Elixir cushioned the defeat — you escaped without a penalty!",
+      "loss_u1": "🌿 The beast fled into the thicket. Your knight suffered minor wounds.",
+      "loss_hospital": "🏥 You were transported to the Royal Hospital for recovery.",
+      "loss_retreat_continue": "🩹 Retreat & End Turn ▶",
+      "trophy_equipped_box": "✅ Trophy equipped in knight's 5th slot!",
+      "trophy_equipped_toast": "🎖️ Trophy equipped!"
+    }
   },
   "engine": {
     "start_title": "👑 Royal heraldic fanfare! The game \"The Princess's Heart\" begins.",
@@ -1865,7 +2415,11 @@ window.PRS_I18N["en"] = {
     "hearts_count": "hearts",
     "saved": "SAVED",
     "stat_combat": "⚔️ Combat Prowess",
-    "stat_charisma": "✨ Noble Charisma"
+    "stat_charisma": "✨ Noble Charisma",
+    "gold_short": "g.",
+    "guest": "Guest",
+    "hearts_singular": "Heart",
+    "hearts_singular_princezna": "Princess's Heart"
   },
   "animals": {
     "horse": "Horse",
@@ -2038,7 +2592,29 @@ window.PRS_I18N["en"] = {
     "text_festival_invite": "The Royal Festival is underway! Show your grace and win the Princess's Heart.",
     "text_tax_warning": "The Tax Collector taxes landless knights and pays yields to estate owners.",
     "text_hospital_care": "The Royal Infirmary treats your wounds and restores your fighting strength.",
-    "text_prison_sentence": "Royal Dungeon! Serve your sentence, pay bail, or test your luck on dice."
+    "text_prison_sentence": "Royal Dungeon! Serve your sentence, pay bail, or test your luck on dice.",
+    "eval_animal_own": "Your own beast (Set #{setId}).",
+    "eval_animal_rival": "Owned by a rival. Landing here will cost rent.",
+    "eval_animal_complete": "Key tile! Buying completes Set #{setId} (3/3, crown 👑 + 1.5 💖).",
+    "eval_animal_pair": "Gives you a pair (2/3 in Set #{setId}).",
+    "eval_animal_free": "Available breeding beast (price {price}).",
+    "eval_town_own": "Your town yielding 1,200 g. in taxes.",
+    "eval_town_rival": "Rival's town earning them taxes on collections.",
+    "eval_tycoon_goal": "Tycoon scenario target!",
+    "eval_town_free": "Available town for {price} (+1,200 g. tax).",
+    "eval_castle_own": "Your castle (+2,500 g. tax and +1 Charisma).",
+    "eval_castle_rival": "Rival's castle. Watch out for steep rent.",
+    "eval_castle_free": "Available castle for {price} (+2,500 g. tax and +1 Charisma).",
+    "eval_village_own": "Your tier {lvl}★ village. Ready for upgrade.",
+    "eval_village_rival": "Rival's village.",
+    "eval_village_free": "Available village for {price}. Reliable tax source.",
+    "eval_slayer_goal": "Dragon Slayers target!",
+    "eval_quest_u3": "Perilous Dragon Lair holding royal treasure.",
+    "eval_quest_u2": "Monster den. Requires solid combat equipment.",
+    "eval_quest_u1": "Forest beast. Ideal target for hunting with dogs or falcons.",
+    "eval_virtue_fallback": "Virtue",
+    "eval_master": "Virtue Master ({skill}). Raises virtue rank.",
+    "eval_festival": "Royal Festivals. Prime spot for winning Princess's Hearts 💖."
   },
   "pouch": {
     "title": "Scroll Pouch",
@@ -2541,7 +3117,9 @@ window.PRS_I18N["en"] = {
     "calc_and": "and",
     "calc_place_1": "🥇 1st Place (Strong chance of victory)",
     "calc_place_2": "🥈 2nd Place (Top contenders of the realm)",
-    "calc_place_3": "🥉 3rd Place (It will be a tough contest)"
+    "calc_place_3": "🥉 3rd Place (It will be a tough contest)",
+    "mode_art_active": "🎨 Painted Art (active)",
+    "mode_scheme_active": "📐 Blueprint (active)"
   },
   "saves": {
     "last_played": "⚔️ Last Played Game",
@@ -2590,7 +3168,23 @@ window.PRS_I18N["en"] = {
     "code_prefix": "Code: ",
     "default_royal_map": "Royal Map",
     "recent_map_prefix": "Map: ",
-    "recent_tpl_tiles_suffix": " tiles)"
+    "recent_tpl_tiles_suffix": " tiles)",
+    "autosave_title": "🟢 Last Played Active Quest (Autosave)",
+    "btn_continue_game": "▶️ Continue Game",
+    "btn_continue_short": "▶️ Continue",
+    "btn_delete_save_title": "Delete this saved quest",
+    "empty_active_desc": "You can launch a new quest on any of your saved templates above!",
+    "empty_active_title": "No active games in progress",
+    "empty_saves_btn": "⚡ Start New Solo Quest",
+    "empty_saves_desc": "During any quest (Solo AI, Hot-Seat, or Online), click <strong>💾 Save Game</strong> in the top table bar to reload it anytime.",
+    "empty_saves_title": "No saved quests yet",
+    "goal_prefix": "Goal: ",
+    "saved_boards_header": "My Saved Board Templates ({count})",
+    "saved_boards_hint": "Launch a new game on this template or edit it in Map Studio",
+    "tpl_chip_edit_title": "Edit in Map Studio",
+    "tpl_chip_play_title": "Start game on this board template",
+    "tpl_chip_remove_title": "Remove",
+    "unknown_time": "Unknown time"
   },
   "lower_dashboard": {
     "title": "Hall of Knights & Royal Chronicle",
@@ -2635,7 +3229,35 @@ window.PRS_I18N["en"] = {
     "filter_young": "Young Dragons (5)",
     "filter_elemental": "Elemental Dragons (9)",
     "filter_boss": "Dragon Bosses (6)",
-    "tactical_tip": "<strong>Combat Tactical Bonus:</strong> Every beast and dragon has an identified weakness in the Bestiary. If you enter the Combat Arena equipped with matching gear, virtue, element, or beasts, you automatically gain a <strong>+2 combat power bonus (🎯 Exploited Weakness)</strong>!"
+    "tactical_tip": "<strong>Combat Tactical Bonus:</strong> Every beast and dragon has an identified weakness in the Bestiary. If you enter the Combat Arena equipped with matching gear, virtue, element, or beasts, you automatically gain a <strong>+2 combat power bonus (🎯 Exploited Weakness)</strong>!",
+    "tiers": {
+      "u1": "Tier U1 (Forest Beasts)",
+      "u2_epic": "Tier U2+ (Mythic Titan)",
+      "u2": "Tier U2 (Fabled Monster)",
+      "young": "Tier A (Young Dragon)",
+      "elemental": "Tier B (Elemental Dragon)",
+      "boss": "Tier C (Legendary Boss)"
+    },
+    "weaknesses": {
+      "dogs": "Hunting dogs distract the beast (+2 power with dogs owned)",
+      "falcon": "Falcon strikes weak spots (+2 power with falcon owned)",
+      "falcons": "Hunting falcon tracks lair / counters aerial strike (+2 power)",
+      "animals": "Dog and falcon confuse the enemy in combat (+2 power with both owned)",
+      "animals_and_spear": "Horse/dog combined with a tournament spear (+2 power)",
+      "horse": "Full cavalry charge on horseback (+2 power with horse owned)",
+      "dance": "Can be charmed with graceful dancing (+2 power with Dance ≥ 2)",
+      "elixir": "Healing elixir neutralizes breath or venom (+2 power with elixir)",
+      "water_armor": "Water pearl or sturdy armor dampens heat (+2 power)",
+      "ice": "Frost weapons weaken the foe (+2 power with frost weapon/relic)",
+      "fire": "Fire melts ice, crystals, and webs (+2 power with fiery weapon/relic)",
+      "armor": "Heavy knight armor grounds lightning and deflects blows (+2 power)",
+      "light": "Consecrated relics dispel darkness and phantoms (+2 power)",
+      "charisma": "Noble charisma wins over the rival (+2 power with Charisma ≥ 3)",
+      "holy": "Holy relics banish undead and break curses (+2 power)",
+      "courage": "Unbreakable will pierces the mist (+2 power with Combat ≥ 3 or Riding ≥ 3)",
+      "mastery": "Trial of all 4 virtues (+2 power with all virtues ≥ 2)",
+      "spear": "Long knightly lance keeps the foe at bay (+2 power)"
+    }
   },
   "castles_gallery": {
     "title": "🏰 Gallery of Royal and Ancestral Castles",
@@ -3118,7 +3740,11 @@ window.PRS_I18N["en"] = {
       "all_scenarios": "All scenarios achievable",
       "trios": "animal trios",
       "branches": "branches",
-      "tiles": "tiles"
+      "tiles": "tiles",
+      "tier_prefix": "Tier",
+      "warn_badge": "Scenario warning",
+      "warn_slayer": "At least 2× Dragon U3 recommended for Dragon Slayers scenario",
+      "warn_tycoon": "3× Town + 1× Castle recommended for Tycoon scenario"
     },
     "select_options": {
       "shape_auto": "🎲 By seed (Automatic mix)",
@@ -3159,7 +3785,15 @@ window.PRS_I18N["en"] = {
     "start_quest_template_msg": "Starting a quest on template \"{name}\" requires restarting the match.\nDo you wish to start playing?",
     "start_quest_template_confirm": "⚔️ Start Game",
     "start_quest_template_cancel": "Back",
-    "default_custom_map_name": "Custom Map"
+    "default_custom_map_name": "Custom Map",
+    "animal_level_prefix": "Level {lvl}",
+    "animal_price_fmt": "Price {p1}/{p2}/{p3} {curr}",
+    "animal_summary_badge": "{count} trios = {tiles} tiles",
+    "procedural_route": "Procedural Route",
+    "start_quest_dyn_cancel": "Back to Game",
+    "start_quest_dyn_confirm": "⚔️ Start Game on This Board",
+    "start_quest_dyn_msg": "Starting a new quest on your dynamic board requires restarting the match.\nStart playing on \"{name}\" ({count} tiles)?",
+    "start_quest_dyn_title": "Start Quest on Custom Board"
   },
   "settings": {
     "title": "Game Settings & Realm",
@@ -3290,7 +3924,15 @@ window.PRS_I18N["en"] = {
     "toll_label": "Toll: {amount} {curr}",
     "estates_header": "🏰 Estates & Breeding ({count} tiles):",
     "farming_sub": "🌾 Stock: 🐄{cattle} 🐑{sheep} 🐖{pigs}",
-    "no_estates": "🏰 The knight owns no estates or stables yet. Buy tiles across the realm!"
+    "no_estates": "🏰 The knight owns no estates or stables yet. Buy tiles across the realm!",
+    "level_short": "Lvl {lvl}/3",
+    "pill_horses": "Horses: {count}",
+    "pill_dogs": "Hunting dogs: {count}",
+    "pill_falcons": "Falcons: {count}",
+    "pill_villages": "Villages: {count}",
+    "pill_towns": "Towns: {count}",
+    "pill_castles": "Castles: {count}",
+    "pill_crafts": "Guild trades & jesters: {count}"
   },
   "decks_row": {
     "header_title": "Royal Card Decks &amp; Treasury",
@@ -3311,14 +3953,96 @@ window.PRS_I18N["en"] = {
     "festivals_sub": "Tournament &amp; ball",
     "diff_4_6": "Difficulty 4–6",
     "diff_8_10": "Difficulty 8–10",
-    "diff_11_17": "Difficulty 11–17"
+    "diff_11_17": "Difficulty 11–17",
+    "zone": {
+      "default_title": "Card Deck",
+      "btn_preview": "🔍 Preview",
+      "btn_detail": "🔍 Detail",
+      "items_header": "Overview of items in this deck (click for card details):",
+      "veci1_title": "🛡️ ITEMS 1 Deck (Basic Gear)",
+      "veci1_summary": "<strong>Pack price: {price}</strong> | Contains {count} basic weapons, armors, and courtly jewels.",
+      "veci1_desc": "Can be purchased at the Blacksmith, Merchant, or Armory tab. Grants bonuses to Combat (+2 to +3), Riding, Dance, and Charisma.",
+      "veci2_title": "⚔️ ITEMS 2 Deck (Knightly Gear)",
+      "veci2_summary": "<strong>Pack price: {price}</strong> | Contains {count} elite weapons, plate armors, and brocade robes.",
+      "veci2_desc": "Essential for Tier 2 monster duels and royal court prestige. Grants combined attribute bonuses up to +7.",
+      "veci3_title": "👑 ITEMS 3 Deck (Legendary Royal Relics)",
+      "veci3_summary": "<strong>Pack price: {price}</strong> | Contains {count} ultimate jewels and Dragonslayer swords.",
+      "veci3_desc": "The rarest royal relics granting up to +13 total attributes, essential for defeating the mightiest Tier 3 dragons.",
+      "u1_title": "🐗 BEASTS Deck (Quests T1 - Hunting Grounds)",
+      "u1_summary": "<strong>Difficulty: 4–6</strong> | Reward: 1,200 – 2,600 {curr} + 0.5–1.5 💖 Hearts.",
+      "u1_desc": "Hunting dogs and falcons make hunting game easier. Defeating each beast grants a unique hunting trophy for your 5th gear slot.",
+      "u1_list_header": "List of {count} beasts in the grounds (click for card details):",
+      "u2_title": "👹 MONSTERS Deck (Quests T2 - Dangerous Trials)",
+      "u2_summary": "<strong>Difficulty: 8–15</strong> | Reward: 3,000 – 12,000 {curr} + 1–5 💖 + Gear Item.",
+      "u2_desc": "Rock giants, werewolves, robber knights, titans, and sorcerers. Defeating them grants permanent Princess Hearts and a mighty relic.",
+      "u2_list_header": "List of {count} monsters in the deck (click for card details):",
+      "u3_title": "🐉 DRAGONS Deck (Quests T3 - Dragon Lairs)",
+      "u3_summary": "<strong>Difficulty: 11–17</strong> | Reward: 6,000 – 16,000 {curr} + 2.5–6.0 💖 Princess Hearts.",
+      "u3_desc": "The kingdom is threatened by {count} unique dragons and wyrms. Each has its weakness (spears, dogs, elixirs, fire, or frost) and leaves a legendary treasure.",
+      "u3_list_header": "List of {count} dragons in the deck (click for card details):",
+      "u3_bestiary_btn": "🐉 View Full Dragon Bestiary in Rules ({count})",
+      "chance_title": "❓ CHANCE Deck (24 Royal Fate Cards)",
+      "chance_summary": "Total {count} authentic royal events.",
+      "chance_desc": "Royal favor (+1 💖), bandit ambushes, love sonnets, gifts from the Queen Mother, armor repairs, and crossroad treasure finds.",
+      "chance_list_header": "Selection of fate cards (click for card details):",
+      "chance_pos": "Court Favor (+)",
+      "chance_neg": "Misfortune (-)",
+      "chance_challenge": "Trial (!)",
+      "fest_title": "🎪 FESTIVALS Deck (Royal Contests)",
+      "fest_summary": "Royal Tournament, Court Ball, and Horse Race.",
+      "fest_desc": "Players compare virtues: Tournament (Combat & Riding), Ball (Dance & Charisma), Race (Riding & Combat). Top three earn cash prizes up to {prize}!",
+      "fest_prize_upto": "up to {prize}",
+      "fest_list_header": "Royal Festivals (click for details):"
+    }
   },
   "dice": {
     "click_to_roll": "Click the dice to roll!"
   },
   "achievements": {
     "modal_title": "🏆 Knight's Hall of Fame &amp; Achievements",
-    "modal_close": "Close Hall of Fame"
+    "modal_close": "Close Hall of Fame",
+    "badge_first_game_name": "🥉 First Step",
+    "badge_first_game_title": "First Step",
+    "badge_first_game_desc": "Play your first match in the realm of Princess's Heart.",
+    "badge_slayer_name": "🐉 Dragon Slayer",
+    "badge_slayer_title": "Dragon Slayer",
+    "badge_slayer_desc": "Slay a fearsome dragon inside its dangerous lair.",
+    "badge_castle_lord_name": "🏰 Castle Lord",
+    "badge_castle_lord_title": "Castle Lord",
+    "badge_castle_lord_desc": "Build at least 2 majestic castles on your estates.",
+    "badge_breeder_name": "🐎 Master Breeder",
+    "badge_breeder_title": "Master Breeder",
+    "badge_breeder_desc": "Own a complete horse set and at least 3 livestock herds.",
+    "badge_ball_master_name": "💃 Ball Virtuoso",
+    "badge_ball_master_title": "Ball Virtuoso",
+    "badge_ball_master_desc": "Earn over 15 Princess's Hearts from Festivals.",
+    "badge_champion_name": "👑 Royal Champion",
+    "badge_champion_title": "Royal Champion",
+    "badge_champion_desc": "Win a match and claim both the princess's hand and the crown.",
+    "badge_grandmaster_name": "🌟 Dragon Legend",
+    "badge_grandmaster_title": "Dragon Legend",
+    "badge_grandmaster_desc": "Reach at least 3 glorious victories or slay 3 dragons.",
+    "newly_unlocked_title": "New Royal Badge",
+    "newly_unlocked_msg": "Congratulations! You unlocked a new royal badge:<br><br><strong style='color:#fde68a; font-size:1.15rem;'>{names}</strong><br><br>View it in your Knight's Hall of Fame.",
+    "rank_grandmaster": "Dragon Grandmaster",
+    "rank_champion": "Champion Knight",
+    "rank_squire": "Honorable Squire",
+    "title_label": "Title:",
+    "treasury_label": "Treasury:",
+    "stat_games": "Matches",
+    "stat_wins": "Victories",
+    "stat_dragons": "Dragons",
+    "stat_hearts": "Total Hearts",
+    "stat_record": "Match Record",
+    "tab_badges": "🏆 Royal Badges ({unlocked} / {total})",
+    "tab_history": "📜 Quest History ({count})",
+    "history_empty_title": "No recorded match history yet",
+    "history_empty_desc": "Complete a match at the table and your results and victory diplomas will be stored here in the realm chronicle.",
+    "winner_fallback": "Winner",
+    "rounds_label": "{count} rounds",
+    "btn_diploma": "📜 Royal Diploma",
+    "status_unlocked": "✨ Unlocked",
+    "status_locked": "🔒 Locked"
   },
   "dialogs": {
     "new_realm": {
@@ -3932,7 +4656,32 @@ window.PRS_I18N["en"] = {
   "combat": {
     "intrigue_ballad_success_summary": "Mocking ballad succeeded! Rival {name} lost -{penalty} 💖.",
     "intrigue_ballad_fail_summary": "Mocking ballad failed. Rival {name} gained +0.25 💖.",
-    "intrigue_customs_summary": "Customs audit imposed on {name} (1 round without rent)."
+    "intrigue_customs_summary": "Customs audit imposed on {name} (1 round without rent).",
+    "armor_fallback": "Sturdy Armor",
+    "tactic_normal": "Standard Attack",
+    "tactic_charge": "🏇 Mounted Charge (+1 Power)",
+    "tactic_hounds": "🐕 Hunting Pack Distraction (+1 Power)",
+    "tactic_elixir": "🧪 Infirmary Healing Elixir (Hospital Shield)",
+    "stance_tactical": "🎯 Tactical Maneuver",
+    "stance_aggressive": "⚔️ Fierce Assault (+2 Power, on loss -2 💖 or 2× penalty)",
+    "stance_defensive": "🛡️ Cautious Defense (-1 Power, 0 heart loss on retreat)",
+    "weakness_dogs": "Hunting hounds distracted the beast",
+    "weakness_falcon": "Hunting falcon pinpointed vulnerable spots",
+    "weakness_horse": "Devastating cavalry charge broke the enemy defense",
+    "weakness_animals": "Trained beasts thoroughly disoriented the dragon",
+    "weakness_animals_spear": "Masterful coordination of steed and tournament lance",
+    "weakness_spear_item": "Long {item} kept the monster at a safe distance",
+    "weakness_spear_skill": "Knightly mastery of cavalry lance and maneuvers",
+    "weakness_armor": "{item} deflected the crushing blow",
+    "weakness_water_armor": "Protective armor and water pearl cooled the searing heat",
+    "weakness_fire": "Roaring flames and volcanic heat melted the icy carapace",
+    "weakness_ice": "Freezing chill and ice crystals cooled the lava maw",
+    "weakness_elixir": "Infirmary healing elixir neutralized the venomous breath",
+    "weakness_dance": "Graceful dance steps and courtly gown charmed the playful dragon",
+    "weakness_charisma": "Knight's noble charisma moved the jeweled dragon",
+    "weakness_courage": "Unshakable knightly courage pierced the shadow mist",
+    "weakness_light": "Radiant sacred light of relics burned away the shadow gloom",
+    "weakness_mastery": "Complete mastery of all 4 virtues (Combat, Riding, Dance, Charisma)"
   },
   "story": {
     "kicker": "📜 Kingdom Lore & Quest Objective",
@@ -4209,7 +4958,14 @@ window.PRS_I18N["en"] = {
       "🐉 Dračí soutěska": "🐉 Dragon Gorge",
       "🐍 Hadovitá magistrála": "🐍 Serpentine Highway",
       "👑 Královská rovnováha": "👑 Royal Balance",
-      "🧙‍♂️ Turnaj čtyř mistrů": "🧙‍♂️ Four Masters Tournament"
+      "🧙‍♂️ Turnaj čtyř mistrů": "🧙‍♂️ Four Masters Tournament",
+      "Sokol 6 (Sokol stěhovavý)": "Falcon 6 (Peregrine)",
+      "Kůň 13 (Zlatý palomino)": "Horse 13 (Golden Palomino)",
+      "Sokol 13 (Skalní orel)": "Falcon 13 (Golden Eagle)",
+      "Pes 13 (Severní vlkodav)": "Dog 13 (Northern Wolfhound)",
+      "Kůň 14 (Stínový oř)": "Horse 14 (Shadow Steed)",
+      "Sokol 14 (Noční raroh)": "Falcon 14 (Night Falcon)",
+      "Pes 14 (Hradní chrlič)": "Dog 14 (Castle Gargoyle)"
     }
   },
   "beta_games": {

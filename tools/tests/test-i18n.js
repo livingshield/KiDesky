@@ -186,19 +186,21 @@ function main() {
     return `${selects.length} .prs-lang-select dropdowns verified`;
   });
 
-  runTest(`6. Ratchet guard: getLanguage() === occurrences in js/ <= ${MAX_HARDCODED_LANG_CHECKS}`, () => {
+  runTest(`6. Ratchet guard: hardcoded lang checks (getLanguage === / _lang === / isEn) in js/ <= ${MAX_HARDCODED_LANG_CHECKS}`, () => {
     const jsFiles = walkJsFiles(path.join(ROOT, 'js'));
     let total = 0;
     const byFile = [];
     for (const f of jsFiles) {
+      const rel = path.relative(ROOT, f).split(path.sep).join('/');
+      if (rel === 'js/app-i18n.js' || rel.startsWith('js/i18n/')) continue;
       const txt = fs.readFileSync(f, 'utf8');
-      const matches = txt.match(/getLanguage\(\)\s*===/g);
+      const matches = txt.match(/getLanguage\(\)\s*===|_lang\s*[=!]==|\bisEn\b/g);
       if (matches && matches.length > 0) {
         total += matches.length;
-        byFile.push(`${path.relative(ROOT, f).split(path.sep).join('/')}:${matches.length}`);
+        byFile.push(`${rel}:${matches.length}`);
       }
     }
-    assert(total <= MAX_HARDCODED_LANG_CHECKS, `getLanguage() === count grew from baseline ${MAX_HARDCODED_LANG_CHECKS} to ${total} (${byFile.join(', ')})`);
+    assert(total <= MAX_HARDCODED_LANG_CHECKS, `Hardcoded lang checks grew from baseline ${MAX_HARDCODED_LANG_CHECKS} to ${total} (${byFile.join(', ')})`);
     return `count=${total}/${MAX_HARDCODED_LANG_CHECKS} (no regressions)`;
   });
 

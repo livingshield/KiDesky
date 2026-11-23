@@ -998,7 +998,6 @@
 
             var html = [];
             var saveCards = [];
-            var isEn = window.PRS_I18n ? window.PRS_I18n._lang === "en" : false;
 
             // 1b. Karta právě rozehrané výpravy z automatického uložení (vždy na 1. místě)
             var activeMeta = (typeof this.getActiveAutosaveMeta === "function") ? this.getActiveAutosaveMeta() : null;
@@ -1015,34 +1014,30 @@
                         var apl = activeMeta.players[ap];
                         var aIsBot = (apl.type !== "Human");
                         var aGold = (typeof apl.gold === "number" && !isNaN(apl.gold)) ? apl.gold : 0;
-                        var aPlName = this.escapeHtml(apl.name);
-                        if (isEn) {
-                            aPlName = aPlName.replace(/\(Ty\)/g, "(You)").replace(/\(PC\)/g, "(AI)");
-                            aPlName = aPlName.replace(/^Černý Baron/i, "Black Baron")
-                                             .replace(/^Zikmund z Chovu/i, "Sigismund the Breeder")
-                                             .replace(/^Kněžna Eliška/i, "Princess Eliška");
-                        }
+                        var aPlName = this.escapeHtml(this.getPlayerDisplayName ? this.getPlayerDisplayName(apl) : apl.name);
+                        var aGoldStr = (window.PRS_I18n && window.PRS_I18n.formatNumber) ? window.PRS_I18n.formatNumber(aGold) : aGold.toLocaleString();
                         aPills.push(
                             '<span class="save-game-player-chip" style="border-left:3px solid ' + (apl.color || "#d4af37") + ';">' +
-                            (aIsBot ? "🤖 " : "👤 ") + aPlName + " (" + (apl.totalHearts || 0) + " 💖, " + aGold.toLocaleString(isEn ? "en-US" : "cs-CZ") + " " + currStr + ")" +
+                            (aIsBot ? "🤖 " : "👤 ") + aPlName + " (" + (apl.totalHearts || 0) + " 💖, " + aGoldStr + " " + currStr + ")" +
                             "</span>"
                         );
                     }
+                    var aBoardDisplay = this.formatBoardDisplayName ? this.formatBoardDisplayName(activeMeta.boardName || "") : (activeMeta.boardName || "");
                     saveCards.push(
                         '<div class="save-game-card" style="border:1.5px solid #4ade80; background:rgba(34,197,94,0.08);">' +
                         '  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; gap:0.5rem; flex-wrap:wrap;">' +
                         '    <div>' +
-                        '      <h4 style="font-family:\'Cinzel\',serif; color:#86efac; font-size:1.05rem; margin:0 0 0.25rem;">' + (isEn ? "🟢 Last Played Active Quest (Autosave)" : "🟢 Poslední rozehraná výprava (Automatické uložení)") + '</h4>' +
+                        '      <h4 style="font-family:\'Cinzel\',serif; color:#86efac; font-size:1.05rem; margin:0 0 0.25rem;">' + tList("saves.autosave_title", null, "🟢 Poslední rozehraná výprava (Automatické uložení)") + '</h4>' +
                         '      <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; font-size:0.76rem; color:var(--text-muted);">' +
                         '        <span class="' + aBadgeClass + '" style="font-size:0.7rem; padding:1px 6px;">' + aBadgeLabel + '</span>' +
-                        '        <span style="font-size:0.7rem; background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.4); color:#e9d5ff; padding:1px 6px; border-radius:4px;">🗺️ ' + this.escapeHtml(activeMeta.boardName) + '</span>' +
+                        '        <span style="font-size:0.7rem; background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.4); color:#e9d5ff; padding:1px 6px; border-radius:4px;">🗺️ ' + this.escapeHtml(aBoardDisplay) + '</span>' +
                         '        <span>🕒 ' + this.escapeHtml(activeMeta.savedAtFormatted) + '</span>' +
-                        '        <span>🏆 ' + (isEn ? ("Round " + activeMeta.roundNumber + " (Turn #" + activeMeta.turnNumber + ")") : ("Kolo " + activeMeta.roundNumber + " (Tah #" + activeMeta.turnNumber + ")")) + '</span>' +
-                        '        <span>🎯 ' + (isEn ? "Goal: " : "Cíl: ") + activeMeta.targetHearts + ' 💖</span>' +
+                        '        <span>🏆 ' + tList("saves.round_turn_meta", { round: activeMeta.roundNumber, turn: activeMeta.turnNumber }, "Kolo " + activeMeta.roundNumber + " (Tah #" + activeMeta.turnNumber + ")") + '</span>' +
+                        '        <span>🎯 ' + tList("saves.goal_prefix", null, "Cíl: ") + activeMeta.targetHearts + ' 💖</span>' +
                         '      </div>' +
                         '    </div>' +
                         '    <div style="display:flex; gap:0.4rem;">' +
-                        '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="PRS_App.resumeActiveAutosavedGame()">' + (isEn ? "▶️ Continue Game" : "▶️ Pokračovat ve hře") + '</button>' +
+                        '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="PRS_App.resumeActiveAutosavedGame()">' + tList("saves.btn_continue_game", null, "▶️ Pokračovat ve hře") + '</button>' +
                         '    </div>' +
                         '  </div>' +
                         '  <div style="display:flex; gap:0.35rem; flex-wrap:wrap; margin-top:0.4rem; padding-top:0.45rem; border-top:1px solid rgba(74,222,128,0.22);">' +
@@ -1060,17 +1055,17 @@
                     var mItem = savedMaps[k];
                     mapChips.push(
                         '<div style="display:inline-flex; align-items:center; gap:6px; background:rgba(168,85,247,0.18); border:1px solid rgba(168,85,247,0.45); border-radius:6px; padding:3px 8px; font-size:0.75rem; color:#fef08a;">' +
-                        '  <strong style="cursor:pointer;" onclick="PRS_App.playOnSavedFavoriteMap(' + k + ')" title="' + (isEn ? "Start game on this board template" : "Zahájit hru na tomto plánu") + '">⭐ ' + this.escapeHtml(mItem.name || ((isEn ? "Board #" : "Plán #") + mItem.seed)) + ' (' + (mItem.nodeCount || 96) + (isEn ? ' tiles)' : ' polí)') + '</strong>' +
-                        '  <button class="btn-zoom" style="font-size:0.65rem; padding:1px 5px; border-color:#a855f7; color:#e9d5ff;" onclick="PRS_App.editSavedFavoriteMapInStudio(' + k + ')" title="' + (isEn ? "Edit in Map Studio" : "Upravit v Map Studiu") + '">🛠️</button>' +
-                        '  <span onclick="PRS_App.deleteSavedFavoriteMap(' + k + ', event)" style="color:#f87171; cursor:pointer; font-weight:bold; margin-left:2px;" title="' + (isEn ? "Remove" : "Odebrat") + '">×</span>' +
+                        '  <strong style="cursor:pointer;" onclick="PRS_App.playOnSavedFavoriteMap(' + k + ')" title="' + tList("saves.tpl_chip_play_title", null, "Zahájit hru na tomto plánu") + '">⭐ ' + this.escapeHtml(mItem.name || (tList("saves.tpl_custom_board_prefix", null, "Vlastní plán #") + mItem.seed)) + ' (' + (mItem.nodeCount || 96) + tList("saves.recent_tpl_tiles_suffix", null, " polí)") + '</strong>' +
+                        '  <button class="btn-zoom" style="font-size:0.65rem; padding:1px 5px; border-color:#a855f7; color:#e9d5ff;" onclick="PRS_App.editSavedFavoriteMapInStudio(' + k + ')" title="' + tList("saves.tpl_chip_edit_title", null, "Upravit v Map Studiu") + '">🛠️</button>' +
+                        '  <span onclick="PRS_App.deleteSavedFavoriteMap(' + k + ', event)" style="color:#f87171; cursor:pointer; font-weight:bold; margin-left:2px;" title="' + tList("saves.tpl_chip_remove_title", null, "Odebrat") + '">×</span>' +
                         '</div>'
                     );
                 }
                 html.push(
                     '<div style="background:rgba(88,28,135,0.12); border:1px solid rgba(168,85,247,0.35); border-radius:10px; padding:0.65rem 0.85rem; margin-bottom:1rem;">' +
                     '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; flex-wrap:wrap; gap:0.4rem;">' +
-                    '    <span style="font-size:0.8rem; color:#e9d5ff; font-weight:bold;">⭐ ' + (isEn ? ("My Saved Board Templates (" + savedMaps.length + ")") : ("Moje uložené šablony herních plánů (" + savedMaps.length + ")")) + '</span>' +
-                    '    <span style="font-size:0.72rem; color:var(--text-muted);">' + (isEn ? "Launch a new game on this template or edit in Map Studio" : "Zahájit novou partii na této šabloně plánu nebo ji otevřít v Map Studiu k úpravám") + '</span>' +
+                    '    <span style="font-size:0.8rem; color:#e9d5ff; font-weight:bold;">⭐ ' + tList("saves.saved_boards_header", { count: savedMaps.length }, "Moje uložené šablony herních plánů (" + savedMaps.length + ")") + '</span>' +
+                    '    <span style="font-size:0.72rem; color:var(--text-muted);">' + tList("saves.saved_boards_hint", null, "Zahájit novou partii na této šabloně plánu nebo ji otevřít v Map Studiu k úpravám") + '</span>' +
                     '  </div>' +
                     '  <div style="display:flex; gap:0.45rem; flex-wrap:wrap;">' +
                     mapChips.join("") +
@@ -1083,8 +1078,8 @@
                 if (filter === "all" && savedMaps.length > 0) {
                     html.push(
                         '<div class="empty-note" style="padding:1.5rem 1rem; text-align:center;">' +
-                        '  <strong style="color:var(--gold-light); font-size:0.95rem; display:block; margin-bottom:0.25rem;">' + (isEn ? "No active games in progress" : "Žádné rozehrané herní partie") + '</strong>' +
-                        '  <p style="color:var(--text-muted); font-size:0.82rem; margin:0 auto 0.75rem;">' + (isEn ? "You can launch a new quest on any of your saved templates above!" : "Můžeš zahájit novou výpravu na některé ze svých uložených šablon výše!") + '</p>' +
+                        '  <strong style="color:var(--gold-light); font-size:0.95rem; display:block; margin-bottom:0.25rem;">' + tList("saves.empty_active_title", null, "Žádné rozehrané herní partie") + '</strong>' +
+                        '  <p style="color:var(--text-muted); font-size:0.82rem; margin:0 auto 0.75rem;">' + tList("saves.empty_active_desc", null, "Můžeš zahájit novou výpravu na některé ze svých uložených šablon výše!") + '</p>' +
                         '</div>'
                     );
                     container.innerHTML = html.join("\n");
@@ -1093,13 +1088,11 @@
                 container.innerHTML =
                     '<div class="empty-note" style="padding:2rem 1rem; text-align:center;">' +
                     '  <div style="font-size:2.4rem; margin-bottom:0.5rem;">📜</div>' +
-                    '  <strong style="color:var(--gold-light); font-size:1rem; display:block; margin-bottom:0.35rem;">' + (isEn ? "No saved quests yet" : "Zatím nemáš žádné uložené výpravy") + '</strong>' +
+                    '  <strong style="color:var(--gold-light); font-size:1rem; display:block; margin-bottom:0.35rem;">' + tList("saves.empty_saves_title", null, "Zatím nemáš žádné uložené výpravy") + '</strong>' +
                     '  <p style="color:var(--text-muted); font-size:0.84rem; max-width:440px; margin:0 auto 1rem;">' +
-                    (isEn
-                        ? 'During any quest (Solo AI, Hot-Seat, or Online), click <strong>💾 Save Game</strong> in the top table bar to reload it anytime.'
-                        : 'Během kterékoliv partie (Solo AI, Hot-Seat i Online) klikni v horní liště herního stolu na tlačítko <strong>💾 Uložit hru</strong> a partii si můžeš kdykoliv načíst zpět.') +
+                    tList("saves.empty_saves_desc", null, 'Během kterékoliv partie (Solo AI, Hot-Seat i Online) klikni v horní liště herního stolu na tlačítko <strong>💾 Uložit hru</strong> a partii si můžeš kdykoliv načíst zpět.') +
                     '  </p>' +
-                    '  <button class="btn-gold-lg" style="font-size:0.86rem; padding:0.45rem 1rem;" onclick="PRS_App.quickStartSoloGame(\'standard\')">' + (isEn ? "⚡ Start New Solo Quest" : "⚡ Spustit novou Solo výpravu") + '</button>' +
+                    '  <button class="btn-gold-lg" style="font-size:0.86rem; padding:0.45rem 1rem;" onclick="PRS_App.quickStartSoloGame(\'standard\')">' + tList("saves.empty_saves_btn", null, "⚡ Spustit novou Solo výpravu") + '</button>' +
                     '</div>';
                 return;
             }
@@ -1107,25 +1100,21 @@
             for (var i = 0; i < saves.length; i++) {
                 var s = saves[i];
                 var isOnline = (s.mode === "Online");
-                var badgeLabel = isOnline ? ("🌐 Online (" + (isEn ? "Code: " : "Kód: ") + (s.roomCode || "—") + ")") : (s.mode === "HotSeat" ? "🛋️ Hot-Seat" : "⚡ Solo AI");
+                var badgeLabel = isOnline ? ("🌐 Online (" + tList("saves.code_prefix", null, "Kód: ") + (s.roomCode || "—") + ")") : (s.mode === "HotSeat" ? "🛋️ Hot-Seat" : "⚡ Solo AI");
                 var badgeClass = isOnline ? "lp-mode-badge" : "user-pill";
-                var boardBadge = s.boardName || s.boardCode || (isEn ? "Royal Map" : "Královský plán");
+                var rawBoardBadge = s.boardName || s.boardCode || tList("saves.default_royal_map", null, "Královský plán");
+                var boardBadge = this.formatBoardDisplayName ? this.formatBoardDisplayName(rawBoardBadge) : rawBoardBadge;
 
                 var playersPills = [];
                 for (var p = 0; p < (s.playersSummary || []).length; p++) {
                     var pl = s.playersSummary[p];
                     var isBot = (pl.type !== "Human");
                     var plGold = (typeof pl.gold === "number" && !isNaN(pl.gold)) ? pl.gold : 0;
-                    var sPlName = this.escapeHtml(pl.name);
-                    if (isEn) {
-                        sPlName = sPlName.replace(/\(Ty\)/g, "(You)").replace(/\(PC\)/g, "(AI)");
-                        sPlName = sPlName.replace(/^Černý Baron/i, "Black Baron")
-                                         .replace(/^Zikmund z Chovu/i, "Sigismund the Breeder")
-                                         .replace(/^Kněžna Eliška/i, "Princess Eliška");
-                    }
+                    var sPlName = this.escapeHtml(this.getPlayerDisplayName ? this.getPlayerDisplayName(pl) : pl.name);
+                    var plGoldStr = (window.PRS_I18n && window.PRS_I18n.formatNumber) ? window.PRS_I18n.formatNumber(plGold) : plGold.toLocaleString();
                     playersPills.push(
                         '<span class="save-game-player-chip" style="border-left:3px solid ' + (pl.color || '#d4af37') + ';">' +
-                        (isBot ? '🤖 ' : '👤 ') + sPlName + ' (' + (pl.hearts || 0) + ' 💖, ' + plGold.toLocaleString(isEn ? "en-US" : "cs-CZ") + ' ' + currStr + ')' +
+                        (isBot ? '🤖 ' : '👤 ') + sPlName + ' (' + (pl.hearts || 0) + ' 💖, ' + plGoldStr + ' ' + currStr + ')' +
                         '</span>'
                     );
                 }
@@ -1138,14 +1127,14 @@
                     '      <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; font-size:0.76rem; color:var(--text-muted);">' +
                     '        <span class="' + badgeClass + '" style="font-size:0.7rem; padding:1px 6px;">' + badgeLabel + '</span>' +
                     '        <span style="font-size:0.7rem; background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.4); color:#e9d5ff; padding:1px 6px; border-radius:4px;">🗺️ ' + this.escapeHtml(boardBadge) + '</span>' +
-                    '        <span>🕒 ' + (s.savedAtFormatted || (isEn ? "Unknown time" : "Neznámý čas")) + '</span>' +
-                    '        <span>🏆 ' + (isEn ? ("Round " + (s.roundNumber || 1) + " (Turn #" + (s.turnNumber || 0) + ")") : ("Kolo " + (s.roundNumber || 1) + " (Tah #" + (s.turnNumber || 0) + ")")) + '</span>' +
-                    '        <span>🎯 ' + (isEn ? "Goal: " : "Cíl: ") + (s.targetHearts || 30) + ' 💖</span>' +
+                    '        <span>🕒 ' + (s.savedAtFormatted || tList("saves.unknown_time", null, "Neznámý čas")) + '</span>' +
+                    '        <span>🏆 ' + tList("saves.round_turn_meta", { round: (s.roundNumber || 1), turn: (s.turnNumber || 0) }, "Kolo " + (s.roundNumber || 1) + " (Tah #" + (s.turnNumber || 0) + ")") + '</span>' +
+                    '        <span>🎯 ' + tList("saves.goal_prefix", null, "Cíl: ") + (s.targetHearts || 30) + ' 💖</span>' +
                     '      </div>' +
                     '    </div>' +
                     '    <div style="display:flex; gap:0.4rem;">' +
-                    '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.8rem;" onclick="PRS_App.loadSavedGame(\'' + s.id + '\')">' + (isEn ? "▶️ Continue Game" : "▶️ Pokračovat") + '</button>' +
-                    '      <button class="btn-icon-danger" style="padding:0.3rem 0.55rem; font-size:0.85rem;" onclick="PRS_App.deleteSavedGame(\'' + s.id + '\')" title="' + (isEn ? "Delete this saved quest" : "Smazat tuto uloženou partii") + '">🗑️</button>' +
+                    '      <button class="btn-gold-lg" style="font-size:0.8rem; padding:0.35rem 0.8rem;" onclick="PRS_App.loadSavedGame(\'' + s.id + '\')">' + tList("saves.btn_continue_short", null, "▶️ Pokračovat") + '</button>' +
+                    '      <button class="btn-icon-danger" style="padding:0.3rem 0.55rem; font-size:0.85rem;" onclick="PRS_App.deleteSavedGame(\'' + s.id + '\')" title="' + tList("saves.btn_delete_save_title", null, "Smazat tuto uloženou partii") + '">🗑️</button>' +
                     '    </div>' +
                     '  </div>' +
                     '  <div style="display:flex; gap:0.35rem; flex-wrap:wrap; margin-top:0.4rem; padding-top:0.45rem; border-top:1px solid rgba(212,175,55,0.15);">' +
@@ -1307,11 +1296,12 @@
                 var p = players[i];
                 var isMe = (i === myIdx);
                 var isBot = (p.type !== "Human");
+                var _tSeat = window.PRS_I18n ? function (k, p2, d) { return window.PRS_I18n.t(k, p2, d); } : function (k, p2, d) { return d; };
                 var botRoleLabel = "";
-                if (p.type === "Bot_Aggressive") botRoleLabel = "⚔️ PC Válečník (Lovec draků)";
-                else if (p.type === "Bot_Breeder") botRoleLabel = "🐎 PC Chovatel (Sady zvířat)";
-                else if (p.type === "Bot_Noble") botRoleLabel = "👑 PC Dvořan (Diplomacie)";
-                else if (p.type === "Bot_Balanced") botRoleLabel = "🛡️ PC Rytíř (Vyvážený)";
+                if (p.type === "Bot_Aggressive") botRoleLabel = _tSeat("online.seats_bot_warrior", null, "⚔️ PC Válečník (Lovec draků)");
+                else if (p.type === "Bot_Breeder") botRoleLabel = _tSeat("online.seats_bot_breeder", null, "🐎 PC Chovatel (Sady zvířat)");
+                else if (p.type === "Bot_Noble") botRoleLabel = _tSeat("online.seats_bot_courtier", null, "👑 PC Dvořan (Diplomacie)");
+                else if (p.type === "Bot_Balanced") botRoleLabel = _tSeat("online.seats_bot_balanced", null, "🛡️ PC Rytíř (Vyvážený)");
 
                 html.push(
                     '<div class="seat-item-card" style="border-left:4px solid ' + (p.color || '#d4af37') + ';">' +
@@ -1332,15 +1322,15 @@
                     (!isMe ? (
                         isBot ? (
                             '<button class="btn-secondary" style="font-size:0.74rem; padding:0.25rem 0.6rem;" onclick="PRS_App.convertSeatToHuman(' + i + ')">' +
-                            '  👤 Uvolnit pro člověka' +
+                            '  ' + _tSeat("online.seats_btn_free_human", null, "👤 Uvolnit pro člověka") +
                             '</button>'
                         ) : (
                             '<div style="display:flex; gap:0.3rem; align-items:center;">' +
                             '  <select id="bot-type-select-' + i + '" class="prs-select" style="font-size:0.74rem; padding:0.25rem 0.4rem; width:auto;">' +
-                            '    <option value="Bot_Aggressive">⚔️ Válečník</option>' +
-                            '    <option value="Bot_Breeder">🐎 Chovatel</option>' +
-                            '    <option value="Bot_Noble">👑 Dvořan</option>' +
-                            '    <option value="Bot_Balanced" selected>🛡️ Vyvážený</option>' +
+                            '    <option value="Bot_Aggressive">' + _tSeat("online.seats_opt_warrior", null, "⚔️ Válečník") + '</option>' +
+                            '    <option value="Bot_Breeder">' + _tSeat("online.seats_opt_breeder", null, "🐎 Chovatel") + '</option>' +
+                            '    <option value="Bot_Noble">' + _tSeat("online.seats_opt_courtier", null, "👑 Dvořan") + '</option>' +
+                            '    <option value="Bot_Balanced" selected>' + _tSeat("online.seats_opt_balanced", null, "🛡️ Vyvážený") + '</option>' +
                             '  </select>' +
                             '  <button class="btn-secondary" style="font-size:0.74rem; padding:0.25rem 0.6rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_App.convertSeatToBot(' + i + ')">' +
                             '    ' + (window.PRS_I18n ? window.PRS_I18n.t("online.seats_btn_replace_bot") : "🤖 Nahradit botem") +

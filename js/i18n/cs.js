@@ -29,7 +29,103 @@ window.PRS_I18N["cs"] = {
     "modal_title": "Královská šatna & Sběratelské figurky",
     "credits_title": "Tvůj zůstatek královských kreditů pro odemykání prémiových figurek",
     "slot_info_default": "Vyber figurku pro svého rytíře nebo odemkni unikátní prémiové šampiony s animovanou aurou!",
-    "close_title": "Zavřít šatnu"
+    "close_title": "Zavřít šatnu",
+    "badge_basic": "🛡️ Základní",
+    "badge_bot": "🤖 PC Bot",
+    "badge_premium": "💎 Prémiová",
+    "btn_registered_only": "🔒 Pro přihlášené",
+    "btn_select": "🎭 Zvolit figurku",
+    "btn_selected": "✅ Právě zvoleno",
+    "btn_unlock": "🔓 Odemknout ({price} 💎)",
+    "status_pc_only": "🔒 Pouze pro PC",
+    "status_unlocked": "✓ Odemčeno",
+    "pawns": {
+      "knight_valiant": {
+        "name": "Sir Roland",
+        "title": "Rytíř Královské Koruny",
+        "desc": "Ušlechtilý královský paladin v zářivé zlatostříbrné zbroji se lvím erbem na rameni."
+      },
+      "knight_tourney": {
+        "name": "Baron z Růže",
+        "title": "Turnajový Šampion",
+        "desc": "Neporažený mistr klání na dřevce s chocholem z rudých růží a zdobenou přilbicí."
+      },
+      "lady_huntress": {
+        "name": "Lady Sylva",
+        "title": "Královská Lovkyně",
+        "desc": "Vznešená paní hvozdů v zeleném sametu s loveckým sokolem na rameni a lukem."
+      },
+      "lord_diplomat": {
+        "name": "Vévoda Armand",
+        "title": "Mistr Královské Dvorany",
+        "desc": "Charismatický dvořan a diplomat v purpurovém plášti se zlatým řetězem a kordem."
+      },
+      "knight_warden": {
+        "name": "Strážce Hvozdů",
+        "title": "Smaragdový Rytíř",
+        "desc": "Prastarý ochránce královských lesů s korunou z jeleního paroží a dubovým pláštěm."
+      },
+      "lady_sorceress": {
+        "name": "Čarodějka Astrida",
+        "title": "Hvězdná Dáma",
+        "desc": "Tajemná šlechtična a hvězdopravkyně s diadémem souhvězdí a zářícím křišťálem."
+      },
+      "bot_aggressive": {
+        "name": "Černý Baron",
+        "title": "PC Válečník (Lovec draků)",
+        "desc": "Obávaný železný baron v rohaté černé přilbici s rudě žhnoucím hledím."
+      },
+      "bot_breeder": {
+        "name": "Zikmund z Chovu",
+        "title": "PC Chovatel (Pán hřebčínů)",
+        "desc": "Bohatý správce královských obor v kožešinovém plášti se zlatým loveckým rohem."
+      },
+      "bot_noble": {
+        "name": "Kněžna Eliška",
+        "title": "PC Dvořan (Diplomacie & Ples)",
+        "desc": "Hrdá vévodkyně s vysokou zlatou korunou, perlami a krajkovým dvorním vějířem."
+      },
+      "bot_balanced": {
+        "name": "Železný Strážce",
+        "title": "PC Rytíř (Královský automat)",
+        "desc": "Mechanický rytířský golem z tepané mosazi a oceli poháněný královskými runami."
+      },
+      "bot_easy": {
+        "name": "Panoš Vítek",
+        "title": "PC Panoš (Opatrný nováček)",
+        "desc": "Mladý usměvavý panoš v prošívanici s dřevěným štítem a železným kloboukem nakřivo."
+      },
+      "prem_dragon_lord": {
+        "name": "Dračí Vojevůdce",
+        "title": "Legendární Pán Plamenů",
+        "desc": "Epický vojevůdce v dračí šupinové zbroji s ohnivými křídly a planoucí aurou na herním plánu."
+      },
+      "prem_ice_queen": {
+        "name": "Ledová Královna",
+        "title": "Panovnice Severních Štítů",
+        "desc": "Majestátní královna s korunou z ledových krystalů, obklopená mrazivou krystalovou září."
+      },
+      "prem_shadow_assassin": {
+        "name": "Rytíř Stínů",
+        "title": "Přízračný Mistr Noci",
+        "desc": "Tajemný bojovník zahalený v temné kápi s fialovou přízračnou mlhou a runovými dýkami."
+      },
+      "prem_golden_king": {
+        "name": "Zlatý Král Slunce",
+        "title": "Svrchovaný Panovník",
+        "desc": "Oslnivý panovník v celozlaté zbroji se svatozáří slunečních paprsků a zlatým třpytem."
+      },
+      "prem_unicorn_rider": {
+        "name": "Jezdec na Jednorožci",
+        "title": "Nebeský Šampion",
+        "desc": "Stříbrný paladin doprovázený bájným jednorožcem s duhovou hvězdnou aurou."
+      },
+      "prem_phoenix_paladin": {
+        "name": "Paladin Fénixe",
+        "title": "Nesmrtelný Strážce Srdce",
+        "desc": "Nejvyšší prémiová figurka se zlatými křídly ohnivého fénixe a královskou jiskřící korónou."
+      }
+    }
   },
   "ui": {
     "brand_subtitle": "Princeznino srdce",
@@ -232,7 +328,188 @@ window.PRS_I18N["cs"] = {
       "trophy_tier3_label": "Dračí trofej U3",
       "trophy_tier_label": "Trofej U{tier}",
       "castle_benefit_html": "🏰 <strong>Výhoda panství:</strong> Výnos daní +2 500 zl., nájem 1 500 zl., trvale +1 Charisma a audience u princezny.",
-      "flip_castle_label": "🔄 Otočit pohled na hrad"
+      "flip_castle_label": "🔄 Otočit pohled na hrad",
+      "atlas_card_hint": "Kliknutím otevřeš velký detail s ilustrací a přesnými pravidly",
+      "tip_prefix": "💡 Tip:",
+      "tier_num_label": "{tier}. stupeň",
+      "atlas_tiles": {
+        "start": {
+          "code": "START",
+          "name": "Královský START",
+          "cat": "Speciální",
+          "cost": "—",
+          "action": "Žold <strong>+3 000 zl.</strong> (nemajetní bezzemci <strong>+5 000 zl.</strong>). Šlechtici, majitelé Města/Hradu nebo zkušení tanečníci (Tanec ≥ 2 a šaty) navíc získávají <strong>audienci u krále (+0,5 až +1,0 💖)</strong>.",
+          "tip": "Využij včasný zisk šatů k čerpání královské přízně při každém oběhu plánu."
+        },
+        "village": {
+          "code": "VESNICE",
+          "name": "Poddanská vesnice (V1–V12)",
+          "cat": "Panství",
+          "cost": "1 500 zl.",
+          "action": "Koupě panství a výběr nájmu (100–300 zl.) od projíždějících rytířů. Možnost rozvoje: 1★ Vesnice → 2★ Městečko (+1 500 zl.) → 3★ Velká osada (+1 500 zl.). Plně rozvinutá vesnice dává trvale <strong>+0,5 💖</strong> a chová dobytek.",
+          "tip": "Vesnice jsou základem stabilního příjmu. Na 3★ generují vysoký nájem a automatická stáda."
+        },
+        "town": {
+          "code": "MĚSTO",
+          "name": "Královské město (M1–M4)",
+          "cat": "Panství",
+          "cost": "4 000 zl.",
+          "action": "Bohaté sídlo s vysokým nájmem (500 zl.) a stálou prestiží: majiteli uděluje trvale <strong>+0,5 💖</strong> a přináší <strong>+1 200 zl.</strong> při návštěvě Výběrčího daní.",
+          "tip": "Město rozšiřuje kapacitu stád o +2 a zaručuje královskou audienci na STARTu."
+        },
+        "castle": {
+          "code": "HRAD",
+          "name": "Šlechtický hrad (H1–H4)",
+          "cat": "Panství",
+          "cost": "7 000 zl.",
+          "action": "Vrchol feudální moci: trvale <strong>+1,0 💖</strong> a <strong>+1 Charisma</strong> pro majitele! Nájem 1 000 zl., výnos u Výběrčího daní činí celých <strong>+2 500 zl.</strong>",
+          "tip": "Nejrychlejší způsob, jak si trvale pojistit srdce a získat převahu na královském dvoře."
+        },
+        "horse": {
+          "code": "KŮŇ",
+          "name": "Chov koní (K1–K12)",
+          "cat": "Zvířata",
+          "cost": "600 × úroveň zl.",
+          "action": "Koupě koně. Zpřístupňuje <strong>koňský pohyb (klus, cval, trysk)</strong>, umožňuje obranu obratností v duelech a je nutnou podmínkou účasti ve <strong>Velkém závodě</strong>.",
+          "tip": "Kůň je klíč k rychlému pohybu po mapě. V kombinaci se psem a sokolem tvoří Chovnou sadu (+1,5 💖)."
+        },
+        "dog": {
+          "code": "PES",
+          "name": "Lovecký pes (P1–P12)",
+          "cat": "Zvířata",
+          "cost": "500 × úroveň zl.",
+          "action": "Koupě loveckého psa. Věrný společník ti dává taktickou výhodu v aréně draků – při těsné prohře o 1–2 body získáš <strong>🎲 Taktický reroll 1 kostky</strong> zdarma!",
+          "tip": "Pes ti zachrání život v aréně draků a chrání tě před převozem do Lazaretu."
+        },
+        "falcon": {
+          "code": "SOKOL",
+          "name": "Lovecký sokol (S1–S12)",
+          "cat": "Zvířata",
+          "cost": "400 × úroveň zl.",
+          "action": "Koupě dravce. Umožňuje <strong>Sokolí navigaci (±1 pole)</strong> při taktickém manévrování pěšky, čímž ti dovolí přesně dosednout na cíl nebo se vyhnout pasti.",
+          "tip": "Sokolí navigace nefunguje při plném koňském cvalu a trysku – kůň letí kupředu příliš rychle."
+        },
+        "stables": {
+          "code": "STAJE",
+          "name": "Královské stáje & Dobytčí trh",
+          "cat": "Ekonomika",
+          "cost": "Dle druhu",
+          "action": "Nákup hospodářského dobytka: <strong>🐑 Ovce (500 zl.)</strong>, <strong>🐖 Prase (600 zl.)</strong> a <strong>🐄 Skot (800 zl.)</strong>. Stáda zvyšují nájmy vesnic a generují pasivní výnos u Výběrčího daní.",
+          "tip": "Kapacita stád závisí na počtu tvých vesnic a měst. Stáje samy o sobě přidávají +4 místa."
+        },
+        "master": {
+          "code": "MISTR",
+          "name": "Sídlo Mistra (MB, MJ, MT, MCH, VM)",
+          "cat": "Výcvik",
+          "cost": "1 000–5 000 zl.",
+          "action": "Trénink ctností (Boj, Jízda, Tanec, Charisma). Hod kostkou: 1–3 = nepřijat, 4–6 = přijat k výcviku. Úspěšný trénink uděluje <strong>Pečeť mistra</strong>. 3 různé pečetě = <strong>Rytířská záštita</strong>!",
+          "tip": "Velmistr (VM) učí jakoukoliv vlastnost dle tvé volby. Investuj do své primární ctnosti co nejdříve."
+        },
+        "festival": {
+          "code": "SLAVNOST",
+          "name": "Královská slavnost (♡ ♡ ♡)",
+          "cat": "Soutěž",
+          "cost": "—",
+          "action": "Turnaj (Boj + Jízda), Zámecký ples (Tanec + Charisma) nebo Velký závod (Jízda + koně). Hlavní zdroj srdcí ve hře! Vítěz získá <strong>až +5 💖 a 1 200 zl.</strong>",
+          "tip": "Při účasti méně než 2 rytířů se slavnost nekoná, ale pořadatel dostane útěchu +800 zl. a +0,5 💖."
+        },
+        "u1": {
+          "code": "U1",
+          "name": "Běžná stvůra (Lesní dravci)",
+          "cat": "Lov",
+          "cost": "—",
+          "action": "Lov vlků, medvědů a divočáků. Vítězství přináší <strong>1 000–2 500 zl.</strong> a <strong>+0,5 až +1,5 💖</strong>. Skvělý bezpečný trénink pro začínající válečníky.",
+          "tip": "Použij Taktický postoj: Opatrná obrana tě ochrání před zraněním i v případě prohry."
+        },
+        "u2": {
+          "code": "U2",
+          "name": "Mocné monstrum (Bájní netvoři)",
+          "cat": "Lov",
+          "cost": "—",
+          "action": "Boj s Chimérami, Trolly a Golemy. Odměna <strong>2 600 zl.</strong>, <strong>+1,5 až +2,5 💖</strong> a 65% šance na unikátní trofej. Lze uplatnit taktický ústup za 400 zl.",
+          "tip": "Před bojem zkontroluj slabinu monstra v Bestiáři pro automatický bonus +2 k síle."
+        },
+        "u3": {
+          "code": "U3",
+          "name": "Dračí sluj (Legendární draci)",
+          "cat": "Drakobijci",
+          "cost": "—",
+          "action": "Souboj o čest s jedním z 20 unikátních draků! Odměna <strong>6 000 zl.</strong>, <strong>+2,5 až +5,0 💖</strong> a garantovaná dračí trofej. <strong>Skolení 2 draků = okamžitá výhra v celé hře!</strong>",
+          "tip": "Taktický ústup z dračí sluje stojí 800 zl. Pokud nemáš dostatečný Boj a zbraně, raději ustup."
+        },
+        "merchant": {
+          "code": "OBCHODNÍK",
+          "name": "Královský obchodník",
+          "cat": "Trh",
+          "cost": "Dle nákupu",
+          "action": "Nákup balíčků výstroje (zbraně, zbroje, plesové šaty, klenoty). Možnost dobrovolného odprodeje majetku bance (věci za 50 % ceny, nemovitosti za 100 %).",
+          "tip": "Nakupuj přednostně věci, které odpovídají tvé zvolené cestě k vítězství."
+        },
+        "forge": {
+          "code": "KOVÁRNA",
+          "name": "Cechovní kovárna",
+          "cat": "Trh",
+          "cost": "Dle zbraně",
+          "action": "Výroba a nákup mečů, seker, kopí a brnění. Zbraně zvyšují Boj a poskytují taktickou výhodu proti specifickým drakům.",
+          "tip": "Kopí platí na Vodní draky, těžké brnění na ohnivé plameny."
+        },
+        "tailor": {
+          "code": "KREJČÍ",
+          "name": "Zámecký krejčí",
+          "cat": "Trh",
+          "cost": "Dle oděvu",
+          "action": "Ušití dvorských šatů a brokátových rouch. Poskytuje bonusy k Tanci a Charismatu, zásadní pro vítězství na Zámeckém plese.",
+          "tip": "Šaty ti na Zámeckém plese přinášejí automatický bonus +2 ke skóre."
+        },
+        "tavern": {
+          "code": "KRČMA",
+          "name": "Krčma U Zlatého korbelu",
+          "cat": "Služby",
+          "cost": "500 zl.",
+          "action": "Odpočinek a pohoštění. Runda medoviny za 500 zl. Pro zkušené tanečníky (Tanec ≥ 2) přináší dvorní obdiv a zisk <strong>+1,0 💖</strong> za okouzlující zábavu.",
+          "tip": "Diplomaté a tanečníci zde proměňují drobné mince v cenná srdce."
+        },
+        "tax": {
+          "code": "DANĚ",
+          "name": "Výběrčí daní",
+          "cat": "Ekonomika",
+          "cost": "—",
+          "action": "Výplata feudálních rent: Vesnice (500/900/1 400 zl.), Města (1 200 zl.), Hrady (2 500 zl.) a dobytek (ovce +120, prase +150, kráva +200 zl.).",
+          "tip": "Rytíř s Rytířskou záštitou (3 pečetě mistrů) je navíc osvobozen od všech plateb královských desátků."
+        },
+        "prison": {
+          "code": "ŠATLAVA",
+          "name": "Hradní šatlava",
+          "cat": "Trest",
+          "cost": "Kauce 1 000 zl.",
+          "action": "Uvěznění na 1 kolo. Možnosti záchrany: zaplacení kauce 1 000 zl., úspěšný útěk (hod kostkou 6), nebo okamžité zahrání svitku <strong>Královská amnestie</strong> z brašny.",
+          "tip": "Pokud máš v brašně svitek Královské amnestie, jsi propuštěn okamžitě bez ztráty tahu i peněz."
+        },
+        "hospital": {
+          "code": "LAZARET",
+          "name": "Královský lazaret",
+          "cat": "Léčení",
+          "cost": "1 000 zl.",
+          "action": "Zotavení po těžkém zranění. Hojivý elixír za 1 000 zl. trvale zvýší Boj o +1 (pokud Boj < 2), udělí <strong>+0,5 💖 za statečnost</strong> a ochranný amulet proti dalšímu převozu!",
+          "tip": "Držitelé Rytířské záštity (3 pečetě mistrů) jsou v lazaretu ošetřeni zcela zdarma."
+        },
+        "jester": {
+          "code": "KEJKLÍŘ",
+          "name": "Dvorní Kejklíř & Šašek",
+          "cat": "Speciální",
+          "cost": "2 000 zl. (Kejklíř)",
+          "action": "Zábava u dvora. Kejklíř skládá posměšnou baladu na protivníky; Šašek odměňuje zkušené tanečníky královským darem <strong>+200 zl. × stupeň Tance</strong>.",
+          "tip": "Vysoký Tanec promění návštěvu Šaška ve štědrou královskou rentu."
+        },
+        "chance": {
+          "code": "NÁHODA",
+          "name": "Náhoda & Královský dar",
+          "cat": "Osud",
+          "cost": "—",
+          "action": "Tažení osudové karty ze zemského balíčku: královské dotace, turnajové výzvy, lapkové, zkoušky jezdectví i nález <strong>taktických pergamenů do brašny rytíře</strong>.",
+          "tip": "Taktické pergameny můžeš uschovat do brašny (kapacita 3) a zahrát je kdykoliv ve svém tahu."
+        }
+      }
     },
     "board_bar": {
       "back_landing": "🏰 ← Zpět na Landing Page",
@@ -582,7 +859,8 @@ window.PRS_I18N["cs"] = {
       "modal_subtitle": "Oficiální listina krále s pečetí a podpisem kancléře",
       "close_title": "Zavřít diplom",
       "behalf_of": "V zastoupení koruny a dvora:",
-      "chancellor_title": "Nejvyšší královský kancléř"
+      "chancellor_title": "Nejvyšší královský kancléř",
+      "download_toast": "💾 Královský diplom vítěze byl úspěšně stažen do tvého zařízení!"
     },
     "online_role": {
       "free_play": "🛋️ Hrát bez zámku (Všichni hráči / Hot-Seat)"
@@ -615,7 +893,24 @@ window.PRS_I18N["cs"] = {
       "title": "Průvodce hrou: Princeznino srdce",
       "subtitle": "Krok za krokem ke cti, bohatství a ruce princezny",
       "prev_btn": "← Předchozí",
-      "next_btn": "Další →"
+      "next_btn": "Další →",
+      "step1_badge": "Krok 1 ze 4 • Základní princip",
+      "step1_title": "Pohyb po království a nákup panství",
+      "step1_desc": "Házíš kostkou (1–6) a putuješ po herním plánu. Když zastavíš na volné <strong>Vesnici</strong>, <strong>Městě</strong>, <strong>Hradu</strong> nebo <strong>Živnosti</strong>, můžeš panství koupit a vybírat od soupeřů mýtné i získávat pravidelné daně.",
+      "step1_tip": "💡 Tip pro nováčky: Hradby a vesnice ti v první polovině hry zajistí stálý přísun zlata pro výzbroj i lov.",
+      "step2_badge": "Krok 2 ze 4 • Zvířata & Láska",
+      "step2_title": "Šlechtický chov a Srdce princezny",
+      "step2_desc": "Na polích <strong>Koně (K)</strong>, <strong>Psi (P)</strong> a <strong>Sokoli (S)</strong> kupuješ ušlechtilá zvířata ze sad 1–14. Složení kompletní trojice stejné sady (K+P+S) ti vynese <strong>+1 💖 Srdce princezny</strong> navíc a silnější útok!",
+      "step2_tip": "💡 Tip pro nováčky: Kůň odemyká režim pohybu Cval (2d6) a sovy i psi pomáhají při loveckých úkolech U1–U3.",
+      "step3_badge": "Krok 3 ze 4 • Feudální růst",
+      "step3_title": "Povyšování sídel, pastviny a zbrojnice",
+      "step3_desc": "Vlastní <strong>Vesnice</strong> můžeš povýšit až na úroveň ⭐3 (vyšší daň i mýtné). U Měst a Hradů buduješ <strong>Pastviny</strong> pro ovce, prasata a skot. U Kováře nebo ve Zbrojnici kupuješ <strong>zbraně, zbroje a dvorské šperky</strong>.",
+      "step3_tip": "💡 Tip pro nováčky: Hospodářský skot a vylepšené vesnice ti při návštěvě Výběrčího daní (VD) zaplatí novou výbavu.",
+      "step4_badge": "Krok 4 ze 4 • Výpravy & Trofeje",
+      "step4_title": "Bojové úkoly, slavnosti a cesta k vítězství",
+      "step4_desc": "Porážej <strong>Zvěř (U1)</strong>, <strong>Monstra (U2)</strong> a <strong>Draky (U3)</strong> pro zlato, trofeje a cenná 💖 Srdce princezny. Zvítězí ten, kdo jako první splní cílový počet srdcí a dorazí na <strong>Královský hrad</strong>!",
+      "step4_tip": "💡 <em>Zlaté pravidlo rytíře:</em> Sleduj zranitelnosti monster a draků — správně zvolený pes, sokol, kopí nebo lektvar dokáže zvrátit každý souboj!",
+      "finish_btn": "Rozumím, jdeme do hry! 🎲"
     },
     "knight_duel_default_title": "Rytířský duel cti",
     "knight_duel_default_sub": "Výsledek přímého souboje na poli",
@@ -743,7 +1038,262 @@ window.PRS_I18N["cs"] = {
     "armory_equipped": "Nasazeno",
     "armory_owned": "Vlastněno",
     "armory_req_virtue": "Vyžaduje ctnost: {virtue}",
-    "cheatsheet_subtitle": "Přehled pravidel, rytířských ctností, soubojů, chovu zvířat a ekonomiky království"
+    "cheatsheet_subtitle": "Přehled pravidel, rytířských ctností, soubojů, chovu zvířat a ekonomiky království",
+    "card_preview": {
+      "default_title": "Detail karty",
+      "weakness_usable": "🎯 <strong>Zranitelnost / Lze použít:</strong> ",
+      "item_tier": "Předmět {tier}",
+      "rare_price": "Vzácný předmět",
+      "item_default_desc": "Výzbroj či dvorský šperk královského rytíře.",
+      "knight_slot": "<strong>Slot rytíře:</strong> ",
+      "slot_universal": "Univerzální",
+      "cat_positive": "✨ Přízeň dvora (+)",
+      "cat_negative": "⛈️ Nepřízeň osudu (-)",
+      "cat_challenge": "⚖️ Zkouška ctnosti (!)",
+      "rated_virtues": "⚔️ <strong>Hodnocené ctnosti:</strong> ",
+      "winner_prizes": "💰 <strong>Odměny vítězů:</strong> ",
+      "fest_tournament": {
+        "title": "⚔️ Královský turnaj",
+        "desc": "Rytíři se střetnou v rytířském klání na dřevce. Vyžaduje zbroj i bojového ducha.",
+        "virtues": "Boj + Jízda na koni + Hod kostkou",
+        "prizes": "1. místo: 2 000 zl. • 2. místo: 1 000 zl. • 3. místo: 500 zl."
+      },
+      "fest_ball": {
+        "title": "💃 Dvorský ples",
+        "desc": "Taneční slavnost v královském sále před očima samotné princezny a královského dvora.",
+        "virtues": "Tanec + Charisma + Hod kostkou",
+        "prizes": "1. místo: 1 800 zl. • 2. místo: 900 zl. • 3. místo: 450 zl."
+      },
+      "fest_race": {
+        "title": "🏇 Královský závod koní",
+        "desc": "Napínavý závod nejrychlejších jezdců a ušlechtilých ořů království.",
+        "virtues": "Jízda na koni + Boj + Hod kostkou",
+        "prizes": "1. místo: 1 600 zl. • 2. místo: 800 zl. • 3. místo: 400 zl."
+      },
+      "fest_default": {
+        "title": "🎪 Královská slavnost",
+        "desc": "Slavnostní klání v přítomnosti královského dvora.",
+        "virtues": "Ctnosti rytíře + Hod kostkou",
+        "prizes": "Zlato a prestiž pro tři nejlepší"
+      }
+    },
+    "chance_modal": {
+      "seal_title": "Pečeť Královského osudu",
+      "seal_desc": "Na rozcestí tě dostihl královský posel se zapečetěnou listinou. Rozlom pečeť a zjisti, co ti osud přichystal.",
+      "seal_btn": "✉️ Rozlomit pečeť osudu!",
+      "card_badge": "KARTA NÁHODY",
+      "dilemma_label": "⚔️ Rozhodnutí na místě",
+      "scroll_hint": "📜 Tuto příznivou listinu můžeš ihned použít, nebo si ji uložit do brašny na vhodnější chvíli.",
+      "btn_store": "🎒 Schovat do brašny ({count}/{max})",
+      "bag_full": "🎒 Brašna je plná ({count}/{max})",
+      "btn_use_now": "⚡ Použít ihned",
+      "btn_end_turn": "Přijmout osud a ukončit tah ▶",
+      "scroll_stored_toast": "🎒 Svitek „{title}“ byl uložen do tvé rytířské brašny.",
+      "scroll_activated_toast": "⚡ Použil jsi svitek „{title}“!"
+    },
+    "festival_modal": {
+      "tournament": {
+        "title": "⚔️ KRÁLOVSKÝ TURNAJ",
+        "sub": "Královský turnaj rytířů v jízdě na dřevce a souboji muže proti muži.",
+        "req": "Účast vyžaduje alespoň 1 zbraň či zbroj, nebo vlastního koně.",
+        "formula": "Boj + Jízda na koni + Bonus za kompletní zbroj + Hod kostkou",
+        "prizes": "🥇 2 000 zl. • 🥈 1 000 zl. • 🥉 500 zl."
+      },
+      "ball": {
+        "title": "💃 DVORSKÝ PLES",
+        "sub": "Velkolepý ples na královském dvoře plný hudby, elegance a dvorské etikety.",
+        "req": "Krásné dvorské šaty nebo charisma či tanec v základní hodnotě alespoň 3.",
+        "formula": "Tanec + Charisma + Bonus za šaty + Hod kostkou",
+        "prizes": "🥇 1 800 zl. • 🥈 900 zl. • 🥉 450 zl."
+      },
+      "race": {
+        "title": "🏇 ZÁVOD KONÍ",
+        "sub": "Královská steeplechase o nejrychlejšího jezdce a nejlepšího oře království.",
+        "req": "Účast vyžaduje vlastnit alespoň jednoho chovného koně.",
+        "formula": "Jízda na koni + Boj + Počet koní + Hod kostkou",
+        "prizes": "🥇 1 600 zl. • 🥈 800 zl. • 🥉 400 zl."
+      },
+      "default": {
+        "title": "🎪 KRÁLOVSKÁ SLAVNOST",
+        "sub": "Slavnostní klání za účasti předních rytířů království.",
+        "req": "Splnění podmínek královského klání.",
+        "formula": "Vybrané ctnosti + Hod kostkou",
+        "prizes": "Odměny ve zlatě pro tři nejlepší"
+      },
+      "bonus_set_tag": "⚔️ +3 zbrojní set",
+      "bonus_dress_tag": "👗 +3 dvorské šaty",
+      "bonus_horses": "🐎 +{val} koně",
+      "bonus_base": "Základ {base}",
+      "reason_tournament": "Nemá zbroj, zbraň ani koně",
+      "reason_ball": "Chybí šaty, charisma i tanec (min. 3)",
+      "reason_race": "Nevlastní žádného koně",
+      "label_req": "<strong>Podmínka účasti:</strong>",
+      "label_formula": "<strong>Hodnocení:</strong>",
+      "label_prizes": "<strong>Výhry:</strong>",
+      "cancelled_title": "Slavnost se nekoná (nedostatek účastníků)",
+      "cancelled_desc": "Kvalifikovalo se pouze <strong>{count}</strong> rytířů. Protože slavnost vyžaduje alespoň 2 soutěžící, dvůr však oceňuje přípravu pořadatele <strong>{organizer}</strong>.",
+      "cancelled_hearts": "💖 +0.5 Srdce princezny za připravenost pro pořadatele",
+      "btn_accept_gift": "👑 Přijmout uznání dvora a pokračovat",
+      "qualified_header": "⚔️ Kvalifikovaní soutěžící ({count})",
+      "host_badge": "👑 Pořadatel",
+      "ready_badge": "Připraven",
+      "spectators_header": "👀 Pouze v hledišti (nesplňují podmínku)",
+      "btn_start_contest": "🎺 Zahájit královské klání a hodit kostkou! 🎲",
+      "ceremony_title": "VÝSLEDKY KRÁLOVSKÉHO KLÁNÍ",
+      "ceremony_sub": "Herold vyhlásil konečné pořadí před zraky princezny.",
+      "medal_1": "🥇 1. místo",
+      "medal_2": "🥈 2. místo",
+      "medal_3": "🥉 3. místo",
+      "medal_nth": "{place}. místo",
+      "roll_score_line": "Hod kostkou: <strong>🎲 {roll}</strong> • Celkové skóre: <strong>{score}</strong>",
+      "points_badge": "{score} bodů",
+      "btn_continue_victory": "🏆 Přijmout ceny a pokračovat ▶"
+    },
+    "armory_view": {
+      "knight_label": "⚔️ Rytíř:",
+      "purse_label": "Měšec:",
+      "status_can_shop": "🏰 Jsi u Kováře / na trhu — můžeš nakupovat!",
+      "status_at_merchant": "🛒 Stojíš u Obchodníka!",
+      "status_browse": "📜 Prohlížení katalogu (nákup možný u Kováře/Obchodníka)",
+      "sell_rate_label": "⚖️ Výkupní kurz:",
+      "sell_rate_merchant": "Stojíš na trhu! Výkup výbavy <strong>{itemPct}%</strong>, panství <strong>{bldPct}%</strong> (včetně povýšení a pastvin).",
+      "sell_rate_road": "Na cestě mimo trh je nouzový výkup výbavy <strong>{itemPct}%</strong> a panství <strong>{bldPct}%</strong> ceny.",
+      "sell_empty": "Nemáš žádnou výbavu ani panství k prodeji.",
+      "unknown_item": "Neznámý předmět",
+      "tier_short": "Úr. {tier}",
+      "btn_sell_item": "Prodat výbavu",
+      "estate_badge": "Panství",
+      "invested_total": "Celkem investováno: {val}",
+      "btn_sell_node": "Prodat sídlo",
+      "tier_upper": "ÚROVEŇ {tier}",
+      "pack_1_name": "Základní výzbroj (Věci 1)",
+      "pack_1_desc": "Vylosuje náhodnou kartu z balíčku VĚCI 1 (základní zbraně, zbroje či šperky).",
+      "pack_2_name": "Rytířská výzbroj (Věci 2)",
+      "pack_2_desc": "Vylosuje náhodnou kartu z balíčku VĚCI 2 (plátová zbroj, ostré meče, brokát).",
+      "pack_3_name": "Královská relikvie (Věci 3)",
+      "pack_3_desc": "Vylosuje náhodnou legendární kartu z balíčku VĚCI 3 (Dračobijci a koruny).",
+      "btn_merchant_only": "🔒 Pouze u Obchodníka",
+      "btn_no_gold": "🪙 Nedostatek zlata",
+      "btn_buy_pack": "🎁 Losovat za {price}",
+      "pastures_title": "🌾 Pastviny & Hospodářský skot:",
+      "livestock_tax_gain": "Výnos daní VD: {val}",
+      "livestock_capacity": "Obsazenost pastvin: <strong>{count} / {cap}</strong> kusů (🐄 Skot: {cattle} • 🐑 Ovce: {sheep} • 🐖 Prasata: {pigs})",
+      "livestock_hint": "Pastviny zřizuješ ve svých Městech a Hradech. Zvířata lze kupovat ve stájích na mapě, na trhu, nebo zde u Obchodníka.",
+      "badge_livestock": "Hospodářství",
+      "slot_animal": "Zvíře",
+      "sheep_name": "Stádo ovcí",
+      "sheep_desc": "Ušlechtilé vlněné stádo. Zvyšuje výnos daní VD o +{tax} a hodnotu mýtného sídla o +{rent}.",
+      "pigs_name": "Stádo prasat",
+      "pigs_desc": "Výnosný chov vepřů pro královské hostiny. Přidává +{tax} k daním VD a +{rent} k mýtnému.",
+      "cattle_name": "Stádo hovězího skotu",
+      "cattle_desc": "Nejcennější hospodářské stádo království. Přináší +{tax} k daním VD a +{rent} k mýtnému.",
+      "chip_per_tax": "+{val} / daň",
+      "chip_per_rent": "+{val} / mýto",
+      "btn_no_pastures": "⛔ Nemáš pastviny",
+      "btn_no_pastures_title": "Nejprve si vybuduj pastvinu u svého Města nebo Hradu.",
+      "btn_pastures_full": "⛔ Pastviny jsou plné",
+      "btn_pastures_full_title": "Kapacita pastvin je vyčerpána, postav další pastviny.",
+      "btn_at_merchant_stables": "🔒 U Obchodníka / Stájí",
+      "btn_at_merchant_stables_title": "Hospodářská zvířata lze koupit na trhu, u Obchodníka nebo ve stájích.",
+      "btn_low_gold": "🪙 Málo zlata",
+      "btn_buy_animal": "{icon} Koupit stádo",
+      "btn_owned": "✅ Vlastněno",
+      "btn_market_only": "🔒 Na trhu",
+      "btn_buy_item": "🛒 Koupit výbavu"
+    },
+    "quest_duel": {
+      "tier_u1": "U1 • Lov zvěře",
+      "tier_u2": "U2 • Zkouška cti",
+      "tier_u3": "U3 • Dračí sluj",
+      "w_dogs": "Lovečtí psi (+2)",
+      "w_falcon": "Lovečtí sokoli (+2)",
+      "w_falcons": "Sokoli / Kuše (+2)",
+      "w_horse": "Vlastní kůň (+2)",
+      "w_animals": "Chovaná zvířata K/P/S (+2)",
+      "w_animals_and_spear": "Zvířata a dlouhé kopí (+2)",
+      "w_spear": "Dlouhé kopí / Píka (+2)",
+      "w_armor": "Plátová zbroj / Štít (+2)",
+      "w_water_armor": "Vodní zbroj / Štít (+2)",
+      "w_fire": "Ohnivá zbraň / Kouzlo (+2)",
+      "w_ice": "Mrazivá čepel / Ochrana (+2)",
+      "w_elixir": "Alchymistický lektvar (+2)",
+      "w_dance": "Tanec a hbitost (+2)",
+      "w_charisma": "Vysoké charisma (+2)",
+      "w_light": "Světlo a stříbrná čepel (+2)",
+      "w_crystal": "Průrazná zbraň / Kopí (+2)",
+      "w_undead": "Stříbro / Svěcená zbroj (+2)",
+      "w_holy": "Posvěcená relikvie (+2)",
+      "w_dragon_slayer": "Dračobijec / Výbava U3 (+2)",
+      "w_mastery": "Vysoké bojové mistrovství (+2)",
+      "w_default": "Bojová přesila",
+      "possible_trophy": "Možná trofej: {name}",
+      "trophy_bonus_slot": "Bonus do 5. slotu: {bonus}",
+      "flip_title": "Otoč kartu a zjisti podrobnosti výpravy!",
+      "flip_btn": "🃏 Otočit kartu!",
+      "weakness_label": "Zranitelnost / Využitelné vybavení:",
+      "weakness_exploited_title": "Zranitelnost využita! (+2 k síle)",
+      "weakness_beast_title": "Můžeš koupit zástavu zvěře!",
+      "weakness_locked_hint": "Vlastníš pouze náhled nebo jiný set — tato slabina teď nefunguje.",
+      "static_power": "Základní síla rytíře",
+      "part_horse": "Kůň: +{val}",
+      "part_beasts": "Zvířata: +{val}",
+      "part_tactic": "Taktika: {val}",
+      "part_weakness": "Zranitelnost: +{val}",
+      "part_stance": "Postoj: {val}",
+      "difficulty_small": "Náročnost",
+      "needed_roll_label": "Potřebný hod kostkou:",
+      "impossible_without_roll": "Nedosažitelné (min. hod > 6)",
+      "win_chance_label": "Šance na úspěch:",
+      "stance_header": "⚔️ Zvol bojový postoj rytíře:",
+      "stance_aggressive_title": "Útočný výpad",
+      "stance_aggressive_badge": "+2 Síla | Riziko",
+      "stance_aggressive_desc": "Přidá +2 k bojové síle, při porážce však utrpíš dvojnásobnou pokutu.",
+      "stance_tactical_title": "Taktická rozvaha",
+      "stance_tactical_badge": "Vyvážený",
+      "stance_tactical_desc": "Klasický rytířský styl bez postihů a bez rizika ztráty navíc.",
+      "stance_defensive_title": "Opatrný kryt",
+      "stance_defensive_badge": "-1 Síla | Bezpečí",
+      "stance_defensive_desc": "Sníží sílu o -1, v případě neúspěchu však neplatíš léčení v nemocnici.",
+      "tactic_header": "🛡️ Příprava a válečná taktika před bojem:",
+      "tactic_normal_name": "Standardní střet",
+      "tactic_normal_desc": "Boj se stávající výzbrojí bez dodatečných nákladů.",
+      "tactic_charge_name": "Jezdecký nájezd (Kůň)",
+      "tactic_charge_desc": "Využiješ rychlost svých koní (+2 k síle útoku).",
+      "tactic_hounds_name": "Nasadit psy a sokoly",
+      "tactic_hounds_desc": "Lovečtí tvorové obklíčí nepřítele (+2 k síle, na U1 +3!).",
+      "tactic_elixir_name": "Dračí elixír ({price})",
+      "tactic_elixir_desc": "Koupený alchymistický lektvar: přidá +3 k síle a ochrání před pokutou.",
+      "btn_roll_action": "⚔️ Vrhnout se do boje a hodit kostkou! 🎲",
+      "rolling_btn": "🎲 Kostka se točí...",
+      "rerolling_btn": "🎲 Opakovaný hod...",
+      "animal_fallback": "zvíře",
+      "buyout_toast": "🐾 Vykoupil jsi zástavu „{name}“ za {price}!",
+      "buyout_pawn_toast": "🐾 Získal jsi kartu zástavy „{name}“! Můžeš si ji později vykoupit.",
+      "ceremony_win_banner": "🏆 SLAVNÉ VÍTĚZSTVÍ V BOJI!",
+      "ceremony_win_sub": "{badge} • Hrdina <strong>{player}</strong> porazil soka <strong>{quest}</strong>!",
+      "ceremony_roll_stats": "Hod kostkou: <strong>🎲 {roll}</strong> • Celková síla: <strong>{power}</strong> (vs. {diff})",
+      "ceremony_stance_label": "Postoj:",
+      "ceremony_tactic_label": "Taktika:",
+      "ceremony_weakness_win": "🎯 Využitá zranitelnost (+2): {reason}",
+      "ceremony_trophy_won": "🏅 Nová trofej do sbírky: {name}",
+      "ceremony_trophy_default_desc": "Vzácná lovecká či válečná trofej zvyšující prestiž rytíře.",
+      "ceremony_trophy_auto_equipped": "✅ Automaticky nasazeno do 5. slotu (Trofej)",
+      "ceremony_btn_equip_trophy": "🎖️ Nasadit tuto trofej ihned",
+      "ceremony_loot_found": "💎 Nalezená kořist výbavy: {item}",
+      "ceremony_win_continue": "⚔️ Převzít odměnu a pokračovat ▶",
+      "ceremony_loss_banner": "💥 ÚSTUP Z BOJIŠTĚ",
+      "ceremony_loss_sub": "Souboj proti <strong>{quest}</strong> nevyšel. Hod: <strong>🎲 {roll}</strong> • Síla: <strong>{power}</strong> (potřeba {diff}).",
+      "ceremony_weakness_loss": "🎯 Slabina ({reason}) ti pomohla (+2), přesto to těsně nestačilo.",
+      "reroll_title": "🍀 Šance na zvrat (Taktický re-roll)!",
+      "reroll_desc": "Tvoje výbava i taktika umožňují zopakovat hod kostkou za cílem {diff}.",
+      "reroll_btn": "🎲 Hodit kostkou znovu!",
+      "loss_saved_elixir": "🧪 Dračí elixír ztlumil následky porážky — vyvázl jsi bez pokuty!",
+      "loss_u1": "🌿 Zvěř ti utekla do houští. Rytíř utrpěl lehká zranění a byl ošetřen.",
+      "loss_hospital": "🏥 Byl jsi převezen do Královské nemocnice na zotavenou.",
+      "loss_retreat_continue": "🩹 Ustoupit a ukončit tah ▶",
+      "trophy_equipped_box": "✅ Trofej úspěšně nasazena do 5. slotu rytíře!",
+      "trophy_equipped_toast": "🎖️ Trofej byla nasazena!"
+    }
   },
   "engine": {
     "start_title": "👑 Královská trubačská fanfára! Hra „Princeznino srdce“ začíná.",
@@ -1865,7 +2415,11 @@ window.PRS_I18N["cs"] = {
     "hearts_count": "srdcí",
     "saved": "ULOŽENO",
     "stat_combat": "⚔️ Bojové umění",
-    "stat_charisma": "✨ Šlechtické charisma"
+    "stat_charisma": "✨ Šlechtické charisma",
+    "gold_short": "zl.",
+    "guest": "Host",
+    "hearts_singular": "Srdce",
+    "hearts_singular_princezna": "Srdce princezny"
   },
   "animals": {
     "horse": "Kůň",
@@ -2038,7 +2592,29 @@ window.PRS_I18N["cs"] = {
     "text_festival_invite": "Královská slavnost je v plném proudu! Využij své nadání a získej Srdce princezny.",
     "text_tax_warning": "Výběrčí daní vybírá berni od bezzemků a vyplácí výnosy majitelům panství.",
     "text_hospital_care": "Královský lazaret ošetří tvá zranění a vrátí ti sílu do dalších bojů.",
-    "text_prison_sentence": "Královská šatlava! Odsedíš si trest, zaplatíš kauci, nebo zkusíš štěstí v kostkách."
+    "text_prison_sentence": "Královská šatlava! Odsedíš si trest, zaplatíš kauci, nebo zkusíš štěstí v kostkách.",
+    "eval_animal_own": "Tvé vlastní zvíře (sada č. {setId}).",
+    "eval_animal_rival": "Patří soupeři. Stoupnutí tě bude stát nájemné.",
+    "eval_animal_complete": "Klíčové pole! Koupí završíš sadu č. {setId} na 3/3 (korunka 👑 + 1.5 💖).",
+    "eval_animal_pair": "Koupí získáš pár (2/3 v sadě č. {setId}).",
+    "eval_animal_free": "Volné zvíře do chovu (cena {price}).",
+    "eval_town_own": "Tvé město s daňovým výnosem 1 200 zl.",
+    "eval_town_rival": "Město soupeře. Přináší mu daně z každého výběru.",
+    "eval_tycoon_goal": "Cíl scénáře Magnát!",
+    "eval_town_free": "Volné město za {price} (+1 200 zl. daň).",
+    "eval_castle_own": "Tvůj hrad (+2 500 zl. daň a +1 Charisma).",
+    "eval_castle_rival": "Hrad soupeře. Pozor na vysoký nájem.",
+    "eval_castle_free": "Volný hrad za {price} (+2 500 zl. daň a +1 Charisma).",
+    "eval_village_own": "Tvá vesnice úrovně {lvl}★. Lze ji povýšit.",
+    "eval_village_rival": "Vesnice soupeře.",
+    "eval_village_free": "Volná vesnice za {price}. Stabilní zdroj daní.",
+    "eval_slayer_goal": "Cíl scénáře Lovci draků!",
+    "eval_quest_u3": "Nebezpečná Dračí sluj s královským pokladem.",
+    "eval_quest_u2": "Doupě monstra. Vyžaduje solidní bojovou výbavu.",
+    "eval_quest_u1": "Lesní zvěř. Vhodný cíl pro lehký lov se psy či sokoly.",
+    "eval_virtue_fallback": "Ctnost",
+    "eval_master": "Mistr ctnosti ({skill}). Zvyšuje úroveň vlastnosti.",
+    "eval_festival": "Královské slavnosti. Skvělé místo pro zisk Princezniných srdcí 💖."
   },
   "pouch": {
     "title": "Brašna pergamenů",
@@ -2541,7 +3117,9 @@ window.PRS_I18N["cs"] = {
     "calc_and": "a",
     "calc_place_1": "🥇 1. Místo (Vysoká šance na triumf)",
     "calc_place_2": "🥈 2. Místo (Přední příčky království)",
-    "calc_place_3": "🥉 3. Místo (Bude to tuhý boj)"
+    "calc_place_3": "🥉 3. Místo (Bude to tuhý boj)",
+    "mode_art_active": "🎨 Malovaný (aktivní)",
+    "mode_scheme_active": "📐 Schéma (aktivní)"
   },
   "saves": {
     "last_played": "⚔️ Poslední rozehraná hra",
@@ -2590,7 +3168,23 @@ window.PRS_I18N["cs"] = {
     "code_prefix": "Kód: ",
     "default_royal_map": "Královský plán",
     "recent_map_prefix": "Plán: ",
-    "recent_tpl_tiles_suffix": " polí)"
+    "recent_tpl_tiles_suffix": " polí)",
+    "autosave_title": "🟢 Poslední rozehraná výprava (Automatické uložení)",
+    "btn_continue_game": "▶️ Pokračovat ve hře",
+    "btn_continue_short": "▶️ Pokračovat",
+    "btn_delete_save_title": "Smazat tuto uloženou partii",
+    "empty_active_desc": "Můžeš zahájit novou výpravu na některé ze svých uložených šablon výše!",
+    "empty_active_title": "Žádné rozehrané herní partie",
+    "empty_saves_btn": "⚡ Spustit novou Solo výpravu",
+    "empty_saves_desc": "Během kterékoliv partie (Solo AI, Hot-Seat i Online) klikni v horní liště herního stolu na tlačítko <strong>💾 Uložit hru</strong> a partii si můžeš kdykoliv načíst zpět.",
+    "empty_saves_title": "Zatím nemáš žádné uložené výpravy",
+    "goal_prefix": "Cíl: ",
+    "saved_boards_header": "Moje uložené šablony herních plánů ({count})",
+    "saved_boards_hint": "Zahájit novou partii na této šabloně plánu nebo ji otevřít v Map Studiu k úpravám",
+    "tpl_chip_edit_title": "Upravit v Map Studiu",
+    "tpl_chip_play_title": "Zahájit hru na tomto plánu",
+    "tpl_chip_remove_title": "Odebrat",
+    "unknown_time": "Neznámý čas"
   },
   "lower_dashboard": {
     "title": "Sál rytířů & Královská kronika",
@@ -2635,7 +3229,35 @@ window.PRS_I18N["cs"] = {
     "filter_young": "Mladí draci (5)",
     "filter_elemental": "Živloví draci (9)",
     "filter_boss": "Dračí bossové (6)",
-    "tactical_tip": "<strong>Taktický bonus v souboji:</strong> Každá bestie i drak má v Bestiáři popsanou svou slabinu. Pokud do Soubojové arény nastoupíš s odpovídajícím vybavením, ctností, živlem či zvířaty, automaticky v souboji získáš <strong>bonus +2 k bojové síle (🎯 Využitá slabina)</strong>!"
+    "tactical_tip": "<strong>Taktický bonus v souboji:</strong> Každá bestie i drak má v Bestiáři popsanou svou slabinu. Pokud do Soubojové arény nastoupíš s odpovídajícím vybavením, ctností, živlem či zvířaty, automaticky v souboji získáš <strong>bonus +2 k bojové síle (🎯 Využitá slabina)</strong>!",
+    "tiers": {
+      "u1": "Tier U1 (Lesní zvěř)",
+      "u2_epic": "Tier U2+ (Mýtický titán)",
+      "u2": "Tier U2 (Bájné monstrum)",
+      "young": "Tier A (Mladý drak)",
+      "elemental": "Tier B (Živlový drak)",
+      "boss": "Tier C (Legendární Boss)"
+    },
+    "weaknesses": {
+      "dogs": "Lovečtí psi odlákají pozornost (+2 k síle se psy v chovu)",
+      "falcon": "Sokol útočí na zranitelná místa (+2 k síle se sokolem v chovu)",
+      "falcons": "Lovecký sokol vystopuje úkryt / odrazí vzdušný útok (+2 k síle)",
+      "animals": "Pes i sokol matou protivníka v boji (+2 k síle při vlastnictví psa i sokola)",
+      "animals_and_spear": "Spojení koně/psa a turnajového kopí (+2 k síle)",
+      "horse": "Útok z plné jízdy na koni (+2 k síle s koněm v chovu)",
+      "dance": "Lze okouzlit ladným tancem (+2 k síle s Tancem ≥ 2)",
+      "elixir": "Hojivý lektvar neutralizuje dech či jed (+2 k síle s lektvarem)",
+      "water_armor": "Vodní perla či pevná zbroj tlumí žár (+2 k síle se zbrojí / vodní perlou)",
+      "ice": "Mrazivé zbraně oslabují protivníka (+2 k síle s mrazivou zbraní / relikvií)",
+      "fire": "Oheň taví led, krystaly a sítě (+2 k síle s ohnivou zbraní / relikvií)",
+      "armor": "Pevná rytířská zbroj svádí blesky a odráží drtivé údery (+2 k síle)",
+      "light": "Posvěcené relikvie rozhánějí temnotu a přízraky (+2 k síle)",
+      "charisma": "Vznešené charisma soka uchlácholí (+2 k síle s Charismatem ≥ 3)",
+      "holy": "Svaté relikvie zaženou nemrtvého a zlomí kletbu (+2 k síle)",
+      "courage": "Pevná vůle a odvaha pronikne mlhou (+2 k síle s Bojem ≥ 3 či Jízdou ≥ 3)",
+      "mastery": "Zkouška všech 4 ctností (+2 k síle při všech ctnostech ≥ 2)",
+      "spear": "Dlouhé rytířské kopí udrží soka v bezpečné vzdálenosti (+2 k síle)"
+    }
   },
   "castles_gallery": {
     "title": "🏰 Galerie královských a rodových hradů",
@@ -3118,7 +3740,11 @@ window.PRS_I18N["cs"] = {
       "all_scenarios": "Všechny scénáře splnitelné",
       "trios": "trojic zvířat",
       "branches": "větví",
-      "tiles": "polí"
+      "tiles": "polí",
+      "tier_prefix": "Stupeň",
+      "warn_badge": "Upozornění ke scénářům",
+      "warn_slayer": "Pro scénář Lovci draků doporučeno alespoň 2× Drak U3",
+      "warn_tycoon": "Pro scénář Magnát doporučeno 3× Město + 1× Hrad"
     },
     "select_options": {
       "shape_auto": "🎲 Podle seedu (Automatický mix)",
@@ -3159,7 +3785,15 @@ window.PRS_I18N["cs"] = {
     "start_quest_template_msg": "Spuštění výpravy na šabloně „{name}“ vyžaduje restart partie.\nPřeješ si začít hrát?",
     "start_quest_template_confirm": "⚔️ Zahájit hru",
     "start_quest_template_cancel": "Zpět",
-    "default_custom_map_name": "Vlastní plán"
+    "default_custom_map_name": "Vlastní plán",
+    "animal_level_prefix": "Level {lvl}",
+    "animal_price_fmt": "Cena {p1}/{p2}/{p3} {curr}",
+    "animal_summary_badge": "{count} trojic = {tiles} polí",
+    "procedural_route": "Procedurální trasa",
+    "start_quest_dyn_cancel": "Zpět k partii",
+    "start_quest_dyn_confirm": "⚔️ Zahájit hru na tomto plánu",
+    "start_quest_dyn_msg": "Spuštění nové výpravy na vlastním dynamickém plánu vyžaduje restart partie.\nPřeješ si začít hrát na plánu „{name}“ ({count} polí)?",
+    "start_quest_dyn_title": "Zahájení výpravy na vlastním plánu"
   },
   "settings": {
     "title": "Nastavení hry & království",
@@ -3290,7 +3924,15 @@ window.PRS_I18N["cs"] = {
     "toll_label": "Mýtné: {amount} {curr}",
     "estates_header": "🏰 Panství a chovy ({count} polí):",
     "farming_sub": "🌾 Chov: 🐄{cattle} 🐑{sheep} 🐖{pigs}",
-    "no_estates": "🏰 Rytíř zatím nevlastní panství ani stáje. Kupuj pole po království!"
+    "no_estates": "🏰 Rytíř zatím nevlastní panství ani stáje. Kupuj pole po království!",
+    "level_short": "Úr. {lvl}/3",
+    "pill_horses": "Koně: {count}",
+    "pill_dogs": "Lovečtí psi: {count}",
+    "pill_falcons": "Sokoli: {count}",
+    "pill_villages": "Vesnice: {count}",
+    "pill_towns": "Města: {count}",
+    "pill_castles": "Hrady: {count}",
+    "pill_crafts": "Řemeslné živnosti a kejklíři: {count}"
   },
   "decks_row": {
     "header_title": "Královské balíčky karet &amp; Pokladnice",
@@ -3311,14 +3953,96 @@ window.PRS_I18N["cs"] = {
     "festivals_sub": "Turnaj &amp; ples",
     "diff_4_6": "Obtížnost 4–6",
     "diff_8_10": "Obtížnost 8–10",
-    "diff_11_17": "Obtížnost 11–17"
+    "diff_11_17": "Obtížnost 11–17",
+    "zone": {
+      "default_title": "Balíček karet",
+      "btn_preview": "🔍 Náhled",
+      "btn_detail": "🔍 Detail",
+      "items_header": "Přehled předmětů v balíčku (klikni pro detail karty):",
+      "veci1_title": "🛡️ Balíček VĚCI 1 (Základní výzbroj)",
+      "veci1_summary": "<strong>Cena balíčku: {price}</strong> | Obsahuje {count} základních zbraní, zbrojí a dvorských šperků.",
+      "veci1_desc": "Lze nakupovat u Kováře, Obchodníka nebo v záložce Zbrojnice. Poskytují bonusy k Boji (+2 až +3), Jízdě na koni či Tanci a Charismatu.",
+      "veci2_title": "⚔️ Balíček VĚCI 2 (Rytířská výzbroj)",
+      "veci2_summary": "<strong>Cena balíčku: {price}</strong> | Obsahuje {count} elitních zbraní, plátových zbrojí a brokátových rouch.",
+      "veci2_desc": "Zásadní pro souboje s monstry U2 a prestiž u královského dvora. Dávají souhrnné bonusy až +7 k vlastnostem.",
+      "veci3_title": "👑 Balíček VĚCI 3 (Legendární královské relikvie)",
+      "veci3_summary": "<strong>Cena balíčku: {price}</strong> | Obsahuje {count} ultimátní klenoty a meče Dračích bijců.",
+      "veci3_desc": "Nejvzácnější královské relikvie dávající až +13 k celkovým vlastnostem, nezbytné pro porážku nejmocnějších draků U3.",
+      "u1_title": "🐗 Balíček ZVĚŘ (Úkoly U1 - Lovecký revír)",
+      "u1_summary": "<strong>Obtížnost: 4–6</strong> | Odměna: 1 200 – 2 600 {curr} + 0.5–1.5 💖 Srdce.",
+      "u1_desc": "Lovečtí psi a sokoli usnadňují ulovení zvěře. Poražením každého zvířete získáte unikátní loveckou trofej do 5. slotu výbavy.",
+      "u1_list_header": "Seznam {count} zvířat v revíru (klikni pro detail karty):",
+      "u2_title": "👹 Balíček MONSTRA (Úkoly U2 - Nebezpečné zkoušky)",
+      "u2_summary": "<strong>Obtížnost: 8–15</strong> | Odměna: 3 000 – 12 000 {curr} + 1–5 💖 + Předmět výbavy.",
+      "u2_desc": "Skalní obři, vlkodlaci, loupeživí rytíři, titáni a čarodějové. Poražení vám přinese trvalé srdce princezny a mocnou relikvii.",
+      "u2_list_header": "Seznam {count} monster v balíčku (klikni pro detail karty):",
+      "u3_title": "🐉 Balíček DRACI (Úkoly U3 - Dračí sluje)",
+      "u3_summary": "<strong>Obtížnost: 11–17</strong> | Odměna: 6 000 – 16 000 {curr} + 2.5–6.0 💖 Srdcí princezny.",
+      "u3_desc": "Království ohrožuje {count} unikátních draků a saní. Každý má svou zranitelnost (kopí, psi, lektvary, oheň či mráz) a zanechává legendární poklad.",
+      "u3_list_header": "Seznam {count} draků v balíčku (klikni pro detail karty):",
+      "u3_bestiary_btn": "🐉 Prohlédnout kompletní Dračí Bestiář v pravidlech ({count})",
+      "chance_title": "❓ Balíček NÁHODA (24 karet královského osudu)",
+      "chance_summary": "Celkem {count} autentických královských událostí.",
+      "chance_desc": "Královská přízeň (+1 💖), loupežnická přepadení, milostné sonety, dary od královny matky, opravy zbrojí i nálezy pokladů na rozcestí.",
+      "chance_list_header": "Výběr karet osudu (klikni pro detail karty):",
+      "chance_pos": "Přízeň dvora (+)",
+      "chance_neg": "Neštěstí (-)",
+      "chance_challenge": "Zkouška (!)",
+      "fest_title": "🎪 Balíček SLAVNOSTI (Královská klání)",
+      "fest_summary": "Královský turnaj, Dvorský ples a Závod koní.",
+      "fest_desc": "Hráči porovnávají své ctnosti: Turnaj (Boj a Jízda), Ples (Tanec a Charisma), Závod (Jízda a Boj). Tři nejlepší získávají peněžité ceny až {prize}!",
+      "fest_prize_upto": "až {prize}",
+      "fest_list_header": "Královské slavnosti (klikni pro detail):"
+    }
   },
   "dice": {
     "click_to_roll": "Klepni na kostku pro hod!"
   },
   "achievements": {
     "modal_title": "🏆 Rytířská síň slávy &amp; Úspěchy",
-    "modal_close": "Zavřít síň slávy"
+    "modal_close": "Zavřít síň slávy",
+    "badge_first_game_name": "🥉 První krok",
+    "badge_first_game_title": "První krok",
+    "badge_first_game_desc": "Zahraj svou první partii v království Princeznina srdce.",
+    "badge_slayer_name": "🐉 Drakobijce",
+    "badge_slayer_title": "Drakobijce",
+    "badge_slayer_desc": "Skol obávaného draka v jeho nebezpečné sluji.",
+    "badge_castle_lord_name": "🏰 Pán hradů",
+    "badge_castle_lord_title": "Pán hradů",
+    "badge_castle_lord_desc": "Postav alespoň 2 majestátní hrady na svých panstvích.",
+    "badge_breeder_name": "🐎 Velkochovatel",
+    "badge_breeder_title": "Velkochovatel",
+    "badge_breeder_desc": "Vlastni kompletní sadu koní a alespoň 3 stáda užitkového dobytka.",
+    "badge_ball_master_name": "💃 Mistr bálů",
+    "badge_ball_master_title": "Mistr bálů",
+    "badge_ball_master_desc": "Získej na jedněch Slavnostech přes 15 Princezniných srdcí.",
+    "badge_champion_name": "👑 Královský vítěz",
+    "badge_champion_title": "Královský vítěz",
+    "badge_champion_desc": "Zvítěz v partii a získej ruku princezny i královskou korunu.",
+    "badge_grandmaster_name": "🌟 Dračí legenda",
+    "badge_grandmaster_title": "Dračí legenda",
+    "badge_grandmaster_desc": "Dosáhni alespoň 3 slavných vítězství nebo skol 3 draky.",
+    "newly_unlocked_title": "Nový královský odznak",
+    "newly_unlocked_msg": "Gratulujeme! Získal jsi nový královský odznak:<br><br><strong style='color:#fde68a; font-size:1.15rem;'>{names}</strong><br><br>Najdeš ho ve své Rytířské síni slávy.",
+    "rank_grandmaster": "Dračí velmistr",
+    "rank_champion": "Rytíř šampion",
+    "rank_squire": "Čestný panoš",
+    "title_label": "Titul:",
+    "treasury_label": "Pokladnice:",
+    "stat_games": "Partií",
+    "stat_wins": "Vítězství",
+    "stat_dragons": "Draků",
+    "stat_hearts": "Srdcí celkem",
+    "stat_record": "Rekord partie",
+    "tab_badges": "🏆 Královské odznaky ({unlocked} / {total})",
+    "tab_history": "📜 Historie výprav ({count})",
+    "history_empty_title": "Žádná zaznamenaná historie partií",
+    "history_empty_desc": "Odehraj partii na herním stole a tvoje výsledky i slavnostní diplomy se uloží sem do kroniky království.",
+    "winner_fallback": "Vítěz",
+    "rounds_label": "{count} kol",
+    "btn_diploma": "📜 Královský diplom",
+    "status_unlocked": "✨ Odemčeno",
+    "status_locked": "🔒 Zamčeno"
   },
   "dialogs": {
     "new_realm": {
@@ -3932,7 +4656,32 @@ window.PRS_I18N["cs"] = {
   "combat": {
     "intrigue_ballad_success_summary": "Posměšná balada uspěla! Soupeř {name} ztratil -{penalty} 💖.",
     "intrigue_ballad_fail_summary": "Posměšná balada selhala. Soupeř {name} získal +0,25 💖.",
-    "intrigue_customs_summary": "Celní kontrola uvalena na {name} (1 kolo bez nájmu)."
+    "intrigue_customs_summary": "Celní kontrola uvalena na {name} (1 kolo bez nájmu).",
+    "armor_fallback": "Pevná zbroj",
+    "tactic_normal": "Běžný útok",
+    "tactic_charge": "🏇 Útok z plné jízdy (+1 k síle)",
+    "tactic_hounds": "🐕 Lovecká smečka odlákala pozornost (+1 k síle)",
+    "tactic_elixir": "🧪 Hojivý elixír z Lazaretu (Pojistka proti Špitálu)",
+    "stance_tactical": "🎯 Taktický manévr",
+    "stance_aggressive": "⚔️ Dravý útok (+2 k síle, při prohře -2 💖 nebo 2× pokuta)",
+    "stance_defensive": "🛡️ Opatrná obrana (-1 k síle, při prohře 0 ztráta srdcí & bezpečný ústup)",
+    "weakness_dogs": "Lovečtí psi odlákali pozornost bestie",
+    "weakness_falcon": "Lovecký sokol vystopoval zranitelná místa",
+    "weakness_horse": "Drtivý nájezd z plné jízdy na koni zlomil obranu",
+    "weakness_animals": "Kombinace vycvičených zvířat dokonale zmátla draka",
+    "weakness_animals_spear": "Mistrovská koordinace jízdy na koni a turnajového kopí",
+    "weakness_spear_item": "Dlouhé {item} udrželo nestvůru v bezpečném odstupu",
+    "weakness_spear_skill": "Rytířské ovládnutí jezdeckého kopí a manévrů",
+    "weakness_armor": "{item} odrazila drtivý úder",
+    "weakness_water_armor": "Ochranné brnění a vodní perla zchladily spalující žár",
+    "weakness_fire": "Žhavé plameny a sopečný žár roztavily ledový krunýř",
+    "weakness_ice": "Mrazivý chlad a ledové krystaly zchladily lávovou tlamu",
+    "weakness_elixir": "Hojivý lektvar z Lazaretu neutralizoval jedovatý dech",
+    "weakness_dance": "Půvabný taneční krok a dvorský šat okouzlily hravého draka",
+    "weakness_charisma": "Vznešené charisma rytíře dojalo drahokamového draka",
+    "weakness_courage": "Nezlomná rytířská odvaha pronikla mlhou stínů",
+    "weakness_light": "Zářící posvátné světlo relikvií spálilo stínovou temnotu",
+    "weakness_mastery": "Dokonalé ovládnutí všech 4 rytířských ctností (Boj, Jízda, Tanec, Charisma)"
   },
   "story": {
     "kicker": "📜 Příběh království & Cíl hry",
@@ -4209,7 +4958,14 @@ window.PRS_I18N["cs"] = {
       "🐉 Dračí soutěska": "🐉 Dračí soutěska",
       "🐍 Hadovitá magistrála": "🐍 Hadovitá magistrála",
       "👑 Královská rovnováha": "👑 Královská rovnováha",
-      "🧙‍♂️ Turnaj čtyř mistrů": "🧙‍♂️ Turnaj čtyř mistrů"
+      "🧙‍♂️ Turnaj čtyř mistrů": "🧙‍♂️ Turnaj čtyř mistrů",
+      "Sokol 6 (Sokol stěhovavý)": "Sokol 6 (Sokol stěhovavý)",
+      "Kůň 13 (Zlatý palomino)": "Kůň 13 (Zlatý palomino)",
+      "Sokol 13 (Skalní orel)": "Sokol 13 (Skalní orel)",
+      "Pes 13 (Severní vlkodav)": "Pes 13 (Severní vlkodav)",
+      "Kůň 14 (Stínový oř)": "Kůň 14 (Stínový oř)",
+      "Sokol 14 (Noční raroh)": "Sokol 14 (Noční raroh)",
+      "Pes 14 (Hradní chrlič)": "Pes 14 (Hradní chrlič)"
     }
   },
   "beta_games": {
