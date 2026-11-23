@@ -499,7 +499,7 @@ window.PRS_App = {
 
             water: "assets/dragons/dragon_ice.webp",
 
-            earth: "assets/dragons/dragon_green.webp",
+            earth: "assets/dragons/dragon_forest.webp",
 
             air: "assets/dragons/dragon_wind.webp"
 

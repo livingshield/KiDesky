@@ -460,6 +460,17 @@ window.PRS_TROPHIES = {
     },
 
     // --- U3: TIER A – MLADÍ A DIVOCÍ DRACI (Stupeň 2) ---
+    trophy_forest: {
+        id: "trophy_forest",
+        name: "Pralesní šupina zeleného draka",
+        tier: 2,
+        slot: "trophy",
+        icon: "🌲",
+        source: "Zelený lesní drak (U3)",
+        combat: 3, riding: 3, dance: 0, charisma: 1,
+        pluses: 7, minuses: 0, price: 8000,
+        desc: "Tvrzená smaragdová šupina pokrytá zkamenělou kůrou a mechem. Odolává šípům i čepelím v hvozdech."
+    },
     trophy_green: {
         id: "trophy_green",
         name: "Větrná šupina útesového draka",
@@ -928,6 +939,8 @@ window.PRS_QUESTS = {
     ],
     U3: [
         // --- TIER A: Mladí a divocí draci (Obtížnost 11–12) ---
+        { id: "u3_forest", name: "Zelený lesní drak", icon: "🌲", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6800, hearts: 2.5, itemTier: 2, trophyId: "trophy_forest", img: "assets/dragons/dragon_forest.webp",
+        canFlip: true, weakness: "dogs", desc: "Prastarý drak se smaragdovými šupinami prorostlými kůrou a mechem, střežící hluboké hvozdy. Lovečtí psi snadno odlákají jeho pozornost v podrostu!" },
         { id: "u3_green", name: "Větrný útesový drak", icon: "🌬️", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6500, hearts: 2.5, itemTier: 2, trophyId: "trophy_green", img: "assets/dragons/dragon_green.webp",
         canFlip: true, weakness: "dogs", desc: "Majestátní azurový drak trůnící na skalním útesu uprostřed oblaků. Ze chřtánu vydechuje víry větru a střeží starobylé svitky i poklad. Lovečtí psi snadno odlákají jeho pozornost!" },
         { id: "u3_swamp", name: "Bažinný jedový drak", icon: "🐊", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 7000, hearts: 2.5, itemTier: 2, trophyId: "trophy_swamp", img: "assets/dragons/dragon_swamp.webp",

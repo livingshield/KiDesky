@@ -1121,7 +1121,7 @@
 
             html.push('<div style="text-align:center; margin-top:0.4rem;">');
 
-            html.push('  <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal(); PRS_App.switchTab(\'rules\'); PRS_App.switchRulesSubtab(\'dragons\');" style="cursor:pointer; padding:0.45rem 1rem;">🐉 Prohlédnout kompletní Dračí Bestiář v pravidlech (20)</button>');
+            html.push('  <button class="rules-subnav-btn active" onclick="PRS_App.closeDeckModal(); PRS_App.switchTab(\'rules\'); PRS_App.switchRulesSubtab(\'dragons\');" style="cursor:pointer; padding:0.45rem 1rem;">🐉 Prohlédnout kompletní Dračí Bestiář v pravidlech (21)</button>');
 
             html.push('</div>');
 

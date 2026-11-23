@@ -18,7 +18,7 @@ Tento dokument je **oficiálním a úplným katalogem všech grafických prvků,
 
 ---
 
-## 🐉 Kapitola 1: Draci & Bestiář (20 draků pro úkol U3)
+## 🐉 Kapitola 1: Draci & Bestiář (21 draků pro úkol U3)
 
 Draci představují nejvyšší výzvu královských rytířů na políčkách **Úkol 3 (U3)**. Jsou rozděleni do tří výkonnostních kategorií (Tierů). Každý drak má specifickou slabinu, odměnu ve zlatě, zisk **Princezniných srdcí (💖)** a zanechává po sobě unikátní **trofej** do 5. slotu výbavy.
 
@@ -26,6 +26,7 @@ Draci představují nejvyšší výzvu královských rytířů na políčkách *
 
 | ID draka | Název | Živel / Ikona | Tier | Obtížnost | Odměna (zl. / 💖) | Klíčová slabina | Spojená trofej |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| `u3_forest` | **Zelený lesní drak** | 🌲 Příroda | A (Mladý) | 11 | 6 800 / +2.5 💖 | Lovečtí psi (`dogs`) | Pralesní šupina zeleného draka |
 | `u3_green` | **Větrný útesový drak** | 🌬️ Vzduch | A (Mladý) | 11 | 6 500 / +2.5 💖 | Lovečtí psi (`dogs`) | Větrná šupina útesového draka |
 | `u3_swamp` | **Bažinný jedový drak** | 🐊 Voda/Jed | A (Mladý) | 11 | 7 000 / +2.5 💖 | Lektvar z lazaretu (`elixir`) | Jedový váček z močálu |
 | `u3_fairy` | **Pohádkový pestrý drak** | 🦋 Magie | A (Mladý) | 11 | 6 000 / +3.0 💖 | Tanec & Charisma (`dance`) | Pyl kouzelného motýlodraka |

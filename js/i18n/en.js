@@ -139,7 +139,7 @@ window.PRS_I18N.en = {
         },
         "rules_tabs": {
             "rules": "📜 Game Rules",
-            "dragons": "🐉 Bestiary & Monsters (62)",
+            "dragons": "🐉 Bestiary & Monsters (63)",
             "castles": "🏰 Castles Gallery (10)",
             "trophies": "🏆 Hall of Trophies (29)",
             "decorations": "🌲 Landscape Atlas (42)"
@@ -868,6 +868,10 @@ window.PRS_I18N.en = {
             "name": "Colossal Behemoth Tusks",
             "desc": "Monstrous ivory of the primeval terrestrial colossus. No fortress door can withstand its weight."
         },
+        "trophy_forest": {
+            "name": "Forest Dragon Emerald Scale",
+            "desc": "Hardened emerald scale overgrown with petrified bark and moss. Deflects arrows and blades in woodlands."
+        },
         "trophy_green": {
             "name": "Cliff Dragon Wind Scale",
             "desc": "Lightweight azure scale brushed by mountain breezes. Deflects blows and grants the knight the agility of the wind."
@@ -1121,6 +1125,10 @@ window.PRS_I18N.en = {
         "u2_behemoth": {
             "name": "Legendary Primeval Behemoth",
             "desc": "An ancient land titan shaking the ground with every stride. Tremendous bravery and a lance charge bring him down."
+        },
+        "u3_forest": {
+            "name": "Green Forest Dragon",
+            "desc": "An ancient dragon with emerald scales overgrown with bark and moss, guarding the deep woodlands. Hunting hounds easily distract its attention in the undergrowth!"
         },
         "u3_green": {
             "name": "Cliff Wind Dragon",

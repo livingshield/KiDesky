@@ -139,7 +139,7 @@ window.PRS_I18N.cs = {
         },
         "rules_tabs": {
             "rules": "📜 Pravidla hry",
-            "dragons": "🐉 Bestiář & Monstra (62)",
+            "dragons": "🐉 Bestiář & Monstra (63)",
             "castles": "🏰 Galerie hradů (10)",
             "trophies": "🏆 Síň trofejí & Relikvií (29)",
             "decorations": "🌲 Atlas dekorací & krajiny (42)"
@@ -736,6 +736,10 @@ window.PRS_I18N.cs = {
             "name": "Prsten loupeživého hejtmana",
             "desc": "Zlatý pečetní prsten ukořistěný veliteli lesních banditů, kteří tě zkusili přepadnout."
         },
+        "trophy_forest": {
+            "name": "Pralesní šupina zeleného draka",
+            "desc": "Tvrzená smaragdová šupina pokrytá zkamenělou kůrou a mechem. Odolává šípům i čepelím v hvozdech."
+        },
         "trophy_green": {
             "name": "Větrná šupina útesového draka",
             "desc": "Lehká azurová šupina obtékaná horskými vánky. Odolává úderům a dodává rytíři hbitost větru."
@@ -1121,6 +1125,10 @@ window.PRS_I18N.cs = {
         "u2_behemoth": {
             "name": "Bájný obří Behemot",
             "desc": "Pravěký pozemní gigant otřásající zemí každým krokem. Dlouhé kopí šampionů najde skulinu pod krunýřem."
+        },
+        "u3_forest": {
+            "name": "Zelený lesní drak",
+            "desc": "Prastarý drak se smaragdovými šupinami prorostlými kůrou a mechem, střežící hluboké hvozdy. Lovečtí psi snadno odlákají jeho pozornost v podrostu!"
         },
         "u3_green": {
             "name": "Větrný útesový drak",

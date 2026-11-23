@@ -49,14 +49,14 @@ function findGitBin() {
   throw new Error('git executable not found');
 }
 
-async function fetchWithRetry(url, opts = {}, retries = 3) {
+async function fetchWithRetry(url, opts = {}, retries = 4) {
   let lastErr;
   for (let i = 1; i <= retries; i++) {
     try {
-      return await fetch(url, { ...opts, signal: AbortSignal.timeout(20000) });
+      return await fetch(url, { ...opts, signal: AbortSignal.timeout(30000) });
     } catch (err) {
       lastErr = err;
-      if (i < retries) await new Promise(r => setTimeout(r, 700));
+      if (i < retries) await new Promise(r => setTimeout(r, 1200 * i));
     }
   }
   throw lastErr;
