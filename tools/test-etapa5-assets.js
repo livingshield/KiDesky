@@ -124,7 +124,7 @@ async function main() {
     ]);
     const codeFiles = collectCodeFiles();
     const refs = new Map();
-    const refRe = /(?:["'`(\s]|\/apps\/KiDesky\/)(assets\/(?:backgrounds|board|castles|decorations|dragons|env|icons|landmarks|monsters|pawns|tiles)\/[A-Za-z0-9_\-\.]+\.(?:png|jpe?g|webp|gif|svg|ico))/gi;
+    const refRe = /(?:["'`(\s]|\/apps\/KiDesky\/)(assets\/(?:backgrounds|board|castles|decorations|dragons|env|icons|landmarks|monsters|pawns|terrain|tiles)\/[A-Za-z0-9_\-\.]+\.(?:png|jpe?g|webp|gif|svg|ico))/gi;
     for (const cf of codeFiles) {
       const txt = fs.readFileSync(cf.full, 'utf8');
       let m;
@@ -244,6 +244,7 @@ async function main() {
       'assets/tiles/start.webp',
       'assets/backgrounds/bg_theme_fire.webp',
       'assets/board/parchment_board_bg.webp',
+      'assets/terrain/grass.webp',
       'assets/env/table_bg.webp'
     ];
 

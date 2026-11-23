@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kidesky-cache-v1.9.72';
+const CACHE_NAME = 'kidesky-cache-v1.9.73';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -43,6 +43,7 @@ const CORE_ASSETS = [
   './js/app/app-map-studio.js',
   './js/board/board-camera.js',
   './js/board/board-rivers.js',
+  './js/board/board-terrain.js',
   './js/board/board-static-svg.js',
   './js/board/board-tokens.js',
   './js/board/board-ambient.js',
@@ -62,7 +63,15 @@ const CORE_ASSETS = [
   './js/app-catalog.js',
   './js/app-rules-guide.js',
   './js/app-admin.js',
-  './js/app-musicwidget.js'
+  './js/app-musicwidget.js',
+  './assets/terrain/grass.webp',
+  './assets/terrain/meadow.webp',
+  './assets/terrain/forest_floor.webp',
+  './assets/terrain/rock.webp',
+  './assets/terrain/dirt.webp',
+  './assets/terrain/ash.webp',
+  './assets/terrain/snow.webp',
+  './assets/terrain/mist.webp'
 ];
 
 self.addEventListener('install', (event) => {

@@ -226,6 +226,7 @@
             '<radialGradient id="tileInnerShadow" cx="50%" cy="50%" r="50%"><stop offset="70%" stop-color="#000000" stop-opacity="0"/><stop offset="100%" stop-color="#000000" stop-opacity="0.55"/></radialGradient>' +
             '<filter id="dragonFireGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
             '<filter id="goldAuraGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+            (typeof this.getBoardTerrainDefsSVG === "function" ? this.getBoardTerrainDefsSVG(this.state && this.state.board, th) : "") +
 
             '</defs>';
 
@@ -311,18 +312,21 @@
     
     renderBoardBiomesHTML: function (board) {
         if (!board || !board.biomes || board.biomes.length === 0) return "";
+        var hasTexturedTerrain = (typeof this.renderBoardTerrainHTML === "function");
+        var baseOpacityScale = hasTexturedTerrain ? 0.32 : 1.0;
+        var heartlandOp = hasTexturedTerrain ? "0.20" : "0.55";
         var out = [];
         out.push('  <g id="prs-biomes-layer" pointer-events="none">');
         // Celkový teplý podkladový akvarelový přeliv krajiny
-        out.push('    <ellipse cx="690" cy="430" rx="640" ry="380" fill="url(#heartlandBiomeGrad)" opacity="0.55" filter="url(#biomeBlur)"/>');
+        out.push('    <ellipse cx="690" cy="430" rx="640" ry="380" fill="url(#heartlandBiomeGrad)" opacity="' + heartlandOp + '" filter="url(#biomeBlur)"/>');
         for (var b = 0; b < board.biomes.length; b++) {
             var bm = board.biomes[b];
             var fillVal = bm.fillGrad ? ("url(#" + bm.fillGrad + ")") : bm.fill;
             out.push('    <g class="biome-region" data-biome-id="' + bm.id + '">');
-            out.push('      <path d="' + bm.path + '" fill="' + fillVal + '" opacity="' + (bm.opacity || 0.78) + '" filter="url(#biomeBlur)"/>');
+            out.push('      <path d="' + bm.path + '" fill="' + fillVal + '" opacity="' + (Math.round(((bm.opacity || 0.78) * baseOpacityScale) * 100) / 100) + '" filter="url(#biomeBlur)"/>');
             if (bm.contours && bm.contours.length > 0) {
                 for (var c = 0; c < bm.contours.length; c++) {
-                    out.push('      <path d="' + bm.contours[c] + '" fill="none" stroke="' + (bm.contourStroke || 'rgba(251,191,36,0.32)') + '" stroke-width="1.15" stroke-dasharray="' + (bm.contourDash || '7,5') + '"/>');
+                    out.push('      <path d="' + bm.contours[c] + '" fill="none" stroke="' + (bm.contourStroke || 'rgba(251,191,36,0.32)') + '" stroke-width="1.15" stroke-dasharray="' + (bm.contourDash || '7,5') + '"' + (hasTexturedTerrain ? ' opacity="0.55"' : '') + '/>');
                 }
             }
             out.push('    </g>');
@@ -488,6 +492,11 @@
         // Kartografický dvojitý rám královské mapy (bez umělých čárkovaných přehybů)
         out.push('  <rect x="10" y="10" width="1380" height="840" rx="18" fill="none" stroke="rgba(212,175,55,0.34)" stroke-width="1.3"/>');
         out.push('  <rect x="16" y="16" width="1368" height="828" rx="14" fill="none" stroke="rgba(212,175,55,0.22)" stroke-width="1.0" stroke-dasharray="14,6,3,6"/>');
+
+        // 1a. Souvislý namalovaný terén (bezešvé textury se šumovými maskami)
+        if (typeof this.renderBoardTerrainHTML === "function" && this.state.board) {
+            out.push(this.renderBoardTerrainHTML(this.state.board));
+        }
 
         // 1b. Sémantické akvarelové biomy a vrstevnice
         if (this.state.board && this.state.board.biomes && this.state.board.biomes.length > 0) {
