@@ -462,14 +462,14 @@ window.PRS_TROPHIES = {
     // --- U3: TIER A – MLADÍ A DIVOCÍ DRACI (Stupeň 2) ---
     trophy_green: {
         id: "trophy_green",
-        name: "Pralesní šupina zeleného draka",
+        name: "Větrná šupina útesového draka",
         tier: 2,
         slot: "trophy",
-        icon: "🌲",
-        source: "Zelený lesní drak (U3)",
+        icon: "🌬️",
+        source: "Větrný útesový drak (U3)",
         combat: 3, riding: 3, dance: 0, charisma: 1,
         pluses: 7, minuses: 0, price: 8000,
-        desc: "Tvrzená šupina pokrytá zkamenělou kůrou a mechem. Odolává šípům i čepelím v hvozdech."
+        desc: "Lehká azurová šupina obtékaná horskými vánky. Odolává úderům a dodává rytíři hbitost větru."
     },
     trophy_swamp: {
         id: "trophy_swamp",
@@ -928,8 +928,8 @@ window.PRS_QUESTS = {
     ],
     U3: [
         // --- TIER A: Mladí a divocí draci (Obtížnost 11–12) ---
-        { id: "u3_green", name: "Zelený lesní drak", icon: "🌲", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6500, hearts: 2.5, itemTier: 2, trophyId: "trophy_green", img: "assets/dragons/dragon_green.webp",
-        canFlip: true, weakness: "dogs", desc: "Drak s šupinami z kůry a mechu. Lovečtí psi snadno odlákají jeho pozornost!" },
+        { id: "u3_green", name: "Větrný útesový drak", icon: "🌬️", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6500, hearts: 2.5, itemTier: 2, trophyId: "trophy_green", img: "assets/dragons/dragon_green.webp",
+        canFlip: true, weakness: "dogs", desc: "Majestátní azurový drak trůnící na skalním útesu uprostřed oblaků. Ze chřtánu vydechuje víry větru a střeží starobylé svitky i poklad. Lovečtí psi snadno odlákají jeho pozornost!" },
         { id: "u3_swamp", name: "Bažinný jedový drak", icon: "🐊", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 7000, hearts: 2.5, itemTier: 2, trophyId: "trophy_swamp", img: "assets/dragons/dragon_swamp.webp",
         canFlip: true, weakness: "elixir", desc: "Těžkopádný drak z močálu chrlící jedovatý dým. Hojivý lektvar z Lazaretu ti pomůže přežít." },
         { id: "u3_fairy", name: "Pohádkový pestrý drak", icon: "🦋", tierGroup: "young", difficulty: 11, diffOffset: -2, gold: 6000, hearts: 3.0, itemTier: 2, trophyId: "trophy_fairy", img: "assets/dragons/dragon_fairy.webp",

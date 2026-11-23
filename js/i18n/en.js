@@ -869,8 +869,8 @@ window.PRS_I18N.en = {
             "desc": "Monstrous ivory of the primeval terrestrial colossus. No fortress door can withstand its weight."
         },
         "trophy_green": {
-            "name": "Forest Dragon Emerald Scale",
-            "desc": "Mossy emerald scale shimmering with woodland vitality. Grants passive stamina in forests."
+            "name": "Cliff Dragon Wind Scale",
+            "desc": "Lightweight azure scale brushed by mountain breezes. Deflects blows and grants the knight the agility of the wind."
         },
         "trophy_swamp": {
             "name": "Swamp Dragon Poison Spur",
@@ -1123,8 +1123,8 @@ window.PRS_I18N.en = {
             "desc": "An ancient land titan shaking the ground with every stride. Tremendous bravery and a lance charge bring him down."
         },
         "u3_green": {
-            "name": "Green Forest Dragon",
-            "desc": "A dragon with scales of bark and moss. Hunting hounds easily sniff out its woodland lair!"
+            "name": "Cliff Wind Dragon",
+            "desc": "A majestic azure dragon perched upon a rocky cliff amidst the clouds. It breathes swirling gusts of wind, guarding ancient scrolls and treasure. Hunting hounds easily distract its attention!"
         },
         "u3_swamp": {
             "name": "Poisonous Swamp Dragon",

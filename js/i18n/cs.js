@@ -737,8 +737,8 @@ window.PRS_I18N.cs = {
             "desc": "Zlatý pečetní prsten ukořistěný veliteli lesních banditů, kteří tě zkusili přepadnout."
         },
         "trophy_green": {
-            "name": "Pralesní šupina zeleného draka",
-            "desc": "Tvrzená šupina pokrytá zkamenělou kůrou a mechem. Odolává šípům i čepelím v hvozdech."
+            "name": "Větrná šupina útesového draka",
+            "desc": "Lehká azurová šupina obtékaná horskými vánky. Odolává úderům a dodává rytíři hbitost větru."
         },
         "trophy_swamp": {
             "name": "Jedový bodec bažinného draka",
@@ -1123,8 +1123,8 @@ window.PRS_I18N.cs = {
             "desc": "Pravěký pozemní gigant otřásající zemí každým krokem. Dlouhé kopí šampionů najde skulinu pod krunýřem."
         },
         "u3_green": {
-            "name": "Zelený lesní drak",
-            "desc": "Drak s šupinami z kůry a mechu. Lovečtí psi snadno odlákají jeho pozornost!"
+            "name": "Větrný útesový drak",
+            "desc": "Majestátní azurový drak trůnící na skalním útesu uprostřed oblaků. Ze chřtánu vydechuje víry větru a střeží starobylé svitky i poklad. Lovečtí psi snadno odlákají jeho pozornost!"
         },
         "u3_swamp": {
             "name": "Bažinný jedový drak",

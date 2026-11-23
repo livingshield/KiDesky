@@ -26,7 +26,7 @@ Draci představují nejvyšší výzvu královských rytířů na políčkách *
 
 | ID draka | Název | Živel / Ikona | Tier | Obtížnost | Odměna (zl. / 💖) | Klíčová slabina | Spojená trofej |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| `u3_green` | **Zelený lesní drak** | 🌲 Země | A (Mladý) | 11 | 6 500 / +2.5 💖 | Lovečtí psi (`dogs`) | Šupina lesního draka |
+| `u3_green` | **Větrný útesový drak** | 🌬️ Vzduch | A (Mladý) | 11 | 6 500 / +2.5 💖 | Lovečtí psi (`dogs`) | Větrná šupina útesového draka |
 | `u3_swamp` | **Bažinný jedový drak** | 🐊 Voda/Jed | A (Mladý) | 11 | 7 000 / +2.5 💖 | Lektvar z lazaretu (`elixir`) | Jedový váček z močálu |
 | `u3_fairy` | **Pohádkový pestrý drak** | 🦋 Magie | A (Mladý) | 11 | 6 000 / +3.0 💖 | Tanec & Charisma (`dance`) | Pyl kouzelného motýlodraka |
 | `u3_water` | **Vodní jezerní drak** | 🌊 Voda | A (Mladý) | 12 | 7 500 / +3.0 💖 | Jezdecké kopí (`spear`) | Perla jezerního draka |
