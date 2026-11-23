@@ -1857,3 +1857,209 @@ body[data-device="mobile"][data-orientation="portrait"] .lp-kicker-badge {
     max-width: 100%;
     box-sizing: border-box;
 }
+
+/* Mobilní portrét: Rytířský duel (#knight-duel-modal) a Aréna výpravy (#quest-duel-modal) */
+@media (max-width: 768px) and (orientation: portrait), (max-width: 520px) {
+    #knight-duel-modal.modal-backdrop,
+    #quest-duel-modal.modal-backdrop {
+        padding: 0.45rem;
+        align-items: center;
+    }
+
+    .knight-duel-modal-dialog,
+    .quest-duel-modal-dialog {
+        width: 100%;
+        max-width: 100%;
+        max-height: 92vh;
+        max-height: 92dvh;
+        border-radius: 12px;
+    }
+
+    .knight-duel-modal-header,
+    .quest-duel-modal-header {
+        padding: 0.65rem 0.85rem;
+        flex-shrink: 0;
+    }
+
+    #knight-duel-modal .quest-duel-title-wrap,
+    #quest-duel-modal .quest-duel-title-wrap {
+        gap: 0.5rem;
+        min-width: 0;
+    }
+
+    #knight-duel-modal .quest-duel-header-icon,
+    #quest-duel-modal .quest-duel-header-icon {
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+
+    #knight-duel-modal .quest-duel-header-title,
+    #quest-duel-modal .quest-duel-header-title {
+        font-size: 1rem;
+        line-height: 1.2;
+        word-break: break-word;
+    }
+
+    #knight-duel-modal .quest-duel-header-sub,
+    #quest-duel-modal .quest-duel-header-sub {
+        font-size: 0.72rem;
+        line-height: 1.25;
+    }
+
+    .knight-duel-modal-body,
+    .quest-duel-modal-body {
+        padding: 0.75rem 0.7rem;
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .duel-combatants-arena {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .duel-combatant-card {
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 0.55rem 0.7rem;
+        border-radius: 10px;
+    }
+
+    .duel-combatant-badge {
+        font-size: 1.5rem;
+        margin-bottom: 0.1rem;
+    }
+
+    .duel-combatant-name {
+        font-size: 0.95rem;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .duel-combatant-stats {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.3rem 0.75rem;
+        padding: 0.35rem 0.5rem;
+        margin-top: 0.3rem;
+        font-size: 0.78rem;
+    }
+
+    .duel-combatant-total {
+        font-size: 1.25rem;
+        margin-top: 0.25rem;
+    }
+
+    .duel-vs-divider {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-width: 0;
+        width: 100%;
+        padding: 0.22rem 0.5rem;
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.28);
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    .duel-vs-text {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    .duel-outcome-banner {
+        padding: 0.65rem 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .duel-outcome-banner h4 {
+        font-size: 0.98rem !important;
+    }
+
+    .knight-duel-modal-body .btn-gold-lg {
+        padding: 0.65rem !important;
+        font-size: 0.95rem !important;
+    }
+
+    .quest-duel-grid {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .quest-duel-col-left,
+    .quest-duel-col-right {
+        flex: 1 1 auto;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .duel-arena-grid {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 0.3rem;
+    }
+
+    .duel-combatant {
+        min-width: 0;
+        padding: 0.45rem 0.35rem;
+    }
+
+    .duel-fighter-role {
+        font-size: 0.7rem;
+    }
+
+    .duel-fighter-stat {
+        font-size: 1rem;
+    }
+
+    .duel-vs-badge {
+        width: 26px;
+        height: 26px;
+        font-size: 0.8rem;
+    }
+}
+
+body[data-device="mobile"][data-orientation="portrait"] .duel-combatants-arena {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+}
+
+body[data-device="mobile"][data-orientation="portrait"] .duel-combatant-card {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+body[data-device="mobile"][data-orientation="portrait"] .duel-vs-divider {
+    flex-direction: row;
+    min-width: 0;
+    width: 100%;
+    gap: 0.5rem;
+}
+
+body[data-device="mobile"][data-orientation="portrait"] .quest-duel-grid {
+    flex-direction: column;
+}
+
+body[data-device="mobile"][data-orientation="portrait"] .quest-duel-col-left,
+body[data-device="mobile"][data-orientation="portrait"] .quest-duel-col-right {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+body[data-device="mobile"][data-orientation="portrait"] .duel-arena-grid {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
