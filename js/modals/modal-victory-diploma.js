@@ -259,7 +259,7 @@
                 if (isDeadP) {
                     podHtml.push('  <small style="color:#ef4444; font-size:0.75rem; font-weight:700;">' + tModal("modals.endgame.podium_bankrupt", null, "💀 Vyřazen (bankrot)") + '</small>');
                 } else {
-                    podHtml.push('  <small style="color:var(--text-muted); font-size:0.75rem;">' + rp.gold.toLocaleString(isEn ? "en-US" : "cs-CZ") + ' ' + currGold + '</small>');
+                    podHtml.push('  <small style="color:var(--text-muted); font-size:0.75rem;">' + (window.PRS_I18n ? window.PRS_I18n.formatGold(rp.gold) : (rp.gold + ' ' + currGold)) + '</small>');
                 }
                 podHtml.push('</div>');
             }
@@ -307,9 +307,9 @@
                 if (isDeadRow) {
                     tHtml.push('  <td><strong style="color:#ef4444;">💀 0 ' + currGold + '</strong></td>');
                 } else {
-                    tHtml.push('  <td><strong style="color:var(--gold-light);">' + p.gold.toLocaleString(isEn ? "en-US" : "cs-CZ") + ' ' + currGold + '</strong></td>');
+                    tHtml.push('  <td><strong style="color:var(--gold-light);">' + (window.PRS_I18n ? window.PRS_I18n.formatGold(p.gold) : (p.gold + ' ' + currGold)) + '</strong></td>');
                 }
-                tHtml.push('  <td>' + wealth.toLocaleString(isEn ? "en-US" : "cs-CZ") + ' ' + currGold + '</td>');
+                tHtml.push('  <td>' + (window.PRS_I18n ? window.PRS_I18n.formatGold(wealth) : (wealth + ' ' + currGold)) + '</td>');
                 tHtml.push('</tr>');
             }
             tHtml.push('</tbody>');
@@ -421,17 +421,17 @@
                 if (btn) btn.disabled = false;
                 if (fb) {
                     if (res && res.ok) {
-                        var code = res.roomCode || (isEn ? "SAVED" : "ULOŽENO");
+                        var code = res.roomCode || (window.PRS_I18n ? window.PRS_I18n.t("common.saved", null, "ULOŽENO") : "ULOŽENO");
                         fb.innerHTML = tModal("modals.endgame.hall_saved_ok", { code: code },
-                            "✅ <strong>" + (isEn ? "Great! Victory was permanently recorded in the Hall of Fame on the server (code: " : "Skvělé! Vítězství bylo trvale zapsáno do Síně slávy na serveru (kód: ") + code + ").</strong>");
+                            (window.PRS_I18n ? window.PRS_I18n.t("modals.endgame.hall_saved_ok", { code: code }, "✅ <strong>Skvělé! Vítězství bylo trvale zapsáno do Síně slávy na serveru (kód: " + code + ").</strong>") : ("✅ <strong>Skvělé! Vítězství bylo trvale zapsáno do Síně slávy na serveru (kód: " + code + ").</strong>")));
                     } else {
-                        fb.innerHTML = tModal("modals.endgame.hall_saved_db", null, isEn ? "✅ Game saved to database." : "✅ Partie uložena do databáze.");
+                        fb.innerHTML = tModal("modals.endgame.hall_saved_db", null, "✅ Partie uložena do databáze.");
                     }
                 }
             })
             .catch(function () {
                 if (btn) btn.disabled = false;
-                if (fb) fb.textContent = tModal("modals.endgame.hall_saved_local", null, isEn ? "✅ Match recorded locally." : "✅ Partie zaznamenána lokálně.");
+                if (fb) fb.textContent = tModal("modals.endgame.hall_saved_local", null, "✅ Match recorded locally.");
             });
     },
 
@@ -621,7 +621,7 @@
         // Dekretový text o vítězství
         ctx.font = "16px 'Outfit', sans-serif";
         ctx.fillStyle = "#3e2710";
-        var mapTxt = data.boardName || (isEnDip ? "Realm of KiDesky" : "Království");
+        var mapTxt = data.boardName || (window.PRS_I18n ? window.PRS_I18n.t("common.realm", null, "Království") : "Království");
         var rTxt = data.roundNumber || 1;
         var hTxt = data.winnerHearts || 30;
         ctx.fillText(tDip("modals.diploma.decree_p1", { round: rTxt }, "dokázal v nelítostném a čestném zápolení po " + rTxt + " kolech ovládnout turnaj"), w / 2, 315);
@@ -655,7 +655,7 @@
         ctx.fillText(tDip("modals.diploma.issued_in", null, "Dáno v sídelním městě království KiDesky"), w / 2, 445);
         ctx.font = "bold 13px 'Cinzel', serif";
         ctx.fillStyle = "#451a03";
-        var dateFormatted = data.date || new Date().toLocaleDateString(isEnDip ? "en-US" : "cs-CZ");
+        var dateFormatted = data.date || (window.PRS_I18n ? (typeof window.PRS_I18n.formatDate === "function" ? window.PRS_I18n.formatDate() : new Date().toLocaleDateString(window.PRS_I18n._lang === "en" ? "en-US" : "cs-CZ")) : new Date().toLocaleDateString("cs-CZ"));
         ctx.fillText(tDip("modals.diploma.date_label", { date: dateFormatted }, "Datum: " + dateFormatted), w / 2, 468);
         ctx.font = "11px 'Outfit', sans-serif";
         ctx.fillStyle = "#854d0e";

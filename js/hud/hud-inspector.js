@@ -58,14 +58,13 @@
             round: winRound
         }, '🏆 ' + 'HRA JE DOHRÁNA • VÍTĚZ: ' + '<strong style="color:' + winColor + ';">' + this.escapeHtml(winName) + '</strong> (' + winRound + '. kolo' + ')!');
 
-        var bannerDesc = tHudE("hud.endless_banner_desc", null, isEnEndless ?
-            '♾️ <em>Endless free play mode: continue building, breeding, and completing remaining goals for the joy of the game.</em>' :
+        var bannerDesc = tHudE("hud.endless_banner_desc", null,
             '♾️ <em>Režim nekonečné volné hry: pokračuješ ve stavění, chovu a plnění zbývajících cílů pro radost ze hry.</em>');
 
-        var btnRes = tHudE("hud.endless_banner_results", null, isEnEndless ? "🏆 Results &amp; Hall of Fame" : "🏆 Výsledky &amp; Síň slávy");
-        var btnResTitle = tHudE("hud.endless_banner_results_title", null, isEnEndless ? "View victory table and game statistics" : "Zobrazit slavnostní tabulku a statistiky vítězství");
-        var btnNew = tHudE("hud.endless_banner_new_game", null, isEnEndless ? "🔄 New Game" : "🔄 Nová partie");
-        var btnNewTitle = tHudE("hud.endless_banner_new_game_title", null, isEnEndless ? "Start a new match from the beginning" : "Začít novou partii od začátku");
+        var btnRes = tHudE("hud.endless_banner_results", null, "🏆 Výsledky &amp; Síň slávy");
+        var btnResTitle = tHudE("hud.endless_banner_results_title", null, "Zobrazit slavnostní tabulku a statistiky vítězství");
+        var btnNew = tHudE("hud.endless_banner_new_game", null, "🔄 Nová partie");
+        var btnNewTitle = tHudE("hud.endless_banner_new_game_title", null, "Začít novou partii od začátku");
 
         banner.innerHTML =
             '<div style="display:flex; align-items:center; gap:0.65rem;">' +

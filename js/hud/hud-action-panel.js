@@ -179,13 +179,13 @@
                     ? (window.PRS_I18n ? window.PRS_I18n.t("hud.bot_turn_rolled", { roll: botRoll, name: this.escapeHtml(botLandedName) }) : ("Hodil <strong>" + botRoll + "</strong> a dorazil na pole <strong>" + this.escapeHtml(botLandedName) + "</strong>."))
                     : ("Hodil <strong>" + botRoll + "</strong>.");
             } else {
-                botStatusText = isEnBotTurn ? "Making moves across the realm..." : "Provádí tah královstvím...";
+                botStatusText = window.PRS_I18n ? window.PRS_I18n.t("hud.bot_turn_moving", null, "Provádí tah královstvím...") : "Provádí tah královstvím...";
             }
 
-            var skipBtnText = isEnBotTurn ? "⚡ Skip directly to my turn" : "⚡ Přeskočit přímo na můj tah";
-            var onTurnLabel = isEnBotTurn ? "On turn: " : "Na tahu: ";
-            var botAutoNotice = isEnBotTurn
-                ? "The AI turn runs automatically. Tap the button above to jump straight to your turn."
+            var skipBtnText = window.PRS_I18n ? window.PRS_I18n.t("hud.skip_bot_turn", null, "⚡ Přeskočit přímo na můj tah") : "⚡ Přeskočit přímo na můj tah";
+            var onTurnLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.on_turn_label", null, "Na tahu: ") : "Na tahu: ";
+            var botAutoNotice = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.bot_turn_auto_notice", null, "Tah počítače běží automaticky. Klepnutím na tlačítko výše ihned skočíš na svůj tah.")
                 : "Tah počítače běží automaticky. Klepnutím na tlačítko výše ihned skočíš na svůj tah.";
 
             el.innerHTML = '<div class="action-card" style="border-color:rgba(212,175,55,0.4);">' +
@@ -282,7 +282,7 @@
 
                 '  <div style="text-align:right;">' +
 
-                '    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + player.gold.toLocaleString(isHudEn ? "en-US" : "cs-CZ") + ' ' + hudCurr + '</div>' +
+                '    <div style="font-size:1.15rem; font-weight:900; color:#facc15; text-shadow:0 0 10px rgba(250,204,21,0.5);">🪙 ' + (window.PRS_I18n ? window.PRS_I18n.formatGold(player.gold) : (player.gold + ' ' + hudCurr)) + '</div>' +
 
                 '    <div style="font-size:0.76rem; font-weight:bold;">' + (this.state.config && this.state.config.scenario === "slayer" ? ('<span style="color:#ef4444;">' + tHud("hud.dragons_slain", { count: ((player.stats && player.stats.dragonsSlain) ? player.stats.dragonsSlain : 0) }, '🐉 ' + ((player.stats && player.stats.dragonsSlain) ? player.stats.dragonsSlain : 0) + ' / 2 draků') + '</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : (this.state.config && this.state.config.scenario === "tycoon" ? ('<span style="color:#f59e0b;">' + tHud("hud.estates_owned", { count: (player.ownedNodes ? player.ownedNodes.length : 0) }, '🏰 ' + (player.ownedNodes ? player.ownedNodes.length : 0) + ' sídel') + '</span> <span style="color:#f472b6; font-size:0.72rem;">(' + player.totalHearts + ' 💖)</span>') : ('<span style="color:#f472b6;">💖 ' + player.totalHearts + ' / ' + targetHearts + '</span>'))) + '</div>' +
 
@@ -354,13 +354,11 @@
                 var junctionName = getNdName(junctionNode, "");
 
                 var branchTitle = window.PRS_I18n ? window.PRS_I18n.t("hud.crossroads_title", null, "🔀 Volba trasy na rozcestí!") : "🔀 Volba trasy na rozcestí!";
-                var branchPrompt = isEn
-                    ? ("You are standing on <strong>" + this.escapeHtml(junctionName) + "</strong>. You have <strong>" + pbc.remainingSteps + "</strong> steps remaining. Which path will you take?")
-                    : ("Stojíš na poli <strong>" + this.escapeHtml(junctionName) + "</strong>. Zbývá ti ještě <strong>" + pbc.remainingSteps + "</strong> kroků. Kudy se vydáš?");
-                var branchLowLabel = isEn ? ("🌿 Outer Ring (" + this.escapeHtml(lowName) + ")") : ("🌿 Vnější okruh (" + this.escapeHtml(lowName) + ")");
-                var branchLowTarget = isEn ? ("🎯 Destination in " + pbc.remainingSteps + " steps: <strong>" + this.escapeHtml(targetLowName) + "</strong>") : ("🎯 Cíl za " + pbc.remainingSteps + " kr.: <strong>" + this.escapeHtml(targetLowName) + "</strong>");
-                var branchHighLabel = isEn ? ("🏰 Inner Royal Path (" + this.escapeHtml(highName) + ")") : ("🏰 Vnitřní královská stezka (" + this.escapeHtml(highName) + ")");
-                var branchHighTarget = isEn ? ("🎯 Destination in " + pbc.remainingSteps + " steps: <strong>" + this.escapeHtml(targetHighName) + "</strong>") : ("🎯 Cíl za " + pbc.remainingSteps + " kr.: <strong>" + this.escapeHtml(targetHighName) + "</strong>");
+                var branchPrompt = window.PRS_I18n ? window.PRS_I18n.t("hud.crossroads_prompt", { name: this.escapeHtml(junctionName), steps: pbc.remainingSteps }, ("Stojíš na poli <strong>" + this.escapeHtml(junctionName) + "</strong>. Zbývá ti ještě <strong>" + pbc.remainingSteps + "</strong> kroků. Kudy se vydáš?")) : ("Stojíš na poli <strong>" + this.escapeHtml(junctionName) + "</strong>. Zbývá ti ještě <strong>" + pbc.remainingSteps + "</strong> kroků. Kudy se vydáš?");
+                var branchLowLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.crossroads_outer_ring", { name: this.escapeHtml(lowName) }, ("🌿 Vnější okruh (" + this.escapeHtml(lowName) + ")")) : ("🌿 Vnější okruh (" + this.escapeHtml(lowName) + ")");
+                var branchLowTarget = window.PRS_I18n ? window.PRS_I18n.t("hud.crossroads_dest_steps", { steps: pbc.remainingSteps, target: this.escapeHtml(targetLowName) }, ("🎯 Cíl za " + pbc.remainingSteps + " kr.: <strong>" + this.escapeHtml(targetLowName) + "</strong>")) : ("🎯 Cíl za " + pbc.remainingSteps + " kr.: <strong>" + this.escapeHtml(targetLowName) + "</strong>");
+                var branchHighLabel = window.PRS_I18n ? window.PRS_I18n.t("hud.crossroads_inner_path", { name: this.escapeHtml(highName) }, ("🏰 Vnitřní královská stezka (" + this.escapeHtml(highName) + ")")) : ("🏰 Vnitřní královská stezka (" + this.escapeHtml(highName) + ")");
+                var branchHighTarget = window.PRS_I18n ? window.PRS_I18n.t("hud.crossroads_dest_steps", { steps: pbc.remainingSteps, target: this.escapeHtml(targetHighName) }, ("🎯 Cíl za " + pbc.remainingSteps + " kr.: <strong>" + this.escapeHtml(targetHighName) + "</strong>")) : ("🎯 Cíl za " + pbc.remainingSteps + " kr.: <strong>" + this.escapeHtml(targetHighName) + "</strong>");
 
                 el.innerHTML = '<div class="action-card branch-choice-card" style="border:1.5px solid var(--gold); background:linear-gradient(180deg, rgba(30,27,75,0.92), rgba(15,23,42,0.95));">' +
 
@@ -944,16 +942,17 @@
 
         if (validBuyoutCandidates.length > 0) {
             specialCardHtml += '<div class="buyout-interaction-card" style="border:1.5px solid #10b981; background:linear-gradient(180deg, rgba(6,78,59,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; margin-bottom:4px;">' + (isEnAction ? "📜 Royal Pre-Emption Right on Animal!" : "📜 Královské předkupní právo na zvíře!") + '</div>' +
-                '<p style="font-size:0.8rem; color:#a7f3d0; margin-bottom:0.6rem;">' + (isEnAction ? "You own 2 of 3 animals in this set! You may buy out the missing animal from its owner for 2x price to immediately complete the set (+1.0 💖):" : "Vlastníš 2 ze 3 zvířat sady! Můžeš vykoupit chybějící kus od majitele za dvojnásobek ceny a ihned zkompletovat sadu (+1,0 💖):") + '</p>' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; margin-bottom:4px;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.buyout_preemption_title", null, "📜 Královské předkupní právo na zvíře!") : "📜 Královské předkupní právo na zvíře!") + '</div>' +
+                '<p style="font-size:0.8rem; color:#a7f3d0; margin-bottom:0.6rem;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.buyout_preemption_desc", null, "Vlastníš 2 ze 3 zvířat sady! Můžeš vykoupit chybějící kus od majitele za dvojnásobek ceny a ihned zkompletovat sadu (+1,0 💖):") : "Vlastníš 2 ze 3 zvířat sady! Můžeš vykoupit chybějící kus od majitele za dvojnásobek ceny a ihned zkompletovat sadu (+1,0 💖):") + '</p>' +
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">';
 
             for (var bi = 0; bi < validBuyoutCandidates.length; bi++) {
                 var bc = validBuyoutCandidates[bi];
                 var canAffordBc = player.gold >= bc.buyoutPrice;
-                var boBtnText = isEnAction
-                    ? (bc.icon + ' Buy out ' + this.escapeHtml(bc.name) + ' from set #' + bc.setId + ' (' + bc.buyoutPrice + ' g. for ' + this.escapeHtml(bc.ownerName) + ') ➔ +1.0 💖')
-                    : (bc.icon + ' Vykoupit ' + this.escapeHtml(bc.name) + ' ze sady #' + bc.setId + ' (' + bc.buyoutPrice + ' zl. pro ' + this.escapeHtml(bc.ownerName) + ') ➔ +1.0 💖');
+                var boPriceFormatted = window.PRS_I18n ? window.PRS_I18n.formatGold(bc.buyoutPrice) : (bc.buyoutPrice + " zl.");
+                var boBtnText = window.PRS_I18n
+                    ? window.PRS_I18n.t("hud.buyout_btn", { icon: bc.icon, name: this.escapeHtml(bc.name), setId: bc.setId, price: boPriceFormatted, owner: this.escapeHtml(bc.ownerName) }, (bc.icon + ' Vykoupit ' + this.escapeHtml(bc.name) + ' ze sady #' + bc.setId + ' (' + boPriceFormatted + ' pro ' + this.escapeHtml(bc.ownerName) + ') ➔ +1.0 💖'))
+                    : (bc.icon + ' Vykoupit ' + this.escapeHtml(bc.name) + ' ze sady #' + bc.setId + ' (' + boPriceFormatted + ' pro ' + this.escapeHtml(bc.ownerName) + ') ➔ +1.0 💖');
                 specialCardHtml += '  <button class="btn-action-buyout" ' + (!canAffordBc ? 'disabled' : '') + ' style="padding:0.55rem; background:linear-gradient(135deg, #059669, #047857); color:#fff; border:1px solid #6ee7b7; border-radius:7px; font-weight:700; text-align:left; cursor:pointer;" onclick="PRS_App.handleAnimalBuyout(' + bc.nodeId + ')">' +
                     boBtnText +
                     '</button>';
@@ -962,17 +961,18 @@
             specialCardHtml += '</div></div>';
         } else if (pa.buyoutSuccess) {
             var bs = pa.buyoutSuccess;
-            var boSuccTitle = isEnAction ? "✅ Royal Buyout Successfully Completed!" : "✅ Královský výkup úspěšně dokončen!";
-            var boSuccDesc = isEnAction
-                ? ("Animal <strong>" + this.escapeHtml(bs.nodeName) + "</strong> was bought from rival <strong>" + this.escapeHtml(bs.sellerName) + "</strong> for <strong>" + bs.price.toLocaleString(actLoc) + " g.</strong> Your breeding set #" + bs.setId + " is now complete (+1.0 💖)!")
-                : ("Kus <strong>" + this.escapeHtml(bs.nodeName) + "</strong> byl vykoupen od soupeře <strong>" + this.escapeHtml(bs.sellerName) + "</strong> za <strong>" + bs.price.toLocaleString("cs-CZ") + " zl.</strong> Tvoje chovná sada #" + bs.setId + " je nyní kompletní (+1,0 💖)!");
+            var boSuccPrice = window.PRS_I18n ? window.PRS_I18n.formatGold(bs.price) : (bs.price + " zl.");
+            var boSuccTitle = window.PRS_I18n ? window.PRS_I18n.t("hud.buyout_success_title", null, "✅ Královský výkup úspěšně dokončen!") : "✅ Královský výkup úspěšně dokončen!";
+            var boSuccDesc = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.buyout_success_desc", { name: this.escapeHtml(bs.nodeName), seller: this.escapeHtml(bs.sellerName), price: boSuccPrice, setId: bs.setId }, ("Kus <strong>" + this.escapeHtml(bs.nodeName) + "</strong> byl vykoupen od soupeře <strong>" + this.escapeHtml(bs.sellerName) + "</strong> za <strong>" + boSuccPrice + "</strong>. Tvoje chovná sada #" + bs.setId + " je nyní kompletní (+1,0 💖)!"))
+                : ("Kus <strong>" + this.escapeHtml(bs.nodeName) + "</strong> byl vykoupen od soupeře <strong>" + this.escapeHtml(bs.sellerName) + "</strong> za <strong>" + boSuccPrice + "</strong>. Tvoje chovná sada #" + bs.setId + " je nyní kompletní (+1,0 💖)!");
             specialCardHtml += '<div class="buyout-interaction-card" style="border:1.5px solid #10b981; background:linear-gradient(180deg, rgba(6,78,59,0.55), rgba(15,23,42,0.92)); border-radius:10px; padding:0.85rem; margin-top:0.6rem; display:flex; align-items:flex-start; gap:0.75rem; position:relative;">' +
                 '<div style="font-size:1.8rem; line-height:1;">' + (bs.nodeIcon || '🦅') + '</div>' +
                 '<div style="flex:1;">' +
                 '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#6ee7b7; font-weight:700;">' + boSuccTitle + '</div>' +
                 '<div style="font-size:0.82rem; color:#a7f3d0; margin-top:0.25rem;">' + boSuccDesc + '</div>' +
                 '</div>' +
-                '<button type="button" onclick="this.closest(\'.buyout-interaction-card\').remove(); if(PRS_App.state && PRS_App.state.pendingAction) PRS_App.state.pendingAction.buyoutSuccess=null;" style="background:transparent; border:none; color:#a7f3d0; font-size:1.15rem; cursor:pointer; padding:0 4px; line-height:1;" title="' + (isEnAction ? "Close notice" : "Zavřít oznámení") + '">✕</button>' +
+                '<button type="button" onclick="this.closest(\'.buyout-interaction-card\').remove(); if(PRS_App.state && PRS_App.state.pendingAction) PRS_App.state.pendingAction.buyoutSuccess=null;" style="background:transparent; border:none; color:#a7f3d0; font-size:1.15rem; cursor:pointer; padding:0 4px; line-height:1;" title="' + (window.PRS_I18n ? window.PRS_I18n.t("common.close_notice", null, "Zavřít oznámení") : "Zavřít oznámení") + '">✕</button>' +
                 '</div>';
         }
 
@@ -981,16 +981,18 @@
         if (pa.canPlotIntrigue) {
             var bCost = pa.intrigueBalladCost || 750;
             var cCost = pa.intrigueCustomsCost || 600;
-            var balladBtnLabel = isEnAction
-                ? ('🎭 Mocking Ballad Under Balcony (' + bCost + ' g. ➔ Reduce Rival\'s Hearts 💖)')
-                : ('🎭 Posměšná balada pod balkónem (' + bCost + ' zl. ➔ Srazit soupeři Srdce 💖)');
-            var customsBtnLabel = isEnAction
-                ? ('📜 Royal Customs Inspection (' + cCost + ' g. ➔ Freeze Rents for 1 Round)')
-                : ('📜 Královská celní kontrola (' + cCost + ' zl. ➔ Zmrazit nájemné na 1 kolo)');
+            var balladCostStr = window.PRS_I18n ? window.PRS_I18n.formatGold(bCost) : (bCost + " zl.");
+            var customsCostStr = window.PRS_I18n ? window.PRS_I18n.formatGold(cCost) : (cCost + " zl.");
+            var balladBtnLabel = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.intrigue_ballad_btn", { cost: balladCostStr }, ('🎭 Posměšná balada pod balkónem (' + balladCostStr + ' ➔ Srazit soupeři Srdce 💖)'))
+                : ('🎭 Posměšná balada pod balkónem (' + balladCostStr + ' ➔ Srazit soupeři Srdce 💖)');
+            var customsBtnLabel = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.intrigue_customs_btn", { cost: customsCostStr }, ('📜 Královská celní kontrola (' + customsCostStr + ' ➔ Zmrazit nájemné na 1 kolo)'))
+                : ('📜 Královská celní kontrola (' + customsCostStr + ' ➔ Zmrazit nájemné na 1 kolo)');
 
             specialCardHtml += '<div class="intrigue-interaction-card" style="border:1.5px solid #d97706; background:linear-gradient(180deg, rgba(120,53,15,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fde68a; margin-bottom:4px;">' + (isEnAction ? "🃏 Court Intrigues Against Rivals" : "🃏 Dvorní intriky proti soupeřům") + '</div>' +
-                '<p style="font-size:0.8rem; color:#fef3c7; margin-bottom:0.6rem;">' + (isEnAction ? "Hire a jester to mock the leader or exercise royal authority:" : "Najmi kejklíře k posměchu lídra nebo uplatni královské pravomoci:") + '</p>' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fde68a; margin-bottom:4px;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.intrigue_title", null, "🃏 Dvorní intriky proti soupeřům") : "🃏 Dvorní intriky proti soupeřům") + '</div>' +
+                '<p style="font-size:0.8rem; color:#fef3c7; margin-bottom:0.6rem;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.intrigue_desc", null, "Najmi kejklíře k posměchu lídra nebo uplatni královské pravomoci:") : "Najmi kejklíře k posměchu lídra nebo uplatni královské pravomoci:") + '</p>' +
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
                 '  <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #7c3aed, #5b21b6); border-color:#c084fc;" onclick="PRS_App.openIntrigueModal(\'ballad\')">' + balladBtnLabel + '</button>' +
                 '  <button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #b45309, #78350f); border-color:#fbbf24;" onclick="PRS_App.openIntrigueModal(\'customs\')">' + customsBtnLabel + '</button>' +
@@ -999,7 +1001,7 @@
         } else if (pa.intriguePlotted) {
 
             specialCardHtml += '<div class="intrigue-interaction-card" style="border:1px solid #10b981; background:rgba(6,78,59,0.35); border-radius:10px; padding:0.6rem 0.8rem; margin-top:0.6rem; font-size:0.82rem; color:#6ee7b7; display:flex; align-items:center; gap:8px;">' +
-                '<span style="font-size:1.3rem;">🎭</span> <span>' + this.escapeHtml(pa.intrigueSummary || (isEnAction ? "Court intrigue has been evaluated for this turn." : "Dvorní intrika byla pro tento tah vyhodnocena.")) + '</span>' +
+                '<span style="font-size:1.3rem;">🎭</span> <span>' + this.escapeHtml(pa.intrigueSummary || (window.PRS_I18n ? window.PRS_I18n.t("hud.intrigue_evaluated", null, "Dvorní intrika byla pro tento tah vyhodnocena.") : "Dvorní intrika byla pro tento tah vyhodnocena.")) + '</span>' +
                 '</div>';
 
         }
@@ -1008,13 +1010,14 @@
 
         if (pa.canFormTradePact) {
             var tpCost = pa.tradePactCost || 750;
-            var tpBtnLabel = isEnAction
-                ? ('🤝 Seal Trade Pact (' + tpCost + ' g.)')
-                : ('🤝 Uzavřít Obchodní pakt (' + tpCost + ' zl.)');
+            var tpCostStr = window.PRS_I18n ? window.PRS_I18n.formatGold(tpCost) : (tpCost + " zl.");
+            var tpBtnLabel = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.trade_pact_btn", { cost: tpCostStr }, ('🤝 Uzavřít Obchodní pakt (' + tpCostStr + ')'))
+                : ('🤝 Uzavřít Obchodní pakt (' + tpCostStr + ')');
 
             specialCardHtml += '<div class="pact-interaction-card" style="border:1.5px solid #0284c7; background:linear-gradient(180deg, rgba(12,74,110,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">' + (isEnAction ? "🤝 Trade Pact (Duty-Free Alliance for 8 Rounds)" : "🤝 Obchodní pakt (Bezcelní aliance na 8 kol)") + '</div>' +
-                '<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">' + (isEnAction ? "Ally with a knight: zero tolls on estates and +300 g. dividend on every visit!" : "Spoj se s rytířem: nulové mýtné na panstvích a dividenda +300 zl. při každé návštěvě!") + '</p>' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#7dd3fc; margin-bottom:4px;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.trade_pact_title", null, "🤝 Obchodní pakt (Bezcelní aliance na 8 kol)") : "🤝 Obchodní pakt (Bezcelní aliance na 8 kol)") + '</div>' +
+                '<p style="font-size:0.8rem; color:#bae6fd; margin-bottom:0.6rem;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.trade_pact_desc", null, "Spoj se s rytířem: nulové mýtné na panstvích a dividenda +300 zl. při každé návštěvě!") : "Spoj se s rytířem: nulové mýtné na panstvích a dividenda +300 zl. při každé návštěvě!") + '</p>' +
                 '<button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #0284c7, #0369a1); border-color:#38bdf8;" onclick="PRS_App.openTradePactModal()">' + tpBtnLabel + '</button>' +
                 '</div>';
 
@@ -1024,13 +1027,14 @@
 
         if (pa.canChallengeFestivalRival) {
             var fcStake = pa.festivalChallengeStake || 750;
-            var fcBtnLabel = isEnAction
-                ? ('🤺 Issue Personal Challenge to Rival (' + fcStake + ' g.)')
-                : ('🤺 Vyhlásit osobní výzvu soupeři (' + fcStake + ' zl.)');
+            var fcStakeStr = window.PRS_I18n ? window.PRS_I18n.formatGold(fcStake) : (fcStake + " zl.");
+            var fcBtnLabel = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.festival_challenge_btn", { stake: fcStakeStr }, ('🤺 Vyhlásit osobní výzvu soupeři (' + fcStakeStr + ')'))
+                : ('🤺 Vyhlásit osobní výzvu soupeři (' + fcStakeStr + ')');
 
             specialCardHtml += '<div class="festival-challenge-card" style="border:1.5px solid #ec4899; background:linear-gradient(180deg, rgba(131,24,67,0.4), rgba(15,23,42,0.85)); border-radius:10px; padding:0.8rem; margin-top:0.6rem;">' +
-                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fbcfe8; margin-bottom:4px;">' + (isEnAction ? "🏆 1-on-1 Personal Challenge at Festival" : "🏆 Osobní výzva 1 na 1 na Slavnosti") + '</div>' +
-                '<p style="font-size:0.8rem; color:#fce7f3; margin-bottom:0.6rem;">' + (isEnAction ? "Challenge a specific rival to a contest of royal virtue for gold and glory:" : "Vyzvi konkrétního soupeře k souboji v královské ctnosti o zlato a slávu:") + '</p>' +
+                '<div style="font-size:0.92rem; font-family:\'Cinzel\',serif; color:#fbcfe8; margin-bottom:4px;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.festival_challenge_title", null, "🏆 Osobní výzva 1 na 1 na Slavnosti") : "🏆 Osobní výzva 1 na 1 na Slavnosti") + '</div>' +
+                '<p style="font-size:0.8rem; color:#fce7f3; margin-bottom:0.6rem;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.festival_challenge_desc", null, "Vyzvi konkrétního soupeře k souboji v královské ctnosti o zlato a slávu:") : "Vyzvi konkrétního soupeře k souboji v královské ctnosti o zlato a slávu:") + '</p>' +
                 '<button class="btn-gold-lg" style="font-size:0.84rem; padding:0.5rem; background:linear-gradient(135deg, #ec4899, #be185d); border-color:#fbcfe8;" onclick="PRS_App.openFestivalChallengeModal()">' + fcBtnLabel + '</button>' +
                 '</div>';
 
@@ -1042,22 +1046,24 @@
 
             var canAffordBet = player.gold >= (pa.gambleBet || 500);
             var canAffordRound = player.gold >= (pa.roundCost || 400);
-            var tBetLabel = isEnAction
-                ? ('🎲 Dice with Innkeeper (Bet ' + (pa.gambleBet || 500) + ' g. – roll 2 dice)')
-                : ('🎲 Kostky s krčmářem (Sázka ' + (pa.gambleBet || 500) + ' zl. – hod 2 kostkami)');
-            var tRoundLabel = isEnAction
-                ? ('🍻 Round of Mead for the Entire Tavern (+0.5 💖 for ' + (pa.roundCost || 400) + ' g.)')
-                : ('🍻 Runda medoviny pro celou hospodu (+0.5 💖 za ' + (pa.roundCost || 400) + ' zl.)');
+            var betGoldStr = window.PRS_I18n ? window.PRS_I18n.formatGold(pa.gambleBet || 500) : ((pa.gambleBet || 500) + " zl.");
+            var roundGoldStr = window.PRS_I18n ? window.PRS_I18n.formatGold(pa.roundCost || 400) : ((pa.roundCost || 400) + " zl.");
+            var tBetLabel = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.tavern_gamble_btn", { bet: betGoldStr }, ('🎲 Kostky s krčmářem (Sázka ' + betGoldStr + ' – hod 2 kostkami)'))
+                : ('🎲 Kostky s krčmářem (Sázka ' + betGoldStr + ' – hod 2 kostkami)');
+            var tRoundLabel = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.tavern_round_btn", { cost: roundGoldStr }, ('🍻 Runda medoviny pro celou hospodu (+0.5 💖 za ' + roundGoldStr + ')'))
+                : ('🍻 Runda medoviny pro celou hospodu (+0.5 💖 za ' + roundGoldStr + ')');
 
             specialCardHtml += '<div class="tavern-encounter-card">' +
                 '<div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">' +
                 '  <div class="standing-tile-medallion" style="border-color:#f59e0b; background:#451a03;"><span style="font-size:1.6rem;">🍺</span></div>' +
                 '  <div>' +
-                '    <span class="standing-tile-badge" style="background:rgba(217,119,6,0.3); color:#fde68a; border-color:#d97706;">' + (isEnAction ? "🍺 Tavern" : "🍺 Hostinec") + '</span>' +
-                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#fef3c7;">' + (isEnAction ? "The Golden Flagon Tavern" : "Krčma U Zlatého korbelu") + '</div>' +
+                '    <span class="standing-tile-badge" style="background:rgba(217,119,6,0.3); color:#fde68a; border-color:#d97706;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.tavern_badge", null, "🍺 Hostinec") : "🍺 Hostinec") + '</span>' +
+                '    <div style="font-family:\'Cinzel\',serif; font-size:1.05rem; font-weight:bold; color:#fef3c7;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.tavern_title", null, "Krčma U Zlatého korbelu") : "Krčma U Zlatého korbelu") + '</div>' +
                 '  </div>' +
                 '</div>' +
-                '<p style="font-size:0.84rem; color:#fde68a; margin-bottom:0.6rem;">' + (isEnAction ? "Merry folk and travelling merchants sit by the hearth. Choose your entertainment:" : "U krbu sedí veselá chasa i záletní kupci. Vyber si zábavu:") + '</p>' +
+                '<p style="font-size:0.84rem; color:#fde68a; margin-bottom:0.6rem;">' + (window.PRS_I18n ? window.PRS_I18n.t("hud.tavern_desc", null, "U krbu sedí veselá chasa i záletní kupci. Vyber si zábavu:") : "U krbu sedí veselá chasa i záletní kupci. Vyber si zábavu:") + '</p>' +
                 '<div style="display:flex; flex-direction:column; gap:0.4rem;">' +
                 '  <button class="btn-action-tavern" ' + (!canAffordBet ? 'disabled' : '') + ' onclick="PRS_App.handleTavernGamble()">' + tBetLabel + '</button>' +
                 '  <button class="btn-action-tavern" ' + (!canAffordRound ? 'disabled' : '') + ' onclick="PRS_App.handleBuyTavernRound()">' + tRoundLabel + '</button>' +
@@ -1071,7 +1077,8 @@
         if (pa.debt) {
 
             var creditor = this.state.players[pa.debt.creditorIndex];
-            var credName = creditor ? creditor.name : (isEnAction ? "creditor" : "věřiteli");
+            var credName = creditor ? creditor.name : (window.PRS_I18n ? window.PRS_I18n.t("hud.debt_creditor_fallback", null, "věřiteli") : "věřiteli");
+            var debtCurr = window.PRS_I18n ? window.PRS_I18n.t("common.gold_symbol", null, "zl.") : "zl.";
             var rate = (this.state.config.sellRates && this.state.config.sellRates.forcedLiquidation) || 0.60;
             var assetsRows = "";
 
@@ -1086,8 +1093,8 @@
                 var itIcon = itObj.icon || (baseDef ? baseDef.icon : "📦");
                 var itLiq = Math.round(itPrice * rate);
 
-                var eqBadge = itObj.isEquipped === false ? (isEnAction ? "🎒 in bag" : "🎒 v batohu") : (isEnAction ? "⚔️ equipped" : "⚔️ nasazeno");
-                var liqBtnText = isEnAction ? ("Sell for +" + itLiq + " g.") : ("Odprodat za +" + itLiq + " zl.");
+                var eqBadge = itObj.isEquipped === false ? (window.PRS_I18n ? window.PRS_I18n.t("hud.debt_bag_badge", null, "🎒 v batohu") : "🎒 v batohu") : (window.PRS_I18n ? window.PRS_I18n.t("hud.debt_equipped_badge", null, "⚔️ nasazeno") : "⚔️ nasazeno");
+                var liqBtnText = window.PRS_I18n ? window.PRS_I18n.t("hud.debt_sell_btn", { amount: itLiq, currency: debtCurr }, ("Odprodat za +" + itLiq + " " + debtCurr)) : ("Odprodat za +" + itLiq + " " + debtCurr);
 
                 assetsRows += '<div class="debt-asset-row">' +
                     '<span>' + itIcon + ' <strong>' + this.escapeHtml(itName) + '</strong> (' + eqBadge + ')</span>' +
@@ -1108,10 +1115,10 @@
                 if (ndObj.type === "VILLAGE" && (ndObj.villageLevel || 1) > 1) {
                     var downCost = (this.state.config.estates.villagePrices && this.state.config.estates.villagePrices[ndObj.villageLevel - 1]) || 1500;
                     var downLiq = Math.round(downCost * rate);
-                    var downSpan = isEnAction
-                        ? ('🏘️ Downgrade village <strong>' + this.escapeHtml(ndObj.name) + '</strong> from ' + ndObj.villageLevel + '★ to ' + (ndObj.villageLevel - 1) + '★')
+                    var downSpan = window.PRS_I18n
+                        ? window.PRS_I18n.t("hud.debt_downgrade_title", { name: this.escapeHtml(ndObj.name), from: ndObj.villageLevel, to: (ndObj.villageLevel - 1) }, ('🏘️ Snížit vesnici <strong>' + this.escapeHtml(ndObj.name) + '</strong> z ' + ndObj.villageLevel + '★ na ' + (ndObj.villageLevel - 1) + '★'))
                         : ('🏘️ Snížit vesnici <strong>' + this.escapeHtml(ndObj.name) + '</strong> z ' + ndObj.villageLevel + '★ na ' + (ndObj.villageLevel - 1) + '★');
-                    var downBtn = isEnAction ? ('Downgrade for +' + downLiq + ' g.') : ('Snížit za +' + downLiq + ' zl.');
+                    var downBtn = window.PRS_I18n ? window.PRS_I18n.t("hud.debt_downgrade_btn", { amount: downLiq, currency: debtCurr }, ('Snížit za +' + downLiq + ' ' + debtCurr)) : ('Snížit za +' + downLiq + ' ' + debtCurr);
 
                     assetsRows += '<div class="debt-asset-row">' +
                         '<span>' + downSpan + '</span>' +
@@ -1121,7 +1128,7 @@
 
                 var investVal = window.PRS_GameEngine.getNodeInvestedValue(this.state, ndObj);
                 var ndLiq = Math.round(investVal * rate);
-                var ndBtn = isEnAction ? ('Sell for +' + ndLiq + ' g.') : ('Odprodat za +' + ndLiq + ' zl.');
+                var ndBtn = window.PRS_I18n ? window.PRS_I18n.t("hud.debt_sell_btn", { amount: ndLiq, currency: debtCurr }, ('Odprodat za +' + ndLiq + ' ' + debtCurr)) : ('Odprodat za +' + ndLiq + ' ' + debtCurr);
 
                 assetsRows += '<div class="debt-asset-row">' +
                     '<span>' + (ndObj.icon || '📍') + ' <strong>' + this.escapeHtml(ndObj.name) + '</strong> (' + ndObj.code + ')</span>' +
@@ -1129,15 +1136,15 @@
                     '</div>';
             }
 
-            var debtBadge = isEnAction ? "⚖️ Royal Auction &amp; Debt Settlement" : "⚖️ Královská dražba &amp; Vyrovnání dluhu";
-            var debtRem = isEnAction
-                ? ('Remaining to pay: <span style="color:#ef4444;">' + pa.debt.remainingDebt + ' g.</span>')
-                : ('Zbývá doplatit: <span style="color:#ef4444;">' + pa.debt.remainingDebt + ' zl.</span>');
-            var debtDesc = isEnAction
-                ? ('Not enough cash to pay rent to knight <strong>' + this.escapeHtml(credName) + '</strong>. To settle the debt, you must liquidate assets to the Royal Chamber at 60% value:')
+            var debtBadge = window.PRS_I18n ? window.PRS_I18n.t("hud.debt_badge", null, "⚖️ Královská dražba &amp; Vyrovnání dluhu") : "⚖️ Královská dražba &amp; Vyrovnání dluhu";
+            var debtRem = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.debt_remaining", { amount: pa.debt.remainingDebt, currency: debtCurr }, ('Zbývá doplatit: <span style="color:#ef4444;">' + pa.debt.remainingDebt + ' ' + debtCurr + '</span>'))
+                : ('Zbývá doplatit: <span style="color:#ef4444;">' + pa.debt.remainingDebt + ' ' + debtCurr + '</span>');
+            var debtDesc = window.PRS_I18n
+                ? window.PRS_I18n.t("hud.debt_desc", { creditor: this.escapeHtml(credName) }, ('Hotovost nestačila na úhradu nájmu hráči <strong>' + this.escapeHtml(credName) + '</strong>. K vyrovnání závazku musíš odprodat část majetku Královské komoře za 60 % pořizovací ceny:'))
                 : ('Hotovost nestačila na úhradu nájmu hráči <strong>' + this.escapeHtml(credName) + '</strong>. K vyrovnání závazku musíš odprodat část majetku Královské komoře za 60 % pořizovací ceny:');
-            var debtEmpty = isEnAction ? "No assets available for liquidation." : "Žádný majetek k odprodeji.";
-            var debtAuto = isEnAction ? "⚡ Automatically select and settle debt" : "⚡ Automaticky vybrat a uhradit dluh";
+            var debtEmpty = window.PRS_I18n ? window.PRS_I18n.t("hud.debt_empty", null, "Žádný majetek k odprodeji.") : "Žádný majetek k odprodeji.";
+            var debtAuto = window.PRS_I18n ? window.PRS_I18n.t("hud.debt_auto", null, "⚡ Automaticky vybrat a uhradit dluh") : "⚡ Automaticky vybrat a uhradit dluh";
 
             specialCardHtml += '<div class="debt-encounter-card">' +
                 '<span class="debt-badge">' + debtBadge + '</span>' +
@@ -1155,12 +1162,11 @@
 
         if (isScrollPending) {
             if (!player.inventory || player.inventory.length < 3) {
-                var storeText = isEnAction
-                    ? ('🎒 Store in pouch (' + ((player.inventory && player.inventory.length) || 0) + '/3)')
-                    : ('🎒 Uložit do brašny (' + ((player.inventory && player.inventory.length) || 0) + '/3)');
+                var invCount = ((player.inventory && player.inventory.length) || 0);
+                var storeText = window.PRS_I18n ? window.PRS_I18n.t("hud.store_in_pouch", { count: invCount }, ('🎒 Uložit do brašny (' + invCount + '/3)')) : ('🎒 Uložit do brašny (' + invCount + '/3)');
                 btns.push('<button class="btn-primary" style="background:linear-gradient(135deg, #059669, #047857); border:1.5px solid #34d399; font-weight:700; padding:0.55rem 0.9rem;" onclick="PRS_App.handleStoreScroll()">' + storeText + '</button>');
             }
-            var useText = isEnAction ? '⚡ Use scroll immediately' : '⚡ Použít svitek ihned';
+            var useText = window.PRS_I18n ? window.PRS_I18n.t("hud.use_scroll_now", null, "⚡ Použít svitek ihned") : "⚡ Použít svitek ihned";
             btns.push('<button class="btn-primary" style="background:linear-gradient(135deg, #d97706, #b45309); border:1.5px solid #fde047; font-weight:700; padding:0.55rem 0.9rem;" onclick="PRS_App.handleUseScrollNow()">' + useText + '</button>');
         }
 

@@ -984,6 +984,7 @@
 
         var catalog = window.PRS_PAWNS_CATALOG || [];
         var html = [];
+        var isEn = window.PRS_I18n ? window.PRS_I18n._lang === "en" : false;
         for (var i = 0; i < catalog.length; i++) {
             var pw = catalog[i];
             if (cat !== "all" && pw.category !== cat) continue;

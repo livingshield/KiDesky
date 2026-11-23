@@ -358,6 +358,7 @@
 
         this.atlasTileDefinitions = tileDefinitions;
 
+        var isEn = window.PRS_I18n ? window.PRS_I18n._lang === "en" : false;
         var cardTitleHint = isEn ? "Click to inspect large tile illustration and full rules" : "Kliknutím otevřeš velký detail s ilustrací a přesnými pravidly";
         var priceLabel = isEn ? "Cost: " : "Cena: ";
 
@@ -620,6 +621,7 @@
             mastery: "Mastery test of all 4 virtues (+2 strength with all virtues ≥ 2)",
             animals_and_spear: "Coordinating horse, animals, and spear (+2 strength with steed, animals, and spear)"
         };
+        var isEn = window.PRS_I18n ? window.PRS_I18n._lang === "en" : false;
         var activeWMap = isEn ? wMapEn : wMap;
 
         var html = [];

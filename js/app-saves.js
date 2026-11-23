@@ -998,6 +998,7 @@
 
             var html = [];
             var saveCards = [];
+            var isEn = window.PRS_I18n ? window.PRS_I18n._lang === "en" : false;
 
             // 1b. Karta právě rozehrané výpravy z automatického uložení (vždy na 1. místě)
             var activeMeta = (typeof this.getActiveAutosaveMeta === "function") ? this.getActiveAutosaveMeta() : null;
@@ -1323,7 +1324,7 @@
                     '      </div>' +
                     '      <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">' +
                     '        ' + (isBot ? ('<span style="color:#fde047;">' + botRoleLabel + '</span>') : ('<span style="color:#86efac;">' + (window.PRS_I18n ? window.PRS_I18n.t("online.seats_live_human") : "👤 Živý hráč u stolu") + '</span>')) +
-                    '        • 💖 ' + (p.totalHearts || 0) + ' ' + (isEnSeats ? "hearts" : "srdcí") + ' • 🪙 ' + (p.gold || 0).toLocaleString(isEnSeats ? "en-US" : "cs-CZ") + ' ' + (window.PRS_I18n ? window.PRS_I18n.t("common.gold") : "zl.") +
+                    '        • 💖 ' + (p.totalHearts || 0) + ' ' + (window.PRS_I18n ? window.PRS_I18n.t("common.hearts_count", null, "srdcí") : "srdcí") + ' • 🪙 ' + (window.PRS_I18n ? window.PRS_I18n.formatGold(p.gold || 0) : ((p.gold || 0) + " zl.")) +
                     '      </div>' +
                     '    </div>' +
                     '  </div>' +

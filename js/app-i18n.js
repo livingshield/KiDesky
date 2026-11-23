@@ -510,4 +510,22 @@
     window.PRS_I18n = PRS_I18n;
     PRS_I18n.init();
 
+    // Bezpečnostní síť proti ReferenceError pro starší kontexty a legacy proměnné
+    var legacyFlags = ['isEn', 'isEnAction', 'isHudEn', 'isEnBotTurn', 'isEnSeats', 'isEnDip', 'isEnEndless', 'isEnAdv', 'isEnInsp', 'isEnEnc', 'isEnGameOver'];
+    legacyFlags.forEach(function (flag) {
+        try {
+            if (!(flag in window)) {
+                Object.defineProperty(window, flag, {
+                    get: function () {
+                        return window.PRS_I18n ? window.PRS_I18n._lang === 'en' : false;
+                    },
+                    set: function () {},
+                    configurable: true
+                });
+            }
+        } catch (e) {
+            window[flag] = false;
+        }
+    });
+
 })(window);
