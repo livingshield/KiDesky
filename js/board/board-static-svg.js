@@ -226,6 +226,24 @@
             '<radialGradient id="tileInnerShadow" cx="50%" cy="50%" r="50%"><stop offset="70%" stop-color="#000000" stop-opacity="0"/><stop offset="100%" stop-color="#000000" stop-opacity="0.55"/></radialGradient>' +
             '<filter id="dragonFireGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
             '<filter id="goldAuraGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+            '<linearGradient id="decorFootFadeGrad_strong" x1="0" y1="0" x2="0" y2="1">' +
+            '  <stop offset="0%" stop-color="#ffffff"/><stop offset="68%" stop-color="#ffffff"/><stop offset="86%" stop-color="#bbbbbb"/><stop offset="100%" stop-color="#000000"/>' +
+            '</linearGradient>' +
+            '<mask id="decorFootFadeMask_strong" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#decorFootFadeGrad_strong)"/></mask>' +
+            '<linearGradient id="decorFootFadeGrad_soft" x1="0" y1="0" x2="0" y2="1">' +
+            '  <stop offset="0%" stop-color="#ffffff"/><stop offset="74%" stop-color="#ffffff"/><stop offset="89%" stop-color="#cccccc"/><stop offset="100%" stop-color="#000000"/>' +
+            '</linearGradient>' +
+            '<mask id="decorFootFadeMask_soft" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#decorFootFadeGrad_soft)"/></mask>' +
+            '<linearGradient id="decorFootFadeGrad_light" x1="0" y1="0" x2="0" y2="1">' +
+            '  <stop offset="0%" stop-color="#ffffff"/><stop offset="84%" stop-color="#ffffff"/><stop offset="94%" stop-color="#cccccc"/><stop offset="100%" stop-color="#000000"/>' +
+            '</linearGradient>' +
+            '<mask id="decorFootFadeMask_light" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#decorFootFadeGrad_light)"/></mask>' +
+            '<radialGradient id="decorCastShadowGrad" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="rgba(10,12,8,0.40)"/><stop offset="62%" stop-color="rgba(10,12,8,0.16)"/><stop offset="100%" stop-color="rgba(10,12,8,0)"/>' +
+            '</radialGradient>' +
+            '<filter id="decorColorHarmonize">' +
+            '  <feColorMatrix type="matrix" values="1.01 0.02 0 0 0  0.01 0.99 0 0 0  0 0.01 0.94 0 0  0 0 0 1 0"/>' +
+            '</filter>' +
             (typeof this.getBoardTerrainDefsSVG === "function" ? this.getBoardTerrainDefsSVG(this.state && this.state.board, th) : "") +
 
             '</defs>';
@@ -845,7 +863,8 @@
 
         if (this.state.board && this.state.board.decorations && this.state.board.decorations.length > 0) {
 
-            out.push('  <g id="prs-decor-layer">');
+            var hasTexturedTerrain = (typeof this.renderBoardTerrainHTML === "function");
+            out.push(hasTexturedTerrain ? '  <g id="prs-decor-layer" filter="url(#decorColorHarmonize)">' : '  <g id="prs-decor-layer">');
 
             this._cachedRiverPoints = null;
             var decs = this.state.board.decorations;
@@ -883,7 +902,22 @@
                     var decFlipAttr = decorFlip ? ' transform="scale(-1, 1)"' : '';
 
                     out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')" onclick="PRS_App.handleDecorClick(\'' + dec.catalogId + '\', ' + dec.x + ', ' + dec.y + ', event)" style="cursor:pointer;">');
-                    // Přirozené terénní lůžko a kontaktní stín ukotvující prvek do krajiny
+                    var fFade = (cat && typeof cat.footFade === "number") ? cat.footFade : 0.25;
+                    var sLen = (cat && typeof cat.shadowLen === "number") ? cat.shadowLen : 0.95;
+                    if (hasTexturedTerrain) {
+                        // Jednotný vržený stín ze slunce vlevo nahoře + kontaktní stín + měkké zapuštění podstavce do terénu
+                        if (sLen > 0.25) {
+                            var castRx = Math.round(dec.w * 0.38 * Math.min(1.4, Math.max(0.6, sLen)));
+                            var castRy = Math.max(5, Math.round(dec.h * 0.14));
+                            var castDx = Math.round(dec.w * 0.22 * sLen);
+                            out.push('      <ellipse cx="0" cy="0" rx="' + castRx + '" ry="' + castRy + '" fill="url(#decorCastShadowGrad)" transform="translate(' + castDx + ',' + (footY + 3) + ') skewX(-28)" pointer-events="none"/>');
+                        }
+                        out.push('      <ellipse cx="0" cy="' + (footY + 1) + '" rx="' + Math.round(dec.w * 0.30) + '" ry="' + Math.max(4, Math.round(dec.h * 0.10)) + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
+                        var fadeMaskName = (fFade >= 0.25) ? "decorFootFadeMask_strong" : (fFade >= 0.17 ? "decorFootFadeMask_soft" : (fFade > 0 ? "decorFootFadeMask_light" : ""));
+                        var imgMaskAttr = fadeMaskName ? (' mask="url(#' + fadeMaskName + ')"') : '';
+                        out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid meet"' + imgMaskAttr + decFlipAttr + '/>');
+                        out.push('    </g>');
+                    } else {
                     out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
                     out.push('      <ellipse cx="0" cy="' + (footY + 2) + '" rx="' + shadRx + '" ry="' + shadRy + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
                     out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid meet"' + decFlipAttr + '/>');
@@ -894,15 +928,27 @@
                     }
                     out.push('    </g>');
 
+                    }
                 } else if (cat && cat.renderSVG) {
 
                     var sc = dec.scale || 1;
 
                     var scX = dec.isFlipped ? (-sc) : sc;
-                    out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + scX + ',' + sc + ')">');
+                    out.push('    <g class="board-decor-item" data-catalog-id="' + dec.catalogId + '" transform="translate(' + dec.x + ',' + dec.y + ') scale(' + sc + ')">');
+                    if (hasTexturedTerrain) {
+                        var sLenSvg = (cat && typeof cat.shadowLen === "number") ? cat.shadowLen : 0.95;
+                        if (sLenSvg > 0.25) {
+                            var castRxSvg = Math.round(dec.w * 0.38 * Math.min(1.4, Math.max(0.6, sLenSvg)));
+                            var castRySvg = Math.max(5, Math.round(dec.h * 0.14));
+                            var castDxSvg = Math.round(dec.w * 0.22 * sLenSvg);
+                            out.push('      <ellipse cx="0" cy="0" rx="' + castRxSvg + '" ry="' + castRySvg + '" fill="url(#decorCastShadowGrad)" transform="translate(' + castDxSvg + ',' + (footY + 3) + ') skewX(-28)" pointer-events="none"/>');
+                        }
+                        out.push('      <ellipse cx="0" cy="' + (footY + 1) + '" rx="' + Math.round(dec.w * 0.30) + '" ry="' + Math.max(4, Math.round(dec.h * 0.10)) + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
+                    } else {
                     out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
                     out.push('      <ellipse cx="0" cy="' + (footY + 2) + '" rx="' + shadRx + '" ry="' + shadRy + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
-                    out.push(cat.renderSVG());
+                    }
+                    out.push(dec.isFlipped ? ('      <g transform="scale(-1, 1)">' + cat.renderSVG() + '</g>') : cat.renderSVG());
 
                     out.push('    </g>');
 

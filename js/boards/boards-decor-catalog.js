@@ -49,7 +49,7 @@ window.PRS_DECOR_CATALOG = {
         desc: "Půvabná bělostná bříza se stříbřitou kůrou a jemným listovím, oblíbená v hájích u koňských pastvin.",
         category: "vegetation",
         w: 44, h: 64, clearance: 22,
-        img: "assets/decorations/tree_birch.webp?v=202611021708",
+        img: "assets/decorations/tree_birch.webp",
         canFlip: true,
         renderSVG: function () {
             return '' +
@@ -708,3 +708,53 @@ window.PRS_DECOR_CATALOG = {
         canFlip: true
     }
 };
+
+// Doplnění sjednocených parametrů zapuštění do terénu (footFade) a délky vrženého stínu (shadowLen)
+(function () {
+    "use strict";
+    var cat = window.PRS_DECOR_CATALOG;
+    if (!cat) return;
+
+    var categoryDefaults = {
+        water:        { footFade: 0.14, shadowLen: 0.20 },
+        agriculture:  { footFade: 0.20, shadowLen: 0.50 },
+        settlement:   { footFade: 0.24, shadowLen: 1.05 },
+        civilization: { footFade: 0.24, shadowLen: 1.05 },
+        quest_lair:   { footFade: 0.24, shadowLen: 1.05 },
+        vegetation:   { footFade: 0.26, shadowLen: 0.95 },
+        terrain:      { footFade: 0.26, shadowLen: 0.95 },
+        magic:        { footFade: 0.26, shadowLen: 0.95 }
+    };
+
+    var shadowOverrides = {
+        windmill: 1.35,
+        wooden_watchtower: 1.35,
+        ancient_tower_ruin: 1.30,
+        mountain_peaks: 1.25,
+        tree_pine: 1.20,
+        tree_birch: 1.15,
+        tree_oak: 1.10,
+        grove_pine: 1.10,
+        grove_pine2: 1.10,
+        grove_oak: 1.00,
+        cottage_timber: 1.05,
+        orchad_apple: 0.90,
+        hruskovy_sad: 0.90,
+        orchad_plum: 0.90,
+        rock_boulder: 0.70,
+        bush: 0.60,
+        farm_field: 0.35
+    };
+
+    var keys = Object.keys(cat);
+    for (var i = 0; i < keys.length; i++) {
+        var id = keys[i];
+        var item = cat[id];
+        if (!item) continue;
+        var def = categoryDefaults[item.category] || categoryDefaults.vegetation;
+        if (typeof item.footFade !== "number") item.footFade = def.footFade;
+        if (typeof item.shadowLen !== "number") {
+            item.shadowLen = (typeof shadowOverrides[id] === "number") ? shadowOverrides[id] : def.shadowLen;
+        }
+    }
+})();
