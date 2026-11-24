@@ -67,7 +67,7 @@
 
             self.clampViewportPan();
 
-            self.applyViewportTransform();
+            self.scheduleViewportTransform();
 
         }, { passive: false });
 
@@ -111,7 +111,11 @@
 
             self.viewport.startPanY = self.viewport.panY;
 
+            if (typeof self._invalidateBoardSize === "function") self._invalidateBoardSize();
+
             wrap.classList.add("is-panning");
+
+            if (document.body) document.body.classList.add("prs-board-panning");
 
         });
 
@@ -137,7 +141,7 @@
 
             self.clampViewportPan();
 
-            self.applyViewportTransform();
+            self.scheduleViewportTransform();
 
         });
 
@@ -148,6 +152,10 @@
                 self.viewport.isDragging = false;
 
                 wrap.classList.remove("is-panning");
+
+            if (document.body) document.body.classList.remove("prs-board-panning");
+
+            if (typeof self.flushViewportTransform === "function") self.flushViewportTransform();
 
             }
 
@@ -177,6 +185,12 @@
 
                 lastTapTime = now;
 
+                if (typeof self._invalidateBoardSize === "function") self._invalidateBoardSize();
+
+                wrap.classList.add("is-panning");
+
+                if (document.body) document.body.classList.add("prs-board-panning");
+
                 self.viewport.isDragging = true;
 
                 self.viewport.dragMoved = false;
@@ -190,6 +204,12 @@
                 self.viewport.startPanY = self.viewport.panY;
 
             } else if (e.touches.length === 2) {
+
+                if (typeof self._invalidateBoardSize === "function") self._invalidateBoardSize();
+
+                wrap.classList.add("is-panning");
+
+                if (document.body) document.body.classList.add("prs-board-panning");
 
                 self.viewport.isDragging = false;
 
@@ -251,7 +271,7 @@
 
                     self.clampViewportPan();
 
-                    self.applyViewportTransform();
+                    self.scheduleViewportTransform();
 
                 }
 
@@ -275,7 +295,7 @@
 
                 self.clampViewportPan();
 
-                self.applyViewportTransform();
+                self.scheduleViewportTransform();
 
             }
 
@@ -293,31 +313,97 @@
 
                 self.viewport.isDragging = false;
 
+                wrap.classList.remove("is-panning");
+
+                if (document.body) document.body.classList.remove("prs-board-panning");
+
+                if (typeof self.flushViewportTransform === "function") self.flushViewportTransform();
+
             }
 
         });
 
+        wrap.addEventListener("touchcancel", function () {
+
+            self.viewport.isPinching = false;
+
+            self.viewport.isDragging = false;
+
+            wrap.classList.remove("is-panning");
+
+            if (document.body) document.body.classList.remove("prs-board-panning");
+
+            if (typeof self.flushViewportTransform === "function") self.flushViewportTransform();
+
+        });
+
         window.addEventListener("resize", function () {
+            if (typeof self._invalidateBoardSize === "function") self._invalidateBoardSize();
             self.clampViewportPan();
-            self.applyViewportTransform();
+            self.applyViewportTransform(false);
         });
 
     },
 
     
+    _invalidateBoardSize: function () {
+        this._boardSizeCache = null;
+    },
+
+    _measureBoardSize: function (force) {
+        var svgEl = document.getElementById("prs-board-svg");
+        var wrap = document.getElementById("board-viewport-wrap");
+        var now = Date.now();
+        var c = this._boardSizeCache;
+        if (!force && c && c.svgEl === svgEl && c.wrap === wrap && c.w > 0 && c.h > 0 && (now - c.ts) < 1500) {
+            return c;
+        }
+        var w = (svgEl && svgEl.clientWidth > 0) ? svgEl.clientWidth : (wrap ? (wrap.clientWidth || 1000) : 1000);
+        var h = (svgEl && svgEl.clientHeight > 0) ? svgEl.clientHeight : (wrap ? (wrap.clientHeight || 620) : 620);
+        var res = {
+            svgEl: svgEl,
+            wrap: wrap,
+            w: w,
+            h: h,
+            ratioX: 1400 / Math.max(1, w),
+            ratioY: 860 / Math.max(1, h),
+            ts: now
+        };
+        if (svgEl && svgEl.clientWidth > 0 && svgEl.clientHeight > 0) {
+            this._boardSizeCache = res;
+        }
+        return res;
+    },
+
+    scheduleViewportTransform: function () {
+        var self = this;
+        if (this._panRafId) return;
+        var raf = (typeof window !== "undefined" && window.requestAnimationFrame)
+            ? window.requestAnimationFrame
+            : function (cb) { return setTimeout(cb, 16); };
+        this._panRafId = raf(function () {
+            self._panRafId = 0;
+            self.applyViewportTransform(false);
+        });
+    },
+
+    flushViewportTransform: function () {
+        if (this._panRafId) {
+            if (typeof cancelAnimationFrame === "function") cancelAnimationFrame(this._panRafId);
+            else clearTimeout(this._panRafId);
+            this._panRafId = 0;
+            this.applyViewportTransform(false);
+        }
+    },
+
     clampViewportPan: function () {
 
-        var wrap = document.getElementById("board-viewport-wrap");
+        var sz = this._measureBoardSize();
 
-        var svgEl = document.getElementById("prs-board-svg");
+        if (!sz.wrap) return;
 
-        if (!wrap) return;
-
-        var w = (svgEl && svgEl.clientWidth > 0) ? svgEl.clientWidth : (wrap.clientWidth || 1000);
-
-        var h = (svgEl && svgEl.clientHeight > 0) ? svgEl.clientHeight : (wrap.clientHeight || 620);
-        var svgRatioX = 1400 / Math.max(1, w);
-        var svgRatioY = 860 / Math.max(1, h);
+        var svgRatioX = sz.ratioX;
+        var svgRatioY = sz.ratioY;
 
         // Pojistka minimálního měřítka (minScale = 1.0) - zamezí zmenšení desky pod velikost herní plochy
         var minS = (this.viewport && this.viewport.minScale) ? this.viewport.minScale : 1.0;
@@ -372,23 +458,33 @@
             lbl.textContent = Math.round(s * 100) + " %";
         }
 
-        if (!g || !wrap) return;
+        if (!svgEl || !wrap) return;
 
-        if (smooth) {
-            g.style.transition = "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)";
-            setTimeout(function () {
-                if (g) g.style.transition = "";
-            }, 480);
-        } else if (!this.viewport.isDragging && !this.viewport.isPinching) {
-            g.style.transition = "";
+        if (this._panRafId) {
+            if (typeof cancelAnimationFrame === "function") cancelAnimationFrame(this._panRafId);
+            else clearTimeout(this._panRafId);
+            this._panRafId = 0;
+        }
+        if (g && g.getAttribute && g.getAttribute("transform")) {
+            g.removeAttribute("transform");
         }
 
-        // Převod pixelového posunu na souřadnice SVG (1400 x 860) měřený z reálné velikosti SVG
-        var svgW = (svgEl && svgEl.clientWidth > 0) ? svgEl.clientWidth : (wrap.clientWidth || 1000);
-        var svgH = (svgEl && svgEl.clientHeight > 0) ? svgEl.clientHeight : (wrap.clientHeight || 620);
+        if (smooth) {
+            svgEl.style.transition = "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)";
+            if (this._smoothTimer) clearTimeout(this._smoothTimer);
+            this._smoothTimer = setTimeout(function () {
+                if (svgEl) svgEl.style.transition = "";
+            }, 480);
+        } else if (!this.viewport.isDragging && !this.viewport.isPinching) {
+            svgEl.style.transition = "";
+        } else {
+            svgEl.style.transition = "none";
+        }
 
-        var svgRatioX = 1400 / Math.max(1, svgW);
-        var svgRatioY = 860 / Math.max(1, svgH);
+        // Převod pixelového posunu na CSS pixely s využitím mezipaměti rozměrů SVG (bez layout reflow)
+        var sz = this._measureBoardSize();
+        var svgRatioX = sz.ratioX;
+        var svgRatioY = sz.ratioY;
 
         // Striktní hranice v souřadnicích SVG (1400 x 860):
         // Deska nikdy nesmí odkrýt černé okraje:
@@ -408,15 +504,17 @@
         this.viewport.panX = tx / svgRatioX;
         this.viewport.panY = ty / svgRatioY;
 
-        var finalTx = Math.round(tx * 10) / 10;
-        var finalTy = Math.round(ty * 10) / 10;
+        var finalPanX = Math.round(this.viewport.panX * 100) / 100;
+        var finalPanY = Math.round(this.viewport.panY * 100) / 100;
 
-        g.setAttribute("transform", "translate(" + finalTx + "," + finalTy + ") scale(" + s.toFixed(3) + ")");
+        svgEl.style.transform = "translate3d(" + finalPanX + "px, " + finalPanY + "px, 0) scale(" + s.toFixed(4) + ")";
 
         wrap.classList.add("is-interacting");
+        if (document.body) document.body.classList.add("prs-board-interacting");
         if (this._interactTimer) clearTimeout(this._interactTimer);
         this._interactTimer = setTimeout(function () {
             if (wrap) wrap.classList.remove("is-interacting");
+            if (document.body) document.body.classList.remove("prs-board-interacting");
         }, 180);
 
     },
@@ -424,11 +522,11 @@
     
     zoomBy: function (factor) {
 
-        var wrap = document.getElementById("board-viewport-wrap");
+        var sz = this._measureBoardSize();
 
-        var cx = wrap ? wrap.clientWidth / 2 : 500;
+        var cx = sz.w ? sz.w / 2 : 500;
 
-        var cy = wrap ? wrap.clientHeight / 2 : 310;
+        var cy = sz.h ? sz.h / 2 : 310;
 
         var newScale = Math.min(this.viewport.maxScale, Math.max(this.viewport.minScale, this.viewport.scale * factor));
 
@@ -484,15 +582,11 @@
 
         this.viewport.scale = targetScale;
 
-        var svgEl = document.getElementById("prs-board-svg");
+        var sz = this._measureBoardSize();
 
-        var svgW = (svgEl && svgEl.clientWidth > 0) ? svgEl.clientWidth : (wrap.clientWidth || 1000);
+        var svgRatioX = sz.ratioX;
 
-        var svgH = (svgEl && svgEl.clientHeight > 0) ? svgEl.clientHeight : (wrap.clientHeight || 620);
-
-        var svgRatioX = 1400 / Math.max(1, svgW);
-
-        var svgRatioY = 860 / Math.max(1, svgH);
+        var svgRatioY = sz.ratioY;
 
         // Bezpečné vycentrování na hráče s respektováním okrajů desky
 

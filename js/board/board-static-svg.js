@@ -324,7 +324,7 @@
             var finalTy = Math.round(ty * 10) / 10;
 
             svg.innerHTML = this.getBoardDefsSVG() +
-                '<g id="prs-board-stage" transform="translate(' + finalTx + ',' + finalTy + ') scale(' + s.toFixed(3) + ')">' +
+                '<g id="prs-board-stage">' +
                 '  <g id="prs-static-layer"></g>' +
                 '  <g id="prs-tokens-layer"></g>' +
                 '</g>';
@@ -364,6 +364,10 @@
 
         this.renderBoardTokens();
 
+        if (typeof this._invalidateBoardSize === "function") this._invalidateBoardSize();
+
+        if (typeof this.applyViewportTransform === "function") this.applyViewportTransform(false);
+
     },
 
     
@@ -374,15 +378,16 @@
         var hasTexturedTerrain = (gQuality !== "low") && (typeof this.renderBoardTerrainHTML === "function");
         var baseOpacityScale = hasTexturedTerrain ? 0.32 : 1.0;
         var heartlandOp = hasTexturedTerrain ? "0.20" : "0.55";
+        var biomeBlurAttr = (gQuality === "low") ? '' : ' filter="url(#biomeBlur)"';
         var out = [];
         out.push('  <g id="prs-biomes-layer" pointer-events="none">');
         // Celkový teplý podkladový akvarelový přeliv krajiny
-        out.push('    <ellipse cx="690" cy="430" rx="640" ry="380" fill="url(#heartlandBiomeGrad)" opacity="' + heartlandOp + '" filter="url(#biomeBlur)"/>');
+        out.push('    <ellipse cx="690" cy="430" rx="640" ry="380" fill="url(#heartlandBiomeGrad)" opacity="' + heartlandOp + '"' + biomeBlurAttr + '/>');
         for (var b = 0; b < board.biomes.length; b++) {
             var bm = board.biomes[b];
             var fillVal = bm.fillGrad ? ("url(#" + bm.fillGrad + ")") : bm.fill;
             out.push('    <g class="biome-region" data-biome-id="' + bm.id + '">');
-            out.push('      <path d="' + bm.path + '" fill="' + fillVal + '" opacity="' + (Math.round(((bm.opacity || 0.78) * baseOpacityScale) * 100) / 100) + '" filter="url(#biomeBlur)"/>');
+            out.push('      <path d="' + bm.path + '" fill="' + fillVal + '" opacity="' + (Math.round(((bm.opacity || 0.78) * baseOpacityScale) * 100) / 100) + '"' + biomeBlurAttr + '/>');
             if (bm.contours && bm.contours.length > 0) {
                 for (var c = 0; c < bm.contours.length; c++) {
                     out.push('      <path d="' + bm.contours[c] + '" fill="none" stroke="' + (bm.contourStroke || 'rgba(251,191,36,0.32)') + '" stroke-width="1.15" stroke-dasharray="' + (bm.contourDash || '7,5') + '"' + (hasTexturedTerrain ? ' opacity="0.55"' : '') + '/>');
@@ -573,15 +578,17 @@
             // mosty presunuty za cesty aby je neprekryval asfalt
         }
 
-        // 1e. Plovoucí ranní mlha nad horami a hvozdem (Atmosférický opar)
-        out.push('  <g id="prs-mist-layer" pointer-events="none" opacity="0.65">');
-        out.push('    <g>');
-        out.push('      <animateTransform attributeName="transform" type="translate" values="0,0; 32,-12; 0,0" dur="22s" repeatCount="indefinite" />');
-        out.push('      <ellipse cx="1160" cy="320" rx="200" ry="110" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
-        out.push('      <ellipse cx="320" cy="180" rx="220" ry="120" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
-        out.push('      <ellipse cx="880" cy="540" rx="170" ry="95" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
-        out.push('    </g>');
-        out.push('  </g>');
+        // 1e. Plovoucí ranní mlha nad horami a hvozdem (Atmosférický opar - pouze HIGH)
+        if (gQuality === "high") {
+            out.push('  <g id="prs-mist-layer" pointer-events="none" opacity="0.65">');
+            out.push('    <g>');
+            out.push('      <animateTransform attributeName="transform" type="translate" values="0,0; 32,-12; 0,0" dur="22s" repeatCount="indefinite" />');
+            out.push('      <ellipse cx="1160" cy="320" rx="200" ry="110" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
+            out.push('      <ellipse cx="320" cy="180" rx="220" ry="120" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
+            out.push('      <ellipse cx="880" cy="540" rx="170" ry="95" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
+            out.push('    </g>');
+            out.push('  </g>');
+        }
 
         // 2. Balíčky karet přesunuty z plánu do přehledné řady pod herním plánem (mezi detail rytíře a kroniku)
 
@@ -611,7 +618,8 @@
             if (customLmUrl) {
                 // Přirozené terénní lůžko a kontaktní stín pod dominantou (hrad, citadela, dračí sluj)
                 var lmBaseGrad = (lmk.id === "dragonLair" || customLmUrl.indexOf("dragon") !== -1) ? "groundStoneGrad" : "groundMossGrad";
-                out.push('    <ellipse cx="' + (lmk.w / 2) + '" cy="' + (lmk.h - 24) + '" rx="' + Math.round(lmk.w * 0.48) + '" ry="' + Math.round(lmk.h * 0.24) + '" fill="url(#' + lmBaseGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
+                var lmCushBlurAttr = (gQuality === "high") ? ' filter="url(#groundCushionBlur)"' : '';
+                out.push('    <ellipse cx="' + (lmk.w / 2) + '" cy="' + (lmk.h - 24) + '" rx="' + Math.round(lmk.w * 0.48) + '" ry="' + Math.round(lmk.h * 0.24) + '" fill="url(#' + lmBaseGrad + ')"' + lmCushBlurAttr + ' pointer-events="none"/>');
                 out.push('    <ellipse cx="' + (lmk.w / 2) + '" cy="' + (lmk.h - 20) + '" rx="' + Math.round(lmk.w * 0.39) + '" ry="' + Math.round(lmk.h * 0.16) + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
 
                 // Průsvitná 3D izometrická ilustrace hradu nebo draka (zrcadlení jen na <image>, popiska zůstává čitelná)
@@ -636,7 +644,8 @@
 
                     out.push('    <g transform="translate(' + (lmk.w / 2) + ', ' + (lmk.h - 14) + ')">');
 
-                    out.push('      <rect x="-115" y="-13" width="230" height="26" rx="13" fill="rgba(18,12,8,0.92)" stroke="' + activePalette.stroke + '" stroke-width="1.6" filter="drop-shadow(0 3px 6px rgba(0,0,0,0.7))"/>');
+                    var rcShadowAttr = (gQuality === "high") ? ' filter="drop-shadow(0 3px 6px rgba(0,0,0,0.7))"' : '';
+                    out.push('      <rect x="-115" y="-13" width="230" height="26" rx="13" fill="rgba(18,12,8,0.92)" stroke="' + activePalette.stroke + '" stroke-width="1.6"' + rcShadowAttr + '/>');
 
                     var rcName = (this.getLandmarkDisplayName ? this.getLandmarkDisplayName(lmk) : lmk.name) || "Královský Hrad";
                     out.push('      <text x="0" y="5" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="bold">♡ ' + this.escapeHtml(rcName) + ' (' + this.state.config.targetHearts + ' 💖) ♡</text>');
@@ -647,7 +656,8 @@
 
                     out.push('    <g transform="translate(' + (lmk.w / 2) + ', ' + (lmk.h - 12) + ')">');
 
-                    out.push('      <rect x="-85" y="-11" width="170" height="22" rx="11" fill="rgba(16,10,6,0.90)" stroke="' + activePalette.stroke + '" stroke-width="1.2" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.7))"/>');
+                    var lmShadowAttr = (gQuality === "high") ? ' filter="drop-shadow(0 2px 6px rgba(0,0,0,0.7))"' : '';
+                    out.push('      <rect x="-85" y="-11" width="170" height="22" rx="11" fill="rgba(16,10,6,0.90)" stroke="' + activePalette.stroke + '" stroke-width="1.2"' + lmShadowAttr + '/>');
 
                     var lmTitle = (this.getLandmarkDisplayName ? this.getLandmarkDisplayName(lmk) : lmk.name);
                     out.push('      <text x="0" y="4" text-anchor="middle" fill="#fef08a" font-family="Cinzel, serif" font-size="10" font-weight="bold">' + this.escapeHtml(lmTitle) + '</text>');
@@ -846,7 +856,8 @@
 
                     out.push('    <rect x="-2.2" y="5.5" width="4.4" height="7" rx="1" fill="#472b14" stroke="#241409" stroke-width="0.6"/>');
 
-                    out.push('    <path d="M -20,-8.5 L 17,-8.5 L 22,0 L 17,8.5 L -20,8.5 Q -21.5,0 -20,-8.5 Z" fill="url(#signpostWoodGrad)" stroke="#2b190b" stroke-width="1.2" style="filter:drop-shadow(0 2px 3px rgba(0,0,0,0.68));"/>');
+                    var spShadowAttr = (gQuality === "high") ? ' style="filter:drop-shadow(0 2px 3px rgba(0,0,0,0.68));"' : '';
+    out.push('    <path d="M -20,-8.5 L 17,-8.5 L 22,0 L 17,8.5 L -20,8.5 Q -21.5,0 -20,-8.5 Z" fill="url(#signpostWoodGrad)" stroke="#2b190b" stroke-width="1.2"' + spShadowAttr + '/>');
 
                     out.push('    <line x1="-16" y1="-4.5" x2="14" y2="-4.5" stroke="rgba(255,232,190,0.18)" stroke-width="0.7"/>');
 
@@ -932,6 +943,7 @@
 
                 var cat = window.PRS_DECOR_CATALOG ? window.PRS_DECOR_CATALOG[dec.catalogId] : null;
                 var catType = (cat && cat.category) || "vegetation";
+                if (gQuality === "low" && catType === "vegetation" && (d % 2 === 1)) continue;
                 var cushionGrad = "groundMossGrad";
                 if (catType === "settlement" || catType === "agriculture") cushionGrad = "groundEarthGrad";
                 else if (catType === "terrain" || catType === "quest_lair" || catType === "civilization") cushionGrad = "groundStoneGrad";
@@ -972,7 +984,11 @@
                         out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid meet"' + imgMaskAttr + decFlipAttr + '/>');
                         out.push('    </g>');
                     } else {
-                    out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
+                    if (gQuality === "high") {
+                        out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
+                    } else {
+                        out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" pointer-events="none"/>');
+                    }
                     out.push('      <ellipse cx="0" cy="' + (footY + 2) + '" rx="' + shadRx + '" ry="' + shadRy + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
                     out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid meet"' + decFlipAttr + '/>');
                     if (catType === "vegetation" || catType === "settlement" || catType === "agriculture") {
@@ -999,7 +1015,11 @@
                         }
                         out.push('      <ellipse cx="0" cy="' + (footY + 1) + '" rx="' + Math.round(dec.w * 0.30) + '" ry="' + Math.max(4, Math.round(dec.h * 0.10)) + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
                     } else {
-                    out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
+                    if (gQuality === "high") {
+                        out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" filter="url(#groundCushionBlur)" pointer-events="none"/>');
+                    } else {
+                        out.push('      <ellipse cx="0" cy="' + footY + '" rx="' + cushRx + '" ry="' + cushRy + '" fill="url(#' + cushionGrad + ')" pointer-events="none"/>');
+                    }
                     out.push('      <ellipse cx="0" cy="' + (footY + 2) + '" rx="' + shadRx + '" ry="' + shadRy + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
                     }
                     out.push(dec.isFlipped ? ('      <g transform="scale(-1, 1)">' + cat.renderSVG() + '</g>') : cat.renderSVG());
@@ -1146,7 +1166,8 @@
 
                 out.push('      <g class="prs-flag-cloth" style="animation-delay:-' + flagDelay + 's;">');
 
-                out.push('        <path d="M 0 0 C 6 -3, 12 3, 19 0 L 15 7 L 19 14 C 12 11, 6 17, 0 14 Z" fill="' + ownerP.color + '" stroke="#ffffff" stroke-width="1.1" style="filter:drop-shadow(0 3px 3px rgba(0,0,0,0.7));"/>');
+                var flagShadowAttr = (gQuality === "high") ? ' style="filter:drop-shadow(0 3px 3px rgba(0,0,0,0.7));"' : '';
+                out.push('        <path d="M 0 0 C 6 -3, 12 3, 19 0 L 15 7 L 19 14 C 12 11, 6 17, 0 14 Z" fill="' + ownerP.color + '" stroke="#ffffff" stroke-width="1.1"' + flagShadowAttr + '/>');
 
                 out.push('        <path d="M 0 0 C 6 -3, 12 3, 19 0 L 15 3.5 L 0 3.5 Z" fill="rgba(255,255,255,0.25)"/>');
 
@@ -1197,22 +1218,28 @@
         // Taktická aura cílových uzlů podle aktivního scénáře
         if (this.state && this.state.config) {
             var curScn = this.state.config.scenario || "CLASSIC";
+            var gQualNode = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+            var fireGlowAttr = (gQualNode === "low") ? '' : ' filter="url(#dragonFireGlow)"';
+            var goldGlowAttr = (gQualNode === "low") ? '' : ' filter="url(#goldAuraGlow)"';
             if (curScn === "DRAGON" && nd.type === "QUEST" && nd.subtype === "U3") {
-                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 7) + '" fill="none" stroke="#ea580c" stroke-width="3" stroke-dasharray="4,3" filter="url(#dragonFireGlow)"><animate attributeName="stroke-width" values="2;4.5;2" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></circle>');
+                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 7) + '" fill="none" stroke="#ea580c" stroke-width="3" stroke-dasharray="4,3"' + fireGlowAttr + '><animate attributeName="stroke-width" values="2;4.5;2" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></circle>');
             } else if (curScn === "TYCOON" && (nd.type === "TOWN" || nd.type === "CASTLE")) {
-                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 5.5) + '" fill="none" stroke="#facc15" stroke-width="2.5" stroke-dasharray="3,2" filter="url(#goldAuraGlow)"><animate attributeName="opacity" values="0.4;1;0.4" dur="2.2s" repeatCount="indefinite"/></circle>');
+                out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 5.5) + '" fill="none" stroke="#facc15" stroke-width="2.5" stroke-dasharray="3,2"' + goldGlowAttr + '><animate attributeName="opacity" values="0.4;1;0.4" dur="2.2s" repeatCount="indefinite"/></circle>');
             }
         }
+
+        var nodeGQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+        var majorGlowAttr = (nodeGQuality === "high") ? ' filter="url(#glowFilter)"' : '';
 
         if (nd.type === "START") {
             // Královský erbovní štít
             var startPth = 'M ' + (nd.x - 22) + ' ' + (nd.y - 20) + ' L ' + (nd.x + 22) + ' ' + (nd.y - 20) + ' L ' + (nd.x + 22) + ' ' + (nd.y + 4) + ' Q ' + (nd.x + 22) + ' ' + (nd.y + 24) + ' ' + nd.x + ' ' + (nd.y + 28) + ' Q ' + (nd.x - 22) + ' ' + (nd.y + 24) + ' ' + (nd.x - 22) + ' ' + (nd.y + 4) + ' Z';
-            out.push('    <path d="' + startPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <path d="' + startPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"' + majorGlowAttr + '/>');
 
         } else if (nd.type === "FESTIVAL") {
             // Zamilované srdcové turnajové pole
             var festPth = 'M ' + nd.x + ' ' + (nd.y + 20) + ' C ' + (nd.x - 25) + ' ' + (nd.y + 4) + ' ' + (nd.x - 24) + ' ' + (nd.y - 18) + ' ' + (nd.x - 10) + ' ' + (nd.y - 18) + ' C ' + (nd.x - 2) + ' ' + (nd.y - 18) + ' ' + nd.x + ' ' + (nd.y - 9) + ' ' + nd.x + ' ' + (nd.y - 8) + ' C ' + nd.x + ' ' + (nd.y - 9) + ' ' + (nd.x + 2) + ' ' + (nd.y - 18) + ' ' + (nd.x + 10) + ' ' + (nd.y - 18) + ' C ' + (nd.x + 24) + ' ' + (nd.y - 18) + ' ' + (nd.x + 25) + ' ' + (nd.y + 4) + ' ' + nd.x + ' ' + (nd.y + 20) + ' Z';
-            out.push('    <path d="' + festPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <path d="' + festPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"' + majorGlowAttr + '/>');
 
         } else if (nd.type === "CASTLE" || nd.type === "TOWN") {
             // Opevněný 8-úhelníkový hradní a městský polygon
@@ -1222,7 +1249,8 @@
                 var ang = a * Math.PI / 4 + Math.PI / 8;
                 octPts.push(Math.round(nd.x + Math.cos(ang) * rad) + ',' + Math.round(nd.y + Math.sin(ang) * rad));
             }
-            out.push('    <polygon points="' + octPts.join(' ') + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            var octGlowAttr = (nd.type === "CASTLE") ? majorGlowAttr : '';
+            out.push('    <polygon points="' + octPts.join(' ') + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"' + octGlowAttr + '/>');
 
         } else if (nd.type === "QUEST") {
             // Kosočtvercová 4-cípá rytířská hvězda
@@ -1231,7 +1259,7 @@
                        ' L ' + (nd.x + qRad + 3) + ' ' + nd.y + ' L ' + Math.round(nd.x + qRad * 0.6) + ' ' + Math.round(nd.y + qRad * 0.6) +
                        ' L ' + nd.x + ' ' + (nd.y + qRad + 3) + ' L ' + Math.round(nd.x - qRad * 0.6) + ' ' + Math.round(nd.y + qRad * 0.6) +
                        ' L ' + (nd.x - qRad - 3) + ' ' + nd.y + ' L ' + Math.round(nd.x - qRad * 0.6) + ' ' + Math.round(nd.y - qRad * 0.6) + ' Z';
-            out.push('    <path d="' + qPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <path d="' + qPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"/>');
 
         } else if (nd.type === "ANIMAL") {
             // Medailon s barevnou závěsnou stuhou chovné sady (všech 14 heraldických barev)
@@ -1265,7 +1293,7 @@
                 out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 4) + '" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-dasharray="3,2"><animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite"/></circle>');
             }
 
-            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"/>');
 
         } else if (nd.type === "MASTER") {
             // Speciální ctnostní medailon Mistra s barevným prstencem
@@ -1276,7 +1304,7 @@
             else if (skill === "tanec") { mColor = "#d946ef"; }
             else if (skill === "charisma") { mColor = "#06b6d4"; }
 
-            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"/>');
             out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 3.2) + '" fill="none" stroke="' + mColor + '" stroke-width="2.2" stroke-dasharray="4,2"/>');
 
         } else if (nd.type === "CHANCE" || nd.type === "JESTER" || nd.type === "TAX") {
@@ -1287,20 +1315,20 @@
                 var hang = ha * Math.PI / 3;
                 hexPts.push(Math.round(nd.x + Math.cos(hang) * hexRad) + ',' + Math.round(nd.y + Math.sin(hang) * hexRad));
             }
-            out.push('    <polygon points="' + hexPts.join(' ') + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <polygon points="' + hexPts.join(' ') + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"/>');
 
         } else if (nd.type === "PRISON") {
             // Okovaný čtverec šatlavy
-            out.push('    <rect x="' + (nd.x - 16) + '" y="' + (nd.y - 16) + '" width="32" height="32" rx="4" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <rect x="' + (nd.x - 16) + '" y="' + (nd.y - 16) + '" width="32" height="32" rx="4" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"/>');
 
         } else if (nd.type === "HOSPITAL") {
             // Křižácký erb špitálu
             var hospPth = 'M ' + (nd.x - 16) + ' ' + (nd.y - 16) + ' L ' + (nd.x + 16) + ' ' + (nd.y - 16) + ' L ' + (nd.x + 16) + ' ' + (nd.y + 2) + ' Q ' + (nd.x + 16) + ' ' + (nd.y + 18) + ' ' + nd.x + ' ' + (nd.y + 22) + ' Q ' + (nd.x - 16) + ' ' + (nd.y + 18) + ' ' + (nd.x - 16) + ' ' + (nd.y + 2) + ' Z';
-            out.push('    <path d="' + hospPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <path d="' + hospPth + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"/>');
 
         } else {
             // Standardní kruhový medailon
-            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" filter="url(#glowFilter)"/>');
+            out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '"/>');
         }
 
         // Vložení bitmapy nebo procedurální heraldické kresby
@@ -1336,7 +1364,8 @@
             out.push('      <text x="0" y="2.3" text-anchor="middle" fill="#ffffff" font-size="6.5" font-weight="bold">' + setNum + '</text>');
             out.push('    </g>');
             if (completedOwner !== null) {
-                out.push('    <g transform="translate(' + nd.x + ',' + (nd.y - r - 6) + ')" pointer-events="none"><text x="0" y="0" text-anchor="middle" font-size="9.5" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.85))">👑</text></g>');
+                var crownShadowAttr = (nodeGQuality === "high") ? ' filter="drop-shadow(0 1px 2px rgba(0,0,0,0.85))"' : '';
+                out.push('    <g transform="translate(' + nd.x + ',' + (nd.y - r - 6) + ')" pointer-events="none"><text x="0" y="0" text-anchor="middle" font-size="9.5"' + crownShadowAttr + '>👑</text></g>');
             }
         } else if (nd.type === "MASTER") {
             var mSkill = nd.skill || "any";
@@ -1575,7 +1604,9 @@
 
             // Výchozí heraldická ikona s vrženým stínem
 
-            out.push('    <text x="' + nd.x + '" y="' + (nd.y - 0.5) + '" text-anchor="middle" font-size="' + (isMajor ? '14' : '11.5') + '" style="filter: drop-shadow(0 2px 2px rgba(0,0,0,0.85));">' + nd.icon + '</text>');
+            var procGQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+            var procIconShadow = (procGQuality === "high") ? ' style="filter: drop-shadow(0 2px 2px rgba(0,0,0,0.85));"' : '';
+            out.push('    <text x="' + nd.x + '" y="' + (nd.y - 0.5) + '" text-anchor="middle" font-size="' + (isMajor ? '14' : '11.5') + '"' + procIconShadow + '>' + nd.icon + '</text>');
 
         }
 

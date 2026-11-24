@@ -290,6 +290,10 @@
         var activeTheme = (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
                           (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
         var rTheme = this.RIVER_THEMES[activeTheme] || this.RIVER_THEMES.light;
+        var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+        var bankBlurAttr = (gQuality === "low") ? '' : ' filter="url(#riverBankBlur)"';
+        var wobbleAttr = (gQuality === "high") ? ' filter="url(#riverWobble)"' : '';
+        var softAttr = (gQuality === "low") ? '' : ' filter="url(#riverSoft)"';
         out.push('  <g id="prs-rivers-layer">');
 
         // 1. Vzorkování všech řek v království
@@ -511,20 +515,20 @@
         // PASS 1: Vlhká louka kolem toku (měkký rozptyl podle živlu)
         if (activeConf) {
             var net1 = buildUnifiedNetwork(activeConf, "sides1");
-            out.push('    <path d="' + this.riverClosedPolygonPath(net1.poly) + '" fill="' + rTheme.meadowColor + '" filter="url(#riverBankBlur)"/>');
+            out.push('    <path d="' + this.riverClosedPolygonPath(net1.poly) + '" fill="' + rTheme.meadowColor + '"' + bankBlurAttr + '/>');
         } else {
             for (var i1 = 0; i1 < sampledRivers.length; i1++) {
-                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i1].sides1.L, sampledRivers[i1].sides1.R) + '" fill="' + rTheme.meadowColor + '" filter="url(#riverBankBlur)"/>');
+                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i1].sides1.L, sampledRivers[i1].sides1.R) + '" fill="' + rTheme.meadowColor + '"' + bankBlurAttr + '/>');
             }
         }
 
         // PASS 2: Písčito-bahnitý / čedičový břeh (pod vodou)
         if (activeConf) {
             var net2 = buildUnifiedNetwork(activeConf, "sides2");
-            out.push('    <path d="' + this.riverClosedPolygonPath(net2.poly) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverClosedPolygonPath(net2.poly) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '"' + wobbleAttr + '/>');
         } else {
             for (var i2 = 0; i2 < sampledRivers.length; i2++) {
-                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i2].sides2.L, sampledRivers[i2].sides2.R) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '" filter="url(#riverWobble)"/>');
+                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i2].sides2.L, sampledRivers[i2].sides2.R) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '"' + wobbleAttr + '/>');
             }
         }
 
@@ -532,38 +536,38 @@
         var wetRimColor = rTheme.wetBankColor || "rgba(68,52,36,0.42)";
         var net3 = activeConf ? buildUnifiedNetwork(activeConf, "sides3") : null;
         if (net3) {
-            out.push('    <path d="' + this.riverClosedPolygonPath(net3.poly) + '" fill="url(#prsMasterRiverWater)" stroke="' + wetRimColor + '" stroke-width="3.4" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverClosedPolygonPath(net3.poly) + '" fill="url(#prsMasterRiverWater)" stroke="' + wetRimColor + '" stroke-width="3.4" stroke-linejoin="round"' + wobbleAttr + '/>');
         } else {
             for (var i3 = 0; i3 < sampledRivers.length; i3++) {
                 var waterD = this.riverPolyPath(sampledRivers[i3].sides3.L, sampledRivers[i3].sides3.R);
-                out.push('    <path d="' + waterD + '" fill="url(#prsMasterRiverWater)" stroke="' + wetRimColor + '" stroke-width="3.4" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+                out.push('    <path d="' + waterD + '" fill="url(#prsMasterRiverWater)" stroke="' + wetRimColor + '" stroke-width="3.4" stroke-linejoin="round"' + wobbleAttr + '/>');
             }
         }
 
         // PASS 4: Hlubší střed toku (hloubkové stínování koryta)
         for (var i4 = 0; i4 < sampledRivers.length; i4++) {
-            out.push('    <path d="' + this.riverPolyPath(sampledRivers[i4].sides4.L, sampledRivers[i4].sides4.R) + '" fill="' + rTheme.deepWaterColor + '" filter="url(#riverSoft)"/>');
+            out.push('    <path d="' + this.riverPolyPath(sampledRivers[i4].sides4.L, sampledRivers[i4].sides4.R) + '" fill="' + rTheme.deepWaterColor + '"' + softAttr + '/>');
         }
 
         // PASS 4.5: Zelené ostrůvky v toku řeky
-        out.push(this.renderRiverIslandsHTML(sampledRivers, board, rTheme, activeTheme));
+        out.push(this.renderRiverIslandsHTML(sampledRivers, board, rTheme, activeTheme, gQuality));
 
         // PASS 4.6: Jezírka v meandrech (mrtvá ramena)
-        out.push(this.renderOxbowLakesHTML(sampledRivers, board, rTheme, activeTheme));
+        out.push(this.renderOxbowLakesHTML(sampledRivers, board, rTheme, activeTheme, gQuality));
 
         // PASS 4.7: Ústí v deltě (rozvětvená delta a naplavené ostrovy)
-        out.push(this.renderRiverDeltaHTML(sampledRivers, board, rTheme, activeTheme));
+        out.push(this.renderRiverDeltaHTML(sampledRivers, board, rTheme, activeTheme, gQuality));
 
         // PASS 5: Inkoustové břehy řeky s přirozeným soutokovým rozvětvením
         if (net3) {
-            out.push('    <path d="' + this.riverBankPath(net3.bankOpp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
-            out.push('    <path d="' + this.riverBankPath(net3.bankUp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
-            out.push('    <path d="' + this.riverBankPath(net3.bankDown) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverBankPath(net3.bankOpp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
+            out.push('    <path d="' + this.riverBankPath(net3.bankUp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
+            out.push('    <path d="' + this.riverBankPath(net3.bankDown) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
         } else {
             for (var i5 = 0; i5 < sampledRivers.length; i5++) {
                 var rivObj = sampledRivers[i5];
-                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.L) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
-                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.R) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.L) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
+                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.R) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
             }
         }
 
@@ -582,7 +586,7 @@
             var sSide = (cnf.confSide === "L") ? -1 : 1;
             var spX = (cPoint.nx * sSide * 16).toFixed(1);
             var spY = (cPoint.ny * sSide * 16).toFixed(1);
-            out.push('      <ellipse cx="' + spX + '" cy="' + spY + '" rx="12" ry="7" transform="rotate(' + (sAngle + 20) + ' ' + spX + ' ' + spY + ')" fill="' + rTheme.bankColor + '" stroke="' + ink5 + '" stroke-width="1.0" filter="url(#riverWobble)"/>');
+            out.push('      <ellipse cx="' + spX + '" cy="' + spY + '" rx="12" ry="7" transform="rotate(' + (sAngle + 20) + ' ' + spX + ' ' + spY + ')" fill="' + rTheme.bankColor + '" stroke="' + ink5 + '" stroke-width="1.0"' + wobbleAttr + '/>');
             out.push('      <circle cx="' + (parseFloat(spX) + 2).toFixed(1) + '" cy="' + (parseFloat(spY) - 1).toFixed(1) + '" r="2.2" fill="#8d877d"/>');
             out.push('      <circle cx="' + (parseFloat(spX) - 3).toFixed(1) + '" cy="' + (parseFloat(spY) + 1).toFixed(1) + '" r="1.6" fill="#a8a29e"/>');
             out.push('      <path d="M -7 -3 Q 0 -7 7 -4 Q 10 2 4 7" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.8)") + '" stroke-width="1.1" stroke-linecap="round" opacity="0.85"/>');
@@ -623,7 +627,7 @@
 
             // Horský pramen (pouze pokud začíná uvnitř mapy a není za rámem)
             if (first6.y > 40 && first6.x > 40 && first6.x < 1360) {
-                out.push('    <ellipse cx="' + first6.x.toFixed(1) + '" cy="' + (first6.y + 2).toFixed(1) + '" rx="' + (rw6 * 0.72).toFixed(1) + '" ry="' + (rw6 * 0.50).toFixed(1) + '" fill="' + rTheme.springColor + '" stroke="' + rTheme.bankInkColor + '" stroke-width="1" filter="url(#riverWobble)"/>');
+                out.push('    <ellipse cx="' + first6.x.toFixed(1) + '" cy="' + (first6.y + 2).toFixed(1) + '" rx="' + (rw6 * 0.72).toFixed(1) + '" ry="' + (rw6 * 0.50).toFixed(1) + '" fill="' + rTheme.springColor + '" stroke="' + rTheme.bankInkColor + '" stroke-width="1"' + wobbleAttr + '/>');
                 var spr = [[-1.0, -0.2, 3.6], [0.9, -0.7, 3.0], [0.2, 0.9, 2.6], [-0.5, 0.8, 2.2]];
                 for (var sp = 0; sp < spr.length; sp++) {
                     var sx = first6.x + spr[sp][0] * rw6 * 0.75, sy = first6.y + 2 + spr[sp][1] * rw6 * 0.5;
@@ -632,6 +636,7 @@
                 }
             }
 
+            if (gQuality !== "low") {
             // Pobřežní vegetace a kamínky
             var nextVeg = 18, side = 1;
             for (var vIdx = 0; vIdx < n6; vIdx++) {
@@ -672,14 +677,18 @@
                 if (wClash) continue;
                 out.push(this.riverWaterDetailSVG(wx, wy, hashVal(rData.seedBase, dIdx + 500), activeTheme));
             }
+            }
         }
         out.push('  </g>');
         return out.join("\n");
     },
 
     
-    renderRiverIslandsHTML: function (sampledRivers, board, rTheme, activeTheme) {
+    renderRiverIslandsHTML: function (sampledRivers, board, rTheme, activeTheme, gQuality) {
         if (!sampledRivers || sampledRivers.length === 0) return "";
+        if (!gQuality) gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+        var wobbleAttr = (gQuality === "high") ? ' filter="url(#riverWobble)"' : '';
+        var softAttr = (gQuality === "low") ? '' : ' filter="url(#riverSoft)"';
         var out = [];
         var nodes = (board && board.nodes) || [];
         var bridges = (board && board.bridges) || [];
@@ -757,14 +766,14 @@
                 out.push('    <g class="river-island" transform="translate(' + pt.x.toFixed(1) + ',' + pt.y.toFixed(1) + ') rotate(' + angleDeg.toFixed(1) + ')" pointer-events="none">');
                 
                 // 1. Měkký stín ostrova v korytu řeky
-                out.push('      <ellipse cx="0" cy="3" rx="' + (islRx + 4).toFixed(1) + '" ry="' + (islRy + 3.5).toFixed(1) + '" fill="' + (rTheme.deepWaterColor || "rgba(0,0,0,0.30)") + '" filter="url(#riverSoft)"/>');
+                out.push('      <ellipse cx="0" cy="3" rx="' + (islRx + 4).toFixed(1) + '" ry="' + (islRy + 3.5).toFixed(1) + '" fill="' + (rTheme.deepWaterColor || "rgba(0,0,0,0.30)") + '"' + softAttr + '/>');
 
                 // 2. Bílá příbojová vlna lámající se o špici ostrova proti proudu
                 var bowWaveW = (islRx + 7).toFixed(1);
                 out.push('      <path d="M -' + bowWaveW + ' -4 Q -' + (islRx + 1).toFixed(1) + ' 0 -' + bowWaveW + ' 4" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.85)") + '" stroke-width="1.6" stroke-linecap="round"/>');
 
                 // 3. Písčito-štěrková pláž ostrova s texturovaným okrajem
-                out.push('      <ellipse cx="0" cy="0" rx="' + islRx.toFixed(1) + '" ry="' + islRy.toFixed(1) + '" fill="' + (rTheme.bankColor || "#dfbe86") + '" stroke="' + ink + '" stroke-width="1.3" filter="url(#riverWobble)"/>');
+                out.push('      <ellipse cx="0" cy="0" rx="' + islRx.toFixed(1) + '" ry="' + islRy.toFixed(1) + '" fill="' + (rTheme.bankColor || "#dfbe86") + '" stroke="' + ink + '" stroke-width="1.3"' + wobbleAttr + '/>');
 
                 // 4. Vyvýšený zelený travnatý kopec / čedičový val
                 var lawnFill = (activeTheme === "fire") ? "#451a03" : (activeTheme === "earth" ? "#166534" : (activeTheme === "water" ? "#0369a1" : (activeTheme === "air" ? "#6366f1" : "#5d8438")));
@@ -799,8 +808,12 @@
     },
 
     
-    renderOxbowLakesHTML: function (sampledRivers, board, rTheme, activeTheme) {
+    renderOxbowLakesHTML: function (sampledRivers, board, rTheme, activeTheme, gQuality) {
         if (!sampledRivers || sampledRivers.length === 0) return "";
+        if (!gQuality) gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+        var bankBlurAttr = (gQuality === "low") ? '' : ' filter="url(#riverBankBlur)"';
+        var wobbleAttr = (gQuality === "high") ? ' filter="url(#riverWobble)"' : '';
+        var softAttr = (gQuality === "low") ? '' : ' filter="url(#riverSoft)"';
         var out = [];
         var nodes = (board && board.nodes) || [];
         var bridges = (board && board.bridges) || [];
@@ -889,16 +902,16 @@
             out.push('    <g class="meander-oxbow-lake" transform="translate(' + lcx.toFixed(1) + ',' + lcy.toFixed(1) + ') rotate(' + rot + ')" pointer-events="none">');
 
             // 1. Vlhká louka / rašeliniště kolem jezírka
-            out.push('      <ellipse cx="0" cy="0" rx="' + (lrx + 16).toFixed(1) + '" ry="' + (lry + 13).toFixed(1) + '" fill="' + rTheme.meadowColor + '" filter="url(#riverBankBlur)" opacity="0.85"/>');
+            out.push('      <ellipse cx="0" cy="0" rx="' + (lrx + 16).toFixed(1) + '" ry="' + (lry + 13).toFixed(1) + '" fill="' + rTheme.meadowColor + '"' + bankBlurAttr + ' opacity="0.85"/>');
 
             // 2. Písčito-štěrkový břeh s texturovaným vlněním
-            out.push('      <ellipse cx="0" cy="0" rx="' + (lrx + 5).toFixed(1) + '" ry="' + (lry + 4).toFixed(1) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '" stroke="' + ink + '" stroke-width="1.1" filter="url(#riverWobble)"/>');
+            out.push('      <ellipse cx="0" cy="0" rx="' + (lrx + 5).toFixed(1) + '" ry="' + (lry + 4).toFixed(1) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '" stroke="' + ink + '" stroke-width="1.1"' + wobbleAttr + '/>');
 
             // 3. Klidná zrcadlová hladina jezírka
-            out.push('      <ellipse cx="0" cy="0" rx="' + lrx.toFixed(1) + '" ry="' + lry.toFixed(1) + '" fill="url(#prsMasterRiverWater)" filter="url(#riverWobble)"/>');
+            out.push('      <ellipse cx="0" cy="0" rx="' + lrx.toFixed(1) + '" ry="' + lry.toFixed(1) + '" fill="url(#prsMasterRiverWater)"' + wobbleAttr + '/>');
 
             // 4. Hluboké jádro mrtvého ramene
-            out.push('      <ellipse cx="-1" cy="0" rx="' + (lrx * 0.62).toFixed(1) + '" ry="' + (lry * 0.58).toFixed(1) + '" fill="' + rTheme.deepWaterColor + '" filter="url(#riverSoft)"/>');
+            out.push('      <ellipse cx="-1" cy="0" rx="' + (lrx * 0.62).toFixed(1) + '" ry="' + (lry * 0.58).toFixed(1) + '" fill="' + rTheme.deepWaterColor + '"' + softAttr + '/>');
 
             // 5. Jemné kruhy čeření / odlesk hladiny
             out.push('      <ellipse cx="' + (lrx * 0.25).toFixed(1) + '" cy="' + (-lry * 0.2).toFixed(1) + '" rx="' + (lrx * 0.35).toFixed(1) + '" ry="' + (lry * 0.25).toFixed(1) + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.7)") + '" stroke-width="0.9" stroke-dasharray="8,5" opacity="0.8"/>');
@@ -946,8 +959,11 @@
     },
 
     
-    renderRiverDeltaHTML: function (sampledRivers, board, rTheme, activeTheme) {
+    renderRiverDeltaHTML: function (sampledRivers, board, rTheme, activeTheme, gQuality) {
         if (!sampledRivers || sampledRivers.length === 0) return "";
+        if (!gQuality) gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+        var bankBlurAttr = (gQuality === "low") ? '' : ' filter="url(#riverBankBlur)"';
+        var wobbleAttr = (gQuality === "high") ? ' filter="url(#riverWobble)"' : '';
         var out = [];
         var ink = rTheme.bankInkColor || "rgba(45,26,14,0.92)";
 
@@ -996,13 +1012,13 @@
                 { x: rightBranchEnd.x + 28, y: rightBranchEnd.y },
                 { x: forkPt.x + fHw * 1.6, y: forkPt.y }
             ];
-            out.push('      <polygon points="' + deltaFanPoly.map(function(p){ return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ') + '" fill="' + rTheme.meadowColor + '" filter="url(#riverBankBlur)" opacity="0.75"/>');
+            out.push('      <polygon points="' + deltaFanPoly.map(function(p){ return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ') + '" fill="' + rTheme.meadowColor + '"' + bankBlurAttr + ' opacity="0.75"/>');
 
-            out.push('      <path d="' + dLeft + '" fill="none" stroke="' + rTheme.bankColor + '" stroke-width="' + (rData.rw * 0.85).toFixed(1) + '" stroke-linecap="round" opacity="' + rTheme.bankOpacity + '" filter="url(#riverWobble)"/>');
-            out.push('      <path d="' + dRight + '" fill="none" stroke="' + rTheme.bankColor + '" stroke-width="' + (rData.rw * 0.85).toFixed(1) + '" stroke-linecap="round" opacity="' + rTheme.bankOpacity + '" filter="url(#riverWobble)"/>');
+            out.push('      <path d="' + dLeft + '" fill="none" stroke="' + rTheme.bankColor + '" stroke-width="' + (rData.rw * 0.85).toFixed(1) + '" stroke-linecap="round" opacity="' + rTheme.bankOpacity + '"' + wobbleAttr + '/>');
+            out.push('      <path d="' + dRight + '" fill="none" stroke="' + rTheme.bankColor + '" stroke-width="' + (rData.rw * 0.85).toFixed(1) + '" stroke-linecap="round" opacity="' + rTheme.bankOpacity + '"' + wobbleAttr + '/>');
 
-            out.push('      <path d="' + dLeft + '" fill="none" stroke="url(#prsMasterRiverWater)" stroke-width="' + (rData.rw * 0.62).toFixed(1) + '" stroke-linecap="round" filter="url(#riverWobble)"/>');
-            out.push('      <path d="' + dRight + '" fill="none" stroke="url(#prsMasterRiverWater)" stroke-width="' + (rData.rw * 0.62).toFixed(1) + '" stroke-linecap="round" filter="url(#riverWobble)"/>');
+            out.push('      <path d="' + dLeft + '" fill="none" stroke="url(#prsMasterRiverWater)" stroke-width="' + (rData.rw * 0.62).toFixed(1) + '" stroke-linecap="round"' + wobbleAttr + '/>');
+            out.push('      <path d="' + dRight + '" fill="none" stroke="url(#prsMasterRiverWater)" stroke-width="' + (rData.rw * 0.62).toFixed(1) + '" stroke-linecap="round"' + wobbleAttr + '/>');
 
             out.push('      <path d="' + dLeft + '" fill="none" stroke="' + ink + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="14,2,26,4"/>');
             out.push('      <path d="' + dRight + '" fill="none" stroke="' + ink + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="14,2,26,4"/>');
@@ -1015,11 +1031,11 @@
             var island2X = (forkPt.x + rightBranchEnd.x + lastPt.x) / 3;
             var island2Y = (forkPt.y + rightBranchEnd.y + lastPt.y) / 3;
 
-            out.push('      <ellipse cx="' + island1X.toFixed(1) + '" cy="' + island1Y.toFixed(1) + '" rx="18" ry="9.5" fill="' + rTheme.bankColor + '" stroke="' + ink + '" stroke-width="1.1" filter="url(#riverWobble)"/>');
+            out.push('      <ellipse cx="' + island1X.toFixed(1) + '" cy="' + island1Y.toFixed(1) + '" rx="18" ry="9.5" fill="' + rTheme.bankColor + '" stroke="' + ink + '" stroke-width="1.1"' + wobbleAttr + '/>');
             out.push('      <ellipse cx="' + (island1X - 1).toFixed(1) + '" cy="' + island1Y.toFixed(1) + '" rx="13" ry="6.5" fill="' + (activeTheme === "fire" ? "#451a03" : "#5d8438") + '" opacity="0.9"/>');
             out.push('      <path d="M ' + (island1X - 6).toFixed(1) + ' ' + (island1Y - 2).toFixed(1) + ' L ' + (island1X - 7).toFixed(1) + ' ' + (island1Y - 9).toFixed(1) + ' M ' + (island1X - 2).toFixed(1) + ' ' + island1Y.toFixed(1) + ' L ' + (island1X - 2).toFixed(1) + ' ' + (island1Y - 8).toFixed(1) + '" stroke="#606c38" stroke-width="1.3" stroke-linecap="round"/>');
 
-            out.push('      <ellipse cx="' + island2X.toFixed(1) + '" cy="' + island2Y.toFixed(1) + '" rx="16" ry="8.5" fill="' + rTheme.bankColor + '" stroke="' + ink + '" stroke-width="1.1" filter="url(#riverWobble)"/>');
+            out.push('      <ellipse cx="' + island2X.toFixed(1) + '" cy="' + island2Y.toFixed(1) + '" rx="16" ry="8.5" fill="' + rTheme.bankColor + '" stroke="' + ink + '" stroke-width="1.1"' + wobbleAttr + '/>');
             out.push('      <ellipse cx="' + island2X.toFixed(1) + '" cy="' + island2Y.toFixed(1) + '" rx="11" ry="5.8" fill="' + (activeTheme === "fire" ? "#451a03" : "#5d8438") + '" opacity="0.9"/>');
 
             var surfY1 = Math.min(880, lastPt.y + 12);
@@ -1168,8 +1184,10 @@
     },
 
     
-    renderBoardBridgesHTML: function (board) {
+    renderBoardBridgesHTML: function (board, gQuality) {
         if (!board || !board.bridges || board.bridges.length === 0) return "";
+        if (!gQuality) gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+        var softAttr = (gQuality === "low") ? '' : ' filter="url(#riverSoft)"';
         var out = [];
         var ink = "rgba(40,24,14,0.92)";
         var activeTheme = (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
@@ -1211,7 +1229,7 @@
                 // TYP 2: DŘEVĚNÁ TRÁMOVÁ LÁVKA (DÉLKA 54 PX, ŠÍŘKA 22 PX)
                 // ============================================================
                 // Hluboký stín lávky na hladině
-                out.push('      <rect x="-27" y="-9" width="54" height="22" rx="7" fill="rgba(8,20,32,0.42)" filter="url(#riverSoft)"/>');
+                out.push('      <rect x="-27" y="-9" width="54" height="22" rx="7" fill="rgba(8,20,32,0.42)"' + softAttr + '/>');
                 // Tři podélné nosné dubové trámy přes řeku
                 var beamCol = (activeTheme === "fire") ? "#1c1917" : "#3e240f";
                 out.push('      <rect x="-28" y="-8.5" width="56" height="3.2" rx="1.5" fill="' + beamCol + '" stroke="' + ink + '" stroke-width="0.7"/>');
@@ -1257,7 +1275,7 @@
                 for (var si = 0; si < stones.length; si++) {
                     var st = stones[si];
                     out.push('      <g transform="translate(' + st.x + ',' + st.y + ') rotate(' + st.rot + ')">');
-                    out.push('        <ellipse cx="1" cy="2.5" rx="' + (st.rx + 2.5).toFixed(1) + '" ry="' + (st.ry + 2.5).toFixed(1) + '" fill="rgba(8,20,32,0.40)" filter="url(#riverSoft)"/>');
+                    out.push('        <ellipse cx="1" cy="2.5" rx="' + (st.rx + 2.5).toFixed(1) + '" ry="' + (st.ry + 2.5).toFixed(1) + '" fill="rgba(8,20,32,0.40)"' + softAttr + '/>');
                     out.push('        <path d="M -' + (st.rx + 2.8).toFixed(1) + ' 0 Q 0 ' + (st.ry + 4.5).toFixed(1) + ' ' + (st.rx + 2.8).toFixed(1) + ' 0" fill="none" stroke="' + frothCol + '" stroke-width="1.4" stroke-linecap="round"/>');
                     out.push('        <ellipse cx="0" cy="0" rx="' + st.rx + '" ry="' + st.ry + '" fill="' + rockBase + '" stroke="' + ink + '" stroke-width="1"/>');
                     out.push('        <ellipse cx="-1" cy="-0.8" rx="' + (st.rx * 0.65).toFixed(1) + '" ry="' + (st.ry * 0.62).toFixed(1) + '" fill="' + rockTop + '"/>');
@@ -1278,7 +1296,7 @@
                 var archCol = th.bridgeArch || "#44403c";
 
                 // Hluboký stín mostovky na vodě
-                out.push('      <rect x="-28" y="-11" width="56" height="26" rx="10" fill="rgba(4,18,36,0.40)" filter="url(#riverSoft)"/>');
+                out.push('      <rect x="-28" y="-11" width="56" height="26" rx="10" fill="rgba(4,18,36,0.40)"' + softAttr + '/>');
                 // Masivní vystupující klenbové oblouky a pilíře ve vodě (proti i po proudu)
                 out.push('      <path d="M-16 13 A16 9 0 0 0 16 13 Z" fill="' + archCol + '" stroke="' + ink + '" stroke-width="1.1"/>');
                 out.push('      <path d="M-16 -13 A16 9 0 0 1 16 -13 Z" fill="' + archCol + '" stroke="' + ink + '" stroke-width="1.1"/>');

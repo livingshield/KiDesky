@@ -91,9 +91,44 @@
 
         }
 
+        var hadDrawn = false;
+
+        var vpWrap = document.getElementById("board-viewport-wrap");
+
         function loop() {
 
             var tabBoard = document.getElementById("tab-board");
+
+            var gQual = (typeof self.getGraphicsQuality === "function") ? self.getGraphicsQuality() : "high";
+
+            var isMobileDev = (typeof document !== "undefined" && document.body && document.body.getAttribute("data-device") === "mobile");
+
+            var reducedMotion = (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+            var isInteracting = Boolean(
+                (vpWrap && (vpWrap.classList.contains("is-panning") || vpWrap.classList.contains("is-interacting"))) ||
+                (typeof document !== "undefined" && document.body && (document.body.classList.contains("prs-board-panning") || document.body.classList.contains("prs-board-interacting")))
+            );
+
+            var shouldPauseCanvas = !tabBoard || tabBoard.style.display === "none" || gQual === "low" || gQual === "medium" || isMobileDev || reducedMotion || isInteracting;
+
+            if (shouldPauseCanvas) {
+
+                if (hadDrawn) {
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    hadDrawn = false;
+
+                }
+
+                setTimeout(function () { requestAnimationFrame(loop); }, 450);
+
+                return;
+
+            }
+
+            hadDrawn = true;
 
             if (tabBoard && tabBoard.style.display !== "none") {
 

@@ -256,6 +256,12 @@
 
             -webkit-user-select: none;
 
+            transform-origin: 0 0;
+
+            will-change: transform;
+
+            backface-visibility: hidden;
+
         }
 
         #prs-board-svg image {
@@ -4080,9 +4086,7 @@ body[data-active-tab="board"] #topbar-announcement-banner {
     contain: layout style paint;
 }
 
-#prs-board-stage {
-    will-change: transform;
-}
+/* #prs-board-svg je propagován jako jediná GPU vrstva pro pan/zoom (bez zdvojeného composite layer na #prs-board-stage) */
 
 #board-viewport-wrap.is-panning *,
 #board-viewport-wrap.is-interacting * {

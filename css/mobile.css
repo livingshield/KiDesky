@@ -2063,3 +2063,23 @@ body[data-device="mobile"][data-orientation="portrait"] .quest-duel-col-right {
 body[data-device="mobile"][data-orientation="portrait"] .duel-arena-grid {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 }
+
+/* Mobilní výkon mapy: vypnout drahé backdrop-filter blur efekty na low kvalitě a při posunu/zoomu */
+html[data-graphics-quality="low"] .topbar,
+html[data-graphics-quality="low"] #mobile-action-dock,
+html[data-graphics-quality="low"] .mobile-sheet-backdrop,
+html[data-graphics-quality="low"] .mobile-floating-pill,
+html[data-graphics-quality="low"] .player-hover-tooltip,
+body.prs-board-panning .topbar,
+body.prs-board-panning #mobile-action-dock,
+body.prs-board-panning .mobile-sheet-backdrop,
+body.prs-board-panning .mobile-floating-pill,
+body.prs-board-panning .player-hover-tooltip,
+body.prs-board-interacting .topbar,
+body.prs-board-interacting #mobile-action-dock,
+body.prs-board-interacting .mobile-sheet-backdrop,
+body.prs-board-interacting .mobile-floating-pill,
+body.prs-board-interacting .player-hover-tooltip {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
