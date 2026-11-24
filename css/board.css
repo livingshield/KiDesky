@@ -3921,3 +3921,30 @@ body[data-active-tab="board"] #topbar-announcement-banner {
         box-sizing: border-box;
     }
 }
+
+/* === FÁZE 4: Plynulý animovaný proud řeky (respektuje prefers-reduced-motion) === */
+@keyframes prsRiverFlow1 {
+    from { stroke-dashoffset: 0; }
+    to { stroke-dashoffset: -162; }
+}
+
+@keyframes prsRiverFlow2 {
+    from { stroke-dashoffset: 0; }
+    to { stroke-dashoffset: -135; }
+}
+
+.prs-river-stream-1 {
+    animation: prsRiverFlow1 9.5s linear infinite;
+}
+
+.prs-river-stream-2 {
+    animation: prsRiverFlow2 13s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .prs-river-stream,
+    .prs-river-stream-1,
+    .prs-river-stream-2 {
+        animation: none !important;
+    }
+}

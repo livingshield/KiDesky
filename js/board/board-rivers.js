@@ -181,37 +181,39 @@
     RIVER_THEMES: {
         light: {
             waterGradient: [
-                { offset: "0%", color: "#7dd3fc" },
-                { offset: "22%", color: "#38bdf8" },
-                { offset: "60%", color: "#0284c7" },
-                { offset: "100%", color: "#0369a1" }
+                { offset: "0%", color: "#63a3a8" },
+                { offset: "25%", color: "#3e8291" },
+                { offset: "62%", color: "#265e75" },
+                { offset: "100%", color: "#1a4259" }
             ],
-            deepWaterColor: "rgba(2, 60, 115, 0.45)",
-            meadowColor: "rgba(132, 204, 22, 0.30)",
-            bankColor: "#dfbe86",
-            bankOpacity: 0.95,
-            bankInkColor: "rgba(45, 26, 14, 0.92)",
-            streamColor1: "rgba(255, 255, 255, 0.85)",
-            streamColor2: "rgba(186, 230, 253, 0.70)",
-            springColor: "#bae6fd",
+            deepWaterColor: "rgba(12, 38, 56, 0.42)",
+            meadowColor: "rgba(76, 112, 50, 0.28)",
+            bankColor: "#c4a676",
+            bankOpacity: 0.88,
+            wetBankColor: "rgba(76, 58, 38, 0.44)",
+            bankInkColor: "rgba(48, 34, 20, 0.56)",
+            streamColor1: "rgba(236, 249, 252, 0.52)",
+            streamColor2: "rgba(182, 224, 234, 0.36)",
+            springColor: "#8ec3c8",
             bridgeStoneBody: "#78716c",
             bridgeStoneRoad: "#e7e5e4",
             bridgeArch: "#44403c"
         },
         fire: {
             waterGradient: [
-                { offset: "0%", color: "#fef08a" },
-                { offset: "20%", color: "#f97316" },
-                { offset: "55%", color: "#ea580c" },
-                { offset: "100%", color: "#7f1d1d" }
+                { offset: "0%", color: "#fde08a" },
+                { offset: "22%", color: "#ea6a1a" },
+                { offset: "58%", color: "#c84412" },
+                { offset: "100%", color: "#6e1b14" }
             ],
-            deepWaterColor: "rgba(254, 240, 138, 0.42)",
-            meadowColor: "rgba(180, 50, 10, 0.35)",
-            bankColor: "#292524",
-            bankOpacity: 0.95,
-            bankInkColor: "rgba(249, 115, 22, 0.95)",
-            streamColor1: "rgba(254, 240, 138, 0.90)",
-            streamColor2: "rgba(251, 146, 60, 0.75)",
+            deepWaterColor: "rgba(254, 232, 130, 0.36)",
+            meadowColor: "rgba(148, 48, 16, 0.30)",
+            bankColor: "#2e2724",
+            bankOpacity: 0.92,
+            wetBankColor: "rgba(24, 14, 10, 0.64)",
+            bankInkColor: "rgba(218, 96, 28, 0.72)",
+            streamColor1: "rgba(254, 236, 148, 0.72)",
+            streamColor2: "rgba(248, 138, 56, 0.52)",
             springColor: "#fef08a",
             bridgeStoneBody: "#1c1917",
             bridgeStoneRoad: "#44403c",
@@ -219,18 +221,19 @@
         },
         water: {
             waterGradient: [
-                { offset: "0%", color: "#67e8f9" },
-                { offset: "25%", color: "#06b6d4" },
-                { offset: "65%", color: "#0284c7" },
-                { offset: "100%", color: "#1e3a8a" }
+                { offset: "0%", color: "#7bcce0" },
+                { offset: "28%", color: "#2995b8" },
+                { offset: "65%", color: "#186b99" },
+                { offset: "100%", color: "#163a6e" }
             ],
-            deepWaterColor: "rgba(6, 40, 110, 0.48)",
-            meadowColor: "rgba(20, 140, 150, 0.35)",
-            bankColor: "#93c5fd",
-            bankOpacity: 0.85,
-            bankInkColor: "rgba(12, 74, 110, 0.92)",
-            streamColor1: "rgba(255, 255, 255, 0.88)",
-            streamColor2: "rgba(186, 230, 253, 0.65)",
+            deepWaterColor: "rgba(10, 36, 86, 0.44)",
+            meadowColor: "rgba(30, 116, 128, 0.28)",
+            bankColor: "#9ab8cf",
+            bankOpacity: 0.82,
+            wetBankColor: "rgba(28, 66, 94, 0.44)",
+            bankInkColor: "rgba(18, 62, 92, 0.62)",
+            streamColor1: "rgba(240, 250, 255, 0.65)",
+            streamColor2: "rgba(180, 224, 248, 0.44)",
             springColor: "#a5f3fc",
             bridgeStoneBody: "#64748b",
             bridgeStoneRoad: "#cbd5e1",
@@ -238,18 +241,19 @@
         },
         earth: {
             waterGradient: [
-                { offset: "0%", color: "#a7f3d0" },
-                { offset: "28%", color: "#34d399" },
-                { offset: "65%", color: "#059669" },
-                { offset: "100%", color: "#14532d" }
+                { offset: "0%", color: "#7dc7a8" },
+                { offset: "28%", color: "#3a9c7a" },
+                { offset: "65%", color: "#1b6e56" },
+                { offset: "100%", color: "#144734" }
             ],
-            deepWaterColor: "rgba(6, 45, 18, 0.45)",
-            meadowColor: "rgba(45, 110, 30, 0.38)",
-            bankColor: "#854d0e",
-            bankOpacity: 0.90,
-            bankInkColor: "rgba(35, 20, 10, 0.92)",
-            streamColor1: "rgba(240, 253, 244, 0.65)",
-            streamColor2: "rgba(187, 247, 208, 0.45)",
+            deepWaterColor: "rgba(10, 42, 26, 0.42)",
+            meadowColor: "rgba(52, 100, 38, 0.32)",
+            bankColor: "#8b683b",
+            bankOpacity: 0.86,
+            wetBankColor: "rgba(42, 52, 28, 0.46)",
+            bankInkColor: "rgba(36, 26, 14, 0.60)",
+            streamColor1: "rgba(232, 250, 240, 0.52)",
+            streamColor2: "rgba(176, 230, 200, 0.36)",
             springColor: "#6ee7b7",
             bridgeStoneBody: "#57534e",
             bridgeStoneRoad: "#a8a29e",
@@ -257,18 +261,19 @@
         },
         air: {
             waterGradient: [
-                { offset: "0%", color: "#e0e7ff" },
-                { offset: "30%", color: "#c7d2fe" },
-                { offset: "65%", color: "#818cf8" },
-                { offset: "100%", color: "#4338ca" }
+                { offset: "0%", color: "#cbd5f5" },
+                { offset: "30%", color: "#9eaee6" },
+                { offset: "65%", color: "#6778c8" },
+                { offset: "100%", color: "#3c4396" }
             ],
-            deepWaterColor: "rgba(35, 25, 95, 0.40)",
-            meadowColor: "rgba(99, 102, 241, 0.28)",
-            bankColor: "#c7d2fe",
-            bankOpacity: 0.85,
-            bankInkColor: "rgba(49, 46, 129, 0.88)",
-            streamColor1: "rgba(255, 255, 255, 0.90)",
-            streamColor2: "rgba(224, 231, 255, 0.60)",
+            deepWaterColor: "rgba(34, 30, 86, 0.38)",
+            meadowColor: "rgba(96, 102, 186, 0.24)",
+            bankColor: "#b6bede",
+            bankOpacity: 0.80,
+            wetBankColor: "rgba(66, 72, 124, 0.38)",
+            bankInkColor: "rgba(48, 46, 108, 0.58)",
+            streamColor1: "rgba(248, 250, 255, 0.68)",
+            streamColor2: "rgba(216, 224, 250, 0.46)",
             springColor: "#e0e7ff",
             bridgeStoneBody: "#94a3b8",
             bridgeStoneRoad: "#e2e8f0",
@@ -523,14 +528,15 @@
             }
         }
 
-        // PASS 3: Hladina vody (jeden souvislý polygon se živlovým gradientem)
+        // PASS 3: Hladina vody (jeden souvislý polygon se živlovým gradientem a vlhkým okrajem břehu)
+        var wetRimColor = rTheme.wetBankColor || "rgba(68,52,36,0.42)";
         var net3 = activeConf ? buildUnifiedNetwork(activeConf, "sides3") : null;
         if (net3) {
-            out.push('    <path d="' + this.riverClosedPolygonPath(net3.poly) + '" fill="url(#prsMasterRiverWater)" stroke="none" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverClosedPolygonPath(net3.poly) + '" fill="url(#prsMasterRiverWater)" stroke="' + wetRimColor + '" stroke-width="3.4" stroke-linejoin="round" filter="url(#riverWobble)"/>');
         } else {
             for (var i3 = 0; i3 < sampledRivers.length; i3++) {
                 var waterD = this.riverPolyPath(sampledRivers[i3].sides3.L, sampledRivers[i3].sides3.R);
-                out.push('    <path d="' + waterD + '" fill="url(#prsMasterRiverWater)" stroke="none" filter="url(#riverWobble)"/>');
+                out.push('    <path d="' + waterD + '" fill="url(#prsMasterRiverWater)" stroke="' + wetRimColor + '" stroke-width="3.4" stroke-linejoin="round" filter="url(#riverWobble)"/>');
             }
         }
 
@@ -550,14 +556,14 @@
 
         // PASS 5: Inkoustové břehy řeky s přirozeným soutokovým rozvětvením
         if (net3) {
-            out.push('    <path d="' + this.riverBankPath(net3.bankOpp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
-            out.push('    <path d="' + this.riverBankPath(net3.bankUp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
-            out.push('    <path d="' + this.riverBankPath(net3.bankDown) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverBankPath(net3.bankOpp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverBankPath(net3.bankUp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+            out.push('    <path d="' + this.riverBankPath(net3.bankDown) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
         } else {
             for (var i5 = 0; i5 < sampledRivers.length; i5++) {
                 var rivObj = sampledRivers[i5];
-                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.L) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
-                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.R) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.L) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
+                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.R) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" filter="url(#riverWobble)"/>');
             }
         }
 
@@ -609,10 +615,10 @@
             }
 
             if (streamPts1.length > 3) {
-                out.push('    <path d="' + this.riverBankPath(streamPts1) + '" fill="none" stroke="' + rTheme.streamColor1 + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="38,24,68,32" pointer-events="none"/>');
+                out.push('    <path class="prs-river-stream prs-river-stream-1" d="' + this.riverBankPath(streamPts1) + '" fill="none" stroke="' + rTheme.streamColor1 + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="38,24,68,32" pointer-events="none"/>');
             }
             if (streamPts2.length > 3) {
-                out.push('    <path d="' + this.riverBankPath(streamPts2) + '" fill="none" stroke="' + rTheme.streamColor2 + '" stroke-width="0.9" stroke-linecap="round" stroke-dasharray="24,35,48,28" pointer-events="none"/>');
+                out.push('    <path class="prs-river-stream prs-river-stream-2" d="' + this.riverBankPath(streamPts2) + '" fill="none" stroke="' + rTheme.streamColor2 + '" stroke-width="0.9" stroke-linecap="round" stroke-dasharray="24,35,48,28" pointer-events="none"/>');
             }
 
             // Horský pramen (pouze pokud začíná uvnitř mapy a není za rámem)
@@ -644,6 +650,27 @@
                 }
                 if (clash) continue;
                 out.push(this.riverVegetationSVG(vx, vy, hashVal(rData.seedBase, vIdx + 300), activeTheme));
+            }
+
+            // Lekníny a jemné hladinové detaily u klidnějších břehů
+            var nextDetail = 52, dSide = -1;
+            for (var dIdx = 2; dIdx < n6 - 2; dIdx++) {
+                var pd = pts6[dIdx];
+                if (pd.s < nextDetail || pd.t > 0.90) continue;
+                nextDetail = pd.s + 75 + hashVal(rData.seedBase, dIdx + 400) * 40;
+                dSide = -dSide;
+                if (rData.halfW[dIdx] < 10) continue;
+                var dOff = rData.halfW[dIdx] * 0.52;
+                var wx = pd.x + pd.nx * dOff * dSide, wy = pd.y + pd.ny * dOff * dSide;
+                if (wx < 34 || wx > 1366 || wy < 34 || wy > 826) continue;
+                if (this.riverNearBridge(pd, bridges, 42)) continue;
+                var wClash = false;
+                for (var wq = 0; wq < nodes.length; wq++) {
+                    var wdx = nodes[wq].x - wx, wdy = nodes[wq].y - wy;
+                    if (wdx * wdx + wdy * wdy < 32 * 32) { wClash = true; break; }
+                }
+                if (wClash) continue;
+                out.push(this.riverWaterDetailSVG(wx, wy, hashVal(rData.seedBase, dIdx + 500), activeTheme));
             }
         }
         out.push('  </g>');
@@ -997,8 +1024,8 @@
 
             var surfY1 = Math.min(880, lastPt.y + 12);
             var surfY2 = Math.min(890, lastPt.y + 22);
-            out.push('      <path d="M ' + (leftBranchEnd.x - 22).toFixed(1) + ' ' + surfY1 + ' Q ' + lastPt.x.toFixed(1) + ' ' + (surfY1 - 4) + ' ' + (rightBranchEnd.x + 22).toFixed(1) + ' ' + surfY1 + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.75)") + '" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="18,12,32,16"/>');
-            out.push('      <path d="M ' + (leftBranchEnd.x - 30).toFixed(1) + ' ' + surfY2 + ' Q ' + lastPt.x.toFixed(1) + ' ' + (surfY2 - 3) + ' ' + (rightBranchEnd.x + 30).toFixed(1) + ' ' + surfY2 + '" fill="none" stroke="' + (rTheme.streamColor2 || "rgba(255,255,255,0.5)") + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="24,14,40,18"/>');
+            out.push('      <path class="prs-river-stream prs-river-stream-2" d="M ' + (leftBranchEnd.x - 22).toFixed(1) + ' ' + surfY1 + ' Q ' + lastPt.x.toFixed(1) + ' ' + (surfY1 - 4) + ' ' + (rightBranchEnd.x + 22).toFixed(1) + ' ' + surfY1 + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.75)") + '" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="18,12,32,16"/>');
+            out.push('      <path class="prs-river-stream prs-river-stream-2" d="M ' + (leftBranchEnd.x - 30).toFixed(1) + ' ' + surfY2 + ' Q ' + lastPt.x.toFixed(1) + ' ' + (surfY2 - 3) + ' ' + (rightBranchEnd.x + 30).toFixed(1) + ' ' + surfY2 + '" fill="none" stroke="' + (rTheme.streamColor2 || "rgba(255,255,255,0.5)") + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="24,14,40,18"/>');
 
             out.push('      <line x1="' + island1X.toFixed(1) + '" y1="' + (island1Y - 2).toFixed(1) + '" x2="' + island1X.toFixed(1) + '" y2="' + (island1Y - 14).toFixed(1) + '" stroke="#78350f" stroke-width="1.6" stroke-linecap="round"/>');
             out.push('      <polygon points="' + island1X.toFixed(1) + ',' + (island1Y - 14).toFixed(1) + ' ' + (island1X + 4).toFixed(1) + ',' + (island1Y - 12).toFixed(1) + ' ' + island1X.toFixed(1) + ',' + (island1Y - 10).toFixed(1) + '" fill="#ea580c"/>');
@@ -1088,10 +1115,10 @@
         } else {
             // Výchozí klasický královský biom (Světlo / Doubravka)
             if (h < 0.42) {
-                // Rákosí s palicemi
-                g += '<path d="M-5 4 L-6 -9 M0 4 L0 -14 M5 4 L6 -8" stroke="#6b7d3a" stroke-width="1.6" stroke-linecap="round" fill="none"/>' +
-                     '<ellipse cx="0" cy="-14" rx="1.6" ry="3.5" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.5"/>' +
-                     '<ellipse cx="6" cy="-8.5" rx="1.4" ry="2.8" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.5"/>';
+                // Rákosí s palicemi a obloukovými stébly
+                g += '<path d="M-7 5 Q-9 -2 -10 -7 M-4 4 Q-5 -3 -6 -11 M0 4 Q0 -5 0 -14 M4 4 Q5 -2 6 -9 M7 5 Q9 -1 10 -6" stroke="#53682b" stroke-width="1.45" stroke-linecap="round" fill="none"/>' +
+                     '<ellipse cx="0" cy="-14" rx="1.5" ry="3.3" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.45"/>' +
+                     '<ellipse cx="6" cy="-9" rx="1.35" ry="2.6" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.45"/>';
             } else if (h < 0.68) {
                 // Říční balvany na pláži
                 g += '<ellipse cx="0" cy="1" rx="6.5" ry="4.2" fill="#8d877d" stroke="' + ink + '" stroke-width="1"/>' +
@@ -1107,6 +1134,34 @@
                 g += '<ellipse cx="0" cy="5" rx="9" ry="2.8" fill="rgba(0,0,0,0.20)"/>' +
                      '<circle cx="-4" cy="0" r="5.6" fill="#58803a" stroke="' + ink + '" stroke-width="0.8"/>' +
                      '<circle cx="4" cy="1" r="5.2" fill="#6a9644" stroke="' + ink + '" stroke-width="0.8"/>';
+            }
+        }
+        return g + '</g>';
+    },
+
+    riverWaterDetailSVG: function (x, y, h, activeTheme) {
+        var rot = Math.round((h * 360) % 360);
+        var g = '    <g class="prs-river-lily" transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') rotate(' + rot + ')" pointer-events="none">';
+        if (activeTheme === "fire") {
+            // Plovoucí sopečná struska a žhavá jiskra
+            g += '<ellipse cx="0" cy="0" rx="3.2" ry="2.0" fill="#292524" opacity="0.72"/>' +
+                 '<ellipse cx="4.5" cy="1.8" rx="1.9" ry="1.3" fill="#292524" opacity="0.65"/>';
+            if (h < 0.45) {
+                g += '<circle cx="1.0" cy="-0.4" r="1.2" fill="#fb923c" opacity="0.9"/>';
+            }
+        } else if (activeTheme === "air") {
+            // Jemné mlžné vlnky na hladině
+            g += '<path d="M-5 0 Q-1 -2 3 0 M-2 2.8 Q2 1 6 2.6" fill="none" stroke="#e0e7ff" stroke-width="0.9" stroke-linecap="round" opacity="0.58"/>';
+        } else {
+            // Skupinka 2-3 leknínových listů s výřezem a volitelným kvítkem
+            g += '<path d="M 0,0 L 3.8,-1.4 A 4.0,2.8 0 1,1 3.1,-2.2 Z" fill="#2f6b3e" stroke="rgba(22,44,24,0.65)" stroke-width="0.55" opacity="0.9"/>' +
+                 '<path d="M -5.4,2.4 L -2.6,1.5 A 3.0,2.1 0 1,1 -3.0,0.8 Z" fill="#3e7d4a" stroke="rgba(22,44,24,0.60)" stroke-width="0.5" opacity="0.88"/>';
+            if (h > 0.62) {
+                g += '<ellipse cx="5.2" cy="2.6" rx="2.3" ry="1.6" fill="#2f6b3e" stroke="rgba(22,44,24,0.55)" stroke-width="0.45" opacity="0.84"/>';
+            }
+            if (h < 0.45) {
+                var bloom = (activeTheme === "water") ? "#bae6fd" : (h < 0.22 ? "#f9a8d4" : "#fef3c7");
+                g += '<circle cx="0.6" cy="-0.3" r="1.55" fill="' + bloom + '" stroke="rgba(90,60,40,0.45)" stroke-width="0.35"/>';
             }
         }
         return g + '</g>';

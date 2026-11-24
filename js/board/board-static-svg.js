@@ -97,6 +97,12 @@
             '<filter id="groundCushionBlur" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="4.5" /></filter>' +
             '<filter id="riverWobble" x="-4%" y="-4%" width="108%" height="108%"><feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="7" result="rn"/><feDisplacementMap in="SourceGraphic" in2="rn" scale="3.4" xChannelSelector="R" yChannelSelector="G"/></filter>' +
             '<filter id="riverGlow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+            '<filter id="roadVergeBlur" x="-12%" y="-12%" width="124%" height="124%"><feGaussianBlur stdDeviation="2.2" /></filter>' +
+            '<linearGradient id="signpostWoodGrad" x1="0%" y1="0%" x2="0%" y2="100%">' +
+            '  <stop offset="0%" stop-color="#9a6f42" />' +
+            '  <stop offset="50%" stop-color="#734d28" />' +
+            '  <stop offset="100%" stop-color="#4e3218" />' +
+            '</linearGradient>' +
             '<radialGradient id="heartlandBiomeGrad" cx="50%" cy="48%" r="58%">' +
             '  <stop offset="0%" stop-color="' + activePalette.heartland.c0 + '" stop-opacity="0.58" />' +
             '  <stop offset="55%" stop-color="' + activePalette.heartland.c1 + '" stop-opacity="0.46" />' +
@@ -724,51 +730,56 @@
                 var isFestivalPath = (nCode.indexOf("SLAV") !== -1 || tCode.indexOf("SLAV") !== -1 || nCode.indexOf("_BR") !== -1 || tCode.indexOf("_BR") !== -1 || n.type === "FESTIVAL" || targetNode.type === "FESTIVAL");
                 var isForestPath = (nCode.indexOf("_L") !== -1 || tCode.indexOf("_L") !== -1 || ((n.type === "VILLAGE" || targetNode.type === "VILLAGE") && (n.x < 500 && targetNode.x < 500)));
 
-                var rBase = "rgba(48,32,18,0.72)";
-                var rShadow = "rgba(10,7,5,0.92)";
-                var rCobble = "rgba(195,148,82,0.72)";
-                var rCurbs = "rgba(255,235,175,0.45)";
-                var rTrack = targets[t].isBranch ? targets[t].color : "rgba(253,224,71,0.65)";
-                var rTrackDash = targets[t].isBranch ? "4,4" : "6,5";
+                var rVerge = "rgba(68,50,28,0.40)";
+                var rShoulder = "rgba(44,30,16,0.58)";
+                var rSurface = "rgba(188,154,102,0.88)";
+                var rCobble = "rgba(238,218,176,0.36)";
+                var rCobbleDash = "2.2,4.4";
+                var rTrack = targets[t].isBranch ? targets[t].color : "rgba(248,230,172,0.36)";
+                var rTrackOpacity = targets[t].isBranch ? "0.62" : "1";
+                var rTrackDash = targets[t].isBranch ? "5,5" : "5,7";
 
                 if (isDragonPath) {
-                    rBase = "rgba(28,14,10,0.88)";
-                    rShadow = "rgba(15,8,8,0.96)";
-                    rCobble = "rgba(68,58,58,0.88)";
-                    rCurbs = "rgba(234,88,12,0.45)";
-                    rTrack = targets[t].isBranch ? targets[t].color : "rgba(249,115,22,0.88)";
-                    rTrackDash = "5,4";
-                } else if (isFestivalPath) {
-                    rBase = "rgba(52,22,38,0.80)";
-                    rShadow = "rgba(22,6,16,0.94)";
-                    rCobble = "rgba(162,75,115,0.75)";
-                    rCurbs = "rgba(244,114,182,0.52)";
-                    rTrack = targets[t].isBranch ? targets[t].color : "rgba(251,191,36,0.88)";
-                    rTrackDash = "6,4";
-                } else if (isForestPath) {
-                    rBase = "rgba(22,42,22,0.80)";
-                    rShadow = "rgba(10,22,10,0.92)";
-                    rCobble = "rgba(105,125,70,0.75)";
-                    rCurbs = "rgba(134,239,172,0.40)";
-                    rTrack = targets[t].isBranch ? targets[t].color : "rgba(190,150,80,0.80)";
+                    rVerge = "rgba(44,20,14,0.48)";
+                    rShoulder = "rgba(26,14,12,0.68)";
+                    rSurface = "rgba(92,76,72,0.88)";
+                    rCobble = "rgba(234,110,48,0.34)";
+                    rCobbleDash = "2.6,4.0";
+                    rTrack = targets[t].isBranch ? targets[t].color : "rgba(249,135,52,0.46)";
                     rTrackDash = "5,5";
+                } else if (isFestivalPath) {
+                    rVerge = "rgba(62,34,46,0.42)";
+                    rShoulder = "rgba(38,18,28,0.60)";
+                    rSurface = "rgba(176,124,132,0.85)";
+                    rCobble = "rgba(246,204,196,0.40)";
+                    rCobbleDash = "3.4,2.6";
+                    rTrack = targets[t].isBranch ? targets[t].color : "rgba(251,210,108,0.44)";
+                    rTrackDash = "5,6";
+                } else if (isForestPath) {
+                    rVerge = "rgba(28,48,24,0.44)";
+                    rShoulder = "rgba(20,34,18,0.58)";
+                    rSurface = "rgba(136,146,94,0.84)";
+                    rCobble = "rgba(204,224,158,0.32)";
+                    rCobbleDash = "2.0,4.8";
+                    rTrack = targets[t].isBranch ? targets[t].color : "rgba(218,196,132,0.40)";
+                    rTrackDash = "5,6";
                 }
 
-                // 0. Vyšlapaný štěrkový násep
-                out.push('  <path d="' + pthD + '" stroke="' + rBase + '" stroke-width="19" stroke-linecap="round" fill="none"/>');
+                // 0. Měkký vyšlapaný okraj cesty rozpuštěný do terénu
+                out.push('  <path d="' + pthD + '" stroke="' + rVerge + '" stroke-width="20" stroke-linecap="round" fill="none" filter="url(#roadVergeBlur)"/>');
 
-                // 1. Spodní stín/příkop cesty
-                out.push('  <path d="' + pthD + '" stroke="' + rShadow + '" stroke-width="14" stroke-linecap="round" fill="none"/>');
+                // 1. Zemitá krajnice / stín příkopu
+                out.push('  <path d="' + pthD + '" stroke="' + rShoulder + '" stroke-width="13.5" stroke-linecap="round" fill="none"/>');
 
-                // 2. Dlážděný pruh
-                out.push('  <path d="' + pthD + '" stroke="' + rCobble + '" stroke-width="9.5" stroke-linecap="round" fill="none"/>');
+                // 2. Uježděný malovaný povrch cesty
+                out.push('  <path d="' + pthD + '" stroke="' + rSurface + '" stroke-width="10.2" stroke-linecap="round" fill="none"/>');
 
-                // 2b. Reliéfní obrubníky
-                out.push('  <path d="' + pthD + '" stroke="' + rCurbs + '" stroke-width="8.2" stroke-dasharray="2.5,3" stroke-linecap="round" fill="none"/>');
+                // 2b. Jemná textura štěrku / dlažebních kamenů
+                out.push('  <path d="' + pthD + '" stroke="' + rCobble + '" stroke-width="7.8" stroke-dasharray="' + rCobbleDash + '" stroke-linecap="round" fill="none"/>');
 
-                // 3. Vnitřní stopa cesty
-                var trackWidth = targets[t].isBranch ? '3.5' : '4.2';
-                out.push('  <path d="' + pthD + '" stroke="' + rTrack + '" stroke-width="' + trackWidth + '" stroke-dasharray="' + rTrackDash + '" stroke-linecap="round" fill="none"/>');
+                // 3. Slabá vodicí linka uprostřed (čitelnost tahu bez rušivé vektorovosti)
+                var trackWidth = targets[t].isBranch ? '2.2' : '1.8';
+                out.push('  <path d="' + pthD + '" stroke="' + rTrack + '" stroke-opacity="' + rTrackOpacity + '" stroke-width="' + trackWidth + '" stroke-dasharray="' + rTrackDash + '" stroke-linecap="round" fill="none"/>');
 
                 // Bod uprostřed křivky (t = 0.5)
 
@@ -784,21 +795,27 @@
 
                     out.push('  <g transform="translate(' + midCurveX + ',' + midCurveY + ') rotate(' + angle + ')">');
 
-                    out.push('    <polygon points="-4,-3 3,0 -4,3" fill="rgba(253,224,71,0.85)" stroke="#78350f" stroke-width="0.7"/>');
+                    out.push('    <polygon points="-4,-3 3,0 -4,3" fill="rgba(252,235,165,0.72)" stroke="rgba(92,56,22,0.75)" stroke-width="0.65"/>');
 
                     out.push('  </g>');
 
                 }
 
-                // Heraldický milník rozcestníku (1–3 vs 4–6)
+                // Středověký dřevěný rozcestník (1–3 vs 4–6)
 
                 if (targets[t].label) {
 
-                    out.push('  <g transform="translate(' + midCurveX + ',' + midCurveY + ')">');
+                    out.push('  <g class="prs-road-signpost" transform="translate(' + midCurveX + ',' + midCurveY + ')">');
 
-                    out.push('    <rect x="-18" y="-9.5" width="36" height="19" rx="5" fill="#14100c" stroke="' + targets[t].color + '" stroke-width="1.4" style="filter:drop-shadow(0 2px 3px rgba(0,0,0,0.8));"/>');
+                    out.push('    <rect x="-2.2" y="5.5" width="4.4" height="7" rx="1" fill="#472b14" stroke="#241409" stroke-width="0.6"/>');
 
-                    out.push('    <text x="0" y="3.8" text-anchor="middle" fill="' + targets[t].color + '" font-size="9" font-weight="bold">' + (targets[t].label === "1–3" ? '⚀⚁⚂ ' : '⚃⚄⚅ ') + targets[t].label + '</text>');
+                    out.push('    <path d="M -20,-8.5 L 17,-8.5 L 22,0 L 17,8.5 L -20,8.5 Q -21.5,0 -20,-8.5 Z" fill="url(#signpostWoodGrad)" stroke="#2b190b" stroke-width="1.2" style="filter:drop-shadow(0 2px 3px rgba(0,0,0,0.68));"/>');
+
+                    out.push('    <line x1="-16" y1="-4.5" x2="14" y2="-4.5" stroke="rgba(255,232,190,0.18)" stroke-width="0.7"/>');
+
+                    out.push('    <circle cx="-16.5" cy="0" r="1.2" fill="#292524" stroke="rgba(255,240,210,0.35)" stroke-width="0.4"/>');
+
+                    out.push('    <text x="1" y="3.4" text-anchor="middle" fill="' + targets[t].color + '" font-size="8.8" font-weight="bold" style="paint-order:stroke;stroke:#1a1008;stroke-width:2.2px;stroke-linejoin:round;">' + (targets[t].label === "1–3" ? '⚀⚁⚂ ' : '⚃⚄⚅ ') + targets[t].label + '</text>');
 
                     out.push('  </g>');
 
