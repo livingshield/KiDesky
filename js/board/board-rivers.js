@@ -291,9 +291,9 @@
                           (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
         var rTheme = this.RIVER_THEMES[activeTheme] || this.RIVER_THEMES.light;
         var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
-        var bankBlurAttr = (gQuality === "low") ? '' : ' filter="url(#riverBankBlur)"';
+        var bankBlurAttr = (gQuality === "high") ? ' filter="url(#riverBankBlur)"' : '';
         var wobbleAttr = (gQuality === "high") ? ' filter="url(#riverWobble)"' : '';
-        var softAttr = (gQuality === "low") ? '' : ' filter="url(#riverSoft)"';
+        var softAttr = (gQuality === "high") ? ' filter="url(#riverSoft)"' : '';
         out.push('  <g id="prs-rivers-layer">');
 
         // 1. Vzorkování všech řek v království
@@ -688,7 +688,7 @@
         if (!sampledRivers || sampledRivers.length === 0) return "";
         if (!gQuality) gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
         var wobbleAttr = (gQuality === "high") ? ' filter="url(#riverWobble)"' : '';
-        var softAttr = (gQuality === "low") ? '' : ' filter="url(#riverSoft)"';
+        var softAttr = (gQuality === "high") ? ' filter="url(#riverSoft)"' : '';
         var out = [];
         var nodes = (board && board.nodes) || [];
         var bridges = (board && board.bridges) || [];
@@ -811,9 +811,9 @@
     renderOxbowLakesHTML: function (sampledRivers, board, rTheme, activeTheme, gQuality) {
         if (!sampledRivers || sampledRivers.length === 0) return "";
         if (!gQuality) gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
-        var bankBlurAttr = (gQuality === "low") ? '' : ' filter="url(#riverBankBlur)"';
+        var bankBlurAttr = (gQuality === "high") ? ' filter="url(#riverBankBlur)"' : '';
         var wobbleAttr = (gQuality === "high") ? ' filter="url(#riverWobble)"' : '';
-        var softAttr = (gQuality === "low") ? '' : ' filter="url(#riverSoft)"';
+        var softAttr = (gQuality === "high") ? ' filter="url(#riverSoft)"' : '';
         var out = [];
         var nodes = (board && board.nodes) || [];
         var bridges = (board && board.bridges) || [];
@@ -962,7 +962,7 @@
     renderRiverDeltaHTML: function (sampledRivers, board, rTheme, activeTheme, gQuality) {
         if (!sampledRivers || sampledRivers.length === 0) return "";
         if (!gQuality) gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
-        var bankBlurAttr = (gQuality === "low") ? '' : ' filter="url(#riverBankBlur)"';
+        var bankBlurAttr = (gQuality === "high") ? ' filter="url(#riverBankBlur)"' : '';
         var wobbleAttr = (gQuality === "high") ? ' filter="url(#riverWobble)"' : '';
         var out = [];
         var ink = rTheme.bankInkColor || "rgba(45,26,14,0.92)";
@@ -1187,7 +1187,7 @@
     renderBoardBridgesHTML: function (board, gQuality) {
         if (!board || !board.bridges || board.bridges.length === 0) return "";
         if (!gQuality) gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
-        var softAttr = (gQuality === "low") ? '' : ' filter="url(#riverSoft)"';
+        var softAttr = (gQuality === "high") ? ' filter="url(#riverSoft)"' : '';
         var out = [];
         var ink = "rgba(40,24,14,0.92)";
         var activeTheme = (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||

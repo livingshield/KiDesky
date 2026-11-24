@@ -378,7 +378,7 @@
         var hasTexturedTerrain = (gQuality !== "low") && (typeof this.renderBoardTerrainHTML === "function");
         var baseOpacityScale = hasTexturedTerrain ? 0.32 : 1.0;
         var heartlandOp = hasTexturedTerrain ? "0.20" : "0.55";
-        var biomeBlurAttr = (gQuality === "low") ? '' : ' filter="url(#biomeBlur)"';
+        var biomeBlurAttr = (gQuality === "high") ? ' filter="url(#biomeBlur)"' : '';
         var out = [];
         out.push('  <g id="prs-biomes-layer" pointer-events="none">');
         // Celkový teplý podkladový akvarelový přeliv krajiny
@@ -812,7 +812,7 @@
                 }
 
                 // 0. Měkký vyšlapaný okraj cesty rozpuštěný do terénu
-                var vergeFilterAttr = (gQuality === "low") ? '' : ' filter="url(#roadVergeBlur)"';
+                var vergeFilterAttr = (gQuality === "high") ? ' filter="url(#roadVergeBlur)"' : '';
                 out.push('  <path d="' + pthD + '" stroke="' + rVerge + '" stroke-width="20" stroke-linecap="round" fill="none"' + vergeFilterAttr + '/>');
 
                 // 1. Zemitá krajnice / stín příkopu
@@ -980,7 +980,7 @@
                         }
                         out.push('      <ellipse cx="0" cy="' + (footY + 1) + '" rx="' + Math.round(dec.w * 0.30) + '" ry="' + Math.max(4, Math.round(dec.h * 0.10)) + '" fill="url(#decorShadowGrad)" pointer-events="none"/>');
                         var fadeMaskName = (fFade >= 0.25) ? "decorFootFadeMask_strong" : (fFade >= 0.17 ? "decorFootFadeMask_soft" : (fFade > 0 ? "decorFootFadeMask_light" : ""));
-                        var imgMaskAttr = fadeMaskName ? (' mask="url(#' + fadeMaskName + ')"') : '';
+                        var imgMaskAttr = (gQuality === "high" && fadeMaskName) ? (' mask="url(#' + fadeMaskName + ')"') : '';
                         out.push('      <image href="' + this.escapeHtml(decorUrl) + '" x="' + (-dec.w / 2) + '" y="' + (-dec.h / 2) + '" width="' + dec.w + '" height="' + dec.h + '" preserveAspectRatio="xMidYMid meet"' + imgMaskAttr + decFlipAttr + '/>');
                         out.push('    </g>');
                     } else {
@@ -1219,8 +1219,8 @@
         if (this.state && this.state.config) {
             var curScn = this.state.config.scenario || "CLASSIC";
             var gQualNode = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
-            var fireGlowAttr = (gQualNode === "low") ? '' : ' filter="url(#dragonFireGlow)"';
-            var goldGlowAttr = (gQualNode === "low") ? '' : ' filter="url(#goldAuraGlow)"';
+            var fireGlowAttr = (gQualNode === "high") ? ' filter="url(#dragonFireGlow)"' : '';
+            var goldGlowAttr = (gQualNode === "high") ? ' filter="url(#goldAuraGlow)"' : '';
             if (curScn === "DRAGON" && nd.type === "QUEST" && nd.subtype === "U3") {
                 out.push('    <circle cx="' + nd.x + '" cy="' + nd.y + '" r="' + (r + 7) + '" fill="none" stroke="#ea580c" stroke-width="3" stroke-dasharray="4,3"' + fireGlowAttr + '><animate attributeName="stroke-width" values="2;4.5;2" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></circle>');
             } else if (curScn === "TYCOON" && (nd.type === "TOWN" || nd.type === "CASTLE")) {

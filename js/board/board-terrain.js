@@ -86,13 +86,14 @@
         return THEME_CONFIGS[th] ? th : "light";
     }
 
-    function computeRoadMaskPaths(nodes) {
+    function computeRoadMaskPaths(nodes, paintColor) {
         if (!nodes || !nodes.length) return "";
+        var paint = paintColor || "#ffffff";
         var out = [];
         for (var i = 0; i < nodes.length; i++) {
             var n = nodes[i];
             if (!n) continue;
-            out.push('<circle cx="' + n.x + '" cy="' + n.y + '" r="34" fill="#ffffff"/>');
+            out.push('<circle cx="' + n.x + '" cy="' + n.y + '" r="34" fill="' + paint + '"/>');
 
             var targets = [];
             if (n.branchLow !== null && n.branchLow !== undefined && n.branchHigh !== null && n.branchHigh !== undefined) {
@@ -119,10 +120,58 @@
                 var bend = Math.min(10, Math.max(3, dist * 0.065)) * curveSign;
                 var qx = Math.round((mx + perpX * bend) * 10) / 10;
                 var qy = Math.round((my + perpY * bend) * 10) / 10;
-                out.push('<path d="M ' + n.x + ' ' + n.y + ' Q ' + qx + ' ' + qy + ' ' + tn.x + ' ' + tn.y + '" stroke="#ffffff" stroke-width="46" stroke-linecap="round" fill="none"/>');
+                out.push('<path d="M ' + n.x + ' ' + n.y + ' Q ' + qx + ' ' + qy + ' ' + tn.x + ' ' + tn.y + '" stroke="' + paint + '" stroke-width="46" stroke-linecap="round" fill="none"/>');
             }
         }
         return out.join("");
+    }
+
+    function buildMediumTerrainOverlayHTML(board, cfg) {
+        if (!board || !cfg || !cfg.overlays) return "";
+        var allowed = {};
+        for (var i = 0; i < cfg.overlays.length; i++) {
+            allowed[cfg.overlays[i]] = true;
+        }
+        var out = [];
+        var biomes = board.biomes || [];
+        var biomeOut = [];
+        for (var b = 0; b < biomes.length; b++) {
+            var bm = biomes[b];
+            if (!bm || !bm.path) continue;
+            var id = bm.id || "";
+            var ovKey = "";
+            if (id.indexOf("forest") !== -1) ovKey = "forest_floor";
+            else if (id.indexOf("mountain") !== -1) ovKey = "rock";
+            else if (id.indexOf("meadow") !== -1) ovKey = "meadow";
+            if (ovKey && allowed[ovKey]) {
+                biomeOut.push('      <path d="' + bm.path + '" fill="url(#terrainPat_' + ovKey + ')"/>');
+            }
+        }
+
+        var landmarks = board.landmarks || [];
+        for (var l = 0; l < landmarks.length; l++) {
+            var lm = landmarks[l];
+            if (!lm) continue;
+            if (lm.id === "royalCastle") {
+                if (allowed.meadow) biomeOut.push('      <ellipse cx="' + lm.x + '" cy="' + (lm.y + 12) + '" rx="175" ry="120" fill="url(#terrainPat_meadow)"/>');
+                if (allowed.dirt) biomeOut.push('      <ellipse cx="' + lm.x + '" cy="' + (lm.y + 28) + '" rx="95" ry="52" fill="url(#terrainPat_dirt)"/>');
+            } else if (lm.id === "dragon" || (lm.id && lm.id.indexOf("dragon") !== -1)) {
+                if (allowed.rock) biomeOut.push('      <ellipse cx="' + lm.x + '" cy="' + (lm.y + 14) + '" rx="115" ry="82" fill="url(#terrainPat_rock)"/>');
+            } else if (lm.id && lm.id.indexOf("castle") !== -1) {
+                if (allowed.rock) biomeOut.push('      <ellipse cx="' + lm.x + '" cy="' + (lm.y + 18) + '" rx="90" ry="62" fill="url(#terrainPat_rock)"/>');
+            }
+        }
+        if (biomeOut.length > 0) {
+            out.push('    <g opacity="0.58">\n' + biomeOut.join("\n") + '\n    </g>');
+        }
+
+        if (allowed.dirt) {
+            var roadDirt = computeRoadMaskPaths(board.nodes, "url(#terrainPat_dirt)");
+            if (roadDirt) {
+                out.push('    <g opacity="0.42">' + roadDirt + '</g>');
+            }
+        }
+        return out.join("\n");
     }
 
     function buildMaskShapesByType(board) {
@@ -186,6 +235,9 @@
 
     Object.assign(window.PRS_App, {
         getBoardTerrainDefsSVG: function (board, themeOverride) {
+            var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+            if (gQuality === "low") return "";
+
             var th = resolveThemeKey(this, themeOverride);
             var cfg = THEME_CONFIGS[th];
             var seed = (board && board.seed) || 4599;
@@ -205,6 +257,15 @@
                     '  <image href="' + escapeFn(url) + '" x="0" y="0" width="256" height="256" preserveAspectRatio="xMidYMid slice"/>' +
                     '</pattern>'
                 );
+            }
+
+            if (gQuality === "medium") {
+                out.push(
+                    '<clipPath id="terrainInnerClip">' +
+                    '  <rect x="44" y="36" width="1312" height="788" rx="48"/>' +
+                    '</clipPath>'
+                );
+                return out.join("");
             }
 
             out.push(
@@ -243,10 +304,26 @@
         },
 
         renderBoardTerrainHTML: function (board) {
+            var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+            if (gQuality === "low") return "";
+
             var th = resolveThemeKey(this, null);
             var cfg = THEME_CONFIGS[th];
-            var maskShapes = buildMaskShapesByType(board);
             var out = [];
+
+            if (gQuality === "medium") {
+                out.push('  <g id="prs-terrain-layer" clip-path="url(#terrainInnerClip)" pointer-events="none">');
+                out.push('    <rect x="0" y="0" width="1400" height="860" fill="url(#terrainPat_' + cfg.base + ')"/>');
+                var mediumOverlays = buildMediumTerrainOverlayHTML(board, cfg);
+                if (mediumOverlays) out.push(mediumOverlays);
+                if (cfg.glaze) {
+                    out.push('    <rect x="0" y="0" width="1400" height="860" fill="' + cfg.glaze + '"/>');
+                }
+                out.push('  </g>');
+                return out.join("\n");
+            }
+
+            var maskShapes = buildMaskShapesByType(board);
 
             out.push('  <g id="prs-terrain-layer" mask="url(#terrainInnerMask)" pointer-events="none">');
             out.push('    <rect x="0" y="0" width="1400" height="860" fill="url(#terrainPat_' + cfg.base + ')"/>');
