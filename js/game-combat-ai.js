@@ -1862,8 +1862,8 @@
                 params: {
                     badge: player.badge,
                     player: player.name,
-                    opponentBadge: target.badge,
-                    opponent: target.name
+                    opponentBadge: rival.badge,
+                    opponent: rival.name
                 }
             });
 
@@ -1886,8 +1886,8 @@
                 params: {
                     badge: player.badge,
                     player: player.name,
-                    opponentBadge: target.badge,
-                    opponent: target.name
+                    opponentBadge: rival.badge,
+                    opponent: rival.name
                 }
             });
 
