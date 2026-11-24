@@ -465,23 +465,10 @@
             else clearTimeout(this._panRafId);
             this._panRafId = 0;
         }
-        if (g && g.getAttribute && g.getAttribute("transform")) {
-            g.removeAttribute("transform");
-        }
 
-        if (smooth) {
-            svgEl.style.transition = "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)";
-            if (this._smoothTimer) clearTimeout(this._smoothTimer);
-            this._smoothTimer = setTimeout(function () {
-                if (svgEl) svgEl.style.transition = "";
-            }, 480);
-        } else if (!this.viewport.isDragging && !this.viewport.isPinching) {
-            svgEl.style.transition = "";
-        } else {
-            svgEl.style.transition = "none";
-        }
+        var useVectorStage = (typeof this.isDesktopHighCrispMode === "function") && this.isDesktopHighCrispMode();
 
-        // Převod pixelového posunu na CSS pixely s využitím mezipaměti rozměrů SVG (bez layout reflow)
+        // Převod pixelového posunu s využitím mezipaměti rozměrů SVG (bez layout reflow)
         var sz = this._measureBoardSize();
         var svgRatioX = sz.ratioX;
         var svgRatioY = sz.ratioY;
@@ -504,10 +491,45 @@
         this.viewport.panX = tx / svgRatioX;
         this.viewport.panY = ty / svgRatioY;
 
-        var finalPanX = Math.round(this.viewport.panX * 100) / 100;
-        var finalPanY = Math.round(this.viewport.panY * 100) / 100;
-
-        svgEl.style.transform = "translate3d(" + finalPanX + "px, " + finalPanY + "px, 0) scale(" + s.toFixed(4) + ")";
+        if (useVectorStage && g) {
+            svgEl.style.transition = "";
+            svgEl.style.transform = "";
+            if (smooth) {
+                g.style.transition = "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)";
+                if (this._smoothTimer) clearTimeout(this._smoothTimer);
+                this._smoothTimer = setTimeout(function () {
+                    if (g) g.style.transition = "";
+                }, 480);
+            } else if (!this.viewport.isDragging && !this.viewport.isPinching) {
+                g.style.transition = "";
+            } else {
+                g.style.transition = "none";
+            }
+            var finalTx = Math.round(tx * 10) / 10;
+            var finalTy = Math.round(ty * 10) / 10;
+            g.setAttribute("transform", "translate(" + finalTx + "," + finalTy + ") scale(" + s.toFixed(3) + ")");
+        } else {
+            if (g) {
+                g.style.transition = "";
+                if (g.getAttribute && g.getAttribute("transform")) {
+                    g.removeAttribute("transform");
+                }
+            }
+            if (smooth) {
+                svgEl.style.transition = "transform 0.45s cubic-bezier(0.22, 1, 0.36, 1)";
+                if (this._smoothTimer) clearTimeout(this._smoothTimer);
+                this._smoothTimer = setTimeout(function () {
+                    if (svgEl) svgEl.style.transition = "";
+                }, 480);
+            } else if (!this.viewport.isDragging && !this.viewport.isPinching) {
+                svgEl.style.transition = "";
+            } else {
+                svgEl.style.transition = "none";
+            }
+            var finalPanX = Math.round(this.viewport.panX * 100) / 100;
+            var finalPanY = Math.round(this.viewport.panY * 100) / 100;
+            svgEl.style.transform = "translate3d(" + finalPanX + "px, " + finalPanY + "px, 0) scale(" + s.toFixed(4) + ")";
+        }
 
         wrap.classList.add("is-interacting");
         if (document.body) document.body.classList.add("prs-board-interacting");

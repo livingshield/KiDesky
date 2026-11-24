@@ -4087,6 +4087,11 @@ body[data-active-tab="board"] #topbar-announcement-banner {
 }
 
 /* #prs-board-svg je propagován jako jediná GPU vrstva pro pan/zoom (bez zdvojeného composite layer na #prs-board-stage) */
+body[data-device="desktop"][data-graphics-quality="high"] #prs-board-svg,
+body[data-device="tablet"][data-graphics-quality="high"] #prs-board-svg {
+    will-change: auto;
+    backface-visibility: visible;
+}
 
 #board-viewport-wrap.is-panning *,
 #board-viewport-wrap.is-interacting * {

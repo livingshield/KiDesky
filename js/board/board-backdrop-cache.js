@@ -89,6 +89,22 @@
     }
 
     Object.assign(window.PRS_App, {
+        isDesktopHighCrispMode: function () {
+            var q = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+            if (q !== "high") return false;
+            if (this.deviceProfile && this.deviceProfile.device === "mobile") return false;
+            var bodyDev = (typeof document !== "undefined" && document.body && typeof document.body.getAttribute === "function")
+                ? document.body.getAttribute("data-device")
+                : null;
+            if (bodyDev === "mobile") return false;
+            if (bodyDev === "desktop" || bodyDev === "tablet") return true;
+            if (this.deviceProfile && (this.deviceProfile.device === "desktop" || this.deviceProfile.device === "tablet")) return true;
+            if (typeof window !== "undefined" && typeof window.innerWidth === "number") {
+                return window.innerWidth >= 768;
+            }
+            return true;
+        },
+
         getBackdropResolutionScale: function (quality) {
             var q = quality || (typeof this.getGraphicsQuality === "function" ? this.getGraphicsQuality() : "high");
             return BACKDROP_SCALE_BY_QUALITY[q] || 1.5;
@@ -127,6 +143,10 @@
 
         applyBakedBackdropToDOM: function () {
             if (typeof document === "undefined") return false;
+            if (this.isDesktopHighCrispMode()) {
+                this.disposeBackdropCache();
+                return false;
+            }
             var baked = this._bakedBackdrop;
             if (!baked || !baked.blobUrl || baked.key !== this.getBackdropCacheKey()) return false;
             var container = document.getElementById("prs-static-backdrop");
@@ -136,6 +156,10 @@
         },
 
         scheduleBackdropBake: function (bakeKey, defsSvg, backdropInnerSvg, quality) {
+            if (this.isDesktopHighCrispMode()) {
+                this.disposeBackdropCache();
+                return;
+            }
             if (typeof document === "undefined" || typeof fetch !== "function" ||
                 typeof Blob === "undefined" || typeof Image === "undefined" ||
                 typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {

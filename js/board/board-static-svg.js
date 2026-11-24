@@ -535,7 +535,11 @@
 
         var activePalette = themePalettes[th] || themePalettes.light;
 
-        var bakeKey = (typeof this.getBackdropCacheKey === "function") ? this.getBackdropCacheKey() : null;
+        var isDesktopCrisp = (typeof this.isDesktopHighCrispMode === "function" && this.isDesktopHighCrispMode());
+        if (isDesktopCrisp && this._bakedBackdrop && typeof this.disposeBackdropCache === "function") {
+            this.disposeBackdropCache();
+        }
+        var bakeKey = (!isDesktopCrisp && typeof this.getBackdropCacheKey === "function") ? this.getBackdropCacheKey() : null;
         var bakedEntry = (bakeKey && this._bakedBackdrop && this._bakedBackdrop.key === bakeKey && this._bakedBackdrop.blobUrl) ? this._bakedBackdrop : null;
 
         if (bakedEntry && typeof this.renderBakedBackdropImageHTML === "function") {
