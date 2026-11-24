@@ -111,9 +111,25 @@
             '  <stop offset="100%" stop-color="#0f0a06" stop-opacity="0.22" />' +
             '</radialGradient>' +
             '<radialGradient id="dayNightTorchGlow" cx="50%" cy="50%" r="50%">' +
-            '  <stop offset="0%" stop-color="#fde047" stop-opacity="0.72" />' +
-            '  <stop offset="45%" stop-color="#f97316" stop-opacity="0.34" />' +
-            '  <stop offset="100%" stop-color="#f97316" stop-opacity="0" />' +
+            '  <stop offset="0%" stop-color="#fff7cc" stop-opacity="0.90" />' +
+            '  <stop offset="30%" stop-color="#fbbf24" stop-opacity="0.62" />' +
+            '  <stop offset="65%" stop-color="#ea580c" stop-opacity="0.24" />' +
+            '  <stop offset="100%" stop-color="#ea580c" stop-opacity="0" />' +
+            '</radialGradient>' +
+            '<radialGradient id="nightArcaneGlow" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="#e9d5ff" stop-opacity="0.85" />' +
+            '  <stop offset="45%" stop-color="#a855f7" stop-opacity="0.40" />' +
+            '  <stop offset="100%" stop-color="#6b21a8" stop-opacity="0" />' +
+            '</radialGradient>' +
+            '<radialGradient id="nightMoonVeilGrad" cx="62%" cy="32%" r="76%">' +
+            '  <stop offset="0%" stop-color="' + (th === "fire" ? "rgba(46,18,30,0.52)" : "rgba(34,58,128,0.52)") + '" />' +
+            '  <stop offset="55%" stop-color="' + (th === "fire" ? "rgba(32,12,24,0.64)" : "rgba(14,28,72,0.66)") + '" />' +
+            '  <stop offset="100%" stop-color="' + (th === "fire" ? "rgba(22,10,22,0.72)" : "rgba(6,12,34,0.80)") + '" />' +
+            '</radialGradient>' +
+            '<radialGradient id="nightMoonbeamGrad" cx="76%" cy="16%" r="56%">' +
+            '  <stop offset="0%" stop-color="rgba(186,222,255,0.16)" />' +
+            '  <stop offset="55%" stop-color="rgba(148,196,255,0.05)" />' +
+            '  <stop offset="100%" stop-color="rgba(148,196,255,0)" />' +
             '</radialGradient>' +
             '<radialGradient id="heartlandBiomeGrad" cx="50%" cy="48%" r="58%">' +
             '  <stop offset="0%" stop-color="' + activePalette.heartland.c0 + '" stop-opacity="0.58" />' +

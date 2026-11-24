@@ -92,6 +92,10 @@ window.PRS_App = {
 
     currentTheme: "light",
 
+    currentThemeVariant: "light",
+
+    isNightMode: false,
+
     isBoardStaticDirty: true,
 
     // Stav interaktivního Zoomu a Posouvání (Pan & Zoom) herní mapy
@@ -413,17 +417,24 @@ window.PRS_App = {
 
     setElementTheme: function (themeName, playSound) {
 
-        var validThemes = ["light", "fire", "water", "earth", "air"];
+        var validThemes = ["light", "light_night", "fire", "fire_night", "water", "water_night", "earth", "earth_night", "air", "air_night"];
 
         if (validThemes.indexOf(themeName) === -1) themeName = "light";
 
-        this.currentTheme = themeName;
+        var isNight = (themeName.indexOf("_night") !== -1);
+        var baseTheme = themeName.replace("_night", "");
+        var timeMode = isNight ? "night" : "day";
+
+        this.currentTheme = baseTheme;
+        this.currentThemeVariant = themeName;
+        this.isNightMode = isNight;
 
         if (typeof document !== "undefined") {
 
             if (document.documentElement) {
 
-                document.documentElement.setAttribute("data-theme", themeName);
+                document.documentElement.setAttribute("data-theme", baseTheme);
+                document.documentElement.setAttribute("data-time", timeMode);
 
             }
 
@@ -435,7 +446,8 @@ window.PRS_App = {
 
                 }
 
-                document.body.setAttribute("data-theme", themeName);
+                document.body.setAttribute("data-theme", baseTheme);
+                document.body.setAttribute("data-time", timeMode);
 
             }
 
@@ -502,9 +514,9 @@ window.PRS_App = {
 
         if (this.graphicsConfig && this.graphicsConfig.landmarkBitmaps) {
 
-            this.graphicsConfig.landmarkBitmaps.royalCastle = themeCastles[themeName] || "assets/castles/castle_royal.webp";
+            this.graphicsConfig.landmarkBitmaps.royalCastle = themeCastles[baseTheme] || "assets/castles/castle_royal.webp";
 
-            this.graphicsConfig.landmarkBitmaps.dragonLair = themeDragons[themeName] || "assets/dragons/dragon_volcano.webp";
+            this.graphicsConfig.landmarkBitmaps.dragonLair = themeDragons[baseTheme] || "assets/dragons/dragon_volcano.webp";
 
         }
 
@@ -1087,7 +1099,6 @@ window.PRS_App = {
         if (this.hasGameStarted) {
             this._safeCall("renderQuestGoalBar", this.renderQuestGoalBar);
         }
-        this._safeCall("updateDayNightButtonUI", this.updateDayNightButtonUI);
         if (this.lastSavedSessions && typeof this.renderSavedSessionsList === "function") {
             this._safeCall("renderSavedSessionsList", function () { self.renderSavedSessionsList(self.lastSavedSessions); });
         }
@@ -1709,7 +1720,7 @@ window.PRS_App = {
 
     syncSettingsThemeBtns: function () {
 
-        var t = this.currentTheme || (document.documentElement ? document.documentElement.getAttribute("data-theme") : "light") || "light";
+        var t = this.currentThemeVariant || (typeof localStorage !== "undefined" && localStorage.getItem("kidesky_element_theme")) || this.currentTheme || "light";
 
         var btns = document.querySelectorAll(".settings-theme-switcher .theme-btn");
 
