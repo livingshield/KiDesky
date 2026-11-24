@@ -4074,3 +4074,30 @@ body[data-active-tab="board"] #topbar-announcement-banner {
     box-shadow: 0 18px 46px rgba(4, 10, 28, 0.85), 0 0 28px rgba(99, 102, 241, 0.24);
     border-color: rgba(148, 182, 232, 0.45);
 }
+
+/* === FÁZE 6: GPU optimalizace, pauza při posunu/zoomu a úrovně kvality grafiky === */
+#board-viewport-wrap {
+    contain: layout style paint;
+}
+
+#prs-board-stage {
+    will-change: transform;
+}
+
+#board-viewport-wrap.is-panning *,
+#board-viewport-wrap.is-interacting * {
+    animation-play-state: paused !important;
+}
+
+[data-graphics-quality="low"] .prs-river-stream,
+[data-graphics-quality="low"] .prs-flag-cloth,
+[data-graphics-quality="low"] .prs-quest-guard-body,
+[data-graphics-quality="low"] .prs-torch-flicker,
+[data-graphics-quality="low"] .prs-firefly,
+[data-graphics-quality="medium"] .prs-cloud-shadow,
+[data-graphics-quality="medium"] .prs-smoke-puff,
+[data-graphics-quality="medium"] .prs-windmill-rotor,
+[data-graphics-quality="medium"] .prs-bird-flock,
+[data-graphics-quality="medium"] .prs-bird-wing {
+    animation: none !important;
+}

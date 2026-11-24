@@ -413,6 +413,12 @@
 
         g.setAttribute("transform", "translate(" + finalTx + "," + finalTy + ") scale(" + s.toFixed(3) + ")");
 
+        wrap.classList.add("is-interacting");
+        if (this._interactTimer) clearTimeout(this._interactTimer);
+        this._interactTimer = setTimeout(function () {
+            if (wrap) wrap.classList.remove("is-interacting");
+        }, 180);
+
     },
 
     

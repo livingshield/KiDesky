@@ -297,6 +297,9 @@
 
         var tokensLayer = document.getElementById("prs-tokens-layer");
 
+        var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+        var defsKey = (this.currentTheme || "light") + "|" + (this.isNightMode ? "night" : "day") + "|" + gQuality + "|" + ((this.state && this.state.board && (this.state.board.seed || this.state.board.id)) || "static");
+
         if (!stage || !staticLayer || !tokensLayer) {
             var s = Math.max(1.0, this.viewport.scale || 1.0);
             this.viewport.scale = s;
@@ -326,6 +329,7 @@
                 '  <g id="prs-tokens-layer"></g>' +
                 '</g>';
 
+            this._lastDefsKey = defsKey;
             staticLayer = document.getElementById("prs-static-layer");
 
             tokensLayer = document.getElementById("prs-tokens-layer");
@@ -334,7 +338,7 @@
 
             var defsEl = svg.querySelector("defs");
 
-            if (defsEl) {
+            if (defsEl && (this._lastDefsKey !== defsKey || this.isBoardStaticDirty)) {
 
                 var tempDiv = document.createElement("div");
 
@@ -343,6 +347,8 @@
                 var newDefs = tempDiv.querySelector("defs");
 
                 if (newDefs) defsEl.innerHTML = newDefs.innerHTML;
+
+                this._lastDefsKey = defsKey;
 
             }
 
@@ -364,7 +370,8 @@
     
     renderBoardBiomesHTML: function (board) {
         if (!board || !board.biomes || board.biomes.length === 0) return "";
-        var hasTexturedTerrain = (typeof this.renderBoardTerrainHTML === "function");
+        var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
+        var hasTexturedTerrain = (gQuality !== "low") && (typeof this.renderBoardTerrainHTML === "function");
         var baseOpacityScale = hasTexturedTerrain ? 0.32 : 1.0;
         var heartlandOp = hasTexturedTerrain ? "0.20" : "0.55";
         var out = [];
@@ -499,6 +506,7 @@
         var out = [];
 
         var th = this.currentTheme || "light";
+        var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
 
         var themePalettes = {
 
@@ -546,7 +554,7 @@
         out.push('  <rect x="16" y="16" width="1368" height="828" rx="14" fill="none" stroke="rgba(212,175,55,0.22)" stroke-width="1.0" stroke-dasharray="14,6,3,6"/>');
 
         // 1a. Souvislý namalovaný terén (bezešvé textury se šumovými maskami)
-        if (typeof this.renderBoardTerrainHTML === "function" && this.state.board) {
+        if (gQuality !== "low" && typeof this.renderBoardTerrainHTML === "function" && this.state.board) {
             out.push(this.renderBoardTerrainHTML(this.state.board));
         }
 
@@ -794,7 +802,8 @@
                 }
 
                 // 0. Měkký vyšlapaný okraj cesty rozpuštěný do terénu
-                out.push('  <path d="' + pthD + '" stroke="' + rVerge + '" stroke-width="20" stroke-linecap="round" fill="none" filter="url(#roadVergeBlur)"/>');
+                var vergeFilterAttr = (gQuality === "low") ? '' : ' filter="url(#roadVergeBlur)"';
+                out.push('  <path d="' + pthD + '" stroke="' + rVerge + '" stroke-width="20" stroke-linecap="round" fill="none"' + vergeFilterAttr + '/>');
 
                 // 1. Zemitá krajnice / stín příkopu
                 out.push('  <path d="' + pthD + '" stroke="' + rShoulder + '" stroke-width="13.5" stroke-linecap="round" fill="none"/>');
@@ -908,8 +917,8 @@
 
         if (this.state.board && this.state.board.decorations && this.state.board.decorations.length > 0) {
 
-            var hasTexturedTerrain = (typeof this.renderBoardTerrainHTML === "function");
-            out.push(hasTexturedTerrain ? '  <g id="prs-decor-layer" filter="url(#decorColorHarmonize)">' : '  <g id="prs-decor-layer">');
+            var hasTexturedTerrain = (gQuality !== "low") && (typeof this.renderBoardTerrainHTML === "function");
+            out.push((hasTexturedTerrain && gQuality === "high") ? '  <g id="prs-decor-layer" filter="url(#decorColorHarmonize)">' : '  <g id="prs-decor-layer">');
 
             this._cachedRiverPoints = null;
             var decs = this.state.board.decorations;

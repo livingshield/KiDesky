@@ -3835,6 +3835,15 @@ window.PRS_I18N["en"] = {
     "mode_tablet": "Mode: Tablet",
     "fast_anim": "Fast roll & pawn animations:",
     "auto_bots": "Automatic AI bot turns:",
+    "graphics_quality": {
+      "label": "Map graphics quality:",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "hint_low": "Battery-saving mode for older devices: classic parchment without terrain textures or animations.",
+      "hint_medium": "Balanced performance: painted terrain, rivers, and guards without continuous heavy animations.",
+      "hint_high": "Full living world: painted terrain, organic noise masks, and all ambient animations."
+    },
     "graphics_title": "🎨 Bitmaps & Visual Environment",
     "graphics_desc": "Detailed management of board textures, backgrounds, and decorations:",
     "graphics_btn": "🎨 Open Environment & Texture Manager",

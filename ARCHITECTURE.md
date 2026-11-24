@@ -22,7 +22,7 @@ Aplikace kombinuje čistý **klientský Vanilla JS / SVG / PWA stack** (bez bund
 KiDesky/
 ├── index.html                  # Aplikační shell, sekvenční <script defer> s ?v=... cache-bustingem
 ├── manifest.json               # PWA manifest
-├── service-worker.js           # Offline/caching strategie (CACHE_NAME = kidesky-cache-v1.9.79)
+├── service-worker.js           # Offline/caching strategie (CACHE_NAME = kidesky-cache-v1.9.80)
 ├── web.config                  # IIS hlavičky, customErrors=RemoteOnly, skrytí backend/, MIME mapy
 ├── appsettings.json            # Šablona konfigurace (SQL, SMTP, Google OAuth, FTP, Gemini)
 ├── deploy_code_update.ps1      # FTP deploy s 64 KB streamingem, retry a před-deploy kontrolou
@@ -164,6 +164,30 @@ Jediný komunikační bod frontendu se serverem `api.ashx`:
 - **Okamžité překreslení a ochrana proti race-condition:** `setLanguage(lang)` zvyšuje interní čítač `_switchSeq`; po případném dočtení slovníku a pravidel přes `PRS_ModuleLoader` aplikuje jen nejnovější požadavek. `_applyLanguage()` volá `translateDOM()`, `syncUi()` (naplnění a synchronizace všech `.prs-lang-select` včetně kompaktního `#mobile-dock-lang-select`), překreslí otevřené Map Studio / Map Editor / `PRS_HUD.render()`, spustí registrované callbacky `onLanguageChanged` a vyšle událost `prs:lang-change`.
 - **Překladové API:** `t(key, params, fallback)` (s automatickým fallbackem na `cs` a interpolací `{param}`), `plural(count, forms)` (`one`/`few`/`many` pro `cs`, `one`/`other` pro ostatní), a atributový překlad v HTML (`data-i18n`, `data-i18n-html`, `data-i18n-title`, `data-i18n-placeholder`, `data-i18n-aria`, plus `app.page_title` pro `<title>`).
 
+### 3.5 Vrstvy herní plochy (Board Rendering Pipeline)
+Plán hry (`1400×860`) je skládán deterministicky v `#prs-board-stage` (`board-static-svg.js`, `board-terrain.js`, `board-rivers.js`, `board-ambient.js`, `board-tokens.js`):
+
+```mermaid
+flowchart TB
+    A["Pergamenový rám + zlaté rohy"] --> B["Namalovaný terén + šumové masky (board-terrain.js)"]
+    B --> C["Ztlumené akvarelové biomy & vrstevnice"]
+    C --> D["Řeky, mokré břehy, proudnice & lekníny (board-rivers.js)"]
+    D --> E["Malované cesty, štěrk & dřevěné rozcestníky"]
+    E --> F["Mosty přes řeku"]
+    F --> G["Zapuštěné dekorace, jednotný stín & Y-řazení (decorationsVersion = 5)"]
+    G --> H["Dominanty (hrad, dračí sluj)"]
+    H --> I["Herní pole, stráže questů & vlající praporky"]
+    I --> J["Atmosféra: mraky/kouř/ptáci nebo noční závoj/světlušky (board-ambient.js)"]
+    J --> K["Živí hráči & pohyblivé prvky (#prs-tokens-layer)"]
+```
+
+- **Fingerprint cache `<defs>` (`_lastDefsKey`):** V `renderBoardSVG()` se `<defs>` přestavují pouze při změně motivu, denní/noční varianty, kvality grafiky nebo seedu mapy – ne při každém tahu figurky.
+- **Pauza animací při interakci (`is-panning` / `is-interacting`):** Při posunu a zoomu (`board-camera.js`) se dočasně pozastaví CSS animace (`animation-play-state: paused`) pro plynulých 60 fps na mobilu.
+- **Úrovně kvality grafiky (`localStorage.kidesky_graphics_quality`):**
+  - `low`: klasický pergamenový podklad bez `board-terrain` textur/filtrů a bez animací (šetrné k baterii).
+  - `medium` (výchozí na mobilech `< 768 px` nebo `<= 4` CPU vláknech): texturovaný terén, řeky, stráže a noční atmosféra bez náročných souvislých animací mraků/kouře/ptáků.
+  - `high` (výchozí na desktopu): kompletní živý svět včetně barevné harmonizace a všech animací (respektuje `prefers-reduced-motion`).
+
 ---
 
 ## 4. Backendová architektura (`backend/` a `api*.ashx`)
@@ -197,7 +221,7 @@ Sdílená abstraktní bázová třída pro router i všechny subhandlery:
 - **Grafika v WebP + SVG/CSS zrcadlení:** Herní obrázky byly zkonvertovány do `.webp` (`tools/optimize-assets-webp.py`) a duplicitní soubory `*_flip.*` byly zrušeny. Zrcadlení doleva/doprava provádí nativní SVG transformace `scale(-1, 1)` nebo CSS třída `.is-flipped`. Zpětnou kompatibilitu u starších URL zajišťuje `PRS_normalizeAssetUrl()`.
 - **Média mimo Git:** Audio stopy (`assets/audio/*.mp3`, 128 kbps CBR) i videa (`*.mp4`, např. `ps_intro_04.mp4` v 720p H.264 CRF 26) jsou v `.gitignore` vyloučeny pomocí pravidel `*.mp3` a `*.mp4` (složku `assets/audio/` udržuje `.gitkeep`), aby se nenafukovala historie repozitáře.
 - **PWA Service Worker (`service-worker.js`):**
-  - `CACHE_NAME` (aktuálně `kidesky-cache-v1.9.79`) se při změně kódu navyšuje společně s `?v=...` u všech stylů/skriptů v `index.html` (kontroluje `predeploy-check.js`).
+  - `CACHE_NAME` (aktuálně `kidesky-cache-v1.9.80`) se při změně kódu navyšuje společně s `?v=...` u všech stylů/skriptů v `index.html` (kontroluje `predeploy-check.js`).
   - `install` přednačte `CORE_ASSETS` a volá `self.skipWaiting()`; `activate` smaže staré verze cache a převezme klienty (`clients.claim()`).
   - **Fetch strategie:**
     - *Bypass (vždy síť):* non-GET požadavky, cizí domény, `api.ashx`, `/api/`, `Range` hlavičky, `/assets/audio/`, `/assets/video/` a přípony `.mp3`, `.wav`, `.ogg`, `.m4a`, `.mp4`, `.webm`.

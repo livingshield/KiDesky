@@ -25,6 +25,11 @@
                 document.documentElement.setAttribute("data-theme", theme.replace("_night", ""));
                 document.documentElement.setAttribute("data-time", theme.indexOf("_night") !== -1 ? "night" : "day");
 
+                var gQual = localStorage.getItem("kidesky_graphics_quality");
+                if (gQual === "low" || gQual === "medium" || gQual === "high") {
+                    document.documentElement.setAttribute("data-graphics-quality", gQual);
+                }
+
             } catch (e) {}
 
         })();
@@ -63,13 +68,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611240945">
+    <link rel="stylesheet" href="css/main.css?v=202611241100">
 
-    <link rel="stylesheet" href="css/board.css?v=202611240945">
+    <link rel="stylesheet" href="css/board.css?v=202611241100">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611240945">
+    <link rel="stylesheet" href="css/modals.css?v=202611241100">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611240945">
+    <link rel="stylesheet" href="css/mobile.css?v=202611241100">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -3111,49 +3116,49 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/languages.js?v=202611240945" defer></script>
-    <script src="js/core/module-loader.js?v=202611240945" defer></script>
-    <script src="js/app-i18n.js?v=202611240945" defer></script>
-    <script src="js/game-data.js?v=202611240945" defer></script>
-    <script src="js/boards/boards-decor-catalog.js?v=202611240945" defer></script>
-    <script src="js/boards/boards-geometry.js?v=202611240945" defer></script>
-    <script src="js/boards/boards-generator.js?v=202611240945" defer></script>
-    <script src="js/boards/boards-builder.js?v=202611240945" defer></script>
-    <script src="js/boards/boards-presets.js?v=202611240945" defer></script>
-    <script src="js/engine/engine-state.js?v=202611240945" defer></script>
-    <script src="js/engine/engine-movement.js?v=202611240945" defer></script>
-    <script src="js/engine/engine-economy.js?v=202611240945" defer></script>
-    <script src="js/engine/engine-actions.js?v=202611240945" defer></script>
-    <script src="js/game-combat-ai.js?v=202611240945" defer></script>
-    <script src="js/app-audio.js?v=202611240945" defer></script>
-    <script src="js/app-dialog.js?v=202611240945" defer></script>
-    <script src="js/app-api.js?v=202611240945" defer></script>
-    <script src="js/app-modal-manager.js?v=202611240945" defer></script>
-    <script src="js/app.js?v=202611240945" defer></script>
-    <script src="js/app/app-music-ui.js?v=202611240945" defer></script>
-    <script src="js/app/app-landing.js?v=202611240945" defer></script>
-    <script src="js/app/app-profile-cosmetics.js?v=202611240945" defer></script>
-    <script src="js/app/app-lobby-session.js?v=202611240945" defer></script>
-    <script src="js/app/app-map-studio.js?v=202611240945" defer></script>
-    <script src="js/board/board-camera.js?v=202611240945" defer></script>
-    <script src="js/board/board-rivers.js?v=202611240945" defer></script>
-    <script src="js/board/board-terrain.js?v=202611240945" defer></script>
-    <script src="js/board/board-static-svg.js?v=202611240945" defer></script>
-    <script src="js/board/board-tokens.js?v=202611240945" defer></script>
-    <script src="js/board/board-ambient.js?v=202611240945" defer></script>
-    <script src="js/hud/hud-mobile-dock.js?v=202611240945" defer></script>
-    <script src="js/hud/hud-inspector.js?v=202611240945" defer></script>
-    <script src="js/hud/hud-advisor.js?v=202611240945" defer></script>
-    <script src="js/hud/hud-action-panel.js?v=202611240945" defer></script>
-    <script src="js/hud/hud-turn-actions.js?v=202611240945" defer></script>
-    <script src="js/modals/modal-victory-diploma.js?v=202611240945" defer></script>
-    <script src="js/modals/modal-armory.js?v=202611240945" defer></script>
-    <script src="js/modals/modal-combat.js?v=202611240945" defer></script>
-    <script src="js/modals/modal-festival-chance.js?v=202611240945" defer></script>
-    <script src="js/modals/modal-cheatsheet.js?v=202611240945" defer></script>
-    <script src="js/app-online.js?v=202611240945" defer></script>
-    <script src="js/app-saves.js?v=202611240945" defer></script>
-    <script src="js/app-musicwidget.js?v=202611240945" defer></script>
+    <script src="js/i18n/languages.js?v=202611241100" defer></script>
+    <script src="js/core/module-loader.js?v=202611241100" defer></script>
+    <script src="js/app-i18n.js?v=202611241100" defer></script>
+    <script src="js/game-data.js?v=202611241100" defer></script>
+    <script src="js/boards/boards-decor-catalog.js?v=202611241100" defer></script>
+    <script src="js/boards/boards-geometry.js?v=202611241100" defer></script>
+    <script src="js/boards/boards-generator.js?v=202611241100" defer></script>
+    <script src="js/boards/boards-builder.js?v=202611241100" defer></script>
+    <script src="js/boards/boards-presets.js?v=202611241100" defer></script>
+    <script src="js/engine/engine-state.js?v=202611241100" defer></script>
+    <script src="js/engine/engine-movement.js?v=202611241100" defer></script>
+    <script src="js/engine/engine-economy.js?v=202611241100" defer></script>
+    <script src="js/engine/engine-actions.js?v=202611241100" defer></script>
+    <script src="js/game-combat-ai.js?v=202611241100" defer></script>
+    <script src="js/app-audio.js?v=202611241100" defer></script>
+    <script src="js/app-dialog.js?v=202611241100" defer></script>
+    <script src="js/app-api.js?v=202611241100" defer></script>
+    <script src="js/app-modal-manager.js?v=202611241100" defer></script>
+    <script src="js/app.js?v=202611241100" defer></script>
+    <script src="js/app/app-music-ui.js?v=202611241100" defer></script>
+    <script src="js/app/app-landing.js?v=202611241100" defer></script>
+    <script src="js/app/app-profile-cosmetics.js?v=202611241100" defer></script>
+    <script src="js/app/app-lobby-session.js?v=202611241100" defer></script>
+    <script src="js/app/app-map-studio.js?v=202611241100" defer></script>
+    <script src="js/board/board-camera.js?v=202611241100" defer></script>
+    <script src="js/board/board-rivers.js?v=202611241100" defer></script>
+    <script src="js/board/board-terrain.js?v=202611241100" defer></script>
+    <script src="js/board/board-static-svg.js?v=202611241100" defer></script>
+    <script src="js/board/board-tokens.js?v=202611241100" defer></script>
+    <script src="js/board/board-ambient.js?v=202611241100" defer></script>
+    <script src="js/hud/hud-mobile-dock.js?v=202611241100" defer></script>
+    <script src="js/hud/hud-inspector.js?v=202611241100" defer></script>
+    <script src="js/hud/hud-advisor.js?v=202611241100" defer></script>
+    <script src="js/hud/hud-action-panel.js?v=202611241100" defer></script>
+    <script src="js/hud/hud-turn-actions.js?v=202611241100" defer></script>
+    <script src="js/modals/modal-victory-diploma.js?v=202611241100" defer></script>
+    <script src="js/modals/modal-armory.js?v=202611241100" defer></script>
+    <script src="js/modals/modal-combat.js?v=202611241100" defer></script>
+    <script src="js/modals/modal-festival-chance.js?v=202611241100" defer></script>
+    <script src="js/modals/modal-cheatsheet.js?v=202611241100" defer></script>
+    <script src="js/app-online.js?v=202611241100" defer></script>
+    <script src="js/app-saves.js?v=202611241100" defer></script>
+    <script src="js/app-musicwidget.js?v=202611241100" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3512,6 +3517,28 @@
                             <span style="font-size:0.85rem; color:#cbd5e1;" data-i18n="settings.display_mode">Režim zobrazení:</span>
 
                             <button id="settings-device-btn" class="btn-secondary" onclick="PRS_App.cycleDeviceMode(); PRS_App.syncSettingsDeviceLabel();" style="padding:0.35rem 0.75rem;" data-i18n="modals.settings_device_init">📱 Režim: Auto</button>
+
+                        </div>
+
+                        <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:0.55rem;">
+
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:0.75rem; flex-wrap:wrap;">
+
+                                <span style="font-size:0.85rem; color:#cbd5e1;" data-i18n="settings.graphics_quality.label">Kvalita grafiky mapy:</span>
+
+                                <div class="element-theme-switcher settings-quality-switcher" style="display:flex; gap:0.25rem; border-radius:12px; padding:0.2rem;">
+
+                                    <button type="button" class="theme-btn quality-btn" data-quality-btn="low" onclick="PRS_App.setGraphicsQuality('low', true)" data-i18n="settings.graphics_quality.low">Nízká</button>
+
+                                    <button type="button" class="theme-btn quality-btn" data-quality-btn="medium" onclick="PRS_App.setGraphicsQuality('medium', true)" data-i18n="settings.graphics_quality.medium">Střední</button>
+
+                                    <button type="button" class="theme-btn quality-btn" data-quality-btn="high" onclick="PRS_App.setGraphicsQuality('high', true)" data-i18n="settings.graphics_quality.high">Vysoká</button>
+
+                                </div>
+
+                            </div>
+
+                            <div id="settings-quality-hint" class="prs-text-muted-sm" style="margin-top:0.3rem; font-size:0.74rem;" data-i18n="settings.graphics_quality.hint_high">Plný živý svět: malovaný terén, šumové masky a všechny animace prostředí.</div>
 
                         </div>
 

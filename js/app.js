@@ -96,6 +96,10 @@ window.PRS_App = {
 
     isNightMode: false,
 
+    graphicsQuality: null,
+
+    _lastDefsKey: null,
+
     isBoardStaticDirty: true,
 
     // Stav interaktivního Zoomu a Posouvání (Pan & Zoom) herní mapy
@@ -403,6 +407,7 @@ window.PRS_App = {
         var theme = saved || "light";
 
         this.setElementTheme(theme, false);
+        this.initGraphicsQuality();
 
         if (typeof localStorage !== "undefined") {
             var savedCastle = localStorage.getItem("kidesky_royal_castle");
@@ -1099,6 +1104,7 @@ window.PRS_App = {
         if (this.hasGameStarted) {
             this._safeCall("renderQuestGoalBar", this.renderQuestGoalBar);
         }
+        this._safeCall("syncSettingsGraphicsQualityUI", this.syncSettingsGraphicsQualityUI);
         if (this.lastSavedSessions && typeof this.renderSavedSessionsList === "function") {
             this._safeCall("renderSavedSessionsList", function () { self.renderSavedSessionsList(self.lastSavedSessions); });
         }
@@ -1690,6 +1696,8 @@ window.PRS_App = {
 
         this.syncSettingsThemeBtns();
 
+        this.syncSettingsGraphicsQualityUI();
+
         this.syncSettingsSoundLabel();
 
         this.syncSettingsDeviceLabel();
@@ -1732,6 +1740,71 @@ window.PRS_App = {
 
         }
 
+    },
+
+    getDefaultGraphicsQuality: function () {
+        if (typeof window !== "undefined" && ((window.innerWidth > 0 && window.innerWidth < 768) || (typeof navigator !== "undefined" && navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4))) {
+            return "medium";
+        }
+        return "high";
+    },
+
+    getGraphicsQuality: function () {
+        var q = this.graphicsQuality;
+        if (!q && typeof localStorage !== "undefined" && localStorage) {
+            try { q = localStorage.getItem("kidesky_graphics_quality"); } catch (e) { q = null; }
+        }
+        if (q === "low" || q === "medium" || q === "high") return q;
+        return this.getDefaultGraphicsQuality();
+    },
+
+    initGraphicsQuality: function () {
+        this.setGraphicsQuality(this.getGraphicsQuality(), false);
+    },
+
+    setGraphicsQuality: function (level, playSound) {
+        var valid = ["low", "medium", "high"];
+        if (valid.indexOf(level) === -1) level = this.getDefaultGraphicsQuality();
+        this.graphicsQuality = level;
+        try {
+            if (typeof localStorage !== "undefined" && localStorage) {
+                localStorage.setItem("kidesky_graphics_quality", level);
+            }
+        } catch (e) { }
+        if (typeof document !== "undefined" && document) {
+            if (document.documentElement) document.documentElement.setAttribute("data-graphics-quality", level);
+            if (document.body) document.body.setAttribute("data-graphics-quality", level);
+        }
+        this.syncSettingsGraphicsQualityUI();
+        this._lastDefsKey = null;
+        this.isBoardStaticDirty = true;
+        if (playSound !== false && window.PRS_Audio) {
+            window.PRS_Audio.playItem();
+        }
+        if (this.state && typeof this.renderBoardSVG === "function") {
+            this.renderBoardSVG();
+        }
+    },
+
+    syncSettingsGraphicsQualityUI: function () {
+        if (typeof document === "undefined" || !document) return;
+        var q = this.getGraphicsQuality();
+        var btns = document.querySelectorAll(".settings-quality-switcher .quality-btn");
+        for (var i = 0; i < btns.length; i++) {
+            if (btns[i].getAttribute("data-quality-btn") === q) btns[i].classList.add("active");
+            else btns[i].classList.remove("active");
+        }
+        var hintEl = document.getElementById("settings-quality-hint");
+        if (hintEl) {
+            var hintKey = "settings.graphics_quality.hint_" + q;
+            var defaults = {
+                low: "Úsporný režim pro starší mobily: klasický pergamen bez terénních textur a animací.",
+                medium: "Vyvážený výkon: malovaný terén, řeky a stráže bez náročných souvislých animací.",
+                high: "Plný živý svět: malovaný terén, šumové masky a všechny animace prostředí."
+            };
+            hintEl.setAttribute("data-i18n", hintKey);
+            hintEl.textContent = (window.PRS_I18n && typeof window.PRS_I18n.t === "function") ? window.PRS_I18n.t(hintKey, null, defaults[q]) : defaults[q];
+        }
     },
 
     syncSettingsSoundLabel: function () {

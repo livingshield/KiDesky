@@ -332,7 +332,9 @@
         var nodes = Array.isArray(board.nodes) ? board.nodes : [];
         var rivers = Array.isArray(board.rivers) ? board.rivers : [];
         var th = this.currentTheme || (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) || "light";
+        var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
         var isNight = Boolean(this.isNightMode || (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-time") === "night"));
+        if (gQuality === "low" && !isNight) return "";
 
         function atmoHash(a, b) {
             var v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
@@ -342,16 +344,19 @@
         out.push('  <g id="prs-atmosphere-layer" clip-path="url(#prsBoardInnerClip)" pointer-events="none">');
 
         // A. Denní teplá sluneční vinětace a stíny mraků (pouze ve dne)
-        if (!isNight) {
+        if (!isNight && gQuality !== "low") {
             out.push('    <rect x="18" y="18" width="1364" height="824" fill="url(#atmoSunWarmth)" opacity="0.55"/>');
-            out.push('    <g id="prs-cloud-shadows" style="mix-blend-mode:multiply;">');
-            out.push('      <ellipse class="prs-cloud-shadow prs-cloud-1" cx="240" cy="180" rx="220" ry="82" fill="rgba(12,18,24,0.16)" filter="url(#cloudShadowBlur)"/>');
-            out.push('      <ellipse class="prs-cloud-shadow prs-cloud-2" cx="780" cy="460" rx="260" ry="95" fill="rgba(10,16,22,0.14)" filter="url(#cloudShadowBlur)"/>');
-            out.push('      <ellipse class="prs-cloud-shadow prs-cloud-3" cx="480" cy="690" rx="190" ry="72" fill="rgba(12,18,24,0.15)" filter="url(#cloudShadowBlur)"/>');
-            out.push('    </g>');
+            if (gQuality === "high") {
+                out.push('    <g id="prs-cloud-shadows" style="mix-blend-mode:multiply;">');
+                out.push('      <ellipse class="prs-cloud-shadow prs-cloud-1" cx="240" cy="180" rx="220" ry="82" fill="rgba(12,18,24,0.16)" filter="url(#cloudShadowBlur)"/>');
+                out.push('      <ellipse class="prs-cloud-shadow prs-cloud-2" cx="780" cy="460" rx="260" ry="95" fill="rgba(10,16,22,0.14)" filter="url(#cloudShadowBlur)"/>');
+                out.push('      <ellipse class="prs-cloud-shadow prs-cloud-3" cx="480" cy="690" rx="190" ry="72" fill="rgba(12,18,24,0.15)" filter="url(#cloudShadowBlur)"/>');
+                out.push('    </g>');
+            }
         }
 
-        // C. Kouř stoupající z komínů chalup, čarodějných chýší a sídel
+        // C. Kouř stoupající z komínů chalup, čarodějných chýší a sídel (pouze na vysoké kvalitě)
+        if (gQuality === "high") {
         var smokeEmitters = [];
         for (var i = 0; i < decs.length && smokeEmitters.length < 10; i++) {
             var d = decs[i];
@@ -418,7 +423,10 @@
         }
         out.push('    </g>');
 
+        } // konec C/D pro high
+
         // E. Třpytivé odlesky na hladině řeky (ve dne teplé, v noci měsíční stříbro)
+        if (gQuality !== "low") {
         out.push('    <g id="prs-water-sparkles">');
         if (rivers.length > 0 && typeof this.sampleRiverPath === "function") {
             var spCol = isNight
@@ -444,8 +452,10 @@
         }
         out.push('    </g>');
 
-        // F. Dvě malá hejna ptáků plachtící nad mapou (pouze ve dne)
-        if (!isNight) {
+        } // konec E pro medium/high
+
+        // F. Dvě malá hejna ptáků plachtící nad mapou (pouze ve dne a na vysoké kvalitě)
+        if (!isNight && gQuality === "high") {
             var birdCol = (th === "fire") ? "rgba(48,20,14,0.68)" : "rgba(36,28,22,0.62)";
             out.push('    <g id="prs-bird-flocks">');
             out.push('      <g class="prs-bird-flock prs-bird-flock-1">');
@@ -480,7 +490,7 @@
                     var lDel = (atmoHash(lnd.x, lnd.y) * 2.2).toFixed(2);
                     out.push('        <g transform="translate(' + Math.round(lnd.x) + ',' + Math.round(lnd.y) + ')">');
                     out.push('          <circle cx="0" cy="0" r="' + lr + '" fill="url(#dayNightTorchGlow)"/>');
-                    out.push('          <circle class="prs-torch-flicker" style="animation-delay:-' + lDel + 's;" cx="0" cy="0" r="' + coreR + '" fill="url(#dayNightTorchGlow)"/>');
+                    if (gQuality !== "low") out.push('          <circle class="prs-torch-flicker" style="animation-delay:-' + lDel + 's;" cx="0" cy="0" r="' + coreR + '" fill="url(#dayNightTorchGlow)"/>');
                     out.push('        </g>');
                     lanCount++;
                 }
@@ -493,13 +503,14 @@
                 var dDel = (atmoHash(ldc.x, ldc.y) * 2.2).toFixed(2);
                 out.push('        <g transform="translate(' + Math.round(ldc.x) + ',' + Math.round(ldc.y + 3) + ')">');
                 out.push('          <circle cx="0" cy="0" r="36" fill="url(#' + gradId + ')"/>');
-                out.push('          <circle class="prs-torch-flicker" style="animation-delay:-' + dDel + 's;" cx="0" cy="0" r="11" fill="url(#' + gradId + ')"/>');
+                if (gQuality !== "low") out.push('          <circle class="prs-torch-flicker" style="animation-delay:-' + dDel + 's;" cx="0" cy="0" r="11" fill="url(#' + gradId + ')"/>');
                 out.push('        </g>');
                 lanCount++;
             }
             out.push('      </g>');
 
-            // Světlušky tančící nad noční krajinou
+            // Světlušky tančící nad noční krajinou (medium/high)
+            if (gQuality !== "low") {
             var ffCol = (th === "fire") ? "#fb923c" : ((th === "water" || th === "air") ? "#bae6fd" : "#fef08a");
             out.push('      <g id="prs-night-fireflies">');
             for (var ff = 0; ff < 22; ff++) {
@@ -510,6 +521,7 @@
                 out.push('        <g transform="translate(' + fx + ',' + fy + ')"><circle class="prs-firefly" style="animation-delay:-' + ffDel + 's;" cx="0" cy="0" r="' + ffR + '" fill="' + ffCol + '"/></g>');
             }
             out.push('      </g>');
+            }
             out.push('    </g>');
         }
 

@@ -3835,6 +3835,15 @@ window.PRS_I18N["cs"] = {
     "mode_tablet": "Režim: Tablet",
     "fast_anim": "Rychlé animace hodů a figurek:",
     "auto_bots": "Automatický tah botů (AI):",
+    "graphics_quality": {
+      "label": "Kvalita grafiky mapy:",
+      "low": "Nízká",
+      "medium": "Střední",
+      "high": "Vysoká",
+      "hint_low": "Úsporný režim pro starší mobily: klasický pergamen bez terénních textur a animací.",
+      "hint_medium": "Vyvážený výkon: malovaný terén, řeky a stráže bez náročných souvislých animací.",
+      "hint_high": "Plný živý svět: malovaný terén, šumové masky a všechny animace prostředí."
+    },
     "graphics_title": "🎨 Bitmapy & grafické prostředí",
     "graphics_desc": "Detailní správa textur desky, pozadí a dekoračních prvků:",
     "graphics_btn": "🎨 Otevřít správce prostředí a textur",

@@ -3832,6 +3832,15 @@ window.PRS_I18N.sk = {
     "mode_tablet": "Režim: Tablet",
     "fast_anim": "Rýchle animácie hodov a figúrok:",
     "auto_bots": "Automatický ťah botov (AI):",
+    "graphics_quality": {
+      "label": "Kvalita grafiky mapy:",
+      "low": "Nízka",
+      "medium": "Stredná",
+      "high": "Vysoká",
+      "hint_low": "Úsporný režim pre staršie mobily: klasický pergamen bez terénnych textúr a animácií.",
+      "hint_medium": "Vyvážený výkon: maľovaný terén, rieky a stráže bez náročných súvislých animácií.",
+      "hint_high": "Plný živý svet: maľovaný terén, šumové masky a všetky animácie prostredia."
+    },
     "graphics_title": "🎨 Bitmapy & grafické prostredie",
     "graphics_desc": "Detailná správa textúr dosky, pozadia a dekoračných prvkov:",
     "graphics_btn": "🎨 Otvoriť správcu prostredia a textúr",

@@ -3832,6 +3832,15 @@ window.PRS_I18N.pl = {
     "mode_tablet": "Tryb: Tablet",
     "fast_anim": "Szybkie animacje rzutów i pionków:",
     "auto_bots": "Automatyczna tura botów (AI):",
+    "graphics_quality": {
+      "label": "Jakość grafiki mapy:",
+      "low": "Niska",
+      "medium": "Średnia",
+      "high": "Wysoka",
+      "hint_low": "Tryb oszczędny dla starszych urządzeń: klasyczny pergamin bez tekstur terenu i animacji.",
+      "hint_medium": "Zrównoważona wydajność: malowany teren, rzeki i strażnicy bez ciężkich ciągłych animacji.",
+      "hint_high": "Pełny żywy świat: malowany teren, maski szumu i wszystkie animacje otoczenia."
+    },
     "graphics_title": "🎨 Bitmapy &amp; otoczenie graficzne",
     "graphics_desc": "Szczegółowe zarządzanie teksturami planszy, tła i elementów dekoracyjnych:",
     "graphics_btn": "🎨 Otwórz menedżera otoczenia i tekstur",
