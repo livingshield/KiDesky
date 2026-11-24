@@ -73,15 +73,18 @@
 
                 out.push('    <circle cx="' + standNode.x + '" cy="' + standNode.y + '" r="' + (standR + 4) + '" fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.9"/>');
 
-                out.push('    <g transform="translate(' + standNode.x + ',' + (standNode.y - standR - 15) + ')">');
-
-                out.push('      <rect x="-24" y="-12" width="48" height="15" rx="5" fill="#b45309" stroke="#fbbf24" stroke-width="1.2"/>');
-
+                var flipStandBelow = (standNode.y < 76);
+                var standOff = (standNode.type === "VILLAGE") ? (standR + 34) : (standR + 26);
+                var badgeY = flipStandBelow ? (standNode.y + standR + 22) : (standNode.y - standOff);
+                out.push('    <g transform="translate(' + standNode.x + ',' + badgeY + ')">');
+                out.push('      <rect x="-25" y="-11.5" width="50" height="15" rx="6" fill="rgba(120,53,15,0.94)" stroke="#fbbf24" stroke-width="1.2"/>');
                 var standingLabel = (window.PRS_I18n && window.PRS_I18n.t) ? window.PRS_I18n.t("board.standing_here", null, "ZDE STOJÍŠ") : "ZDE STOJÍŠ";
-                out.push('      <text x="0" y="-1" text-anchor="middle" fill="#fff" font-size="8.5" font-weight="bold">' + standingLabel + '</text>');
-
-                out.push('      <polygon points="-4,3 0,7 4,3" fill="#fbbf24"/>');
-
+                out.push('      <text x="0" y="-1" text-anchor="middle" fill="#fffbeb" font-size="8.2" font-weight="bold" letter-spacing="0.2">' + standingLabel + '</text>');
+                if (flipStandBelow) {
+                    out.push('      <polygon points="-4,-11.5 0,-15.5 4,-11.5" fill="#fbbf24"/>');
+                } else {
+                    out.push('      <polygon points="-4,3.5 0,7.5 4,3.5" fill="#fbbf24"/>');
+                }
                 out.push('    </g>');
 
                 out.push('  </g>');

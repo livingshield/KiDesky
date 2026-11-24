@@ -244,11 +244,12 @@
             height: auto;
             aspect-ratio: 1400 / 860;
             min-height: auto;
-            border-radius: 12px;
-            padding: 2px;
+            border-radius: 14px;
+            padding: 0;
+            border: none;
             touch-action: pan-y pinch-zoom;
             box-sizing: border-box;
-            background: #14100c;
+            background: transparent;
         }
         body[data-device="mobile"] #prs-board-svg {
             width: 100%;
@@ -523,6 +524,9 @@
             max-height: calc(100vh - 76px);
             max-height: calc(100dvh - 76px);
             aspect-ratio: 1400 / 860;
+            padding: 0;
+            border: none;
+            background: transparent;
             touch-action: pan-y pinch-zoom;
             margin: 0 auto;
             box-sizing: border-box;

@@ -212,15 +212,15 @@
 
             position: relative;
 
-            background: #14100c;
+            background: transparent;
 
-            border: 2px solid var(--gold);
+            border: none;
 
-            border-radius: 18px;
+            border-radius: 22px;
 
-            padding: 0.45rem;
+            padding: 0;
 
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+            box-shadow: 0 18px 42px rgba(0, 0, 0, 0.72);
 
             overflow: hidden;
 
@@ -4081,8 +4081,7 @@ body[data-active-tab="board"] #topbar-announcement-banner {
 }
 
 [data-time="night"] #board-viewport-wrap {
-    box-shadow: 0 18px 46px rgba(4, 10, 28, 0.85), 0 0 28px rgba(99, 102, 241, 0.24);
-    border-color: rgba(148, 182, 232, 0.45);
+    box-shadow: 0 20px 48px rgba(4, 10, 28, 0.88), 0 0 28px rgba(99, 102, 241, 0.24);
 }
 
 /* === FÁZE 6: GPU optimalizace, pauza při posunu/zoomu a úrovně kvality grafiky === */

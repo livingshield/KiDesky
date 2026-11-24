@@ -781,20 +781,23 @@
                 var lawnFill = (activeTheme === "fire") ? "#451a03" : (activeTheme === "earth" ? "#166534" : (activeTheme === "water" ? "#0369a1" : (activeTheme === "air" ? "#6366f1" : "#5d8438")));
                 out.push('      <ellipse cx="-1" cy="0" rx="' + (islRx * 0.70).toFixed(1) + '" ry="' + (islRy * 0.65).toFixed(1) + '" fill="' + lawnFill + '" opacity="0.92"/>');
 
-                // 5. Přírodní dominanta ostrova (strom, balvany, květy)
+                // 5. Přírodní dominanta ostrova (strom, balvany, led, květy)
                 if (activeTheme === "fire") {
                     out.push('      <ellipse cx="2" cy="0" rx="4.5" ry="2.8" fill="#1c1917" stroke="rgba(249,115,22,0.9)" stroke-width="0.9"/>');
                     out.push('      <circle cx="-3" cy="-1" r="2.2" fill="#ea580c"/>');
                     out.push('      <circle cx="5" cy="1" r="1.5" fill="#fef08a"/>');
+                } else if (activeTheme === "water") {
+                    out.push('      <ellipse cx="0" cy="-0.4" rx="' + (islRx * 0.55).toFixed(1) + '" ry="' + (islRy * 0.48).toFixed(1) + '" fill="#e0f2fe" opacity="0.88"/>');
+                    out.push('      <polygon points="1,-5.5 4.2,0.8 -2.2,0.8" fill="#bae6fd" stroke="#38bdf8" stroke-width="0.7"/>');
+                    out.push('      <ellipse cx="-4.5" cy="1" rx="2.6" ry="1.7" fill="#94a3b8" stroke="' + ink + '" stroke-width="0.5"/>');
                 } else if (activeTheme === "air") {
                     out.push('      <polygon points="0,-7 3,2 -3,2" fill="#e0e7ff" stroke="#4f46e5" stroke-width="0.7"/>');
                     out.push('      <circle cx="4" cy="0" r="2.5" fill="#c7d2fe"/>');
                 } else {
-                    // Majestátní smuteční vrba a balvan
-                    out.push('      <circle cx="2" cy="-1.5" r="4.2" fill="#4d7c2a" stroke="' + ink + '" stroke-width="0.7"/>');
-                    out.push('      <circle cx="4" cy="-2.5" r="2.8" fill="#65a30d"/>');
+                    out.push('      <circle cx="2" cy="-1.5" r="4.0" fill="#3e6328" stroke="' + ink + '" stroke-width="0.7"/>');
+                    out.push('      <circle cx="4" cy="-2.4" r="2.5" fill="#557a34"/>');
                     out.push('      <ellipse cx="-5" cy="1" rx="3.2" ry="2.0" fill="#8d877d" stroke="' + ink + '" stroke-width="0.6"/>');
-                    out.push('      <path d="M 6 -1 L 10 -4 M 7 0 L 11 -2 M -7 2 L -10 4" stroke="#6b7d3a" stroke-width="1.2" stroke-linecap="round"/>');
+                    out.push('      <path d="M 6 -1 L 9.5 -3.8 M 7 0 L 10.5 -1.8 M -7 2 L -9.5 3.6" stroke="#53682b" stroke-width="1.15" stroke-linecap="round"/>');
                 }
 
                 // 6. Plynulé vlnové proudnice po obou stranách ostrova (wake waves)
@@ -1066,92 +1069,67 @@
     riverVegetationSVG: function (x, y, h, activeTheme) {
         var ink = "rgba(45,26,14,0.85)";
         var g = '    <g transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')" pointer-events="none">';
-        
+
         if (activeTheme === "fire") {
-            // Sopečný a lávový biom
             if (h < 0.40) {
-                // Žhavé uhlíky a kouřící trsy
-                g += '<circle cx="0" cy="0" r="4.2" fill="#ea580c" opacity="0.85"/>' +
-                     '<circle cx="2" cy="-2" r="2.2" fill="#fef08a"/>' +
-                     '<path d="M-4 3 L-5 -7 M0 3 L1 -10 M4 3 L6 -6" stroke="#78350f" stroke-width="1.4" stroke-linecap="round"/>';
-            } else if (h < 0.70) {
-                // Čedičové balvany se žhavými prasklinami
-                g += '<ellipse cx="0" cy="1" rx="7" ry="4.2" fill="#1c1917" stroke="#ea580c" stroke-width="1"/>' +
-                     '<path d="M-3 1 L1 -1 L4 2" stroke="#fbbf24" stroke-width="0.9"/>';
+                g += '<circle cx="0" cy="0" r="3.6" fill="#ea580c" opacity="0.82"/>' +
+                     '<circle cx="1.8" cy="-1.6" r="1.8" fill="#fef08a"/>' +
+                     '<path d="M-3.5 3 L-4.5 -5.5 M0 3 L0.8 -8 M3.5 3 L5 -4.8" stroke="#78350f" stroke-width="1.3" stroke-linecap="round"/>';
+            } else if (h < 0.72) {
+                g += '<ellipse cx="0" cy="1" rx="6.5" ry="3.8" fill="#1c1917" stroke="#ea580c" stroke-width="0.9"/>' +
+                     '<path d="M-2.8 1 L1 -0.8 L3.5 1.8" stroke="#fb923c" stroke-width="0.85"/>';
             } else {
-                // Lávový obelisk / vyhaslý kmen
-                g += '<path d="M-3 5 L0 -11 L3 5 Z" fill="#292524" stroke="#b45309" stroke-width="1"/>' +
-                     '<circle cx="0" cy="-11" r="2" fill="#f97316"/>';
+                g += '<polygon points="-3.2,4.2 0,-7.5 3.5,4.2" fill="#292524" stroke="#b45309" stroke-width="0.9"/>' +
+                     '<circle cx="0.2" cy="-7.2" r="1.6" fill="#f97316"/>';
             }
         } else if (activeTheme === "water") {
-            // Vodní a safírový biom
-            if (h < 0.45) {
-                // Lekníny a modré vodní květy
-                g += '<ellipse cx="0" cy="1" rx="8" ry="4.5" fill="#047857" opacity="0.9"/>' +
-                     '<circle cx="1" cy="-1" r="3.2" fill="#38bdf8" stroke="#ffffff" stroke-width="0.7"/>';
-            } else if (h < 0.72) {
-                // Oblé říční valouny s perletí
-                g += '<ellipse cx="0" cy="1" rx="6.5" ry="4" fill="#64748b" stroke="#cbd5e1" stroke-width="0.9"/>' +
-                     '<ellipse cx="6" cy="2.5" rx="4" ry="2.6" fill="#94a3b8"/>';
+            if (h < 0.42) {
+                // Fasetované ledové krystaly u břehu
+                g += '<polygon points="-4,3 -1,-5.5 2,3" fill="#bae6fd" stroke="#38bdf8" stroke-width="0.75"/>' +
+                     '<polygon points="1,3.5 4.2,-2.5 7,3.5" fill="#e0f2fe" stroke="#0284c7" stroke-width="0.65"/>';
+            } else if (h < 0.76) {
+                // Namrzlé říční oblázky
+                g += '<ellipse cx="0" cy="1" rx="6.0" ry="3.6" fill="#64748b" stroke="#cbd5e1" stroke-width="0.85"/>' +
+                     '<ellipse cx="-1.2" cy="-0.2" rx="3.4" ry="1.6" fill="#e0f2fe" opacity="0.55"/>' +
+                     '<ellipse cx="5.5" cy="2.2" rx="3.6" ry="2.3" fill="#94a3b8"/>';
             } else {
-                // Vodní vrba
-                g += '<path d="M0 8 L0 -5" stroke="#475569" stroke-width="2.5" stroke-linecap="round"/>' +
-                     '<circle cx="0" cy="-9" r="8.5" fill="#0284c7" stroke="' + ink + '" stroke-width="0.8"/>' +
-                     '<path d="M-6 -6 Q-9 3 -6 7 M-1 -2 Q-3 5 -1 8 M4 -2 Q5 5 4 8 M8 -6 Q10 3 8 7" stroke="#38bdf8" stroke-width="1.3" fill="none"/>';
+                // Jinovatkový pobřežní trs (bez zelených kruhů)
+                g += '<path d="M-5 4 L-6.5 -6 M-1.5 3.5 L-1 -9 M2.5 3.5 L3.5 -7 M5.5 4 L7 -4.5" stroke="#bae6fd" stroke-width="1.3" stroke-linecap="round" opacity="0.85"/>' +
+                     '<circle cx="-1" cy="-9" r="1.3" fill="#f0f9ff"/>';
             }
         } else if (activeTheme === "earth") {
-            // Zemský mechový hvozd
             if (h < 0.45) {
-                // Mechové rákosí
-                g += '<path d="M-5 4 L-6 -9 M0 4 L0 -13 M5 4 L6 -8" stroke="#22c55e" stroke-width="1.6" stroke-linecap="round" fill="none"/>' +
-                     '<ellipse cx="0" cy="-13" rx="1.8" ry="3.6" fill="#365314"/>';
+                g += '<path d="M-5 4 L-6 -8.5 M0 4 L0 -12 M5 4 L5.5 -7.5" stroke="#2f6b3e" stroke-width="1.5" stroke-linecap="round" fill="none"/>' +
+                     '<ellipse cx="0" cy="-12" rx="1.6" ry="3.2" fill="#365314"/>';
             } else if (h < 0.75) {
-                // Zelené mechem porostlé balvany
-                g += '<ellipse cx="0" cy="1" rx="7" ry="4.5" fill="#3f6212" stroke="#14532d" stroke-width="1"/>' +
-                     '<circle cx="-1" cy="0" r="3.2" fill="#65a30d"/>';
+                g += '<ellipse cx="0" cy="1" rx="6.5" ry="4.1" fill="#3f5a28" stroke="#14532d" stroke-width="0.9"/>' +
+                     '<circle cx="-1" cy="0" r="2.8" fill="#577332"/>';
             } else {
-                // Husté kapradí a keř
-                g += '<ellipse cx="0" cy="4" rx="9" ry="3" fill="rgba(0,0,0,0.22)"/>' +
-                     '<circle cx="-4" cy="0" r="5.8" fill="#15803d" stroke="' + ink + '" stroke-width="0.8"/>' +
-                     '<circle cx="4" cy="1" r="5.2" fill="#166534" stroke="' + ink + '" stroke-width="0.8"/>';
+                g += '<path d="M-6 3.5 Q-4 -4 -7 -7 M-2 3.5 Q0 -6 -1 -10 M2 3.5 Q4 -5 5 -8.5 M5.5 3.5 Q8 -2 8 -5.5" stroke="#1b5e36" stroke-width="1.4" stroke-linecap="round" fill="none"/>';
             }
         } else if (activeTheme === "air") {
-            // Vzdušný éterický biom
             if (h < 0.45) {
-                // Stříbrné křehké rákosí
-                g += '<path d="M-5 4 L-5 -10 M0 4 L1 -14 M5 4 L4 -9" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>' +
-                     '<circle cx="1" cy="-14" r="2" fill="#e0e7ff"/>';
-            } else if (h < 0.75) {
-                // Krystalové stříbrné kameny
-                g += '<polygon points="-5,4 0,-6 5,4" fill="#c7d2fe" stroke="#6366f1" stroke-width="0.9"/>' +
-                     '<polygon points="3,4 7,-3 10,4" fill="#e0e7ff" stroke="#818cf8" stroke-width="0.8"/>';
+                g += '<path d="M-5 4 L-5 -9 M0 4 L1 -12.5 M5 4 L4 -8.5" stroke="#93c5fd" stroke-width="1.4" stroke-linecap="round"/>' +
+                     '<circle cx="1" cy="-12.5" r="1.8" fill="#e0e7ff"/>';
+            } else if (h < 0.76) {
+                g += '<polygon points="-4.8,3.8 0,-5.5 4.8,3.8" fill="#c7d2fe" stroke="#6366f1" stroke-width="0.85"/>' +
+                     '<polygon points="2.8,3.8 6.5,-2.5 9.2,3.8" fill="#e0e7ff" stroke="#818cf8" stroke-width="0.75"/>';
             } else {
-                // Větrný stříbrný strom
-                g += '<path d="M0 8 L0 -5" stroke="#64748b" stroke-width="2.4" stroke-linecap="round"/>' +
-                     '<circle cx="0" cy="-9" r="8" fill="#a5b4fc" stroke="#4f46e5" stroke-width="0.8"/>';
+                g += '<ellipse cx="0" cy="2" rx="6.2" ry="3.4" fill="#64748b" stroke="#a5b4fc" stroke-width="0.8"/>' +
+                     '<path d="M-3 1 L-4 -5 M1 1 L2 -6.5 M4 1.5 L6 -4" stroke="#c7d2fe" stroke-width="1.2" stroke-linecap="round"/>';
             }
         } else {
-            // Výchozí klasický královský biom (Světlo / Doubravka)
-            if (h < 0.42) {
-                // Rákosí s palicemi a obloukovými stébly
-                g += '<path d="M-7 5 Q-9 -2 -10 -7 M-4 4 Q-5 -3 -6 -11 M0 4 Q0 -5 0 -14 M4 4 Q5 -2 6 -9 M7 5 Q9 -1 10 -6" stroke="#53682b" stroke-width="1.45" stroke-linecap="round" fill="none"/>' +
-                     '<ellipse cx="0" cy="-14" rx="1.5" ry="3.3" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.45"/>' +
-                     '<ellipse cx="6" cy="-9" rx="1.35" ry="2.6" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.45"/>';
-            } else if (h < 0.68) {
-                // Říční balvany na pláži
-                g += '<ellipse cx="0" cy="1" rx="6.5" ry="4.2" fill="#8d877d" stroke="' + ink + '" stroke-width="1"/>' +
-                     '<ellipse cx="7" cy="2.8" rx="4" ry="2.7" fill="#a39d92" stroke="' + ink + '" stroke-width="0.8"/>';
-            } else if (h < 0.88) {
-                // Smuteční vrba sklánějící se k vodě
-                g += '<ellipse cx="0" cy="7" rx="10" ry="3.2" fill="rgba(0,0,0,0.22)"/>' +
-                     '<path d="M0 8 L0 -5" stroke="#5a4028" stroke-width="2.8" stroke-linecap="round"/>' +
-                     '<circle cx="0" cy="-10" r="9" fill="#5f8a3c" stroke="' + ink + '" stroke-width="0.9"/>' +
-                     '<path d="M-7 -8 Q-10 2 -7 6 M-2 -3 Q-3 5 -2 8 M3 -3 Q5 5 4 8 M8 -8 Q11 2 9 6" stroke="#84cc16" stroke-width="1.4" fill="none" stroke-linecap="round"/>';
+            // Slunečný (light) — tlumené rákosí, oblázky a nízký břehový trs
+            if (h < 0.46) {
+                g += '<path d="M-6.5 4.5 Q-8 -1.5 -9 -6.5 M-3.5 3.8 Q-4.5 -2.5 -5.5 -9.5 M0 3.8 Q0 -4.5 0 -12.5 M3.8 3.8 Q4.5 -2 5.5 -8.5 M6.5 4.5 Q8 -1 9 -5.5" stroke="#4a5d29" stroke-width="1.35" stroke-linecap="round" fill="none"/>' +
+                     '<ellipse cx="0" cy="-12.5" rx="1.4" ry="3.0" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.4"/>' +
+                     '<ellipse cx="5.5" cy="-8.5" rx="1.25" ry="2.4" fill="#5c3a1e" stroke="' + ink + '" stroke-width="0.4"/>';
+            } else if (h < 0.76) {
+                g += '<ellipse cx="0" cy="1" rx="6.2" ry="3.9" fill="#8d877d" stroke="' + ink + '" stroke-width="0.9"/>' +
+                     '<ellipse cx="6.2" cy="2.5" rx="3.8" ry="2.5" fill="#a39d92" stroke="' + ink + '" stroke-width="0.75"/>';
             } else {
-                // Pobřežní keř
-                g += '<ellipse cx="0" cy="5" rx="9" ry="2.8" fill="rgba(0,0,0,0.20)"/>' +
-                     '<circle cx="-4" cy="0" r="5.6" fill="#58803a" stroke="' + ink + '" stroke-width="0.8"/>' +
-                     '<circle cx="4" cy="1" r="5.2" fill="#6a9644" stroke="' + ink + '" stroke-width="0.8"/>';
+                g += '<path d="M-5.5 3.8 Q-6.8 -3 -8.5 -6 M-1.5 3.8 Q-2 -5 -1.5 -9 M2.5 3.8 Q3.5 -4.5 4.5 -8 M5.5 3.8 Q7.2 -2.5 8.5 -5" stroke="#4c6b30" stroke-width="1.4" stroke-linecap="round" fill="none"/>' +
+                     '<ellipse cx="0" cy="4.2" rx="6.5" ry="2.0" fill="rgba(42,52,24,0.28)"/>';
             }
         }
         return g + '</g>';
@@ -1161,25 +1139,25 @@
         var rot = Math.round((h * 360) % 360);
         var g = '    <g class="prs-river-lily" transform="translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') rotate(' + rot + ')" pointer-events="none">';
         if (activeTheme === "fire") {
-            // Plovoucí sopečná struska a žhavá jiskra
             g += '<ellipse cx="0" cy="0" rx="3.2" ry="2.0" fill="#292524" opacity="0.72"/>' +
                  '<ellipse cx="4.5" cy="1.8" rx="1.9" ry="1.3" fill="#292524" opacity="0.65"/>';
             if (h < 0.45) {
                 g += '<circle cx="1.0" cy="-0.4" r="1.2" fill="#fb923c" opacity="0.9"/>';
             }
+        } else if (activeTheme === "water") {
+            // Plovoucí ledové kry a chladná vlnka
+            g += '<polygon points="-4.5,1 -1.5,-2.8 3.6,-1.4 4.8,2.2 -1.2,3.0" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="0.6" opacity="0.72"/>' +
+                 '<path d="M-5.5 4.2 Q0 5.5 5.8 3.8" fill="none" stroke="rgba(224,242,254,0.45)" stroke-width="0.7" stroke-linecap="round"/>';
         } else if (activeTheme === "air") {
-            // Jemné mlžné vlnky na hladině
             g += '<path d="M-5 0 Q-1 -2 3 0 M-2 2.8 Q2 1 6 2.6" fill="none" stroke="#e0e7ff" stroke-width="0.9" stroke-linecap="round" opacity="0.58"/>';
         } else {
-            // Skupinka 2-3 leknínových listů s výřezem a volitelným kvítkem
-            g += '<path d="M 0,0 L 3.8,-1.4 A 4.0,2.8 0 1,1 3.1,-2.2 Z" fill="#2f6b3e" stroke="rgba(22,44,24,0.65)" stroke-width="0.55" opacity="0.9"/>' +
-                 '<path d="M -5.4,2.4 L -2.6,1.5 A 3.0,2.1 0 1,1 -3.0,0.8 Z" fill="#3e7d4a" stroke="rgba(22,44,24,0.60)" stroke-width="0.5" opacity="0.88"/>';
-            if (h > 0.62) {
-                g += '<ellipse cx="5.2" cy="2.6" rx="2.3" ry="1.6" fill="#2f6b3e" stroke="rgba(22,44,24,0.55)" stroke-width="0.45" opacity="0.84"/>';
-            }
-            if (h < 0.45) {
-                var bloom = (activeTheme === "water") ? "#bae6fd" : (h < 0.22 ? "#f9a8d4" : "#fef3c7");
-                g += '<circle cx="0.6" cy="-0.3" r="1.55" fill="' + bloom + '" stroke="rgba(90,60,40,0.45)" stroke-width="0.35"/>';
+            // Tlumené olivové lekníny s jemnou vlnkou kolem
+            g += '<ellipse cx="0" cy="0.6" rx="6.2" ry="3.8" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="0.55"/>' +
+                 '<path d="M 0,0 L 3.4,-1.2 A 3.6,2.5 0 1,1 2.8,-1.9 Z" fill="#2a5434" stroke="rgba(18,36,20,0.65)" stroke-width="0.5" opacity="0.72"/>' +
+                 '<path d="M -4.8,2.1 L -2.3,1.3 A 2.6,1.8 0 1,1 -2.7,0.7 Z" fill="#366640" stroke="rgba(18,36,20,0.60)" stroke-width="0.45" opacity="0.70"/>';
+            if (h < 0.36) {
+                var bloom = (h < 0.18) ? "#f9a8d4" : "#fef3c7";
+                g += '<circle cx="0.5" cy="-0.2" r="1.35" fill="' + bloom + '" opacity="0.85"/>';
             }
         }
         return g + '</g>';

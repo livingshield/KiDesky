@@ -89,6 +89,34 @@
         }
     };
 
+    var ROAD_THEME_STYLES = {
+        light: {
+            verge: "rgba(68,50,28,0.40)", shoulder: "rgba(44,30,16,0.58)", surface: "rgba(188,154,102,0.88)",
+            cobble: "rgba(238,218,176,0.36)", track: "rgba(248,230,172,0.36)",
+            arrowFill: "rgba(252,235,165,0.72)", arrowStroke: "rgba(92,56,22,0.75)"
+        },
+        fire: {
+            verge: "rgba(38,14,10,0.52)", shoulder: "rgba(22,9,7,0.72)", surface: "rgba(86,62,56,0.88)",
+            cobble: "rgba(234,110,48,0.28)", track: "rgba(251,146,60,0.42)",
+            arrowFill: "rgba(253,186,116,0.76)", arrowStroke: "rgba(67,20,7,0.85)"
+        },
+        water: {
+            verge: "rgba(12,34,58,0.48)", shoulder: "rgba(8,22,40,0.68)", surface: "rgba(116,148,176,0.86)",
+            cobble: "rgba(224,242,254,0.36)", track: "rgba(186,230,253,0.44)",
+            arrowFill: "rgba(224,242,254,0.80)", arrowStroke: "rgba(12,74,110,0.85)"
+        },
+        earth: {
+            verge: "rgba(22,46,24,0.48)", shoulder: "rgba(16,32,18,0.64)", surface: "rgba(138,140,96,0.86)",
+            cobble: "rgba(202,226,164,0.32)", track: "rgba(167,243,208,0.40)",
+            arrowFill: "rgba(217,249,157,0.78)", arrowStroke: "rgba(20,83,45,0.85)"
+        },
+        air: {
+            verge: "rgba(26,16,56,0.48)", shoulder: "rgba(16,10,36,0.68)", surface: "rgba(124,116,158,0.86)",
+            cobble: "rgba(233,213,255,0.34)", track: "rgba(192,132,252,0.42)",
+            arrowFill: "rgba(233,213,255,0.78)", arrowStroke: "rgba(59,7,100,0.85)"
+        }
+    };
+
     function resolveBoardThemeKey(rawTheme) {
         return String(rawTheme || "light").replace(/_night$/, "");
     }
@@ -912,14 +940,17 @@
                 var isFestivalPath = (nCode.indexOf("SLAV") !== -1 || tCode.indexOf("SLAV") !== -1 || nCode.indexOf("_BR") !== -1 || tCode.indexOf("_BR") !== -1 || n.type === "FESTIVAL" || targetNode.type === "FESTIVAL");
                 var isForestPath = (nCode.indexOf("_L") !== -1 || tCode.indexOf("_L") !== -1 || ((n.type === "VILLAGE" || targetNode.type === "VILLAGE") && (n.x < 500 && targetNode.x < 500)));
 
-                var rVerge = "rgba(68,50,28,0.40)";
-                var rShoulder = "rgba(44,30,16,0.58)";
-                var rSurface = "rgba(188,154,102,0.88)";
-                var rCobble = "rgba(238,218,176,0.36)";
+                var baseRoad = ROAD_THEME_STYLES[th] || ROAD_THEME_STYLES.light;
+                var rVerge = baseRoad.verge;
+                var rShoulder = baseRoad.shoulder;
+                var rSurface = baseRoad.surface;
+                var rCobble = baseRoad.cobble;
                 var rCobbleDash = "2.2,4.4";
-                var rTrack = targets[t].isBranch ? targets[t].color : "rgba(248,230,172,0.36)";
+                var rTrack = targets[t].isBranch ? targets[t].color : baseRoad.track;
                 var rTrackOpacity = targets[t].isBranch ? "0.62" : "1";
                 var rTrackDash = targets[t].isBranch ? "5,5" : "5,7";
+                var rArrowFill = baseRoad.arrowFill;
+                var rArrowStroke = baseRoad.arrowStroke;
 
                 if (isDragonPath) {
                     rVerge = "rgba(44,20,14,0.48)";
@@ -929,15 +960,17 @@
                     rCobbleDash = "2.6,4.0";
                     rTrack = targets[t].isBranch ? targets[t].color : "rgba(249,135,52,0.46)";
                     rTrackDash = "5,5";
+                    rArrowFill = "rgba(253,186,116,0.78)";
+                    rArrowStroke = "rgba(67,20,7,0.85)";
                 } else if (isFestivalPath) {
-                    rVerge = "rgba(62,34,46,0.42)";
-                    rShoulder = "rgba(38,18,28,0.60)";
-                    rSurface = "rgba(176,124,132,0.85)";
-                    rCobble = "rgba(246,204,196,0.40)";
+                    rVerge = (th === "water") ? "rgba(40,42,74,0.44)" : "rgba(62,34,46,0.42)";
+                    rShoulder = (th === "water") ? "rgba(24,26,52,0.64)" : "rgba(38,18,28,0.60)";
+                    rSurface = (th === "water") ? "rgba(136,138,176,0.86)" : "rgba(176,124,132,0.85)";
+                    rCobble = (th === "water") ? "rgba(224,231,255,0.42)" : "rgba(246,204,196,0.40)";
                     rCobbleDash = "3.4,2.6";
                     rTrack = targets[t].isBranch ? targets[t].color : "rgba(251,210,108,0.44)";
                     rTrackDash = "5,6";
-                } else if (isForestPath) {
+                } else if (isForestPath && (th === "light" || th === "earth")) {
                     rVerge = "rgba(28,48,24,0.44)";
                     rShoulder = "rgba(20,34,18,0.58)";
                     rSurface = "rgba(136,146,94,0.84)";
@@ -978,7 +1011,7 @@
 
                     out.push('  <g transform="translate(' + midCurveX + ',' + midCurveY + ') rotate(' + angle + ')">');
 
-                    out.push('    <polygon points="-4,-3 3,0 -4,3" fill="rgba(252,235,165,0.72)" stroke="rgba(92,56,22,0.75)" stroke-width="0.65"/>');
+                    out.push('    <polygon points="-4,-3 3,0 -4,3" fill="' + rArrowFill + '" stroke="' + rArrowStroke + '" stroke-width="0.65"/>');
 
                     out.push('  </g>');
 
@@ -997,7 +1030,7 @@
 
                     out.push('    <line x1="-16" y1="-4.5" x2="14" y2="-4.5" stroke="rgba(255,232,190,0.18)" stroke-width="0.7"/>');
 
-                    out.push('    <circle cx="-16.5" cy="0" r="1.2" fill="#292524" stroke="rgba(255,240,210,0.35)" stroke-width="0.4"/>');
+                    out.push('    <circle cx="-16.5" cy="0" r="1.25" fill="' + activePalette.rimMid + '" stroke="#1c1917" stroke-width="0.45"/>');
 
                     out.push('    <text x="1" y="3.4" text-anchor="middle" fill="' + targets[t].color + '" font-size="8.8" font-weight="bold" style="paint-order:stroke;stroke:#1a1008;stroke-width:2.2px;stroke-linejoin:round;">' + (targets[t].label === "1–3" ? '⚀⚁⚂ ' : '⚃⚄⚅ ') + targets[t].label + '</text>');
 
@@ -1216,41 +1249,41 @@
             // Vizuální vývoj panství u vesnic (Úroveň 1: došková chalupa, Úroveň 2: kamenný statek, Úroveň 3: opevněná tvrz)
 
             if (nd.type === "VILLAGE") {
-
                 var lvl = nd.villageLevel || 1;
-
                 if (lvl === 1) {
-
-                    out.push('    <polygon points="' + (nd.x - 14) + ',' + (nd.y - r - 1) + ' ' + nd.x + ',' + (nd.y - r - 12) + ' ' + (nd.x + 14) + ',' + (nd.y - r - 1) + '" fill="#b45309" stroke="#fcd34d" stroke-width="1.1"/>');
-
+                    // Úroveň 1: doškový štít s trámovím
+                    out.push('    <g pointer-events="none">');
+                    out.push('      <polygon points="' + (nd.x - 13.5) + ',' + (nd.y - r - 0.5) + ' ' + nd.x + ',' + (nd.y - r - 11.5) + ' ' + (nd.x + 13.5) + ',' + (nd.y - r - 0.5) + '" fill="#a16207" stroke="#fde68a" stroke-width="1.05"/>');
+                    out.push('      <line x1="' + (nd.x - 6.5) + '" y1="' + (nd.y - r - 0.5) + '" x2="' + nd.x + '" y2="' + (nd.y - r - 9.5) + '" stroke="#451a03" stroke-width="0.9"/>');
+                    out.push('      <line x1="' + (nd.x + 6.5) + '" y1="' + (nd.y - r - 0.5) + '" x2="' + nd.x + '" y2="' + (nd.y - r - 9.5) + '" stroke="#451a03" stroke-width="0.9"/>');
+                    out.push('      <rect x="' + (nd.x - 2.2) + '" y="' + (nd.y - r - 6.2) + '" width="4.4" height="4.4" rx="0.8" fill="#fef08a" stroke="#451a03" stroke-width="0.6"/>');
+                    out.push('    </g>');
                 } else if (lvl === 2) {
-
-                    out.push('    <polygon points="' + (nd.x - 15) + ',' + (nd.y - r - 1) + ' ' + nd.x + ',' + (nd.y - r - 14) + ' ' + (nd.x + 15) + ',' + (nd.y - r - 1) + '" fill="#991b1b" stroke="#fef08a" stroke-width="1.2"/>');
-
-                    out.push('    <rect x="' + (nd.x + 6) + '" y="' + (nd.y - r - 19) + '" width="3.5" height="6.5" fill="#57534e" stroke="#292524" stroke-width="0.6"/>');
-
+                    // Úroveň 2: kamenný statek se sedlovou taškovou střechou a komínkem
+                    out.push('    <g pointer-events="none">');
+                    out.push('      <rect x="' + (nd.x + 5.5) + '" y="' + (nd.y - r - 18) + '" width="3.8" height="7" rx="0.6" fill="#57534e" stroke="#1c1917" stroke-width="0.65"/>');
+                    out.push('      <polygon points="' + (nd.x - 15) + ',' + (nd.y - r - 0.5) + ' ' + nd.x + ',' + (nd.y - r - 14) + ' ' + (nd.x + 15) + ',' + (nd.y - r - 0.5) + '" fill="#991b1b" stroke="#fef08a" stroke-width="1.1"/>');
+                    out.push('      <polygon points="' + (nd.x - 7) + ',' + (nd.y - r - 0.5) + ' ' + nd.x + ',' + (nd.y - r - 9.5) + ' ' + (nd.x + 7) + ',' + (nd.y - r - 0.5) + '" fill="#d6d3d1" stroke="#44403c" stroke-width="0.7"/>');
+                    out.push('      <rect x="' + (nd.x - 1.8) + '" y="' + (nd.y - r - 6) + '" width="3.6" height="4.5" rx="0.8" fill="#fbbf24" stroke="#451a03" stroke-width="0.55"/>');
+                    out.push('    </g>');
                 } else if (lvl >= 3) {
-
-                    out.push('    <rect x="' + (nd.x - 14) + '" y="' + (nd.y - r - 15) + '" width="28" height="15" fill="#334155" stroke="#fbbf24" stroke-width="1.2"/>');
-
-                    out.push('    <polygon points="' + (nd.x - 14) + ',' + (nd.y - r - 15) + ' ' + (nd.x - 10) + ',' + (nd.y - r - 19) + ' ' + (nd.x - 6) + ',' + (nd.y - r - 15) + ' ' + (nd.x - 2) + ',' + (nd.y - r - 19) + ' ' + (nd.x + 2) + ',' + (nd.y - r - 15) + ' ' + (nd.x + 6) + ',' + (nd.y - r - 19) + ' ' + (nd.x + 10) + ',' + (nd.y - r - 15) + ' ' + (nd.x + 14) + ',' + (nd.y - r - 19) + ' ' + (nd.x + 14) + ',' + (nd.y - r - 15) + '" fill="#cbd5e1"/>');
-
+                    // Úroveň 3: opevněná kamenná tvrz s cimbuřím a praporkem
+                    out.push('    <g pointer-events="none">');
+                    out.push('      <line x1="' + nd.x + '" y1="' + (nd.y - r - 15) + '" x2="' + nd.x + '" y2="' + (nd.y - r - 24) + '" stroke="#fef08a" stroke-width="1.1"/>');
+                    out.push('      <polygon points="' + nd.x + ',' + (nd.y - r - 24) + ' ' + (nd.x + 7) + ',' + (nd.y - r - 21.5) + ' ' + nd.x + ',' + (nd.y - r - 19) + '" fill="#dc2626" stroke="#fde68a" stroke-width="0.6"/>');
+                    out.push('      <rect x="' + (nd.x - 14.5) + '" y="' + (nd.y - r - 12.5) + '" width="29" height="12" rx="1.5" fill="#475569" stroke="#fbbf24" stroke-width="1.1"/>');
+                    out.push('      <polygon points="' + (nd.x - 14.5) + ',' + (nd.y - r - 12.5) + ' ' + (nd.x - 14.5) + ',' + (nd.y - r - 16.5) + ' ' + (nd.x - 10) + ',' + (nd.y - r - 16.5) + ' ' + (nd.x - 10) + ',' + (nd.y - r - 12.5) + ' ' + (nd.x - 4.5) + ',' + (nd.y - r - 12.5) + ' ' + (nd.x - 4.5) + ',' + (nd.y - r - 17.5) + ' ' + (nd.x + 4.5) + ',' + (nd.y - r - 17.5) + ' ' + (nd.x + 4.5) + ',' + (nd.y - r - 12.5) + ' ' + (nd.x + 10) + ',' + (nd.y - r - 12.5) + ' ' + (nd.x + 10) + ',' + (nd.y - r - 16.5) + ' ' + (nd.x + 14.5) + ',' + (nd.y - r - 16.5) + ' ' + (nd.x + 14.5) + ',' + (nd.y - r - 12.5) + '" fill="#94a3b8" stroke="#fbbf24" stroke-width="0.7"/>');
+                    out.push('      <path d="M ' + (nd.x - 3) + ' ' + (nd.y - r - 0.5) + ' V ' + (nd.y - r - 6.5) + ' A 3 3 0 0 1 ' + (nd.x + 3) + ' ' + (nd.y - r - 6.5) + ' V ' + (nd.y - r - 0.5) + ' Z" fill="#1e293b" stroke="#fbbf24" stroke-width="0.6"/>');
+                    out.push('    </g>');
                 }
 
                 if (nd.owner !== null) {
-
                     var stars = "★".repeat(lvl);
-
-                    out.push('    <g transform="translate(' + nd.x + ',' + (nd.y + r + 13) + ')">');
-
-                    out.push('      <rect x="-16" y="-7" width="32" height="13" rx="4" fill="rgba(20,14,10,0.85)" stroke="#fbbf24" stroke-width="0.8"/>');
-
-                    out.push('      <text x="0" y="3" text-anchor="middle" fill="#fbbf24" font-size="9.5" font-weight="bold">' + stars + '</text>');
-
+                    out.push('    <g transform="translate(' + nd.x + ',' + (nd.y + r + 10.5) + ')" pointer-events="none">');
+                    out.push('      <rect x="-15" y="-6" width="30" height="11.5" rx="4" fill="rgba(18,12,8,0.90)" stroke="#fbbf24" stroke-width="0.85"/>');
+                    out.push('      <text x="0" y="3" text-anchor="middle" fill="#fbbf24" font-size="9" font-weight="bold">' + stars + '</text>');
                     out.push('    </g>');
-
                 }
-
             }
 
             // Stráže u questových políček ve stylu HoMM
