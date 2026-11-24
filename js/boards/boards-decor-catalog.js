@@ -752,6 +752,8 @@ window.PRS_DECOR_CATALOG = {
         tree_birch: 0,
         grove_oak: 0,
         grove_pine: 0,
+        grove_pine2: 0,
+        bush: 0,
         rock_boulder: 0,
         mountain_peaks: 0,
         farm_field: 0,

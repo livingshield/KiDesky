@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kidesky-cache-v1.9.84';
+const CACHE_NAME = 'kidesky-cache-v1.9.85';
 const CORE_ASSETS = [
   './',
   './index.html',
