@@ -262,7 +262,7 @@
             if (gQuality === "medium") {
                 out.push(
                     '<clipPath id="terrainInnerClip">' +
-                    '  <rect x="44" y="36" width="1312" height="788" rx="48"/>' +
+                    '  <rect x="14" y="14" width="1372" height="832" rx="16"/>' +
                     '</clipPath>'
                 );
                 return out.join("");
@@ -277,14 +277,9 @@
             );
 
             out.push(
-                '<filter id="terrainFrameBlur" x="-10%" y="-10%" width="120%" height="120%">' +
-                '  <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="' + (seed + 13) + '" result="tf"/>' +
-                '  <feDisplacementMap in="SourceGraphic" in2="tf" scale="20" xChannelSelector="R" yChannelSelector="G"/>' +
-                '  <feGaussianBlur stdDeviation="16"/>' +
-                '</filter>' +
                 '<mask id="terrainInnerMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1400" height="860">' +
                 '  <rect x="0" y="0" width="1400" height="860" fill="#000000"/>' +
-                '  <rect x="44" y="36" width="1312" height="788" rx="48" fill="#ffffff" filter="url(#terrainFrameBlur)"/>' +
+                '  <rect x="14" y="14" width="1372" height="832" rx="16" fill="#ffffff"/>' +
                 '</mask>'
             );
 

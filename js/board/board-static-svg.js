@@ -4,90 +4,144 @@
 
 (function () {
     "use strict";
-    if (!window.PRS_App) window.PRS_App = {};
+        if (!window.PRS_App) window.PRS_App = {};
+
+    var BOARD_THEME_PALETTES = {
+        light: {
+            c0: "#fef08a", c1: "#d4af37", c2: "#854d0e", stroke: "#d4af37", glow: "rgba(250,204,21,0.55)",
+            frameOuter: "#1c1408", frameMid: "#423011", rimLight: "#fef08a", rimMid: "#d4af37", rimDark: "#78350f",
+            ornament: "#facc15", ornamentCore: "#fffbeb", vignetteRgb: "24,16,6",
+            parchment: ["#3d3423", "#31291b", "#251e14", "#17120c"],
+            heartland: { c0: "#4d7c0f", c1: "#3f6212", c2: "#365314" },
+            forest:    { c0: "#14532d", c1: "#166534", c2: "#15803d" },
+            mountain:  { c0: "#57534e", c1: "#44403c", c2: "#292524" },
+            meadows:   { c0: "#a16207", c1: "#65a30d", c2: "#4d7c0f" },
+            water:     { c0: "#0f766e", c1: "#0369a1", c2: "#155e75" },
+            groundMoss:  "rgba(34,84,42,0.64)",
+            groundEarth: "rgba(120,82,40,0.58)",
+            groundStone: "rgba(87,83,78,0.62)",
+            groundWater: "rgba(14,116,144,0.58)",
+            groundMagic: "rgba(52,105,68,0.60)"
+        },
+        fire: {
+            c0: "#fed7aa", c1: "#f97316", c2: "#9a3412", stroke: "#ea580c", glow: "rgba(239,68,68,0.65)",
+            frameOuter: "#160704", frameMid: "#3b1208", rimLight: "#fdba74", rimMid: "#ea580c", rimDark: "#7c2d12",
+            ornament: "#fb923c", ornamentCore: "#ffedd5", vignetteRgb: "26,6,2",
+            parchment: ["#2d120a", "#220c06", "#170703", "#0d0402"],
+            heartland: { c0: "#7c2d12", c1: "#431407", c2: "#290d05" },
+            forest:    { c0: "#451a03", c1: "#290e02", c2: "#1c0901" },
+            mountain:  { c0: "#44403c", c1: "#292524", c2: "#1c1917" },
+            meadows:   { c0: "#c2410c", c1: "#9a3412", c2: "#7c2d12" },
+            water:     { c0: "#ea580c", c1: "#b91c1c", c2: "#7f1d1d" },
+            groundMoss:  "rgba(154,52,18,0.64)",
+            groundEarth: "rgba(124,45,18,0.58)",
+            groundStone: "rgba(68,64,60,0.72)",
+            groundWater: "rgba(234,88,12,0.65)",
+            groundMagic: "rgba(220,38,38,0.60)"
+        },
+        water: {
+            c0: "#bae6fd", c1: "#38bdf8", c2: "#0369a1", stroke: "#0284c7", glow: "rgba(14,165,233,0.65)",
+            frameOuter: "#061322", frameMid: "#0c2d4d", rimLight: "#bae6fd", rimMid: "#38bdf8", rimDark: "#0369a1",
+            ornament: "#7dd3fc", ornamentCore: "#f0f9ff", vignetteRgb: "4,18,36",
+            parchment: ["#0e2a47", "#091d33", "#061322", "#030a13"],
+            heartland: { c0: "#075985", c1: "#0c4a6e", c2: "#082f49" },
+            forest:    { c0: "#0f766e", c1: "#115e59", c2: "#134e4a" },
+            mountain:  { c0: "#64748b", c1: "#475569", c2: "#334155" },
+            meadows:   { c0: "#0284c7", c1: "#0369a1", c2: "#075985" },
+            water:     { c0: "#38bdf8", c1: "#0284c7", c2: "#0369a1" },
+            groundMoss:  "rgba(15,118,110,0.64)",
+            groundEarth: "rgba(12,74,110,0.58)",
+            groundStone: "rgba(71,85,105,0.65)",
+            groundWater: "rgba(14,165,233,0.62)",
+            groundMagic: "rgba(56,189,248,0.60)"
+        },
+        earth: {
+            c0: "#a7f3d0", c1: "#10b981", c2: "#065f46", stroke: "#059669", glow: "rgba(34,197,94,0.65)",
+            frameOuter: "#09140a", frameMid: "#16301b", rimLight: "#a7f3d0", rimMid: "#10b981", rimDark: "#065f46",
+            ornament: "#34d399", ornamentCore: "#ecfdf5", vignetteRgb: "6,22,10",
+            parchment: ["#1f331b", "#162613", "#0e1a0c", "#070e06"],
+            heartland: { c0: "#15803d", c1: "#166534", c2: "#14532d" },
+            forest:    { c0: "#064e3b", c1: "#065f46", c2: "#047857" },
+            mountain:  { c0: "#44403c", c1: "#3f3f46", c2: "#27272a" },
+            meadows:   { c0: "#4d7c0f", c1: "#3f6212", c2: "#365314" },
+            water:     { c0: "#047857", c1: "#065f46", c2: "#064e3b" },
+            groundMoss:  "rgba(22,101,52,0.68)",
+            groundEarth: "rgba(113,63,18,0.58)",
+            groundStone: "rgba(63,63,70,0.65)",
+            groundWater: "rgba(5,150,105,0.60)",
+            groundMagic: "rgba(16,185,129,0.60)"
+        },
+        air: {
+            c0: "#ede9fe", c1: "#c084fc", c2: "#6b21a8", stroke: "#9333ea", glow: "rgba(168,85,247,0.65)",
+            frameOuter: "#0e081f", frameMid: "#27144d", rimLight: "#e9d5ff", rimMid: "#a855f7", rimDark: "#581c87",
+            ornament: "#c084fc", ornamentCore: "#faf5ff", vignetteRgb: "16,8,36",
+            parchment: ["#241b4b", "#1a1338", "#120d26", "#090615"],
+            heartland: { c0: "#5b21b6", c1: "#4c1d95", c2: "#3b0764" },
+            forest:    { c0: "#4338ca", c1: "#3730a3", c2: "#312e81" },
+            mountain:  { c0: "#6b7280", c1: "#4b5563", c2: "#374151" },
+            meadows:   { c0: "#7c3aed", c1: "#6d28d9", c2: "#5b21b6" },
+            water:     { c0: "#a855f7", c1: "#9333ea", c2: "#7e22ce" },
+            groundMoss:  "rgba(76,29,149,0.64)",
+            groundEarth: "rgba(67,56,202,0.58)",
+            groundStone: "rgba(75,85,99,0.65)",
+            groundWater: "rgba(168,85,247,0.62)",
+            groundMagic: "rgba(192,132,252,0.60)"
+        }
+    };
+
+    function resolveBoardThemeKey(rawTheme) {
+        return String(rawTheme || "light").replace(/_night$/, "");
+    }
+
+    function roundedRectPathD(x, y, w, h, r) {
+        var x2 = x + w;
+        var y2 = y + h;
+        return "M " + (x + r) + " " + y +
+            " H " + (x2 - r) +
+            " A " + r + " " + r + " 0 0 1 " + x2 + " " + (y + r) +
+            " V " + (y2 - r) +
+            " A " + r + " " + r + " 0 0 1 " + (x2 - r) + " " + y2 +
+            " H " + (x + r) +
+            " A " + r + " " + r + " 0 0 1 " + x + " " + (y2 - r) +
+            " V " + (y + r) +
+            " A " + r + " " + r + " 0 0 1 " + (x + r) + " " + y + " Z";
+    }
+
+    function renderCornerElementGlyphSVG(baseTh, pal) {
+        if (baseTh === "fire") {
+            return '<path d="M 0 -6.6 L 6.6 0 L 0 6.6 L -6.6 0 Z" fill="' + pal.rimDark + '" stroke="' + pal.ornament + '" stroke-width="1"/>' +
+                '<path d="M 0 -4.8 C 2.4 -2.0 3.3 0.4 2.1 2.9 C 1.2 4.3 -1.2 4.3 -2.1 2.9 C -3.3 0.4 -2.0 -1.9 0 -4.8 Z" fill="' + pal.ornament + '"/>' +
+                '<circle cx="0" cy="1.1" r="1.4" fill="' + pal.ornamentCore + '"/>';
+        }
+        if (baseTh === "water") {
+            return '<path d="M 0 -6.8 L 1.6 -1.6 L 6.8 0 L 1.6 1.6 L 0 6.8 L -1.6 1.6 L -6.8 0 L -1.6 -1.6 Z" fill="' + pal.ornament + '"/>' +
+                '<path d="M -4.2 -4.2 L 4.2 4.2 M 4.2 -4.2 L -4.2 4.2" stroke="' + pal.rimLight + '" stroke-width="1" stroke-linecap="round"/>' +
+                '<circle cx="0" cy="0" r="2.0" fill="' + pal.ornamentCore + '"/>';
+        }
+        if (baseTh === "earth") {
+            return '<circle cx="0" cy="0" r="5.6" fill="' + pal.rimDark + '" stroke="' + pal.ornament + '" stroke-width="1"/>' +
+                '<path d="M 0 4.2 C -3.8 3.2 -5.0 -0.6 -3.0 -3.4 C -0.8 -2.3 0 0.5 0 4.2 Z M 0 4.2 C 3.8 3.2 5.0 -0.6 3.0 -3.4 C 0.8 -2.3 0 0.5 0 4.2 Z" fill="' + pal.ornament + '"/>' +
+                '<circle cx="0" cy="-2.2" r="1.5" fill="' + pal.ornamentCore + '"/>';
+        }
+        if (baseTh === "air") {
+            return '<path d="M 0 -6.6 L 5.6 0 L 0 6.6 L -5.6 0 Z" fill="' + pal.rimDark + '" stroke="' + pal.ornament + '" stroke-width="1"/>' +
+                '<path d="M 1.2 -4.8 L -2.9 0.5 L 0.2 0.5 L -1.2 4.8 L 2.9 -0.6 L -0.2 -0.6 Z" fill="' + pal.ornamentCore + '"/>';
+        }
+        // Slunečný (light) — 8cípý královský sluneční medailon
+        return '<path d="M 0 -6.8 L 1.3 -2.1 L 4.8 -4.8 L 2.1 -1.3 L 6.8 0 L 2.1 1.3 L 4.8 4.8 L 1.3 2.1 L 0 6.8 L -1.3 2.1 L -4.8 4.8 L -2.1 1.3 L -6.8 0 L -2.1 -1.3 L -4.8 -4.8 L -1.3 -2.1 Z" fill="' + pal.ornament + '"/>' +
+            '<circle cx="0" cy="0" r="2.3" fill="' + pal.ornamentCore + '"/>';
+    }
 
     Object.assign(window.PRS_App, {
-    
+
     getBoardDefsSVG: function () {
 
-        var th = this.currentTheme ||
+        var rawTh = this.currentTheme ||
                  (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
                  (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
+        var th = resolveBoardThemeKey(rawTh);
 
-        var themePalettes = {
-            light: {
-                c0: "#fef08a", c1: "#d4af37", c2: "#854d0e", stroke: "#d4af37", glow: "rgba(250,204,21,0.55)",
-                parchment: ["#3d3423", "#31291b", "#251e14", "#17120c"],
-                heartland: { c0: "#4d7c0f", c1: "#3f6212", c2: "#365314" },
-                forest:    { c0: "#14532d", c1: "#166534", c2: "#15803d" },
-                mountain:  { c0: "#57534e", c1: "#44403c", c2: "#292524" },
-                meadows:   { c0: "#a16207", c1: "#65a30d", c2: "#4d7c0f" },
-                water:     { c0: "#0f766e", c1: "#0369a1", c2: "#155e75" },
-                groundMoss:  "rgba(34,84,42,0.64)",
-                groundEarth: "rgba(120,82,40,0.58)",
-                groundStone: "rgba(87,83,78,0.62)",
-                groundWater: "rgba(14,116,144,0.58)",
-                groundMagic: "rgba(52,105,68,0.60)"
-            },
-            fire: {
-                c0: "#fed7aa", c1: "#f97316", c2: "#9a3412", stroke: "#ea580c", glow: "rgba(239,68,68,0.65)",
-                parchment: ["#2d120a", "#220c06", "#170703", "#0d0402"],
-                heartland: { c0: "#7c2d12", c1: "#431407", c2: "#290d05" },
-                forest:    { c0: "#451a03", c1: "#290e02", c2: "#1c0901" },
-                mountain:  { c0: "#44403c", c1: "#292524", c2: "#1c1917" },
-                meadows:   { c0: "#c2410c", c1: "#9a3412", c2: "#7c2d12" },
-                water:     { c0: "#ea580c", c1: "#b91c1c", c2: "#7f1d1d" },
-                groundMoss:  "rgba(154,52,18,0.64)",
-                groundEarth: "rgba(124,45,18,0.58)",
-                groundStone: "rgba(68,64,60,0.72)",
-                groundWater: "rgba(234,88,12,0.65)",
-                groundMagic: "rgba(220,38,38,0.60)"
-            },
-            water: {
-                c0: "#bae6fd", c1: "#38bdf8", c2: "#0369a1", stroke: "#0284c7", glow: "rgba(14,165,233,0.65)",
-                parchment: ["#0e2a47", "#091d33", "#061322", "#030a13"],
-                heartland: { c0: "#075985", c1: "#0c4a6e", c2: "#082f49" },
-                forest:    { c0: "#0f766e", c1: "#115e59", c2: "#134e4a" },
-                mountain:  { c0: "#64748b", c1: "#475569", c2: "#334155" },
-                meadows:   { c0: "#0284c7", c1: "#0369a1", c2: "#075985" },
-                water:     { c0: "#38bdf8", c1: "#0284c7", c2: "#0369a1" },
-                groundMoss:  "rgba(15,118,110,0.64)",
-                groundEarth: "rgba(12,74,110,0.58)",
-                groundStone: "rgba(71,85,105,0.65)",
-                groundWater: "rgba(14,165,233,0.62)",
-                groundMagic: "rgba(56,189,248,0.60)"
-            },
-            earth: {
-                c0: "#a7f3d0", c1: "#10b981", c2: "#065f46", stroke: "#059669", glow: "rgba(34,197,94,0.65)",
-                parchment: ["#1f331b", "#162613", "#0e1a0c", "#070e06"],
-                heartland: { c0: "#15803d", c1: "#166534", c2: "#14532d" },
-                forest:    { c0: "#064e3b", c1: "#065f46", c2: "#047857" },
-                mountain:  { c0: "#44403c", c1: "#3f3f46", c2: "#27272a" },
-                meadows:   { c0: "#4d7c0f", c1: "#3f6212", c2: "#365314" },
-                water:     { c0: "#047857", c1: "#065f46", c2: "#064e3b" },
-                groundMoss:  "rgba(22,101,52,0.68)",
-                groundEarth: "rgba(113,63,18,0.58)",
-                groundStone: "rgba(63,63,70,0.65)",
-                groundWater: "rgba(5,150,105,0.60)",
-                groundMagic: "rgba(16,185,129,0.60)"
-            },
-            air: {
-                c0: "#ede9fe", c1: "#c084fc", c2: "#6b21a8", stroke: "#9333ea", glow: "rgba(168,85,247,0.65)",
-                parchment: ["#241b4b", "#1a1338", "#120d26", "#090615"],
-                heartland: { c0: "#5b21b6", c1: "#4c1d95", c2: "#3b0764" },
-                forest:    { c0: "#4338ca", c1: "#3730a3", c2: "#312e81" },
-                mountain:  { c0: "#6b7280", c1: "#4b5563", c2: "#374151" },
-                meadows:   { c0: "#7c3aed", c1: "#6d28d9", c2: "#5b21b6" },
-                water:     { c0: "#a855f7", c1: "#9333ea", c2: "#7e22ce" },
-                groundMoss:  "rgba(76,29,149,0.64)",
-                groundEarth: "rgba(67,56,202,0.58)",
-                groundStone: "rgba(75,85,99,0.65)",
-                groundWater: "rgba(168,85,247,0.62)",
-                groundMagic: "rgba(192,132,252,0.60)"
-            }
-        };
-
-        var activePalette = themePalettes[th] || themePalettes.light;
+        var activePalette = BOARD_THEME_PALETTES[th] || BOARD_THEME_PALETTES.light;
 
         return '<defs>' +
             '<filter id="biomeBlur" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="34" /></filter>' +
@@ -103,7 +157,7 @@
             '  <stop offset="50%" stop-color="#734d28" />' +
             '  <stop offset="100%" stop-color="#4e3218" />' +
             '</linearGradient>' +
-            '<clipPath id="prsBoardInnerClip"><rect x="18" y="18" width="1364" height="824" rx="18"/></clipPath>' +
+            '<clipPath id="prsBoardInnerClip"><rect x="14" y="14" width="1372" height="832" rx="16"/></clipPath>' +
             '<filter id="cloudShadowBlur" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="28"/></filter>' +
             '<radialGradient id="atmoSunWarmth" cx="32%" cy="28%" r="72%">' +
             '  <stop offset="0%" stop-color="#fef3c7" stop-opacity="0.14" />' +
@@ -224,7 +278,17 @@
             '  <stop offset="100%" stop-color="' + activePalette.c2 + '" />' +
 
             '</linearGradient>' +
-
+            '<linearGradient id="boardFrameRimGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+            '  <stop offset="0%" stop-color="' + activePalette.rimLight + '" />' +
+            '  <stop offset="48%" stop-color="' + activePalette.rimMid + '" />' +
+            '  <stop offset="100%" stop-color="' + activePalette.rimDark + '" />' +
+            '</linearGradient>' +
+            '<radialGradient id="boardEdgeVignetteGrad" cx="50%" cy="50%" r="68%">' +
+            '  <stop offset="0%" stop-color="rgb(' + activePalette.vignetteRgb + ')" stop-opacity="0" />' +
+            '  <stop offset="74%" stop-color="rgb(' + activePalette.vignetteRgb + ')" stop-opacity="0" />' +
+            '  <stop offset="90%" stop-color="rgb(' + activePalette.vignetteRgb + ')" stop-opacity="0.26" />' +
+            '  <stop offset="100%" stop-color="rgb(' + activePalette.vignetteRgb + ')" stop-opacity="0.54" />' +
+            '</radialGradient>' +
             '<linearGradient id="pedestalGrad" x1="0%" y1="0%" x2="0%" y2="100%">' +
 
             '  <stop offset="0%" stop-color="#cbd5e1" />' +
@@ -519,6 +583,43 @@
     },
 
     
+        renderBoardFrameHTML: function (baseTh, pal) {
+        var out = [];
+        var th = resolveBoardThemeKey(baseTh);
+        var palette = pal || BOARD_THEME_PALETTES[th] || BOARD_THEME_PALETTES.light;
+        var outerRingD = roundedRectPathD(0, 0, 1400, 860, 22) + " " + roundedRectPathD(14, 14, 1372, 832, 16);
+        var bevelRingD = roundedRectPathD(5, 5, 1390, 850, 19) + " " + roundedRectPathD(13, 13, 1374, 834, 16);
+
+        out.push('  <g id="prs-board-frame" data-frame-element="' + this.escapeHtml(th) + '" pointer-events="none">');
+        out.push('    <path d="' + outerRingD + '" fill-rule="evenodd" fill="' + palette.frameOuter + '"/>');
+        out.push('    <path d="' + bevelRingD + '" fill-rule="evenodd" fill="' + palette.frameMid + '" opacity="0.92"/>');
+        out.push('    <rect x="2" y="2" width="1396" height="856" rx="20" fill="none" stroke="url(#boardFrameRimGrad)" stroke-width="3.2"/>');
+        out.push('    <rect x="13" y="13" width="1374" height="834" rx="16" fill="none" stroke="url(#boardFrameRimGrad)" stroke-width="2" opacity="0.88"/>');
+        out.push('    <rect x="18" y="18" width="1364" height="824" rx="13" fill="none" stroke="' + palette.rimLight + '" stroke-width="0.9" opacity="0.32"/>');
+
+        var midStuds = [[700, 7], [700, 853], [7, 430], [1393, 430]];
+        for (var si = 0; si < midStuds.length; si++) {
+            out.push('    <circle cx="' + midStuds[si][0] + '" cy="' + midStuds[si][1] + '" r="3.4" fill="' + palette.frameOuter + '" stroke="url(#boardFrameRimGrad)" stroke-width="1.2"/>');
+            out.push('    <circle cx="' + midStuds[si][0] + '" cy="' + midStuds[si][1] + '" r="1.3" fill="' + palette.ornamentCore + '" opacity="0.85"/>');
+        }
+
+        var corners = [[18, 18, 0], [1382, 18, 90], [1382, 842, 180], [18, 842, 270]];
+        for (var ci = 0; ci < corners.length; ci++) {
+            var cx = corners[ci][0];
+            var cy = corners[ci][1];
+            var deg = corners[ci][2];
+            out.push('    <g transform="translate(' + cx + ',' + cy + ') rotate(' + deg + ')">');
+            out.push('      <path d="M -7 30 L -7 -2 Q -7 -7 -2 -7 L 30 -7 L 24 0 L 2 0 Q 0 0 0 2 L 0 24 Z" fill="' + palette.frameMid + '" stroke="url(#boardFrameRimGrad)" stroke-width="1.35"/>');
+            out.push('      <circle cx="22.5" cy="-3.5" r="1.5" fill="' + palette.ornamentCore + '" opacity="0.78"/>');
+            out.push('      <circle cx="-3.5" cy="22.5" r="1.5" fill="' + palette.ornamentCore + '" opacity="0.78"/>');
+            out.push('      <circle cx="0" cy="0" r="8.8" fill="' + palette.frameOuter + '" stroke="url(#boardFrameRimGrad)" stroke-width="1.6"/>');
+            out.push('      <g transform="rotate(' + (-deg) + ')">' + renderCornerElementGlyphSVG(th, palette) + '</g>');
+            out.push('    </g>');
+        }
+        out.push('  </g>');
+        return out.join("\n");
+    },
+
     renderBoardStaticHTML: function () {
 
         var nodes = this.state.board.nodes;
@@ -529,24 +630,9 @@
 
         var out = [];
 
-        var th = this.currentTheme || "light";
+        var th = resolveBoardThemeKey(this.currentTheme || "light");
         var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
-
-        var themePalettes = {
-
-            light: { stroke: "#d4af37" },
-
-            fire:  { stroke: "#ea580c" },
-
-            water: { stroke: "#0284c7" },
-
-            earth: { stroke: "#059669" },
-
-            air:   { stroke: "#9333ea" }
-
-        };
-
-        var activePalette = themePalettes[th] || themePalettes.light;
+        var activePalette = BOARD_THEME_PALETTES[th] || BOARD_THEME_PALETTES.light;
 
         var isDesktopCrisp = (typeof this.isDesktopHighCrispMode === "function" && this.isDesktopHighCrispMode());
         if (isDesktopCrisp && this._bakedBackdrop && typeof this.disposeBackdropCache === "function") {
@@ -564,49 +650,42 @@
             out.push('  <g id="prs-static-backdrop">');
             var backdropStartIdx = out.length;
 
-        // 1. Podklad herní desky (pergamen nebo vlastní bitmapa)
+        // 1. Podklad herní desky (čistý vnitřek bez dřevěného okraje stolu + pergamen jako fallback když nekreslíme terén)
+        var terrainHTML = (gQuality !== "low" && typeof this.renderBoardTerrainHTML === "function" && this.state.board)
+            ? this.renderBoardTerrainHTML(this.state.board)
+            : "";
 
-        out.push('  <rect x="0" y="0" width="1400" height="860" rx="22" fill="url(#parchmentGrad)" stroke="' + activePalette.stroke + '" stroke-width="3.5"/>');
+        out.push('  <rect x="14" y="14" width="1372" height="832" rx="16" fill="url(#parchmentGrad)"/>');
 
-        if (this.graphicsConfig && this.graphicsConfig.boardBgUrl) {
+        if (!terrainHTML && this.graphicsConfig && this.graphicsConfig.boardBgUrl) {
             var boardBgHref = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(this.graphicsConfig.boardBgUrl) : this.graphicsConfig.boardBgUrl;
-            out.push('  <image href="' + this.escapeHtml(boardBgHref) + '" x="4" y="4" width="1392" height="852" preserveAspectRatio="xMidYMid slice" opacity="0.88" style="filter: var(--board-filter, none);" />');
+            out.push('  <g clip-path="url(#prsBoardInnerClip)">');
+            out.push('    <image href="' + this.escapeHtml(boardBgHref) + '" x="-34" y="-50" width="1468" height="960" preserveAspectRatio="xMidYMid slice" opacity="0.88" style="filter: var(--board-filter, none);" />');
+            out.push('  </g>');
         }
 
-        // Rohové kování desky
-
-        var corners = [[18, 18], [1382, 18], [18, 842], [1382, 842]];
-
-        for (var ci = 0; ci < corners.length; ci++) {
-
-            var ccx = corners[ci][0];
-
-            var ccy = corners[ci][1];
-
-            out.push('  <circle cx="' + ccx + '" cy="' + ccy + '" r="7" fill="' + activePalette.stroke + '" stroke="#000" stroke-width="1.2"/>');
-
-            out.push('  <circle cx="' + ccx + '" cy="' + ccy + '" r="2" fill="#fff" opacity="0.8"/>');
-
+        // 1a. Souvislý namalovaný terén (bezešvé textury se šumovými maskami / ořezem až k rámu)
+        if (terrainHTML) {
+            out.push(terrainHTML);
         }
 
-        // Kartografický dvojitý rám královské mapy (bez umělých čárkovaných přehybů)
-        out.push('  <rect x="10" y="10" width="1380" height="840" rx="18" fill="none" stroke="rgba(212,175,55,0.34)" stroke-width="1.3"/>');
-        out.push('  <rect x="16" y="16" width="1368" height="828" rx="14" fill="none" stroke="rgba(212,175,55,0.22)" stroke-width="1.0" stroke-dasharray="14,6,3,6"/>');
-
-        // 1a. Souvislý namalovaný terén (bezešvé textury se šumovými maskami)
-        if (gQuality !== "low" && typeof this.renderBoardTerrainHTML === "function" && this.state.board) {
-            out.push(this.renderBoardTerrainHTML(this.state.board));
+        // 1b + 1c. Sémantické akvarelové biomy a meandrující říční síť (oříznuté na vnitřní rám)
+        var hasBiomesLayer = Boolean(this.state.board && this.state.board.biomes && this.state.board.biomes.length > 0);
+        var hasRiversLayer = Boolean(this.state.board && this.state.board.rivers && this.state.board.rivers.length > 0);
+        if (hasBiomesLayer || hasRiversLayer) {
+            out.push('  <g clip-path="url(#prsBoardInnerClip)">');
+            if (hasBiomesLayer) {
+                out.push(this.renderBoardBiomesHTML(this.state.board));
+            }
+            if (hasRiversLayer) {
+                out.push(this.renderBoardRiversHTML(this.state.board));
+            }
+            out.push('  </g>');
         }
 
-        // 1b. Sémantické akvarelové biomy a vrstevnice
-        if (this.state.board && this.state.board.biomes && this.state.board.biomes.length > 0) {
-            out.push(this.renderBoardBiomesHTML(this.state.board));
-        }
-
-        // 1c. Meandrující říční síť a vodní toky
-        if (this.state.board && this.state.board.rivers && this.state.board.rivers.length > 0) {
-            out.push(this.renderBoardRiversHTML(this.state.board));
-        }
+        // 1d-pre. Jemná okrajová viněta a kovaný elementární rám herní desky
+        out.push('  <rect x="14" y="14" width="1372" height="832" rx="16" fill="url(#boardEdgeVignetteGrad)" pointer-events="none"/>');
+        out.push(this.renderBoardFrameHTML(th, activePalette));
 
         // 1d. Architektonické mosty přes řeku na křížení cest
         if (this.state.board && this.state.board.bridges && this.state.board.bridges.length > 0) {

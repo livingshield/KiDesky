@@ -68,13 +68,13 @@
     <meta name="apple-mobile-web-app-title" content="KiDesky">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 
-    <link rel="stylesheet" href="css/main.css?v=202611241405">
+    <link rel="stylesheet" href="css/main.css?v=202611241650">
 
-    <link rel="stylesheet" href="css/board.css?v=202611241405">
+    <link rel="stylesheet" href="css/board.css?v=202611241650">
 
-    <link rel="stylesheet" href="css/modals.css?v=202611241405">
+    <link rel="stylesheet" href="css/modals.css?v=202611241650">
 
-    <link rel="stylesheet" href="css/mobile.css?v=202611241405">
+    <link rel="stylesheet" href="css/mobile.css?v=202611241650">
 
     <!-- Google Identity Services (Sign-In with Google) -->
     <script>
@@ -147,8 +147,8 @@
                 <!-- Barevný design & živel království -->
                 <div class="topbar-theme-wrap" title="Vyber živel & barevný design království" data-i18n-title="ui.theme.title">
                     <select id="global-element-theme-select" class="topbar-theme-select" onchange="PRS_App.setElementTheme(this.value, true)" aria-label="Barevný design království" data-i18n-aria="ui.theme.aria">
-                        <option value="light" data-i18n="ui.theme.light">👑 Zlato – Den</option>
-                        <option value="light_night" data-i18n="ui.theme.light_night">🌙 Zlato – Noc</option>
+                        <option value="light" data-i18n="ui.theme.light">☀️ Slunečný – Den</option>
+                        <option value="light_night" data-i18n="ui.theme.light_night">🌙 Slunečný – Noc</option>
                         <option value="fire" data-i18n="ui.theme.fire">🔥 Oheň – Den</option>
                         <option value="fire_night" data-i18n="ui.theme.fire_night">🌋 Oheň – Noc</option>
                         <option value="water" data-i18n="ui.theme.water">💧 Voda – Den</option>
@@ -727,8 +727,8 @@
                         <div style="border-top:1px solid rgba(212,175,55,0.2); padding-top:0.65rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
                             <div style="font-size:0.78rem; color:var(--text-muted); font-weight:600;" data-i18n="lobby.realm_element">🎨 Živel království:</div>
                             <select id="lobby-element-theme-select" class="topbar-theme-select" style="max-width:145px; padding:0.25rem 0.5rem; font-size:0.8rem; border:1px solid rgba(212,175,55,0.3); border-radius:6px;" onchange="PRS_App.setElementTheme(this.value, true)" aria-label="Živel království" data-i18n-aria="ui.theme.aria">
-                                <option value="light" data-i18n="lobby.elements.light">👑 Zlato – Den</option>
-                                <option value="light_night" data-i18n="lobby.elements.light_night">🌙 Zlato – Noc</option>
+                                <option value="light" data-i18n="lobby.elements.light">☀️ Slunečný – Den</option>
+                                <option value="light_night" data-i18n="lobby.elements.light_night">🌙 Slunečný – Noc</option>
                                 <option value="fire" data-i18n="lobby.elements.fire">🔥 Oheň – Den</option>
                                 <option value="fire_night" data-i18n="lobby.elements.fire_night">🌋 Oheň – Noc</option>
                                 <option value="water" data-i18n="lobby.elements.water">💧 Voda – Den</option>
@@ -2742,8 +2742,8 @@
 
                     <div class="element-theme-switcher" style="flex-wrap:wrap;">
 
-                        <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true)" title="Královské Zlato (Den)" data-i18n-title="ui.theme.light_title">👑 <span class="theme-label" data-i18n="ui.theme.light_short">Zlato (Den)</span></button>
-                        <button class="theme-btn" data-theme-btn="light_night" onclick="PRS_App.setElementTheme('light_night', true)" title="Královské Zlato (Noc)" data-i18n-title="ui.theme.light_night_title">🌙 <span class="theme-label" data-i18n="ui.theme.light_night_short">Zlato (Noc)</span></button>
+                        <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true)" title="Slunečné království (Den)" data-i18n-title="ui.theme.light_title">☀️ <span class="theme-label" data-i18n="ui.theme.light_short">Slunečný (Den)</span></button>
+                        <button class="theme-btn" data-theme-btn="light_night" onclick="PRS_App.setElementTheme('light_night', true)" title="Slunečné království (Noc)" data-i18n-title="ui.theme.light_night_title">🌙 <span class="theme-label" data-i18n="ui.theme.light_night_short">Slunečný (Noc)</span></button>
 
                         <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true)" title="Dračí Oheň (Den)" data-i18n-title="ui.theme.fire_title">🔥 <span class="theme-label" data-i18n="ui.theme.fire_short">Oheň (Den)</span></button>
                         <button class="theme-btn" data-theme-btn="fire_night" onclick="PRS_App.setElementTheme('fire_night', true)" title="Dračí Oheň (Noc)" data-i18n-title="ui.theme.fire_night_title">🌋 <span class="theme-label" data-i18n="ui.theme.fire_night_short">Oheň (Noc)</span></button>
@@ -3116,50 +3116,50 @@
 
     <audio id="prs-bgm-audio" loop preload="none"></audio>
 
-    <script src="js/i18n/languages.js?v=202611241405" defer></script>
-    <script src="js/core/module-loader.js?v=202611241405" defer></script>
-    <script src="js/app-i18n.js?v=202611241405" defer></script>
-    <script src="js/game-data.js?v=202611241405" defer></script>
-    <script src="js/boards/boards-decor-catalog.js?v=202611241405" defer></script>
-    <script src="js/boards/boards-geometry.js?v=202611241405" defer></script>
-    <script src="js/boards/boards-generator.js?v=202611241405" defer></script>
-    <script src="js/boards/boards-builder.js?v=202611241405" defer></script>
-    <script src="js/boards/boards-presets.js?v=202611241405" defer></script>
-    <script src="js/engine/engine-state.js?v=202611241405" defer></script>
-    <script src="js/engine/engine-movement.js?v=202611241405" defer></script>
-    <script src="js/engine/engine-economy.js?v=202611241405" defer></script>
-    <script src="js/engine/engine-actions.js?v=202611241405" defer></script>
-    <script src="js/game-combat-ai.js?v=202611241405" defer></script>
-    <script src="js/app-audio.js?v=202611241405" defer></script>
-    <script src="js/app-dialog.js?v=202611241405" defer></script>
-    <script src="js/app-api.js?v=202611241405" defer></script>
-    <script src="js/app-modal-manager.js?v=202611241405" defer></script>
-    <script src="js/app.js?v=202611241405" defer></script>
-    <script src="js/app/app-music-ui.js?v=202611241405" defer></script>
-    <script src="js/app/app-landing.js?v=202611241405" defer></script>
-    <script src="js/app/app-profile-cosmetics.js?v=202611241405" defer></script>
-    <script src="js/app/app-lobby-session.js?v=202611241405" defer></script>
-    <script src="js/app/app-map-studio.js?v=202611241405" defer></script>
-    <script src="js/board/board-camera.js?v=202611241405" defer></script>
-    <script src="js/board/board-rivers.js?v=202611241405" defer></script>
-    <script src="js/board/board-terrain.js?v=202611241405" defer></script>
-    <script src="js/board/board-backdrop-cache.js?v=202611241405" defer></script>
-    <script src="js/board/board-static-svg.js?v=202611241405" defer></script>
-    <script src="js/board/board-tokens.js?v=202611241405" defer></script>
-    <script src="js/board/board-ambient.js?v=202611241405" defer></script>
-    <script src="js/hud/hud-mobile-dock.js?v=202611241405" defer></script>
-    <script src="js/hud/hud-inspector.js?v=202611241405" defer></script>
-    <script src="js/hud/hud-advisor.js?v=202611241405" defer></script>
-    <script src="js/hud/hud-action-panel.js?v=202611241405" defer></script>
-    <script src="js/hud/hud-turn-actions.js?v=202611241405" defer></script>
-    <script src="js/modals/modal-victory-diploma.js?v=202611241405" defer></script>
-    <script src="js/modals/modal-armory.js?v=202611241405" defer></script>
-    <script src="js/modals/modal-combat.js?v=202611241405" defer></script>
-    <script src="js/modals/modal-festival-chance.js?v=202611241405" defer></script>
-    <script src="js/modals/modal-cheatsheet.js?v=202611241405" defer></script>
-    <script src="js/app-online.js?v=202611241405" defer></script>
-    <script src="js/app-saves.js?v=202611241405" defer></script>
-    <script src="js/app-musicwidget.js?v=202611241405" defer></script>
+    <script src="js/i18n/languages.js?v=202611241650" defer></script>
+    <script src="js/core/module-loader.js?v=202611241650" defer></script>
+    <script src="js/app-i18n.js?v=202611241650" defer></script>
+    <script src="js/game-data.js?v=202611241650" defer></script>
+    <script src="js/boards/boards-decor-catalog.js?v=202611241650" defer></script>
+    <script src="js/boards/boards-geometry.js?v=202611241650" defer></script>
+    <script src="js/boards/boards-generator.js?v=202611241650" defer></script>
+    <script src="js/boards/boards-builder.js?v=202611241650" defer></script>
+    <script src="js/boards/boards-presets.js?v=202611241650" defer></script>
+    <script src="js/engine/engine-state.js?v=202611241650" defer></script>
+    <script src="js/engine/engine-movement.js?v=202611241650" defer></script>
+    <script src="js/engine/engine-economy.js?v=202611241650" defer></script>
+    <script src="js/engine/engine-actions.js?v=202611241650" defer></script>
+    <script src="js/game-combat-ai.js?v=202611241650" defer></script>
+    <script src="js/app-audio.js?v=202611241650" defer></script>
+    <script src="js/app-dialog.js?v=202611241650" defer></script>
+    <script src="js/app-api.js?v=202611241650" defer></script>
+    <script src="js/app-modal-manager.js?v=202611241650" defer></script>
+    <script src="js/app.js?v=202611241650" defer></script>
+    <script src="js/app/app-music-ui.js?v=202611241650" defer></script>
+    <script src="js/app/app-landing.js?v=202611241650" defer></script>
+    <script src="js/app/app-profile-cosmetics.js?v=202611241650" defer></script>
+    <script src="js/app/app-lobby-session.js?v=202611241650" defer></script>
+    <script src="js/app/app-map-studio.js?v=202611241650" defer></script>
+    <script src="js/board/board-camera.js?v=202611241650" defer></script>
+    <script src="js/board/board-rivers.js?v=202611241650" defer></script>
+    <script src="js/board/board-terrain.js?v=202611241650" defer></script>
+    <script src="js/board/board-backdrop-cache.js?v=202611241650" defer></script>
+    <script src="js/board/board-static-svg.js?v=202611241650" defer></script>
+    <script src="js/board/board-tokens.js?v=202611241650" defer></script>
+    <script src="js/board/board-ambient.js?v=202611241650" defer></script>
+    <script src="js/hud/hud-mobile-dock.js?v=202611241650" defer></script>
+    <script src="js/hud/hud-inspector.js?v=202611241650" defer></script>
+    <script src="js/hud/hud-advisor.js?v=202611241650" defer></script>
+    <script src="js/hud/hud-action-panel.js?v=202611241650" defer></script>
+    <script src="js/hud/hud-turn-actions.js?v=202611241650" defer></script>
+    <script src="js/modals/modal-victory-diploma.js?v=202611241650" defer></script>
+    <script src="js/modals/modal-armory.js?v=202611241650" defer></script>
+    <script src="js/modals/modal-combat.js?v=202611241650" defer></script>
+    <script src="js/modals/modal-festival-chance.js?v=202611241650" defer></script>
+    <script src="js/modals/modal-cheatsheet.js?v=202611241650" defer></script>
+    <script src="js/app-online.js?v=202611241650" defer></script>
+    <script src="js/app-saves.js?v=202611241650" defer></script>
+    <script src="js/app-musicwidget.js?v=202611241650" defer></script>
     <script>
         (function () {
             function bootApp() {
@@ -3462,8 +3462,8 @@
 
                     <div class="element-theme-switcher settings-theme-switcher" style="display:flex; gap:0.35rem; flex-wrap:wrap; border-radius:16px; padding:0.3rem;">
 
-                        <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true); PRS_App.syncSettingsThemeBtns();" title="Královské Zlato (Den)" data-i18n-title="ui.theme.light_title">👑 <span class="theme-label" data-i18n="ui.theme.light_short">Zlato (Den)</span></button>
-                        <button class="theme-btn" data-theme-btn="light_night" onclick="PRS_App.setElementTheme('light_night', true); PRS_App.syncSettingsThemeBtns();" title="Královské Zlato (Noc)" data-i18n-title="ui.theme.light_night_title">🌙 <span class="theme-label" data-i18n="ui.theme.light_night_short">Zlato (Noc)</span></button>
+                        <button class="theme-btn" data-theme-btn="light" onclick="PRS_App.setElementTheme('light', true); PRS_App.syncSettingsThemeBtns();" title="Slunečné království (Den)" data-i18n-title="ui.theme.light_title">☀️ <span class="theme-label" data-i18n="ui.theme.light_short">Slunečný (Den)</span></button>
+                        <button class="theme-btn" data-theme-btn="light_night" onclick="PRS_App.setElementTheme('light_night', true); PRS_App.syncSettingsThemeBtns();" title="Slunečné království (Noc)" data-i18n-title="ui.theme.light_night_title">🌙 <span class="theme-label" data-i18n="ui.theme.light_night_short">Slunečný (Noc)</span></button>
 
                         <button class="theme-btn" data-theme-btn="fire" onclick="PRS_App.setElementTheme('fire', true); PRS_App.syncSettingsThemeBtns();" title="Dračí Oheň (Den)" data-i18n-title="ui.theme.fire_title">🔥 <span class="theme-label" data-i18n="ui.theme.fire_short">Oheň (Den)</span></button>
                         <button class="theme-btn" data-theme-btn="fire_night" onclick="PRS_App.setElementTheme('fire_night', true); PRS_App.syncSettingsThemeBtns();" title="Dračí Oheň (Noc)" data-i18n-title="ui.theme.fire_night_title">🌋 <span class="theme-label" data-i18n="ui.theme.fire_night_short">Oheň (Noc)</span></button>
