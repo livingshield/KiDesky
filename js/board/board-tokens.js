@@ -16,6 +16,8 @@
 
         tokensLayer.innerHTML = this.renderBoardTokensHTML();
 
+        if (typeof this.updateDayNightOverlay === "function") this.updateDayNightOverlay();
+
     },
 
     

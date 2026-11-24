@@ -103,6 +103,18 @@
             '  <stop offset="50%" stop-color="#734d28" />' +
             '  <stop offset="100%" stop-color="#4e3218" />' +
             '</linearGradient>' +
+            '<clipPath id="prsBoardInnerClip"><rect x="18" y="18" width="1364" height="824" rx="18"/></clipPath>' +
+            '<filter id="cloudShadowBlur" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="28"/></filter>' +
+            '<radialGradient id="atmoSunWarmth" cx="32%" cy="28%" r="72%">' +
+            '  <stop offset="0%" stop-color="#fef3c7" stop-opacity="0.14" />' +
+            '  <stop offset="55%" stop-color="#fde68a" stop-opacity="0.02" />' +
+            '  <stop offset="100%" stop-color="#0f0a06" stop-opacity="0.22" />' +
+            '</radialGradient>' +
+            '<radialGradient id="dayNightTorchGlow" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="#fde047" stop-opacity="0.72" />' +
+            '  <stop offset="45%" stop-color="#f97316" stop-opacity="0.34" />' +
+            '  <stop offset="100%" stop-color="#f97316" stop-opacity="0" />' +
+            '</radialGradient>' +
             '<radialGradient id="heartlandBiomeGrad" cx="50%" cy="48%" r="58%">' +
             '  <stop offset="0%" stop-color="' + activePalette.heartland.c0 + '" stop-opacity="0.58" />' +
             '  <stop offset="55%" stop-color="' + activePalette.heartland.c1 + '" stop-opacity="0.46" />' +
@@ -1051,11 +1063,53 @@
 
             }
 
+            // Stráže u questových políček ve stylu HoMM
+
+            if (nd.type === "QUEST") {
+
+                var qGuardsU3 = ["assets/monsters/monster_chimera.webp", "assets/monsters/monster_manticore.webp", "assets/monsters/monster_rock_giant.webp"];
+
+                var qGuardsU2 = ["assets/monsters/monster_troll.webp", "assets/monsters/monster_griffin.webp", "assets/monsters/monster_minotaur.webp", "assets/monsters/monster_black_knight.webp"];
+
+                var qGuardsU1 = ["assets/monsters/monster_wolf_pack.webp", "assets/monsters/monster_boar.webp", "assets/monsters/monster_bear.webp"];
+
+                var gPool = (nd.subtype === "U3") ? qGuardsU3 : ((nd.subtype === "U2") ? qGuardsU2 : qGuardsU1);
+
+                var rawGuardUrl = gPool[Math.abs(nd.id || 0) % gPool.length];
+
+                var guardUrl = window.PRS_normalizeAssetUrl ? window.PRS_normalizeAssetUrl(rawGuardUrl) : rawGuardUrl;
+
+                var guardSide = (nd.x > 700) ? -1 : 1;
+
+                var gx = Math.max(26, Math.min(1374, Math.round(nd.x + guardSide * (r + 14))));
+
+                var gy = Math.max(28, Math.min(832, Math.round(nd.y - 6)));
+
+                var gw = (nd.subtype === "U3") ? 32 : 26;
+
+                var gDelay = ((Math.abs(nd.id || 0) % 6) * 0.45).toFixed(2);
+
+                out.push('    <g class="prs-quest-guard" transform="translate(' + gx + ',' + gy + ')" pointer-events="none">');
+
+                out.push('      <ellipse cx="0" cy="11" rx="9" ry="3.4" fill="rgba(0,0,0,0.42)"/>');
+
+                out.push('      <g class="prs-quest-guard-body" style="animation-delay:-' + gDelay + 's;">');
+
+                out.push('        <image href="' + this.escapeHtml(guardUrl) + '" x="' + (-gw / 2) + '" y="' + (-gw / 2 - 2) + '" width="' + gw + '" height="' + gw + '" preserveAspectRatio="xMidYMid meet"/>');
+
+                out.push('      </g>');
+
+                out.push('    </g>');
+
+            }
+
             // 3D Vlající praporek vlastnictví u obsazených políček v barvě daného hráče
 
             if (nd.owner !== null && this.state.players[nd.owner]) {
 
                 var ownerP = this.state.players[nd.owner];
+
+                var flagDelay = ((Math.abs(nd.id || 0) % 7) * 0.35).toFixed(2);
 
                 out.push('    <g class="tile-ownership-flag" transform="translate(' + (nd.x + r - 3) + ',' + (nd.y - r - 8) + ')">');
 
@@ -1065,17 +1119,27 @@
 
                 out.push('      <polygon points="0,-6 -2.5,-1 2.5,-1" fill="#fde047" stroke="#b45309" stroke-width="0.6"/>');
 
-                out.push('      <path d="M 0 0 C 6 -3, 12 3, 19 0 L 15 7 L 19 14 C 12 11, 6 17, 0 14 Z" fill="' + ownerP.color + '" stroke="#ffffff" stroke-width="1.1" style="filter:drop-shadow(0 3px 3px rgba(0,0,0,0.7));"/>');
+                out.push('      <g class="prs-flag-cloth" style="animation-delay:-' + flagDelay + 's;">');
 
-                out.push('      <path d="M 0 0 C 6 -3, 12 3, 19 0 L 15 3.5 L 0 3.5 Z" fill="rgba(255,255,255,0.25)"/>');
+                out.push('        <path d="M 0 0 C 6 -3, 12 3, 19 0 L 15 7 L 19 14 C 12 11, 6 17, 0 14 Z" fill="' + ownerP.color + '" stroke="#ffffff" stroke-width="1.1" style="filter:drop-shadow(0 3px 3px rgba(0,0,0,0.7));"/>');
 
-                out.push('      <text x="8" y="9.5" text-anchor="middle" fill="#ffffff" font-size="7.5" font-weight="bold" font-family="Cinzel, serif">' + (ownerP.index + 1) + '</text>');
+                out.push('        <path d="M 0 0 C 6 -3, 12 3, 19 0 L 15 3.5 L 0 3.5 Z" fill="rgba(255,255,255,0.25)"/>');
+
+                out.push('        <text x="8" y="9.5" text-anchor="middle" fill="#ffffff" font-size="7.5" font-weight="bold" font-family="Cinzel, serif">' + (ownerP.index + 1) + '</text>');
+
+                out.push('      </g>');
 
                 out.push('    </g>');
 
             }
 
             out.push('  </g>');
+
+        }
+
+        if (typeof this.renderBoardAtmosphereHTML === "function") {
+
+            out.push(this.renderBoardAtmosphereHTML(this.state.board));
 
         }
 

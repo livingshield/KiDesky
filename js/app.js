@@ -1087,6 +1087,7 @@ window.PRS_App = {
         if (this.hasGameStarted) {
             this._safeCall("renderQuestGoalBar", this.renderQuestGoalBar);
         }
+        this._safeCall("updateDayNightButtonUI", this.updateDayNightButtonUI);
         if (this.lastSavedSessions && typeof this.renderSavedSessionsList === "function") {
             this._safeCall("renderSavedSessionsList", function () { self.renderSavedSessionsList(self.lastSavedSessions); });
         }

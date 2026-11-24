@@ -320,7 +320,241 @@
         }
 
         return [l1, l2];
+    },
 
+    // ========================================================================
+    // FÁZE 5: ŽIVÝ SVĚT — ATMOSFÉRA, MRAKY, KOUŘ, MLÝNY, PTÁCI A DEN/NOC
+    // ========================================================================
+    isDayNightEnabled: function () {
+        try {
+            return typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_daynight_enabled") === "1";
+        } catch (e) {
+            return false;
+        }
+    },
+
+    getDayNightPhase: function () {
+        var rnd = (this.state && typeof this.state.round === "number" && this.state.round > 0) ? this.state.round : 1;
+        var slot = (rnd - 1) % 4;
+        if (slot === 0) return { key: "dawn", fill: "rgba(255,178,102,0.12)", lanternOpacity: 0.25 };
+        if (slot === 1) return { key: "day", fill: "rgba(255,244,200,0.03)", lanternOpacity: 0 };
+        if (slot === 2) return { key: "dusk", fill: "rgba(168,78,54,0.18)", lanternOpacity: 0.55 };
+        return { key: "night", fill: "rgba(12,24,62,0.34)", lanternOpacity: 0.92 };
+    },
+
+    toggleDayNightCycle: function () {
+        var nextVal = this.isDayNightEnabled() ? "0" : "1";
+        try {
+            if (typeof localStorage !== "undefined" && localStorage) {
+                localStorage.setItem("kidesky_daynight_enabled", nextVal);
+            }
+        } catch (e) { }
+        this.updateDayNightOverlay();
+        this.updateDayNightButtonUI();
+    },
+
+    updateDayNightButtonUI: function () {
+        if (typeof document === "undefined" || !document) return;
+        var btn = document.getElementById("btn-toggle-daynight");
+        if (!btn) return;
+        var enabled = this.isDayNightEnabled();
+        var labelKey = enabled ? "ui.board_bar.daynight_on" : "ui.board_bar.daynight_off";
+        var fallback = enabled ? "🌙 Den/Noc ✓" : "☀️ Den/Noc";
+        var text = (window.PRS_I18n && typeof window.PRS_I18n.t === "function") ? window.PRS_I18n.t(labelKey, null, fallback) : fallback;
+        var title = (window.PRS_I18n && typeof window.PRS_I18n.t === "function") ? window.PRS_I18n.t("ui.board_bar.daynight_title", null, "Zapnout nebo vypnout volitelný cyklus denní doby podle kola") : "Zapnout nebo vypnout volitelný cyklus denní doby podle kola";
+        btn.textContent = text;
+        btn.setAttribute("data-i18n", labelKey);
+        btn.setAttribute("title", title);
+        btn.setAttribute("aria-pressed", enabled ? "true" : "false");
+        if (enabled) {
+            btn.style.borderColor = "#818cf8";
+            btn.style.background = "rgba(49, 46, 129, 0.55)";
+            btn.style.color = "#e0e7ff";
+        } else {
+            btn.style.borderColor = "";
+            btn.style.background = "";
+            btn.style.color = "";
+        }
+    },
+
+    updateDayNightOverlay: function () {
+        if (typeof document !== "undefined" && document) {
+            var tintEl = document.getElementById("prs-daynight-tint");
+            var lanternsEl = document.getElementById("prs-daynight-lanterns");
+            var enabled = this.isDayNightEnabled();
+            var phase = this.getDayNightPhase();
+            if (tintEl) {
+                tintEl.setAttribute("fill", phase.fill);
+                tintEl.setAttribute("opacity", enabled ? "1" : "0");
+            }
+            if (lanternsEl) {
+                lanternsEl.setAttribute("opacity", enabled ? String(phase.lanternOpacity) : "0");
+            }
+        }
+        this.updateDayNightButtonUI();
+    },
+
+    renderBoardAtmosphereHTML: function (board) {
+        if (!board) return "";
+        var out = [];
+        var decs = Array.isArray(board.decorations) ? board.decorations : [];
+        var nodes = Array.isArray(board.nodes) ? board.nodes : [];
+        var rivers = Array.isArray(board.rivers) ? board.rivers : [];
+        var th = this.currentTheme || (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) || "light";
+
+        function atmoHash(a, b) {
+            var v = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453;
+            return v - Math.floor(v);
+        }
+
+        out.push('  <g id="prs-atmosphere-layer" clip-path="url(#prsBoardInnerClip)" pointer-events="none">');
+
+        // A. Jemné sluneční teplo a okrajová vinětace
+        out.push('    <rect x="18" y="18" width="1364" height="824" fill="url(#atmoSunWarmth)" opacity="0.55"/>');
+
+        // B. Putující stíny mraků
+        out.push('    <g id="prs-cloud-shadows" style="mix-blend-mode:multiply;">');
+        out.push('      <ellipse class="prs-cloud-shadow prs-cloud-1" cx="240" cy="180" rx="220" ry="82" fill="rgba(12,18,24,0.16)" filter="url(#cloudShadowBlur)"/>');
+        out.push('      <ellipse class="prs-cloud-shadow prs-cloud-2" cx="780" cy="460" rx="260" ry="95" fill="rgba(10,16,22,0.14)" filter="url(#cloudShadowBlur)"/>');
+        out.push('      <ellipse class="prs-cloud-shadow prs-cloud-3" cx="480" cy="690" rx="190" ry="72" fill="rgba(12,18,24,0.15)" filter="url(#cloudShadowBlur)"/>');
+        out.push('    </g>');
+
+        // C. Kouř stoupající z komínů chalup, čarodějných chýší a sídel
+        var smokeEmitters = [];
+        for (var i = 0; i < decs.length && smokeEmitters.length < 10; i++) {
+            var d = decs[i];
+            if (!d || (d.catalogId !== "cottage_timber" && d.catalogId !== "witch_hut")) continue;
+            if (typeof this.isDecorCollidingWithRivers === "function" && this.isDecorCollidingWithRivers(d, rivers)) continue;
+            var sc = d.scale || 1;
+            var flipSign = d.isFlipped ? -1 : 1;
+            var sx, sy, sCol;
+            if (d.catalogId === "witch_hut") {
+                sx = Math.round(d.x + d.w * 0.19 * sc * flipSign);
+                sy = Math.round(d.y - d.h * 0.31 * sc);
+                sCol = "rgba(212,186,246,0.46)";
+            } else {
+                sx = Math.round(d.x - d.w * 0.07 * sc * flipSign);
+                sy = Math.round(d.y - d.h * 0.45 * sc);
+                sCol = "rgba(236,232,226,0.44)";
+            }
+            smokeEmitters.push({ x: sx, y: sy, color: sCol, phase: atmoHash(d.x, d.y) * 4.5 });
+        }
+        for (var ni = 0; ni < nodes.length && smokeEmitters.length < 14; ni++) {
+            var nd = nodes[ni];
+            if (!nd) continue;
+            if ((nd.type === "VILLAGE" && (nd.villageLevel || 1) >= 2) || nd.type === "TOWN" || nd.type === "TAVERN" || nd.type === "BLACKSMITH") {
+                smokeEmitters.push({ x: Math.round(nd.x + 8), y: Math.round(nd.y - 24), color: "rgba(234,230,224,0.42)", phase: atmoHash(nd.x, nd.y) * 4.5 });
+            }
+        }
+        out.push('    <g id="prs-chimney-smoke">');
+        for (var se = 0; se < smokeEmitters.length; se++) {
+            var em = smokeEmitters[se];
+            for (var p = 0; p < 3; p++) {
+                var delay = (em.phase + p * 1.73).toFixed(2);
+                out.push('      <circle class="prs-smoke-puff" cx="' + em.x + '" cy="' + em.y + '" r="3.2" fill="' + em.color + '" style="animation-delay:-' + delay + 's;"/>');
+            }
+        }
+        out.push('    </g>');
+
+        // D. Větrné víry kolem lopatek větrných mlýnů
+        out.push('    <g id="prs-windmill-anim">');
+        var millCount = 0;
+        for (var wi = 0; wi < decs.length && millCount < 8; wi++) {
+            var wd = decs[wi];
+            if (!wd || wd.catalogId !== "windmill") continue;
+            if (typeof this.isDecorCollidingWithRivers === "function" && this.isDecorCollidingWithRivers(wd, rivers)) continue;
+            var wsc = wd.scale || 1;
+            var wFlip = wd.isFlipped ? -1 : 1;
+            var hubX = Math.round(wd.x + wd.w * 0.13 * wsc * wFlip);
+            var hubY = Math.round(wd.y - wd.h * 0.14 * wsc);
+            var rr = Math.max(9, Math.round(14 * wsc));
+            var wDelay = (atmoHash(wd.x, wd.y) * 9).toFixed(2);
+            out.push('      <g transform="translate(' + hubX + ',' + hubY + ')">');
+            out.push('        <g class="prs-windmill-rotor" style="animation-delay:-' + wDelay + 's;">');
+            out.push('          <path d="M 0,-' + rr + ' A ' + rr + ',' + rr + ' 0 0,1 ' + Math.round(rr * 0.72) + ',-' + Math.round(rr * 0.68) + '" fill="none" stroke="rgba(255,248,220,0.48)" stroke-width="1.2" stroke-linecap="round"/>');
+            out.push('          <path d="M ' + rr + ',0 A ' + rr + ',' + rr + ' 0 0,1 ' + Math.round(rr * 0.68) + ',' + Math.round(rr * 0.72) + '" fill="none" stroke="rgba(255,248,220,0.42)" stroke-width="1.1" stroke-linecap="round"/>');
+            out.push('          <path d="M 0,' + rr + ' A ' + rr + ',' + rr + ' 0 0,1 -' + Math.round(rr * 0.72) + ',' + Math.round(rr * 0.68) + '" fill="none" stroke="rgba(255,248,220,0.48)" stroke-width="1.2" stroke-linecap="round"/>');
+            out.push('          <path d="M -' + rr + ',0 A ' + rr + ',' + rr + ' 0 0,1 -' + Math.round(rr * 0.68) + ',-' + Math.round(rr * 0.72) + '" fill="none" stroke="rgba(255,248,220,0.42)" stroke-width="1.1" stroke-linecap="round"/>');
+            out.push('          <line x1="-' + Math.round(rr * 0.45) + '" y1="0" x2="' + Math.round(rr * 0.45) + '" y2="0" stroke="rgba(253,230,138,0.35)" stroke-width="0.9" stroke-linecap="round"/>');
+            out.push('          <line x1="0" y1="-' + Math.round(rr * 0.45) + '" x2="0" y2="' + Math.round(rr * 0.45) + '" stroke="rgba(253,230,138,0.35)" stroke-width="0.9" stroke-linecap="round"/>');
+            out.push('        </g>');
+            out.push('        <circle cx="0" cy="0" r="2.0" fill="rgba(254,243,199,0.72)"/>');
+            out.push('      </g>');
+            millCount++;
+        }
+        out.push('    </g>');
+
+        // E. Třpytivé odlesky na hladině řeky
+        out.push('    <g id="prs-water-sparkles">');
+        if (rivers.length > 0 && typeof this.sampleRiverPath === "function") {
+            var spCol = (th === "fire") ? "rgba(254,240,138,0.90)" : ((th === "air") ? "rgba(224,231,255,0.88)" : "rgba(255,255,255,0.86)");
+            var spPlaced = 0;
+            for (var rIdx = 0; rIdx < rivers.length && spPlaced < 16; rIdx++) {
+                var rsmp = this.sampleRiverPath(rivers[rIdx].path, 55);
+                if (!rsmp || !rsmp.pts) continue;
+                for (var ptIdx = 1; ptIdx < rsmp.pts.length - 1 && spPlaced < 16; ptIdx++) {
+                    var rpt = rsmp.pts[ptIdx];
+                    var off = (atmoHash(rpt.x, rpt.y) - 0.5) * 14;
+                    var spX = Math.round(rpt.x + (rpt.nx || 0) * off);
+                    var spY = Math.round(rpt.y + (rpt.ny || 0) * off);
+                    if (spX < 36 || spX > 1364 || spY < 36 || spY > 824) continue;
+                    var spDelay = (atmoHash(spX, spY) * 4.4).toFixed(2);
+                    out.push('      <g transform="translate(' + spX + ',' + spY + ')">');
+                    out.push('        <path class="prs-water-sparkle" style="animation-delay:-' + spDelay + 's;" d="M 0,-3.2 L 0.8,-0.8 L 3.2,0 L 0.8,0.8 L 0,3.2 L -0.8,0.8 L -3.2,0 L -0.8,-0.8 Z" fill="' + spCol + '"/>');
+                    out.push('      </g>');
+                    spPlaced++;
+                }
+            }
+        }
+        out.push('    </g>');
+
+        // F. Dvě malá hejna ptáků plachtící nad mapou
+        var birdCol = (th === "fire") ? "rgba(48,20,14,0.68)" : "rgba(36,28,22,0.62)";
+        out.push('    <g id="prs-bird-flocks">');
+        out.push('      <g class="prs-bird-flock prs-bird-flock-1">');
+        var flock1 = [[0, 0, "0s"], [-14, -9, "0.22s"], [-12, 10, "0.41s"], [-26, -15, "0.15s"]];
+        for (var b1 = 0; b1 < flock1.length; b1++) {
+            out.push('        <g transform="translate(' + flock1[b1][0] + ',' + flock1[b1][1] + ')"><path class="prs-bird-wing" style="animation-delay:' + flock1[b1][2] + ';" d="M -4.2,1.2 Q -2,-2.2 0,0.4 Q 2,-2.2 4.2,1.2" fill="none" stroke="' + birdCol + '" stroke-width="1.25" stroke-linecap="round"/></g>');
+        }
+        out.push('      </g>');
+        out.push('      <g class="prs-bird-flock prs-bird-flock-2">');
+        var flock2 = [[0, 0, "0.10s"], [-13, 8, "0.33s"], [-15, -7, "0.52s"]];
+        for (var b2 = 0; b2 < flock2.length; b2++) {
+            out.push('        <g transform="translate(' + flock2[b2][0] + ',' + flock2[b2][1] + ')"><path class="prs-bird-wing" style="animation-delay:' + flock2[b2][2] + ';" d="M -3.8,1.0 Q -1.8,-1.8 0,0.4 Q 1.8,-1.8 3.8,1.0" fill="none" stroke="' + birdCol + '" stroke-width="1.15" stroke-linecap="round"/></g>');
+        }
+        out.push('      </g>');
+        out.push('    </g>');
+
+        // G. Volitelný cyklus dne a noci podle kola (výchozí stav: vypnuto)
+        var dnEnabled = this.isDayNightEnabled();
+        var dnPhase = this.getDayNightPhase();
+        var tintOp = dnEnabled ? "1" : "0";
+        var lanOp = dnEnabled ? String(dnPhase.lanternOpacity) : "0";
+        out.push('    <g id="prs-daynight-layer">');
+        out.push('      <rect id="prs-daynight-tint" class="prs-daynight-tint" x="18" y="18" width="1364" height="824" fill="' + dnPhase.fill + '" opacity="' + tintOp + '"/>');
+        out.push('      <g id="prs-daynight-lanterns" class="prs-daynight-lanterns" opacity="' + lanOp + '">');
+        var lanCount = 0;
+        for (var ln = 0; ln < nodes.length && lanCount < 18; ln++) {
+            var lnd = nodes[ln];
+            if (!lnd) continue;
+            if (lnd.type === "CASTLE" || lnd.type === "TOWN" || lnd.type === "VILLAGE" || lnd.type === "TAVERN" || lnd.type === "BLACKSMITH" || lnd.type === "START") {
+                var lr = (lnd.type === "CASTLE" || lnd.type === "START") ? 30 : 20;
+                out.push('        <circle cx="' + Math.round(lnd.x) + '" cy="' + Math.round(lnd.y) + '" r="' + lr + '" fill="url(#dayNightTorchGlow)"/>');
+                lanCount++;
+            }
+        }
+        for (var ld = 0; ld < decs.length && lanCount < 26; ld++) {
+            var ldc = decs[ld];
+            if (!ldc || (ldc.catalogId !== "cottage_timber" && ldc.catalogId !== "witch_hut")) continue;
+            if (typeof this.isDecorCollidingWithRivers === "function" && this.isDecorCollidingWithRivers(ldc, rivers)) continue;
+            out.push('        <circle cx="' + Math.round(ldc.x) + '" cy="' + Math.round(ldc.y + 4) + '" r="19" fill="url(#dayNightTorchGlow)"/>');
+            lanCount++;
+        }
+        out.push('      </g>');
+        out.push('    </g>');
+
+        out.push('  </g>');
+        return out.join("\n");
     }
     });
 })();
