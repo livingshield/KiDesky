@@ -746,13 +746,31 @@ window.PRS_DECOR_CATALOG = {
         farm_field: 0.35
     };
 
+    var footFadeOverrides = {
+        tree_oak: 0,
+        tree_pine: 0,
+        tree_birch: 0,
+        grove_oak: 0,
+        grove_pine: 0,
+        rock_boulder: 0,
+        mountain_peaks: 0,
+        farm_field: 0,
+        windmill: 0,
+        cottage_timber: 0,
+        orchad_apple: 0,
+        hruskovy_sad: 0,
+        orchad_plum: 0
+    };
+
     var keys = Object.keys(cat);
     for (var i = 0; i < keys.length; i++) {
         var id = keys[i];
         var item = cat[id];
         if (!item) continue;
         var def = categoryDefaults[item.category] || categoryDefaults.vegetation;
-        if (typeof item.footFade !== "number") item.footFade = def.footFade;
+        if (typeof item.footFade !== "number") {
+            item.footFade = (typeof footFadeOverrides[id] === "number") ? footFadeOverrides[id] : def.footFade;
+        }
         if (typeof item.shadowLen !== "number") {
             item.shadowLen = (typeof shadowOverrides[id] === "number") ? shadowOverrides[id] : def.shadowLen;
         }
