@@ -761,7 +761,20 @@ window.PRS_DECOR_CATALOG = {
         cottage_timber: 0,
         orchad_apple: 0,
         hruskovy_sad: 0,
-        orchad_plum: 0
+        orchad_plum: 0,
+        // Etapa 5 — Vlna A
+        fairy_ring_mushrooms: 0,
+        druid_monoliths: 0,
+        watermill: 0,
+        wooden_watchtower: 0,
+        witch_hut: 0,
+        tournament_tent: 0,
+        ancient_ruins: 0,
+        lake_pond: 0,
+        merchant_wagon: 0,
+        unicorn_grove: 0,
+        village_well: 0,
+        pasture_fence: 0
     };
 
     var keys = Object.keys(cat);
