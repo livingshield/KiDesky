@@ -2733,7 +2733,7 @@ window.PRS_I18N.sk = {
     "btn_to_table": "Prejsť k stolu →",
     "dressing_room": "Šatňa 🎭",
     "open_wardrobe": "Celá šatňa ➜",
-    "pawn_for_game": "🎭 Figúrka pro partii:",
+    "pawn_for_game": "🎭 Figúrka pre partiu:",
     "realm_element": "🎨 Živel kráľovstva:",
     "elements": {
       "light": "☀️ Slnečný – Deň",
@@ -4677,7 +4677,11 @@ window.PRS_I18N.sk = {
     "page_title": "KiDesky | Princeznino srdce – Stolová & Online Dosková Hra"
   },
   "board": {
-    "standing_here": "TU STOJÍŠ"
+    "standing_here": "TU STOJÍŠ",
+    "castle_banner_classic": "♡ PRINCEZNINO SRDCE ({hearts} 💖) ♡",
+    "castle_banner_dragon": "🐉 LOVCI DRAKOV — Získajte Dračiu korunu! 👑",
+    "castle_banner_tycoon": "🏰 FEUDÁLNY MAGNÁT — Ovládnite mestá a cechy! 🪙",
+    "castle_banner_sprint": "⚡ KRÁĽOVSKÝ ŠPRINT (15 💖)"
   },
   "combat": {
     "intrigue_ballad_success_summary": "Posmešná balada uspela! Súper {name} stratil -{penalty} 💖.",

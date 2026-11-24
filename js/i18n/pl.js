@@ -163,8 +163,8 @@ window.PRS_I18N.pl = {
       "water_night": "🌃 Woda – Noc",
       "earth": "🌿 Ziemia – Dzień",
       "earth_night": "🌲 Ziemia – Noc",
-      "air": "🌪️ Powietrze – Dzień",
-      "air_night": "🌌 Powietrze – Noc",
+      "air": "⚡ Burza – Dzień",
+      "air_night": "🌌 Burza – Noc",
       "light_title": "Słoneczne Królestwo (Dzień)",
       "light_night_title": "Słoneczne Królestwo (Noc)",
       "fire_title": "Smoczy Ogień (Dzień)",
@@ -4677,7 +4677,11 @@ window.PRS_I18N.pl = {
     "page_title": "KiDesky | Serce Księżniczki – Planszowa & Online Gra Rycerska"
   },
   "board": {
-    "standing_here": "TU STOISZ"
+    "standing_here": "TU STOISZ",
+    "castle_banner_classic": "♡ SERCE KSIĘŻNICZKI ({hearts} 💖) ♡",
+    "castle_banner_dragon": "🐉 ŁOWCY SMOKÓW — Zdobądź Smoczą Koronę! 👑",
+    "castle_banner_tycoon": "🏰 FEUDALNY MAGNAT — Opanuj miasta i gildie! 🪙",
+    "castle_banner_sprint": "⚡ KRÓLEWSKI SPRINT (15 💖)"
   },
   "combat": {
     "intrigue_ballad_success_summary": "Prześmiewcza ballada odniosła sukces! Rywal {name} stracił -{penalty} 💖.",

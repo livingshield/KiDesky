@@ -4680,7 +4680,11 @@ window.PRS_I18N["cs"] = {
     "page_title": "KiDesky | Princeznino srdce – Stolní & Online Desková Hra"
   },
   "board": {
-    "standing_here": "ZDE STOJÍŠ"
+    "standing_here": "ZDE STOJÍŠ",
+    "castle_banner_classic": "♡ PRINCEZNINO SRDCE ({hearts} 💖) ♡",
+    "castle_banner_dragon": "🐉 LOVCI DRAKŮ — Získejte Dračí korunu! 👑",
+    "castle_banner_tycoon": "🏰 FEUDÁLNÍ MAGNÁT — Ovládněte města a cechy! 🪙",
+    "castle_banner_sprint": "⚡ KRÁLOVSKÝ SPRINT (15 💖)"
   },
   "combat": {
     "intrigue_ballad_success_summary": "Posměšná balada uspěla! Soupeř {name} ztratil -{penalty} 💖.",

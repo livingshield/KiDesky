@@ -6,6 +6,8 @@
     "use strict";
     if (!window.PRS_App) window.PRS_App = {};
 
+    var ZOOM_LOCK_EPS = 0.015;
+
     Object.assign(window.PRS_App, {
         initMapPanAndZoom: function () {
 
@@ -51,19 +53,19 @@
 
             var mouseY = e.clientY - rect.top;
 
+            var minS = self.viewport.minScale || 1.0;
             var delta = (e.deltaY < 0) ? 1.14 : 0.88;
-
-            var newScale = Math.min(self.viewport.maxScale, Math.max(self.viewport.minScale, self.viewport.scale * delta));
-
-            // Přepočet posunu tak, aby bod pod kurzorem zůstal na místě
-
-            var scaleRatio = newScale / self.viewport.scale;
-
-            self.viewport.panX = mouseX - (mouseX - self.viewport.panX) * scaleRatio;
-
-            self.viewport.panY = mouseY - (mouseY - self.viewport.panY) * scaleRatio;
-
-            self.viewport.scale = newScale;
+            var newScale = Math.min(self.viewport.maxScale, Math.max(minS, self.viewport.scale * delta));
+            if (newScale <= minS + ZOOM_LOCK_EPS) {
+                self.viewport.panX = 0;
+                self.viewport.panY = 0;
+                self.viewport.scale = minS;
+            } else {
+                var scaleRatio = newScale / self.viewport.scale;
+                self.viewport.panX = mouseX - (mouseX - self.viewport.panX) * scaleRatio;
+                self.viewport.panY = mouseY - (mouseY - self.viewport.panY) * scaleRatio;
+                self.viewport.scale = newScale;
+            }
 
             self.clampViewportPan();
 
@@ -84,6 +86,8 @@
         wrap.addEventListener("mousedown", function (e) {
 
             if (e.button !== 0) return;
+            var minS = (self.viewport && self.viewport.minScale) ? self.viewport.minScale : 1.0;
+            if (!self.viewport || self.viewport.scale <= minS + ZOOM_LOCK_EPS) return;
 
             // Zamezíme nativnímu drag&drop obrázků/textu prohlížečem
 
@@ -185,6 +189,8 @@
 
                 lastTapTime = now;
 
+                var minS = (self.viewport && self.viewport.minScale) ? self.viewport.minScale : 1.0;
+                if (!self.viewport || self.viewport.scale <= minS + ZOOM_LOCK_EPS) return;
                 if (typeof self._invalidateBoardSize === "function") self._invalidateBoardSize();
 
                 wrap.classList.add("is-panning");
@@ -253,21 +259,21 @@
 
                 if (self.viewport.pinchDist0 > 0) {
 
+                    var minS = self.viewport.minScale || 1.0;
                     var factor = dist1 / self.viewport.pinchDist0;
-
-                    var newScale = Math.min(self.viewport.maxScale, Math.max(self.viewport.minScale, self.viewport.pinchScale0 * factor));
-
-                    var ratio = newScale / self.viewport.pinchScale0;
-
-                    var cx = self.viewport.pinchCenterX;
-
-                    var cy = self.viewport.pinchCenterY;
-
-                    self.viewport.panX = cx - (cx - self.viewport.pinchPanX0) * ratio;
-
-                    self.viewport.panY = cy - (cy - self.viewport.pinchPanY0) * ratio;
-
-                    self.viewport.scale = newScale;
+                    var newScale = Math.min(self.viewport.maxScale, Math.max(minS, self.viewport.pinchScale0 * factor));
+                    if (newScale <= minS + ZOOM_LOCK_EPS) {
+                        self.viewport.panX = 0;
+                        self.viewport.panY = 0;
+                        self.viewport.scale = minS;
+                    } else {
+                        var ratio = newScale / self.viewport.pinchScale0;
+                        var cx = self.viewport.pinchCenterX;
+                        var cy = self.viewport.pinchCenterY;
+                        self.viewport.panX = cx - (cx - self.viewport.pinchPanX0) * ratio;
+                        self.viewport.panY = cy - (cy - self.viewport.pinchPanY0) * ratio;
+                        self.viewport.scale = newScale;
+                    }
 
                     self.clampViewportPan();
 
@@ -275,7 +281,7 @@
 
                 }
 
-            } else if (e.touches.length === 1 && self.viewport.isDragging) {
+            } else if (e.touches.length === 1 && self.viewport.isDragging && self.viewport.scale > ((self.viewport.minScale || 1.0) + ZOOM_LOCK_EPS)) {
 
                 var dx = e.touches[0].clientX - self.viewport.startX;
 
@@ -411,6 +417,12 @@
         this.viewport.scale = Math.min(maxS, Math.max(minS, this.viewport.scale));
 
         var s = this.viewport.scale;
+        if (s <= minS + ZOOM_LOCK_EPS) {
+            this.viewport.scale = minS;
+            this.viewport.panX = 0;
+            this.viewport.panY = 0;
+            return;
+        }
 
         // V SVG souřadnicích (viewBox 0 0 1400 860):
         // Deska má rozměry 1400 x 860.
@@ -453,11 +465,28 @@
         this.viewport.minScale = minS;
         this.viewport.scale = Math.min(maxS, Math.max(minS, this.viewport.scale || 1.0));
         var s = this.viewport.scale;
+        if (s <= minS + ZOOM_LOCK_EPS) {
+            s = minS;
+            this.viewport.scale = minS;
+            this.viewport.panX = 0;
+            this.viewport.panY = 0;
+        }
 
         if (lbl) {
             lbl.textContent = Math.round(s * 100) + " %";
         }
 
+        if (wrap && wrap.classList) {
+            if (s > minS + 0.001) wrap.classList.add("is-zoomed");
+            else {
+                wrap.classList.remove("is-zoomed");
+                wrap.classList.remove("is-panning");
+                if (typeof document !== "undefined" && document.body && document.body.classList) {
+                    document.body.classList.remove("prs-board-panning");
+                }
+                if (this.viewport) this.viewport.isDragging = false;
+            }
+        }
         if (!svgEl || !wrap) return;
 
         if (this._panRafId) {
@@ -550,15 +579,18 @@
 
         var cy = sz.h ? sz.h / 2 : 310;
 
-        var newScale = Math.min(this.viewport.maxScale, Math.max(this.viewport.minScale, this.viewport.scale * factor));
-
-        var ratio = newScale / this.viewport.scale;
-
-        this.viewport.panX = cx - (cx - this.viewport.panX) * ratio;
-
-        this.viewport.panY = cy - (cy - this.viewport.panY) * ratio;
-
-        this.viewport.scale = newScale;
+        var minS = this.viewport.minScale || 1.0;
+        var newScale = Math.min(this.viewport.maxScale, Math.max(minS, this.viewport.scale * factor));
+        if (newScale <= minS + ZOOM_LOCK_EPS) {
+            this.viewport.panX = 0;
+            this.viewport.panY = 0;
+            this.viewport.scale = minS;
+        } else {
+            var ratio = newScale / this.viewport.scale;
+            this.viewport.panX = cx - (cx - this.viewport.panX) * ratio;
+            this.viewport.panY = cy - (cy - this.viewport.panY) * ratio;
+            this.viewport.scale = newScale;
+        }
 
         this.clampViewportPan();
 

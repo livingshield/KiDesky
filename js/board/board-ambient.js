@@ -380,7 +380,7 @@
 
         // A. Denní teplá sluneční vinětace a stíny mraků (pouze ve dne)
         if (!isNight && gQuality !== "low") {
-            out.push('    <rect x="18" y="18" width="1364" height="824" fill="url(#atmoSunWarmth)" opacity="0.55"/>');
+            out.push('    <rect x="14" y="14" width="1372" height="832" rx="16" fill="url(#atmoSunWarmth)" opacity="0.55"/>');
             if (gQuality === "high") {
                 out.push('    <g id="prs-cloud-shadows" style="mix-blend-mode:multiply;">');
                 out.push('      <ellipse class="prs-cloud-shadow prs-cloud-1" cx="240" cy="180" rx="220" ry="82" fill="rgba(12,18,24,0.16)" filter="url(#cloudShadowBlur)"/>');
@@ -511,8 +511,8 @@
         // G. Dramatická noční atmosféra pro varianty *_night
         if (isNight) {
             out.push('    <g id="prs-night-atmosphere">');
-            out.push('      <rect x="18" y="18" width="1364" height="824" fill="url(#nightMoonVeilGrad)" style="mix-blend-mode:multiply;"/>');
-            out.push('      <rect x="18" y="18" width="1364" height="824" fill="url(#nightMoonbeamGrad)" style="mix-blend-mode:screen;"/>');
+            out.push('      <rect x="14" y="14" width="1372" height="832" rx="16" fill="url(#nightMoonVeilGrad)" style="mix-blend-mode:multiply;"/>');
+            out.push('      <rect x="14" y="14" width="1372" height="832" rx="16" fill="url(#nightMoonbeamGrad)" style="mix-blend-mode:screen;"/>');
             out.push('      <g id="prs-night-lanterns" style="mix-blend-mode:screen;">');
             var landmarks = Array.isArray(board.landmarks) ? board.landmarks : [];
             var lanCount = 0;

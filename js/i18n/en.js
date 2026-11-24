@@ -4680,7 +4680,11 @@ window.PRS_I18N["en"] = {
     "page_title": "KiDesky | The Princess's Heart – Tabletop & Online Board Game"
   },
   "board": {
-    "standing_here": "HERE"
+    "standing_here": "HERE",
+    "castle_banner_classic": "♡ PRINCESS'S HEART ({hearts} 💖) ♡",
+    "castle_banner_dragon": "🐉 DRAGON SLAYERS — Claim the Dragon Crown! 👑",
+    "castle_banner_tycoon": "🏰 FEUDAL TYCOON — Rule Towns & Guilds! 🪙",
+    "castle_banner_sprint": "⚡ ROYAL SPRINT (15 💖)"
   },
   "combat": {
     "intrigue_ballad_success_summary": "Mocking ballad succeeded! Rival {name} lost -{penalty} 💖.",

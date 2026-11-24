@@ -287,8 +287,10 @@
         var out = [];
         var nodes = board.nodes || [];
         var bridges = board.bridges || [];
-        var activeTheme = (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
+        var rawRiverTheme = this.currentTheme ||
+                          (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
                           (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
+        var activeTheme = String(rawRiverTheme).replace(/_night$/, "");
         var rTheme = this.RIVER_THEMES[activeTheme] || this.RIVER_THEMES.light;
         var gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
         var bankBlurAttr = (gQuality === "high") ? ' filter="url(#riverBankBlur)"' : '';
@@ -1190,8 +1192,10 @@
         var softAttr = (gQuality === "high") ? ' filter="url(#riverSoft)"' : '';
         var out = [];
         var ink = "rgba(40,24,14,0.92)";
-        var activeTheme = (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
-                          (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
+        var rawBridgeTheme = this.currentTheme ||
+                           (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
+                           (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
+        var activeTheme = String(rawBridgeTheme).replace(/_night$/, "");
         var th = (this.RIVER_THEMES && this.RIVER_THEMES[activeTheme]) || (this.RIVER_THEMES && this.RIVER_THEMES.light) || {};
         var nodes = board.nodes || [];
 

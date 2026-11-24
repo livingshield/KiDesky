@@ -224,13 +224,13 @@
 
             overflow: hidden;
 
-            cursor: grab;
+            cursor: default;
 
             user-select: none;
 
             -webkit-user-select: none;
 
-            touch-action: none;
+            touch-action: pan-y pinch-zoom;
 
             max-width: 100%;
 
@@ -238,7 +238,15 @@
 
         }
 
-        .svg-board-container.is-panning {
+        .svg-board-container.is-zoomed {
+
+            cursor: grab;
+
+            touch-action: none;
+
+        }
+
+        .svg-board-container.is-zoomed.is-panning {
 
             cursor: grabbing !important;
 

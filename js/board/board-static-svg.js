@@ -486,9 +486,12 @@
     
     renderNaturalTerrainDetailsHTML: function (board) {
         var seed = (board && board.seed) || 4599;
-        var activeTheme = this.currentTheme ||
-                          (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
-                          (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) || "light";
+        var activeTheme = resolveBoardThemeKey(
+            this.currentTheme ||
+            (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-theme")) ||
+            (typeof localStorage !== "undefined" && localStorage && localStorage.getItem("kidesky_element_theme")) ||
+            "light"
+        );
         var out = [];
         out.push('    <g id="prs-micro-terrain" opacity="0.78">');
         function hVal(idx) {
@@ -583,24 +586,32 @@
     },
 
     
-        renderBoardFrameHTML: function (baseTh, pal) {
+        renderBoardFrameHTML: function (baseTh, pal, isNight) {
         var out = [];
         var th = resolveBoardThemeKey(baseTh);
         var palette = pal || BOARD_THEME_PALETTES[th] || BOARD_THEME_PALETTES.light;
+        var night = Boolean(isNight);
         var outerRingD = roundedRectPathD(0, 0, 1400, 860, 22) + " " + roundedRectPathD(14, 14, 1372, 832, 16);
         var bevelRingD = roundedRectPathD(5, 5, 1390, 850, 19) + " " + roundedRectPathD(13, 13, 1374, 834, 16);
 
-        out.push('  <g id="prs-board-frame" data-frame-element="' + this.escapeHtml(th) + '" pointer-events="none">');
+        var bevelOp = night ? "0.68" : "0.92";
+        var outerStrokeOpAttr = night ? ' opacity="0.62"' : '';
+        var innerStrokeOp = night ? "0.52" : "0.88";
+        var hairlineOp = night ? "0.18" : "0.32";
+        var studCoreOp = night ? "0.45" : "0.85";
+        var bracketOpAttr = night ? ' opacity="0.72"' : '';
+
+        out.push('  <g id="prs-board-frame" data-frame-element="' + this.escapeHtml(th) + '"' + (night ? ' data-frame-night="1"' : '') + ' pointer-events="none">');
         out.push('    <path d="' + outerRingD + '" fill-rule="evenodd" fill="' + palette.frameOuter + '"/>');
-        out.push('    <path d="' + bevelRingD + '" fill-rule="evenodd" fill="' + palette.frameMid + '" opacity="0.92"/>');
-        out.push('    <rect x="2" y="2" width="1396" height="856" rx="20" fill="none" stroke="url(#boardFrameRimGrad)" stroke-width="3.2"/>');
-        out.push('    <rect x="13" y="13" width="1374" height="834" rx="16" fill="none" stroke="url(#boardFrameRimGrad)" stroke-width="2" opacity="0.88"/>');
-        out.push('    <rect x="18" y="18" width="1364" height="824" rx="13" fill="none" stroke="' + palette.rimLight + '" stroke-width="0.9" opacity="0.32"/>');
+        out.push('    <path d="' + bevelRingD + '" fill-rule="evenodd" fill="' + palette.frameMid + '" opacity="' + bevelOp + '"/>');
+        out.push('    <rect x="2" y="2" width="1396" height="856" rx="20" fill="none" stroke="url(#boardFrameRimGrad)" stroke-width="3.2"' + outerStrokeOpAttr + '/>');
+        out.push('    <rect x="13" y="13" width="1374" height="834" rx="16" fill="none" stroke="url(#boardFrameRimGrad)" stroke-width="2" opacity="' + innerStrokeOp + '"/>');
+        out.push('    <rect x="18" y="18" width="1364" height="824" rx="13" fill="none" stroke="' + palette.rimLight + '" stroke-width="0.9" opacity="' + hairlineOp + '"/>');
 
         var midStuds = [[700, 7], [700, 853], [7, 430], [1393, 430]];
         for (var si = 0; si < midStuds.length; si++) {
-            out.push('    <circle cx="' + midStuds[si][0] + '" cy="' + midStuds[si][1] + '" r="3.4" fill="' + palette.frameOuter + '" stroke="url(#boardFrameRimGrad)" stroke-width="1.2"/>');
-            out.push('    <circle cx="' + midStuds[si][0] + '" cy="' + midStuds[si][1] + '" r="1.3" fill="' + palette.ornamentCore + '" opacity="0.85"/>');
+            out.push('    <circle cx="' + midStuds[si][0] + '" cy="' + midStuds[si][1] + '" r="3.4" fill="' + palette.frameOuter + '" stroke="url(#boardFrameRimGrad)" stroke-width="1.2"' + bracketOpAttr + '/>');
+            out.push('    <circle cx="' + midStuds[si][0] + '" cy="' + midStuds[si][1] + '" r="1.3" fill="' + palette.ornamentCore + '" opacity="' + studCoreOp + '"/>');
         }
 
         var corners = [[18, 18, 0], [1382, 18, 90], [1382, 842, 180], [18, 842, 270]];
@@ -609,10 +620,14 @@
             var cy = corners[ci][1];
             var deg = corners[ci][2];
             out.push('    <g transform="translate(' + cx + ',' + cy + ') rotate(' + deg + ')">');
-            out.push('      <path d="M -7 30 L -7 -2 Q -7 -7 -2 -7 L 30 -7 L 24 0 L 2 0 Q 0 0 0 2 L 0 24 Z" fill="' + palette.frameMid + '" stroke="url(#boardFrameRimGrad)" stroke-width="1.35"/>');
-            out.push('      <circle cx="22.5" cy="-3.5" r="1.5" fill="' + palette.ornamentCore + '" opacity="0.78"/>');
-            out.push('      <circle cx="-3.5" cy="22.5" r="1.5" fill="' + palette.ornamentCore + '" opacity="0.78"/>');
-            out.push('      <circle cx="0" cy="0" r="8.8" fill="' + palette.frameOuter + '" stroke="url(#boardFrameRimGrad)" stroke-width="1.6"/>');
+            out.push('      <path d="M -7 30 L -7 -2 Q -7 -7 -2 -7 L 30 -7 L 24 0 L 2 0 Q 0 0 0 2 L 0 24 Z" fill="' + palette.frameMid + '" stroke="url(#boardFrameRimGrad)" stroke-width="1.35"' + bracketOpAttr + '/>');
+            out.push('      <circle cx="22.5" cy="-3.5" r="1.5" fill="' + palette.ornamentCore + '" opacity="' + (night ? "0.42" : "0.78") + '"/>');
+            out.push('      <circle cx="-3.5" cy="22.5" r="1.5" fill="' + palette.ornamentCore + '" opacity="' + (night ? "0.42" : "0.78") + '"/>');
+            out.push('      <circle cx="0" cy="0" r="8.8" fill="' + palette.frameOuter + '" stroke="url(#boardFrameRimGrad)" stroke-width="1.6"' + bracketOpAttr + '/>');
+            if (night) {
+                out.push('      <circle cx="0" cy="0" r="11.5" fill="' + palette.ornament + '" opacity="0.22"/>');
+                out.push('      <circle cx="0" cy="0" r="7.5" fill="' + palette.ornamentCore + '" opacity="0.16"/>');
+            }
             out.push('      <g transform="rotate(' + (-deg) + ')">' + renderCornerElementGlyphSVG(th, palette) + '</g>');
             out.push('    </g>');
         }
@@ -683,18 +698,9 @@
             out.push('  </g>');
         }
 
-        // 1d-pre. Jemná okrajová viněta a kovaný elementární rám herní desky
-        out.push('  <rect x="14" y="14" width="1372" height="832" rx="16" fill="url(#boardEdgeVignetteGrad)" pointer-events="none"/>');
-        out.push(this.renderBoardFrameHTML(th, activePalette));
-
-        // 1d. Architektonické mosty přes řeku na křížení cest
-        if (this.state.board && this.state.board.bridges && this.state.board.bridges.length > 0) {
-            // mosty presunuty za cesty aby je neprekryval asfalt
-        }
-
-        // 1e. Plovoucí ranní mlha nad horami a hvozdem (Atmosférický opar - pouze HIGH)
+        // 1d-pre-mist. Plovoucí ranní mlha pod rámem a oříznutá na vnitřní plochu (pouze HIGH)
         if (gQuality === "high") {
-            out.push('  <g id="prs-mist-layer" pointer-events="none" opacity="0.65">');
+            out.push('  <g id="prs-mist-layer" clip-path="url(#prsBoardInnerClip)" pointer-events="none" opacity="0.65">');
             out.push('    <g>');
             out.push('      <animateTransform attributeName="transform" type="translate" values="0,0; 32,-12; 0,0" dur="22s" repeatCount="indefinite" />');
             out.push('      <ellipse cx="1160" cy="320" rx="200" ry="110" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
@@ -702,6 +708,16 @@
             out.push('      <ellipse cx="880" cy="540" rx="170" ry="95" fill="url(#mistSoftGrad)" filter="url(#mistBlur)"/>');
             out.push('    </g>');
             out.push('  </g>');
+        }
+
+        // 1d-pre. Jemná okrajová viněta a kovaný elementární rám herní desky
+        var isNightFrame = Boolean(this.isNightMode || (typeof document !== "undefined" && document && document.documentElement && document.documentElement.getAttribute("data-time") === "night"));
+        out.push('  <rect x="14" y="14" width="1372" height="832" rx="16" fill="url(#boardEdgeVignetteGrad)" pointer-events="none"/>');
+        out.push(this.renderBoardFrameHTML(th, activePalette, isNightFrame));
+
+        // 1d. Architektonické mosty přes řeku na křížení cest
+        if (this.state.board && this.state.board.bridges && this.state.board.bridges.length > 0) {
+            // mosty presunuty za cesty aby je neprekryval asfalt
         }
 
         // 2. Balíčky karet přesunuty z plánu do přehledné řady pod herním plánem (mezi detail rytíře a kroniku)
@@ -795,19 +811,25 @@
                 out.push('    <text x="' + (lmk.w / 2) + '" y="102" text-anchor="middle" fill="#f3e5ab" font-family="Cinzel, serif" font-size="14" font-weight="bold">' + this.escapeHtml((window.PRS_I18n ? window.PRS_I18n.t("castles.royal.name", null, "KRÁLOVSKÝ HRAD") : "KRÁLOVSKÝ HRAD").toUpperCase()) + '</text>');
 
                 var scn = (this.state.config && this.state.config.scenario) || "CLASSIC";
-                var scnTitle = "♡ PRINCEZNINO SRDCE (" + this.state.config.targetHearts + " 💖) ♡";
+                var tgtHearts = (this.state.config && this.state.config.targetHearts) || 30;
+                var tr = function (key, params, fallback) {
+                    return (typeof window !== "undefined" && window.PRS_I18n && typeof window.PRS_I18n.t === "function")
+                        ? window.PRS_I18n.t(key, params, fallback)
+                        : (params && params.hearts !== undefined ? String(fallback).replace("{hearts}", params.hearts) : fallback);
+                };
+                var scnTitle = tr("board.castle_banner_classic", { hearts: tgtHearts }, "♡ PRINCEZNINO SRDCE (" + tgtHearts + " 💖) ♡");
                 var scnColor = "#f472b6";
                 if (scn === "DRAGON") {
-                    scnTitle = "🐉 LOVCI DRAKŮ — Získejte Dračí korunu! 👑";
+                    scnTitle = tr("board.castle_banner_dragon", null, "🐉 LOVCI DRAKŮ — Získejte Dračí korunu! 👑");
                     scnColor = "#f97316";
                 } else if (scn === "TYCOON") {
-                    scnTitle = "🏰 FEUDÁLNÍ MAGNÁT — Ovládněte města a cechy! 🪙";
+                    scnTitle = tr("board.castle_banner_tycoon", null, "🏰 FEUDÁLNÍ MAGNÁT — Ovládněte města a cechy! 🪙");
                     scnColor = "#eab308";
                 } else if (scn === "SPRINT") {
-                    scnTitle = "⚡ KRÁLOVSKÝ SPRINT (15 💖)";
+                    scnTitle = tr("board.castle_banner_sprint", null, "⚡ KRÁLOVSKÝ SPRINT (15 💖)");
                     scnColor = "#38bdf8";
                 }
-                out.push('    <text x="' + (lmk.w / 2) + '" y="121" text-anchor="middle" fill="' + scnColor + '" font-size="10.5" font-weight="bold">' + scnTitle + '</text>');
+                out.push('    <text x="' + (lmk.w / 2) + '" y="121" text-anchor="middle" fill="' + scnColor + '" font-size="10.5" font-weight="bold">' + this.escapeHtml(scnTitle) + '</text>');
 
             } else {
 
