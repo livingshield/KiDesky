@@ -775,8 +775,29 @@ window.PRS_DECOR_CATALOG = {
         unicorn_grove: 0,
         village_well: 0,
         pasture_fence: 0,
-        // Etapa 5 — Vlna B (hotová věž)
-        ancient_tower_ruin: 0
+        // Etapa 5 — Vlny B a C (všech 49 dekorací s footFade: 0)
+        ancient_tower_ruin: 0,
+        hrad: 0,
+        ancient_graveyard: 0,
+        swamp_bridge: 0,
+        lake_nymphs: 0,
+        vodnik_pond: 0,
+        pegasus_pond: 0,
+        dryad_sacred_oak: 0,
+        forest_ent: 0,
+        crystal_golem: 0,
+        phoenix_nest: 0,
+        cave_bear_den: 0,
+        bandit_cave: 0,
+        griffin_nest: 0,
+        fire_salamander: 0,
+        dragon_cave: 0,
+        basilisk_cave: 0,
+        snow_troll_cave: 0,
+        swamp_troll: 0,
+        swamp_hydra: 0,
+        signpost: 0,
+        signpost2: 0
     };
 
     var keys = Object.keys(cat);
