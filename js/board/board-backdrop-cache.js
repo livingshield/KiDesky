@@ -90,8 +90,6 @@
 
     Object.assign(window.PRS_App, {
         isDesktopHighCrispMode: function () {
-            var q = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
-            if (q !== "high") return false;
             if (this.deviceProfile && this.deviceProfile.device === "mobile") return false;
             var bodyDev = (typeof document !== "undefined" && document.body && typeof document.body.getAttribute === "function")
                 ? document.body.getAttribute("data-device")

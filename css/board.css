@@ -258,10 +258,6 @@
 
             transform-origin: 0 0;
 
-            will-change: transform;
-
-            backface-visibility: hidden;
-
         }
 
         #prs-board-svg image {
@@ -4086,11 +4082,10 @@ body[data-active-tab="board"] #topbar-announcement-banner {
     contain: layout style paint;
 }
 
-/* #prs-board-svg je propagován jako jediná GPU vrstva pro pan/zoom (bez zdvojeného composite layer na #prs-board-stage) */
-body[data-device="desktop"][data-graphics-quality="high"] #prs-board-svg,
-body[data-device="tablet"][data-graphics-quality="high"] #prs-board-svg {
-    will-change: auto;
-    backface-visibility: visible;
+/* Na mobilu je #prs-board-svg propagován jako jediná GPU vrstva pro pan/zoom (na desktopu zůstávají vektory vždy ostré bez GPU škálování bitmapy) */
+body[data-device="mobile"] #prs-board-svg {
+    will-change: transform;
+    backface-visibility: hidden;
 }
 
 #board-viewport-wrap.is-panning *,
