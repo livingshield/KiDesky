@@ -6,7 +6,7 @@
     "use strict";
     if (!window.PRS_App) window.PRS_App = {};
 
-    var ZOOM_LOCK_EPS = 0.015;
+    var ZOOM_LOCK_EPS = 0.035;
 
     Object.assign(window.PRS_App, {
         initMapPanAndZoom: function () {
@@ -23,7 +23,7 @@
 
             var isZoomKey = e.ctrlKey || e.metaKey;
 
-            var isZoomedIn = self.viewport.scale > (self.viewport.minScale + 0.03);
+            var isZoomedIn = self.viewport.scale > ((self.viewport.minScale || 1.0) + ZOOM_LOCK_EPS);
 
             if (!isZoomKey) {
 
