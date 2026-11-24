@@ -514,33 +514,153 @@
             out.push('      <rect x="18" y="18" width="1364" height="824" fill="url(#nightMoonVeilGrad)" style="mix-blend-mode:multiply;"/>');
             out.push('      <rect x="18" y="18" width="1364" height="824" fill="url(#nightMoonbeamGrad)" style="mix-blend-mode:screen;"/>');
             out.push('      <g id="prs-night-lanterns" style="mix-blend-mode:screen;">');
+            var landmarks = Array.isArray(board.landmarks) ? board.landmarks : [];
             var lanCount = 0;
-            for (var ln = 0; ln < nodes.length && lanCount < 24; ln++) {
+
+            function pushNightPool(kind, gx, gy, gradId, rx, ry, ox, oy, tiltDeg, delaySec, details) {
+                var rot = tiltDeg ? (' rotate(' + tiltDeg.toFixed(1) + ')') : '';
+                out.push('        <g data-light-kind="' + kind + '" transform="translate(' + Math.round(gx) + ',' + Math.round(gy) + ')">');
+                out.push('          <ellipse cx="' + ox + '" cy="' + oy + '" rx="' + rx + '" ry="' + ry + '"' + (rot ? (' transform="' + rot.trim() + '"') : '') + ' fill="url(#' + gradId + ')"/>');
+                if (gQuality !== "low" && details && details.halos) {
+                    for (var hi = 0; hi < details.halos.length; hi++) {
+                        var hl = details.halos[hi];
+                        out.push('          <ellipse class="prs-torch-flicker" style="animation-delay:-' + (delaySec + hi * 0.43).toFixed(2) + 's;" cx="' + hl[0] + '" cy="' + hl[1] + '" rx="' + hl[2] + '" ry="' + hl[3] + '" fill="url(#' + (hl[4] || gradId) + ')"/>');
+                    }
+                }
+                if (details && details.wins) {
+                    for (var wi2 = 0; wi2 < details.wins.length; wi2++) {
+                        var wn = details.wins[wi2];
+                        out.push('          <rect x="' + wn[0] + '" y="' + wn[1] + '" width="' + wn[2] + '" height="' + wn[3] + '" rx="0.6" fill="' + (wn[4] || '#fef08a') + '" opacity="' + (wn[5] || '0.88') + '"/>');
+                    }
+                }
+                if (details && details.dots) {
+                    for (var di = 0; di < details.dots.length; di++) {
+                        var dt = details.dots[di];
+                        var dotCls = (gQuality !== "low" && dt[4]) ? (' class="prs-torch-flicker" style="animation-delay:-' + (delaySec + di * 0.37).toFixed(2) + 's;"') : '';
+                        out.push('          <circle' + dotCls + ' cx="' + dt[0] + '" cy="' + dt[1] + '" r="' + dt[2] + '" fill="' + dt[3] + '"/>');
+                    }
+                }
+                out.push('        </g>');
+            }
+
+            // 1. Dominanty království (Královský hrad, Dračí sluj, Citadely)
+            for (var lmIdx = 0; lmIdx < landmarks.length && lmIdx < 6; lmIdx++) {
+                var lmk = landmarks[lmIdx];
+                if (!lmk) continue;
+                var lmDel = atmoHash(lmk.x, lmk.y) * 2.4;
+                var lmId = String(lmk.id || "");
+                if (lmId === "royalCastle") {
+                    pushNightPool("royal_castle", lmk.x, lmk.y, "nightRoyalGlow", 74, 36, 0, 18, 0, lmDel, {
+                        halos: [[-18, 6, 16, 10, "dayNightTorchGlow"], [18, 6, 16, 10, "dayNightTorchGlow"]],
+                        wins: [[-12, -16, 2.4, 3.2], [-3, -21, 2.4, 3.4], [5, -18, 2.4, 3.2], [11, -11, 2.2, 3.0]],
+                        dots: [[-18, 5, 1.9, "#fde047", true], [18, 5, 1.9, "#fde047", true]]
+                    });
+                } else if (lmId === "dragonLair" || lmId.indexOf("dragon") !== -1) {
+                    pushNightPool("dragon_lair", lmk.x, lmk.y, "nightEmberGlow", 60, 28, 2, 14, -6, lmDel, {
+                        halos: [[2, 10, 18, 10, "nightEmberGlow"]],
+                        dots: [[2, 9, 2.3, "#fb923c", true], [-5, 12, 1.4, "#fde047", true]]
+                    });
+                } else {
+                    pushNightPool("castle_landmark", lmk.x, lmk.y, "dayNightTorchGlow", 54, 28, 0, 14, 0, lmDel, {
+                        halos: [[-12, 6, 14, 9, "dayNightTorchGlow"]],
+                        wins: [[-7, -13, 2.2, 3.0], [3, -15, 2.2, 3.0], [9, -8, 2.0, 2.8]],
+                        dots: [[-12, 5, 1.8, "#fde047", true]]
+                    });
+                }
+            }
+
+            // 2. Herní uzly rozlišené podle typu osady / lokace
+            for (var ln = 0; ln < nodes.length && lanCount < 28; ln++) {
                 var lnd = nodes[ln];
                 if (!lnd) continue;
-                if (lnd.type === "CASTLE" || lnd.type === "TOWN" || lnd.type === "VILLAGE" || lnd.type === "TAVERN" || lnd.type === "BLACKSMITH" || lnd.type === "START" || lnd.type === "FESTIVAL") {
-                    var isMajorL = (lnd.type === "CASTLE" || lnd.type === "START" || lnd.type === "FESTIVAL");
-                    var lr = isMajorL ? 54 : 34;
-                    var coreR = isMajorL ? 15 : 10;
-                    var lDel = (atmoHash(lnd.x, lnd.y) * 2.2).toFixed(2);
-                    out.push('        <g transform="translate(' + Math.round(lnd.x) + ',' + Math.round(lnd.y) + ')">');
-                    out.push('          <circle cx="0" cy="0" r="' + lr + '" fill="url(#dayNightTorchGlow)"/>');
-                    if (gQuality !== "low") out.push('          <circle class="prs-torch-flicker" style="animation-delay:-' + lDel + 's;" cx="0" cy="0" r="' + coreR + '" fill="url(#dayNightTorchGlow)"/>');
-                    out.push('        </g>');
+                var lDel = atmoHash(lnd.x, lnd.y) * 2.4;
+                var tilt = (atmoHash(lnd.y, lnd.x) - 0.5) * 16;
+                if (lnd.type === "CASTLE") {
+                    pushNightPool("castle", lnd.x, lnd.y, "dayNightTorchGlow", 44, 25, 0, 6, 0, lDel, {
+                        halos: [[-15, -3, 12, 8], [15, -3, 12, 8]],
+                        wins: [[-6, -12, 2.2, 3.0], [1, -14, 2.2, 3.0], [7, -10, 2.0, 2.8]],
+                        dots: [[-15, -4, 1.7, "#fde047", true], [15, -4, 1.7, "#fde047", true]]
+                    });
+                    lanCount++;
+                } else if (lnd.type === "TOWN") {
+                    pushNightPool("town", lnd.x, lnd.y, "dayNightTorchGlow", 35, 20, 0, 5, tilt, lDel, {
+                        halos: [[-11, 4, 10, 6], [12, 2, 10, 6]],
+                        wins: [[-8, -7, 2.0, 2.4], [-2, -10, 2.0, 2.4], [5, -8, 2.0, 2.4], [9, -2, 2.0, 2.4]],
+                        dots: [[-11, 3, 1.5, "#fde047", true], [12, 2, 1.4, "#fbbf24", true]]
+                    });
+                    lanCount++;
+                } else if (lnd.type === "VILLAGE") {
+                    var vLvl = lnd.villageLevel || 1;
+                    var vrx = 22 + vLvl * 3;
+                    var vry = Math.round(vrx * 0.56);
+                    var vWins = vLvl >= 2 ? [[-5, -4, 1.9, 2.1], [3, -2, 1.9, 2.1]] : [[-2, -3, 1.9, 2.1]];
+                    var vDots = vLvl >= 3 ? [[9, 3, 1.4, "#fde047", true]] : [];
+                    pushNightPool("village", lnd.x, lnd.y, "dayNightTorchGlow", vrx, vry, 0, 4, tilt, lDel, {
+                        halos: vLvl >= 3 ? [[9, 3, 9, 5]] : null,
+                        wins: vWins,
+                        dots: vDots
+                    });
+                    lanCount++;
+                } else if (lnd.type === "TAVERN") {
+                    pushNightPool("tavern", lnd.x, lnd.y, "dayNightTorchGlow", 28, 15, 3, 6, 0, lDel, {
+                        halos: [[-9, -2, 9, 6]],
+                        wins: [[1, -2, 2.4, 3.2, "#fde68a", "0.92"]],
+                        dots: [[-9, -3, 1.8, "#fde047", true]]
+                    });
+                    lanCount++;
+                } else if (lnd.type === "BLACKSMITH") {
+                    pushNightPool("blacksmith", lnd.x, lnd.y, "nightEmberGlow", 30, 17, 2, 5, 0, lDel, {
+                        halos: [[5, 2, 11, 7, "nightEmberGlow"]],
+                        dots: [[5, 1, 2.2, "#fb923c", true], [2, 3, 1.3, "#fef08a", true]]
+                    });
+                    lanCount++;
+                } else if (lnd.type === "FESTIVAL") {
+                    pushNightPool("festival", lnd.x, lnd.y, "nightRoyalGlow", 40, 22, 0, 5, 0, lDel, {
+                        halos: [[-10, -4, 10, 6, "dayNightTorchGlow"], [10, -4, 10, 6, "nightRoyalGlow"]],
+                        dots: [[-12, -5, 1.7, "#fef08a", true], [0, -9, 1.8, "#f9a8d4", true], [12, -5, 1.7, "#fef08a", true]]
+                    });
+                    lanCount++;
+                } else if (lnd.type === "START") {
+                    pushNightPool("start", lnd.x, lnd.y, "dayNightTorchGlow", 40, 22, 0, 6, 0, lDel, {
+                        halos: [[-14, -4, 11, 7], [14, -4, 11, 7]],
+                        wins: [[-4, -13, 2.2, 3.0], [3, -13, 2.2, 3.0]],
+                        dots: [[-14, -5, 1.7, "#fde047", true], [14, -5, 1.7, "#fde047", true]]
+                    });
                     lanCount++;
                 }
             }
-            for (var ld = 0; ld < decs.length && lanCount < 36; ld++) {
+
+            // 3. Dekorační stavby (chalupy, čarodějné chýše, strážní věže, turnajové stany)
+            var decLanCount = 0;
+            for (var ld = 0; ld < decs.length && decLanCount < 18; ld++) {
                 var ldc = decs[ld];
-                if (!ldc || (ldc.catalogId !== "cottage_timber" && ldc.catalogId !== "witch_hut")) continue;
+                if (!ldc) continue;
+                var cId = ldc.catalogId;
+                if (cId !== "cottage_timber" && cId !== "witch_hut" && cId !== "wooden_watchtower" && cId !== "tournament_tent") continue;
                 if (typeof this.isDecorCollidingWithRivers === "function" && this.isDecorCollidingWithRivers(ldc, rivers)) continue;
-                var gradId = (ldc.catalogId === "witch_hut") ? "nightArcaneGlow" : "dayNightTorchGlow";
-                var dDel = (atmoHash(ldc.x, ldc.y) * 2.2).toFixed(2);
-                out.push('        <g transform="translate(' + Math.round(ldc.x) + ',' + Math.round(ldc.y + 3) + ')">');
-                out.push('          <circle cx="0" cy="0" r="36" fill="url(#' + gradId + ')"/>');
-                if (gQuality !== "low") out.push('          <circle class="prs-torch-flicker" style="animation-delay:-' + dDel + 's;" cx="0" cy="0" r="11" fill="url(#' + gradId + ')"/>');
-                out.push('        </g>');
-                lanCount++;
+                var dDel = atmoHash(ldc.x, ldc.y) * 2.4;
+                var dFlip = ldc.isFlipped ? -1 : 1;
+                if (cId === "witch_hut") {
+                    pushNightPool("witch_hut", ldc.x, ldc.y, "nightArcaneGlow", 24, 13, -2 * dFlip, 3, 0, dDel, {
+                        halos: [[2 * dFlip, -2, 8, 5, "nightArcaneGlow"]],
+                        dots: [[2 * dFlip, -3, 1.6, "#c4b5fd", true], [-4 * dFlip, -1, 1.2, "#a5f3fc", false]]
+                    });
+                } else if (cId === "wooden_watchtower") {
+                    pushNightPool("watchtower", ldc.x, ldc.y, "dayNightTorchGlow", 16, 9, 0, 6, 0, dDel, {
+                        halos: [[0, -10, 9, 6]],
+                        dots: [[0, -10, 1.7, "#fde047", true]]
+                    });
+                } else if (cId === "tournament_tent") {
+                    pushNightPool("tournament_tent", ldc.x, ldc.y, "nightRoyalGlow", 22, 12, 0, 4, 0, dDel, {
+                        halos: [[0, 0, 8, 5, "dayNightTorchGlow"]],
+                        dots: [[0, 1, 1.5, "#fef08a", true]]
+                    });
+                } else {
+                    pushNightPool("cottage", ldc.x, ldc.y, "dayNightTorchGlow", 18, 10, 2 * dFlip, 4, 0, dDel, {
+                        wins: [[2 * dFlip - 1, -2, 2.0, 2.2, "#fde68a", "0.90"]]
+                    });
+                }
+                decLanCount++;
             }
             out.push('      </g>');
 

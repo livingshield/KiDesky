@@ -111,15 +111,28 @@
             '  <stop offset="100%" stop-color="#0f0a06" stop-opacity="0.22" />' +
             '</radialGradient>' +
             '<radialGradient id="dayNightTorchGlow" cx="50%" cy="50%" r="50%">' +
-            '  <stop offset="0%" stop-color="#fff7cc" stop-opacity="0.90" />' +
-            '  <stop offset="30%" stop-color="#fbbf24" stop-opacity="0.62" />' +
-            '  <stop offset="65%" stop-color="#ea580c" stop-opacity="0.24" />' +
+            '  <stop offset="0%" stop-color="#fff7cc" stop-opacity="0.56" />' +
+            '  <stop offset="28%" stop-color="#fbbf24" stop-opacity="0.30" />' +
+            '  <stop offset="62%" stop-color="#ea580c" stop-opacity="0.10" />' +
             '  <stop offset="100%" stop-color="#ea580c" stop-opacity="0" />' +
             '</radialGradient>' +
             '<radialGradient id="nightArcaneGlow" cx="50%" cy="50%" r="50%">' +
-            '  <stop offset="0%" stop-color="#e9d5ff" stop-opacity="0.85" />' +
-            '  <stop offset="45%" stop-color="#a855f7" stop-opacity="0.40" />' +
+            '  <stop offset="0%" stop-color="#e9d5ff" stop-opacity="0.58" />' +
+            '  <stop offset="35%" stop-color="#a855f7" stop-opacity="0.25" />' +
+            '  <stop offset="70%" stop-color="#6b21a8" stop-opacity="0.08" />' +
             '  <stop offset="100%" stop-color="#6b21a8" stop-opacity="0" />' +
+            '</radialGradient>' +
+            '<radialGradient id="nightEmberGlow" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="#ffedd5" stop-opacity="0.64" />' +
+            '  <stop offset="30%" stop-color="#f97316" stop-opacity="0.34" />' +
+            '  <stop offset="65%" stop-color="#b91c1c" stop-opacity="0.11" />' +
+            '  <stop offset="100%" stop-color="#7f1d1d" stop-opacity="0" />' +
+            '</radialGradient>' +
+            '<radialGradient id="nightRoyalGlow" cx="50%" cy="50%" r="50%">' +
+            '  <stop offset="0%" stop-color="#fef9c3" stop-opacity="0.56" />' +
+            '  <stop offset="34%" stop-color="#f472b6" stop-opacity="0.24" />' +
+            '  <stop offset="68%" stop-color="#be185d" stop-opacity="0.08" />' +
+            '  <stop offset="100%" stop-color="#831843" stop-opacity="0" />' +
             '</radialGradient>' +
             '<radialGradient id="nightMoonVeilGrad" cx="62%" cy="32%" r="76%">' +
             '  <stop offset="0%" stop-color="' + (th === "fire" ? "rgba(46,18,30,0.52)" : "rgba(34,58,128,0.52)") + '" />' +
