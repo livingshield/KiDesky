@@ -774,7 +774,9 @@ window.PRS_DECOR_CATALOG = {
         merchant_wagon: 0,
         unicorn_grove: 0,
         village_well: 0,
-        pasture_fence: 0
+        pasture_fence: 0,
+        // Etapa 5 — Vlna B (hotová věž)
+        ancient_tower_ruin: 0
     };
 
     var keys = Object.keys(cat);
