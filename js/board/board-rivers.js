@@ -931,7 +931,7 @@
                 out.push('      <circle cx="' + (-lrx * 0.3).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" r="1.2" fill="#fff"/>');
                 out.push('      <polygon points="' + (lrx * 0.35).toFixed(1) + ',' + (lry * 0.2).toFixed(1) + ' ' + (lrx * 0.55).toFixed(1) + ',' + (-lry * 0.3).toFixed(1) + ' ' + (lrx * 0.68).toFixed(1) + ',' + (lry * 0.25).toFixed(1) + '" fill="#bae6fd" stroke="#0284c7" stroke-width="0.6"/>');
             } else if (activeTheme === "air") {
-                out.push('      <polygon points="' + (-lrx * 0.35).toFixed(1) + ',' + (-lry * 0.6).toFixed(1) + ' ' + (-lrx * 0.25).toFixed(1) + ',' + (-lry * 0.35).toFixed(1) + ' ' + (-lrx * 0.35).toFixed(1) + ',-' + (-lry * 0.1).toFixed(1) + ' ' + (-lrx * 0.45).toFixed(1) + ',' + (-lry * 0.35).toFixed(1) + '" fill="#c084fc" stroke="#f3e8ff" stroke-width="0.7"/>');
+                out.push('      <polygon points="' + (-lrx * 0.35).toFixed(1) + ',' + (-lry * 0.6).toFixed(1) + ' ' + (-lrx * 0.25).toFixed(1) + ',' + (-lry * 0.35).toFixed(1) + ' ' + (-lrx * 0.35).toFixed(1) + ',' + (-lry * 0.1).toFixed(1) + ' ' + (-lrx * 0.45).toFixed(1) + ',' + (-lry * 0.35).toFixed(1) + '" fill="#c084fc" stroke="#f3e8ff" stroke-width="0.7"/>');
                 out.push('      <circle cx="' + (-lrx * 0.35).toFixed(1) + '" cy="' + (-lry * 0.35).toFixed(1) + '" r="1.2" fill="#ffffff"/>');
                 out.push('      <circle cx="' + (lrx * 0.45).toFixed(1) + '" cy="' + (lry * 0.15).toFixed(1) + '" r="2.0" fill="#ede9fe" opacity="0.8"/>');
             } else {

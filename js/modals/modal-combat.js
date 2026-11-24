@@ -858,78 +858,88 @@
     handleAnimalBuyout: function (nodeId) {
         if (this.isActionProcessing || this.isSavingSession) return;
         this.isActionProcessing = true;
+        var self = this;
+        var deferredRelease = false;
 
-        // Okamžitě v DOMu odstranit panel s předkupním právem pro okamžitou vizuální odezvu
-        var buyoutCards = document.querySelectorAll(".buyout-interaction-card, .btn-action-buyout");
-        for (var b = 0; b < buyoutCards.length; b++) {
-            if (buyoutCards[b].classList.contains("buyout-interaction-card")) {
-                buyoutCards[b].remove();
-            } else {
-                buyoutCards[b].disabled = true;
-                buyoutCards[b].style.opacity = "0.5";
-            }
-        }
-
-        // Preventivně vyčistit stav předkupního práva v pendingAction
-        if (this.state && this.state.pendingAction) {
-            this.state.pendingAction.canBuyoutAnimalSet = false;
-            this.state.pendingAction.buyoutCandidates = [];
-            delete this.state.pendingAction.canBuyoutAnimalSet;
-            delete this.state.pendingAction.buyoutCandidates;
-            delete this.state.pendingAction.buyoutSuccess;
-        }
-
-        var res = null;
         try {
-            res = window.PRS_GameEngine.executeAnimalBuyout(this.state, nodeId);
-        } catch (err) {
-            console.error("Chyba při výkupu zvířete executeAnimalBuyout:", err);
-        }
-
-        if (res) {
-            if (window.PRS_Audio) window.PRS_Audio.playBuy();
-            this.inspectedPlayerIndex = this.state.currentPlayerIndex;
-            var tBo = window.PRS_I18n ? function (k, p2, d) { return window.PRS_I18n.t(k, p2, d); } : function (k, p2, d) { return d; };
-            var price = (typeof res === "object" && res.buyoutPrice) ? res.buyoutPrice : 1600;
-            var rawNodeName = (typeof res === "object" && res.nodeName) ? res.nodeName : "";
-            var nodeName = rawNodeName ? (this.translateDynamicName ? this.translateDynamicName(rawNodeName) : rawNodeName) : tBo("modals.quest_duel.animal_fallback", null, "Zvíře");
-            var priceStrBo = window.PRS_I18n ? window.PRS_I18n.formatGold(price) : (price.toLocaleString("cs-CZ") + " zl.");
-            if (this.showToast) {
-                this.showToast(tBo("modals.quest_duel.buyout_toast", { name: nodeName, price: priceStrBo }, "🦅 " + nodeName + " úspěšně vykoupen ze sady (-" + priceStrBo + ", +1.0 💖)!"), "success");
-            }
-            if (this.showPawnToast) {
-                this.showPawnToast(this.state.currentPlayerIndex, tBo("modals.quest_duel.buyout_pawn_toast", { name: nodeName }, "Vykoupen " + nodeName + "!"), "🦅", "#10b981");
+            // Okamžitě v DOMu odstranit panel s předkupním právem pro okamžitou vizuální odezvu
+            var buyoutCards = document.querySelectorAll(".buyout-interaction-card, .btn-action-buyout");
+            for (var b = 0; b < buyoutCards.length; b++) {
+                if (buyoutCards[b].classList.contains("buyout-interaction-card")) {
+                    buyoutCards[b].remove();
+                } else {
+                    buyoutCards[b].disabled = true;
+                    buyoutCards[b].style.opacity = "0.5";
+                }
             }
 
+            // Preventivně vyčistit stav předkupního práva v pendingAction
             if (this.state && this.state.pendingAction) {
                 this.state.pendingAction.canBuyoutAnimalSet = false;
                 this.state.pendingAction.buyoutCandidates = [];
-                this.state.pendingAction.buyoutSuccess = null;
                 delete this.state.pendingAction.canBuyoutAnimalSet;
                 delete this.state.pendingAction.buyoutCandidates;
                 delete this.state.pendingAction.buyoutSuccess;
             }
 
-            this.isBoardStaticDirty = true;
-            try { this.renderGameScreen(); } catch (e) { console.error("renderGameScreen error:", e); }
-            try { this.renderActionPanel(); } catch (e) { console.error("renderActionPanel error:", e); }
-            try { this.renderLowerKnightDetail(); } catch (e) { console.error("renderLowerKnightDetail error:", e); }
-            if (this.activeSidebarTab === "property") {
-                try { this.renderSidebarPropertyPanel(); } catch (e) { console.warn("[Modals] renderSidebarPropertyPanel error:", e); }
+            var res = null;
+            try {
+                res = window.PRS_GameEngine.executeAnimalBuyout(this.state, nodeId);
+            } catch (err) {
+                console.error("Chyba při výkupu zvířete executeAnimalBuyout:", err);
             }
 
-            var self = this;
-            var p = this.saveSessionAuto();
-            if (p && p.finally) {
-                p.finally(function () {
-                    self.isActionProcessing = false;
-                });
+            if (res) {
+                if (window.PRS_Audio && typeof window.PRS_Audio.playBuy === "function") {
+                    try { window.PRS_Audio.playBuy(); } catch (e) {}
+                }
+                this.inspectedPlayerIndex = this.state.currentPlayerIndex;
+                var tBo = window.PRS_I18n ? function (k, p2, d) { return window.PRS_I18n.t(k, p2, d); } : function (k, p2, d) { return d; };
+                var price = (typeof res === "object" && res.buyoutPrice) ? res.buyoutPrice : 1600;
+                var rawNodeName = (typeof res === "object" && res.nodeName) ? res.nodeName : "";
+                var nodeName = rawNodeName ? (this.translateDynamicName ? this.translateDynamicName(rawNodeName) : rawNodeName) : tBo("modals.quest_duel.animal_fallback", null, "Zvíře");
+                var priceStrBo = window.PRS_I18n ? window.PRS_I18n.formatGold(price) : (price.toLocaleString("cs-CZ") + " zl.");
+                if (this.showToast) {
+                    this.showToast(tBo("modals.quest_duel.buyout_toast", { name: nodeName, price: priceStrBo }, "🦅 " + nodeName + " úspěšně vykoupen ze sady (-" + priceStrBo + ", +1.0 💖)!"), "success");
+                }
+                if (this.showPawnToast) {
+                    this.showPawnToast(this.state.currentPlayerIndex, tBo("modals.quest_duel.buyout_pawn_toast", { name: nodeName }, "Vykoupen " + nodeName + "!"), "🦅", "#10b981");
+                }
+
+                if (this.state && this.state.pendingAction) {
+                    this.state.pendingAction.canBuyoutAnimalSet = false;
+                    this.state.pendingAction.buyoutCandidates = [];
+                    this.state.pendingAction.buyoutSuccess = null;
+                    delete this.state.pendingAction.canBuyoutAnimalSet;
+                    delete this.state.pendingAction.buyoutCandidates;
+                    delete this.state.pendingAction.buyoutSuccess;
+                }
+
+                this.isBoardStaticDirty = true;
+                try { this.renderGameScreen(); } catch (e) { console.error("renderGameScreen error:", e); }
+                try { this.renderActionPanel(); } catch (e) { console.error("renderActionPanel error:", e); }
+                try { this.renderLowerKnightDetail(); } catch (e) { console.error("renderLowerKnightDetail error:", e); }
+                if (this.activeSidebarTab === "property") {
+                    try { this.renderSidebarPropertyPanel(); } catch (e) { console.warn("[Modals] renderSidebarPropertyPanel error:", e); }
+                }
+
+                var p = this.saveSessionAuto();
+                if (p && typeof p.finally === "function") {
+                    deferredRelease = true;
+                    p.finally(function () {
+                        self.isActionProcessing = false;
+                    });
+                } else {
+                    deferredRelease = true;
+                    setTimeout(function () { self.isActionProcessing = false; }, 350);
+                }
             } else {
-                setTimeout(function () { self.isActionProcessing = false; }, 350);
+                try { this.renderActionPanel(); } catch (e) { console.warn("[Modals] renderActionPanel error:", e); }
             }
-        } else {
-            this.isActionProcessing = false;
-            try { this.renderActionPanel(); } catch (e) { console.warn("[Modals] renderActionPanel error:", e); }
+        } finally {
+            if (!deferredRelease) {
+                this.isActionProcessing = false;
+            }
         }
     },
 

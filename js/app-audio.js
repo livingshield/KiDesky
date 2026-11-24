@@ -677,7 +677,13 @@ window.PRS_Audio = {
         this._playChime(now, 440.0, 0.45, 0.20 * this.sfxVolume);
         this._playChime(now + 0.08, 659.25, 0.55, 0.22 * this.sfxVolume);
         this._playChime(now + 0.16, 880.0, 0.70, 0.25 * this.sfxVolume);
-    }
+    },
+
+    // Sémantické aliasy používané v dialozích a bojových/obchodních modálech
+    playBuy: function () { this.playCoin(); },
+    playDiceRoll: function () { this.playDice(); },
+    playVictory: function () { this.playFanfare(); },
+    playFailure: function () { this.playOminous(); }
 };
 
 // ============================================================================
