@@ -22,7 +22,7 @@ Aplikace kombinuje čistý **klientský Vanilla JS / SVG / PWA stack** (bez bund
 KiDesky/
 ├── index.html                  # Aplikační shell, sekvenční <script defer> s ?v=... cache-bustingem
 ├── manifest.json               # PWA manifest
-├── service-worker.js           # Offline/caching strategie (CACHE_NAME = kidesky-cache-v1.9.82)
+├── service-worker.js           # Offline/caching strategie (CACHE_NAME = kidesky-cache-v1.9.83)
 ├── web.config                  # IIS hlavičky, customErrors=RemoteOnly, skrytí backend/, MIME mapy
 ├── appsettings.json            # Šablona konfigurace (SQL, SMTP, Google OAuth, FTP, Gemini)
 ├── deploy_code_update.ps1      # FTP deploy s 64 KB streamingem, retry a před-deploy kontrolou
@@ -82,8 +82,9 @@ KiDesky/
 │   ├── board/
 │   │   ├── board-camera.js     # Pan & zoom kamera SVG plánu (~23.4 KB)
 │   │   ├── board-rivers.js     # SVG renderování řek a mostů (~75.5 KB)
-│   │   ├── board-terrain.js    # Souvislý namalovaný terén se šumovými maskami (~7 KB)
-│   │   ├── board-static-svg.js # Statické SVG vrstvy polí, cest a krajiny (~85 KB)
+│   │   ├── board-terrain.js    # Souvislý namalovaný terén se šumovými maskami (~11 KB)
+│   │   ├── board-backdrop-cache.js # Offscreen Canvas bitmapová cache statického pozadí (~9 KB)
+│   │   ├── board-static-svg.js # Statické SVG vrstvy polí, cest a krajiny (~86 KB)
 │   │   ├── board-tokens.js     # Vykreslování figurek hráčů, draků a vlastnictví (~59.4 KB)
 │   │   └── board-ambient.js    # Dekorativní částice a ambientní efekty (~8.2 KB)
 │   ├── hud/
@@ -182,6 +183,7 @@ flowchart TB
 ```
 
 - **Fingerprint cache `<defs>` (`_lastDefsKey`):** V `renderBoardSVG()` se `<defs>` přestavují pouze při změně motivu, denní/noční varianty, kvality grafiky nebo seedu mapy – ne při každém tahu figurky.
+- **Jednorázová bitmapová cache statického pozadí (`board-backdrop-cache.js`):** Po vyrenderování statického pozadí (`#prs-static-backdrop`: pergamen, terén, biomy, řeky, mosty, cesty, rozcestníky, dominanty a dekorace) se v prohlížeči na pozadí provede `inlineSvgImageHrefs()` (vložení použitých assetů jako `data:` URI v paměti relace) a SVG se jednou rasterizuje přes skrytý `<canvas>` do WebP/PNG `blob:` bitmapy v rozlišení podle kvality (`low = 1.0×`, `medium = 1.5×`, `high = 2.0×`). Poté prohlížeč nahradí stovky statických SVG elementů jediným `<image id="prs-baked-backdrop-img"/>`. Klikání na dekorace řeší souřadnicový hit-test `handleBakedBackdropClick()`, paměť uvolňuje `disposeBackdropCache()` přes `URL.revokeObjectURL()`.
 - **GPU CSS kamera & throttling (`board-camera.js`, `board-ambient.js`):** Posun a zoom aplikuje GPU vrstvu `translate3d(...) scale(...)` přímo na `#prs-board-svg` (`transform-origin: 0 0; will-change: transform`) koaleskovanou přes `requestAnimationFrame` (`scheduleViewportTransform()`) s mezipamětí rozměrů (`_measureBoardSize()`); `#prs-board-stage` nedostává transformaci na každý snímek. Při `is-panning` / `is-interacting` (včetně dotykových gest `touchstart`/`touchend`/`touchcancel`) se pauzují CSS animace, ambientní `#prs-ambient-canvas` (vypnutý na `low`, `medium`, `data-device="mobile"` i při `prefers-reduced-motion`) i mobilní `backdrop-filter`.
 - **Úrovně kvality grafiky (`localStorage.kidesky_graphics_quality`):**
   - `low`: klasický pergamenový podklad bez `board-terrain` textur, s **0** SVG `filter` / `drop-shadow` efekty ve statické vrstvě a řekách, zredukovanou vedlejší vegetací/detaily břehů, bez mobilního `backdrop-filter` a bez animací (maximálně plynulé na starších mobilech).
@@ -221,7 +223,7 @@ Sdílená abstraktní bázová třída pro router i všechny subhandlery:
 - **Grafika v WebP + SVG/CSS zrcadlení:** Herní obrázky byly zkonvertovány do `.webp` (`tools/optimize-assets-webp.py`) a duplicitní soubory `*_flip.*` byly zrušeny. Zrcadlení doleva/doprava provádí nativní SVG transformace `scale(-1, 1)` nebo CSS třída `.is-flipped`. Zpětnou kompatibilitu u starších URL zajišťuje `PRS_normalizeAssetUrl()`.
 - **Média mimo Git:** Audio stopy (`assets/audio/*.mp3`, 128 kbps CBR) i videa (`*.mp4`, např. `ps_intro_04.mp4` v 720p H.264 CRF 26) jsou v `.gitignore` vyloučeny pomocí pravidel `*.mp3` a `*.mp4` (složku `assets/audio/` udržuje `.gitkeep`), aby se nenafukovala historie repozitáře.
 - **PWA Service Worker (`service-worker.js`):**
-  - `CACHE_NAME` (aktuálně `kidesky-cache-v1.9.82`) se při změně kódu navyšuje společně s `?v=...` u všech stylů/skriptů v `index.html` (kontroluje `predeploy-check.js`).
+  - `CACHE_NAME` (aktuálně `kidesky-cache-v1.9.83`) se při změně kódu navyšuje společně s `?v=...` u všech stylů/skriptů v `index.html` (kontroluje `predeploy-check.js`).
   - `install` přednačte `CORE_ASSETS` a volá `self.skipWaiting()`; `activate` smaže staré verze cache a převezme klienty (`clients.claim()`).
   - **Fetch strategie:**
     - *Bypass (vždy síť):* non-GET požadavky, cizí domény, `api.ashx`, `/api/`, `Range` hlavičky, `/assets/audio/`, `/assets/video/` a přípony `.mp3`, `.wav`, `.ogg`, `.m4a`, `.mp4`, `.webm`.

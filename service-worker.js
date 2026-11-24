@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kidesky-cache-v1.9.82';
+const CACHE_NAME = 'kidesky-cache-v1.9.83';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -44,6 +44,7 @@ const CORE_ASSETS = [
   './js/board/board-camera.js',
   './js/board/board-rivers.js',
   './js/board/board-terrain.js',
+  './js/board/board-backdrop-cache.js',
   './js/board/board-static-svg.js',
   './js/board/board-tokens.js',
   './js/board/board-ambient.js',

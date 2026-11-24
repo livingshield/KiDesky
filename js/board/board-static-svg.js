@@ -360,6 +360,12 @@
 
             this.isBoardStaticDirty = false;
 
+            if (this._lastUnbakedBackdrop && typeof this.scheduleBackdropBake === "function") {
+                var unbakedInfo = this._lastUnbakedBackdrop;
+                this._lastUnbakedBackdrop = null;
+                this.scheduleBackdropBake(unbakedInfo.key, this.getBoardDefsSVG(), unbakedInfo.html, gQuality);
+            }
+
         }
 
         this.renderBoardTokens();
@@ -528,6 +534,18 @@
         };
 
         var activePalette = themePalettes[th] || themePalettes.light;
+
+        var bakeKey = (typeof this.getBackdropCacheKey === "function") ? this.getBackdropCacheKey() : null;
+        var bakedEntry = (bakeKey && this._bakedBackdrop && this._bakedBackdrop.key === bakeKey && this._bakedBackdrop.blobUrl) ? this._bakedBackdrop : null;
+
+        if (bakedEntry && typeof this.renderBakedBackdropImageHTML === "function") {
+            this._lastUnbakedBackdrop = null;
+            out.push('  <g id="prs-static-backdrop">');
+            out.push('    ' + this.renderBakedBackdropImageHTML(bakedEntry.blobUrl));
+            out.push('  </g>');
+        } else {
+            out.push('  <g id="prs-static-backdrop">');
+            var backdropStartIdx = out.length;
 
         // 1. Podklad herní desky (pergamen nebo vlastní bitmapa)
 
@@ -1032,6 +1050,15 @@
 
             out.push('  </g>');
 
+        }
+
+            var backdropInnerHtml = out.slice(backdropStartIdx).join("\n");
+            out.push('  </g>');
+            if (bakeKey) {
+                this._lastUnbakedBackdrop = { key: bakeKey, html: backdropInnerHtml };
+            } else {
+                this._lastUnbakedBackdrop = null;
+            }
         }
 
         // 5. Tvarově odlišená herní políčka (erby, osmiúhelníky, kosočtverce, pečetě, stuhy zvířat a praporky)
