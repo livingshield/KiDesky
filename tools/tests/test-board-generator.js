@@ -150,17 +150,54 @@ function assertBoardInvariants(win, board, spec) {
     }
   }
 
-  // 7. Decorations
+  // 7. Decorations & Phase 3 landscape invariants
   const decors = board.decorations || [];
   assert(decors.length > 0, `${spec.label}: decorations list is empty`);
   const catalog = win.PRS_DECOR_CATALOG || {};
+  const builder = win.PRS_BoardBuilder || {};
+  const roadSamples = (typeof builder.sampleRoadCorridor === 'function') ? builder.sampleRoadCorridor(board.nodes) : [];
+  const uniquePoiSet = new Set(builder.UNIQUE_POI_IDS || []);
+  const uniqueCounts = {};
+  const treeSet = new Set(['tree_oak', 'tree_pine', 'tree_birch', 'grove_oak', 'grove_pine']);
+  const trees = [];
+
   for (let di = 0; di < decors.length; di++) {
     const dec = decors[di];
     assert(dec.catalogId && catalog[dec.catalogId], `${spec.label}: decoration[${di}] unknown catalogId "${dec.catalogId}"`);
     assert(Number.isFinite(dec.x) && Number.isFinite(dec.y), `${spec.label}: decoration[${di}] non-finite coords`);
+
+    if (uniquePoiSet.has(dec.catalogId)) {
+      uniqueCounts[dec.catalogId] = (uniqueCounts[dec.catalogId] || 0) + 1;
+      assert(uniqueCounts[dec.catalogId] <= 1, `${spec.label}: unique POI "${dec.catalogId}" appeared ${uniqueCounts[dec.catalogId]}x (max 1)`);
+    }
+    for (let ni = 0; ni < nLen; ni++) {
+      const nd = board.nodes[ni];
+      const ndDist = Math.hypot(dec.x - nd.x, dec.y - nd.y);
+      assert(ndDist >= 34, `${spec.label}: decoration ${dec.catalogId}@(${dec.x},${dec.y}) too close to node ${ni}: ${ndDist.toFixed(1)}px < 34px`);
+    }
+    for (let ri = 0; ri < roadSamples.length; ri++) {
+      const rDist = Math.hypot(dec.x - roadSamples[ri].x, dec.y - roadSamples[ri].y);
+      assert(rDist >= 34, `${spec.label}: decoration ${dec.catalogId}@(${dec.x},${dec.y}) intrudes on road clearing: ${rDist.toFixed(1)}px < 34px`);
+    }
+    if (treeSet.has(dec.catalogId)) {
+      trees.push(dec);
+    }
   }
 
-  return `nodes=${nLen}, reach=${visited.size}/${nLen}, minDist=${minDist.toFixed(1)}px, rivers=${rivers.length}, bridges=${bridges.length}, landmarks=${landmarks.length}, decors=${decors.length}`;
+  assert(trees.length > 0, `${spec.label}: expected forest tree/grove decorations`);
+  let totalNeighbors = 0;
+  for (let ti = 0; ti < trees.length; ti++) {
+    let nb = 0;
+    for (let tj = 0; tj < trees.length; tj++) {
+      if (ti === tj) continue;
+      if (Math.hypot(trees[ti].x - trees[tj].x, trees[ti].y - trees[tj].y) <= 75) nb++;
+    }
+    totalNeighbors += nb;
+  }
+  const avgTreeNeighbors = totalNeighbors / trees.length;
+  assert(avgTreeNeighbors >= 2.0, `${spec.label}: forest clustering avg neighbors ${avgTreeNeighbors.toFixed(2)} < 2.0`);
+
+  return `nodes=${nLen}, reach=${visited.size}/${nLen}, minDist=${minDist.toFixed(1)}px, rivers=${rivers.length}, bridges=${bridges.length}, landmarks=${landmarks.length}, decors=${decors.length}, treeNb=${avgTreeNeighbors.toFixed(1)}`;
 }
 
 function main() {
@@ -198,6 +235,19 @@ function main() {
       console.error(`[FAIL] ${spec.label} — ${err.message}`);
       fail++;
     }
+  }
+
+  // Determinism check for procedural decorations & landscape composition
+  try {
+    const detSpec = boardSpecs.find(s => s.label === 'Procedural: dual #4599');
+    const st1 = engine.createGame({ ...detSpec.opts, players });
+    const st2 = engine.createGame({ ...detSpec.opts, players });
+    assert(JSON.stringify(st1.board.decorations) === JSON.stringify(st2.board.decorations), 'Decoration generation is not bit-exact deterministic for seed #4599');
+    console.log(`[PASS] Determinism: dual #4599 decorations identical (${st1.board.decorations.length} items)`);
+    pass++;
+  } catch (err) {
+    console.error(`[FAIL] Determinism: dual #4599 — ${err.message}`);
+    fail++;
   }
 
   console.log(`\n=== Výsledek test-board-generator: ${pass} PASS, ${fail} FAIL ===`);

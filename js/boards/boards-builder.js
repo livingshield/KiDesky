@@ -152,7 +152,7 @@ window.PRS_BoardBuilder = {
             this.computeRiverBridges(board);
         }
         // Generování procedurálních a ukotvených dekorací krajiny s ekosystémovými shluky
-        if (!board.decorations || board.decorations.length === 0 || board.decorationsVersion !== 4) {
+        if (!board.decorations || board.decorations.length === 0 || board.decorationsVersion !== 5) {
             this.generateBoardDecorations(board, seed);
         }
         return board;
@@ -245,512 +245,610 @@ window.PRS_BoardBuilder = {
     // PROCEDURÁLNÍ DEKORACE KRAJINY (EKOSYSTÉMOVÉ SHLUKY & PAINTER'S ALGORITHM)
     // Skládá husté lesní hvozdy, horské hřebeny a vesnická diorámata
     // ========================================================================
-    generateBoardDecorations: function (board, customSeed) {
-        if (!board || !board.nodes) return [];
-            var seed = customSeed || board.seed || (board.code === "dragon_4598" ? 4598 : (board.code === "compact_48" ? 4848 : 4599));
-        
-            var rnd = (function (s) {
-                var a = s;
-                return function () {
-                    var t = a += 0x6D2B79F5;
-                    t = Math.imul(t ^ t >>> 15, t | 1);
-                    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-                };
-            })(seed);
-        
-            var nodes = board.nodes;
-            var cardZones = board.cardZones || [];
-            var landmarks = board.landmarks || [];
-            var catalog = window.PRS_DECOR_CATALOG || {};
-            var decorList = [];
-        
-            var riverClearancePoints = [];
-            if (board.rivers && board.rivers.length > 0) {
-                var sRPS = (window.PRS_BoardBuilder && window.PRS_BoardBuilder.sampleRiverPathSimple) || (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.sampleRiverPathSimple);
-                if (sRPS) {
-                    for (var ri = 0; ri < board.rivers.length; ri++) {
-                        var rObj = board.rivers[ri];
-                        var rWidth = rObj.width || 14;
-                        var smpPts = sRPS(rObj.path);
-                        for (var sp = 0; sp < smpPts.length; sp++) {
-                            riverClearancePoints.push({ x: smpPts[sp].x, y: smpPts[sp].y, halfW: rWidth / 2 });
-                        }
-                    }
-                }
+    UNIQUE_POI_IDS: [
+        "unicorn_grove", "pegasus_pond", "dryad_sacred_oak", "forest_ent",
+        "crystal_golem", "phoenix_nest", "lake_nymphs", "vodnik_pond",
+        "druid_monoliths", "fairy_ring_mushrooms", "witch_hut",
+        "ancient_ruins", "ancient_tower_ruin", "ancient_graveyard",
+        "dragon_cave", "cave_bear_den", "bandit_cave", "basilisk_cave",
+        "snow_troll_cave", "swamp_troll", "swamp_hydra", "griffin_nest",
+        "fire_salamander", "swamp_bridge"
+    ],
+
+    sampleRoadCorridor: function (nodes) {
+        var pts = [];
+        if (!nodes || !nodes.length) return pts;
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            if (!n) continue;
+            var targets = [];
+            if (n.branchLow !== null && n.branchLow !== undefined && n.branchHigh !== null && n.branchHigh !== undefined) {
+                targets.push({ id: n.branchLow, isBranch: true });
+                targets.push({ id: n.branchHigh, isBranch: true });
+            } else if (n.next && n.next.length > 0) {
+                targets.push({ id: n.next[0], isBranch: false });
             }
-        
-            function isPositionClear(x, y, radius, allowClusterOverlap, minDistFromDecor) {
-                if (x - radius < 35 || x + radius > 1365 || y - radius < 35 || y + radius > 825) return false;
-        
-                for (var rp = 0; rp < riverClearancePoints.length; rp++) {
-                    var rpt = riverClearancePoints[rp];
-                    var rdx = rpt.x - x;
-                    var rdy = rpt.y - y;
-                    var minRDist = radius + rpt.halfW + 16;
-                    if (rdx * rdx + rdy * rdy < minRDist * minRDist) {
-                        return false;
-                    }
-                }
-        
-                for (var i = 0; i < nodes.length; i++) {
-                    var n = nodes[i];
-                    var dx = n.x - x;
-                    var dy = n.y - y;
-                    var distSq = dx * dx + dy * dy;
-                    var minDist = radius + 20;
-                    if (distSq < minDist * minDist) return false;
-                }
-        
-                for (var z = 0; z < cardZones.length; z++) {
-                    var cz = cardZones[z];
-                    if (x + radius > cz.x - 10 && x - radius < cz.x + cz.w + 10 &&
-                        y + radius > cz.y - 10 && y - radius < cz.y + cz.h + 10) {
-                        return false;
-                    }
-                }
-        
-                for (var l = 0; l < landmarks.length; l++) {
-                    var lm = landmarks[l];
-                    var lx1 = lm.x - lm.w / 2 - 14;
-                    var lx2 = lm.x + lm.w / 2 + 14;
-                    var ly1 = lm.y - lm.h / 2 - 14;
-                    var ly2 = lm.y + lm.h / 2 + 14;
-                    if (x + radius > lx1 && x - radius < lx2 && y + radius > ly1 && y - radius < ly2) {
-                        return false;
-                    }
-                }
-        
-                if (!allowClusterOverlap) {
-                    var reqDist = minDistFromDecor || radius;
-                    for (var d = 0; d < decorList.length; d++) {
-                        var dec = decorList[d];
-                        var ddx = dec.x - x;
-                        var ddy = dec.y - y;
-                        var dDist = Math.sqrt(ddx * ddx + ddy * ddy);
-                        var sep = minDistFromDecor ? (minDistFromDecor + (dec.clearance || 20) * 0.4) : (radius + dec.clearance);
-                        if (dDist < sep) {
-                            return false;
-                        }
-                    }
-                }
-        
-                return true;
-            }
-        
-            function findClearSpot(cx, cy, radius, maxOffsets) {
-                if (isPositionClear(cx, cy, radius, false)) return { x: cx, y: cy };
-                var offsets = [
-                    { x: 35, y: 0 }, { x: -35, y: 0 }, { x: 0, y: 35 }, { x: 0, y: -35 },
-                    { x: 30, y: 30 }, { x: -30, y: 30 }, { x: 30, y: -30 }, { x: -30, y: -30 },
-                    { x: 55, y: 0 }, { x: -55, y: 0 }, { x: 0, y: 55 }, { x: 0, y: -55 },
-                    { x: 65, y: 35 }, { x: -65, y: 35 }, { x: 65, y: -35 }, { x: -65, y: -35 },
-                    { x: 80, y: 0 }, { x: -80, y: 0 }, { x: 0, y: 80 }, { x: 0, y: -80 }
-                ];
-                var lim = maxOffsets || offsets.length;
-                for (var o = 0; o < lim; o++) {
-                    var tx = cx + offsets[o].x;
-                    var ty = cy + offsets[o].y;
-                    if (isPositionClear(tx, ty, radius, false)) return { x: tx, y: ty };
-                }
-                return null;
-            }
-        
-            // 1. Shlukové lesní hvozdy (Forest Thickets)
-            function spawnForestThicket(cx, cy, type) {
-                var groveKey = (type === "pine") ? "grove_pine" : (type === "birch" ? "grove_oak" : "grove_oak");
-                var treeKeys = (type === "pine") ? ["tree_pine", "tree_pine", "tree_birch"] : ["tree_oak", "tree_birch", "tree_oak"];
-                if (!catalog[groveKey]) return;
-                var gItem = catalog[groveKey];
-                var spot = findClearSpot(cx, cy, gItem.clearance);
-                if (!spot) return;
-                cx = spot.x; cy = spot.y;
-        
-                decorList.push({
-                    id: "cluster_g_" + cx + "_" + cy,
-                    catalogId: groveKey,
-                    x: cx,
-                    y: cy,
-                    w: gItem.w,
-                    h: gItem.h,
-                    clearance: gItem.clearance,
-                    scale: 1.0,
-                    isFlipped: rnd() < 0.5,
-                    anchoredNodeId: null
-                });
-        
-                var treeCount = 3 + Math.floor(rnd() * 3);
-                for (var t = 0; t < treeCount; t++) {
-                    var ang = (t / treeCount) * Math.PI * 2 + (rnd() - 0.5) * 0.4;
-                    var dist = 22 + rnd() * 20;
-                    var tx = Math.round(cx + Math.cos(ang) * dist);
-                    var ty = Math.round(cy + Math.sin(ang) * dist);
-                    var tKey = treeKeys[Math.floor(rnd() * treeKeys.length)];
-                    var tItem = catalog[tKey];
-                    if (tItem && isPositionClear(tx, ty, 14, true)) {
-                        var sc = Math.round((0.8 + rnd() * 0.25) * 100) / 100;
-                        decorList.push({
-                            id: "cluster_t_" + tx + "_" + ty,
-                            catalogId: tKey,
-                            x: tx,
-                            y: ty,
-                            w: Math.round(tItem.w * sc),
-                            h: Math.round(tItem.h * sc),
-                            clearance: Math.round(tItem.clearance * 0.5),
-                            scale: sc,
-                            isFlipped: rnd() < 0.5,
-                            anchoredNodeId: null
-                        });
-                    }
-                }
-        
-                if (rnd() < 0.75 && catalog["bush"]) {
-                    var bx = Math.round(cx + (rnd() - 0.5) * 44);
-                    var by = Math.round(cy + 26 + rnd() * 14);
-                    if (isPositionClear(bx, by, 10, true)) {
-                        decorList.push({
-                            id: "cluster_b_" + bx + "_" + by,
-                            catalogId: "bush",
-                            x: bx,
-                            y: by,
-                            w: 44,
-                            h: 38,
-                            clearance: 10,
-                            scale: 0.9,
-                            isFlipped: rnd() < 0.5,
-                            anchoredNodeId: null
-                        });
-                    }
-                }
-            }
-        
-            // 2. Horský hřeben (Mountain Ridge)
-            function spawnMountainRidge(cx, cy) {
-                if (!catalog["mountain_peaks"]) return;
-                var mItem = catalog["mountain_peaks"];
-                var spot = findClearSpot(cx, cy, mItem.clearance);
-                if (!spot) return;
-                cx = spot.x; cy = spot.y;
-        
-                var mainFlipped = rnd() < 0.5;
-                decorList.push({
-                    id: "ridge_m1_" + cx + "_" + cy,
-                    catalogId: "mountain_peaks",
-                    x: cx,
-                    y: cy,
-                    w: mItem.w,
-                    h: mItem.h,
-                    clearance: mItem.clearance,
-                    scale: 1.0,
-                    isFlipped: mainFlipped,
-                    anchoredNodeId: null
-                });
-        
-                // Alternujeme směr bočního masivu (vlevo/vpravo s mírným náhodným posunem)
-                var ridgeDir = (rnd() < 0.5 ? 1 : -1);
-                var ox = cx + ridgeDir * (42 + Math.round(rnd() * 8));
-                var oy = cy + (rnd() < 0.5 ? -8 : 8);
-                if (isPositionClear(ox, oy, 22, true)) {
-                    decorList.push({
-                        id: "ridge_m2_" + ox + "_" + oy,
-                        catalogId: "mountain_peaks",
-                        x: ox,
-                        y: oy,
-                        w: Math.round(mItem.w * 0.85),
-                        h: Math.round(mItem.h * 0.85),
-                        clearance: 22,
-                        scale: 0.85,
-                        isFlipped: !mainFlipped,
-                        anchoredNodeId: null
+            for (var t = 0; t < targets.length; t++) {
+                var tn = nodes[targets[t].id];
+                if (!tn) continue;
+                var dx = tn.x - n.x;
+                var dy = tn.y - n.y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 1) continue;
+                var mx = (n.x + tn.x) / 2;
+                var my = (n.y + tn.y) / 2;
+                var perpX = -dy / dist;
+                var perpY = dx / dist;
+                var dotCenter = perpX * (700 - mx) + perpY * (430 - my);
+                var curveSign = (dotCenter >= 0 ? 1 : -1);
+                if (targets[t].isBranch) curveSign = -curveSign;
+                var bend = Math.min(10, Math.max(3, dist * 0.065)) * curveSign;
+                var qx = Math.round((mx + perpX * bend) * 10) / 10;
+                var qy = Math.round((my + perpY * bend) * 10) / 10;
+                var steps = Math.max(4, Math.ceil(dist / 14));
+                for (var s = 0; s <= steps; s++) {
+                    var u = s / steps;
+                    var inv = 1 - u;
+                    pts.push({
+                        x: inv * inv * n.x + 2 * inv * u * qx + u * u * tn.x,
+                        y: inv * inv * n.y + 2 * inv * u * qy + u * u * tn.y
                     });
                 }
-        
-                if (catalog["rock_boulder"]) {
-                    var rDir = (rnd() < 0.5 ? 1 : -1);
-                    var rx = cx + rDir * (20 + Math.round(rnd() * 15));
-                    var ry = cy + 28;
-                    if (isPositionClear(rx, ry, 12, true)) {
-                        decorList.push({
-                            id: "ridge_r_" + rx + "_" + ry,
-                            catalogId: "rock_boulder",
-                            x: rx,
-                            y: ry,
-                            w: 50,
-                            h: 38,
-                            clearance: 12,
-                            scale: 0.9,
-                            isFlipped: rnd() < 0.5,
-                            anchoredNodeId: null
-                        });
-                    }
-                }
             }
-        
-            // 2b. Zemědělský / vesnický shluk (Farm / Meadow Cluster)
-            function spawnFarmCluster(cx, cy) {
-                if (!catalog["farm_field"]) return;
-                var fItem = catalog["farm_field"];
-                var spot = findClearSpot(cx, cy, fItem.clearance);
-                if (!spot) return;
-                cx = spot.x; cy = spot.y;
-        
-                decorList.push({
-                    id: "farm_c1_" + cx + "_" + cy,
-                    catalogId: "farm_field",
-                    x: cx,
-                    y: cy,
-                    w: fItem.w,
-                    h: fItem.h,
-                    clearance: fItem.clearance,
-                    scale: 1.0,
-                    isFlipped: rnd() < 0.5,
-                    anchoredNodeId: null
-                });
-        
-                // Přidáme větrný mlýn nebo chalupu poblíž - střídáme směr umístění i otočení
-                var prop = (rnd() < 0.5 && catalog["windmill"]) ? "windmill" : (catalog["cottage_timber"] ? "cottage_timber" : null);
-                if (prop) {
-                    var pItem = catalog[prop];
-                    var farmDir = (rnd() < 0.5 ? 1 : -1);
-                    var px = cx + farmDir * (40 + Math.round(rnd() * 10));
-                    var py = cy + (rnd() < 0.5 ? -20 : 20);
-                    if (isPositionClear(px, py, 20, true)) {
-                        decorList.push({
-                            id: "farm_p_" + px + "_" + py,
-                            catalogId: prop,
-                            x: px,
-                            y: py,
-                            w: pItem.w,
-                            h: pItem.h,
-                            clearance: 20,
-                            scale: 0.9,
-                            isFlipped: rnd() < 0.5,
-                            anchoredNodeId: null
-                        });
-                    }
-                }
-            }
-        
-            // DYNAMICKÁ ANALÝZA VOLNÉ PLOCHY PLÁNU:
-            // Najdeme všechny volné oblasti na mapě s dostatečným odstupem od cest a řek
-            function evaluateClearance(x, y) {
-                if (x < 65 || x > 1335 || y < 65 || y > 795) return 0;
-                var minD = 9999;
-                for (var ni = 0; ni < nodes.length; ni++) {
-                    var n = nodes[ni];
-                    var d = Math.hypot(n.x - x, n.y - y);
-                    if (d < minD) minD = d;
-                }
-                for (var li = 0; li < landmarks.length; li++) {
-                    var lm = landmarks[li];
-                    var ld = Math.hypot(lm.x - x, lm.y - y) - (lm.w || 90) * 0.5;
-                    if (ld < minD) minD = Math.max(0, ld);
-                }
-                for (var ri = 0; ri < riverClearancePoints.length; ri++) {
-                    var rp = riverClearancePoints[ri];
-                    var rd = Math.hypot(rp.x - x, rp.y - y) - rp.halfW;
-                    if (rd < minD) minD = Math.max(0, rd);
-                }
-                return minD;
-            }
-        
-            var openCells = [];
-            for (var sx = 90; sx <= 1310; sx += 50) {
-                for (var sy = 90; sy <= 770; sy += 50) {
-                    var clr = evaluateClearance(sx, sy);
-                    if (clr >= 60) {
-                        openCells.push({ x: sx, y: sy, clr: clr });
-                    }
-                }
-            }
-            // Setřídíme podle největšího volného prostoru
-            openCells.sort(function (a, b) { return b.clr - a.clr; });
-        
-            // Zkusíme klasické pozice (pro retro-kompatibilitu s classic_96)
-            var fixedMountains = [[1210, 260], [1250, 490], [1180, 680]];
-            var spawnedMtn = 0;
-            for (var fm = 0; fm < fixedMountains.length; fm++) {
-                var spot = findClearSpot(fixedMountains[fm][0], fixedMountains[fm][1], 55, 6);
-                if (spot) {
-                    spawnMountainRidge(spot.x, spot.y);
-                    spawnedMtn++;
-                }
-            }
-            // Pokud se nepodařilo umístit alespoň 2 horské masivy, umístíme je do nejlepších volných buněk u okrajů
-            for (var ci = 0; ci < openCells.length && spawnedMtn < 3; ci++) {
-                var cell = openCells[ci];
-                if (cell.y < 350 || cell.x > 1050 || cell.x < 350) {
-                    var mSpot = findClearSpot(cell.x, cell.y, 52);
-                    if (mSpot) {
-                        spawnMountainRidge(mSpot.x, mSpot.y);
-                        spawnedMtn++;
-                    }
-                }
-            }
-        
-            // Lesní hvozdy: zkusíme klasická místa, pak volné buňky
-            var fixedForests = [
-                [310, 160, "oak"], [200, 240, "oak"], [380, 290, "birch"],
-                [180, 460, "oak"], [480, 710, "pine"], [890, 720, "pine"], [1040, 660, "pine"]
-            ];
-            var spawnedForests = 0;
-            for (var ff = 0; ff < fixedForests.length; ff++) {
-                var fSpot = findClearSpot(fixedForests[ff][0], fixedForests[ff][1], 44, 6);
-                if (fSpot) {
-                    spawnForestThicket(fSpot.x, fSpot.y, fixedForests[ff][2]);
-                    spawnedForests++;
-                }
-            }
-            // Doplníme další lesy a farmy do největších volných buněk
-            var fTypes = ["pine", "oak", "birch", "pine"];
-            for (var ci2 = 0; ci2 < openCells.length && spawnedForests < 7; ci2++) {
-                var oCell = openCells[ci2];
-                if (oCell.clr >= 75) {
-                    var fSp = findClearSpot(oCell.x, oCell.y, 44);
-                    if (fSp) {
-                        if (spawnedForests % 3 === 0 && oCell.y > 300) {
-                            spawnFarmCluster(fSp.x, fSp.y);
-                        } else {
-                            var fType = fTypes[spawnedForests % fTypes.length];
-                            spawnForestThicket(fSp.x, fSp.y, fType);
-                        }
-                        spawnedForests++;
-                    }
-                }
-            }
-        
-            // 3. Ukotvené rekvizity k políčkům (Node-Anchored Props)
-            for (var nIdx = 0; nIdx < nodes.length; nIdx++) {
-                var node = nodes[nIdx];
-                var propKey = null;
-        
-                if (node.type === "VILLAGE") {
-                    propKey = (nIdx % 3 === 0) ? "cottage_timber" : (nIdx % 3 === 1 ? "village_well" : "watermill");
-                } else if (node.type === "ANIMAL") {
-                    if (node.setId === 1) propKey = "pasture_fence";
-                    else if (node.setId === 2) propKey = "unicorn_grove";
-                    else if (node.setId === 3) propKey = "pegasus_pond";
-                    else if (node.setId === 4) propKey = "dryad_sacred_oak";
-                    else propKey = "pasture_fence";
-                } else if (node.type === "MERCHANT" || node.type === "SHOP") {
-                    propKey = "merchant_wagon";
-                } else if (node.type === "FESTIVAL") {
-                    propKey = "tournament_tent";
-                } else if (node.type === "BUILDING" && node.subtype === "forge") {
-                    propKey = "watermill";
-                } else if (node.type === "BUILDING" && (node.subtype === "stables" || node.subtype === "doghandler")) {
-                    propKey = "pasture_fence";
-                } else if (node.type === "QUEST") {
-                    var questProps = ["dragon_cave", "cave_bear_den", "bandit_cave", "basilisk_cave", "snow_troll_cave", "swamp_hydra", "swamp_troll", "griffin_nest", "phoenix_nest", "fire_salamander"];
-                    propKey = questProps[nIdx % questProps.length];
-                } else if (node.type === "CHANCE" || node.type === "JESTER") {
-                    var magicProps = ["fairy_ring_mushrooms", "druid_monoliths", "witch_hut", "ancient_ruins", "crystal_golem", "forest_ent", "ancient_tower_ruin"];
-                    propKey = magicProps[nIdx % magicProps.length];
-                } else if (node.type === "TAX" || node.type === "HOSPITAL") {
-                    propKey = (node.type === "TAX") ? "wooden_watchtower" : "ancient_graveyard";
-                } else if (node.isJunction && nIdx % 2 === 0) {
-                    propKey = (nIdx % 4 === 0) ? "signpost" : "signpost2";
-                }
-        
-                if (propKey && catalog[propKey]) {
-                    var catItem = catalog[propKey];
-                    var placed = false;
-                    var testDistances = [58, 72, 86];
-                    for (var td = 0; td < testDistances.length && !placed; td++) {
-                        var testDist = testDistances[td];
-                        var startAngle = (rnd() * Math.PI * 2);
-                        for (var a = 0; a < 8; a++) {
-                            // Střídáme směr testování úhlů (po / proti směru ručiček)
-                            var stepDir = (nIdx % 2 === 0) ? 1 : -1;
-                            var ang = startAngle + stepDir * (a * Math.PI / 4);
-                            var px = Math.round(node.x + Math.cos(ang) * testDist);
-                            var py = Math.round(node.y + Math.sin(ang) * testDist);
-                            if (isPositionClear(px, py, catItem.clearance * 0.85, false, 28)) {
-                                decorList.push({
-                                    id: "prop_" + nIdx + "_" + propKey,
-                                    catalogId: propKey,
-                                    x: px,
-                                    y: py,
-                                    w: catItem.w,
-                                    h: catItem.h,
-                                    clearance: catItem.clearance,
-                                    scale: Math.round((0.9 + rnd() * 0.2) * 100) / 100,
-                                    isFlipped: rnd() < 0.5,
-                                    anchoredNodeId: nIdx
-                                });
-                                placed = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        
-            // 4. Rozptýlená krajina (Scatter Terrain)
-            var scatterPool = [
-                "tree_oak", "tree_oak", "tree_pine", "tree_pine", "tree_birch",
-                "grove_oak", "grove_pine", "grove_pine2", "rock_boulder", "rock_boulder",
-                "farm_field", "windmill", "lake_pond", "mountain_peaks",
-                "orchad_apple", "hruskovy_sad", "orchad_plum", "bush", "bush",
-                "watermill", "wooden_watchtower", "ancient_ruins", "ancient_tower_ruin",
-                "druid_monoliths", "fairy_ring_mushrooms", "swamp_bridge", "unicorn_grove",
-                "pegasus_pond", "dryad_sacred_oak", "forest_ent", "crystal_golem",
-                "lake_nymphs", "vodnik_pond"
-            ];
-        
-            // Použijeme jemnější krok mřížky (42px místo 60px) s přirozeným rozptylem
-            for (var gx = 70; gx <= 1330; gx += 42) {
-                for (var gy = 70; gy <= 790; gy += 42) {
-                    var jx = Math.round(gx + (rnd() - 0.5) * 32);
-                    var jy = Math.round(gy + (rnd() - 0.5) * 32);
-        
-                    var pickKey;
-                    if (jy < 180 && (jx < 350 || jx > 1050) && rnd() < 0.45) {
-                        pickKey = "mountain_peaks";
-                    } else if (rnd() < 0.08) {
-                        var waterPicks = ["lake_pond", "lake_nymphs", "vodnik_pond", "pegasus_pond"];
-                        pickKey = waterPicks[Math.floor(rnd() * waterPicks.length)];
-                    } else if (rnd() < 0.12) {
-                        pickKey = (rnd() < 0.5) ? "farm_field" : ((rnd() < 0.5) ? "orchad_apple" : "hruskovy_sad");
-                    } else {
-                        pickKey = scatterPool[Math.floor(rnd() * scatterPool.length)];
-                    }
-        
-                    var itemDef = catalog[pickKey];
-                    if (itemDef) {
-                        // Přirozená tolerance rozestupu pro lehkou vegetaci a stromy
-                        var isLightFlora = (pickKey.indexOf("tree_") === 0 || pickKey === "bush" || pickKey === "rock_boulder");
-                        var minDecorDist = isLightFlora ? 26 : (itemDef.clearance * 0.8);
-                        if (isPositionClear(jx, jy, Math.round(itemDef.clearance * 0.65), false, minDecorDist)) {
-                            var sc = (pickKey === "mountain_peaks" || pickKey === "lake_pond" || pickKey === "farm_field")
-                                ? 1.0 : (Math.round((0.82 + rnd() * 0.3) * 100) / 100);
-                            decorList.push({
-                                id: "scatter_" + jx + "_" + jy,
-                                catalogId: pickKey,
-                                x: jx,
-                                y: jy,
-                                w: Math.round(itemDef.w * sc),
-                                h: Math.round(itemDef.h * sc),
-                                clearance: Math.round(itemDef.clearance * sc),
-                                scale: sc,
-                                isFlipped: rnd() < 0.5,
-                                anchoredNodeId: null
-                            });
-                        }
-                    }
-                }
-            }
-        
-            // Izometrické řazení dle souřadnice Y (Painter's algorithm)
-            decorList.sort(function (a, b) {
-                return a.y - b.y;
-            });
-        
-            board.decorations = decorList;
-            board.decorationsVersion = 4;
-            return decorList;
+        }
+        return pts;
     },
 
+    generateBoardDecorations: function (board, customSeed) {
+        if (!board || !board.nodes) return [];
+        var seed = customSeed || board.seed || (board.code === "dragon_4598" ? 4598 : (board.code === "compact_48" ? 4848 : 4599));
+
+        var rnd = (function (s) {
+            var a = s;
+            return function () {
+                var t = a += 0x6D2B79F5;
+                t = Math.imul(t ^ t >>> 15, t | 1);
+                t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            };
+        })(seed);
+
+        var nodes = board.nodes;
+        var cardZones = board.cardZones || [];
+        var landmarks = board.landmarks || [];
+        var catalog = window.PRS_DECOR_CATALOG || {};
+        var decorList = [];
+
+        var uniquePoiSet = {};
+        var uList = this.UNIQUE_POI_IDS || [];
+        for (var ui = 0; ui < uList.length; ui++) {
+            uniquePoiSet[uList[ui]] = true;
+        }
+        var usedUniqueIds = {};
+
+        // Deterministický 2D šum pro přirozené ekosystémové zóny
+        function hash2D(ix, iy) {
+            var v = Math.sin(ix * 127.1 + iy * 311.7 + seed * 0.713) * 43758.5453;
+            return v - Math.floor(v);
+        }
+        function valueNoise2D(nx, ny) {
+            var ix = Math.floor(nx);
+            var iy = Math.floor(ny);
+            var fx = nx - ix;
+            var fy = ny - iy;
+            var sx = fx * fx * (3 - 2 * fx);
+            var sy = fy * fy * (3 - 2 * fy);
+            var a = hash2D(ix, iy);
+            var b = hash2D(ix + 1, iy);
+            var c = hash2D(ix, iy + 1);
+            var d = hash2D(ix + 1, iy + 1);
+            return (a + (b - a) * sx) + ((c + (d - c) * sx) - (a + (b - a) * sx)) * sy;
+        }
+        function noise2D(x, y) {
+            return 0.65 * valueNoise2D(x / 180, y / 180) + 0.35 * valueNoise2D(x / 95 + 13.7, y / 95 + 7.3);
+        }
+
+        // Vzorkování říční sítě a cestních koridorů
+        var riverClearancePoints = [];
+        if (board.rivers && board.rivers.length > 0) {
+            var sRPS = (window.PRS_BoardBuilder && window.PRS_BoardBuilder.sampleRiverPathSimple) ||
+                       (window.KiDeskyMapGenerator && window.KiDeskyMapGenerator.sampleRiverPathSimple);
+            if (sRPS) {
+                for (var ri = 0; ri < board.rivers.length; ri++) {
+                    var rObj = board.rivers[ri];
+                    var rWidth = rObj.width || 14;
+                    var smpPts = sRPS(rObj.path);
+                    for (var sp = 0; sp < smpPts.length; sp++) {
+                        riverClearancePoints.push({ x: smpPts[sp].x, y: smpPts[sp].y, halfW: rWidth / 2 });
+                    }
+                }
+            }
+        }
+        var roadSamples = this.sampleRoadCorridor ? this.sampleRoadCorridor(nodes) : [];
+
+        var villageCenters = [];
+        for (var vi = 0; vi < nodes.length; vi++) {
+            var vn = nodes[vi];
+            if (vn && (vn.type === "VILLAGE" || vn.type === "MERCHANT" || vn.subtype === "stables")) {
+                villageCenters.push({ x: vn.x, y: vn.y });
+            }
+        }
+
+        function isPositionClear(x, y, radius, allowClusterOverlap, minDistFromDecor) {
+            if (x - radius < 42 || x + radius > 1358 || y - radius < 42 || y + radius > 818) return false;
+
+            for (var rp = 0; rp < riverClearancePoints.length; rp++) {
+                var rpt = riverClearancePoints[rp];
+                var rdx = rpt.x - x;
+                var rdy = rpt.y - y;
+                var minRDist = radius + rpt.halfW + 16;
+                if (rdx * rdx + rdy * rdy < minRDist * minRDist) return false;
+            }
+
+            for (var rs = 0; rs < roadSamples.length; rs++) {
+                var rsdx = roadSamples[rs].x - x;
+                var rsdy = roadSamples[rs].y - y;
+                var minRoadDist = Math.max(36, radius + 12);
+                if (rsdx * rsdx + rsdy * rsdy < minRoadDist * minRoadDist) return false;
+            }
+
+            for (var i = 0; i < nodes.length; i++) {
+                var n = nodes[i];
+                var dx = n.x - x;
+                var dy = n.y - y;
+                var minNodeDist = Math.max(radius + 20, 38);
+                if (dx * dx + dy * dy < minNodeDist * minNodeDist) return false;
+            }
+
+            for (var z = 0; z < cardZones.length; z++) {
+                var cz = cardZones[z];
+                if (x + radius > cz.x - 10 && x - radius < cz.x + cz.w + 10 &&
+                    y + radius > cz.y - 10 && y - radius < cz.y + cz.h + 10) {
+                    return false;
+                }
+            }
+
+            for (var l = 0; l < landmarks.length; l++) {
+                var lm = landmarks[l];
+                var lx1 = lm.x - lm.w / 2 - 16;
+                var lx2 = lm.x + lm.w / 2 + 16;
+                var ly1 = lm.y - lm.h / 2 - 16;
+                var ly2 = lm.y + lm.h / 2 + 16;
+                if (x + radius > lx1 && x - radius < lx2 && y + radius > ly1 && y - radius < ly2) return false;
+            }
+
+            for (var d = 0; d < decorList.length; d++) {
+                var dec = decorList[d];
+                var ddx = dec.x - x;
+                var ddy = dec.y - y;
+                var dDist = Math.sqrt(ddx * ddx + ddy * ddy);
+                if (allowClusterOverlap) {
+                    var clusterSep = minDistFromDecor || 15;
+                    if (dDist < clusterSep) return false;
+                } else {
+                    var sep = minDistFromDecor ? (minDistFromDecor + (dec.clearance || 20) * 0.4) : (radius + dec.clearance);
+                    if (dDist < sep) return false;
+                }
+            }
+            return true;
+        }
+
+        function pushDecor(idPrefix, catalogId, x, y, scale, clearanceOverride, anchoredNodeId) {
+            var item = catalog[catalogId];
+            if (!item) return false;
+            if (uniquePoiSet[catalogId]) {
+                if (usedUniqueIds[catalogId]) return false;
+                usedUniqueIds[catalogId] = true;
+            }
+            var sc = scale || 1.0;
+            decorList.push({
+                id: idPrefix + "_" + x + "_" + y,
+                catalogId: catalogId,
+                x: x,
+                y: y,
+                w: Math.round(item.w * sc),
+                h: Math.round(item.h * sc),
+                clearance: clearanceOverride || Math.round((item.clearance || 20) * sc),
+                scale: Math.round(sc * 100) / 100,
+                isFlipped: rnd() < 0.5,
+                anchoredNodeId: (anchoredNodeId !== undefined) ? anchoredNodeId : null
+            });
+            return true;
+        }
+
+        function classifyZone(x, y) {
+            for (var rp = 0; rp < riverClearancePoints.length; rp++) {
+                var rpt = riverClearancePoints[rp];
+                var rdx = rpt.x - x;
+                var rdy = rpt.y - y;
+                if (rdx * rdx + rdy * rdy < 90 * 90) return "wetland";
+            }
+            if ((x > 1060 || y < 160 || (x < 210 && y > 630)) && noise2D(x + 410, y + 190) > 0.32) {
+                return "rocky";
+            }
+            for (var vi = 0; vi < villageCenters.length; vi++) {
+                var vdx = villageCenters[vi].x - x;
+                var vdy = villageCenters[vi].y - y;
+                if (vdx * vdx + vdy * vdy < 165 * 165 && noise2D(x + 920, y + 530) > 0.36) {
+                    return "farmland";
+                }
+            }
+            if (x > 160 && x < 640 && y > 580 && noise2D(x + 920, y + 530) > 0.34) {
+                return "farmland";
+            }
+            if (noise2D(x, y) > 0.52 || (x < 650 && y < 310 && noise2D(x * 1.2, y * 1.2) > 0.34)) {
+                return "forest";
+            }
+            return "meadow";
+        }
+
+        function findClearSpot(cx, cy, radius, maxOffsets) {
+            if (isPositionClear(cx, cy, radius, false)) return { x: cx, y: cy };
+            var offsets = [
+                { x: 35, y: 0 }, { x: -35, y: 0 }, { x: 0, y: 35 }, { x: 0, y: -35 },
+                { x: 32, y: 32 }, { x: -32, y: 32 }, { x: 32, y: -32 }, { x: -32, y: -32 },
+                { x: 58, y: 0 }, { x: -58, y: 0 }, { x: 0, y: 58 }, { x: 0, y: -58 },
+                { x: 68, y: 36 }, { x: -68, y: 36 }, { x: 68, y: -36 }, { x: -68, y: -36 },
+                { x: 88, y: 0 }, { x: -88, y: 0 }, { x: 0, y: 88 }, { x: 0, y: -88 }
+            ];
+            var lim = maxOffsets || offsets.length;
+            for (var o = 0; o < lim; o++) {
+                var tx = cx + offsets[o].x;
+                var ty = cy + offsets[o].y;
+                if (isPositionClear(tx, ty, radius, false)) return { x: tx, y: ty };
+            }
+            return null;
+        }
+
+        // 1. Husté lesní masivy (HoMM styl — překrývající se koruny vytvářejí souvislé lesy)
+        function spawnForestMassif(cx, cy, type) {
+            var groveKey = (type === "pine") ? "grove_pine" : "grove_oak";
+            var treeKeys = (type === "pine") ? ["tree_pine", "tree_pine", "tree_birch"] : ["tree_oak", "tree_oak", "tree_birch"];
+            if (!catalog[groveKey]) return 0;
+            var gItem = catalog[groveKey];
+            var spot = findClearSpot(cx, cy, gItem.clearance);
+            if (!spot) return 0;
+            cx = spot.x; cy = spot.y;
+
+            pushDecor("massif_g", groveKey, cx, cy, 1.0, gItem.clearance);
+
+            // Sekundární hájek pro velké masivy
+            var g2Ang = rnd() * Math.PI * 2;
+            var g2x = Math.round(cx + Math.cos(g2Ang) * 34);
+            var g2y = Math.round(cy + Math.sin(g2Ang) * 26);
+            var placedTrees = 1;
+            if (isPositionClear(g2x, g2y, 18, true, 24)) {
+                pushDecor("massif_g2", groveKey, g2x, g2y, 0.85, 22);
+                placedTrees++;
+            }
+
+            // Husté Poissonovské prstence stromů (8-15 stromů, min. odstup 15 px, měřítko 0.62-1.02)
+            var targetTrees = 10 + Math.floor(rnd() * 6);
+            var tries = targetTrees * 3;
+            for (var t = 0; t < tries && placedTrees < targetTrees + 2; t++) {
+                var ang = rnd() * Math.PI * 2;
+                var dist = 18 + rnd() * 54;
+                var tx = Math.round(cx + Math.cos(ang) * dist);
+                var ty = Math.round(cy + Math.sin(ang) * dist * 0.85);
+                var tKey = treeKeys[Math.floor(rnd() * treeKeys.length)];
+                if (catalog[tKey] && isPositionClear(tx, ty, 14, true, 16)) {
+                    var sc = 0.64 + rnd() * 0.36;
+                    if (pushDecor("massif_t", tKey, tx, ty, sc, 15)) {
+                        placedTrees++;
+                    }
+                }
+            }
+
+            if (rnd() < 0.7 && catalog["bush"]) {
+                var bx = Math.round(cx + (rnd() - 0.5) * 48);
+                var by = Math.round(cy + 24 + rnd() * 18);
+                if (isPositionClear(bx, by, 12, true, 16)) {
+                    pushDecor("massif_b", "bush", bx, by, 0.85, 10);
+                }
+            }
+            return placedTrees;
+        }
+
+        // 2. Řetězené horské hřebeny (3-5 vrcholů podél linie + balvany v podhůří)
+        function spawnMountainRidge(cx, cy) {
+            if (!catalog["mountain_peaks"]) return 0;
+            var mItem = catalog["mountain_peaks"];
+            var spot = findClearSpot(cx, cy, mItem.clearance);
+            if (!spot) return 0;
+            cx = spot.x; cy = spot.y;
+
+            var ridgeLen = 3 + Math.floor(rnd() * 3); // 3-5 vrcholů
+            var baseAng = (rnd() < 0.5 ? 1.1 : -1.1) + (rnd() - 0.5) * 0.6;
+            var placed = 0;
+
+            for (var p = 0; p < ridgeLen; p++) {
+                var off = (p - (ridgeLen - 1) / 2) * 42;
+                var px = Math.round(cx + Math.cos(baseAng) * off + (rnd() - 0.5) * 10);
+                var py = Math.round(cy + Math.sin(baseAng) * off * 0.75 + (rnd() - 0.5) * 10);
+                var rad = (p === 1 || p === 2) ? 24 : 20;
+                if (isPositionClear(px, py, rad, p > 0, 26)) {
+                    var sc = (p === Math.floor(ridgeLen / 2)) ? (0.95 + rnd() * 0.12) : (0.76 + rnd() * 0.22);
+                    if (pushDecor("ridge_m", "mountain_peaks", px, py, sc, rad)) {
+                        placed++;
+                    }
+                }
+            }
+
+            if (catalog["rock_boulder"]) {
+                var bCount = 2 + Math.floor(rnd() * 2);
+                for (var bi = 0; bi < bCount; bi++) {
+                    var ang = rnd() * Math.PI * 2;
+                    var dist = 34 + rnd() * 28;
+                    var rx = Math.round(cx + Math.cos(ang) * dist);
+                    var ry = Math.round(cy + Math.sin(ang) * dist);
+                    if (isPositionClear(rx, ry, 14, true, 20)) {
+                        pushDecor("ridge_r", "rock_boulder", rx, ry, 0.78 + rnd() * 0.24, 14);
+                    }
+                }
+            }
+            return placed;
+        }
+
+        // 3. Zemědělské a vesnické shluky (lánské pole + mlýn/chalupa + sad)
+        function spawnFarmCluster(cx, cy) {
+            if (!catalog["farm_field"]) return 0;
+            var fItem = catalog["farm_field"];
+            var spot = findClearSpot(cx, cy, fItem.clearance);
+            if (!spot) return 0;
+            cx = spot.x; cy = spot.y;
+
+            pushDecor("farm_c", "farm_field", cx, cy, 0.96, fItem.clearance);
+            var count = 1;
+
+            var prop = (rnd() < 0.45 && catalog["windmill"]) ? "windmill" : (catalog["cottage_timber"] ? "cottage_timber" : null);
+            if (prop) {
+                var dir = rnd() < 0.5 ? 1 : -1;
+                var px = Math.round(cx + dir * (40 + rnd() * 10));
+                var py = Math.round(cy + (rnd() < 0.5 ? -18 : 18));
+                if (isPositionClear(px, py, 20, true, 24)) {
+                    pushDecor("farm_p", prop, px, py, 0.9, 20);
+                    count++;
+                }
+            }
+
+            var orchards = ["orchad_apple", "hruskovy_sad", "orchad_plum"];
+            var oKey = orchards[Math.floor(rnd() * orchards.length)];
+            if (rnd() < 0.7 && catalog[oKey]) {
+                var ox = Math.round(cx + (rnd() - 0.5) * 48);
+                var oy = Math.round(cy + 34 + rnd() * 10);
+                if (isPositionClear(ox, oy, 18, true, 24)) {
+                    pushDecor("farm_o", oKey, ox, oy, 0.85, 18);
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        // Analýza volných buněk pro strategické umístění masivů a zón
+        function evaluateClearance(x, y) {
+            if (x < 65 || x > 1335 || y < 65 || y > 795) return 0;
+            var minD = 9999;
+            for (var ni = 0; ni < nodes.length; ni++) {
+                var d = Math.hypot(nodes[ni].x - x, nodes[ni].y - y);
+                if (d < minD) minD = d;
+            }
+            for (var rci = 0; rci < roadSamples.length; rci++) {
+                var rcd = Math.hypot(roadSamples[rci].x - x, roadSamples[rci].y - y);
+                if (rcd < minD) minD = rcd;
+            }
+            for (var li = 0; li < landmarks.length; li++) {
+                var lm = landmarks[li];
+                var ld = Math.hypot(lm.x - x, lm.y - y) - (lm.w || 90) * 0.5;
+                if (ld < minD) minD = Math.max(0, ld);
+            }
+            for (var ri = 0; ri < riverClearancePoints.length; ri++) {
+                var rp = riverClearancePoints[ri];
+                var rd = Math.hypot(rp.x - x, rp.y - y) - rp.halfW;
+                if (rd < minD) minD = Math.max(0, rd);
+            }
+            return minD;
+        }
+
+        var openCells = [];
+        for (var sx = 85; sx <= 1315; sx += 44) {
+            for (var sy = 85; sy <= 775; sy += 44) {
+                var clr = evaluateClearance(sx, sy);
+                if (clr >= 48) {
+                    openCells.push({ x: sx, y: sy, clr: clr, zone: classifyZone(sx, sy) });
+                }
+            }
+        }
+        openCells.sort(function (a, b) { return b.clr - a.clr; });
+
+        // A) Horská pásma
+        var mtnSeeds = [[1215, 250], [1255, 495], [1180, 685]];
+        var spawnedMtn = 0;
+        for (var fm = 0; fm < mtnSeeds.length; fm++) {
+            if (spawnMountainRidge(mtnSeeds[fm][0], mtnSeeds[fm][1]) > 0) spawnedMtn++;
+        }
+        for (var ci = 0; ci < openCells.length && spawnedMtn < 3; ci++) {
+            var mc = openCells[ci];
+            if (mc.clr >= 55 && (mc.zone === "rocky" || mc.y < 260 || mc.x > 1060 || mc.x < 300)) {
+                if (spawnMountainRidge(mc.x, mc.y) > 0) spawnedMtn++;
+            }
+        }
+
+        // B) Lesní masivy (nejprve preferované oblasti a pak top volné lesní buňky)
+        var fixedForests = [
+            [305, 165, "oak"], [195, 255, "oak"], [400, 295, "oak"],
+            [175, 470, "oak"], [470, 710, "pine"], [885, 725, "pine"], [1045, 665, "pine"]
+        ];
+        var spawnedForests = 0;
+        for (var ff = 0; ff < fixedForests.length; ff++) {
+            if (spawnForestMassif(fixedForests[ff][0], fixedForests[ff][1], fixedForests[ff][2]) > 0) {
+                spawnedForests++;
+            }
+        }
+        for (var ci2 = 0; ci2 < openCells.length && spawnedForests < 6; ci2++) {
+            var fc = openCells[ci2];
+            if (fc.clr >= 64 && (fc.zone === "forest" || spawnedForests < 3)) {
+                var fType = (fc.y > 460 || fc.x > 750) ? "pine" : "oak";
+                if (spawnForestMassif(fc.x, fc.y, fType) > 0) spawnedForests++;
+            }
+        }
+
+        // C) Zemědělské osady a lány v nížinách
+        var spawnedFarms = 0;
+        for (var ci3 = 0; ci3 < openCells.length && spawnedFarms < 4; ci3++) {
+            var ac = openCells[ci3];
+            if (ac.clr >= 58 && ac.zone === "farmland") {
+                if (spawnFarmCluster(ac.x, ac.y) > 0) spawnedFarms++;
+            }
+        }
+
+        // D) Ukotvené rekvizity u políček (s respektem ke 35px cestnímu koridoru a unikátnímu limitu)
+        var nonUniqueQuestFallbacks = ["rock_boulder", "mountain_peaks"];
+        for (var nIdx = 0; nIdx < nodes.length; nIdx++) {
+            var node = nodes[nIdx];
+            var propKey = null;
+
+            if (node.type === "VILLAGE") {
+                propKey = (nIdx % 3 === 0) ? "cottage_timber" : (nIdx % 3 === 1 ? "village_well" : "watermill");
+            } else if (node.type === "ANIMAL") {
+                if (node.setId === 2 && !usedUniqueIds["unicorn_grove"]) propKey = "unicorn_grove";
+                else if (node.setId === 3 && !usedUniqueIds["pegasus_pond"]) propKey = "pegasus_pond";
+                else if (node.setId === 4 && !usedUniqueIds["dryad_sacred_oak"]) propKey = "dryad_sacred_oak";
+                else propKey = "pasture_fence";
+            } else if (node.type === "MERCHANT" || node.type === "SHOP") {
+                propKey = "merchant_wagon";
+            } else if (node.type === "FESTIVAL") {
+                propKey = "tournament_tent";
+            } else if (node.type === "BUILDING" && node.subtype === "forge") {
+                propKey = "watermill";
+            } else if (node.type === "BUILDING" && (node.subtype === "stables" || node.subtype === "doghandler")) {
+                propKey = "pasture_fence";
+            } else if (node.type === "QUEST") {
+                var questProps = ["dragon_cave", "cave_bear_den", "bandit_cave", "basilisk_cave", "snow_troll_cave", "swamp_hydra", "swamp_troll", "griffin_nest", "phoenix_nest", "fire_salamander"];
+                for (var qp = 0; qp < questProps.length; qp++) {
+                    var cand = questProps[(nIdx + qp) % questProps.length];
+                    if (!usedUniqueIds[cand]) { propKey = cand; break; }
+                }
+                if (!propKey) propKey = nonUniqueQuestFallbacks[nIdx % nonUniqueQuestFallbacks.length];
+            } else if (node.type === "CHANCE" || node.type === "JESTER") {
+                var magicProps = ["fairy_ring_mushrooms", "druid_monoliths", "witch_hut", "ancient_ruins", "crystal_golem", "forest_ent", "ancient_tower_ruin"];
+                for (var mp = 0; mp < magicProps.length; mp++) {
+                    var mcand = magicProps[(nIdx + mp) % magicProps.length];
+                    if (!usedUniqueIds[mcand]) { propKey = mcand; break; }
+                }
+            } else if (node.type === "TAX") {
+                propKey = "wooden_watchtower";
+            } else if (node.type === "HOSPITAL" && !usedUniqueIds["ancient_graveyard"]) {
+                propKey = "ancient_graveyard";
+            } else if (node.isJunction && nIdx % 2 === 0) {
+                propKey = (nIdx % 4 === 0) ? "signpost" : "signpost2";
+            }
+
+            if (propKey && catalog[propKey]) {
+                var catItem = catalog[propKey];
+                var placed = false;
+                var testDistances = [58, 70, 84];
+                for (var td = 0; td < testDistances.length && !placed; td++) {
+                    var testDist = testDistances[td];
+                    var startAngle = (rnd() * Math.PI * 2);
+                    for (var a = 0; a < 12; a++) {
+                        var stepDir = (nIdx % 2 === 0) ? 1 : -1;
+                        var ang = startAngle + stepDir * (a * Math.PI / 6);
+                        var px = Math.round(node.x + Math.cos(ang) * testDist);
+                        var py = Math.round(node.y + Math.sin(ang) * testDist);
+                        if (isPositionClear(px, py, Math.max(16, catItem.clearance * 0.72), false, 28)) {
+                            placed = pushDecor("prop_" + nIdx, propKey, px, py, 0.9 + rnd() * 0.16, catItem.clearance, nIdx);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // E) Rozmístění unikátních bodů zájmu do jejich přirozených biomů (max 1x na mapu)
+        var poiByZone = {
+            forest: ["unicorn_grove", "dryad_sacred_oak", "forest_ent", "fairy_ring_mushrooms", "druid_monoliths", "witch_hut"],
+            rocky: ["crystal_golem", "ancient_ruins", "ancient_tower_ruin", "phoenix_nest"],
+            wetland: ["lake_nymphs", "vodnik_pond", "pegasus_pond", "swamp_bridge"]
+        };
+        for (var ci4 = 0; ci4 < openCells.length; ci4++) {
+            var pc = openCells[ci4];
+            if (pc.clr < 54) continue;
+            var zPool = poiByZone[pc.zone];
+            if (!zPool) continue;
+            var pickedPoi = null;
+            for (var zp = 0; zp < zPool.length; zp++) {
+                var zCand = zPool[(ci4 + zp) % zPool.length];
+                if (!usedUniqueIds[zCand] && catalog[zCand]) { pickedPoi = zCand; break; }
+            }
+            if (pickedPoi) {
+                var pItem = catalog[pickedPoi];
+                var pRad = Math.max(18, Math.round((pItem.clearance || 26) * 0.75));
+                if (isPositionClear(pc.x, pc.y, pRad, false, pRad)) {
+                    pushDecor("poi_" + pc.zone, pickedPoi, pc.x, pc.y, 0.94, pItem.clearance);
+                }
+            }
+        }
+
+        // F) Doplnění krajiny podle zón: v lese malé hájky, na loukách vzduch, u vody jezírka
+        for (var ci5 = 0; ci5 < openCells.length; ci5++) {
+            var scell = openCells[ci5];
+            var jx = Math.round(scell.x + (rnd() - 0.5) * 20);
+            var jy = Math.round(scell.y + (rnd() - 0.5) * 20);
+            var z = scell.zone;
+
+            if (z === "forest" && rnd() < 0.55) {
+                var copseGrove = (jy > 450 || jx > 750) ? "grove_pine" : "grove_oak";
+                var copseTree = (jy > 450 || jx > 750) ? "tree_pine" : ((rnd() < 0.35) ? "tree_birch" : "tree_oak");
+                if (catalog[copseGrove] && isPositionClear(jx, jy, 24, false, 30)) {
+                    pushDecor("f_copse", copseGrove, jx, jy, 0.9, 26);
+                    for (var ct = 0; ct < 3; ct++) {
+                        var ca = (ct / 3) * Math.PI * 2 + rnd() * 0.7;
+                        var tx = Math.round(jx + Math.cos(ca) * (20 + rnd() * 14));
+                        var ty = Math.round(jy + Math.sin(ca) * (18 + rnd() * 12));
+                        if (catalog[copseTree] && isPositionClear(tx, ty, 14, true, 16)) {
+                            pushDecor("f_tree", copseTree, tx, ty, 0.7 + rnd() * 0.25, 15);
+                        }
+                    }
+                }
+            } else if (z === "rocky" && rnd() < 0.45 && catalog["rock_boulder"]) {
+                if (isPositionClear(jx, jy, 18, false, 26)) {
+                    pushDecor("r_rock", "rock_boulder", jx, jy, 0.85 + rnd() * 0.2, 20);
+                }
+            } else if (z === "wetland" && rnd() < 0.32 && catalog["lake_pond"]) {
+                if (isPositionClear(jx, jy, 22, false, 32)) {
+                    pushDecor("w_pond", "lake_pond", jx, jy, 0.9, 26);
+                }
+            } else if (z === "farmland" && rnd() < 0.28 && catalog["farm_field"]) {
+                if (isPositionClear(jx, jy, 22, false, 32)) {
+                    pushDecor("a_field", "farm_field", jx, jy, 0.92, 26);
+                }
+            } else if (z === "meadow" && rnd() < 0.14) {
+                // Vzdušná louka — jen občasný remízek (háj + 2 stromy) nebo keř
+                if (rnd() < 0.45 && catalog["bush"] && isPositionClear(jx, jy, 14, false, 28)) {
+                    pushDecor("m_bush", "bush", jx, jy, 0.85, 16);
+                } else if (catalog["grove_oak"] && isPositionClear(jx, jy, 26, false, 34)) {
+                    pushDecor("m_copse", "grove_oak", jx, jy, 0.88, 28);
+                    for (var mt = 0; mt < 2; mt++) {
+                        var ma = rnd() * Math.PI * 2;
+                        var mtx = Math.round(jx + Math.cos(ma) * 22);
+                        var mty = Math.round(jy + Math.sin(ma) * 18);
+                        if (catalog["tree_oak"] && isPositionClear(mtx, mty, 14, true, 16)) {
+                            pushDecor("m_tree", "tree_oak", mtx, mty, 0.72 + rnd() * 0.18, 15);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Izometrické řazení dle souřadnice Y (Painter's algorithm)
+        decorList.sort(function (a, b) {
+            return a.y - b.y;
+        });
+
+        board.decorations = decorList;
+        board.decorationsVersion = 5;
+        return decorList;
+    },
 
     sanitizeAndAnchorLandmarks: function (board) {
         if (!board || !board.nodes) return;
