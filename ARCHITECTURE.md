@@ -22,7 +22,7 @@ Aplikace kombinuje čistý **klientský Vanilla JS / SVG / PWA stack** (bez bund
 KiDesky/
 ├── index.html                  # Aplikační shell, sekvenční <script defer> s ?v=... cache-bustingem
 ├── manifest.json               # PWA manifest
-├── service-worker.js           # Offline/caching strategie (CACHE_NAME = kidesky-cache-v1.9.96)
+├── service-worker.js           # Offline/caching strategie (CACHE_NAME = kidesky-cache-v1.9.97)
 ├── web.config                  # IIS hlavičky, customErrors=RemoteOnly, skrytí backend/, MIME mapy
 ├── appsettings.json            # Šablona konfigurace (SQL, SMTP, Google OAuth, FTP, Gemini)
 ├── deploy_code_update.ps1      # FTP deploy s 64 KB streamingem, retry a před-deploy kontrolou
@@ -223,7 +223,7 @@ Sdílená abstraktní bázová třída pro router i všechny subhandlery:
 - **Grafika v WebP + SVG/CSS zrcadlení:** Herní obrázky byly zkonvertovány do `.webp` (`tools/optimize-assets-webp.py`) a duplicitní soubory `*_flip.*` byly zrušeny. Zrcadlení doleva/doprava provádí nativní SVG transformace `scale(-1, 1)` nebo CSS třída `.is-flipped`. Zpětnou kompatibilitu u starších URL zajišťuje `PRS_normalizeAssetUrl()`.
 - **Média mimo Git:** Audio stopy (`assets/audio/*.mp3`, 128 kbps CBR) i videa (`*.mp4`, např. `ps_intro_04.mp4` v 720p H.264 CRF 26) jsou v `.gitignore` vyloučeny pomocí pravidel `*.mp3` a `*.mp4` (složku `assets/audio/` udržuje `.gitkeep`), aby se nenafukovala historie repozitáře.
 - **PWA Service Worker (`service-worker.js`):**
-  - `CACHE_NAME` (aktuálně `kidesky-cache-v1.9.96`) se při změně kódu navyšuje společně s `?v=...` u všech stylů/skriptů v `index.html` (kontroluje `predeploy-check.js`).
+  - `CACHE_NAME` (aktuálně `kidesky-cache-v1.9.97`) se při změně kódu navyšuje společně s `?v=...` u všech stylů/skriptů v `index.html` (kontroluje `predeploy-check.js`).
   - `install` přednačte `CORE_ASSETS` a volá `self.skipWaiting()`; `activate` smaže staré verze cache a převezme klienty (`clients.claim()`).
   - **Fetch strategie:**
     - *Bypass (vždy síť):* non-GET požadavky, cizí domény, `api.ashx`, `/api/`, `Range` hlavičky, `/assets/audio/`, `/assets/video/` a přípony `.mp3`, `.wav`, `.ogg`, `.m4a`, `.mp4`, `.webm`.
@@ -302,3 +302,25 @@ powershell -ExecutionPolicy Bypass -File .\deploy_code_update.ps1
 powershell -ExecutionPolicy Bypass -File .\deploy_code_update.ps1 -AllAssets -IncludeMedia
 ```
 Skript automaticky před nahráním spustí `tools/predeploy-check.js`, odmítne jakýkoliv `.exe` soubor (`Assert-NoExePath`), čte FTP přihlašovací údaje z `appsettings.Production.json` / `appsettings.local.json` a soubory nahraje v 64 KB blocích se 600s timeoutem a 3 pokusy do `/www/apps/KiDesky/` i `/www/wwwroot/apps/KiDesky/`.
+
+---
+
+## 8. Jak přidat novou dekoraci herního plánu
+
+Nové dekorace se registrují deklarativně v [js/boards/boards-decor-catalog.js](file:///c:/Users/janky/.gemini/antigravity/scratch/KiDesky/js/boards/boards-decor-catalog.js) bez nutnosti zasahovat do [js/boards/boards-builder.js](file:///c:/Users/janky/.gemini/antigravity/scratch/KiDesky/js/boards/boards-builder.js).
+
+1. **Příprava průhledného WebP spritu (`assets/decorations/<id>.webp`):**
+   - Obrázek ořízněte těsně kolem siluety (max. delší strana `512 px`, formát RGBA `.webp` bez pozadí).
+   - Po flood-fill odstranění bílého pozadí zkontrolujte i **uzavřené bílé kapsy** (mezi větvemi korun, okny, křídly mlýna). Světlou březovou kůru chraňte lokálním testem sousední zeleně (`green_guard`).
+   - Do udržovaného rozpočtu assetů (`assets/ < 25 MB`) miřte velikostí typicky `40–90 KB` na sprite.
+2. **Registrace v katalogu a parametry umístění:**
+   - Přidejte záznam do `window.PRS_DECOR_CATALOG` (`category`, `img`, `w`, `h`, `clearance`) a parametry umístění v `placementOverrides` (viz šablona v hlavičce souboru):
+     - `biomes`: neprázdné pole z `["forest", "rocky", "wetland", "farmland", "meadow"]` (např. houby nepatří na `"rocky"`, hory jen na `"rocky"`).
+     - `layer`: `"ground"` (jezera, pole, houby, mosty — kreslí se vždy pod stojícími objekty, bez vrženého stínu) nebo `"standing"` (stromy, budovy, skály, bytosti — řadí se podle `footY`).
+     - `anchorY`: svislý offset úpatí od středu spritu (`0.0–0.5`; pro `"ground"` ~`0.15`, pro stojící objekty ~`0.35–0.45`).
+     - `roadPolicy`: `"avoid"` (celá vizuální silueta mimo cestu), `"edge"` (stromy/ukazatele/ploty mohou stát těsně u okraje cesty), `"overhang"` (vysoké bytosti s úpatím mimo cestu `>= 38 px`, jejichž horní část může mírně přečnívat nad okraj cesty).
+     - `maxPerMap`: `null` (neomezeno) nebo kladné celé číslo (např. `1` pro unikátní POI, `3–5` pro mlýny, jezírka a pole).
+     - `overlapGroup`: `"canopy"` (stromy/hájky/keře v lesních shlucích), `"ridge"` (hory/balvany v hřebenech), nebo `"exclusive"`.
+     - `weight`: relativní váha při výběru variant (`1.0` výchozí).
+3. **Verzování a testy:**
+   - Při přidání nového POI nebo úpravě pravidel rozmisťování ověřte shodu všech invariantů přes `node tools/tests/test-board-generator.js` a `node tools/tests/run-all.js`.

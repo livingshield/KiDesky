@@ -1,5 +1,17 @@
 // ============================================================================
 // KiDesky: Princeznino srdce - Katalog dekorací herního plánu (PRS_DECOR_CATALOG)
+//
+// ŠABLONA PRO PŘIDÁVÁNÍ NOVÉ DEKORACE:
+//   1. Vložte záznam do PRS_DECOR_CATALOG + zápis do placementOverrides níže:
+//      - biomes:       ["forest", "meadow", "farmland", "rocky", "wetland"]
+//      - layer:        "ground" (voda, pole, houby, most) | "standing" (stromy, stavby, hory, bytosti)
+//      - anchorY:      0.15 (ploché) .. 0.45 (vysoké stavby/stromy) -> footY = y + h * anchorY
+//      - roadPolicy:   "avoid" (plný odstup) | "edge" (u okraje cesty) | "overhang" (pata mimo, vrch smí přesahovat)
+//      - maxPerMap:    číslo (např. 1 pro unikáty, 2..5 pro stavby) | null (bez limitu)
+//      - overlapGroup: "canopy" (stromy) | "ridge" (hory/skály) | "exclusive" (ostatní samostatné)
+//      - weight:       relativní váha výběru (výchozí 1.0)
+//   2. Čistý RGBA WebP sprite (<= 512 px, bez travnatého ostrůvku a vrženého stínu) -> assets/decorations/<id>.webp
+//      a footFadeOverrides[<id>] = 0.
 // ============================================================================
 
 window.PRS_DECOR_CATALOG = {
@@ -709,21 +721,87 @@ window.PRS_DECOR_CATALOG = {
     }
 };
 
-// Doplnění sjednocených parametrů zapuštění do terénu (footFade) a délky vrženého stínu (shadowLen)
+// Doplnění sjednocených parametrů umístění (biomes, layer, anchorY, roadPolicy, maxPerMap, overlapGroup, weight)
+// a vizuálního zapuštění (footFade, shadowLen) pro všech 49 dekorací
 (function () {
     "use strict";
     var cat = window.PRS_DECOR_CATALOG;
     if (!cat) return;
 
+    var VALID_BIOMES = ["forest", "meadow", "farmland", "rocky", "wetland"];
+
     var categoryDefaults = {
-        water:        { footFade: 0.14, shadowLen: 0.20 },
-        agriculture:  { footFade: 0.20, shadowLen: 0.50 },
-        settlement:   { footFade: 0.24, shadowLen: 1.05 },
-        civilization: { footFade: 0.24, shadowLen: 1.05 },
-        quest_lair:   { footFade: 0.24, shadowLen: 1.05 },
-        vegetation:   { footFade: 0.26, shadowLen: 0.95 },
-        terrain:      { footFade: 0.26, shadowLen: 0.95 },
-        magic:        { footFade: 0.26, shadowLen: 0.95 }
+        water:        { footFade: 0.14, shadowLen: 0.20, layer: "ground",   anchorY: 0.15, roadPolicy: "avoid",    maxPerMap: 2,    overlapGroup: "exclusive", weight: 1.0, biomes: ["wetland", "meadow"] },
+        agriculture:  { footFade: 0.20, shadowLen: 0.50, layer: "standing", anchorY: 0.36, roadPolicy: "avoid",    maxPerMap: 4,    overlapGroup: "exclusive", weight: 1.0, biomes: ["farmland", "meadow"] },
+        settlement:   { footFade: 0.24, shadowLen: 1.05, layer: "standing", anchorY: 0.42, roadPolicy: "avoid",    maxPerMap: 3,    overlapGroup: "exclusive", weight: 1.0, biomes: ["farmland", "meadow", "forest"] },
+        civilization: { footFade: 0.24, shadowLen: 1.05, layer: "standing", anchorY: 0.44, roadPolicy: "avoid",    maxPerMap: 2,    overlapGroup: "exclusive", weight: 1.0, biomes: ["rocky", "meadow", "farmland"] },
+        quest_lair:   { footFade: 0.24, shadowLen: 1.05, layer: "standing", anchorY: 0.42, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0, biomes: ["rocky", "forest"] },
+        vegetation:   { footFade: 0.26, shadowLen: 0.95, layer: "standing", anchorY: 0.44, roadPolicy: "edge",     maxPerMap: null, overlapGroup: "canopy",    weight: 1.0, biomes: ["forest", "meadow"] },
+        terrain:      { footFade: 0.26, shadowLen: 0.95, layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: null, overlapGroup: "ridge",     weight: 1.0, biomes: ["rocky", "forest", "meadow"] },
+        magic:        { footFade: 0.26, shadowLen: 0.95, layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0, biomes: ["forest", "meadow"] }
+    };
+
+    var placementOverrides = {
+        // 1. Stromy a porosty
+        tree_oak:             { biomes: ["forest", "meadow"],            layer: "standing", anchorY: 0.45, roadPolicy: "edge",     maxPerMap: null, overlapGroup: "canopy",    weight: 1.2 },
+        tree_pine:            { biomes: ["forest", "rocky"],             layer: "standing", anchorY: 0.45, roadPolicy: "edge",     maxPerMap: null, overlapGroup: "canopy",    weight: 1.2 },
+        tree_birch:           { biomes: ["forest", "meadow", "wetland"], layer: "standing", anchorY: 0.45, roadPolicy: "edge",     maxPerMap: null, overlapGroup: "canopy",    weight: 1.0 },
+        grove_oak:            { biomes: ["forest", "meadow"],            layer: "standing", anchorY: 0.42, roadPolicy: "avoid",    maxPerMap: null, overlapGroup: "canopy",    weight: 1.0 },
+        grove_pine:           { biomes: ["forest", "rocky"],             layer: "standing", anchorY: 0.42, roadPolicy: "avoid",    maxPerMap: null, overlapGroup: "canopy",    weight: 1.0 },
+        grove_pine2:          { biomes: ["forest", "rocky"],             layer: "standing", anchorY: 0.42, roadPolicy: "avoid",    maxPerMap: null, overlapGroup: "canopy",    weight: 0.9 },
+        bush:                 { biomes: ["forest", "meadow", "wetland"], layer: "standing", anchorY: 0.35, roadPolicy: "edge",     maxPerMap: null, overlapGroup: "canopy",    weight: 1.0 },
+        orchad_apple:         { biomes: ["farmland", "meadow"],          layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 3,    overlapGroup: "canopy",    weight: 1.0 },
+        hruskovy_sad:         { biomes: ["farmland", "meadow"],          layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 3,    overlapGroup: "canopy",    weight: 1.0 },
+        orchad_plum:          { biomes: ["farmland", "meadow"],          layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 3,    overlapGroup: "canopy",    weight: 1.0 },
+        dryad_sacred_oak:     { biomes: ["forest", "meadow"],            layer: "standing", anchorY: 0.45, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        forest_ent:           { biomes: ["forest", "meadow"],            layer: "standing", anchorY: 0.44, roadPolicy: "overhang", maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        unicorn_grove:        { biomes: ["forest", "meadow"],            layer: "standing", anchorY: 0.42, roadPolicy: "overhang", maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+
+        // 2. Skály a ruiny
+        rock_boulder:         { biomes: ["rocky", "forest", "meadow"],   layer: "standing", anchorY: 0.35, roadPolicy: "avoid",    maxPerMap: null, overlapGroup: "ridge",     weight: 1.0 },
+        mountain_peaks:       { biomes: ["rocky"],                       layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: null, overlapGroup: "ridge",     weight: 1.0 },
+        ancient_ruins:        { biomes: ["rocky", "forest", "meadow"],   layer: "standing", anchorY: 0.42, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        ancient_tower_ruin:   { biomes: ["rocky", "forest", "meadow"],   layer: "standing", anchorY: 0.45, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+
+        // 3. Zemědělství a osady
+        farm_field:           { biomes: ["farmland", "meadow"],          layer: "ground",   anchorY: 0.15, roadPolicy: "avoid",    maxPerMap: 5,    overlapGroup: "exclusive", weight: 1.0 },
+        pasture_fence:        { biomes: ["farmland", "meadow"],          layer: "standing", anchorY: 0.35, roadPolicy: "edge",     maxPerMap: 4,    overlapGroup: "exclusive", weight: 1.0 },
+        windmill:             { biomes: ["farmland", "meadow"],          layer: "standing", anchorY: 0.45, roadPolicy: "avoid",    maxPerMap: 3,    overlapGroup: "exclusive", weight: 1.0 },
+        watermill:            { biomes: ["wetland", "farmland", "meadow"], layer: "standing", anchorY: 0.44, roadPolicy: "avoid",  maxPerMap: 2,    overlapGroup: "exclusive", weight: 1.0 },
+        cottage_timber:       { biomes: ["farmland", "meadow", "forest"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",   maxPerMap: 4,    overlapGroup: "exclusive", weight: 1.0 },
+        village_well:         { biomes: ["farmland", "meadow", "forest"], layer: "standing", anchorY: 0.40, roadPolicy: "edge",    maxPerMap: 3,    overlapGroup: "exclusive", weight: 1.0 },
+        merchant_wagon:       { biomes: ["farmland", "meadow", "forest"], layer: "standing", anchorY: 0.38, roadPolicy: "edge",    maxPerMap: 3,    overlapGroup: "exclusive", weight: 1.0 },
+        tournament_tent:      { biomes: ["farmland", "meadow", "forest"], layer: "standing", anchorY: 0.42, roadPolicy: "edge",    maxPerMap: 2,    overlapGroup: "exclusive", weight: 1.0 },
+        signpost:             { biomes: ["farmland", "meadow", "forest"], layer: "standing", anchorY: 0.45, roadPolicy: "edge",    maxPerMap: 3,    overlapGroup: "exclusive", weight: 1.0 },
+        signpost2:            { biomes: ["farmland", "meadow", "forest"], layer: "standing", anchorY: 0.45, roadPolicy: "edge",    maxPerMap: 2,    overlapGroup: "exclusive", weight: 1.0 },
+        hrad:                 { biomes: ["rocky", "meadow", "farmland"],  layer: "standing", anchorY: 0.44, roadPolicy: "avoid",   maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        wooden_watchtower:    { biomes: ["rocky", "meadow", "farmland"],  layer: "standing", anchorY: 0.45, roadPolicy: "avoid",   maxPerMap: 3,    overlapGroup: "exclusive", weight: 1.0 },
+        ancient_graveyard:    { biomes: ["forest", "meadow", "rocky"],   layer: "standing", anchorY: 0.38, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        witch_hut:            { biomes: ["forest", "wetland"],           layer: "standing", anchorY: 0.44, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+
+        // 4. Voda (vrstva "ground" vždy pod stojícími objekty)
+        lake_pond:            { biomes: ["wetland", "meadow"],           layer: "ground",   anchorY: 0.15, roadPolicy: "avoid",    maxPerMap: 3,    overlapGroup: "exclusive", weight: 1.0 },
+        lake_nymphs:          { biomes: ["wetland", "meadow"],           layer: "ground",   anchorY: 0.15, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        vodnik_pond:          { biomes: ["wetland", "forest"],           layer: "ground",   anchorY: 0.15, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        pegasus_pond:         { biomes: ["wetland", "meadow"],           layer: "ground",   anchorY: 0.15, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        swamp_bridge:         { biomes: ["wetland", "forest"],           layer: "ground",   anchorY: 0.15, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+
+        // 5. Magie a unikátní bytosti
+        fairy_ring_mushrooms: { biomes: ["forest", "meadow"],            layer: "ground",   anchorY: 0.18, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        druid_monoliths:      { biomes: ["forest", "meadow", "rocky"],   layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        crystal_golem:        { biomes: ["rocky"],                       layer: "standing", anchorY: 0.44, roadPolicy: "overhang", maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        phoenix_nest:         { biomes: ["rocky"],                       layer: "standing", anchorY: 0.42, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+
+        // 6. Questová doupata
+        cave_bear_den:        { biomes: ["rocky", "forest"],             layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        bandit_cave:          { biomes: ["rocky", "forest"],             layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        basilisk_cave:        { biomes: ["rocky", "forest"],             layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        griffin_nest:         { biomes: ["rocky"],                       layer: "standing", anchorY: 0.44, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        fire_salamander:      { biomes: ["rocky"],                       layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        dragon_cave:          { biomes: ["rocky"],                       layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        snow_troll_cave:      { biomes: ["rocky"],                       layer: "standing", anchorY: 0.40, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        swamp_troll:          { biomes: ["wetland", "forest"],           layer: "standing", anchorY: 0.42, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 },
+        swamp_hydra:          { biomes: ["wetland", "forest"],           layer: "standing", anchorY: 0.42, roadPolicy: "avoid",    maxPerMap: 1,    overlapGroup: "exclusive", weight: 1.0 }
     };
 
     var shadowOverrides = {
@@ -806,11 +884,53 @@ window.PRS_DECOR_CATALOG = {
         var item = cat[id];
         if (!item) continue;
         var def = categoryDefaults[item.category] || categoryDefaults.vegetation;
+        var ov = placementOverrides[id] || {};
+
         if (typeof item.footFade !== "number") {
             item.footFade = (typeof footFadeOverrides[id] === "number") ? footFadeOverrides[id] : def.footFade;
         }
         if (typeof item.shadowLen !== "number") {
             item.shadowLen = (typeof shadowOverrides[id] === "number") ? shadowOverrides[id] : def.shadowLen;
         }
+        if (!Array.isArray(item.biomes) || item.biomes.length === 0) {
+            var bSrc = Array.isArray(ov.biomes) ? ov.biomes : (def.biomes || VALID_BIOMES);
+            item.biomes = bSrc.slice();
+        }
+        if (item.layer !== "ground" && item.layer !== "standing") {
+            item.layer = ov.layer || def.layer || "standing";
+        }
+        if (typeof item.anchorY !== "number") {
+            item.anchorY = (typeof ov.anchorY === "number") ? ov.anchorY : (typeof def.anchorY === "number" ? def.anchorY : 0.42);
+        }
+        if (item.roadPolicy !== "avoid" && item.roadPolicy !== "edge" && item.roadPolicy !== "overhang") {
+            item.roadPolicy = ov.roadPolicy || def.roadPolicy || "avoid";
+        }
+        if (item.maxPerMap === undefined) {
+            item.maxPerMap = (ov.maxPerMap !== undefined) ? ov.maxPerMap : (def.maxPerMap !== undefined ? def.maxPerMap : null);
+        }
+        if (item.overlapGroup !== "canopy" && item.overlapGroup !== "ridge" && item.overlapGroup !== "exclusive") {
+            item.overlapGroup = ov.overlapGroup || def.overlapGroup || "exclusive";
+        }
+        if (typeof item.weight !== "number" || item.weight <= 0) {
+            item.weight = (typeof ov.weight === "number" && ov.weight > 0) ? ov.weight : (def.weight || 1.0);
+        }
     }
+
+    window.PRS_DECOR_SCHEMA_DEFAULTS = {
+        validBiomes: VALID_BIOMES.slice(),
+        categoryDefaults: categoryDefaults
+    };
+
+    window.PRS_getDecorSortMetrics = function (dec, catMap) {
+        var c = (catMap && dec && dec.catalogId) ? catMap[dec.catalogId] : null;
+        var layerName = (dec && (dec.layer === "ground" || dec.layer === "standing"))
+            ? dec.layer
+            : ((c && c.layer) || "standing");
+        var layerRank = (layerName === "ground") ? 0 : 1;
+        var anchorY = (c && typeof c.anchorY === "number") ? c.anchorY : (layerRank === 0 ? 0.15 : 0.42);
+        var hVal = (dec && typeof dec.h === "number") ? dec.h : ((c && c.h) || 60);
+        var yVal = (dec && typeof dec.y === "number") ? dec.y : 0;
+        var footY = (dec && typeof dec.footY === "number") ? dec.footY : (yVal + hVal * anchorY);
+        return { layerRank: layerRank, footY: footY };
+    };
 })();

@@ -314,7 +314,8 @@
                     window.PRS_BoardBuilder.computeRiverBridges(restoredState.board);
                 }
             }
-            if (restoredState.board && restoredState.board.nodes && restoredState.board.decorationsVersion !== 4) {
+            var targetDecorVer = (window.PRS_BoardBuilder && window.PRS_BoardBuilder.DECORATIONS_VERSION) || 6;
+            if (restoredState.board && restoredState.board.nodes && restoredState.board.decorationsVersion !== targetDecorVer) {
                 if (window.PRS_BoardBuilder && typeof window.PRS_BoardBuilder.generateBoardDecorations === "function") {
                     window.PRS_BoardBuilder.generateBoardDecorations(restoredState.board, restoredState.board.seed || 1000);
                 }

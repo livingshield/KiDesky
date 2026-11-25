@@ -1101,7 +1101,16 @@
             out.push((hasTexturedTerrain && gQuality === "high") ? '  <g id="prs-decor-layer" filter="url(#decorColorHarmonize)">' : '  <g id="prs-decor-layer">');
 
             this._cachedRiverPoints = null;
-            var decs = this.state.board.decorations;
+            var catMap = window.PRS_DECOR_CATALOG || {};
+            var decs = this.state.board.decorations.slice().sort(function (a, b) {
+                if (typeof window.PRS_getDecorSortMetrics === "function") {
+                    var ma = window.PRS_getDecorSortMetrics(a, catMap);
+                    var mb = window.PRS_getDecorSortMetrics(b, catMap);
+                    if (ma.layerRank !== mb.layerRank) return ma.layerRank - mb.layerRank;
+                    if (ma.footY !== mb.footY) return ma.footY - mb.footY;
+                }
+                return a.y - b.y;
+            });
 
             for (var d = 0; d < decs.length; d++) {
 
@@ -1110,8 +1119,9 @@
                     continue;
                 }
 
-                var cat = window.PRS_DECOR_CATALOG ? window.PRS_DECOR_CATALOG[dec.catalogId] : null;
+                var cat = catMap[dec.catalogId] || null;
                 var catType = (cat && cat.category) || "vegetation";
+                var catLayer = (dec.layer === "ground" || dec.layer === "standing") ? dec.layer : ((cat && cat.layer) || "standing");
                 if (gQuality === "low" && catType === "vegetation" && (d % 2 === 1)) continue;
                 var cushionGrad = "groundMossGrad";
                 if (catType === "settlement" || catType === "agriculture") cushionGrad = "groundEarthGrad";
@@ -1141,7 +1151,7 @@
                     var sLen = (cat && typeof cat.shadowLen === "number") ? cat.shadowLen : 0.95;
                     if (hasTexturedTerrain) {
                         // Jednotný vržený stín ze slunce vlevo nahoře + kontaktní stín + měkké zapuštění podstavce do terénu
-                        if (sLen > 0.25) {
+                        if (catLayer !== "ground" && sLen > 0.25) {
                             var castRx = Math.round(dec.w * 0.38 * Math.min(1.4, Math.max(0.6, sLen)));
                             var castRy = Math.max(5, Math.round(dec.h * 0.14));
                             var castDx = Math.round(dec.w * 0.22 * sLen);

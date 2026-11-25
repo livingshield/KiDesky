@@ -158,13 +158,33 @@ function assertBoardInvariants(win, board, spec) {
   const roadSamples = (typeof builder.sampleRoadCorridor === 'function') ? builder.sampleRoadCorridor(board.nodes) : [];
   const uniquePoiSet = new Set(builder.UNIQUE_POI_IDS || []);
   const uniqueCounts = {};
-  const treeSet = new Set(['tree_oak', 'tree_pine', 'tree_birch', 'grove_oak', 'grove_pine']);
+  const itemCounts = {};
+  const treeSet = new Set(['tree_oak', 'tree_pine', 'tree_birch', 'grove_oak', 'grove_pine', 'grove_pine2']);
   const trees = [];
+  let prevSortMetrics = null;
 
   for (let di = 0; di < decors.length; di++) {
     const dec = decors[di];
-    assert(dec.catalogId && catalog[dec.catalogId], `${spec.label}: decoration[${di}] unknown catalogId "${dec.catalogId}"`);
+    const catItem = catalog[dec.catalogId];
+    assert(dec.catalogId && catItem, `${spec.label}: decoration[${di}] unknown catalogId "${dec.catalogId}"`);
     assert(Number.isFinite(dec.x) && Number.isFinite(dec.y), `${spec.label}: decoration[${di}] non-finite coords`);
+
+    itemCounts[dec.catalogId] = (itemCounts[dec.catalogId] || 0) + 1;
+    if (typeof catItem.maxPerMap === 'number') {
+      assert(itemCounts[dec.catalogId] <= catItem.maxPerMap, `${spec.label}: "${dec.catalogId}" appeared ${itemCounts[dec.catalogId]}x > maxPerMap ${catItem.maxPerMap}`);
+    }
+    if (dec.zone) {
+      assert(Array.isArray(catItem.biomes) && catItem.biomes.includes(dec.zone), `${spec.label}: decoration "${dec.catalogId}" placed in disallowed biome "${dec.zone}" (allowed: ${catItem.biomes.join(',')})`);
+    }
+    if (typeof win.PRS_getDecorSortMetrics === 'function') {
+      const curSort = win.PRS_getDecorSortMetrics(dec, catalog);
+      if (prevSortMetrics) {
+        const sortedOk = prevSortMetrics.layerRank < curSort.layerRank ||
+          (prevSortMetrics.layerRank === curSort.layerRank && prevSortMetrics.footY <= curSort.footY + 0.01);
+        assert(sortedOk, `${spec.label}: decoration[${di}] ${dec.catalogId} out of (layer, footY) order: prev=(${prevSortMetrics.layerRank},${prevSortMetrics.footY}) cur=(${curSort.layerRank},${curSort.footY})`);
+      }
+      prevSortMetrics = curSort;
+    }
 
     if (uniquePoiSet.has(dec.catalogId)) {
       uniqueCounts[dec.catalogId] = (uniqueCounts[dec.catalogId] || 0) + 1;
@@ -175,9 +195,12 @@ function assertBoardInvariants(win, board, spec) {
       const ndDist = Math.hypot(dec.x - nd.x, dec.y - nd.y);
       assert(ndDist >= 34, `${spec.label}: decoration ${dec.catalogId}@(${dec.x},${dec.y}) too close to node ${ni}: ${ndDist.toFixed(1)}px < 34px`);
     }
+    const minAvoidRoad = (catItem.roadPolicy === 'avoid')
+      ? Math.max(34, Math.round(Math.max(dec.w || 60, dec.h || 60) * 0.44) + 10)
+      : (catItem.roadPolicy === 'overhang' ? 38 : 34);
     for (let ri = 0; ri < roadSamples.length; ri++) {
       const rDist = Math.hypot(dec.x - roadSamples[ri].x, dec.y - roadSamples[ri].y);
-      assert(rDist >= 34, `${spec.label}: decoration ${dec.catalogId}@(${dec.x},${dec.y}) intrudes on road clearing: ${rDist.toFixed(1)}px < 34px`);
+      assert(rDist >= minAvoidRoad, `${spec.label}: decoration ${dec.catalogId}@(${dec.x},${dec.y}) (${catItem.roadPolicy}) intrudes on road clearing: ${rDist.toFixed(1)}px < ${minAvoidRoad}px`);
     }
     if (treeSet.has(dec.catalogId)) {
       trees.push(dec);
@@ -200,9 +223,32 @@ function assertBoardInvariants(win, board, spec) {
   return `nodes=${nLen}, reach=${visited.size}/${nLen}, minDist=${minDist.toFixed(1)}px, rivers=${rivers.length}, bridges=${bridges.length}, landmarks=${landmarks.length}, decors=${decors.length}, treeNb=${avgTreeNeighbors.toFixed(1)}`;
 }
 
+function validateCatalogPlacementSchema(win) {
+  const cat = win.PRS_DECOR_CATALOG || {};
+  const keys = Object.keys(cat);
+  const validBiomes = new Set(['forest', 'rocky', 'wetland', 'farmland', 'meadow']);
+  const validLayers = new Set(['ground', 'standing']);
+  const validPolicies = new Set(['avoid', 'edge', 'overhang']);
+  const validGroups = new Set(['canopy', 'ridge', 'exclusive']);
+  assert(keys.length >= 49, `Catalog should have at least 49 entries, got ${keys.length}`);
+  for (const id of keys) {
+    const it = cat[id];
+    assert(Array.isArray(it.biomes) && it.biomes.length > 0 && it.biomes.every(b => validBiomes.has(b)), `${id}: invalid biomes`);
+    assert(validLayers.has(it.layer), `${id}: invalid layer "${it.layer}"`);
+    assert(typeof it.anchorY === 'number' && it.anchorY >= 0 && it.anchorY <= 0.6, `${id}: invalid anchorY ${it.anchorY}`);
+    assert(validPolicies.has(it.roadPolicy), `${id}: invalid roadPolicy "${it.roadPolicy}"`);
+    assert(it.maxPerMap === null || (Number.isInteger(it.maxPerMap) && it.maxPerMap >= 1), `${id}: invalid maxPerMap ${it.maxPerMap}`);
+    assert(validGroups.has(it.overlapGroup), `${id}: invalid overlapGroup "${it.overlapGroup}"`);
+    assert(typeof it.weight === 'number' && it.weight > 0, `${id}: invalid weight ${it.weight}`);
+  }
+  return keys.length;
+}
+
 function main() {
   console.log('=== KiDesky Regression: Board Presets & Procedural Generator ===');
   const win = loadEngineSandbox();
+  const catCount = validateCatalogPlacementSchema(win);
+  console.log(`[PASS] Catalog schema: ${catCount} items validated (biomes/layer/anchorY/roadPolicy/maxPerMap/overlapGroup/weight)`);
   const engine = win.PRS_GameEngine;
   const players = [
     { name: 'Rytíř A', type: 'Bot_Balanced' },
