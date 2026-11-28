@@ -2532,6 +2532,7 @@
         updateInspectorUI: function () {
             var box = document.getElementById("me-inspector-panel");
             if (!box) return;
+            var tEd = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
 
             var bodyNode = document.getElementById("me-insp-body-node");
             var bodyEdge = document.getElementById("me-insp-body-edge");
@@ -3318,7 +3319,9 @@
             this.selectedNodeId = null;
             this.selectedEdge = null;
             this.inspectorMode = null;
-            if (this.activeTool === "castle" || this.activeTool === "river") {
+            this.isDrawingRiver = false;
+            this.drawRiverPoints = [];
+            if (this.activeTool === "castle" || this.activeTool === "river" || this.activeTool === "biome") {
                 this.activeTool = "select";
                 this.updateToolButtons();
                 this.updateStatusHelp();
@@ -3326,6 +3329,10 @@
             }
             this.updateInspectorUI();
             this.renderCanvas();
+        },
+
+        toggleInspectorCorner: function () {
+            return this.toggleInspectorPosition();
         },
 
         toggleInspectorPosition: function () {
