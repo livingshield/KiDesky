@@ -152,7 +152,7 @@ window.PRS_BoardBuilder = {
             this.computeRiverBridges(board);
         }
         // Generování procedurálních a ukotvených dekorací krajiny s ekosystémovými shluky
-        if (!board.decorations || board.decorations.length === 0 || board.decorationsVersion !== 5) {
+        if (!board.decorations || board.decorations.length === 0 || board.decorationsVersion !== (this.DECORATIONS_VERSION || 7)) {
             this.generateBoardDecorations(board, seed);
         }
         return board;
@@ -392,7 +392,7 @@ window.PRS_BoardBuilder = {
             if (sRPS) {
                 for (var ri = 0; ri < board.rivers.length; ri++) {
                     var rObj = board.rivers[ri];
-                    var rWidth = rObj.width || 14;
+                    var rWidth = (rObj.customWidth && rObj.width) ? Math.max(10, Math.min(64, rObj.width)) : (rObj.width || 14);
                     var smpPts = sRPS(rObj.path);
                     for (var sp = 0; sp < smpPts.length; sp++) {
                         riverClearancePoints.push({ x: smpPts[sp].x, y: smpPts[sp].y, halfW: rWidth / 2 });
@@ -548,6 +548,15 @@ window.PRS_BoardBuilder = {
         }
 
         function classifyZone(x, y) {
+            if (Array.isArray(board.biomeZones) && board.biomeZones.length > 0) {
+                for (var bi = board.biomeZones.length - 1; bi >= 0; bi--) {
+                    var bz = board.biomeZones[bi];
+                    if (!bz || !bz.biome) continue;
+                    var bdx = x - bz.x, bdy = y - bz.y;
+                    var br = bz.r || 90;
+                    if (bdx * bdx + bdy * bdy <= br * br) return bz.biome;
+                }
+            }
             for (var rp = 0; rp < riverClearancePoints.length; rp++) {
                 var rpt = riverClearancePoints[rp];
                 var rdx = rpt.x - x;

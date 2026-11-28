@@ -20,6 +20,11 @@
         selectedEdge: null, // { from: number, to: number }
         selectedRiverIdx: 0,
         selectedRiverPtIdx: null,
+        isDrawingRiver: false,
+        drawRiverPoints: [],
+        activeBiomeBrush: "forest",
+        biomeBrushRadius: 110,
+        _isPaintingBiome: false,
         inspectorMode: "node", // "node" | "edge" | "river" | "castle"
         swapSourceNodeId: null,
         linkSourceNodeId: null,
@@ -65,6 +70,9 @@
             this.selectedEdge = null;
             this.selectedRiverIdx = 0;
             this.selectedRiverPtIdx = null;
+            this.isDrawingRiver = false;
+            this.drawRiverPoints = [];
+            this._isPaintingBiome = false;
             this.inspectorMode = "node";
             this.swapSourceNodeId = null;
             this.linkSourceNodeId = null;
@@ -115,8 +123,15 @@
                         e.preventDefault();
                         self.deleteSelectedNode();
                     }
+                } else if (e.key === "Enter" && self.activeTool === "river" && self.isDrawingRiver) {
+                    e.preventDefault();
+                    self.finishDrawRiver();
                 } else if (e.key === "Escape") {
                     e.preventDefault();
+                    if (self.isDrawingRiver) {
+                        self.cancelDrawRiver();
+                        return;
+                    }
                     self.selectedNodeId = null;
                     self.selectedEdge = null;
                     self.selectedRiverPtIdx = null;
@@ -179,6 +194,10 @@
 
         // Přepnutí aktivního nástroje
         setTool: function (toolName) {
+            if (toolName !== "river" && this.isDrawingRiver) {
+                this.isDrawingRiver = false;
+                this.drawRiverPoints = [];
+            }
             this.activeTool = toolName;
             this.swapSourceNodeId = null;
             this.linkSourceNodeId = null;
@@ -192,13 +211,18 @@
                 if (this.board && this.selectedRiverIdx >= this.board.rivers.length) {
                     this.selectedRiverIdx = 0;
                 }
+            } else if (toolName === "biome") {
+                if (this.board && !Array.isArray(this.board.biomeZones)) this.board.biomeZones = [];
+                this.selectedNodeId = null;
+                this.selectedEdge = null;
+                this.inspectorMode = "biome";
             } else if (toolName === "castle") {
                 if (this.board) this.getRoyalCastleLandmark();
                 this.selectedNodeId = null;
                 this.selectedEdge = null;
                 this.inspectorMode = "castle";
             } else if (toolName !== "link") {
-                if (this.inspectorMode === "river" || this.inspectorMode === "castle") {
+                if (this.inspectorMode === "river" || this.inspectorMode === "castle" || this.inspectorMode === "biome") {
                     this.inspectorMode = this.selectedEdge ? "edge" : "node";
                 }
             }
@@ -217,15 +241,17 @@
                 svg.style.cursor = (this.viewport && this.viewport.isPanning) ? "grabbing" : "grab";
             } else if (this.activeTool === "move" || this.activeTool === "castle") {
                 svg.style.cursor = "move";
-            } else if (this.activeTool === "add" || this.activeTool === "river") {
+            } else if (this.activeTool === "add" || this.activeTool === "biome" || (this.activeTool === "river" && this.isDrawingRiver)) {
                 svg.style.cursor = "crosshair";
+            } else if (this.activeTool === "river") {
+                svg.style.cursor = "pointer";
             } else {
                 svg.style.cursor = "pointer";
             }
         },
 
         updateToolButtons: function () {
-            var tools = ["select", "add", "swap", "link", "river", "castle", "pan", "move"];
+            var tools = ["select", "add", "swap", "link", "river", "biome", "castle", "pan", "move"];
             for (var i = 0; i < tools.length; i++) {
                 var btn = document.getElementById("me-tool-" + tools[i]);
                 if (btn) {
@@ -270,7 +296,13 @@
                     text = tSt("map_editor.status.link_step2", { id: this.linkSourceNodeId }, "🔗 <strong>Cesty &amp; Směry:</strong> Krok 2/2 – Nyní klikni na cílové políčko pro vytvoření cesty z #" + this.linkSourceNodeId + " (nebo zrušení existující).");
                 }
             } else if (this.activeTool === "river") {
-                text = tSt("map_editor.status.river", null, "🌊 <strong>Editor řeky:</strong> Chytni a táhni <strong style='color:#38bdf8;'>modré uzly</strong> (meandry) nebo <strong style='color:#facc15;'>žlutá táhla</strong> křivek. Podržením <kbd>Alt</kbd> posuneš uzel bez jeho táhel; mosty se po puštění přepočítají.");
+                if (this.isDrawingRiver) {
+                    text = tSt("map_editor.status.river_draw", null, "✏️ <strong>Kreslení nové řeky:</strong> Klikej po mapě body trasy od pramene po ústí. Dvojklikem, klávesou <kbd>Enter</kbd> nebo tlačítkem <strong>Dokončit tok</strong> křivku uzavřeš.");
+                } else {
+                    text = tSt("map_editor.status.river", null, "🌊 <strong>Editor řeky:</strong> Táhni <strong style='color:#38bdf8;'>modré uzly</strong> nebo <strong style='color:#facc15;'>žlutá táhla</strong>, případně klikni na <strong>Nakreslit vlastní tok</strong>.");
+                }
+            } else if (this.activeTool === "biome") {
+                text = tSt("map_editor.status.biome", null, "🎨 <strong>Štětec biomů:</strong> Vyber v inspektoru biom (nebo gumu) a kliknutím či tažením maluj krajinu. Poté přepočti dekorace.");
             } else if (this.activeTool === "castle") {
                 text = tSt("map_editor.status.castle", null, "🏰 <strong>Hlavní hrad:</strong> Tažením myší přesuň dominantu Královského hradu na libovolné místo mapy a v panelu vpravo dole uprav jeho vzhled, velikost i otočení.");
             }
@@ -370,28 +402,63 @@
             // 1. Pergamenový podklad
             out.push('  <rect x="10" y="10" width="1380" height="840" rx="16" fill="#1b130c" stroke="#d4af37" stroke-width="2.5"/>');
 
-            // 2. Biomy (pokud existují)
+            // 2. Biomy (výchozí + ručně malované zóny)
+            var isBiomeEditMode = (this.activeTool === "biome" || this.inspectorMode === "biome");
             if (board.biomes) {
                 for (var bm = 0; bm < board.biomes.length; bm++) {
                     var bio = board.biomes[bm];
-                    out.push('  <path d="' + bio.path + '" fill="' + (bio.fill || "rgba(255,255,255,0.06)") + '" opacity="0.45"/>');
+                    out.push('  <path d="' + bio.path + '" fill="' + (bio.fill || "rgba(255,255,255,0.06)") + '" opacity="0.38" pointer-events="none"/>');
                 }
             }
+            var biomePalette = {
+                forest:   { fill: "rgba(21, 128, 61, 0.42)",  stroke: "#4ade80", icon: "🌲" },
+                meadow:   { fill: "rgba(132, 204, 22, 0.36)", stroke: "#bef264", icon: "🌿" },
+                farmland: { fill: "rgba(234, 179, 8, 0.38)",  stroke: "#fde047", icon: "🌾" },
+                rocky:    { fill: "rgba(120, 113, 108, 0.48)",stroke: "#d6d3d1", icon: "⛰️" },
+                wetland:  { fill: "rgba(14, 165, 233, 0.42)", stroke: "#7dd3fc", icon: "🌊" }
+            };
+            out.push('  <g id="me-biome-zones-layer" pointer-events="none">');
+            if (Array.isArray(board.biomeZones)) {
+                for (var bzi = 0; bzi < board.biomeZones.length; bzi++) {
+                    var bz = board.biomeZones[bzi];
+                    if (!bz || !bz.biome) continue;
+                    var bp = biomePalette[bz.biome] || biomePalette.meadow;
+                    var bzDash = isBiomeEditMode ? ' stroke="' + bp.stroke + '" stroke-width="1.6" stroke-dasharray="6,4"' : '';
+                    out.push('    <circle cx="' + Math.round(bz.x) + '" cy="' + Math.round(bz.y) + '" r="' + Math.round(bz.r || 90) + '" fill="' + bp.fill + '" opacity="' + (isBiomeEditMode ? "0.75" : "0.48") + '"' + bzDash + '/>');
+                    if (isBiomeEditMode) {
+                        out.push('    <text x="' + Math.round(bz.x) + '" y="' + (Math.round(bz.y) + 5) + '" text-anchor="middle" font-size="15" opacity="0.85">' + bp.icon + '</text>');
+                    }
+                }
+            }
+            out.push('  </g>');
 
-            // 3. Řeka Doubravka (interaktivní výběr i editace Beziérových bodů)
+            // 3. Řeka Doubravka (víceprůchodově pro přirozené soutoky a křížení už v editoru)
             var isRiverEditMode = (this.activeTool === "river" || this.inspectorMode === "river");
-            if (board.rivers) {
+            if (board.rivers && board.rivers.length > 0) {
+                var rivSpecs = [];
                 for (var r = 0; r < board.rivers.length; r++) {
                     var riv = board.rivers[r];
-                    var rw = (riv.customWidth && riv.width) ? riv.width : ((riv.width && riv.width >= 28) ? riv.width : (riv.isTributary ? 24 : 38));
-                    var isSelectedRiver = (isRiverEditMode && this.selectedRiverIdx === r);
-                    if (isSelectedRiver) {
-                        out.push('  <path class="me-river-sel" data-river-idx="' + r + '" d="' + riv.path + '" stroke="rgba(250,204,21,0.55)" stroke-width="' + (rw + 22) + '" fill="none" stroke-linecap="round" stroke-dasharray="10,6" pointer-events="none"/>');
+                    var rw = (riv.customWidth && riv.width) ? Math.max(10, Math.min(64, riv.width)) : ((riv.width && riv.width >= 28) ? riv.width : (riv.isTributary ? 24 : 38));
+                    rivSpecs.push({ idx: r, riv: riv, rw: rw, selected: (isRiverEditMode && this.selectedRiverIdx === r) });
+                }
+                for (var rs0 = 0; rs0 < rivSpecs.length; rs0++) {
+                    if (rivSpecs[rs0].selected) {
+                        out.push('  <path class="me-river-sel" data-river-idx="' + rivSpecs[rs0].idx + '" d="' + rivSpecs[rs0].riv.path + '" stroke="rgba(250,204,21,0.55)" stroke-width="' + (rivSpecs[rs0].rw + 22) + '" fill="none" stroke-linecap="round" stroke-dasharray="10,6" pointer-events="none"/>');
                     }
-                    out.push('  <path class="me-river-bank" data-river-idx="' + r + '" d="' + riv.path + '" stroke="#dfbe86" stroke-width="' + (rw + 14) + '" fill="none" opacity="0.85" stroke-linecap="round" pointer-events="none"/>');
-                    out.push('  <path class="me-river-water" data-river-idx="' + r + '" d="' + riv.path + '" stroke="#0369a1" stroke-width="' + rw + '" fill="none" opacity="0.95" stroke-linecap="round" pointer-events="none"/>');
-                    out.push('  <path class="me-river-foam" data-river-idx="' + r + '" d="' + riv.path + '" stroke="#38bdf8" stroke-width="' + (rw * 0.5) + '" fill="none" opacity="0.9" stroke-linecap="round" pointer-events="none"/>');
-                    out.push('  <path class="me-river-path" data-river-idx="' + r + '" d="' + riv.path + '" stroke="transparent" stroke-width="' + Math.max(rw + 18, 44) + '" fill="none" stroke-linecap="round" style="cursor:pointer;" onclick="PRS_MapEditor.onRiverPathClick(event, ' + r + ')"/>');
+                }
+                for (var rs1 = 0; rs1 < rivSpecs.length; rs1++) {
+                    out.push('  <path class="me-river-bank" data-river-idx="' + rivSpecs[rs1].idx + '" d="' + rivSpecs[rs1].riv.path + '" stroke="#dfbe86" stroke-width="' + (rivSpecs[rs1].rw + 14) + '" fill="none" opacity="0.85" stroke-linecap="round" pointer-events="none"/>');
+                }
+                for (var rs2 = 0; rs2 < rivSpecs.length; rs2++) {
+                    out.push('  <path class="me-river-water" data-river-idx="' + rivSpecs[rs2].idx + '" d="' + rivSpecs[rs2].riv.path + '" stroke="#0369a1" stroke-width="' + rivSpecs[rs2].rw + '" fill="none" opacity="0.96" stroke-linecap="round" pointer-events="none"/>');
+                }
+                for (var rs3 = 0; rs3 < rivSpecs.length; rs3++) {
+                    out.push('  <path class="me-river-foam" data-river-idx="' + rivSpecs[rs3].idx + '" d="' + rivSpecs[rs3].riv.path + '" stroke="#38bdf8" stroke-width="' + Math.max(4, rivSpecs[rs3].rw * 0.45).toFixed(1) + '" fill="none" opacity="0.85" stroke-linecap="round" pointer-events="none"/>');
+                }
+                if (!this.isDrawingRiver) {
+                    for (var rs4 = 0; rs4 < rivSpecs.length; rs4++) {
+                        out.push('  <path class="me-river-path" data-river-idx="' + rivSpecs[rs4].idx + '" d="' + rivSpecs[rs4].riv.path + '" stroke="transparent" stroke-width="' + Math.max(rivSpecs[rs4].rw + 18, 44) + '" fill="none" stroke-linecap="round" style="cursor:pointer;" onclick="PRS_MapEditor.onRiverPathClick(event, ' + rivSpecs[rs4].idx + ')"/>');
+                    }
                 }
             }
 
@@ -541,7 +608,7 @@
             }
 
             // 8. Interaktivní Beziérovy body a táhla pro vybranou větev řeky
-            if (isRiverEditMode && board.rivers && board.rivers[this.selectedRiverIdx]) {
+            if (isRiverEditMode && !this.isDrawingRiver && board.rivers && board.rivers[this.selectedRiverIdx]) {
                 var selRiv = board.rivers[this.selectedRiverIdx];
                 var pts = this.parseRiverPathPoints(selRiv.path);
                 if (pts && pts.length > 0) {
@@ -566,15 +633,49 @@
                 }
             }
 
+            // 9. Živý náhled kreslené řeky
+            if (isRiverEditMode && this.isDrawingRiver && Array.isArray(this.drawRiverPoints) && this.drawRiverPoints.length > 0) {
+                if (this.drawRiverPoints.length >= 2) {
+                    var previewD = this.catmullRomToCubicBezierPath(this.drawRiverPoints);
+                    out.push('  <path d="' + previewD + '" fill="none" stroke="rgba(56,189,248,0.85)" stroke-width="22" stroke-linecap="round" stroke-dasharray="10,6" pointer-events="none"/>');
+                    out.push('  <path d="' + previewD + '" fill="none" stroke="#fef08a" stroke-width="2.5" stroke-dasharray="6,4" pointer-events="none"/>');
+                }
+                for (var dp = 0; dp < this.drawRiverPoints.length; dp++) {
+                    var dpt = this.drawRiverPoints[dp];
+                    out.push('  <circle cx="' + Math.round(dpt.x) + '" cy="' + Math.round(dpt.y) + '" r="8" fill="#0ea5e9" stroke="#fef08a" stroke-width="2" pointer-events="none"/>');
+                    out.push('  <text x="' + Math.round(dpt.x) + '" y="' + (Math.round(dpt.y) + 3) + '" text-anchor="middle" fill="#ffffff" font-size="8.5" font-weight="bold" pointer-events="none">' + (dp + 1) + '</text>');
+                }
+            }
+
+            // 10. Kruhový kurzor štětce biomů
+            if (isBiomeEditMode) {
+                var curStroke = (this.activeBiomeBrush === "erase") ? "#f87171" : ((biomePalette[this.activeBiomeBrush] && biomePalette[this.activeBiomeBrush].stroke) || "#fde047");
+                out.push('  <circle id="me-biome-cursor-ring" cx="-9999" cy="-9999" r="' + Math.round(this.biomeBrushRadius || 110) + '" fill="none" stroke="' + curStroke + '" stroke-width="2.2" stroke-dasharray="7,4" pointer-events="none"/>');
+            }
+
             out.push('</svg>');
 
             container.innerHTML = out.join("\n");
 
-            // Registrace událostí na SVG pro posun plátna a zoom
+            // Registrace událostí na SVG pro posun plátna, náhled štětce a zoom
             var svgEl = document.getElementById("me-svg-canvas");
             if (svgEl) {
                 var self = this;
                 svgEl.onpointerdown = function (e) { self.onSvgPointerDown(e); };
+                svgEl.onpointermove = function (e) {
+                    if (self.activeTool === "biome") {
+                        var ring = document.getElementById("me-biome-cursor-ring");
+                        if (ring) {
+                            var cur = self.getSvgCoordinates(e, svgEl);
+                            ring.setAttribute("cx", Math.round(cur.x));
+                            ring.setAttribute("cy", Math.round(cur.y));
+                        }
+                    }
+                };
+                svgEl.onpointerleave = function () {
+                    var ring = document.getElementById("me-biome-cursor-ring");
+                    if (ring) { ring.setAttribute("cx", "-9999"); ring.setAttribute("cy", "-9999"); }
+                };
                 svgEl.oncontextmenu = function (e) { e.preventDefault(); };
                 svgEl.onwheel = function (e) {
                     e.preventDefault();
@@ -809,6 +910,66 @@
             }
 
             var target = evt.target;
+            // 0A. Režim kreslení nové řeky klikáním bodů trasy
+            if (this.activeTool === "river" && this.isDrawingRiver && evt.button === 0 && !evt.altKey && !evt.spaceKey) {
+                evt.preventDefault();
+                var svgRiv = document.getElementById("me-svg-canvas");
+                if (svgRiv) {
+                    var ptRiv = this.getSvgCoordinates(evt, svgRiv);
+                    var lastDrawPt = (this.drawRiverPoints && this.drawRiverPoints.length > 0) ? this.drawRiverPoints[this.drawRiverPoints.length - 1] : null;
+                    if (this.drawRiverPoints && this.drawRiverPoints.length >= 2 && (evt.detail >= 2 || (lastDrawPt && Math.hypot(ptRiv.x - lastDrawPt.x, ptRiv.y - lastDrawPt.y) < 14))) {
+                        this.finishDrawRiver();
+                    } else {
+                        this.addDrawRiverPoint(ptRiv.x, ptRiv.y);
+                    }
+                    return;
+                }
+            }
+
+            // 0B. Režim štětce biomů (malování / guma po mapě klikem i tažením)
+            if (this.activeTool === "biome" && evt.button === 0 && !evt.altKey && !evt.spaceKey) {
+                evt.preventDefault();
+                var svgBio = document.getElementById("me-svg-canvas");
+                if (svgBio) {
+                    var selfB = this;
+                    var ptBio = this.getSvgCoordinates(evt, svgBio);
+                    this.pushUndo();
+                    this._isPaintingBiome = true;
+                    var lastStamp = { x: ptBio.x, y: ptBio.y };
+                    this.applyBiomeBrushAt(ptBio.x, ptBio.y);
+                    var minStep = Math.max(18, Math.round((this.biomeBrushRadius || 110) * 0.42));
+
+                    function onBiomeMove(ev) {
+                        if (!selfB._isPaintingBiome) return;
+                        ev.preventDefault();
+                        var sEl = document.getElementById("me-svg-canvas");
+                        if (!sEl) return;
+                        var cPt = selfB.getSvgCoordinates(ev, sEl);
+                        var ring = document.getElementById("me-biome-cursor-ring");
+                        if (ring) {
+                            ring.setAttribute("cx", Math.round(cPt.x));
+                            ring.setAttribute("cy", Math.round(cPt.y));
+                        }
+                        if (Math.hypot(cPt.x - lastStamp.x, cPt.y - lastStamp.y) >= minStep) {
+                            lastStamp = { x: cPt.x, y: cPt.y };
+                            selfB.applyBiomeBrushAt(cPt.x, cPt.y);
+                        }
+                    }
+                    function onBiomeUp() {
+                        window.removeEventListener("pointermove", onBiomeMove);
+                        window.removeEventListener("pointerup", onBiomeUp);
+                        window.removeEventListener("pointercancel", onBiomeUp);
+                        selfB._isPaintingBiome = false;
+                        selfB.renderCanvas();
+                        selfB.updateInspectorUI();
+                    }
+                    window.addEventListener("pointermove", onBiomeMove);
+                    window.addEventListener("pointerup", onBiomeUp);
+                    window.addEventListener("pointercancel", onBiomeUp);
+                    return;
+                }
+            }
+
             var nodeEl = target && target.closest ? (target.closest(".me-node") || target.closest(".me-node-group") || target.closest(".me-river-pt") || target.closest(".me-royal-castle-hit")) : null;
 
             // 1. Režim přidání pole: kliknutím na prázdné místo plátna vytvoříme nový uzel
@@ -1947,7 +2108,7 @@
         },
 
         buildRiverPresetList: function () {
-            return {
+            var defs = {
                 standard: [
                     { path: "M -40 180 C 260 120, 420 520, 700 420 C 980 320, 1140 680, 1440 600", width: 38, isTributary: false, customWidth: true }
                 ],
@@ -1961,19 +2122,24 @@
                 ],
                 delta: [
                     { path: "M -40 380 C 320 300, 520 480, 760 410 C 980 340, 1180 280, 1440 180", width: 40, isTributary: false, customWidth: true },
-                    { path: "M 760 410 C 980 470, 1180 560, 1440 520", width: 30, isTributary: true, customWidth: true },
-                    { path: "M 640 420 C 860 590, 1100 720, 1440 760", width: 28, isTributary: true, customWidth: true }
+                    { path: "M 760 410 C 980 470, 1180 560, 1440 520", width: 30, isTributary: true, isDeltaBranch: true, customWidth: true },
+                    { path: "M 640 420 C 860 590, 1100 720, 1440 760", width: 28, isTributary: true, isDeltaBranch: true, customWidth: true }
                 ],
                 none: []
             };
+            defs.single = defs.standard;
+            return defs;
         },
 
         applyRiverPreset: function (presetKey) {
             if (!this.board) return;
+            var tEd = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
             var presets = this.buildRiverPresetList();
             if (!presets[presetKey]) return;
 
             this.pushUndo();
+            this.isDrawingRiver = false;
+            this.drawRiverPoints = [];
             this.board.rivers = JSON.parse(JSON.stringify(presets[presetKey]));
             this.selectedRiverIdx = 0;
             this.selectedRiverPtIdx = null;
@@ -1981,7 +2147,7 @@
             this.recomputeBridgesSafe();
             this.renderCanvas();
             this.updateInspectorUI();
-            if (window.KiDeskyToast) window.KiDeskyToast.show("🌊 Použita šablona řeky: " + presetKey, "good");
+            if (window.KiDeskyToast) window.KiDeskyToast.show(tEd("map_editor.river_toast_preset", { key: presetKey }, "🌊 Použita šablona řeky: " + presetKey), "good");
             if (window.PRS_Audio) window.PRS_Audio.playStep();
         },
 
@@ -1990,9 +2156,89 @@
             if (rivIdx < 0 || rivIdx >= this.board.rivers.length) return;
             this.selectedRiverIdx = rivIdx;
             this.selectedRiverPtIdx = null;
+            this.isDrawingRiver = false;
+            this.drawRiverPoints = [];
             this.inspectorMode = "river";
             this.renderCanvas();
             this.updateInspectorUI();
+        },
+
+        startDrawRiver: function () {
+            this.activeTool = "river";
+            this.inspectorMode = "river";
+            this.isDrawingRiver = true;
+            this.drawRiverPoints = [];
+            this.selectedRiverPtIdx = null;
+            this.updateToolButtons();
+            this.updateStatusHelp();
+            this.updateCursor();
+            this.updateInspectorUI();
+            this.renderCanvas();
+        },
+
+        cancelDrawRiver: function () {
+            this.isDrawingRiver = false;
+            this.drawRiverPoints = [];
+            this.updateStatusHelp();
+            this.updateCursor();
+            this.updateInspectorUI();
+            this.renderCanvas();
+        },
+
+        addDrawRiverPoint: function (x, y) {
+            if (!this.drawRiverPoints) this.drawRiverPoints = [];
+            var cx = Math.max(-40, Math.min(1440, Math.round(x)));
+            var cy = Math.max(-40, Math.min(900, Math.round(y)));
+            this.drawRiverPoints.push({ x: cx, y: cy });
+            this.updateInspectorUI();
+            this.renderCanvas();
+        },
+
+        catmullRomToCubicBezierPath: function (pts) {
+            if (!pts || pts.length < 2) return "";
+            var d = "M " + Math.round(pts[0].x) + " " + Math.round(pts[0].y);
+            for (var i = 0; i < pts.length - 1; i++) {
+                var p0 = pts[Math.max(0, i - 1)];
+                var p1 = pts[i];
+                var p2 = pts[i + 1];
+                var p3 = pts[Math.min(pts.length - 1, i + 2)];
+                var cp1x = Math.round(p1.x + (p2.x - p0.x) / 6);
+                var cp1y = Math.round(p1.y + (p2.y - p0.y) / 6);
+                var cp2x = Math.round(p2.x - (p3.x - p1.x) / 6);
+                var cp2y = Math.round(p2.y - (p3.y - p1.y) / 6);
+                d += " C " + cp1x + " " + cp1y + ", " + cp2x + " " + cp2y + ", " + Math.round(p2.x) + " " + Math.round(p2.y);
+            }
+            return d;
+        },
+
+        finishDrawRiver: function () {
+            var tEd = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+            if (!this.board || !this.drawRiverPoints || this.drawRiverPoints.length < 2) {
+                this.cancelDrawRiver();
+                return;
+            }
+            if (!Array.isArray(this.board.rivers)) this.board.rivers = [];
+            var pathStr = this.catmullRomToCubicBezierPath(this.drawRiverPoints);
+            var isFirst = (this.board.rivers.length === 0);
+            this.pushUndo();
+            this.board.rivers.push({
+                path: pathStr,
+                width: isFirst ? 36 : 26,
+                isTributary: !isFirst,
+                customWidth: true
+            });
+            this.selectedRiverIdx = this.board.rivers.length - 1;
+            this.selectedRiverPtIdx = null;
+            this.isDrawingRiver = false;
+            this.drawRiverPoints = [];
+            this.board._decorDirty = true;
+            this.recomputeBridgesSafe();
+            this.updateStatusHelp();
+            this.updateCursor();
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.KiDeskyToast) window.KiDeskyToast.show(tEd("map_editor.river_toast_drawn", null, "🌊 Nový vlastní tok byl vytvořen a mosty přepočítány."), "good");
+            if (window.PRS_Audio) window.PRS_Audio.playStep();
         },
 
         addRiverMeander: function () {
@@ -2001,7 +2247,6 @@
             var pts = this.parseRiverPathPoints(riv.path);
             if (!pts || pts.length < 4) return;
 
-            // Najdeme nejdelší Beziérův segment a rozdělíme ho De Casteljauovým krokem
             var bestSegIdx = 0;
             var bestLen = -1;
             for (var s = 0; s + 3 < pts.length; s += 3) {
@@ -2107,17 +2352,151 @@
             if (window.PRS_Audio) window.PRS_Audio.playStep();
         },
 
+        toggleSelectedRiverTributary: function () {
+            if (!this.board || !Array.isArray(this.board.rivers) || !this.board.rivers[this.selectedRiverIdx]) return;
+            this.pushUndo();
+            var riv = this.board.rivers[this.selectedRiverIdx];
+            riv.isTributary = !riv.isTributary;
+            this.renderCanvas();
+            this.updateInspectorUI();
+        },
+
+        deleteSelectedRiverAnchor: function () {
+            if (!this.board || !Array.isArray(this.board.rivers) || !this.board.rivers[this.selectedRiverIdx]) return;
+            if (this.selectedRiverPtIdx === null || this.selectedRiverPtIdx % 3 !== 0) return;
+            var riv = this.board.rivers[this.selectedRiverIdx];
+            var pts = this.parseRiverPathPoints(riv.path);
+            if (!pts || pts.length <= 4) return;
+            this.pushUndo();
+            var idx = this.selectedRiverPtIdx;
+            if (idx === 0) {
+                pts.splice(0, 3);
+            } else if (idx >= pts.length - 1) {
+                pts.splice(pts.length - 3, 3);
+            } else {
+                pts.splice(idx - 1, 3);
+            }
+            riv.path = this.buildRiverPathFromPoints(pts);
+            this.selectedRiverPtIdx = null;
+            this.board._decorDirty = true;
+            this.recomputeBridgesSafe();
+            this.renderCanvas();
+            this.updateInspectorUI();
+        },
+
+        applyRiverWidthLive: function (w) {
+            if (!this.board || !Array.isArray(this.board.rivers) || !this.board.rivers[this.selectedRiverIdx]) return;
+            var riv = this.board.rivers[this.selectedRiverIdx];
+            var clampedW = Math.max(10, Math.min(64, parseInt(w, 10) || 36));
+            riv.width = clampedW;
+            riv.customWidth = true;
+            var lbl = document.getElementById("me-insp-river-w-val");
+            if (lbl) lbl.textContent = clampedW + " px";
+            var svg = document.getElementById("me-svg-canvas");
+            if (svg) {
+                var idx = this.selectedRiverIdx;
+                var upd = function (sel, sw) {
+                    var el = svg.querySelector(sel + '[data-river-idx="' + idx + '"]');
+                    if (el) el.setAttribute("stroke-width", sw);
+                };
+                upd(".me-river-sel", clampedW + 22);
+                upd(".me-river-bank", clampedW + 14);
+                upd(".me-river-water", clampedW);
+                upd(".me-river-foam", Math.max(4, clampedW * 0.45).toFixed(1));
+            }
+        },
+
         applyRiverWidth: function (w) {
             if (!this.board || !Array.isArray(this.board.rivers) || !this.board.rivers[this.selectedRiverIdx]) return;
             var riv = this.board.rivers[this.selectedRiverIdx];
-            var clampedW = Math.max(10, Math.min(56, parseInt(w, 10) || 36));
-            if (riv.width === clampedW && riv.customWidth) return;
-
+            var clampedW = Math.max(10, Math.min(64, parseInt(w, 10) || 36));
             this.pushUndo();
             riv.width = clampedW;
             riv.customWidth = true;
+            this.board._decorDirty = true;
             this.recomputeBridgesSafe();
             this.renderCanvas();
+            this.updateInspectorUI();
+        },
+
+        setBiomeBrush: function (biomeKey) {
+            this.activeBiomeBrush = biomeKey || "forest";
+            this.updateStatusHelp();
+            this.updateInspectorUI();
+            this.renderCanvas();
+        },
+
+        setBiomeBrushRadius: function (r) {
+            var rad = Math.max(50, Math.min(220, parseInt(r, 10) || 110));
+            this.biomeBrushRadius = rad;
+            var lbl = document.getElementById("me-insp-biome-r-val");
+            if (lbl) lbl.textContent = rad + " px";
+            var ring = document.getElementById("me-biome-cursor-ring");
+            if (ring) ring.setAttribute("r", rad);
+        },
+
+        applyBiomeBrushAt: function (x, y) {
+            if (!this.board) return;
+            if (!Array.isArray(this.board.biomeZones)) this.board.biomeZones = [];
+            var cx = Math.max(0, Math.min(1400, Math.round(x)));
+            var cy = Math.max(0, Math.min(860, Math.round(y)));
+            var r = Math.max(50, Math.min(220, parseInt(this.biomeBrushRadius, 10) || 110));
+
+            if (this.activeBiomeBrush === "erase") {
+                this.board.biomeZones = this.board.biomeZones.filter(function (bz) {
+                    var thresh = Math.max(r, (bz.r || 90) * 0.65);
+                    return Math.hypot(bz.x - cx, bz.y - cy) > thresh;
+                });
+                this.board._decorDirty = true;
+                this.renderCanvas();
+                return;
+            }
+
+            if (this.board.biomeZones.length >= 160) {
+                this.board.biomeZones.shift();
+            }
+            this.board.biomeZones.push({
+                id: "bz_" + Date.now() + "_" + Math.floor(Math.random() * 10000),
+                biome: this.activeBiomeBrush || "forest",
+                x: cx,
+                y: cy,
+                r: r
+            });
+            this.board._decorDirty = true;
+
+            // Rychlé přidání kruhu do živého SVG bez překreslování celé mapy během tažení
+            var layer = document.getElementById("me-biome-zones-layer");
+            if (layer && document.createElementNS) {
+                var pal = {
+                    forest:   { fill: "rgba(21, 128, 61, 0.42)",  stroke: "#4ade80" },
+                    meadow:   { fill: "rgba(132, 204, 22, 0.36)", stroke: "#bef264" },
+                    farmland: { fill: "rgba(234, 179, 8, 0.38)",  stroke: "#fde047" },
+                    rocky:    { fill: "rgba(120, 113, 108, 0.48)",stroke: "#d6d3d1" },
+                    wetland:  { fill: "rgba(14, 165, 233, 0.42)", stroke: "#7dd3fc" }
+                };
+                var pCol = pal[this.activeBiomeBrush] || pal.meadow;
+                var cir = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                cir.setAttribute("cx", cx);
+                cir.setAttribute("cy", cy);
+                cir.setAttribute("r", r);
+                cir.setAttribute("fill", pCol.fill);
+                cir.setAttribute("opacity", "0.75");
+                cir.setAttribute("stroke", pCol.stroke);
+                cir.setAttribute("stroke-width", "1.6");
+                cir.setAttribute("stroke-dasharray", "6,4");
+                layer.appendChild(cir);
+            }
+        },
+
+        clearCustomBiomeZones: function () {
+            if (!this.board) return;
+            var tEd = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
+            this.pushUndo();
+            this.board.biomeZones = [];
+            this.board._decorDirty = true;
+            this.renderCanvas();
+            this.updateInspectorUI();
+            if (window.KiDeskyToast) window.KiDeskyToast.show(tEd("map_editor.biome_toast_cleared", null, "🧹 Vlastní biomy byly vymazány."), "turn");
         },
 
         deleteSelectedRiver: function () {
@@ -2158,15 +2537,16 @@
             var bodyEdge = document.getElementById("me-insp-body-edge");
             var bodyCastle = document.getElementById("me-insp-body-castle");
             var bodyRiver = document.getElementById("me-insp-body-river");
+            var bodyBiome = document.getElementById("me-insp-body-biome");
             var titleEl = document.getElementById("me-insp-title");
             var idEl = document.getElementById("me-insp-id");
-            
 
             var hideAll = function () {
                 if (bodyNode) bodyNode.style.display = "none";
                 if (bodyEdge) bodyEdge.style.display = "none";
                 if (bodyCastle) bodyCastle.style.display = "none";
                 if (bodyRiver) bodyRiver.style.display = "none";
+                if (bodyBiome) bodyBiome.style.display = "none";
             };
 
             var mode = this.inspectorMode;
@@ -2175,6 +2555,7 @@
                 else if (this.selectedNodeId !== null) mode = "node";
                 else if (this.activeTool === "castle") mode = "castle";
                 else if (this.activeTool === "river") mode = "river";
+                else if (this.activeTool === "biome") mode = "biome";
             }
 
             if (!mode) {
@@ -2288,10 +2669,23 @@
 
                 if (bodyRiver) {
                     var rHtml = [];
+                    if (this.isDrawingRiver) {
+                        var dCount = (this.drawRiverPoints || []).length;
+                        rHtml.push('<div style="font-size:0.71rem; color:#bae6fd; background:rgba(14,165,233,0.18); border:1px solid rgba(56,189,248,0.45); border-radius:6px; padding:0.45rem; margin-bottom:0.4rem;">');
+                        rHtml.push('  <div style="margin-bottom:4px;">' + tEd("map_editor.river_draw_points", { count: dCount }, "Naklikaných bodů: <strong>" + dCount + "</strong> (min. 2)") + '</div>');
+                        rHtml.push('  <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">');
+                        rHtml.push('    <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.finishDrawRiver()"' + (dCount < 2 ? ' disabled' : '') + '>' + tEd("map_editor.river_btn_finish_draw", null, "✅ Dokončit tok") + '</button>');
+                        rHtml.push('    <button type="button" class="btn-icon-danger" style="font-size:0.7rem; padding:0.28rem 0.4rem;" onclick="PRS_MapEditor.cancelDrawRiver()">' + tEd("map_editor.river_btn_cancel_draw", null, "✕ Zrušit") + '</button>');
+                        rHtml.push('  </div>');
+                        rHtml.push('</div>');
+                    } else {
+                        rHtml.push('<button type="button" class="btn-secondary" style="width:100%; font-size:0.73rem; padding:0.32rem 0.4rem; margin-bottom:0.4rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.startDrawRiver()">' + tEd("map_editor.river_btn_start_draw", null, "✏️ Nakreslit vlastní tok") + '</button>');
+                    }
+
                     rHtml.push('<div style="margin-bottom:0.4rem;">');
                     rHtml.push('  <div style="font-size:0.68rem; color:#cbd5e1; margin-bottom:3px;">' + tEd("map_editor.river_presets_label", null, "Rychlé šablony toku:") + '</div>');
                     rHtml.push('  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">');
-                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'single\')">' + tEd("map_editor.river_preset_main", null, "🌊 Hlavní") + '</button>');
+                    rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'standard\')">' + tEd("map_editor.river_preset_main", null, "🌊 Hlavní") + '</button>');
                     rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'dual\')">' + tEd("map_editor.river_preset_confluence", null, "🌿 Soutok") + '</button>');
                     rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'island\')">' + tEd("map_editor.river_preset_island", null, "🏝️ Ostrov") + '</button>');
                     rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.66rem; padding:2px 4px;" onclick="PRS_MapEditor.applyRiverPreset(\'delta\')">' + tEd("map_editor.river_preset_delta", null, "🔻 Delta") + '</button>');
@@ -2302,6 +2696,8 @@
                     if (rivers.length > 0) {
                         var curRiv = rivers[this.selectedRiverIdx] || rivers[0];
                         var curW = curRiv ? (curRiv.width || 38) : 38;
+                        var rivPts = curRiv ? this.parseRiverPathPoints(curRiv.path) : [];
+                        var canDelPt = (this.selectedRiverPtIdx !== null && this.selectedRiverPtIdx % 3 === 0 && rivPts.length > 4);
 
                         rHtml.push('<div style="display:flex; gap:3px; margin-bottom:0.4rem; overflow-x:auto;">');
                         for (var ri = 0; ri < rivers.length; ri++) {
@@ -2312,15 +2708,22 @@
                         rHtml.push('</div>');
 
                         rHtml.push('<div id="me-insp-river-pt-info" style="font-size:0.68rem; color:#bae6fd; background:rgba(14,165,233,0.12); border-radius:5px; padding:3px 6px; margin-bottom:0.35rem;">' + tEd("map_editor.river_hint_drag", null, "Táhni modré kotvy (s Alt bez táhel) nebo žluté úchyty.") + '</div>');
-                        rHtml.push('<div style="margin-bottom:0.4rem;">');
+                        rHtml.push('<div style="margin-bottom:0.35rem;">');
                         rHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>' + tEd("map_editor.river_width_label", null, "Šířka vybraného toku:") + '</span><strong id="me-insp-river-w-val" style="color:#38bdf8;">' + curW + ' px</strong></label>');
-                        rHtml.push('  <input type="range" min="24" max="54" step="2" value="' + Math.max(24, Math.min(54, curW)) + '" style="width:100%;" oninput="var el=document.getElementById(\'me-insp-river-w-val\'); if(el) el.textContent=this.value+\' px\';" onchange="PRS_MapEditor.applyRiverWidth(this.value)" />');
+                        rHtml.push('  <input type="range" min="10" max="64" step="2" value="' + Math.max(10, Math.min(64, curW)) + '" style="width:100%;" oninput="PRS_MapEditor.applyRiverWidthLive(this.value)" onchange="PRS_MapEditor.applyRiverWidth(this.value)" />');
+                        rHtml.push('  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; margin-top:3px;">');
+                        rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.64rem; padding:2px 3px;" onclick="PRS_MapEditor.applyRiverWidth(16)">' + tEd("map_editor.river_size_stream", null, "Potok 16") + '</button>');
+                        rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.64rem; padding:2px 3px;" onclick="PRS_MapEditor.applyRiverWidth(34)">' + tEd("map_editor.river_size_river", null, "Řeka 34") + '</button>');
+                        rHtml.push('    <button type="button" class="btn-zoom" style="font-size:0.64rem; padding:2px 3px;" onclick="PRS_MapEditor.applyRiverWidth(54)">' + tEd("map_editor.river_size_major", null, "Veletok 54") + '</button>');
+                        rHtml.push('  </div>');
                         rHtml.push('</div>');
 
                         rHtml.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:0.35rem; margin-bottom:0.35rem;">');
                         rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverMeander()">' + tEd("map_editor.river_btn_meander", null, "〰️ Přidat zákrut") + '</button>');
                         rHtml.push('  <button type="button" class="btn-secondary" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.addRiverTributary()">' + tEd("map_editor.river_btn_tributary", null, "➕ Přidat přítok") + '</button>');
+                        rHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.toggleSelectedRiverTributary()">' + (curRiv.isTributary ? tEd("map_editor.river_btn_make_main", null, "🌊 Hlavní tok") : tEd("map_editor.river_btn_make_trib", null, "↪️ Přítok")) + '</button>');
                         rHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.flipSelectedRiverHorizontally()">' + tEd("map_editor.river_btn_flip", null, "↔️ Překlopit X") + '</button>');
+                        rHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedRiverAnchor()"' + (canDelPt ? '' : ' disabled') + '>' + tEd("map_editor.river_btn_del_pt", null, "➖ Odebrat bod") + '</button>');
                         rHtml.push('  <button type="button" class="btn-icon-danger" style="font-size:0.7rem; padding:0.26rem 0.4rem;" onclick="PRS_MapEditor.deleteSelectedRiver()">' + tEd("map_editor.river_btn_delete", null, "🗑️ Smazat větev") + '</button>');
                         rHtml.push('</div>');
                     } else {
@@ -2328,6 +2731,43 @@
                     }
                     rHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">' + tEd("map_editor.river_btn_recalc", null, "🌿 Přepočítat mosty & dekorace") + '</button>');
                     bodyRiver.innerHTML = rHtml.join("\n");
+                }
+                return;
+            }
+
+            // 3B. Režim Štětce biomů
+            if (mode === "biome") {
+                box.style.display = "block";
+                hideAll();
+                if (bodyBiome) bodyBiome.style.display = "block";
+                if (titleEl) titleEl.textContent = tEd("map_editor.biome_inspector_title", null, "🎨 Štětec biomů");
+                var bZones = (this.board && Array.isArray(this.board.biomeZones)) ? this.board.biomeZones : [];
+                if (idEl) idEl.textContent = tEd("map_editor.biome_zones_count", { count: bZones.length }, bZones.length + " zón");
+                if (bodyBiome) {
+                    var bBtns = [
+                        { key: "forest",   label: tEd("map_editor.biome_forest", null, "🌲 Les"),     col: "#4ade80" },
+                        { key: "meadow",   label: tEd("map_editor.biome_meadow", null, "🌿 Louka"),   col: "#bef264" },
+                        { key: "farmland", label: tEd("map_editor.biome_farmland", null, "🌾 Pole"),  col: "#fde047" },
+                        { key: "rocky",    label: tEd("map_editor.biome_rocky", null, "⛰️ Skály"),   col: "#d6d3d1" },
+                        { key: "wetland",  label: tEd("map_editor.biome_wetland", null, "🌊 Mokřad"),col: "#7dd3fc" },
+                        { key: "erase",    label: tEd("map_editor.biome_erase", null, "🧽 Guma"),    col: "#fca5a5" }
+                    ];
+                    var bHtml = [];
+                    bHtml.push('<div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:0.45rem;">');
+                    for (var bi = 0; bi < bBtns.length; bi++) {
+                        var bb = bBtns[bi];
+                        var activeB = (this.activeBiomeBrush === bb.key);
+                        bHtml.push('  <button type="button" class="btn-zoom" style="font-size:0.71rem; padding:0.3rem 0.4rem; border-color:' + (activeB ? bb.col : 'rgba(255,255,255,0.18)') + '; color:' + bb.col + ';' + (activeB ? ' background:rgba(255,255,255,0.14); font-weight:bold;' : '') + '" onclick="PRS_MapEditor.setBiomeBrush(\'' + bb.key + '\')">' + bb.label + '</button>');
+                    }
+                    bHtml.push('</div>');
+                    var curR = this.biomeBrushRadius || 110;
+                    bHtml.push('<div style="margin-bottom:0.45rem;">');
+                    bHtml.push('  <label style="font-size:0.7rem; color:#cbd5e1; display:flex; justify-content:space-between; margin-bottom:2px;"><span>' + tEd("map_editor.biome_brush_size", null, "Velikost štětce:") + '</span><strong id="me-insp-biome-r-val" style="color:#fde047;">' + curR + ' px</strong></label>');
+                    bHtml.push('  <input type="range" min="50" max="220" step="10" value="' + Math.max(50, Math.min(220, curR)) + '" style="width:100%;" oninput="PRS_MapEditor.setBiomeBrushRadius(this.value)" />');
+                    bHtml.push('</div>');
+                    bHtml.push('<button type="button" class="btn-icon-danger" style="width:100%; font-size:0.71rem; padding:0.28rem 0.4rem; margin-bottom:0.35rem;" onclick="PRS_MapEditor.clearCustomBiomeZones()"' + (bZones.length === 0 ? ' disabled' : '') + '>' + tEd("map_editor.biome_btn_clear", null, "🧹 Vymazat vlastní biomy") + '</button>');
+                    bHtml.push('<button type="button" class="btn-zoom" style="width:100%; font-size:0.72rem; padding:0.28rem 0.4rem; border-color:#22c55e; color:#bbf7d0;" onclick="PRS_MapEditor.regenerateDecorAndBridges()">' + tEd("map_editor.biome_btn_recalc", null, "🌿 Přepočítat dekorace podle biomů") + '</button>');
+                    bodyBiome.innerHTML = bHtml.join("\n");
                 }
                 return;
             }
@@ -3166,7 +3606,8 @@
                 '      <button type="button" id="me-tool-add" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'add\')" title="' + tEd("map_editor.tools.add_title", "Kliknutím kamkoliv do mapy přidáš nové políčko") + '">' + tEd("map_editor.tools.add", "➕ Přidat pole") + '</button>',
                 '      <button type="button" id="me-tool-swap" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'swap\')" title="' + tEd("map_editor.tools.swap_title", "Vzájemné prohození obsahu dvou polí") + '">' + tEd("map_editor.tools.swap", "🔄 Prohodit 2 pole") + '</button>',
                 '      <button type="button" id="me-tool-link" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'link\')" title="' + tEd("map_editor.tools.link_title", "Vytvořit / odebrat cestu mezi dvěma poli nebo upravit směry") + '">' + tEd("map_editor.tools.link", "🔗 Cesty & Směry") + '</button>',
-                '      <button type="button" id="me-tool-river" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'river\')" title="' + tEd("map_editor.tools.river_title", "Upravit tok řeky, meandry, přítoky a mosty") + '">' + tEd("map_editor.tools.river", "🌊 Řeka") + '</button>',
+                                '      <button type="button" id="me-tool-river" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'river\')" title="' + tEd("map_editor.tools.river_title", "Upravit tok řeky, meandry, přítoky a mosty") + '">' + tEd("map_editor.tools.river", "🌊 Řeka") + '</button>',
+                '      <button type="button" id="me-tool-biome" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'biome\')" title="' + tEd("map_editor.tools.biome_title", "Malovat zóny biomů štětcem pro terén a dekorace") + '">' + tEd("map_editor.tools.biome", "🎨 Biomy") + '</button>',
                 '      <button type="button" id="me-tool-castle" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'castle\')" title="' + tEd("map_editor.tools.castle_title", "Přemístit Hlavní hrad a zvolit jeho vzhled") + '">' + tEd("map_editor.tools.castle", "🏰 Hlavní hrad") + '</button>',
                 '      <button type="button" id="me-btn-route-shape" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem; border-color:#38bdf8; color:#bae6fd;" onclick="PRS_MapEditor.openRouteShapeModal()" title="' + tEd("map_editor.tools.route_shape_title", "Procedurálně přegenerovat trasu podle 7 archetypů (s historií Undo)") + '">' + tEd("map_editor.tools.route_shape", "🧭 Tvar trasy") + '</button>',
                 '      <button type="button" id="me-tool-pan" class="btn-zoom" style="font-size:0.75rem; padding:0.25rem 0.65rem;" onclick="PRS_MapEditor.setTool(\'pan\')" title="' + tEd("map_editor.tools.pan_title", "Posouvat celou mapu (tažením myši / prstem)") + '">' + tEd("map_editor.tools.pan", "🧭 Posun mapy") + '</button>',
@@ -3290,7 +3731,8 @@
                 '',
                 '      <div id="me-insp-body-edge" style="display:none;"></div>',
                 '      <div id="me-insp-body-castle" style="display:none;"></div>',
-                '      <div id="me-insp-body-river" style="display:none;"></div>',
+                                '      <div id="me-insp-body-river" style="display:none;"></div>',
+                '      <div id="me-insp-body-biome" style="display:none;"></div>',
                 '    </div>',
                 '  </div>',
                 '</div>'

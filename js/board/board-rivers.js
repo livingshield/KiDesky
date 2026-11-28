@@ -140,7 +140,7 @@
             var rpts = [];
             for (var r = 0; r < rivers.length; r++) {
                 var riv = rivers[r];
-                var rw = riv.width || 14;
+                var rw = (riv.customWidth && riv.width) ? Math.max(10, Math.min(64, riv.width)) : (riv.width || 14);
                 var smp = this.sampleRiverPath(riv.path, 10);
                 if (smp && smp.pts) {
                     for (var p = 0; p < smp.pts.length; p++) {
@@ -302,8 +302,8 @@
         var sampledRivers = [];
         for (var r = 0; r < board.rivers.length; r++) {
             var riv = board.rivers[r];
-            var isTrib = Boolean(riv.id === "tributary_river" || riv.isTributary || (board.rivers.length > 1 && r > 0 && riv.id !== "main_river" && riv.id !== "river_classic"));
-            var rw = (riv.width && riv.width >= 28) ? riv.width : (isTrib ? 24 : 38);
+            var isTrib = Boolean(riv.id === "tributary_river" || riv.isTributary || riv.isDeltaBranch || (board.rivers.length > 1 && r > 0 && riv.id !== "main_river" && riv.id !== "river_classic"));
+            var rw = (riv.customWidth && riv.width) ? Math.max(10, Math.min(64, riv.width)) : ((riv.width && riv.width >= 28) ? riv.width : (isTrib ? 24 : 38));
             var smp = this.sampleRiverPath(riv.path, 6.5);
             if (!smp) continue;
 
@@ -316,11 +316,13 @@
             var halfW = [];
             for (var i = 0; i < n; i++) {
                 var t = pts[i].t;
-                var prof = 0.56 + 0.82 * Math.pow(t, 0.85) + 0.32 * Math.pow(Math.max(0, (t - 0.75) / 0.25), 2);
+                var prof = riv.customWidth
+                    ? (0.76 + 0.44 * Math.pow(t, 0.85))
+                    : (0.56 + 0.82 * Math.pow(t, 0.85) + 0.32 * Math.pow(Math.max(0, (t - 0.75) / 0.25), 2));
                 if (isTrib && t > 0.75) {
-                    prof *= (1 + 0.40 * ((t - 0.75) / 0.25)); // plynulé trychtýřové rozšíření ústí přítoku
+                    prof *= (1 + 0.30 * ((t - 0.75) / 0.25));
                 }
-                var w = rw * prof * (1 + 0.12 * noise(pts[i].s, p1, p2));
+                var w = rw * prof * (1 + 0.10 * noise(pts[i].s, p1, p2));
                 halfW.push(Math.max(3.5, w / 2));
             }
 
@@ -335,11 +337,58 @@
                 len: smp.len,
                 seedBase: seedBase,
                 p1: p1, p2: p2, p3: p3, p4: p4, p5: p5, p6: p6,
-                halfW: halfW
+                halfW: halfW,
+                startsInRiver: null,
+                endsInRiver: null
             });
         }
 
         if (sampledRivers.length === 0) return "";
+
+        // Přichycení konců větví k okolním řekám (soutoky, delty, ostrovní větve) bez ostrých švů
+        for (var aIdx = 0; aIdx < sampledRivers.length; aIdx++) {
+            var ra = sampledRivers[aIdx];
+            var epSpecs = [
+                { key: "startsInRiver", idx: 0, dir: 1 },
+                { key: "endsInRiver", idx: ra.n - 1, dir: -1 }
+            ];
+            for (var ep = 0; ep < epSpecs.length; ep++) {
+                var eInfo = epSpecs[ep];
+                var ePt = ra.pts[eInfo.idx];
+                var bestD2 = 72 * 72, bestB = -1, bestK = -1;
+                for (var bIdx = 0; bIdx < sampledRivers.length; bIdx++) {
+                    if (bIdx === aIdx) continue;
+                    var rb = sampledRivers[bIdx];
+                    for (var bk = 0; bk < rb.n; bk++) {
+                        var dx = rb.pts[bk].x - ePt.x;
+                        var dy = rb.pts[bk].y - ePt.y;
+                        var d2 = dx * dx + dy * dy;
+                        if (d2 < bestD2) { bestD2 = d2; bestB = bIdx; bestK = bk; }
+                    }
+                }
+                if (bestB !== -1) {
+                    var tgtPt = sampledRivers[bestB].pts[bestK];
+                    var tgtHalfW = sampledRivers[bestB].halfW[bestK];
+                    ra[eInfo.key] = { otherIdx: bestB, otherK: bestK, x: tgtPt.x, y: tgtPt.y, halfW: tgtHalfW };
+                    var pullN = Math.min(3, Math.floor(ra.n / 2));
+                    for (var pk = 0; pk < pullN; pk++) {
+                        var pIdx = (eInfo.dir > 0) ? pk : (ra.n - 1 - pk);
+                        var blendW = ((pullN - pk) / pullN) * 0.85;
+                        ra.pts[pIdx].x = ra.pts[pIdx].x * (1 - blendW) + tgtPt.x * blendW;
+                        ra.pts[pIdx].y = ra.pts[pIdx].y * (1 - blendW) + tgtPt.y * blendW;
+                    }
+                }
+            }
+            if (ra.startsInRiver || ra.endsInRiver) {
+                for (var ni = 0; ni < ra.n; ni++) {
+                    var pA = ra.pts[Math.max(0, ni - 1)], pB = ra.pts[Math.min(ra.n - 1, ni + 1)];
+                    var nDx = pB.x - pA.x, nDy = pB.y - pA.y;
+                    var nLen = Math.sqrt(nDx * nDx + nDy * nDy) || 1;
+                    ra.pts[ni].tx = nDx / nLen; ra.pts[ni].ty = nDy / nLen;
+                    ra.pts[ni].nx = -nDy / nLen; ra.pts[ni].ny = nDx / nLen;
+                }
+            }
+        }
 
         // Pomocná funkce pro generování břehů
         function getSides(sData, extra, scale, bankJit) {
@@ -350,11 +399,17 @@
             for (var k = 0; k < n; k++) {
                 var pt = pts[k];
                 var t = pt.t;
-                var extraFade = (sData.isTributary && extra > 0) ? Math.min(1, Math.max(0, (n - 1 - k) / 5)) : 1;
+                var extraFade = 1;
+                if (sData.endsInRiver && extra > 0 && k >= n - 6) {
+                    extraFade = Math.min(extraFade, Math.max(0, (n - 1 - k) / 5));
+                }
+                if (sData.startsInRiver && extra > 0 && k < 6) {
+                    extraFade = Math.min(extraFade, Math.max(0, k / 5));
+                }
                 var hw = halfW[k] * scale + extra * extraFade;
 
-                if (sData.isTributary && scale < 0.8 && extra === 0 && t > 0.75) {
-                    hw *= Math.max(0, 1 - (t - 0.75) / 0.25);
+                if ((sData.endsInRiver || sData.isTributary) && scale < 0.8 && extra === 0 && t > 0.78) {
+                    hw *= Math.max(0.25, 1 - (t - 0.78) / 0.25);
                 }
 
                 var shift = pt.curv * 0.16 * halfW[k];
@@ -366,11 +421,11 @@
                 var ry = pt.y - pt.ny * (hw - shift + jr);
 
                 // Prodloužení začátku a konce za rám mapy pro plynulé plynutí bez useknutí
-                if (k === 0 && (pt.y < 35 || pt.x < 35 || pt.x > 1365)) {
+                if (k === 0 && !sData.startsInRiver && (pt.y < 35 || pt.y > 825 || pt.x < 35 || pt.x > 1365)) {
                     lx -= pt.tx * 25; ly -= pt.ty * 25;
                     rx -= pt.tx * 25; ry -= pt.ty * 25;
                 }
-                if (k === n - 1 && !sData.isTributary && (pt.y > 820 || pt.x < 35 || pt.x > 1365)) {
+                if (k === n - 1 && !sData.endsInRiver && (pt.y > 820 || pt.y < 35 || pt.x < 35 || pt.x > 1365)) {
                     lx += pt.tx * 25; ly += pt.ty * 25;
                     rx += pt.tx * 25; ry += pt.ty * 25;
                 }
@@ -390,44 +445,64 @@
             s.sides4 = getSides(s, 0, 0.52, 0);   // Hluboký střed toku
         }
 
-        // 2. Detekce soutoku a vytvoření sjednocené sítě
-        var confluences = [];
-        for (var tIdx = 0; tIdx < sampledRivers.length; tIdx++) {
-            var trib = sampledRivers[tIdx];
-            if (!trib.isTributary) continue;
-            var tLast = trib.pts[trib.n - 1];
-
-            for (var mIdx = 0; mIdx < sampledRivers.length; mIdx++) {
-                if (mIdx === tIdx) continue;
-                var mRiver = sampledRivers[mIdx];
-                var bestD2 = 999999, bestK = -1;
-                for (var k = 0; k < mRiver.n; k++) {
-                    var ddx = mRiver.pts[k].x - tLast.x, ddy = mRiver.pts[k].y - tLast.y;
-                    var d2 = ddx * ddx + ddy * ddy;
-                    if (d2 < bestD2) { bestD2 = d2; bestK = k; }
-                }
-                if (bestD2 < 85 * 85 && bestK !== -1) {
-                    var mPt = mRiver.pts[bestK];
-                    var tBefore = trib.pts[Math.max(0, trib.n - 4)];
-                    // Spolehlivá geometrická detekce břehu podle vzdálenosti
-                    var dL = (tBefore.x - mRiver.sides3.L[bestK].x) * (tBefore.x - mRiver.sides3.L[bestK].x) +
-                             (tBefore.y - mRiver.sides3.L[bestK].y) * (tBefore.y - mRiver.sides3.L[bestK].y);
-                    var dR = (tBefore.x - mRiver.sides3.R[bestK].x) * (tBefore.x - mRiver.sides3.R[bestK].x) +
-                             (tBefore.y - mRiver.sides3.R[bestK].y) * (tBefore.y - mRiver.sides3.R[bestK].y);
-                    var confSide = (dL < dR) ? "L" : "R";
-                    var mouthRad = Math.max(trib.halfW[trib.n - 1] * 1.5 + 8, 26);
-
-                    confluences.push({
-                        tribIdx: tIdx,
-                        mainIdx: mIdx,
-                        mainConfIdx: bestK,
-                        confSide: confSide,
-                        mouthRadius: mouthRad,
-                        mouthX: mPt.x,
-                        mouthY: mPt.y
-                    });
+        // 2. Detekce všech soutoků, rozvětvení i křížení řek pro jemné proudnice
+        var junctions = [];
+        function pushJunction(jx, jy) {
+            for (var ji = 0; ji < junctions.length; ji++) {
+                var jdx = junctions[ji].x - jx, jdy = junctions[ji].y - jy;
+                if (jdx * jdx + jdy * jdy < 70 * 70) return;
+            }
+            junctions.push({ x: jx, y: jy });
+        }
+        for (var jr1 = 0; jr1 < sampledRivers.length; jr1++) {
+            var sr1 = sampledRivers[jr1];
+            if (sr1.startsInRiver) pushJunction(sr1.startsInRiver.x, sr1.startsInRiver.y);
+            if (sr1.endsInRiver) pushJunction(sr1.endsInRiver.x, sr1.endsInRiver.y);
+            for (var jr2 = jr1 + 1; jr2 < sampledRivers.length; jr2++) {
+                var sr2 = sampledRivers[jr2];
+                for (var k1 = 0; k1 < sr1.n; k1 += 2) {
+                    for (var k2 = 0; k2 < sr2.n; k2 += 2) {
+                        var cDx = sr1.pts[k1].x - sr2.pts[k2].x;
+                        var cDy = sr1.pts[k1].y - sr2.pts[k2].y;
+                        var sumHW = sr1.halfW[k1] + sr2.halfW[k2];
+                        if (cDx * cDx + cDy * cDy < sumHW * sumHW) {
+                            pushJunction((sr1.pts[k1].x + sr2.pts[k2].x) * 0.5, (sr1.pts[k1].y + sr2.pts[k2].y) * 0.5);
+                        }
+                    }
                 }
             }
+        }
+
+        function isPointInOtherRiverWater(px, py, selfIdx, margin) {
+            var pad = margin || 0;
+            for (var oj = 0; oj < sampledRivers.length; oj++) {
+                if (oj === selfIdx) continue;
+                var oriv = sampledRivers[oj];
+                for (var ok = 0; ok < oriv.n; ok++) {
+                    var th = oriv.halfW[ok] + pad;
+                    var dx = oriv.pts[ok].x - px;
+                    var dy = oriv.pts[ok].y - py;
+                    if (dx * dx + dy * dy < th * th) return true;
+                }
+            }
+            return false;
+        }
+
+        var self = this;
+        function buildClippedBankPaths(arr, selfIdx, margin) {
+            var segments = [];
+            var curSeg = [];
+            for (var bi = 0; bi < arr.length; bi++) {
+                var bPt = arr[bi];
+                if (isPointInOtherRiverWater(bPt.x, bPt.y, selfIdx, margin)) {
+                    if (curSeg.length >= 2) segments.push(self.riverBankPath(curSeg));
+                    curSeg = [];
+                } else {
+                    curSeg.push(bPt);
+                }
+            }
+            if (curSeg.length >= 2) segments.push(self.riverBankPath(curSeg));
+            return segments;
         }
 
         // 3. Společný master gradient pro vodní hladinu podle živlu
@@ -440,110 +515,28 @@
         out.push('      </linearGradient>');
         out.push('    </defs>');
 
-        // Funkce pro sestavení sjednocené sítě dvou spojených řek
-        var self = this;
-        function buildUnifiedNetwork(conf, sidesKey) {
-            var mRiver = sampledRivers[conf.mainIdx];
-            var tRiver = sampledRivers[conf.tribIdx];
-            var ptsM = mRiver.pts, nM = ptsM.length;
-            var ptsT = tRiver.pts, nT = ptsT.length;
-            var bestK = conf.mainConfIdx;
-            var mouthLen = conf.mouthRadius;
-
-            var mConfBank = (conf.confSide === "L" ? mRiver[sidesKey].L : mRiver[sidesKey].R).slice();
-            var mOppBank  = (conf.confSide === "L" ? mRiver[sidesKey].R : mRiver[sidesKey].L).slice();
-
-            var kUp = bestK, kDown = bestK;
-            while (kUp > 1 && (ptsM[bestK].s - ptsM[kUp].s) < mouthLen) kUp--;
-            while (kDown < nM - 2 && (ptsM[kDown].s - ptsM[bestK].s) < mouthLen) kDown++;
-
-            var pMainUp = mConfBank[kUp];
-            var pMainDown = mConfBank[kDown];
-
-            var tL = tRiver[sidesKey].L.slice();
-            var tR = tRiver[sidesKey].R.slice();
-
-            var d1 = (tL[nT - 1].x - pMainUp.x) * (tL[nT - 1].x - pMainUp.x) + (tL[nT - 1].y - pMainUp.y) * (tL[nT - 1].y - pMainUp.y) +
-                     (tR[nT - 1].x - pMainDown.x) * (tR[nT - 1].x - pMainDown.x) + (tR[nT - 1].y - pMainDown.y) * (tR[nT - 1].y - pMainDown.y);
-            var d2 = (tR[nT - 1].x - pMainUp.x) * (tR[nT - 1].x - pMainUp.x) + (tR[nT - 1].y - pMainUp.y) * (tR[nT - 1].y - pMainUp.y) +
-                     (tL[nT - 1].x - pMainDown.x) * (tL[nT - 1].x - pMainDown.x) + (tL[nT - 1].y - pMainDown.y) * (tL[nT - 1].y - pMainDown.y);
-
-            var tUpBank = (d1 <= d2) ? tL : tR;
-            var tDownBank = (d1 <= d2) ? tR : tL;
-
-            // Hladký přechod břehů přítoku přímo do břehů hlavní řeky (žádná useknutá hrana!)
-            var blendN = Math.min(5, nT - 1);
-            for (var b = 0; b <= blendN; b++) {
-                var frac = b / blendN;
-                var idx = nT - 1 - (blendN - b);
-                tUpBank[idx] = {
-                    x: tUpBank[idx].x * (1 - frac) + pMainUp.x * frac,
-                    y: tUpBank[idx].y * (1 - frac) + pMainUp.y * frac
-                };
-                tDownBank[idx] = {
-                    x: tDownBank[idx].x * (1 - frac) + pMainDown.x * frac,
-                    y: tDownBank[idx].y * (1 - frac) + pMainDown.y * frac
-                };
-            }
-
-            // Sjednocený uzavřený polygon
-            var poly = [];
-            for (var i = 0; i < nM; i++) poly.push(mOppBank[i]);
-            for (var i = nM - 1; i >= kDown; i--) poly.push(mConfBank[i]);
-            for (var i = nT - 1; i >= 0; i--) poly.push(tDownBank[i]);
-            for (var i = 0; i < nT; i++) poly.push(tUpBank[i]);
-            for (var i = kUp; i >= 0; i--) poly.push(mConfBank[i]);
-
-            // Hladké inkoustové břehy bez přerušení
-            var bankOppArr = mOppBank.slice();
-            var bankUpArr = [];
-            for (var i = 0; i <= kUp; i++) bankUpArr.push(mConfBank[i]);
-            for (var i = nT - 1; i >= 0; i--) bankUpArr.push(tUpBank[i]);
-
-            var bankDownArr = [];
-            for (var i = 0; i < nT; i++) bankDownArr.push(tDownBank[i]);
-            for (var i = kDown; i < nM; i++) bankDownArr.push(mConfBank[i]);
-
-            return {
-                poly: poly,
-                bankOpp: bankOppArr,
-                bankUp: bankUpArr,
-                bankDown: bankDownArr
-            };
+        // PASS 1: Vlhká louka kolem všech toků
+        for (var i1 = 0; i1 < sampledRivers.length; i1++) {
+            out.push('    <path d="' + this.riverPolyPath(sampledRivers[i1].sides1.L, sampledRivers[i1].sides1.R) + '" fill="' + rTheme.meadowColor + '"' + bankBlurAttr + '/>');
         }
 
-        var activeConf = (confluences.length > 0) ? confluences[0] : null;
-
-        // PASS 1: Vlhká louka kolem toku (měkký rozptyl podle živlu)
-        if (activeConf) {
-            var net1 = buildUnifiedNetwork(activeConf, "sides1");
-            out.push('    <path d="' + this.riverClosedPolygonPath(net1.poly) + '" fill="' + rTheme.meadowColor + '"' + bankBlurAttr + '/>');
-        } else {
-            for (var i1 = 0; i1 < sampledRivers.length; i1++) {
-                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i1].sides1.L, sampledRivers[i1].sides1.R) + '" fill="' + rTheme.meadowColor + '"' + bankBlurAttr + '/>');
-            }
+        // PASS 2: Písčito-bahnitý / čedičový břeh všech toků (pod vodou)
+        for (var i2 = 0; i2 < sampledRivers.length; i2++) {
+            var srObj2 = sampledRivers[i2];
+            out.push('    <path d="' + this.riverPolyPath(srObj2.sides2.L, srObj2.sides2.R) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '"' + wobbleAttr + '/>');
         }
 
-        // PASS 2: Písčito-bahnitý / čedičový břeh (pod vodou)
-        if (activeConf) {
-            var net2 = buildUnifiedNetwork(activeConf, "sides2");
-            out.push('    <path d="' + this.riverClosedPolygonPath(net2.poly) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '"' + wobbleAttr + '/>');
-        } else {
-            for (var i2 = 0; i2 < sampledRivers.length; i2++) {
-                out.push('    <path d="' + this.riverPolyPath(sampledRivers[i2].sides2.L, sampledRivers[i2].sides2.R) + '" fill="' + rTheme.bankColor + '" opacity="' + rTheme.bankOpacity + '"' + wobbleAttr + '/>');
-            }
-        }
-
-        // PASS 3: Hladina vody (jeden souvislý polygon se živlovým gradientem a vlhkým okrajem břehu)
+        // PASS 2.5: Vlhký tmavý lem břehů PŘED hladinou vody (soutoky i křížení bez čar přes vodu)
         var wetRimColor = rTheme.wetBankColor || "rgba(68,52,36,0.42)";
-        var net3 = activeConf ? buildUnifiedNetwork(activeConf, "sides3") : null;
-        if (net3) {
-            out.push('    <path d="' + this.riverClosedPolygonPath(net3.poly) + '" fill="url(#prsMasterRiverWater)" stroke="' + wetRimColor + '" stroke-width="3.4" stroke-linejoin="round"' + wobbleAttr + '/>');
-        } else {
-            for (var i3 = 0; i3 < sampledRivers.length; i3++) {
-                var waterD = this.riverPolyPath(sampledRivers[i3].sides3.L, sampledRivers[i3].sides3.R);
-                out.push('    <path d="' + waterD + '" fill="url(#prsMasterRiverWater)" stroke="' + wetRimColor + '" stroke-width="3.4" stroke-linejoin="round"' + wobbleAttr + '/>');
-            }
+        for (var i2b = 0; i2b < sampledRivers.length; i2b++) {
+            var rimD = this.riverPolyPath(sampledRivers[i2b].sides3.L, sampledRivers[i2b].sides3.R);
+            out.push('    <path d="' + rimD + '" fill="none" stroke="' + wetRimColor + '" stroke-width="5.0" stroke-linejoin="round" stroke-linecap="round"' + wobbleAttr + '/>');
+        }
+
+        // PASS 3: Jednotná hladina vody BEZ vnějšího stroke (soutoky, delty i křížení splývají v jeden povrch)
+        for (var i3 = 0; i3 < sampledRivers.length; i3++) {
+            var waterD = this.riverPolyPath(sampledRivers[i3].sides3.L, sampledRivers[i3].sides3.R);
+            out.push('    <path d="' + waterD + '" fill="url(#prsMasterRiverWater)"' + wobbleAttr + '/>');
         }
 
         // PASS 4: Hlubší střed toku (hloubkové stínování koryta)
@@ -551,62 +544,48 @@
             out.push('    <path d="' + this.riverPolyPath(sampledRivers[i4].sides4.L, sampledRivers[i4].sides4.R) + '" fill="' + rTheme.deepWaterColor + '"' + softAttr + '/>');
         }
 
-        // PASS 4.5: Zelené ostrůvky v toku řeky
+        // PASS 4.5: Zelené ostrůvky v toku řeky (mimo soutoky a křížení)
         out.push(this.renderRiverIslandsHTML(sampledRivers, board, rTheme, activeTheme, gQuality));
 
-        // PASS 4.6: Jezírka v meandrech (mrtvá ramena)
+        // PASS 4.6: Jezírka v meandrech (mrtvá ramena mimo koryta ostatních řek)
         out.push(this.renderOxbowLakesHTML(sampledRivers, board, rTheme, activeTheme, gQuality));
 
-        // PASS 4.7: Ústí v deltě (rozvětvená delta a naplavené ostrovy)
+        // PASS 4.7: Ústí v deltě (řešeno čistě větvením v board.rivers)
         out.push(this.renderRiverDeltaHTML(sampledRivers, board, rTheme, activeTheme, gQuality));
 
-        // PASS 5: Inkoustové břehy řeky s přirozeným soutokovým rozvětvením
-        if (net3) {
-            out.push('    <path d="' + this.riverBankPath(net3.bankOpp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
-            out.push('    <path d="' + this.riverBankPath(net3.bankUp) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
-            out.push('    <path d="' + this.riverBankPath(net3.bankDown) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
-        } else {
-            for (var i5 = 0; i5 < sampledRivers.length; i5++) {
-                var rivObj = sampledRivers[i5];
-                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.L) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
-                out.push('    <path d="' + this.riverBankPath(rivObj.sides3.R) + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
+        // PASS 5: Inkoustové břehy oříznuté v místech soutoků a křížení
+        for (var i5 = 0; i5 < sampledRivers.length; i5++) {
+            var rivObj = sampledRivers[i5];
+            var leftSegs = buildClippedBankPaths(rivObj.sides3.L, i5, 0.0);
+            for (var ls = 0; ls < leftSegs.length; ls++) {
+                out.push('    <path d="' + leftSegs[ls] + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
+            }
+            var rightSegs = buildClippedBankPaths(rivObj.sides3.R, i5, 0.0);
+            for (var rsg = 0; rsg < rightSegs.length; rsg++) {
+                out.push('    <path d="' + rightSegs[rsg] + '" fill="none" stroke="' + rTheme.bankInkColor + '" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round"' + wobbleAttr + '/>');
             }
         }
 
-        // PASS 5.5: Soutokové náplavky a víry na soutocích přítoků
-        var ink5 = rTheme.bankInkColor || "rgba(45,26,14,0.92)";
-        for (var ci = 0; ci < confluences.length; ci++) {
-            var cnf = confluences[ci];
-            var mRiv = sampledRivers[cnf.mainIdx];
-            var tRiv = sampledRivers[cnf.tribIdx];
-            var cPoint = mRiv.pts[cnf.mainConfIdx];
-            var tEnd = tRiv.pts[tRiv.n - 1];
-            var tBeforeMouth = tRiv.pts[Math.max(0, tRiv.n - 4)];
-            var sAngle = Math.atan2(tEnd.y - tBeforeMouth.y, tEnd.x - tBeforeMouth.x) * 180 / Math.PI;
-
-            out.push('    <g class="river-confluence-detail" transform="translate(' + cnf.mouthX.toFixed(1) + ',' + cnf.mouthY.toFixed(1) + ')" pointer-events="none">');
-            var sSide = (cnf.confSide === "L") ? -1 : 1;
-            var spX = (cPoint.nx * sSide * 16).toFixed(1);
-            var spY = (cPoint.ny * sSide * 16).toFixed(1);
-            out.push('      <ellipse cx="' + spX + '" cy="' + spY + '" rx="12" ry="7" transform="rotate(' + (sAngle + 20) + ' ' + spX + ' ' + spY + ')" fill="' + rTheme.bankColor + '" stroke="' + ink5 + '" stroke-width="1.0"' + wobbleAttr + '/>');
-            out.push('      <circle cx="' + (parseFloat(spX) + 2).toFixed(1) + '" cy="' + (parseFloat(spY) - 1).toFixed(1) + '" r="2.2" fill="#8d877d"/>');
-            out.push('      <circle cx="' + (parseFloat(spX) - 3).toFixed(1) + '" cy="' + (parseFloat(spY) + 1).toFixed(1) + '" r="1.6" fill="#a8a29e"/>');
-            out.push('      <path d="M -7 -3 Q 0 -7 7 -4 Q 10 2 4 7" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.8)") + '" stroke-width="1.1" stroke-linecap="round" opacity="0.85"/>');
+        // PASS 5.5: Jemné hladinové čeření na soutocích a kříženích (bez štěrkových oválů ve vodě)
+        for (var ji2 = 0; ji2 < junctions.length; ji2++) {
+            var jPt = junctions[ji2];
+            out.push('    <g class="river-confluence-detail" transform="translate(' + jPt.x.toFixed(1) + ',' + jPt.y.toFixed(1) + ')" pointer-events="none">');
+            out.push('      <path d="M -9 -3 Q -1 -8 8 -3 Q 11 3 3 7" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.72)") + '" stroke-width="1.05" stroke-linecap="round" opacity="0.78"/>');
+            out.push('      <path d="M -5 5 Q 2 8 9 3" fill="none" stroke="' + (rTheme.streamColor2 || "rgba(255,255,255,0.45)") + '" stroke-width="0.85" stroke-linecap="round" opacity="0.70"/>');
             out.push('    </g>');
         }
 
-        // PASS 6: Organický proud vody (proudnice / meandry), pramen, pobřežní vegetace
+        // PASS 6: Organický proud vody (proudnice), pramen, pobřežní vegetace
         function hashVal(seed, k) { var v = Math.sin((seed + k) * 91.345) * 23421.631; return v - Math.floor(v); }
 
         for (var i6 = 0; i6 < sampledRivers.length; i6++) {
             var rData = sampledRivers[i6];
             var pts6 = rData.pts, n6 = rData.n, first6 = pts6[0], rw6 = rData.rw;
 
-            // Plynulé podélné proudnice (streamlines) podél osy toku
             var streamPts1 = [], streamPts2 = [];
             for (var stIdx = 2; stIdx < n6 - 2; stIdx++) {
                 var pst = pts6[stIdx];
-                if (rData.isTributary && pst.t > 0.88) continue; // v ústí se proud vlije do hlavní řeky
+                if (rData.endsInRiver && pst.t > 0.88) continue;
                 var wOff = Math.sin(pst.s * 0.05 + rData.p1) * rData.halfW[stIdx] * 0.35;
                 streamPts1.push({
                     x: pst.x + pst.nx * (wOff - 2.5),
@@ -627,8 +606,8 @@
                 out.push('    <path class="prs-river-stream prs-river-stream-2" d="' + this.riverBankPath(streamPts2) + '" fill="none" stroke="' + rTheme.streamColor2 + '" stroke-width="0.9" stroke-linecap="round" stroke-dasharray="24,35,48,28" pointer-events="none"/>');
             }
 
-            // Horský pramen (pouze pokud začíná uvnitř mapy a není za rámem)
-            if (first6.y > 40 && first6.x > 40 && first6.x < 1360) {
+            // Horský pramen (pouze pokud nezačíná v jiné řece a není mimo rám)
+            if (!rData.startsInRiver && first6.y > 40 && first6.x > 40 && first6.x < 1360) {
                 out.push('    <ellipse cx="' + first6.x.toFixed(1) + '" cy="' + (first6.y + 2).toFixed(1) + '" rx="' + (rw6 * 0.72).toFixed(1) + '" ry="' + (rw6 * 0.50).toFixed(1) + '" fill="' + rTheme.springColor + '" stroke="' + rTheme.bankInkColor + '" stroke-width="1"' + wobbleAttr + '/>');
                 var spr = [[-1.0, -0.2, 3.6], [0.9, -0.7, 3.0], [0.2, 0.9, 2.6], [-0.5, 0.8, 2.2]];
                 for (var sp = 0; sp < spr.length; sp++) {
@@ -639,46 +618,48 @@
             }
 
             if (gQuality !== "low") {
-            // Pobřežní vegetace a kamínky
-            var nextVeg = 18, side = 1;
-            for (var vIdx = 0; vIdx < n6; vIdx++) {
-                var pv = pts6[vIdx];
-                if (pv.s < nextVeg || pv.t > 0.96) continue;
-                nextVeg = pv.s + 26 + hashVal(rData.seedBase, vIdx + 100) * 30;
-                side = -side;
-                var dist = rData.halfW[vIdx] + 8 + hashVal(rData.seedBase, vIdx + 200) * 10;
-                var vx = pv.x + pv.nx * dist * side, vy = pv.y + pv.ny * dist * side;
-                if (vx < 34 || vx > 1366 || vy < 34 || vy > 826) continue;
-                if (this.riverNearBridge(pv, bridges, 38)) continue;
-                var clash = false;
-                for (var q = 0; q < nodes.length; q++) {
-                    var ddx = nodes[q].x - vx, ddy = nodes[q].y - vy;
-                    if (ddx * ddx + ddy * ddy < 34 * 34) { clash = true; break; }
+                // Pobřežní vegetace a kamínky (mimo soutoky a křížení)
+                var nextVeg = 18, side = 1;
+                for (var vIdx = 0; vIdx < n6; vIdx++) {
+                    var pv = pts6[vIdx];
+                    if (pv.s < nextVeg || pv.t > 0.96) continue;
+                    nextVeg = pv.s + 26 + hashVal(rData.seedBase, vIdx + 100) * 30;
+                    side = -side;
+                    var dist = rData.halfW[vIdx] + 8 + hashVal(rData.seedBase, vIdx + 200) * 10;
+                    var vx = pv.x + pv.nx * dist * side, vy = pv.y + pv.ny * dist * side;
+                    if (vx < 34 || vx > 1366 || vy < 34 || vy > 826) continue;
+                    if (isPointInOtherRiverWater(vx, vy, i6, 8)) continue;
+                    if (this.riverNearBridge(pv, bridges, 38)) continue;
+                    var clash = false;
+                    for (var q = 0; q < nodes.length; q++) {
+                        var ddx = nodes[q].x - vx, ddy = nodes[q].y - vy;
+                        if (ddx * ddx + ddy * ddy < 34 * 34) { clash = true; break; }
+                    }
+                    if (clash) continue;
+                    out.push(this.riverVegetationSVG(vx, vy, hashVal(rData.seedBase, vIdx + 300), activeTheme));
                 }
-                if (clash) continue;
-                out.push(this.riverVegetationSVG(vx, vy, hashVal(rData.seedBase, vIdx + 300), activeTheme));
-            }
 
-            // Lekníny a jemné hladinové detaily u klidnějších břehů
-            var nextDetail = 52, dSide = -1;
-            for (var dIdx = 2; dIdx < n6 - 2; dIdx++) {
-                var pd = pts6[dIdx];
-                if (pd.s < nextDetail || pd.t > 0.90) continue;
-                nextDetail = pd.s + 75 + hashVal(rData.seedBase, dIdx + 400) * 40;
-                dSide = -dSide;
-                if (rData.halfW[dIdx] < 10) continue;
-                var dOff = rData.halfW[dIdx] * 0.52;
-                var wx = pd.x + pd.nx * dOff * dSide, wy = pd.y + pd.ny * dOff * dSide;
-                if (wx < 34 || wx > 1366 || wy < 34 || wy > 826) continue;
-                if (this.riverNearBridge(pd, bridges, 42)) continue;
-                var wClash = false;
-                for (var wq = 0; wq < nodes.length; wq++) {
-                    var wdx = nodes[wq].x - wx, wdy = nodes[wq].y - wy;
-                    if (wdx * wdx + wdy * wdy < 32 * 32) { wClash = true; break; }
+                // Lekníny a jemné hladinové detaily u klidnějších břehů
+                var nextDetail = 52, dSide = -1;
+                for (var dIdx = 2; dIdx < n6 - 2; dIdx++) {
+                    var pd = pts6[dIdx];
+                    if (pd.s < nextDetail || pd.t > 0.90) continue;
+                    nextDetail = pd.s + 75 + hashVal(rData.seedBase, dIdx + 400) * 40;
+                    dSide = -dSide;
+                    if (rData.halfW[dIdx] < 10) continue;
+                    var dOff = rData.halfW[dIdx] * 0.52;
+                    var wx = pd.x + pd.nx * dOff * dSide, wy = pd.y + pd.ny * dOff * dSide;
+                    if (wx < 34 || wx > 1366 || wy < 34 || wy > 826) continue;
+                    if (isPointInOtherRiverWater(wx, wy, i6, 4)) continue;
+                    if (this.riverNearBridge(pd, bridges, 42)) continue;
+                    var wClash = false;
+                    for (var wq = 0; wq < nodes.length; wq++) {
+                        var wdx = nodes[wq].x - wx, wdy = nodes[wq].y - wy;
+                        if (wdx * wdx + wdy * wdy < 32 * 32) { wClash = true; break; }
+                    }
+                    if (wClash) continue;
+                    out.push(this.riverWaterDetailSVG(wx, wy, hashVal(rData.seedBase, dIdx + 500), activeTheme));
                 }
-                if (wClash) continue;
-                out.push(this.riverWaterDetailSVG(wx, wy, hashVal(rData.seedBase, dIdx + 500), activeTheme));
-            }
             }
         }
         out.push('  </g>');
@@ -728,6 +709,17 @@
                     if (bd < minBridgeDist) minBridgeDist = bd;
                 }
                 if (minBridgeDist < 42) continue;
+                var minOtherRivD = 9999;
+                for (var osr = 0; osr < sampledRivers.length; osr++) {
+                    if (osr === sr) continue;
+                    var oPts = sampledRivers[osr].pts;
+                    for (var op = 0; op < oPts.length; op += 2) {
+                        var odx = oPts[op].x - pt.x, ody = oPts[op].y - pt.y;
+                        var od = Math.sqrt(odx * odx + ody * ody);
+                        if (od < minOtherRivD) minOtherRivD = od;
+                    }
+                }
+                if (minOtherRivD < 48) continue;
 
                 candidates.push({
                     idx: idx,
@@ -865,6 +857,15 @@
                                 if (rd < minRivD) minRivD = rd;
                             }
                             if (minRivD < 34 || minRivD > 92) continue;
+                            var nearOtherRiv = false;
+                            for (var oos = 0; oos < sampledRivers.length && !nearOtherRiv; oos++) {
+                                if (oos === sr) continue;
+                                var ooPts = sampledRivers[oos].pts;
+                                for (var orp = 0; orp < ooPts.length; orp += 2) {
+                                    if (Math.hypot(ooPts[orp].x - cx, ooPts[orp].y - cy) < 38) { nearOtherRiv = true; break; }
+                                }
+                            }
+                            if (nearOtherRiv) continue;
 
                             candidates.push({
                                 cx: cx,
@@ -964,96 +965,9 @@
     },
 
     
-    renderRiverDeltaHTML: function (sampledRivers, board, rTheme, activeTheme, gQuality) {
-        if (!sampledRivers || sampledRivers.length === 0) return "";
-        if (!gQuality) gQuality = (typeof this.getGraphicsQuality === "function") ? this.getGraphicsQuality() : "high";
-        var bankBlurAttr = (gQuality === "high") ? ' filter="url(#riverBankBlur)"' : '';
-        var wobbleAttr = (gQuality === "high") ? ' filter="url(#riverWobble)"' : '';
-        var out = [];
-        var ink = rTheme.bankInkColor || "rgba(45,26,14,0.92)";
-
-        for (var sr = 0; sr < sampledRivers.length; sr++) {
-            var rData = sampledRivers[sr];
-            if (rData.isTributary) continue;
-            var pts = rData.pts, n = pts.length;
-            if (n < 20) continue;
-
-            var lastPt = pts[n - 1];
-            var isDeltaZone = (lastPt.y >= 780 || lastPt.x <= 70 || lastPt.x >= 1330 || (board && board.riverMode === "delta"));
-            if (!isDeltaZone) continue;
-
-            var forkIdx = Math.max(0, Math.floor(n * 0.80));
-            var forkPt = pts[forkIdx];
-            var fHw = rData.halfW[forkIdx];
-
-            var leftBranchEnd = {
-                x: lastPt.x - (rData.rw * 1.8 + 26),
-                y: Math.min(895, lastPt.y + 25)
-            };
-            var leftMid = {
-                x: (forkPt.x + leftBranchEnd.x) / 2 - 12,
-                y: (forkPt.y + leftBranchEnd.y) / 2
-            };
-
-            var rightBranchEnd = {
-                x: lastPt.x + (rData.rw * 1.8 + 26),
-                y: Math.min(895, lastPt.y + 25)
-            };
-            var rightMid = {
-                x: (forkPt.x + rightBranchEnd.x) / 2 + 12,
-                y: (forkPt.y + rightBranchEnd.y) / 2
-            };
-
-            var dLeft = "M " + forkPt.x.toFixed(1) + " " + forkPt.y.toFixed(1) +
-                        " Q " + leftMid.x.toFixed(1) + " " + leftMid.y.toFixed(1) + " " + leftBranchEnd.x.toFixed(1) + " " + leftBranchEnd.y.toFixed(1);
-            var dRight = "M " + forkPt.x.toFixed(1) + " " + forkPt.y.toFixed(1) +
-                         " Q " + rightMid.x.toFixed(1) + " " + rightMid.y.toFixed(1) + " " + rightBranchEnd.x.toFixed(1) + " " + rightBranchEnd.y.toFixed(1);
-
-            out.push('    <g class="river-delta-system" pointer-events="none">');
-
-            var deltaFanPoly = [
-                { x: forkPt.x - fHw * 1.6, y: forkPt.y },
-                { x: leftBranchEnd.x - 28, y: leftBranchEnd.y },
-                { x: rightBranchEnd.x + 28, y: rightBranchEnd.y },
-                { x: forkPt.x + fHw * 1.6, y: forkPt.y }
-            ];
-            out.push('      <polygon points="' + deltaFanPoly.map(function(p){ return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ') + '" fill="' + rTheme.meadowColor + '"' + bankBlurAttr + ' opacity="0.75"/>');
-
-            out.push('      <path d="' + dLeft + '" fill="none" stroke="' + rTheme.bankColor + '" stroke-width="' + (rData.rw * 0.85).toFixed(1) + '" stroke-linecap="round" opacity="' + rTheme.bankOpacity + '"' + wobbleAttr + '/>');
-            out.push('      <path d="' + dRight + '" fill="none" stroke="' + rTheme.bankColor + '" stroke-width="' + (rData.rw * 0.85).toFixed(1) + '" stroke-linecap="round" opacity="' + rTheme.bankOpacity + '"' + wobbleAttr + '/>');
-
-            out.push('      <path d="' + dLeft + '" fill="none" stroke="url(#prsMasterRiverWater)" stroke-width="' + (rData.rw * 0.62).toFixed(1) + '" stroke-linecap="round"' + wobbleAttr + '/>');
-            out.push('      <path d="' + dRight + '" fill="none" stroke="url(#prsMasterRiverWater)" stroke-width="' + (rData.rw * 0.62).toFixed(1) + '" stroke-linecap="round"' + wobbleAttr + '/>');
-
-            out.push('      <path d="' + dLeft + '" fill="none" stroke="' + ink + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="14,2,26,4"/>');
-            out.push('      <path d="' + dRight + '" fill="none" stroke="' + ink + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="14,2,26,4"/>');
-
-            out.push('      <path d="' + dLeft + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.7)") + '" stroke-width="1.0" stroke-linecap="round" stroke-dasharray="24,18,36,22"/>');
-            out.push('      <path d="' + dRight + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.7)") + '" stroke-width="1.0" stroke-linecap="round" stroke-dasharray="20,16,40,24"/>');
-
-            var island1X = (forkPt.x + leftBranchEnd.x + lastPt.x) / 3;
-            var island1Y = (forkPt.y + leftBranchEnd.y + lastPt.y) / 3;
-            var island2X = (forkPt.x + rightBranchEnd.x + lastPt.x) / 3;
-            var island2Y = (forkPt.y + rightBranchEnd.y + lastPt.y) / 3;
-
-            out.push('      <ellipse cx="' + island1X.toFixed(1) + '" cy="' + island1Y.toFixed(1) + '" rx="18" ry="9.5" fill="' + rTheme.bankColor + '" stroke="' + ink + '" stroke-width="1.1"' + wobbleAttr + '/>');
-            out.push('      <ellipse cx="' + (island1X - 1).toFixed(1) + '" cy="' + island1Y.toFixed(1) + '" rx="13" ry="6.5" fill="' + (activeTheme === "fire" ? "#451a03" : "#5d8438") + '" opacity="0.9"/>');
-            out.push('      <path d="M ' + (island1X - 6).toFixed(1) + ' ' + (island1Y - 2).toFixed(1) + ' L ' + (island1X - 7).toFixed(1) + ' ' + (island1Y - 9).toFixed(1) + ' M ' + (island1X - 2).toFixed(1) + ' ' + island1Y.toFixed(1) + ' L ' + (island1X - 2).toFixed(1) + ' ' + (island1Y - 8).toFixed(1) + '" stroke="#606c38" stroke-width="1.3" stroke-linecap="round"/>');
-
-            out.push('      <ellipse cx="' + island2X.toFixed(1) + '" cy="' + island2Y.toFixed(1) + '" rx="16" ry="8.5" fill="' + rTheme.bankColor + '" stroke="' + ink + '" stroke-width="1.1"' + wobbleAttr + '/>');
-            out.push('      <ellipse cx="' + island2X.toFixed(1) + '" cy="' + island2Y.toFixed(1) + '" rx="11" ry="5.8" fill="' + (activeTheme === "fire" ? "#451a03" : "#5d8438") + '" opacity="0.9"/>');
-
-            var surfY1 = Math.min(880, lastPt.y + 12);
-            var surfY2 = Math.min(890, lastPt.y + 22);
-            out.push('      <path class="prs-river-stream prs-river-stream-2" d="M ' + (leftBranchEnd.x - 22).toFixed(1) + ' ' + surfY1 + ' Q ' + lastPt.x.toFixed(1) + ' ' + (surfY1 - 4) + ' ' + (rightBranchEnd.x + 22).toFixed(1) + ' ' + surfY1 + '" fill="none" stroke="' + (rTheme.streamColor1 || "rgba(255,255,255,0.75)") + '" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="18,12,32,16"/>');
-            out.push('      <path class="prs-river-stream prs-river-stream-2" d="M ' + (leftBranchEnd.x - 30).toFixed(1) + ' ' + surfY2 + ' Q ' + lastPt.x.toFixed(1) + ' ' + (surfY2 - 3) + ' ' + (rightBranchEnd.x + 30).toFixed(1) + ' ' + surfY2 + '" fill="none" stroke="' + (rTheme.streamColor2 || "rgba(255,255,255,0.5)") + '" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="24,14,40,18"/>');
-
-            out.push('      <line x1="' + island1X.toFixed(1) + '" y1="' + (island1Y - 2).toFixed(1) + '" x2="' + island1X.toFixed(1) + '" y2="' + (island1Y - 14).toFixed(1) + '" stroke="#78350f" stroke-width="1.6" stroke-linecap="round"/>');
-            out.push('      <polygon points="' + island1X.toFixed(1) + ',' + (island1Y - 14).toFixed(1) + ' ' + (island1X + 4).toFixed(1) + ',' + (island1Y - 12).toFixed(1) + ' ' + island1X.toFixed(1) + ',' + (island1Y - 10).toFixed(1) + '" fill="#ea580c"/>');
-
-            out.push('    </g>');
-        }
-        return out.join("\n");
+    renderRiverDeltaHTML: function () {
+        // Plynulý tok bez překrývání falešné delty; skutečná delta používá samostatná ramena v board.rivers.
+        return "";
     },
 
     

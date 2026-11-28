@@ -148,6 +148,26 @@
             }
         }
 
+        var customZonesMed = board.biomeZones || [];
+        for (var czm = 0; czm < customZonesMed.length; czm++) {
+            var bzm = customZonesMed[czm];
+            if (!bzm || !bzm.biome) continue;
+            var bRadM = Math.max(20, Math.round(bzm.r || 90));
+            if (bzm.biome === "forest" && allowed.forest_floor) {
+                biomeOut.push('      <circle cx="' + bzm.x + '" cy="' + bzm.y + '" r="' + bRadM + '" fill="url(#terrainPat_forest_floor)"/>');
+            } else if (bzm.biome === "rocky" && allowed.rock) {
+                biomeOut.push('      <circle cx="' + bzm.x + '" cy="' + bzm.y + '" r="' + bRadM + '" fill="url(#terrainPat_rock)"/>');
+            } else if (bzm.biome === "meadow" && allowed.meadow) {
+                biomeOut.push('      <circle cx="' + bzm.x + '" cy="' + bzm.y + '" r="' + bRadM + '" fill="url(#terrainPat_meadow)"/>');
+            } else if (bzm.biome === "farmland") {
+                if (allowed.meadow) biomeOut.push('      <circle cx="' + bzm.x + '" cy="' + bzm.y + '" r="' + bRadM + '" fill="url(#terrainPat_meadow)"/>');
+                if (allowed.dirt) biomeOut.push('      <circle cx="' + bzm.x + '" cy="' + bzm.y + '" r="' + Math.round(bRadM * 0.65) + '" fill="url(#terrainPat_dirt)"/>');
+            } else if (bzm.biome === "wetland") {
+                if (allowed.forest_floor) biomeOut.push('      <circle cx="' + bzm.x + '" cy="' + bzm.y + '" r="' + Math.round(bRadM * 0.85) + '" fill="url(#terrainPat_forest_floor)"/>');
+                if (allowed.meadow) biomeOut.push('      <circle cx="' + bzm.x + '" cy="' + bzm.y + '" r="' + Math.round(bRadM * 0.55) + '" fill="url(#terrainPat_meadow)"/>');
+            }
+        }
+
         var landmarks = board.landmarks || [];
         for (var l = 0; l < landmarks.length; l++) {
             var lm = landmarks[l];
@@ -194,6 +214,26 @@
                 shapes.rock.push('<path d="' + bm.path + '" fill="#ffffff"/>');
             } else if (id.indexOf("meadow") !== -1) {
                 shapes.meadow.push('<path d="' + bm.path + '" fill="#ffffff"/>');
+            }
+        }
+
+        var customZones = board.biomeZones || [];
+        for (var cz = 0; cz < customZones.length; cz++) {
+            var bz = customZones[cz];
+            if (!bz || !bz.biome) continue;
+            var bRad = Math.max(20, Math.round(bz.r || 90));
+            if (bz.biome === "forest") {
+                shapes.forest_floor.push('<circle cx="' + bz.x + '" cy="' + bz.y + '" r="' + bRad + '" fill="#ffffff"/>');
+            } else if (bz.biome === "rocky") {
+                shapes.rock.push('<circle cx="' + bz.x + '" cy="' + bz.y + '" r="' + bRad + '" fill="#ffffff"/>');
+            } else if (bz.biome === "meadow") {
+                shapes.meadow.push('<circle cx="' + bz.x + '" cy="' + bz.y + '" r="' + bRad + '" fill="#ffffff"/>');
+            } else if (bz.biome === "farmland") {
+                shapes.meadow.push('<circle cx="' + bz.x + '" cy="' + bz.y + '" r="' + bRad + '" fill="#ffffff"/>');
+                shapes.dirt.push('<circle cx="' + bz.x + '" cy="' + bz.y + '" r="' + Math.round(bRad * 0.65) + '" fill="#ffffff"/>');
+            } else if (bz.biome === "wetland") {
+                shapes.forest_floor.push('<circle cx="' + bz.x + '" cy="' + bz.y + '" r="' + Math.round(bRad * 0.9) + '" fill="#ffffff"/>');
+                shapes.meadow.push('<circle cx="' + bz.x + '" cy="' + bz.y + '" r="' + Math.round(bRad * 0.55) + '" fill="#ffffff"/>');
             }
         }
 
