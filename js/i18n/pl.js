@@ -3290,8 +3290,8 @@ window.PRS_I18N.pl = {
   },
   "decorations_gallery": {
     "title": "🌲 Atlas dekoracji i krajobrazu królestwa",
-    "subtitle": "42 unikalne izometryczne dekoracje i budowle ożywiające królestwo, zakotwiczone przy polach i rozmieszczone w terenie.",
-    "filter_all": "Wszystkie (42)",
+    "subtitle": "113 unikalnych izometrycznych dekoracji i budowli ożywiających królestwo, zakotwiczonych przy polach i rozmieszczonych w terenie.",
+    "filter_all": "Wszystkie (113)",
     "filter_vegetation": "🌲 Lasy & Drzewa",
     "filter_settlement": "🌾 Osady & Wieś",
     "filter_water": "🌊 Woda & Moczary",

@@ -3293,8 +3293,8 @@ window.PRS_I18N["cs"] = {
   },
   "decorations_gallery": {
     "title": "🌲 Atlas dekorací a herní krajiny",
-    "subtitle": "42 unikátních izometrických dekorací a staveb oživujících království, kotvených k políčkům a rozptýlených v terénu.",
-    "filter_all": "Všechny (42)",
+    "subtitle": "113 unikátních izometrických dekorací a staveb oživujících království, kotvených k políčkům a rozptýlených v terénu.",
+    "filter_all": "Všechny (113)",
     "filter_vegetation": "🌲 Lesy & Stromy",
     "filter_settlement": "🌾 Sídla & Venkov",
     "filter_water": "🌊 Voda & Močály",

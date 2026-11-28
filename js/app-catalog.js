@@ -678,6 +678,20 @@
 
         var catalog = window.PRS_DECOR_CATALOG;
         var filter = this.decorationsActiveCategory || "all";
+        var totalCount = Object.keys(catalog).length;
+
+        var subtabBtn = document.getElementById("rules-subtab-btn-decorations");
+        if (subtabBtn && subtabBtn.textContent) {
+            subtabBtn.textContent = subtabBtn.textContent.replace(/\(\d+\)/, "(" + totalCount + ")");
+        }
+        var filterAllBtn = document.querySelector('.decor-filter-btn[data-cat="all"]');
+        if (filterAllBtn && filterAllBtn.textContent) {
+            filterAllBtn.textContent = filterAllBtn.textContent.replace(/\(\d+\)/, "(" + totalCount + ")");
+        }
+        var subtitleEl = document.querySelector('[data-i18n="decorations_gallery.subtitle"]');
+        if (subtitleEl && subtitleEl.textContent) {
+            subtitleEl.textContent = subtitleEl.textContent.replace(/^(\s*)\d+/, "$1" + totalCount);
+        }
 
         var tCat = window.PRS_I18n ? function (k, p, d) { return window.PRS_I18n.t(k, p, d); } : function (k, p, d) { return d; };
         var categoryLabels = {
@@ -702,6 +716,10 @@
             quest_lair: "#f87171"
         };
 
+        var self = this;
+        var escJsAttr = function (s) {
+            return self.escapeHtml(s).replace(/'/g, "\\'");
+        };
         var defaultDecorDesc = tCat("ui.catalog.decor_default_desc", null, "Malebný prvek oživující herní plochu království.");
         var clearanceLabel = tCat("ui.catalog.decor_clearance_label", null, "🏷️ Bezpečná zóna (Clearance):");
         var flipBtnText = tCat("ui.catalog.flip_mirror", null, "🔄 Otočit zrcadlení");
@@ -732,7 +750,7 @@
             var desc = (trDecorDesc && trDecorDesc !== ("decorations." + k + ".desc")) ? trDecorDesc : (d.desc || defaultDecorDesc);
 
             html.push('<div class="decor-card" style="background:var(--card-bg, #1a1625); border:1px solid rgba(212,175,55,0.25); border-radius:8px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 4px 14px rgba(0,0,0,0.4);">');
-            html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + d.img + '\', \'' + this.escapeHtml(dName) + '\', \'' + this.escapeHtml(desc) + '\')" title="' + zoomTitle + '" style="position:relative; background:radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.5) 100%); padding:1rem 0.5rem; display:flex; justify-content:center; align-items:center; min-height:160px; cursor:pointer;">');
+            html.push('  <div class="card-media-header" onclick="PRS_App.openImageModal(\'' + escJsAttr(d.img) + '\', \'' + escJsAttr(dName) + '\', \'' + escJsAttr(desc) + '\')" title="' + zoomTitle + '" style="position:relative; background:radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.5) 100%); padding:1rem 0.5rem; display:flex; justify-content:center; align-items:center; min-height:160px; cursor:pointer;">');
             html.push('    <img src="' + d.img + '" alt="' + this.escapeHtml(dName) + '" class="card-media-img" loading="lazy" style="max-height:130px; max-width:85%; object-fit:contain; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.6)); transition:transform 0.2s;" />');
             html.push('    <span class="card-media-badge-left" style="position:absolute; top:8px; left:8px; font-size:0.7rem; font-weight:bold; border:1px solid ' + col + '; color:' + col + '; background:rgba(0,0,0,0.75); padding:2px 6px; border-radius:4px;">' + catName + '</span>');
             html.push('    <span class="card-media-badge-right" style="position:absolute; top:8px; right:8px; font-size:0.7rem; font-weight:bold; border:1px solid rgba(255,255,255,0.2); color:#cbd5e1; background:rgba(0,0,0,0.75); padding:2px 6px; border-radius:4px;">📐 ' + d.w + '×' + d.h + ' px</span>');

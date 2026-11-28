@@ -3293,8 +3293,8 @@ window.PRS_I18N["en"] = {
   },
   "decorations_gallery": {
     "title": "🌲 Atlas of Decorations & Realm Landscape",
-    "subtitle": "42 unique isometric decorations and buildings bringing the kingdom to life, anchored to tiles and scattered across the terrain.",
-    "filter_all": "All (42)",
+    "subtitle": "113 unique isometric decorations and buildings bringing the kingdom to life, anchored to tiles and scattered across the terrain.",
+    "filter_all": "All (113)",
     "filter_vegetation": "🌲 Forests & Trees",
     "filter_settlement": "🌾 Settlements & Countryside",
     "filter_water": "🌊 Water & Swamps",

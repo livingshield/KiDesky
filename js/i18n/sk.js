@@ -3290,8 +3290,8 @@ window.PRS_I18N.sk = {
   },
   "decorations_gallery": {
     "title": "🌲 Atlas dekorácií a hernej krajiny",
-    "subtitle": "42 unikátnych izometrických dekorácií a stavieb oživujúcich kráľovstvo, kotvených k políčkam a rozptýlených v teréne.",
-    "filter_all": "Všetky (42)",
+    "subtitle": "113 unikátnych izometrických dekorácií a stavieb oživujúcich kráľovstvo, kotvených k políčkam a rozptýlených v teréne.",
+    "filter_all": "Všetky (113)",
     "filter_vegetation": "🌲 Lesy & Stromy",
     "filter_settlement": "🌾 Sídla & Vidiek",
     "filter_water": "🌊 Voda & Močály",
