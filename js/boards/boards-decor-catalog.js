@@ -718,6 +718,902 @@ window.PRS_DECOR_CATALOG = {
         w: 84, h: 56, clearance: 38,
         img: "assets/decorations/swamp_hydra.webp",
         canFlip: true
+    },
+
+    reed_bed: {
+        id: "reed_bed",
+        name: "Rákosí u vody",
+        icon: "🌾",
+        desc: "Hustý porost rákosí a orobince, v němž se mihotají vážky a zpívají rákosníci.",
+        category: "water",
+        w: 48, h: 52, clearance: 18,
+        img: "assets/decorations/reed_bed.webp",
+        footFade: 0,
+        biomes: ["wetland","meadow"], layer: "standing", anchorY: 0.38, roadPolicy: "edge",
+        maxPerMap: null, overlapGroup: "canopy", weight: 1.2, scatter: 1.4,
+        canFlip: true
+    },
+
+    lily_pond: {
+        id: "lily_pond",
+        name: "Leknínové jezírko",
+        icon: "🪷",
+        desc: "Klidná hladina plná bílých a růžových leknínů, na nichž posedávají zelené žáby.",
+        category: "water",
+        w: 92, h: 57, clearance: 34,
+        img: "assets/decorations/lily_pond.webp",
+        footFade: 0,
+        biomes: ["wetland","meadow"], layer: "ground", anchorY: 0.15, roadPolicy: "avoid",
+        maxPerMap: 3, overlapGroup: "exclusive", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    mangrove_roots: {
+        id: "mangrove_roots",
+        name: "Bahenní strom na kořenech",
+        icon: "🌳",
+        desc: "Pokřivený strom stojící na vzdušných kořenech v kalné vodě, domov žab a vodních hadů.",
+        category: "water",
+        w: 48, h: 72, clearance: 28,
+        img: "assets/decorations/mangrove_roots.webp",
+        footFade: 0,
+        biomes: ["wetland"], layer: "standing", anchorY: 0.45, roadPolicy: "avoid",
+        maxPerMap: 3, overlapGroup: "canopy", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    willow_weeping: {
+        id: "willow_weeping",
+        name: "Smuteční vrba",
+        icon: "🌿",
+        desc: "Vrba se splývavými větvemi, které se jemně dotýkají vody a šeptají staré pohádky.",
+        category: "water",
+        w: 70, h: 69, clearance: 26,
+        img: "assets/decorations/willow_weeping.webp",
+        footFade: 0,
+        biomes: ["wetland","meadow"], layer: "standing", anchorY: 0.45, roadPolicy: "edge",
+        maxPerMap: 4, overlapGroup: "canopy", weight: 1, scatter: 1.1,
+        canFlip: true
+    },
+
+    stepping_stones: {
+        id: "stepping_stones",
+        name: "Brod z kamenů",
+        icon: "🪨",
+        desc: "Řada plochých kamenů, po nichž lze suchou nohou přeskákat přes mělký potok.",
+        category: "water",
+        w: 70, h: 55, clearance: 24,
+        img: "assets/decorations/stepping_stones.webp",
+        footFade: 0,
+        biomes: ["wetland"], layer: "ground", anchorY: 0.15, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.8, scatter: 0.7,
+        canFlip: true
+    },
+
+    fishing_pier: {
+        id: "fishing_pier",
+        name: "Rybářské molo",
+        icon: "🎣",
+        desc: "Vratké dřevěné molo s loďkou, sítěmi a košem čerstvě chycených ryb.",
+        category: "water",
+        w: 80, h: 65, clearance: 32,
+        img: "assets/decorations/fishing_pier.webp",
+        footFade: 0,
+        biomes: ["wetland","meadow"], layer: "standing", anchorY: 0.4, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.8, scatter: 0.7,
+        canFlip: true
+    },
+
+    waterfall_cliff: {
+        id: "waterfall_cliff",
+        name: "Vodopád v útesu",
+        icon: "💧",
+        desc: "Skalní stupeň, z něhož se řítí pěnivý vodopád a nad ním se vznáší jemná mlha.",
+        category: "water",
+        w: 80, h: 84, clearance: 38,
+        img: "assets/decorations/waterfall_cliff.webp",
+        footFade: 0,
+        biomes: ["rocky","wetland"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.6, scatter: 0.6,
+        canFlip: true
+    },
+
+    hot_spring: {
+        id: "hot_spring",
+        name: "Horký pramen",
+        icon: "♨️",
+        desc: "Kamenná tůň s horkou lázní, z níž stoupá pára a léčivá vůně minerálů.",
+        category: "water",
+        w: 80, h: 71, clearance: 30,
+        img: "assets/decorations/hot_spring.webp",
+        footFade: 0,
+        biomes: ["rocky","meadow"], layer: "ground", anchorY: 0.15, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.6, scatter: 0.6,
+        canFlip: true
+    },
+
+    will_o_wisps: {
+        id: "will_o_wisps",
+        name: "Bludičky v rašeliništi",
+        icon: "🔵",
+        desc: "Modravá světélka nad černou rašelinou, která lákají pocestné z cesty.",
+        category: "water",
+        w: 60, h: 40, clearance: 22,
+        img: "assets/decorations/will_o_wisps.webp",
+        footFade: 0,
+        biomes: ["wetland","forest"], layer: "ground", anchorY: 0.2, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.8, scatter: 0.8,
+        canFlip: true
+    },
+
+    sunken_shipwreck: {
+        id: "sunken_shipwreck",
+        name: "Vrak lodi v bahně",
+        icon: "⚓",
+        desc: "Napůl zapadlá zpuchřelá loď porostlá řasami, o jejímž pokladu vyprávějí rybáři.",
+        category: "water",
+        w: 90, h: 78, clearance: 36,
+        img: "assets/decorations/sunken_shipwreck.webp",
+        footFade: 0,
+        biomes: ["wetland"], layer: "standing", anchorY: 0.4, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.6, scatter: 0.5,
+        canFlip: true
+    },
+
+    heron_island: {
+        id: "heron_island",
+        name: "Volavčí ostrůvek",
+        icon: "🦢",
+        desc: "Zarostlý ostrůvek s hnízdem, kde volavky stojí na jedné noze.",
+        category: "water",
+        w: 76, h: 56, clearance: 28,
+        img: "assets/decorations/heron_island.webp",
+        footFade: 0,
+        biomes: ["wetland"], layer: "ground", anchorY: 0.15, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.8, scatter: 0.8,
+        canFlip: true
+    },
+
+    ice_spring: {
+        id: "ice_spring",
+        name: "Ledový pramen",
+        icon: "❄️",
+        desc: "Zamrzlé jezírko obklopené ledovými krystaly, které se třpytí i v letním slunci.",
+        category: "water",
+        w: 76, h: 52, clearance: 28,
+        img: "assets/decorations/ice_spring.webp",
+        footFade: 0,
+        biomes: ["rocky","wetland"], layer: "ground", anchorY: 0.15, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.5, scatter: 0.5,
+        canFlip: true
+    },
+
+    crystal_cluster: {
+        id: "crystal_cluster",
+        name: "Zářící krystaly",
+        icon: "💎",
+        desc: "Shluk obřích krystalů, které v noci tiše září a odpovídají na kouzla.",
+        category: "magic",
+        w: 43, h: 56, clearance: 22,
+        img: "assets/decorations/crystal_cluster.webp",
+        footFade: 0,
+        biomes: ["rocky","forest"], layer: "standing", anchorY: 0.4, roadPolicy: "avoid",
+        maxPerMap: 3, overlapGroup: "exclusive", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    mage_tower: {
+        id: "mage_tower",
+        name: "Věž čaroděje",
+        icon: "🔮",
+        desc: "Štíhlá věž, na jejímž vrcholu se vznáší zářící koule a občas z ní vyletí jiskra.",
+        category: "magic",
+        w: 28, h: 100, clearance: 34,
+        img: "assets/decorations/mage_tower.webp",
+        footFade: 0,
+        biomes: ["rocky","meadow"], layer: "standing", anchorY: 0.45, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.6, scatter: 0.5,
+        canFlip: true
+    },
+
+    portal_arch: {
+        id: "portal_arch",
+        name: "Kamenný portál",
+        icon: "🌀",
+        desc: "Zvětralý oblouk s runami, v jehož středu víří brána do neznámých světů.",
+        category: "magic",
+        w: 64, h: 80, clearance: 32,
+        img: "assets/decorations/portal_arch.webp",
+        footFade: 0,
+        biomes: ["forest","meadow","rocky"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.5, scatter: 0.5,
+        canFlip: true
+    },
+
+    enchanted_well: {
+        id: "enchanted_well",
+        name: "Studna přání",
+        icon: "⛲",
+        desc: "Prastará studna, jejíž hladina se třpytí hvězdami a plní přání dobrým lidem.",
+        category: "magic",
+        w: 43, h: 56, clearance: 22,
+        img: "assets/decorations/enchanted_well.webp",
+        footFade: 0,
+        biomes: ["meadow","forest"], layer: "standing", anchorY: 0.4, roadPolicy: "edge",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.8, scatter: 0.8,
+        canFlip: true
+    },
+
+    moonlit_altar: {
+        id: "moonlit_altar",
+        name: "Měsíční oltář",
+        icon: "🌙",
+        desc: "Kamenný kruh s runami, který se za úplňku rozzáří stříbrným světlem.",
+        category: "magic",
+        w: 70, h: 51, clearance: 26,
+        img: "assets/decorations/moonlit_altar.webp",
+        footFade: 0,
+        biomes: ["forest","meadow"], layer: "ground", anchorY: 0.18, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.6, scatter: 0.6,
+        canFlip: true
+    },
+
+    glowing_mushroom_grove: {
+        id: "glowing_mushroom_grove",
+        name: "Svítící houbový hájek",
+        icon: "🍄",
+        desc: "Obří houby s kloboukem planoucím modrofialovým světlem, kolem nichž poletují spóry.",
+        category: "magic",
+        w: 70, h: 58, clearance: 26,
+        img: "assets/decorations/glowing_mushroom_grove.webp",
+        footFade: 0,
+        biomes: ["forest"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.9, scatter: 0.9,
+        canFlip: true
+    },
+
+    fairy_village: {
+        id: "fairy_village",
+        name: "Vílí vesnička",
+        icon: "🧚",
+        desc: "Drobné domky v kořenech stromů, v jejichž okénkách se večer rozsvěcují lucerničky.",
+        category: "magic",
+        w: 72, h: 64, clearance: 28,
+        img: "assets/decorations/fairy_village.webp",
+        footFade: 0,
+        biomes: ["forest"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.5, scatter: 0.5,
+        canFlip: true
+    },
+
+    ancient_rune_stone: {
+        id: "ancient_rune_stone",
+        name: "Runový menhir",
+        icon: "🪨",
+        desc: "Vzpřímený kámen pokrytý runami, které se v soumraku jemně rozžhaví.",
+        category: "magic",
+        w: 24, h: 48, clearance: 18,
+        img: "assets/decorations/ancient_rune_stone.webp",
+        footFade: 0,
+        biomes: ["meadow","rocky","forest"], layer: "standing", anchorY: 0.42, roadPolicy: "edge",
+        maxPerMap: 3, overlapGroup: "exclusive", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    treant_stump_throne: {
+        id: "treant_stump_throne",
+        name: "Trůn z pařezu",
+        icon: "🪑",
+        desc: "Obří pařez s opěradlem z kořenů, na němž prý sedává král lesa.",
+        category: "magic",
+        w: 56, h: 64, clearance: 26,
+        img: "assets/decorations/treant_stump_throne.webp",
+        footFade: 0,
+        biomes: ["forest"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.5, scatter: 0.5,
+        canFlip: true
+    },
+
+    spirit_tree: {
+        id: "spirit_tree",
+        name: "Strom duchů",
+        icon: "🌳",
+        desc: "Stříbrný strom, v jehož koruně šeptají duše dávných předků.",
+        category: "magic",
+        w: 80, h: 74, clearance: 32,
+        img: "assets/decorations/spirit_tree.webp",
+        footFade: 0,
+        biomes: ["forest","meadow"], layer: "standing", anchorY: 0.45, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.5, scatter: 0.5,
+        canFlip: true
+    },
+
+    star_fall_crater: {
+        id: "star_fall_crater",
+        name: "Kráter po spadlé hvězdě",
+        icon: "☄️",
+        desc: "Spálená prohlubeň, v níž ještě tlí úlomek hvězdy a třpytí se hvězdný prach.",
+        category: "magic",
+        w: 76, h: 52, clearance: 28,
+        img: "assets/decorations/star_fall_crater.webp",
+        footFade: 0,
+        biomes: ["meadow","rocky"], layer: "ground", anchorY: 0.18, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.5, scatter: 0.5,
+        canFlip: true
+    },
+
+    blacksmith_forge: {
+        id: "blacksmith_forge",
+        name: "Kovárna",
+        icon: "🔨",
+        desc: "Kovář tu od rána buší do kovadliny a z komína stoupá hustý dým.",
+        category: "settlement",
+        w: 50, h: 66, clearance: 26,
+        img: "assets/decorations/blacksmith_forge.webp",
+        footFade: 0,
+        biomes: ["farmland","meadow"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.8, scatter: 0.8,
+        canFlip: true
+    },
+
+    tavern_inn: {
+        id: "tavern_inn",
+        name: "Hostinec u cesty",
+        icon: "🍺",
+        desc: "Útulný hostinec, kde se pocestní zahřejí u ohně a vyslechnou nejnovější drby.",
+        category: "settlement",
+        w: 69, h: 76, clearance: 30,
+        img: "assets/decorations/tavern_inn.webp",
+        footFade: 0,
+        biomes: ["farmland","meadow","forest"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.8, scatter: 0.8,
+        canFlip: true
+    },
+
+    chapel_shrine: {
+        id: "chapel_shrine",
+        name: "Vesnická kaple",
+        icon: "⛪",
+        desc: "Kamenná kaplička se zvoničkou, jejíž zvon svolává celou vsi.",
+        category: "settlement",
+        w: 53, h: 70, clearance: 28,
+        img: "assets/decorations/chapel_shrine.webp",
+        footFade: 0,
+        biomes: ["farmland","meadow"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.7, scatter: 0.7,
+        canFlip: true
+    },
+
+    hay_barn: {
+        id: "hay_barn",
+        name: "Stodola se senem",
+        icon: "🏚️",
+        desc: "Prostorná dřevěná stodola, z jejíchž vrat se line vůně čerstvě sklizeného sena.",
+        category: "agriculture",
+        w: 76, h: 72, clearance: 30,
+        img: "assets/decorations/hay_barn.webp",
+        footFade: 0,
+        biomes: ["farmland"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 3, overlapGroup: "exclusive", weight: 0.9, scatter: 0.9,
+        canFlip: true
+    },
+
+    haystacks: {
+        id: "haystacks",
+        name: "Kopky sena",
+        icon: "🌾",
+        desc: "Zlatavé kopky sena, na kterých si s oblibou hrají děti i kočky.",
+        category: "agriculture",
+        w: 44, h: 34, clearance: 16,
+        img: "assets/decorations/haystacks.webp",
+        footFade: 0,
+        biomes: ["farmland","meadow"], layer: "standing", anchorY: 0.35, roadPolicy: "edge",
+        maxPerMap: 5, overlapGroup: "canopy", weight: 1.2, scatter: 1.4,
+        canFlip: true
+    },
+
+    vineyard: {
+        id: "vineyard",
+        name: "Vinice",
+        icon: "🍇",
+        desc: "Úhledné řady vinné révy, z níž se na podzim vyrábí to nejlepší víno v království.",
+        category: "agriculture",
+        w: 90, h: 66, clearance: 34,
+        img: "assets/decorations/vineyard.webp",
+        footFade: 0,
+        biomes: ["farmland"], layer: "ground", anchorY: 0.15, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.7, scatter: 0.7,
+        canFlip: true
+    },
+
+    beehives_meadow: {
+        id: "beehives_meadow",
+        name: "Včelíny na louce",
+        icon: "🐝",
+        desc: "Dřevěné úly bzučící včelami, které sbírají nektar z okolních květin.",
+        category: "agriculture",
+        w: 52, h: 41, clearance: 20,
+        img: "assets/decorations/beehives_meadow.webp",
+        footFade: 0,
+        biomes: ["farmland","meadow"], layer: "standing", anchorY: 0.38, roadPolicy: "edge",
+        maxPerMap: 3, overlapGroup: "exclusive", weight: 0.9, scatter: 0.9,
+        canFlip: true
+    },
+
+    stone_bridge_small: {
+        id: "stone_bridge_small",
+        name: "Kamenný mostek",
+        icon: "🌉",
+        desc: "Oblouk z omšelého kamene přes tichý potůček, kudy chodí vesničané na trh.",
+        category: "settlement",
+        w: 70, h: 51, clearance: 26,
+        img: "assets/decorations/stone_bridge_small.webp",
+        footFade: 0,
+        biomes: ["farmland","meadow"], layer: "ground", anchorY: 0.15, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.5, scatter: 0.5,
+        canFlip: true
+    },
+
+    campfire_camp: {
+        id: "campfire_camp",
+        name: "Tábořiště",
+        icon: "⛺",
+        desc: "Opuštěný oheň a stan, kde se přes noc ukrývají cestovatelé před vlky.",
+        category: "settlement",
+        w: 60, h: 50, clearance: 22,
+        img: "assets/decorations/campfire_camp.webp",
+        footFade: 0,
+        biomes: ["forest","meadow","rocky"], layer: "standing", anchorY: 0.4, roadPolicy: "edge",
+        maxPerMap: 3, overlapGroup: "exclusive", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    woodcutter_hut: {
+        id: "woodcutter_hut",
+        name: "Dřevorubecká chata",
+        icon: "🪓",
+        desc: "Srubová chata, před níž se tyčí hromada naštípaných polen.",
+        category: "settlement",
+        w: 68, h: 62, clearance: 26,
+        img: "assets/decorations/woodcutter_hut.webp",
+        footFade: 0,
+        biomes: ["forest"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.8, scatter: 0.8,
+        canFlip: true
+    },
+
+    charcoal_burner: {
+        id: "charcoal_burner",
+        name: "Milíř",
+        icon: "🔥",
+        desc: "Doutnající milíř s tenkým kouřem, u kterého uhlíř dohlíží dnem i nocí.",
+        category: "settlement",
+        w: 64, h: 52, clearance: 24,
+        img: "assets/decorations/charcoal_burner.webp",
+        footFade: 0,
+        biomes: ["forest"], layer: "standing", anchorY: 0.4, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.6, scatter: 0.6,
+        canFlip: true
+    },
+
+    market_stalls: {
+        id: "market_stalls",
+        name: "Tržnice",
+        icon: "🛒",
+        desc: "Pestré stánky plné zeleniny, chleba a hrnčiny, kde se smlouvá o každý peníz.",
+        category: "settlement",
+        w: 76, h: 58, clearance: 30,
+        img: "assets/decorations/market_stalls.webp",
+        footFade: 0,
+        biomes: ["farmland","meadow"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.7, scatter: 0.7,
+        canFlip: true
+    },
+
+    scarecrow_field: {
+        id: "scarecrow_field",
+        name: "Strašák",
+        icon: "🎃",
+        desc: "Záplatovaný strašák, kterého vrány respektují jen do poledne.",
+        category: "agriculture",
+        w: 31, h: 44, clearance: 16,
+        img: "assets/decorations/scarecrow_field.webp",
+        footFade: 0,
+        biomes: ["farmland"], layer: "standing", anchorY: 0.42, roadPolicy: "edge",
+        maxPerMap: 4, overlapGroup: "exclusive", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    stone_quarry: {
+        id: "stone_quarry",
+        name: "Kamenolom",
+        icon: "⛏️",
+        desc: "Odkrytý lom s jeřábem a vozíky, odkud se vozí kámen na hradby.",
+        category: "settlement",
+        w: 80, h: 76, clearance: 32,
+        img: "assets/decorations/stone_quarry.webp",
+        footFade: 0,
+        biomes: ["rocky"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "exclusive", weight: 0.8, scatter: 0.8,
+        canFlip: true
+    },
+
+    flower_meadow: {
+        id: "flower_meadow",
+        name: "Rozkvetlá louka",
+        icon: "🌸",
+        desc: "Pestrý koberec máků, chrp a sedmikrásek, nad nímž tančí motýli.",
+        category: "vegetation",
+        w: 64, h: 52, clearance: 20,
+        img: "assets/decorations/flower_meadow.webp",
+        footFade: 0,
+        biomes: ["meadow"], layer: "ground", anchorY: 0.15, roadPolicy: "edge",
+        maxPerMap: 5, overlapGroup: "canopy", weight: 1.2, scatter: 1.3,
+        canFlip: true
+    },
+
+    fallen_log: {
+        id: "fallen_log",
+        name: "Padlý kmen",
+        icon: "🪵",
+        desc: "Mohutný padlý kmen porostlý mechem, na němž rostou houby a kapradí.",
+        category: "vegetation",
+        w: 60, h: 49, clearance: 20,
+        img: "assets/decorations/fallen_log.webp",
+        footFade: 0,
+        biomes: ["forest"], layer: "standing", anchorY: 0.4, roadPolicy: "edge",
+        maxPerMap: 4, overlapGroup: "exclusive", weight: 1.1, scatter: 1.1,
+        canFlip: true
+    },
+
+    giant_stump_ruin: {
+        id: "giant_stump_ruin",
+        name: "Ruina v obřím pařezu",
+        icon: "🏰",
+        desc: "Zřícenina starého hrádku zarostlá kořeny gigantického pařezu.",
+        category: "civilization",
+        w: 80, h: 74, clearance: 32,
+        img: "assets/decorations/giant_stump_ruin.webp",
+        footFade: 0,
+        biomes: ["forest"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.5, scatter: 0.5,
+        canFlip: true
+    },
+
+    autumn_maple: {
+        id: "autumn_maple",
+        name: "Podzimní javor",
+        icon: "🍁",
+        desc: "Javor v plamenných barvách podzimu, který hází k zemi rudé listí.",
+        category: "vegetation",
+        w: 62, h: 58, clearance: 24,
+        img: "assets/decorations/autumn_maple.webp",
+        footFade: 0,
+        biomes: ["forest","meadow"], layer: "standing", anchorY: 0.45, roadPolicy: "edge",
+        maxPerMap: null, overlapGroup: "canopy", weight: 1, scatter: 1.2,
+        canFlip: true
+    },
+
+    rocky_arch: {
+        id: "rocky_arch",
+        name: "Skalní brána",
+        icon: "🪨",
+        desc: "Přírodní oblouk vytvořený větrem, pod nímž se prohání ozvěna.",
+        category: "terrain",
+        w: 80, h: 66, clearance: 32,
+        img: "assets/decorations/rocky_arch.webp",
+        footFade: 0,
+        biomes: ["rocky"], layer: "standing", anchorY: 0.42, roadPolicy: "avoid",
+        maxPerMap: 2, overlapGroup: "ridge", weight: 0.8, scatter: 0.8,
+        canFlip: true
+    },
+
+    cairn_stones: {
+        id: "cairn_stones",
+        name: "Mohyla z kamenů",
+        icon: "🗿",
+        desc: "Hromádka kamenů s praporkem, kterou si pocestní stavějí na památku.",
+        category: "terrain",
+        w: 40, h: 44, clearance: 16,
+        img: "assets/decorations/cairn_stones.webp",
+        footFade: 0,
+        biomes: ["rocky","meadow"], layer: "standing", anchorY: 0.4, roadPolicy: "edge",
+        maxPerMap: 3, overlapGroup: "exclusive", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    dragon_bones: {
+        id: "dragon_bones",
+        name: "Dračí kostra",
+        icon: "🦴",
+        desc: "Obří kostra draka, kterou prý nikdo neodváží přenést.",
+        category: "terrain",
+        w: 90, h: 62, clearance: 34,
+        img: "assets/decorations/dragon_bones.webp",
+        footFade: 0,
+        biomes: ["rocky","meadow"], layer: "standing", anchorY: 0.4, roadPolicy: "avoid",
+        maxPerMap: 1, overlapGroup: "exclusive", weight: 0.5, scatter: 0.5,
+        canFlip: true
+    },
+
+    flower_poppies: {
+        id: "flower_poppies",
+        name: "Vlčí máky",
+        icon: "🌺",
+        desc: "Šarlatové máky, které rozzáří každou louku.",
+        category: "vegetation",
+        w: 34, h: 28, clearance: 10,
+        img: "assets/decorations/flower_poppies.webp",
+        footFade: 0,
+        biomes: ["meadow","farmland"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 14, overlapGroup: "canopy", weight: 1.2, scatter: 1.2,
+        canFlip: true
+    },
+
+    flower_cornflowers: {
+        id: "flower_cornflowers",
+        name: "Chrpy",
+        icon: "💠",
+        desc: "Modré chrpy, které se rády schovávají mezi klasy.",
+        category: "vegetation",
+        w: 32, h: 34, clearance: 10,
+        img: "assets/decorations/flower_cornflowers.webp",
+        footFade: 0,
+        biomes: ["meadow","farmland"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 14, overlapGroup: "canopy", weight: 1.2, scatter: 1.2,
+        canFlip: true
+    },
+
+    flower_daisies: {
+        id: "flower_daisies",
+        name: "Sedmikrásky",
+        icon: "🌼",
+        desc: "Drobné sedmikrásky, které se otáčejí za sluncem.",
+        category: "vegetation",
+        w: 32, h: 26, clearance: 10,
+        img: "assets/decorations/flower_daisies.webp",
+        footFade: 0,
+        biomes: ["meadow","forest","farmland"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 14, overlapGroup: "canopy", weight: 1.3, scatter: 1.3,
+        canFlip: true
+    },
+
+    flower_lavender: {
+        id: "flower_lavender",
+        name: "Levandule",
+        icon: "💜",
+        desc: "Fialová levandule, jejíž vůně láká včely i pocestné.",
+        category: "vegetation",
+        w: 38, h: 36, clearance: 12,
+        img: "assets/decorations/flower_lavender.webp",
+        footFade: 0,
+        biomes: ["meadow","farmland","rocky"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 10, overlapGroup: "canopy", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    flower_sunflowers: {
+        id: "flower_sunflowers",
+        name: "Slunečnice",
+        icon: "🌻",
+        desc: "Vysoké slunečnice, které se vždy dívají k slunci.",
+        category: "vegetation",
+        w: 32, h: 40, clearance: 12,
+        img: "assets/decorations/flower_sunflowers.webp",
+        footFade: 0,
+        biomes: ["farmland","meadow"], layer: "standing", anchorY: 0.35, roadPolicy: "edge",
+        maxPerMap: 10, overlapGroup: "canopy", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    flower_bluebells: {
+        id: "flower_bluebells",
+        name: "Zvonky",
+        icon: "🔔",
+        desc: "Modré zvonky, v jejichž kalíšcích prý přespávají víly.",
+        category: "vegetation",
+        w: 34, h: 33, clearance: 10,
+        img: "assets/decorations/flower_bluebells.webp",
+        footFade: 0,
+        biomes: ["forest","meadow"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 12, overlapGroup: "canopy", weight: 1.1, scatter: 1.1,
+        canFlip: true
+    },
+
+    flower_dandelions: {
+        id: "flower_dandelions",
+        name: "Pampelišky",
+        icon: "🌿",
+        desc: "Žluté pampelišky a chmýří, které odnáší vítr.",
+        category: "vegetation",
+        w: 32, h: 27, clearance: 10,
+        img: "assets/decorations/flower_dandelions.webp",
+        footFade: 0,
+        biomes: ["meadow","farmland","forest"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 14, overlapGroup: "canopy", weight: 1.2, scatter: 1.2,
+        canFlip: true
+    },
+
+    flower_thistles: {
+        id: "flower_thistles",
+        name: "Ostropestřec",
+        icon: "🪻",
+        desc: "Trnitý bodlák s fialovým květem, kterému se vyhýbají i ovce.",
+        category: "vegetation",
+        w: 33, h: 34, clearance: 10,
+        img: "assets/decorations/flower_thistles.webp",
+        footFade: 0,
+        biomes: ["meadow","rocky"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 10, overlapGroup: "canopy", weight: 0.9, scatter: 0.9,
+        canFlip: true
+    },
+
+    tall_grass_tuft: {
+        id: "tall_grass_tuft",
+        name: "Vysoká tráva",
+        icon: "🌱",
+        desc: "Trs vysoké trávy, který se vlní ve větru.",
+        category: "vegetation",
+        w: 34, h: 34, clearance: 10,
+        img: "assets/decorations/tall_grass_tuft.webp",
+        footFade: 0,
+        biomes: ["meadow","forest","farmland","wetland"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 16, overlapGroup: "canopy", weight: 1.5, scatter: 1.5,
+        canFlip: true
+    },
+
+    fern_cluster: {
+        id: "fern_cluster",
+        name: "Kapradiny",
+        icon: "🌿",
+        desc: "Bujné kapradí, pod nímž se ukrývají lesní skřítci.",
+        category: "vegetation",
+        w: 36, h: 28, clearance: 12,
+        img: "assets/decorations/fern_cluster.webp",
+        footFade: 0,
+        biomes: ["forest","wetland"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 14, overlapGroup: "canopy", weight: 1.3, scatter: 1.3,
+        canFlip: true
+    },
+
+    wheat_tuft: {
+        id: "wheat_tuft",
+        name: "Divoké klasy",
+        icon: "🌾",
+        desc: "Zlatavé klasy, které přežily na okraji pole.",
+        category: "agriculture",
+        w: 24, h: 34, clearance: 10,
+        img: "assets/decorations/wheat_tuft.webp",
+        footFade: 0,
+        biomes: ["farmland","meadow"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 12, overlapGroup: "canopy", weight: 1.2, scatter: 1.2,
+        canFlip: true
+    },
+
+    pampas_grass: {
+        id: "pampas_grass",
+        name: "Pampová tráva",
+        icon: "🌾",
+        desc: "Vysoká tráva se stříbrnými chocholy, která šumí při každém závanu.",
+        category: "vegetation",
+        w: 36, h: 40, clearance: 12,
+        img: "assets/decorations/pampas_grass.webp",
+        footFade: 0,
+        biomes: ["meadow","wetland","rocky"], layer: "standing", anchorY: 0.35, roadPolicy: "edge",
+        maxPerMap: 10, overlapGroup: "canopy", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    heather_patch: {
+        id: "heather_patch",
+        name: "Vřes",
+        icon: "🪻",
+        desc: "Fialový vřes, který pokrývá skalnaté svahy jako koberec.",
+        category: "vegetation",
+        w: 36, h: 26, clearance: 12,
+        img: "assets/decorations/heather_patch.webp",
+        footFade: 0,
+        biomes: ["rocky","meadow","forest"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 12, overlapGroup: "canopy", weight: 1.1, scatter: 1.1,
+        canFlip: true
+    },
+
+    mushrooms_red: {
+        id: "mushrooms_red",
+        name: "Muchomůrky",
+        icon: "🍄",
+        desc: "Červené muchomůrky s bílými tečkami, krásné, ale jedovaté.",
+        category: "vegetation",
+        w: 27, h: 30, clearance: 10,
+        img: "assets/decorations/mushrooms_red.webp",
+        footFade: 0,
+        biomes: ["forest","meadow"], layer: "ground", anchorY: 0.25, roadPolicy: "edge",
+        maxPerMap: 12, overlapGroup: "canopy", weight: 1.2, scatter: 1.2,
+        canFlip: true
+    },
+
+    mushrooms_porcini: {
+        id: "mushrooms_porcini",
+        name: "Hřiby",
+        icon: "🍄",
+        desc: "Tlusté hřiby, o které se v lese perou houbaři.",
+        category: "vegetation",
+        w: 30, h: 26, clearance: 10,
+        img: "assets/decorations/mushrooms_porcini.webp",
+        footFade: 0,
+        biomes: ["forest"], layer: "ground", anchorY: 0.25, roadPolicy: "edge",
+        maxPerMap: 10, overlapGroup: "canopy", weight: 1.1, scatter: 1.1,
+        canFlip: true
+    },
+
+    mushrooms_chanterelle: {
+        id: "mushrooms_chanterelle",
+        name: "Lišky",
+        icon: "🍄",
+        desc: "Zlatavé lišky ukryté pod mechem.",
+        category: "vegetation",
+        w: 30, h: 29, clearance: 10,
+        img: "assets/decorations/mushrooms_chanterelle.webp",
+        footFade: 0,
+        biomes: ["forest","wetland"], layer: "ground", anchorY: 0.25, roadPolicy: "edge",
+        maxPerMap: 10, overlapGroup: "canopy", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    mushroom_log: {
+        id: "mushroom_log",
+        name: "Pařez s houbami",
+        icon: "🪵",
+        desc: "Zetlelý pařez pokrytý poličkovitými houbami a mechem.",
+        category: "vegetation",
+        w: 40, h: 34, clearance: 12,
+        img: "assets/decorations/mushroom_log.webp",
+        footFade: 0,
+        biomes: ["forest","wetland"], layer: "standing", anchorY: 0.35, roadPolicy: "edge",
+        maxPerMap: 8, overlapGroup: "canopy", weight: 1, scatter: 1,
+        canFlip: true
+    },
+
+    berry_bush: {
+        id: "berry_bush",
+        name: "Keř s bobulemi",
+        icon: "🫐",
+        desc: "Keř obsypaný borůvkami a malinami, který zná každý medvěd.",
+        category: "vegetation",
+        w: 40, h: 39, clearance: 12,
+        img: "assets/decorations/berry_bush.webp",
+        footFade: 0,
+        biomes: ["forest","meadow","wetland"], layer: "standing", anchorY: 0.35, roadPolicy: "edge",
+        maxPerMap: 10, overlapGroup: "canopy", weight: 1.2, scatter: 1.2,
+        canFlip: true
+    },
+
+    moss_stone: {
+        id: "moss_stone",
+        name: "Mechový kámen",
+        icon: "🪨",
+        desc: "Kámen porostlý hustým mechem, který hřeje i v zimě.",
+        category: "terrain",
+        w: 36, h: 27, clearance: 12,
+        img: "assets/decorations/moss_stone.webp",
+        footFade: 0,
+        biomes: ["forest","meadow","wetland","rocky"], layer: "standing", anchorY: 0.35, roadPolicy: "edge",
+        maxPerMap: 12, overlapGroup: "canopy", weight: 1.2, scatter: 1.2,
+        canFlip: true
+    },
+
+    wildflower_rock_garden: {
+        id: "wildflower_rock_garden",
+        name: "Skalka s květinami",
+        icon: "🌸",
+        desc: "Hrstka horských květin vzdorující kamenům.",
+        category: "terrain",
+        w: 40, h: 25, clearance: 12,
+        img: "assets/decorations/wildflower_rock_garden.webp",
+        footFade: 0,
+        biomes: ["rocky","meadow"], layer: "ground", anchorY: 0.2, roadPolicy: "edge",
+        maxPerMap: 8, overlapGroup: "canopy", weight: 1, scatter: 1,
+        canFlip: true
     }
 };
 
@@ -913,6 +1809,9 @@ window.PRS_DECOR_CATALOG = {
         }
         if (typeof item.weight !== "number" || item.weight <= 0) {
             item.weight = (typeof ov.weight === "number" && ov.weight > 0) ? ov.weight : (def.weight || 1.0);
+        }
+        if (typeof item.scatter !== "number" || item.scatter < 0) {
+            item.scatter = (typeof ov.scatter === "number" && ov.scatter >= 0) ? ov.scatter : 0;
         }
     }
 

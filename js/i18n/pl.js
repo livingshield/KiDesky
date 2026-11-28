@@ -254,7 +254,7 @@ window.PRS_I18N.pl = {
       "dragons": "🐉 Bestiariusz & Potwory (63)",
       "castles": "🏰 Galeria zamków (10)",
       "trophies": "🏆 Sala Trofeów & Relikwii (29)",
-      "decorations": "🌲 Atlas dekoracji & krajobrazu (42)"
+      "decorations": "🌲 Atlas dekoracji & krajobrazu (113)"
     },
     "rules_views": {
       "quick": "⚡ Szybki start",
@@ -4315,6 +4315,262 @@ window.PRS_I18N.pl = {
     "swamp_hydra": {
       "name": "Bagienna hydra",
       "desc": "Wielogłowy potwór czający się wśród sitowia zdradliwych moczarów, gotowy do ataku."
+    },
+    "reed_bed": {
+      "name": "Trzcinowisko",
+      "desc": "Gęste trzciny i pałki wodne, wśród których migoczą ważki i śpiewają trzciniaki."
+    },
+    "lily_pond": {
+      "name": "Staw z grzybieniami",
+      "desc": "Spokojna tafla pełna białych i różowych grzybieni, na których siedzą zielone żaby."
+    },
+    "mangrove_roots": {
+      "name": "Bagienne drzewo na korzeniach",
+      "desc": "Powykręcane drzewo na łukowatych korzeniach w mętnej wodzie, dom żab i wodnych węży."
+    },
+    "willow_weeping": {
+      "name": "Wierzba płacząca",
+      "desc": "Wierzba z opadającymi gałęziami, które delikatnie dotykają wody i szepczą stare baśnie."
+    },
+    "stepping_stones": {
+      "name": "Kamienny bród",
+      "desc": "Rząd płaskich kamieni, po których można suchą stopą przeskoczyć przez płytki potok."
+    },
+    "fishing_pier": {
+      "name": "Pomost rybacki",
+      "desc": "Chybotliwy drewniany pomost z łódką, sieciami i koszem świeżo złowionych ryb."
+    },
+    "waterfall_cliff": {
+      "name": "Wodospad w skale",
+      "desc": "Skalny uskok, z którego spada spieniony wodospad, a nad nim unosi się delikatna mgła."
+    },
+    "hot_spring": {
+      "name": "Gorące źródło",
+      "desc": "Kamienny basen z gorącą wodą, z którego unosi się para i zapach leczniczych minerałów."
+    },
+    "will_o_wisps": {
+      "name": "Błędne ogniki",
+      "desc": "Niebieskawe światełka nad czarnym torfowiskiem, które zwodzą wędrowców z drogi."
+    },
+    "sunken_shipwreck": {
+      "name": "Wrak statku w błocie",
+      "desc": "Do połowy zatopiony, zbutwiały statek porośnięty glonami, o którego skarbie opowiadają rybacy."
+    },
+    "heron_island": {
+      "name": "Wysepka czapli",
+      "desc": "Zarośnięta wysepka z gniazdem, na której czaple stoją na jednej nodze."
+    },
+    "ice_spring": {
+      "name": "Lodowe źródło",
+      "desc": "Zamarznięte jeziorko otoczone kryształami lodu, które błyszczą nawet w letnim słońcu."
+    },
+    "crystal_cluster": {
+      "name": "Świecące kryształy",
+      "desc": "Skupisko ogromnych kryształów, które nocą cicho świecą i reagują na zaklęcia."
+    },
+    "mage_tower": {
+      "name": "Wieża czarodzieja",
+      "desc": "Smukła wieża, na której szczycie unosi się świecąca kula i od czasu do czasu wylatuje z niej iskra."
+    },
+    "portal_arch": {
+      "name": "Kamienny portal",
+      "desc": "Zwietrzały łuk z runami, w którego środku wiruje brama do nieznanych światów."
+    },
+    "enchanted_well": {
+      "name": "Studnia życzeń",
+      "desc": "Prastara studnia, której tafla lśni gwiazdami i spełnia życzenia dobrych ludzi."
+    },
+    "moonlit_altar": {
+      "name": "Księżycowy ołtarz",
+      "desc": "Kamienny krąg z runami, który w pełni księżyca rozbłyska srebrnym światłem."
+    },
+    "glowing_mushroom_grove": {
+      "name": "Świecący grzybowy gaj",
+      "desc": "Olbrzymie grzyby z kapeluszami płonącymi niebiesko-fioletowym światłem, wokół których unoszą się zarodniki."
+    },
+    "fairy_village": {
+      "name": "Wioska wróżek",
+      "desc": "Maleńkie domki wśród korzeni drzew, w których oknach wieczorem zapalają się latarenki."
+    },
+    "ancient_rune_stone": {
+      "name": "Runiczny menhir",
+      "desc": "Stojący głaz pokryty runami, które o zmierzchu delikatnie się żarzą."
+    },
+    "treant_stump_throne": {
+      "name": "Tron z pnia",
+      "desc": "Olbrzymi pień z oparciem z korzeni, na którym podobno zasiada król lasu."
+    },
+    "spirit_tree": {
+      "name": "Drzewo duchów",
+      "desc": "Srebrne drzewo, w którego koronie szepczą dusze dawnych przodków."
+    },
+    "star_fall_crater": {
+      "name": "Krater po spadłej gwieździe",
+      "desc": "Wypalone zagłębienie, w którym wciąż tli się odłamek gwiazdy, a wokół błyszczy gwiezdny pył."
+    },
+    "blacksmith_forge": {
+      "name": "Kuźnia",
+      "desc": "Kowal od świtu wali w kowadło, a z komina unosi się gęsty dym."
+    },
+    "tavern_inn": {
+      "name": "Karczma przy drodze",
+      "desc": "Przytulna karczma, gdzie wędrowcy ogrzewają się przy ogniu i słuchają najnowszych plotek."
+    },
+    "chapel_shrine": {
+      "name": "Wiejska kapliczka",
+      "desc": "Kamienna kapliczka z dzwonnicą, której dzwon woła całą wieś."
+    },
+    "hay_barn": {
+      "name": "Stodoła z sianem",
+      "desc": "Przestronna drewniana stodoła, z której wrót płynie zapach świeżo zebranego siana."
+    },
+    "haystacks": {
+      "name": "Stogi siana",
+      "desc": "Złociste stogi siana, na których uwielbiają bawić się dzieci i koty."
+    },
+    "vineyard": {
+      "name": "Winnica",
+      "desc": "Zadbane rzędy winorośli, z których jesienią powstaje najlepsze wino w królestwie."
+    },
+    "beehives_meadow": {
+      "name": "Ule na łące",
+      "desc": "Drewniane ule brzęczące pszczołami, które zbierają nektar z okolicznych kwiatów."
+    },
+    "stone_bridge_small": {
+      "name": "Kamienny mostek",
+      "desc": "Łuk z omszałego kamienia nad cichym strumykiem, którędy wieśniacy chodzą na targ."
+    },
+    "campfire_camp": {
+      "name": "Obozowisko",
+      "desc": "Ognisko i namiot, w którym podróżni chronią się nocą przed wilkami."
+    },
+    "woodcutter_hut": {
+      "name": "Chata drwala",
+      "desc": "Zrębowa chata, przed którą piętrzy się sterta porąbanego drewna."
+    },
+    "charcoal_burner": {
+      "name": "Mielerz",
+      "desc": "Tlący się mielerz z cienkim dymem, nad którym węglarz czuwa dniem i nocą."
+    },
+    "market_stalls": {
+      "name": "Targowisko",
+      "desc": "Kolorowe stragany pełne warzyw, chleba i garncarstwa, gdzie targuje się o każdy grosz."
+    },
+    "scarecrow_field": {
+      "name": "Strach na wróble",
+      "desc": "Połatany strach na wróble, którego wrony szanują tylko do południa."
+    },
+    "stone_quarry": {
+      "name": "Kamieniołom",
+      "desc": "Odkrywkowy kamieniołom z żurawiem i wózkami, skąd wozi się kamień na mury zamków."
+    },
+    "flower_meadow": {
+      "name": "Kwitnąca łąka",
+      "desc": "Barwny kobierzec maków, chabrów i stokrotek, nad którym tańczą motyle."
+    },
+    "fallen_log": {
+      "name": "Powalony pień",
+      "desc": "Potężny powalony pień porośnięty mchem, na którym rosną grzyby i paprocie."
+    },
+    "giant_stump_ruin": {
+      "name": "Ruina w olbrzymim pniu",
+      "desc": "Ruiny starego grodu zarośnięte korzeniami gigantycznego pnia."
+    },
+    "autumn_maple": {
+      "name": "Jesienny klon",
+      "desc": "Klon w ognistych barwach jesieni, zrzucający czerwone liście na ziemię."
+    },
+    "rocky_arch": {
+      "name": "Skalna brama",
+      "desc": "Naturalny łuk wyrzeźbiony przez wiatr, pod którym hula echo."
+    },
+    "cairn_stones": {
+      "name": "Kopiec z kamieni",
+      "desc": "Stos kamieni z chorągiewką, który wędrowcy budują na pamiątkę."
+    },
+    "dragon_bones": {
+      "name": "Szkielet smoka",
+      "desc": "Gigantyczny szkielet smoka, którego podobno nikt nie śmie ruszyć."
+    },
+    "flower_poppies": {
+      "name": "Dzikie maki",
+      "desc": "Szkarłatne maki, które rozjaśniają każdą łąkę."
+    },
+    "flower_cornflowers": {
+      "name": "Chabry",
+      "desc": "Niebieskie chabry, które lubią chować się wśród kłosów."
+    },
+    "flower_daisies": {
+      "name": "Stokrotki",
+      "desc": "Drobne stokrotki, które odwracają się za słońcem."
+    },
+    "flower_lavender": {
+      "name": "Lawenda",
+      "desc": "Fioletowa lawenda, której zapach wabi pszczoły i wędrowców."
+    },
+    "flower_sunflowers": {
+      "name": "Słoneczniki",
+      "desc": "Wysokie słoneczniki, które zawsze patrzą w stronę słońca."
+    },
+    "flower_bluebells": {
+      "name": "Dzwonki",
+      "desc": "Niebieskie dzwonki, w których kielichach podobno nocują wróżki."
+    },
+    "flower_dandelions": {
+      "name": "Mlecze",
+      "desc": "Żółte mlecze i puch, który unosi wiatr."
+    },
+    "flower_thistles": {
+      "name": "Ostrożenie",
+      "desc": "Kolczaste ostrożenie z fioletowym kwiatem, które omijają nawet owce."
+    },
+    "tall_grass_tuft": {
+      "name": "Wysoka trawa",
+      "desc": "Kępa wysokiej trawy falująca na wietrze."
+    },
+    "fern_cluster": {
+      "name": "Paprocie",
+      "desc": "Bujne paprocie, pod którymi chowają się leśne skrzaty."
+    },
+    "wheat_tuft": {
+      "name": "Dzikie kłosy",
+      "desc": "Złociste kłosy, które przetrwały na skraju pola."
+    },
+    "pampas_grass": {
+      "name": "Trawa pampasowa",
+      "desc": "Wysoka trawa ze srebrzystymi kitami, która szumi przy każdym podmuchu."
+    },
+    "heather_patch": {
+      "name": "Wrzos",
+      "desc": "Fioletowy wrzos, który pokrywa skaliste zbocza jak dywan."
+    },
+    "mushrooms_red": {
+      "name": "Muchomory",
+      "desc": "Czerwone muchomory z białymi kropkami, piękne, ale trujące."
+    },
+    "mushrooms_porcini": {
+      "name": "Borowiki",
+      "desc": "Tęgie borowiki, o które w lesie biją się grzybiarze."
+    },
+    "mushrooms_chanterelle": {
+      "name": "Kurki",
+      "desc": "Złociste kurki ukryte pod mchem."
+    },
+    "mushroom_log": {
+      "name": "Pniak z grzybami",
+      "desc": "Zbutwiały pniak pokryty hubami półkowymi i mchem."
+    },
+    "berry_bush": {
+      "name": "Krzew z jagodami",
+      "desc": "Krzew obsypany jagodami i malinami, który zna każdy niedźwiedź."
+    },
+    "moss_stone": {
+      "name": "Omszały kamień",
+      "desc": "Kamień porośnięty gęstym mchem, który grzeje nawet zimą."
+    },
+    "wildflower_rock_garden": {
+      "name": "Skalniak",
+      "desc": "Garstka górskich kwiatów wyzywających kamienie."
     }
   },
   "map_editor": {

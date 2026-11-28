@@ -254,7 +254,7 @@ window.PRS_I18N.sk = {
       "dragons": "🐉 Beštiár & Monštrá (63)",
       "castles": "🏰 Galéria hradov (10)",
       "trophies": "🏆 Sieň trofejí & Relikvií (29)",
-      "decorations": "🌲 Atlas dekorácií & krajiny (42)"
+      "decorations": "🌲 Atlas dekorácií & krajiny (113)"
     },
     "rules_views": {
       "quick": "⚡ Rýchly štart",
@@ -4315,6 +4315,262 @@ window.PRS_I18N.sk = {
     "swamp_hydra": {
       "name": "Päťhlavá močiarna hydra",
       "desc": "Desivá päťhlavá jašteria hydra vynárajúca sa z hlbín močiara a chrliaca jedovatú hmlu."
+    },
+    "reed_bed": {
+      "name": "Trstinie",
+      "desc": "Hustý porast trstiny a pálky, v ktorom poletujú vážky a spievajú trsteniarky."
+    },
+    "lily_pond": {
+      "name": "Leknové jazierko",
+      "desc": "Pokojná hladina plná bielych a ružových leknien, na ktorých posedávajú zelené žaby."
+    },
+    "mangrove_roots": {
+      "name": "Močiarny strom na koreňoch",
+      "desc": "Pokrútený strom stojaci na vzdušných koreňoch v kalnej vode, domov žiab a vodných hadov."
+    },
+    "willow_weeping": {
+      "name": "Smútočná vŕba",
+      "desc": "Vŕba s splývavými konármi, ktoré sa jemne dotýkajú vody a šepkajú staré rozprávky."
+    },
+    "stepping_stones": {
+      "name": "Brod z kameňov",
+      "desc": "Rad plochých kameňov, po ktorých možno suchou nohou preskákať cez plytký potok."
+    },
+    "fishing_pier": {
+      "name": "Rybárske mólo",
+      "desc": "Vratké drevené mólo s loďkou, sieťami a košom čerstvo chytených rýb."
+    },
+    "waterfall_cliff": {
+      "name": "Vodopád v útese",
+      "desc": "Skalný stupeň, z ktorého sa rúti penivý vodopád a nad ním sa vznáša jemná hmla."
+    },
+    "hot_spring": {
+      "name": "Horúci prameň",
+      "desc": "Kamenná tôňa s horúcim kúpeľom, z ktorej stúpa para a liečivá vôňa minerálov."
+    },
+    "will_o_wisps": {
+      "name": "Blúdivé svetielka",
+      "desc": "Modravé svetielka nad čiernym rašeliniskom, ktoré lákajú pocestných z cesty."
+    },
+    "sunken_shipwreck": {
+      "name": "Vrak lode v blate",
+      "desc": "Napoly zapadnutá schátraná loď zarastená riasami, o ktorej pokladoch rozprávajú rybári."
+    },
+    "heron_island": {
+      "name": "Volavčí ostrovček",
+      "desc": "Zarastený ostrovček s hniezdom, kde volavky stoja na jednej nohe."
+    },
+    "ice_spring": {
+      "name": "Ľadový prameň",
+      "desc": "Zamrznuté jazierko obklopené ľadovými kryštálmi, ktoré sa trblietajú aj v letnom slnku."
+    },
+    "crystal_cluster": {
+      "name": "Žiariace kryštály",
+      "desc": "Zhluk obrovských kryštálov, ktoré v noci ticho žiaria a odpovedajú na kúzla."
+    },
+    "mage_tower": {
+      "name": "Čarodejova veža",
+      "desc": "Štíhla veža, na ktorej vrchole sa vznáša žiariaca guľa a občas z nej vyletí iskra."
+    },
+    "portal_arch": {
+      "name": "Kamenný portál",
+      "desc": "Zvetraný oblúk s runami, v ktorého strede víri brána do neznámych svetov."
+    },
+    "enchanted_well": {
+      "name": "Studňa prianí",
+      "desc": "Prastará studňa, ktorej hladina sa trblieta hviezdami a plní priania dobrým ľuďom."
+    },
+    "moonlit_altar": {
+      "name": "Mesačný oltár",
+      "desc": "Kamenný kruh s runami, ktorý sa za splnu rozžiari strieborným svetlom."
+    },
+    "glowing_mushroom_grove": {
+      "name": "Svietiaci hubový hájik",
+      "desc": "Obrovské huby s klobúkom žiariacim modrofialovým svetlom, okolo ktorých poletujú spóry."
+    },
+    "fairy_village": {
+      "name": "Vília dedinka",
+      "desc": "Drobné domčeky v koreňoch stromov, v ktorých okienkach sa podvečer rozsvecujú lampáše."
+    },
+    "ancient_rune_stone": {
+      "name": "Runový menhir",
+      "desc": "Vzpriamený kameň pokrytý runami, ktoré sa za súmraku jemne rozžiaria."
+    },
+    "treant_stump_throne": {
+      "name": "Trón z pňa",
+      "desc": "Obrovský peň s operadlom z koreňov, na ktorom vraj sedáva kráľ lesa."
+    },
+    "spirit_tree": {
+      "name": "Strom duchov",
+      "desc": "Strieborný strom, v ktorého korune šepkajú duše dávnych predkov."
+    },
+    "star_fall_crater": {
+      "name": "Kráter po spadnutej hviezde",
+      "desc": "Spálená priehlbina, v ktorej ešte tlie úlomok hviezdy a trblieta sa hviezdny prach."
+    },
+    "blacksmith_forge": {
+      "name": "Kováčska dielňa",
+      "desc": "Kováč tu od rána búcha do nákovy a z komína stúpa hustý dym."
+    },
+    "tavern_inn": {
+      "name": "Hostinec pri ceste",
+      "desc": "Útulný hostinec, kde sa pocestní zohrejú pri ohni a vypočujú si najnovšie klebety."
+    },
+    "chapel_shrine": {
+      "name": "Dedinská kaplnka",
+      "desc": "Kamenná kaplnka so zvoničkou, ktorej zvon zvoláva celú dedinu."
+    },
+    "hay_barn": {
+      "name": "Stodola so senom",
+      "desc": "Priestranná drevená stodola, z ktorej vrát sa line vôňa čerstvo zozbieraného sena."
+    },
+    "haystacks": {
+      "name": "Kopy sena",
+      "desc": "Zlatisté kopy sena, na ktorých sa s obľubou hrajú deti i mačky."
+    },
+    "vineyard": {
+      "name": "Vinica",
+      "desc": "Úhľadné rady viniča, z ktorého sa na jeseň vyrába to najlepšie víno v kráľovstve."
+    },
+    "beehives_meadow": {
+      "name": "Včelíny na lúke",
+      "desc": "Drevené úle bzučiace včelami, ktoré zbierajú nektár z okolitých kvetov."
+    },
+    "stone_bridge_small": {
+      "name": "Kamenný mostík",
+      "desc": "Oblúk z machom obrasteného kameňa cez tichý potôčik, kadiaľ chodia dedinčania na trh."
+    },
+    "campfire_camp": {
+      "name": "Tábor",
+      "desc": "Oheň a stan, kde sa cez noc ukrývajú cestovatelia pred vlkmi."
+    },
+    "woodcutter_hut": {
+      "name": "Drevorubačská chata",
+      "desc": "Zrubová chata, pred ktorou sa týči hromada nasekaných polien."
+    },
+    "charcoal_burner": {
+      "name": "Milier",
+      "desc": "Tlejúci milier s tenkým dymom, pri ktorom uhliar dohliada dňom i nocou."
+    },
+    "market_stalls": {
+      "name": "Trhovisko",
+      "desc": "Pestré stánky plné zeleniny, chleba a hrnčiarstva, kde sa zjednáva o každý groš."
+    },
+    "scarecrow_field": {
+      "name": "Strašiak",
+      "desc": "Záplatovaný strašiak, ktorého vrany rešpektujú len do poludnia."
+    },
+    "stone_quarry": {
+      "name": "Kameňolom",
+      "desc": "Odkrytý lom s žeriavom a vozíkmi, odkiaľ sa vozí kameň na hradby."
+    },
+    "flower_meadow": {
+      "name": "Rozkvitnutá lúka",
+      "desc": "Pestrý koberec makov, nevädzí a margarétok, nad ktorým tancujú motýle."
+    },
+    "fallen_log": {
+      "name": "Padnutý kmeň",
+      "desc": "Mohutný padnutý kmeň porastený machom, na ktorom rastú huby a papradie."
+    },
+    "giant_stump_ruin": {
+      "name": "Ruina v obrovskom pni",
+      "desc": "Zrúcanina starého hrádku zarastená koreňmi gigantického pňa."
+    },
+    "autumn_maple": {
+      "name": "Jesenný javor",
+      "desc": "Javor v ohnivých farbách jesene, ktorý hádže na zem červené lístie."
+    },
+    "rocky_arch": {
+      "name": "Skalná brána",
+      "desc": "Prírodný oblúk vytvorený vetrom, pod ktorým sa preháňa ozvena."
+    },
+    "cairn_stones": {
+      "name": "Mohyla z kameňov",
+      "desc": "Hromádka kameňov s vlajočkou, ktorú si pocestní stavajú na pamiatku."
+    },
+    "dragon_bones": {
+      "name": "Dračia kostra",
+      "desc": "Obrovská kostra draka, ktorú vraj nikto neodváži preniesť."
+    },
+    "flower_poppies": {
+      "name": "Divé maky",
+      "desc": "Šarlátové maky, ktoré rozžiaria každú lúku."
+    },
+    "flower_cornflowers": {
+      "name": "Nevädze",
+      "desc": "Modré nevädze, ktoré sa radi skrývajú medzi klasmi."
+    },
+    "flower_daisies": {
+      "name": "Margarétky",
+      "desc": "Drobné margarétky, ktoré sa otáčajú za slnkom."
+    },
+    "flower_lavender": {
+      "name": "Levanduľa",
+      "desc": "Fialová levanduľa, ktorej vôňa láka včely i pocestných."
+    },
+    "flower_sunflowers": {
+      "name": "Slnečnice",
+      "desc": "Vysoké slnečnice, ktoré sa vždy pozerajú k slnku."
+    },
+    "flower_bluebells": {
+      "name": "Zvončeky",
+      "desc": "Modré zvončeky, v ktorých kalichoch vraj prenocúvajú víly."
+    },
+    "flower_dandelions": {
+      "name": "Púpavy",
+      "desc": "Žlté púpavy a páperie, ktoré odnáša vietor."
+    },
+    "flower_thistles": {
+      "name": "Bodliaky",
+      "desc": "Tŕnisté bodliaky s fialovým kvetom, ktorým sa vyhýbajú aj ovce."
+    },
+    "tall_grass_tuft": {
+      "name": "Vysoká tráva",
+      "desc": "Trs vysokej trávy, ktorý sa vlní vo vetre."
+    },
+    "fern_cluster": {
+      "name": "Papraď",
+      "desc": "Bujná papraď, pod ktorou sa ukrývajú lesné škriatky."
+    },
+    "wheat_tuft": {
+      "name": "Divoké klasy",
+      "desc": "Zlatisté klasy, ktoré prežili na okraji poľa."
+    },
+    "pampas_grass": {
+      "name": "Pampová tráva",
+      "desc": "Vysoká tráva so striebornými chochlami, ktorá šumí pri každom závane."
+    },
+    "heather_patch": {
+      "name": "Vresy",
+      "desc": "Fialové vresy, ktoré pokrývajú skalnaté svahy ako koberec."
+    },
+    "mushrooms_red": {
+      "name": "Muchotrávky",
+      "desc": "Červené muchotrávky s bielymi bodkami, krásne, ale jedovaté."
+    },
+    "mushrooms_porcini": {
+      "name": "Hríby",
+      "desc": "Tučné hríby, o ktoré sa v lese bijú hubári."
+    },
+    "mushrooms_chanterelle": {
+      "name": "Kuriatka",
+      "desc": "Zlatisté kuriatka ukryté pod machom."
+    },
+    "mushroom_log": {
+      "name": "Peň s hubami",
+      "desc": "Zhnitý peň pokrytý konzolovými hubami a machom."
+    },
+    "berry_bush": {
+      "name": "Kroví s bobuľami",
+      "desc": "Kroví obsypané čučoriedkami a malinami, ktoré pozná každý medveď."
+    },
+    "moss_stone": {
+      "name": "Machový kameň",
+      "desc": "Kameň porastený hustým machom, ktorý hreje aj v zime."
+    },
+    "wildflower_rock_garden": {
+      "name": "Skalka s kvetmi",
+      "desc": "Hrsť horských kvetov vzdorujúcich kameňom."
     }
   },
   "map_editor": {

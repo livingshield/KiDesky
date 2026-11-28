@@ -230,7 +230,7 @@ function validateCatalogPlacementSchema(win) {
   const validLayers = new Set(['ground', 'standing']);
   const validPolicies = new Set(['avoid', 'edge', 'overhang']);
   const validGroups = new Set(['canopy', 'ridge', 'exclusive']);
-  assert(keys.length >= 49, `Catalog should have at least 49 entries, got ${keys.length}`);
+  assert(keys.length >= 113, `Catalog should have at least 113 entries, got ${keys.length}`);
   for (const id of keys) {
     const it = cat[id];
     assert(Array.isArray(it.biomes) && it.biomes.length > 0 && it.biomes.every(b => validBiomes.has(b)), `${id}: invalid biomes`);

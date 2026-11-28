@@ -257,7 +257,7 @@ window.PRS_I18N["en"] = {
       "dragons": "🐉 Bestiary & Monsters (63)",
       "castles": "🏰 Castles Gallery (10)",
       "trophies": "🏆 Hall of Trophies (29)",
-      "decorations": "🌲 Landscape Atlas (42)"
+      "decorations": "🌲 Landscape Atlas (113)"
     },
     "rules_views": {
       "quick": "⚡ Quick Start",
@@ -4318,6 +4318,262 @@ window.PRS_I18N["en"] = {
     "swamp_hydra": {
       "name": "Five-Headed Swamp Hydra",
       "desc": "A fearsome five-headed marsh serpent rising from murky waters and exhaling noxious venomous mists."
+    },
+    "reed_bed": {
+      "name": "Reed Bed",
+      "desc": "Dense reeds and cattails where dragonflies flit and warblers sing."
+    },
+    "lily_pond": {
+      "name": "Lily Pond",
+      "desc": "A calm pond covered in white and pink water lilies where green frogs sit."
+    },
+    "mangrove_roots": {
+      "name": "Stilt-Root Swamp Tree",
+      "desc": "A twisted tree standing on arching roots in murky water, home to frogs and water snakes."
+    },
+    "willow_weeping": {
+      "name": "Weeping Willow",
+      "desc": "A willow with cascading branches that gently touch the water and whisper old fairy tales."
+    },
+    "stepping_stones": {
+      "name": "Stepping Stones",
+      "desc": "A row of flat stones for hopping dry-footed across a shallow brook."
+    },
+    "fishing_pier": {
+      "name": "Fishing Pier",
+      "desc": "A rickety wooden pier with a rowboat, nets and a basket of fresh-caught fish."
+    },
+    "waterfall_cliff": {
+      "name": "Cliff Waterfall",
+      "desc": "A rocky ledge with a foaming waterfall and a soft mist hovering above."
+    },
+    "hot_spring": {
+      "name": "Hot Spring",
+      "desc": "A stone-rimmed pool of hot water with rising steam and the scent of healing minerals."
+    },
+    "will_o_wisps": {
+      "name": "Will-o'-the-Wisps",
+      "desc": "Bluish lights over black peat that lure travellers off the path."
+    },
+    "sunken_shipwreck": {
+      "name": "Sunken Shipwreck",
+      "desc": "A half-sunken rotting ship overgrown with algae, whose treasure fishermen love to talk about."
+    },
+    "heron_island": {
+      "name": "Heron Islet",
+      "desc": "An overgrown islet with a nest where herons stand on one leg."
+    },
+    "ice_spring": {
+      "name": "Frozen Spring",
+      "desc": "A frozen pond ringed with ice crystals that glitter even in the summer sun."
+    },
+    "crystal_cluster": {
+      "name": "Glowing Crystals",
+      "desc": "A cluster of giant crystals that glow softly at night and answer to spells."
+    },
+    "mage_tower": {
+      "name": "Wizard's Tower",
+      "desc": "A slender tower with a glowing orb floating at its top that now and then shoots out a spark."
+    },
+    "portal_arch": {
+      "name": "Stone Portal",
+      "desc": "A weathered rune-carved arch with a swirling gateway to unknown worlds at its centre."
+    },
+    "enchanted_well": {
+      "name": "Wishing Well",
+      "desc": "An ancient well whose surface glitters with stars and grants wishes to good folk."
+    },
+    "moonlit_altar": {
+      "name": "Moonlit Altar",
+      "desc": "A stone circle of runes that glows with silver light under the full moon."
+    },
+    "glowing_mushroom_grove": {
+      "name": "Glowing Mushroom Grove",
+      "desc": "Giant mushrooms with caps blazing in blue-violet light and spores drifting around them."
+    },
+    "fairy_village": {
+      "name": "Fairy Village",
+      "desc": "Tiny houses among tree roots whose windows light up with little lanterns in the evening."
+    },
+    "ancient_rune_stone": {
+      "name": "Rune Menhir",
+      "desc": "An upright standing stone covered in runes that glow softly at dusk."
+    },
+    "treant_stump_throne": {
+      "name": "Stump Throne",
+      "desc": "A giant stump with a backrest of roots, where the king of the forest is said to sit."
+    },
+    "spirit_tree": {
+      "name": "Spirit Tree",
+      "desc": "A silver tree in whose crown the souls of ancient ancestors whisper."
+    },
+    "star_fall_crater": {
+      "name": "Starfall Crater",
+      "desc": "A scorched hollow where a shard of a fallen star still smoulders amid glittering stardust."
+    },
+    "blacksmith_forge": {
+      "name": "Blacksmith's Forge",
+      "desc": "The smith hammers at his anvil from dawn and thick smoke rises from the chimney."
+    },
+    "tavern_inn": {
+      "name": "Roadside Inn",
+      "desc": "A cosy inn where travellers warm up by the fire and hear the latest gossip."
+    },
+    "chapel_shrine": {
+      "name": "Village Chapel",
+      "desc": "A small stone chapel with a bell tower whose bell calls the whole village."
+    },
+    "hay_barn": {
+      "name": "Hay Barn",
+      "desc": "A roomy wooden barn whose doors waft the scent of freshly harvested hay."
+    },
+    "haystacks": {
+      "name": "Haystacks",
+      "desc": "Golden haystacks where children and cats love to play."
+    },
+    "vineyard": {
+      "name": "Vineyard",
+      "desc": "Neat rows of grapevines that yield the best wine in the kingdom each autumn."
+    },
+    "beehives_meadow": {
+      "name": "Meadow Beehives",
+      "desc": "Wooden hives humming with bees gathering nectar from the flowers around."
+    },
+    "stone_bridge_small": {
+      "name": "Stone Footbridge",
+      "desc": "An arch of mossy stone over a quiet brook that villagers cross on their way to market."
+    },
+    "campfire_camp": {
+      "name": "Traveller's Camp",
+      "desc": "A campfire and tent where travellers shelter from the wolves overnight."
+    },
+    "woodcutter_hut": {
+      "name": "Woodcutter's Hut",
+      "desc": "A log cabin with a towering stack of split firewood in front."
+    },
+    "charcoal_burner": {
+      "name": "Charcoal Kiln",
+      "desc": "A smouldering kiln with thin smoke, tended by the charcoal burner day and night."
+    },
+    "market_stalls": {
+      "name": "Market Stalls",
+      "desc": "Colourful stalls full of vegetables, bread and pottery where every coin is haggled over."
+    },
+    "scarecrow_field": {
+      "name": "Scarecrow",
+      "desc": "A patchwork scarecrow that the crows only respect until noon."
+    },
+    "stone_quarry": {
+      "name": "Stone Quarry",
+      "desc": "An open quarry with a crane and carts, from which stone is hauled to the castle walls."
+    },
+    "flower_meadow": {
+      "name": "Flowering Meadow",
+      "desc": "A colourful carpet of poppies, cornflowers and daisies with butterflies dancing above."
+    },
+    "fallen_log": {
+      "name": "Fallen Log",
+      "desc": "A mighty fallen trunk overgrown with moss, with mushrooms and ferns growing on it."
+    },
+    "giant_stump_ruin": {
+      "name": "Stump Castle Ruin",
+      "desc": "The ruin of an old keep overgrown by the roots of a gigantic stump."
+    },
+    "autumn_maple": {
+      "name": "Autumn Maple",
+      "desc": "A maple in the fiery colours of autumn, shedding red leaves to the ground."
+    },
+    "rocky_arch": {
+      "name": "Rock Arch",
+      "desc": "A natural arch carved by the wind, beneath which echoes race."
+    },
+    "cairn_stones": {
+      "name": "Stone Cairn",
+      "desc": "A pile of stones with a pennant that wayfarers build as a memorial."
+    },
+    "dragon_bones": {
+      "name": "Dragon Skeleton",
+      "desc": "The giant skeleton of a dragon that nobody dares to move."
+    },
+    "flower_poppies": {
+      "name": "Wild Poppies",
+      "desc": "Scarlet poppies that brighten any meadow."
+    },
+    "flower_cornflowers": {
+      "name": "Cornflowers",
+      "desc": "Blue cornflowers that love to hide among the ears of grain."
+    },
+    "flower_daisies": {
+      "name": "Daisies",
+      "desc": "Little daisies that turn to follow the sun."
+    },
+    "flower_lavender": {
+      "name": "Lavender",
+      "desc": "Purple lavender whose scent lures bees and wayfarers alike."
+    },
+    "flower_sunflowers": {
+      "name": "Sunflowers",
+      "desc": "Tall sunflowers that always face the sun."
+    },
+    "flower_bluebells": {
+      "name": "Bluebells",
+      "desc": "Blue bells in whose cups fairies are said to sleep."
+    },
+    "flower_dandelions": {
+      "name": "Dandelions",
+      "desc": "Yellow dandelions and fluff carried away by the wind."
+    },
+    "flower_thistles": {
+      "name": "Thistles",
+      "desc": "Prickly thistles with purple flowers that even sheep avoid."
+    },
+    "tall_grass_tuft": {
+      "name": "Tall Grass",
+      "desc": "A tuft of tall grass swaying in the wind."
+    },
+    "fern_cluster": {
+      "name": "Ferns",
+      "desc": "Lush ferns that forest sprites hide beneath."
+    },
+    "wheat_tuft": {
+      "name": "Wild Wheat",
+      "desc": "Golden ears that survived at the edge of the field."
+    },
+    "pampas_grass": {
+      "name": "Pampas Grass",
+      "desc": "Tall grass with silvery plumes that rustles at every breeze."
+    },
+    "heather_patch": {
+      "name": "Heather",
+      "desc": "Purple heather that blankets rocky slopes like a carpet."
+    },
+    "mushrooms_red": {
+      "name": "Fly Agarics",
+      "desc": "Red toadstools with white spots, beautiful but poisonous."
+    },
+    "mushrooms_porcini": {
+      "name": "Porcini",
+      "desc": "Plump porcini that mushroom pickers fight over in the forest."
+    },
+    "mushrooms_chanterelle": {
+      "name": "Chanterelles",
+      "desc": "Golden chanterelles hidden beneath the moss."
+    },
+    "mushroom_log": {
+      "name": "Mushroom Stump",
+      "desc": "A rotting stump covered with shelf mushrooms and moss."
+    },
+    "berry_bush": {
+      "name": "Berry Bush",
+      "desc": "A bush laden with blueberries and raspberries that every bear knows."
+    },
+    "moss_stone": {
+      "name": "Mossy Stone",
+      "desc": "A stone overgrown with thick moss that stays warm even in winter."
+    },
+    "wildflower_rock_garden": {
+      "name": "Alpine Rock Garden",
+      "desc": "A handful of mountain flowers defying the stones."
     }
   },
   "map_editor": {

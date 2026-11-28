@@ -245,7 +245,7 @@ window.PRS_BoardBuilder = {
     // PROCEDURÁLNÍ DEKORACE KRAJINY (EKOSYSTÉMOVÉ SHLUKY & PAINTER'S ALGORITHM)
     // Skládá husté lesní hvozdy, horské hřebeny a vesnická diorámata
     // ========================================================================
-    DECORATIONS_VERSION: 6,
+    DECORATIONS_VERSION: 7,
 
     UNIQUE_POI_IDS: [
         "unicorn_grove", "pegasus_pond", "dryad_sacred_oak", "forest_ent",
@@ -379,6 +379,7 @@ window.PRS_BoardBuilder = {
             var d = hash2D(ix + 1, iy + 1);
             return (a + (b - a) * sx) + ((c + (d - c) * sx) - (a + (b - a) * sx)) * sy;
         }
+        var WETLAND_PATCH_T = 0.70;
         function noise2D(x, y) {
             return 0.65 * valueNoise2D(x / 180, y / 180) + 0.35 * valueNoise2D(x / 95 + 13.7, y / 95 + 7.3);
         }
@@ -555,6 +556,10 @@ window.PRS_BoardBuilder = {
             }
             if ((x > 1060 || y < 160 || (x < 210 && y > 630)) && noise2D(x + 410, y + 190) > 0.32) {
                 return "rocky";
+            }
+            // Samostatné mokřadní skvrny mimo řeky (rašeliniště, tůně, rákosí)
+            if (noise2D(x + 1310, y + 640) > WETLAND_PATCH_T && y > 110 && y < 760) {
+                return "wetland";
             }
             for (var vi = 0; vi < villageCenters.length; vi++) {
                 var vdx = villageCenters[vi].x - x;
@@ -894,6 +899,28 @@ window.PRS_BoardBuilder = {
             }
         }
 
+        // E2) Vzácné prvky (maxPerMap <= 2, scatter > 0): dostanou šanci zabrat volné místo dřív než lesní výplň
+        var rareIds = Object.keys(catalog).filter(function (cid) {
+            var rIt = catalog[cid];
+            return rIt && rIt.scatter > 0 && typeof rIt.maxPerMap === "number" && rIt.maxPerMap <= 2 && Math.max(rIt.w, rIt.h) > 40;
+        });
+        for (var rr2 = 0; rr2 < rareIds.length; rr2++) {
+            var rid = rareIds[rr2];
+            var rItem = catalog[rid];
+            if (rnd() > Math.min(0.9, 0.45 + rItem.scatter * 0.4)) continue;
+            var rOff = Math.floor(rnd() * openCells.length);
+            for (var rk = 0; rk < openCells.length; rk++) {
+                var rcell = openCells[(rk + rOff) % openCells.length];
+                if (!canSpawnDecor(rid, rcell.zone)) continue;
+                var rscale = 0.92 + rnd() * 0.1;
+                var rRad = Math.max(16, Math.round((rItem.clearance || 24) * 0.72));
+                if (isPositionClear(rcell.x, rcell.y, rRad, false, rRad, rid, rscale)) {
+                    pushDecor("rare_" + rcell.zone, rid, rcell.x, rcell.y, rscale, rItem.clearance);
+                    break;
+                }
+            }
+        }
+
         // F) Doplnění krajiny podle zón: v lese malé hájky, na loukách vzduch, u vody jezírka
         for (var ci5 = 0; ci5 < openCells.length; ci5++) {
             var scell = openCells[ci5];
@@ -945,6 +972,71 @@ window.PRS_BoardBuilder = {
                                 pushDecor("m_tree", "tree_oak", mtx, mty, mtSc, 15);
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // G) Rozptyl středních a větších prvků podle biomu (parametr `scatter` v katalogu)
+        var scatterPool = [];
+        var microPool = [];
+        var catKeys = Object.keys(catalog);
+        for (var sk = 0; sk < catKeys.length; sk++) {
+            var sItem = catalog[catKeys[sk]];
+            if (!sItem || !(sItem.scatter > 0)) continue;
+            if (Math.max(sItem.w, sItem.h) <= 40) microPool.push(catKeys[sk]); else scatterPool.push(catKeys[sk]);
+        }
+        function pickScatterId(pool, zoneName) {
+            var cands = [];
+            var total = 0;
+            for (var pi = 0; pi < pool.length; pi++) {
+                if (!canSpawnDecor(pool[pi], zoneName)) continue;
+                var ww = (catalog[pool[pi]].weight || 1) * catalog[pool[pi]].scatter;
+                cands.push({ id: pool[pi], w: ww });
+                total += ww;
+            }
+            if (!cands.length) return null;
+            var rr = rnd() * total;
+            for (var ci = 0; ci < cands.length; ci++) {
+                rr -= cands[ci].w;
+                if (rr <= 0) return cands[ci].id;
+            }
+            return cands[cands.length - 1].id;
+        }
+        var zoneDensity = { wetland: 0.60, forest: 0.32, meadow: 0.36, farmland: 0.36, rocky: 0.32 };
+        for (var gPass = 0; gPass < 2; gPass++) {
+            for (var ci6 = 0; ci6 < openCells.length; ci6++) {
+                var gcell = openCells[ci6];
+                var gx = Math.round(gcell.x + (rnd() - 0.5) * 26);
+                var gy = Math.round(gcell.y + (rnd() - 0.5) * 26);
+                var gz = classifyZone(gx, gy);
+                if (rnd() > (zoneDensity[gz] || 0.3) * (gPass === 0 ? 1 : 0.7)) continue;
+                var gid = pickScatterId(scatterPool, gz);
+                if (!gid) continue;
+                var gItem = catalog[gid];
+                var gsc = 0.9 + rnd() * 0.2;
+                var gRad = Math.max(14, Math.round((gItem.clearance || 20) * 0.72));
+                var gCanopy = (gItem.overlapGroup === "canopy");
+                if (isPositionClear(gx, gy, gRad, gCanopy, gCanopy ? 26 : gRad, gid, gsc)) {
+                    pushDecor("g_" + gz, gid, gx, gy, gsc, gItem.clearance);
+                }
+            }
+        }
+
+        // H) Drobné přírodní prvky (květiny, traviny, houby) ve shlucích podle šumu
+        var microPlaced = 0;
+        if (microPool.length) {
+            for (var mx0 = 60; mx0 <= 1340 && microPlaced < 90; mx0 += 30) {
+                for (var my0 = 60; my0 <= 800 && microPlaced < 90; my0 += 30) {
+                    var mjx = Math.round(mx0 + (rnd() - 0.5) * 22);
+                    var mjy = Math.round(my0 + (rnd() - 0.5) * 22);
+                    if (noise2D(mjx * 1.9 + 211, mjy * 1.9 + 97) < 0.52 || rnd() > 0.55) continue;
+                    var mz = classifyZone(mjx, mjy);
+                    var mid = pickScatterId(microPool, mz);
+                    if (!mid) continue;
+                    var msc = 0.85 + rnd() * 0.35;
+                    if (isPositionClear(mjx, mjy, 9, true, 15, mid, msc)) {
+                        if (pushDecor("mi_" + mz, mid, mjx, mjy, msc, 8)) microPlaced++;
                     }
                 }
             }
